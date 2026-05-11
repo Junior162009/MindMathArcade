@@ -22,20 +22,34 @@
             background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.12) 2px, rgba(0,0,0,0.12) 4px);
         }
         header {
-            padding: 15px; text-align: center; border-bottom: 2px solid var(--neon-pink);
+            padding: 15px; border-bottom: 2px solid var(--neon-pink);
             background: linear-gradient(90deg, rgba(255,0,255,0.05), transparent, rgba(0,255,255,0.05));
             position: relative;
         }
+        .header-content {
+            display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;
+        }
+        .logo-area { text-align: left; }
         h1 {
             font-size: clamp(14px, 5vw, 22px); color: var(--neon-cyan);
             text-shadow: 0 0 10px var(--neon-cyan), 0 0 30px var(--neon-cyan);
-            letter-spacing: 2px; animation: titlePulse 2s ease-in-out infinite;
+            letter-spacing: 2px; animation: titlePulse 2s ease-in-out infinite; margin: 0;
         }
         @keyframes titlePulse {
             0%,100%{ text-shadow: 0 0 10px var(--neon-cyan), 0 0 30px var(--neon-cyan); }
             50%{ text-shadow: 0 0 20px var(--neon-pink), 0 0 50px var(--neon-pink); }
         }
         .subtitle { font-size: 6px; color: var(--neon-pink); text-shadow: 0 0 8px var(--neon-pink); margin-top: 5px; }
+        .user-area {
+            display: flex; align-items: center; gap: 15px;
+        }
+        #userDisplay { font-size: 6px; color: var(--neon-green); text-shadow: 0 0 6px var(--neon-green); }
+        .auth-link {
+            font-size: 6px; color: var(--neon-pink); text-decoration: none;
+            border: 1px solid var(--neon-pink); padding: 4px 8px; border-radius: 4px;
+            transition: 0.2s;
+        }
+        .auth-link:hover { background: rgba(255,0,255,0.1); box-shadow: 0 0 10px var(--neon-pink); }
         .container {
             max-width: 700px; margin: 20px auto; padding: 10px;
             display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px;
@@ -81,14 +95,24 @@
 </head>
 <body>
     <header>
-        <h1>TECNOMATH</h1>
-        <div class="subtitle">PORTAL DE PROYECTOS</div>
+        <div class="header-content">
+            <div class="logo-area">
+                <h1>TECNOMATH</h1>
+                <div class="subtitle">PORTAL DE PROYECTOS</div>
+            </div>
+            <div class="user-area">
+                <span id="userDisplay">Invitado</span>
+                <a href="auth.html" class="auth-link">🔑 ACCEDER</a>
+            </div>
+        </div>
     </header>
-    <script src="shared.js"></script>
 
     <div class="container" id="projectsContainer"></div>
 
     <footer>© 2026 Tecnomath · Powered by GitHub Pages</footer>
+
+    <!-- Librería central de usuarios/monedas -->
+    <script src="shared.js"></script>
 
     <script>
         // ═══════════════════════════════════════
@@ -99,8 +123,8 @@
                 name: "MindMath Arcade",
                 desc: "Juego de matemáticas retro con 60+ niveles",
                 url: "game.html",
-                imageUrl: "img/mindmath.png",        // ← Pon aquí la ruta de la imagen (ej: "img/mindmath.png")
-                icon: "🧮"           // ← Emoji de respaldo si no hay imagen
+                imageUrl: "",        // ← Pon aquí la ruta de la imagen (ej: "img/mindmath.png")
+                icon: "🧮"           // ← Emoji de respaldo
             },
             {
                 name: "Eco Collector",
@@ -125,14 +149,14 @@
             const card = document.createElement('a');
             card.className = 'project-card';
             card.href = proj.url;
-            card.target = proj.url.includes('game.html') || proj.url.includes('eco-collector.html') ? '_self' : '_blank';
+            // Si el enlace es interno, se abre en la misma pestaña
+            card.target = (proj.url.includes('game.html') || proj.url.includes('eco-collector.html')) ? '_self' : '_blank';
             card.rel = "noopener";
 
-            // Contenedor de imagen/emoji
             const iconDiv = document.createElement('div');
             iconDiv.className = 'project-icon';
 
-            // Si hay imageUrl, intentamos usar la imagen; si no, o falla, ponemos el emoji
+            // Lógica de imagen vs emoji
             if (proj.imageUrl && proj.imageUrl.trim() !== '') {
                 const img = document.createElement('img');
                 img.src = proj.imageUrl;
@@ -163,6 +187,21 @@
             card.appendChild(descDiv);
             container.appendChild(card);
         });
+    </script>
+
+    <!-- Actualizar barra de usuario -->
+    <script>
+        (function updateUserBar() {
+            const userDisplay = document.getElementById('userDisplay');
+            if (!userDisplay) return;
+            const user = Tecnomath.getCurrentUser();
+            if (user) {
+                const coins = Tecnomath.getCoins();
+                userDisplay.textContent = `${user.username} · 💰 ${coins}`;
+            } else {
+                userDisplay.textContent = 'Invitado';
+            }
+        })();
     </script>
 </body>
 </html>
