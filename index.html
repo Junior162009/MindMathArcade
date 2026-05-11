@@ -87,6 +87,33 @@
         .project-icon span { font-size: 36px; }
         .project-name { font-size: 6px; color: white; text-shadow: 0 0 5px rgba(255,255,255,0.5); }
         .project-desc { font-size: 4px; color: #aaa; line-height: 1.4; }
+        /* Estilos para patrocinadores */
+        .sponsors-section {
+            max-width: 700px; margin: 20px auto; padding: 10px;
+        }
+        .sponsors-label {
+            font-size: 6px; color: #888; text-align: center; margin-bottom: 15px; letter-spacing: 2px;
+        }
+        .sponsors-grid {
+            display: flex; flex-wrap: wrap; justify-content: center; gap: 20px;
+        }
+        .sponsor-card {
+            background: var(--card-bg); border: 2px solid #1a1a2e; border-radius: 12px;
+            padding: 12px; text-align: center; width: 140px;
+            display: flex; flex-direction: column; align-items: center; gap: 8px;
+        }
+        .sponsor-icon {
+            width: 60px; height: 60px; border-radius: 12px; background: #0a0a1a;
+            border: 2px solid #333; display: flex; align-items: center; justify-content: center;
+            font-size: 28px;
+        }
+        .sponsor-name {
+            font-size: 5px; color: white;
+        }
+        .sponsor-phone {
+            font-size: 5px; color: var(--gold); text-decoration: none;
+            font-family: 'Orbitron', monospace;
+        }
         footer {
             text-align: center; padding: 15px; color: #444; font-size: 5px;
             border-top: 1px solid #1a1a2e; margin-top: 20px;
@@ -107,6 +134,12 @@
         </div>
     </header>
 
+    <!-- SECCIÓN DE PATROCINADORES -->
+    <div class="sponsors-section">
+        <div class="sponsors-label">— PATROCINADORES —</div>
+        <div class="sponsors-grid" id="sponsorsArea"></div>
+    </div>
+
     <div class="container" id="projectsContainer"></div>
 
     <footer>© 2026 Tecnomath · Powered by GitHub Pages</footer>
@@ -116,15 +149,49 @@
 
     <script>
         // ═══════════════════════════════════════
-        // LISTA DE PROYECTOS (MODIFICA AQUÍ TUS JUEGOS)
+        // PATROCINADORES ALEATORIOS
+        // ═══════════════════════════════════════
+        const allSponsorsPortal = [
+            { name: "Juan Pérez",      phone: "+573001112233", image: "👨‍💼", imageUrl: "" },
+            { name: "María Gómez",     phone: "+573002223344", image: "👩‍🔬", imageUrl: "" },
+            { name: "Carlos Ruiz",     phone: "+573003334455", image: "👨‍🏫", imageUrl: "" },
+            { name: "Laura Díaz",      phone: "+573004445566", image: "👩‍💻", imageUrl: "" },
+            { name: "EcoWorld",        phone: "+573006667788", image: "🌱", imageUrl: "" },
+            { name: "NeuroLab",        phone: "+573007778899", image: "🧠", imageUrl: "" }
+        ];
+        (function renderSponsors() {
+            const selected = [...allSponsorsPortal].sort(() => Math.random() - 0.5).slice(0, 4);
+            const area = document.getElementById('sponsorsArea');
+            selected.forEach(sponsor => {
+                const card = document.createElement('div');
+                card.className = 'sponsor-card';
+                const icon = document.createElement('div');
+                icon.className = 'sponsor-icon';
+                icon.textContent = sponsor.image;
+                const name = document.createElement('div');
+                name.className = 'sponsor-name';
+                name.textContent = sponsor.name;
+                const phone = document.createElement('a');
+                phone.className = 'sponsor-phone';
+                phone.href = 'tel:' + sponsor.phone;
+                phone.textContent = sponsor.phone;
+                card.appendChild(icon);
+                card.appendChild(name);
+                card.appendChild(phone);
+                area.appendChild(card);
+            });
+        })();
+
+        // ═══════════════════════════════════════
+        // LISTA DE PROYECTOS
         // ═══════════════════════════════════════
         const projects = [
             {
                 name: "MindMath Arcade",
                 desc: "Juego de matemáticas retro con 60+ niveles",
                 url: "game.html",
-                imageUrl: "img/mindmath.png",        // ← Pon aquí la ruta de la imagen (ej: "img/mindmath.png")
-                icon: "🧮"           // ← Emoji de respaldo
+                imageUrl: "img/mindmath.png",
+                icon: "🧮"
             },
             {
                 name: "Eco Recolector",
@@ -142,11 +209,11 @@
             },
             {
                 name: "Eco-Barrio 2030",
-                icon: "🏙️",
                 desc: "Simulador de ciudad sostenible. ODS 11,12,13,7",
-                url: "eco-barrio.html"
-            },
-            // Agrega más juegos con el mismo formato
+                url: "eco-barrio.html",
+                imageUrl: "",
+                icon: "🏙️"
+            }
         ];
 
         const container = document.getElementById('projectsContainer');
@@ -155,8 +222,8 @@
             const card = document.createElement('a');
             card.className = 'project-card';
             card.href = proj.url;
-            // Si el enlace es interno, se abre en la misma pestaña
-            card.target = (proj.url.includes('game.html') || proj.url.includes('eco-collector.html')) ? '_self' : '_blank';
+            // Si es un enlace interno, abrir en la misma pestaña
+            card.target = (proj.url.endsWith('.html') && !proj.url.startsWith('http')) ? '_self' : '_blank';
             card.rel = "noopener";
 
             const iconDiv = document.createElement('div');
