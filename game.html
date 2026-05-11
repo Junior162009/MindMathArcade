@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>MindMath Arcade: ODS Supremacy</title>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+    <!-- Librería central de Tecnomath (usuarios, monedas, progreso) -->
+    <script src="shared.js"></script>
     <style>
         :root {
             --neon-green: #39FF14;
@@ -786,6 +788,11 @@
             <div class="shop-item" onclick="buyItem('shield',80)"><span class="shop-item-name">🛡️ ESCUDO x1</span><span class="shop-item-price">80 💰</span></div>
             <div class="shop-item" onclick="buyItem('hint',40)"><span class="shop-item-name">💡 PISTA x3</span><span class="shop-item-price">40 💰</span></div>
             <div class="shop-item" onclick="buyItem('time_boost',60)"><span class="shop-item-name">⏱️ +10s TIEMPO</span><span class="shop-item-price">60 💰</span></div>
+            <!-- Nuevo botón de conversión de monedas -->
+            <div class="shop-item" onclick="openExchangeModal()" style="border-color: var(--neon-yellow); cursor: pointer;">
+                <span class="shop-item-name">💱 CONVERTIR MONEDAS</span>
+                <span class="shop-item-price">10% com</span>
+            </div>
         </div>
 
         <div id="scores-view" class="view hidden">
@@ -1300,41 +1307,41 @@
         }
 
         function updateHUD() {
-    // Actualizar monedas locales y modo administrador
+            // Actualizar monedas locales y modo administrador
             if (stats.isAdmin) {
                 document.getElementById('coin-count').innerText = '∞';
                 document.getElementById('life-count').innerText = '∞';
                 document.getElementById('rank-display').innerText = '[ADMIN]';
                 document.getElementById('rank-display').className = 'header-rank admin-glow';
-        } else {
+            } else {
                 document.getElementById('coin-count').innerText = stats.coins;
                 document.getElementById('life-count').innerText = stats.lives;
                 const ranks = [{ n: 45, r: 'LEYENDA' }, { n: 30, r: 'HACKER' }, { n: 15, r: 'PRO' }, { n: 0, r: 'NOVATO' }];
                 const r = ranks.find(x => stats.unlocked > x.n);
                 document.getElementById('rank-display').innerText = `[${r.r}]`;
                 document.getElementById('rank-display').className = 'header-rank';
-        }
+            }
 
-                // Actualizar otros indicadores del HUD
-        document.getElementById('user-lvl').innerText = stats.unlocked;
-        document.getElementById('shield-count').innerText = stats.shields;
-        document.getElementById('streak-count').innerText = stats.streak;
-        document.getElementById('ods-progress').innerText = stats.odsCompleted.length + '/17';
+            // Actualizar otros indicadores del HUD
+            document.getElementById('user-lvl').innerText = stats.unlocked;
+            document.getElementById('shield-count').innerText = stats.shields;
+            document.getElementById('streak-count').innerText = stats.streak;
+            document.getElementById('ods-progress').innerText = stats.odsCompleted.length + '/17';
 
-        // Actualizar monedas globales del sistema Tecnomath
-        const globalCoinEl = document.getElementById('global-coin-display');
-        if (globalCoinEl) {
-            try {
-                if (typeof Tecnomath !== 'undefined' && Tecnomath.getCurrentUser()) {
-                    globalCoinEl.textContent = Tecnomath.getCoins();
-                } else {
-                    globalCoinEl.textContent = '0';  // No hay sesión o librería no cargada
+            // Actualizar monedas globales del sistema Tecnomath
+            const globalCoinEl = document.getElementById('global-coins-display');
+            if (globalCoinEl) {
+                try {
+                    if (typeof Tecnomath !== 'undefined' && Tecnomath.getCurrentUser()) {
+                        globalCoinEl.textContent = Tecnomath.getCoins();
+                    } else {
+                        globalCoinEl.textContent = '0';  // No hay sesión o librería no cargada
+                    }
+                } catch (e) {
+                    globalCoinEl.textContent = '0';       // Fallo seguro
                 }
-           } catch (e) {
-                globalCoinEl.textContent = '0';       // Fallo seguro
+            }
         }
-    }
-}
 
         function buildCatTabs() {
             const el = document.getElementById('cat-tabs');
@@ -2057,16 +2064,19 @@
         }
 
         // ════════════════════════════════════════════
-        //  WIN / FAIL
+        //  WIN / FAIL (con monedas globales y locales)
         // ════════════════════════════════════════════
         function gameWin(g) {
             clearInterval(gameTimer);
             if (!stats.isAdmin) {
                 const reward = g.id * 10 + Math.floor((timeLeft / Math.max(1, timerTotal)) * 50);
-                // Sistema de monedas globales Tecnomath
+                // Monedas locales del juego
+                stats.coins += reward;
+                stats.streak++;
+                // Monedas globales del sistema
                 if (typeof Tecnomath !== 'undefined' && Tecnomath.getCurrentUser()) {
                     Tecnomath.addCoins(reward);
-                    Tecnomath.updateHighScore('mindmath', stats.unlocked);  // guarda el nivel máximo alcanzado
+                    Tecnomath.updateHighScore('mindmath', stats.unlocked);
                 }
                 if (!stats.completed.includes(g.id)) {
                     stats.completed.push(g.id);
@@ -2074,8 +2084,11 @@
                 }
                 if (g.odsId && !stats.odsCompleted.includes(g.odsId)) {
                     stats.odsCompleted.push(g.odsId);
-                    showPopup('🌍 ODS DESBLOQUEADO!', `ODS ${g.odsId}: +100 💰 bonus`);
-                    stats.coins += 100;
+                    stats.coins += 100; // Bono local
+                    if (typeof Tecnomath !== 'undefined' && Tecnomath.getCurrentUser()) {
+                        Tecnomath.addCoins(100); // Bono global
+                    }
+                    showPopup('🌍 ODS DESBLOQUEADO!', `ODS ${g.odsId}: +100 💰 bono`);
                 }
                 showPopup('¡CORRECTO!', `+${reward} 💰 · Racha: ${stats.streak}🔥`);
             } else {
@@ -2126,21 +2139,57 @@
         }
 
         // ════════════════════════════════════════════
-        //  SHOP
+        //  SHOP (compra con monedas locales, admin no paga)
         // ════════════════════════════════════════════
         function buyItem(type, cost) {
-            const globalCoins = (typeof Tecnomath !== 'undefined') ? Tecnomath.getCoins() : stats.coins;
-            if (!stats.isAdmin && globalCoins < cost) {
-                showPopup('❌ SIN MONEDAS GLOBALES', `Necesitas ${cost} 💰`);
+            // Admin no paga nada
+            if (stats.isAdmin) {
+                applyPurchase(type);
                 return;
+            }
+            // Verificar monedas locales (stats.coins)
+            if (stats.coins < cost) {
+                showPopup('❌ SIN MONEDAS', `Necesitas ${cost} 💰 locales. Convierte desde la tienda.`);
+                return;
+            }
+            stats.coins -= cost;
+            applyPurchase(type);
+            saveStats();
         }
-            if (!stats.isAdmin) stats.coins -= cost;
+
+        function applyPurchase(type) {
             if (type === 'life') stats.lives++;
             if (type === 'shield') stats.shields++;
             if (type === 'hint') stats.hints = (stats.hints || 0) + 3;
             if (type === 'time_boost') stats.timeBoost = (stats.timeBoost || 0) + 10;
-            saveStats();
             showPopup('✅ COMPRADO', `+1 ${type}`);
+            saveStats();
+        }
+
+        // ════════════════════════════════════════════
+        //  CONVERSIÓN DE MONEDAS (globales → locales)
+        // ════════════════════════════════════════════
+        function openExchangeModal() {
+            if (typeof Tecnomath === 'undefined' || !Tecnomath.getCurrentUser()) {
+                showPopup('INICIA SESIÓN', 'Necesitas cuenta para convertir monedas');
+                return;
+            }
+            const globalCoins = Tecnomath.getCoins();
+            const amountStr = prompt(`Tienes ${globalCoins} 🌐 monedas globales.\n¿Cuántas deseas convertir a monedas de MindMath? (10% comisión)`);
+            if (amountStr === null) return;
+            const amount = parseInt(amountStr);
+            if (isNaN(amount) || amount <= 0) {
+                alert('Cantidad inválida');
+                return;
+            }
+            if (Tecnomath.exchangeGlobalToLocal('mindmath', amount)) {
+                // Recargar monedas locales desde el sistema
+                stats.coins = Tecnomath.getGameCoins('mindmath');
+                saveStats();
+                showPopup('✅ CONVERTIDO', `+${Math.floor(amount * 0.9)} 💰 locales`);
+            } else {
+                showPopup('❌ ERROR', 'Fondos globales insuficientes');
+            }
         }
 
         // ════════════════════════════════════════════
@@ -2151,6 +2200,10 @@
             if (ADMINS[code]) {
                 stats.isAdmin = true;
                 stats.unlocked = 57;
+                // Registrar como admin en el sistema global
+                if (typeof Tecnomath !== 'undefined' && Tecnomath.getCurrentUser()) {
+                    Tecnomath.setAdmin(Tecnomath.getCurrentUser().username);
+                }
                 saveStats();
                 showPopup(`⚡ ${ADMINS[code].toUpperCase()}`, 'RECURSOS INFINITOS');
                 renderMenu();
