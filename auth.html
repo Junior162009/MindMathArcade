@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Tecnomath - Iniciar Sesión</title>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --neon-cyan: #00FFFF; --neon-pink: #FF00FF;
+      --retro-bg: #060610; --card-bg: #0d0d1a;
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      background: var(--retro-bg); color: white;
+      font-family: 'Press Start 2P', cursive;
+      display: flex; align-items: center; justify-content: center;
+      height: 100vh; margin: 0;
+      background-image: radial-gradient(ellipse at 30% 50%, rgba(0,255,255,0.1) 0%, transparent 50%);
+    }
+    .login-box {
+      background: var(--card-bg); border: 2px solid var(--neon-cyan);
+      padding: 20px; border-radius: 12px; width: 90%; max-width: 350px;
+      box-shadow: 0 0 20px rgba(0,255,255,0.3); text-align: center;
+    }
+    h2 { color: var(--neon-cyan); font-size: 12px; margin-bottom: 20px; text-shadow: 0 0 10px var(--neon-cyan); }
+    input {
+      width: 100%; padding: 12px; margin: 8px 0;
+      background: #0a0a1a; border: 2px solid #333; color: var(--neon-cyan);
+      font-family: 'Press Start 2P', cursive; font-size: 8px; outline: none;
+      border-radius: 6px; text-align: center;
+    }
+    input:focus { border-color: var(--neon-pink); }
+    .btn {
+      width: 100%; padding: 12px; margin-top: 15px;
+      background: var(--neon-pink); color: white; border: none;
+      font-family: 'Press Start 2P', cursive; font-size: 8px;
+      cursor: pointer; border-radius: 6px; box-shadow: 0 0 10px var(--neon-pink);
+      transition: 0.2s;
+    }
+    .btn:hover { transform: scale(1.02); }
+    .btn-secondary {
+      background: transparent; border: 1px solid var(--neon-cyan); color: var(--neon-cyan);
+      box-shadow: none; margin-top: 10px;
+    }
+    .message { font-size: 6px; margin-top: 10px; color: var(--neon-pink); min-height: 18px; }
+    .back-link { font-size: 5px; color: #888; margin-top: 15px; display: block; text-decoration: none; }
+  </style>
+</head>
+<body>
+<div class="login-box">
+  <h2>🌐 ACCEDER</h2>
+  <input type="text" id="username" placeholder="Usuario" autocomplete="off">
+  <input type="password" id="password" placeholder="Contraseña">
+  <button class="btn" id="btnLogin">ENTRAR / CREAR CUENTA</button>
+  <button class="btn btn-secondary" id="btnLogout" style="display:none;">CERRAR SESIÓN</button>
+  <div class="message" id="message"></div>
+  <a href="index.html" class="back-link">← Volver al portal</a>
+</div>
+
+<script src="shared.js"></script>
+<script>
+  const usernameEl = document.getElementById('username');
+  const passwordEl = document.getElementById('password');
+  const btnLogin = document.getElementById('btnLogin');
+  const btnLogout = document.getElementById('btnLogout');
+  const messageEl = document.getElementById('message');
+
+  function updateUI() {
+    const user = Tecnomath.getCurrentUser();
+    if (user) {
+      usernameEl.value = user.username;
+      usernameEl.disabled = true;
+      passwordEl.style.display = 'none';
+      btnLogin.style.display = 'none';
+      btnLogout.style.display = 'block';
+      messageEl.textContent = `Sesión activa: ${user.username} · ${Tecnomath.getCoins()} monedas`;
+      messageEl.style.color = 'var(--neon-cyan)';
+    } else {
+      usernameEl.value = '';
+      usernameEl.disabled = false;
+      passwordEl.style.display = 'block';
+      btnLogin.style.display = 'block';
+      btnLogout.style.display = 'none';
+      messageEl.textContent = '';
+    }
+  }
+
+  btnLogin.addEventListener('click', () => {
+    const username = usernameEl.value.trim();
+    const password = passwordEl.value.trim();
+    const result = Tecnomath.login(username, password);
+    if (result.success) {
+      messageEl.textContent = `¡Bienvenido/a ${result.username}!`;
+      messageEl.style.color = '#39FF14';
+      updateUI();
+    } else {
+      messageEl.textContent = result.message;
+      messageEl.style.color = '#FF0033';
+    }
+  });
+
+  btnLogout.addEventListener('click', () => {
+    Tecnomath.logout();
+    updateUI();
+  });
+
+  updateUI();
+</script>
+</body>
+</html>
