@@ -7,112 +7,72 @@
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
         :root {
-            --neon-cyan: #00FFFF;
-            --neon-pink: #FF00FF;
-            --neon-green: #39FF14;
-            --neon-yellow: #FFE600;
-            --gold: #FFD700;
-            --retro-bg: #060610;
-            --card-bg: #0d0d1a;
+            --neon-cyan: #00FFFF; --neon-pink: #FF00FF; --neon-green: #39FF14;
+            --neon-yellow: #FFE600; --gold: #FFD700; --retro-bg: #060610; --card-bg: #0d0d1a;
         }
-
         * { margin: 0; padding: 0; box-sizing: border-box; }
         html, body {
-            height: 100%; overflow-y: auto;
-            background: var(--retro-bg);
-            font-family: 'Press Start 2P', cursive;
-            color: white;
-            background-image:
-                radial-gradient(ellipse at 20% 50%, rgba(0,68,255,0.07) 0%, transparent 50%),
-                radial-gradient(ellipse at 80% 20%, rgba(255,0,255,0.07) 0%, transparent 50%);
+            height: 100%; overflow-y: auto; background: var(--retro-bg);
+            font-family: 'Press Start 2P', cursive; color: white;
+            background-image: radial-gradient(ellipse at 20% 50%, rgba(0,68,255,0.07) 0%, transparent 50%),
+                            radial-gradient(ellipse at 80% 20%, rgba(255,0,255,0.07) 0%, transparent 50%);
         }
         body::before {
             content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 9999;
             background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.12) 2px, rgba(0,0,0,0.12) 4px);
         }
-
         header {
             padding: 15px; text-align: center; border-bottom: 2px solid var(--neon-pink);
             background: linear-gradient(90deg, rgba(255,0,255,0.05), transparent, rgba(0,255,255,0.05));
             position: relative;
         }
         h1 {
-            font-size: clamp(14px, 5vw, 22px);
-            color: var(--neon-cyan);
+            font-size: clamp(14px, 5vw, 22px); color: var(--neon-cyan);
             text-shadow: 0 0 10px var(--neon-cyan), 0 0 30px var(--neon-cyan);
-            letter-spacing: 2px;
-            animation: titlePulse 2s ease-in-out infinite;
+            letter-spacing: 2px; animation: titlePulse 2s ease-in-out infinite;
         }
         @keyframes titlePulse {
             0%,100%{ text-shadow: 0 0 10px var(--neon-cyan), 0 0 30px var(--neon-cyan); }
             50%{ text-shadow: 0 0 20px var(--neon-pink), 0 0 50px var(--neon-pink); }
         }
-        .subtitle {
-            font-size: 6px; color: var(--neon-pink); text-shadow: 0 0 8px var(--neon-pink);
-            margin-top: 5px;
-        }
-
+        .subtitle { font-size: 6px; color: var(--neon-pink); text-shadow: 0 0 8px var(--neon-pink); margin-top: 5px; }
         .container {
             max-width: 700px; margin: 20px auto; padding: 10px;
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-            gap: 15px;
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px;
         }
-
         .project-card {
-            background: var(--card-bg);
-            border: 2px solid #1a1a2e;
-            border-radius: 12px;
-            padding: 15px 10px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s;
-            text-decoration: none;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 10px;
-            opacity: 0;
-            animation: fadeIn 0.6s ease-out forwards;
+            background: var(--card-bg); border: 2px solid #1a1a2e; border-radius: 12px;
+            padding: 15px 10px; text-align: center; cursor: pointer; transition: all 0.3s;
+            text-decoration: none; display: flex; flex-direction: column; align-items: center;
+            gap: 10px; opacity: 0; animation: fadeIn 0.6s ease-out forwards;
         }
         .project-card:nth-child(1) { animation-delay: 0.1s; }
         .project-card:nth-child(2) { animation-delay: 0.2s; }
         .project-card:nth-child(3) { animation-delay: 0.3s; }
         .project-card:nth-child(4) { animation-delay: 0.4s; }
         .project-card:nth-child(5) { animation-delay: 0.5s; }
-
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
-
         .project-card:hover {
-            border-color: var(--neon-cyan);
-            box-shadow: 0 0 15px rgba(0,255,255,0.3);
+            border-color: var(--neon-cyan); box-shadow: 0 0 15px rgba(0,255,255,0.3);
             transform: translateY(-5px);
         }
         .project-icon {
-            font-size: 40px;
-            width: 70px; height: 70px;
-            background: #0a0a1a;
-            border-radius: 16px;
+            width: 70px; height: 70px; background: #0a0a1a; border-radius: 16px;
             display: flex; align-items: center; justify-content: center;
-            border: 2px solid #333;
-            transition: 0.3s;
+            border: 2px solid #333; transition: 0.3s; overflow: hidden;
         }
         .project-card:hover .project-icon {
-            border-color: var(--neon-pink);
-            box-shadow: 0 0 15px rgba(255,0,255,0.5);
+            border-color: var(--neon-pink); box-shadow: 0 0 15px rgba(255,0,255,0.5);
         }
-        .project-name {
-            font-size: 6px; color: white;
-            text-shadow: 0 0 5px rgba(255,255,255,0.5);
+        .project-icon img {
+            width: 100%; height: 100%; object-fit: cover; border-radius: 12px;
         }
-        .project-desc {
-            font-size: 4px; color: #aaa;
-            line-height: 1.4;
-        }
-
+        .project-icon span { font-size: 36px; }
+        .project-name { font-size: 6px; color: white; text-shadow: 0 0 5px rgba(255,255,255,0.5); }
+        .project-desc { font-size: 4px; color: #aaa; line-height: 1.4; }
         footer {
             text-align: center; padding: 15px; color: #444; font-size: 5px;
             border-top: 1px solid #1a1a2e; margin-top: 20px;
@@ -131,28 +91,31 @@
 
     <script>
         // ═══════════════════════════════════════
-        // LISTA DE PROYECTOS (modifícala a tu gusto)
+        // LISTA DE PROYECTOS (MODIFICA AQUÍ TUS JUEGOS)
         // ═══════════════════════════════════════
         const projects = [
             {
                 name: "MindMath Arcade",
-                icon: "🧮",
                 desc: "Juego de matemáticas retro con 60+ niveles",
-                url: "game.html"  // El archivo del juego principal
-            },
-            {
-                name: "Memoria ODS",
-                icon: "🧠",
-                desc: "Juego de memoria con temática de los 17 ODS",
-                url: "https://tuusuario.github.io/memoria-ods/"  // ← cambia por tu URL real
+                url: "game.html",
+                imageUrl: "",        // ← Pon aquí la ruta de la imagen (ej: "img/mindmath.png")
+                icon: "🧮"           // ← Emoji de respaldo si no hay imagen
             },
             {
                 name: "Eco Collector",
-                icon: "🌍",
                 desc: "Atrapa agua y reciclables. ODS 6 y 12",
-                url: "eco-collector.html"
+                url: "eco-collector.html",
+                imageUrl: "",
+                icon: "🌍"
+            },
+            {
+                name: "Memoria ODS",
+                desc: "Juego de memoria con los 17 ODS",
+                url: "https://tuusuario.github.io/memoria-ods/",
+                imageUrl: "",
+                icon: "🧠"
             }
-              // Agrega más objetos aquí
+            // Agrega más juegos con el mismo formato
         ];
 
         const container = document.getElementById('projectsContainer');
@@ -161,17 +124,30 @@
             const card = document.createElement('a');
             card.className = 'project-card';
             card.href = proj.url;
-            card.target = "_blank"; // Abre en nueva pestaña (si es externo)
+            card.target = proj.url.includes('game.html') || proj.url.includes('eco-collector.html') ? '_self' : '_blank';
             card.rel = "noopener";
 
-            // Si el enlace es interno (game.html) se abre en la misma ventana
-            if (proj.url.includes("game.html")) {
-                card.target = "_self";
-            }
-
+            // Contenedor de imagen/emoji
             const iconDiv = document.createElement('div');
             iconDiv.className = 'project-icon';
-            iconDiv.textContent = proj.icon;
+
+            // Si hay imageUrl, intentamos usar la imagen; si no, o falla, ponemos el emoji
+            if (proj.imageUrl && proj.imageUrl.trim() !== '') {
+                const img = document.createElement('img');
+                img.src = proj.imageUrl;
+                img.alt = proj.name;
+                img.onerror = function() {
+                    this.remove();
+                    const span = document.createElement('span');
+                    span.textContent = proj.icon || '🕹️';
+                    iconDiv.appendChild(span);
+                };
+                iconDiv.appendChild(img);
+            } else {
+                const span = document.createElement('span');
+                span.textContent = proj.icon || '🕹️';
+                iconDiv.appendChild(span);
+            }
 
             const nameDiv = document.createElement('div');
             nameDiv.className = 'project-name';
