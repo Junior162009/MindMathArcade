@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Eco-Barrio 2030 · ODS 11, 12, 13, 7</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <script src="shared.js"></script>
+    <style>
+        :root {
+            --neon-cyan: #00FFFF; --neon-pink: #FF00FF; --neon-green: #39FF14;
+            --neon-yellow: #FFE600; --neon-orange: #FF6B00; --gold: #FFD700;
+            --retro-bg: #060610; --card-bg: #0d0d1a;
+            --nature: #4CAF50; --energy: #FF9800; --community: #2196F3; --resources: #00BCD4;
+        }
+        * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; user-select:none; }
+        html, body {
+            height:100%; width:100%; overflow:hidden;
+            background:var(--retro-bg); font-family:'Press Start 2P', cursive; color:white;
+            display:flex; align-items:center; justify-content:center;
+        }
+        body::before {
+            content:''; position:fixed; inset:0; z-index:0;
+            background:radial-gradient(ellipse at 30% 50%, rgba(76,175,80,0.1) 0%, transparent 50%),
+                      radial-gradient(ellipse at 70% 80%, rgba(33,150,243,0.08) 0%, transparent 50%);
+            animation: bgPulse 6s ease-in-out infinite;
+        }
+        @keyframes bgPulse {
+            0%,100%{ opacity:0.7; } 50%{ opacity:1; }
+        }
+        .game-wrapper {
+            position:relative; z-index:1; width:100%; max-width:480px; height:100vh;
+            display:flex; flex-direction:column; padding:8px; gap:6px;
+        }
+        .hud {
+            display:flex; justify-content:space-between; align-items:center;
+            font-size:6px; padding:6px 10px; background:rgba(0,0,0,0.7);
+            border-radius:8px; flex-shrink:0; flex-wrap:wrap; gap:4px;
+        }
+        .hud-item { color:var(--neon-green); text-shadow:0 0 6px var(--neon-green); }
+        .map-area {
+            background:var(--card-bg); border:2px solid #1a1a2e; border-radius:10px;
+            padding:8px; display:grid; grid-template-columns:repeat(4,1fr); gap:4px;
+            aspect-ratio:4/3; flex-shrink:0; position:relative; overflow:hidden;
+        }
+        .map-tile {
+            background:#0a0a1a; border:1px solid #222; border-radius:6px;
+            display:flex; align-items:center; justify-content:center;
+            font-size:22px; transition:all 0.5s; position:relative;
+        }
+        .map-tile.dirty { background:#1a0a0a; border-color:#FF0033; }
+        .map-tile.nature { background:#0a1a0a; border-color:var(--nature); }
+        .map-tile.energy { background:#1a1a0a; border-color:var(--energy); }
+        .map-tile.community { background:#0a0a2a; border-color:var(--community); }
+        .bars-area {
+            display:flex; flex-direction:column; gap:4px; flex-shrink:0;
+        }
+        .bar-row {
+            display:flex; align-items:center; gap:6px; font-size:4px;
+        }
+        .bar-label { width:60px; color:#aaa; }
+        .bar-outer {
+            flex:1; height:10px; background:#111; border-radius:5px; overflow:hidden; border:1px solid #333;
+        }
+        .bar-inner {
+            height:100%; border-radius:5px; transition:width 0.5s;
+        }
+        .bar-nature { background:linear-gradient(90deg, #2E7D32, #4CAF50); }
+        .bar-energy { background:linear-gradient(90deg, #E65100, #FF9800); }
+        .bar-community { background:linear-gradient(90deg, #1565C0, #2196F3); }
+        .bar-resources { background:linear-gradient(90deg, #00838F, #00BCD4); }
+        .card-area {
+            background:var(--card-bg); border:2px solid var(--neon-pink); border-radius:10px;
+            padding:10px; flex:1; display:flex; flex-direction:column; gap:8px;
+            box-shadow:0 0 15px rgba(255,0,255,0.3); overflow-y:auto;
+        }
+        .card-title {
+            font-size:7px; color:var(--neon-yellow); text-align:center; text-shadow:0 0 8px var(--neon-yellow);
+        }
+        .card-desc {
+            font-size:5px; color:#ccc; text-align:center; line-height:1.6;
+        }
+        .options { display:flex; flex-direction:column; gap:6px; }
+        .opt-btn {
+            font-family:'Press Start 2P', cursive; font-size:5px; padding:10px 8px;
+            background:#0d0d1a; border:2px solid #333; color:white; border-radius:8px;
+            cursor:pointer; transition:0.2s; text-align:left; line-height:1.5;
+        }
+        .opt-btn:hover { border-color:var(--neon-cyan); background:rgba(0,255,255,0.08); }
+        .opt-btn:active { transform:scale(0.97); }
+        .day-counter {
+            font-size:8px; color:var(--gold); text-align:center; text-shadow:0 0 10px var(--gold);
+        }
+        .btn-help {
+            font-family:'Press Start 2P', cursive; font-size:5px; padding:6px 12px;
+            background:var(--neon-pink); color:white; border:none; border-radius:6px; cursor:pointer;
+            box-shadow:0 0 10px var(--neon-pink);
+        }
+        .btn-help:disabled { opacity:0.5; cursor:not-allowed; }
+        .popup-result {
+            position:fixed; top:50%; left:50%; transform:translate(-50%,-50%) scale(0);
+            background:var(--card-bg); border:2px solid var(--gold); padding:20px;
+            text-align:center; z-index:200; border-radius:10px;
+            box-shadow:0 0 30px rgba(255,215,0,0.4); transition:0.3s;
+        }
+        .popup-result.show { transform:translate(-50%,-50%) scale(1); }
+        @media (max-width:360px) {
+            .map-tile { font-size:16px; }
+            .card-title { font-size:6px; }
+            .opt-btn { font-size:4px; padding:8px 6px; }
+        }
+    </style>
+</head>
+<body>
+<div class="game-wrapper">
+    <div class="hud">
+        <span class="hud-item">📅 Día <span id="dayDisplay">1</span>/30</span>
+        <span class="hud-item">🌐 <span id="globalCoinsHud">0</span></span>
+        <span class="hud-item">💰 <span id="localCoinsHud">0</span></span>
+        <button class="btn-help" id="hintBtn" onclick="useHint()">💡 PISTA (20💰)</button>
+    </div>
+
+    <div class="map-area" id="mapArea"></div>
+
+    <div class="bars-area">
+        <div class="bar-row">
+            <span class="bar-label">🌿 Naturaleza</span>
+            <div class="bar-outer"><div class="bar-inner bar-nature" id="barNature" style="width:30%"></div></div>
+        </div>
+        <div class="bar-row">
+            <span class="bar-label">⚡ Energía</span>
+            <div class="bar-outer"><div class="bar-inner bar-energy" id="barEnergy" style="width:30%"></div></div>
+        </div>
+        <div class="bar-row">
+            <span class="bar-label">🤝 Comunidad</span>
+            <div class="bar-outer"><div class="bar-inner bar-community" id="barCommunity" style="width:30%"></div></div>
+        </div>
+        <div class="bar-row">
+            <span class="bar-label">💧 Recursos</span>
+            <div class="bar-outer"><div class="bar-inner bar-resources" id="barResources" style="width:30%"></div></div>
+        </div>
+    </div>
+
+    <div class="card-area" id="cardArea">
+        <div class="day-counter" id="dayCounter">Día 1 de 30</div>
+        <div class="card-title" id="situationTitle">Cargando...</div>
+        <div class="card-desc" id="situationDesc"></div>
+        <div class="options" id="optionsContainer"></div>
+    </div>
+</div>
+
+<div class="popup-result" id="popupResult">
+    <h2 id="popupTitle" style="font-size:10px; margin-bottom:10px;"></h2>
+    <p id="popupMsg" style="font-size:6px; color:#aaa; margin-bottom:15px;"></p>
+    <button class="btn-help" id="popupBtn" onclick="closePopup()">CONTINUAR</button>
+</div>
+
+<script>
+    // ═══════════════════════════════════════
+    //  DATOS DEL JUEGO - SITUACIONES ODS
+    // ═══════════════════════════════════════
+    const situations = [
+        {
+            title: "Zona baldía abandonada",
+            desc: "Hay un terreno lleno de basura y ratas. Los vecinos se quejan del olor.",
+            options: [
+                { text: "Crear huerto comunitario", effects: { nature:15, community:10, energy:5, resources:5 }, correct:true, hint:"ODS 11, 12, 15: Agricultura urbana" },
+                { text: "Construir estacionamiento", effects: { nature:-10, community:-5, energy:-5, resources:5 }, correct:false, hint:"Más autos, menos verde" },
+                { text: "Ignorar el problema", effects: { nature:-5, community:-10, energy:0, resources:0 }, correct:false, hint:"La basura se acumula" }
+            ]
+        },
+        {
+            title: "Exceso de tráfico",
+            desc: "Las calles están atascadas. El aire es irrespirable y la gente llega tarde al trabajo.",
+            options: [
+                { text: "Invertir en buses eléctricos", effects: { nature:10, energy:15, community:10, resources:-5 }, correct:true, hint:"ODS 7, 11, 13: Transporte limpio" },
+                { text: "Construir más autopistas", effects: { nature:-15, energy:-10, community:5, resources:10 }, correct:false, hint:"Más cemento, más contaminación" },
+                { text: "Subsidiar gasolina", effects: { nature:-10, energy:-15, community:0, resources:-5 }, correct:false, hint:"Fomenta más tráfico" }
+            ]
+        },
+        {
+            title: "Botellas plásticas en el parque",
+            desc: "El parque central está lleno de residuos plásticos. Los niños ya no juegan allí.",
+            options: [
+                { text: "Instalar reciclaje y campaña", effects: { nature:10, community:15, energy:5, resources:10 }, correct:true, hint:"ODS 12: Consumo responsable" },
+                { text: "Quemar la basura", effects: { nature:-15, community:-5, energy:0, resources:-5 }, correct:false, hint:"Contamina el aire" },
+                { text: "Multar a los vecinos", effects: { nature:5, community:-10, energy:0, resources:5 }, correct:false, hint:"Genera malestar social" }
+            ]
+        },
+        {
+            title: "Fábrica que contamina el río",
+            desc: "Una fábrica vierte desechos al río. El agua huele mal y los peces han muerto.",
+            options: [
+                { text: "Instalar filtros de agua", effects: { nature:15, community:10, energy:5, resources:-10 }, correct:true, hint:"Equilibrio entre empleo y ecología" },
+                { text: "Cerrar la fábrica", effects: { nature:20, community:-15, energy:5, resources:0 }, correct:false, hint:"Pierden empleo, pero el río se limpia" },
+                { text: "Ignorar, es fuente de empleo", effects: { nature:-15, community:5, energy:0, resources:5 }, correct:false, hint:"El daño ambiental empeora" }
+            ]
+        },
+        {
+            title: "Apagones frecuentes",
+            desc: "El barrio sufre cortes de luz cada noche. Los vecinos usan velas y generadores.",
+            options: [
+                { text: "Instalar paneles solares", effects: { nature:10, energy:20, community:10, resources:-10 }, correct:true, hint:"ODS 7: Energía limpia y asequible" },
+                { text: "Comprar generadores diésel", effects: { nature:-15, energy:-5, community:0, resources:5 }, correct:false, hint:"Más ruido y humo" },
+                { text: "Pedir más carbón a la central", effects: { nature:-20, energy:5, community:-5, resources:5 }, correct:false, hint:"Combustible fósil" }
+            ]
+        },
+        {
+            title: "Falta de espacios de reunión",
+            desc: "No hay plazas ni centros comunitarios. Los vecinos apenas se conocen.",
+            options: [
+                { text: "Construir centro cultural verde", effects: { nature:10, community:20, energy:10, resources:-5 }, correct:true, hint:"ODS 11: Espacios inclusivos" },
+                { text: "Construir un centro comercial", effects: { nature:-10, community:5, energy:-10, resources:15 }, correct:false, hint:"Consumismo, no comunidad" },
+                { text: "No hacer nada", effects: { nature:0, community:-15, energy:0, resources:0 }, correct:false, hint:"El aislamiento crece" }
+            ]
+        },
+        {
+            title: "Desempleo juvenil",
+            desc: "Muchos jóvenes no tienen trabajo y pasan el día en las esquinas.",
+            options: [
+                { text: "Talleres de oficios verdes", effects: { nature:10, community:15, energy:10, resources:5 }, correct:true, hint:"ODS 4, 8: Empleo y educación" },
+                { text: "Abrir más fábricas", effects: { nature:-10, community:5, energy:-5, resources:10 }, correct:false, hint:"Empleo a costa del ambiente" },
+                { text: "Subsidios sin capacitación", effects: { nature:0, community:-10, energy:0, resources:-10 }, correct:false, hint:"Dependencia, no desarrollo" }
+            ]
+        },
+        {
+            title: "Lluvias e inundaciones",
+            desc: "Cada tormenta inunda las calles porque no hay drenaje adecuado.",
+            options: [
+                { text: "Crear jardines de lluvia", effects: { nature:20, community:10, energy:5, resources:5 }, correct:true, hint:"ODS 13: Adaptación climática" },
+                { text: "Entubar todo el drenaje", effects: { nature:-5, community:5, energy:5, resources:-15 }, correct:false, hint:"Solución gris, no verde" },
+                { text: "Esperar a que escampe", effects: { nature:0, community:-10, energy:0, resources:0 }, correct:false, hint:"El problema persiste" }
+            ]
+        }
+    ];
+
+    // ═══════════════════════════════════════
+    //  ESTADO DEL JUEGO
+    // ═══════════════════════════════════════
+    let bars = { nature:30, energy:30, community:30, resources:30 };
+    let currentDay = 1;
+    let currentSituation = null;
+    let localCoins = 0;
+    let hintsUsed = 0;
+    let gameOver = false;
+
+    // Elementos DOM
+    const mapArea = document.getElementById('mapArea');
+    const barNature = document.getElementById('barNature');
+    const barEnergy = document.getElementById('barEnergy');
+    const barCommunity = document.getElementById('barCommunity');
+    const barResources = document.getElementById('barResources');
+    const situationTitle = document.getElementById('situationTitle');
+    const situationDesc = document.getElementById('situationDesc');
+    const optionsContainer = document.getElementById('optionsContainer');
+    const dayDisplay = document.getElementById('dayDisplay');
+    const dayCounter = document.getElementById('dayCounter');
+    const globalCoinsHud = document.getElementById('globalCoinsHud');
+    const localCoinsHud = document.getElementById('localCoinsHud');
+    const hintBtn = document.getElementById('hintBtn');
+    const popupResult = document.getElementById('popupResult');
+    const popupTitle = document.getElementById('popupTitle');
+    const popupMsg = document.getElementById('popupMsg');
+
+    // ═══════════════════════════════════════
+    //  FUNCIONES DE MONEDAS
+    // ═══════════════════════════════════════
+    function loadLocalCoins() {
+        if (typeof Tecnomath !== 'undefined' && Tecnomath.getCurrentUser()) {
+            localCoins = Tecnomath.getGameCoins('eco-barrio');
+        } else {
+            localCoins = 0;
+        }
+    }
+
+    function saveLocalCoins() {
+        if (typeof Tecnomath !== 'undefined' && Tecnomath.getCurrentUser()) {
+            Tecnomath.setGameCoins('eco-barrio', localCoins);
+        }
+    }
+
+    function updateCoinsDisplay() {
+        globalCoinsHud.textContent = (typeof Tecnomath !== 'undefined' && Tecnomath.getCurrentUser()) ? Tecnomath.getCoins() : '0';
+        localCoinsHud.textContent = localCoins;
+    }
+
+    // ═══════════════════════════════════════
+    //  MAPA Y BARRAS
+    // ═══════════════════════════════════════
+    function buildMap() {
+        mapArea.innerHTML = '';
+        const tiles = [
+            { emoji:'🏠', type:'community' }, { emoji:'🌳', type:'nature' },
+            { emoji:'🏭', type:'energy' }, { emoji:'💧', type:'resources' },
+            { emoji:'🏫', type:'community' }, { emoji:'🌿', type:'nature' },
+            { emoji:'⚡', type:'energy' }, { emoji:'♻️', type:'resources' },
+            { emoji:'🏥', type:'community' }, { emoji:'🌸', type:'nature' },
+            { emoji:'🔋', type:'energy' }, { emoji:'🚰', type:'resources' }
+        ];
+        tiles.forEach((tile, i) => {
+            const div = document.createElement('div');
+            div.className = 'map-tile';
+            div.textContent = tile.emoji;
+            // El aspecto mejora según el valor de la barra correspondiente
+            const barValue = bars[tile.type];
+            if (barValue >= 70) div.classList.add(tile.type);
+            else if (barValue < 30) div.classList.add('dirty');
+            mapArea.appendChild(div);
+        });
+    }
+
+    function updateBars() {
+        barNature.style.width = Math.max(0, Math.min(100, bars.nature)) + '%';
+        barEnergy.style.width = Math.max(0, Math.min(100, bars.energy)) + '%';
+        barCommunity.style.width = Math.max(0, Math.min(100, bars.community)) + '%';
+        barResources.style.width = Math.max(0, Math.min(100, bars.resources)) + '%';
+        buildMap();
+    }
+
+    // ═══════════════════════════════════════
+    //  LÓGICA DEL JUEGO
+    // ═══════════════════════════════════════
+    function pickRandomSituation() {
+        const available = situations.filter(s => s !== currentSituation);
+        return available[Math.floor(Math.random() * available.length)];
+    }
+
+    function loadSituation() {
+        if (gameOver) return;
+        currentSituation = pickRandomSituation();
+        situationTitle.textContent = currentSituation.title;
+        situationDesc.textContent = currentSituation.desc;
+        optionsContainer.innerHTML = '';
+        currentSituation.options.forEach((opt, i) => {
+            const btn = document.createElement('button');
+            btn.className = 'opt-btn';
+            btn.textContent = `${String.fromCharCode(65+i)}) ${opt.text}`;
+            btn.onclick = () => chooseOption(i);
+            optionsContainer.appendChild(btn);
+        });
+        dayCounter.textContent = `Día ${currentDay} de 30`;
+        dayDisplay.textContent = currentDay;
+        updateCoinsDisplay();
+        hintBtn.disabled = localCoins < 20;
+    }
+
+    function chooseOption(index) {
+        if (gameOver) return;
+        const opt = currentSituation.options[index];
+        // Aplicar efectos
+        bars.nature = Math.max(0, Math.min(100, bars.nature + opt.effects.nature));
+        bars.energy = Math.max(0, Math.min(100, bars.energy + opt.effects.energy));
+        bars.community = Math.max(0, Math.min(100, bars.community + opt.effects.community));
+        bars.resources = Math.max(0, Math.min(100, bars.resources + opt.effects.resources));
+        // Recompensa local por decisión correcta
+        if (opt.correct) {
+            localCoins += 15;
+            saveLocalCoins();
+        }
+        updateBars();
+        updateCoinsDisplay();
+        // Avanzar día
+        currentDay++;
+        if (currentDay > 30) {
+            endGame();
+        } else {
+            loadSituation();
+        }
+    }
+
+    function useHint() {
+        if (localCoins < 20 || gameOver) return;
+        localCoins -= 20;
+        saveLocalCoins();
+        updateCoinsDisplay();
+        hintBtn.disabled = localCoins < 20;
+        // Resaltar opción correcta visualmente
+        const buttons = optionsContainer.querySelectorAll('.opt-btn');
+        buttons.forEach((btn, i) => {
+            if (currentSituation.options[i].correct) {
+                btn.style.borderColor = 'var(--neon-green)';
+                btn.style.background = 'rgba(57,255,20,0.2)';
+                setTimeout(() => {
+                    btn.style.borderColor = '#333';
+                    btn.style.background = '#0d0d1a';
+                }, 2000);
+            }
+        });
+    }
+
+    function endGame() {
+        gameOver = true;
+        const avg = (bars.nature + bars.energy + bars.community + bars.resources) / 4;
+        let won = avg >= 60;
+        let rewardGlobal = 0;
+        if (won) {
+            rewardGlobal = Math.floor(avg * 2);
+            if (typeof Tecnomath !== 'undefined' && Tecnomath.getCurrentUser()) {
+                Tecnomath.addCoins(rewardGlobal);
+                Tecnomath.updateHighScore('eco-barrio', Math.floor(avg));
+            }
+            popupTitle.textContent = '🌆 ¡ECO-CIUDAD LOGRADA!';
+            popupMsg.textContent = `Tu barrio es sostenible (${Math.floor(avg)}%).\nGanaste ${rewardGlobal} 🌐 monedas globales.`;
+        } else {
+            popupTitle.textContent = '😞 BARRIO EN CRISIS';
+            popupMsg.textContent = `Promedio de sostenibilidad: ${Math.floor(avg)}%.\nNecesitabas 60%.\n¡Inténtalo de nuevo!`;
+        }
+        popupResult.classList.add('show');
+        // Guardar progreso
+        if (typeof Tecnomath !== 'undefined' && Tecnomath.getCurrentUser()) {
+            Tecnomath.setProgress('eco-barrio', { lastScore: Math.floor(avg), won: won });
+        }
+    }
+
+    function closePopup() {
+        popupResult.classList.remove('show');
+        // Reiniciar juego
+        bars = { nature:30, energy:30, community:30, resources:30 };
+        currentDay = 1;
+        gameOver = false;
+        hintsUsed = 0;
+        updateBars();
+        updateCoinsDisplay();
+        loadSituation();
+    }
+
+    // ═══════════════════════════════════════
+    //  INICIO
+    // ═══════════════════════════════════════
+    function init() {
+        loadLocalCoins();
+        buildMap();
+        updateBars();
+        updateCoinsDisplay();
+        loadSituation();
+    }
+
+    init();
+</script>
+</body>
+</html>
