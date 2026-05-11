@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Eco Collector · ODS 6 y 12</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --neon-green: #39FF14;
+            --neon-pink: #FF00FF;
+            --neon-cyan: #00FFFF;
+            --neon-yellow: #FFE600;
+            --retro-bg: #060610;
+            --card-bg: #0d0d1a;
+        }
+        * {
+            margin: 0; padding: 0; box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
+        html, body {
+            height: 100%; width: 100%; overflow: hidden;
+            background: var(--retro-bg);
+            font-family: 'Press Start 2P', cursive;
+            color: white;
+        }
+        body {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            background-image:
+                radial-gradient(ellipse at 30% 50%, rgba(0,255,255,0.1) 0%, transparent 50%),
+                radial-gradient(ellipse at 70% 80%, rgba(57,255,20,0.08) 0%, transparent 50%);
+        }
+        canvas {
+            border: 2px solid var(--neon-cyan);
+            box-shadow: 0 0 15px var(--neon-cyan);
+            border-radius: 8px;
+            max-width: 100%;
+            height: auto;
+            background: #0a0a1a;
+        }
+        .hud-game {
+            display: flex; justify-content: space-between; width: 100%; max-width: 500px;
+            padding: 8px 12px; font-size: 8px; color: var(--neon-green);
+            text-shadow: 0 0 8px var(--neon-green);
+        }
+        .btn-restart {
+            font-family: 'Press Start 2P', cursive; font-size: 8px; padding: 10px 20px;
+            background: var(--neon-pink); color: white; border: none; border-radius: 8px;
+            cursor: pointer; margin: 10px; box-shadow: 0 0 10px var(--neon-pink);
+            transition: 0.2s;
+        }
+        .btn-restart:hover { transform: scale(1.05); }
+        .ods-badge-game {
+            font-size: 6px; color: #FFD700; text-align: center; margin: 5px 0;
+            text-shadow: 0 0 6px #FFD700;
+        }
+        @media (max-width: 500px) {
+            .hud-game { font-size: 6px; }
+            canvas { max-width: 95%; }
+        }
+    </style>
+</head>
+<body>
+    <div class="hud-game">
+        <span>💧 <span id="scoreDisplay">0</span></span>
+        <span>❤️ <span id="livesDisplay">3</span></span>
+        <span>⏱️ <span id="timeDisplay">60</span></span>
+    </div>
+    <canvas id="gameCanvas" width="400" height="600" aria-label="Juego Eco Collector"></canvas>
+    <div class="ods-badge-game">🌍 ODS 6: Agua limpia · ODS 12: Reciclaje responsable</div>
+    <button class="btn-restart" id="restartBtn" style="display:none;" onclick="restartGame()">🔄 REINICIAR</button>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Variables del juego
+        let player = { x: canvas.width/2 - 25, y: canvas.height - 60, width: 50, height: 30 };
+        let items = [];
+        let score = 0;
+        let lives = 3;
+        let timeLeft = 60;
+        let gameActive = true;
+        let gameInterval;
+        let spawnInterval;
+        let frameId;
+
+        // Elementos HUD
+        const scoreDisplay = document.getElementById('scoreDisplay');
+        const livesDisplay = document.getElementById('livesDisplay');
+        const timeDisplay = document.getElementById('timeDisplay');
+        const restartBtn = document.getElementById('restartBtn');
+
+        // Tipos de objetos
+        const itemTypes = [
+            { type: 'good', emoji: '💧', points: 10, color: '#00BFFF', label: 'Agua limpia' },
+            { type: 'good', emoji: '♻️', points: 15, color: '#4CAF50', label: 'Reciclable' },
+            { type: 'bad', emoji: '☣️', points: -20, color: '#FF0033', label: 'Contaminante' },
+            { type: 'good', emoji: '🌱', points: 20, color: '#8BC34A', label: 'Planta' }
+        ];
+
+        function spawnItem() {
+            if (!gameActive) return;
+            const typeIndex = Math.random() < 0.3 ? 2 : Math.floor(Math.random() * 3); // 30% malo, 70% bueno (0,1,3)
+            const itemType = itemTypes[typeIndex];
+            const x = Math.random() * (canvas.width - 30) + 15;
+            items.push({
+                x: x,
+                y: -20,
+                radius: 18,
+                type: itemType,
+                speed: 2 + Math.random() * 3
+            });
+        }
+
+        function drawPlayer() {
+            ctx.fillStyle = '#FFD700';
+            ctx.shadowColor = '#FFD700';
+            ctx.shadowBlur = 10;
+            ctx.fillRect(player.x, player.y, player.width, player.height);
+            ctx.shadowBlur = 0;
+            ctx.shadowColor = 'transparent';
+            // Pequeño detalle
+            ctx.fillStyle = '#000';
+            ctx.font = '14px "Press Start 2P"';
+            ctx.fillText('🛸', player.x + 12, player.y + 22);
+        }
+
+        function drawItems() {
+            items.forEach(item => {
+                ctx.beginPath();
+                ctx.arc(item.x, item.y, item.radius, 0, Math.PI*2);
+                ctx.fillStyle = item.type.color;
+                ctx.shadowColor = item.type.color;
+                ctx.shadowBlur = 8;
+                ctx.fill();
+                ctx.shadowBlur = 0;
+                ctx.shadowColor = 'transparent';
+                ctx.fillStyle = 'white';
+                ctx.font = '16px "Press Start 2P"';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(item.type.emoji, item.x, item.y);
+            });
+        }
+
+        function updateItems() {
+            for (let i = items.length-1; i >= 0; i--) {
+                items[i].y += items[i].speed;
+                // Colisión con jugador
+                if (items[i].y + items[i].radius > player.y &&
+                    items[i].x > player.x && items[i].x < player.x + player.width) {
+                    handleCollision(items[i]);
+                    items.splice(i,1);
+                    continue;
+                }
+                // Si sale de pantalla
+                if (items[i].y - items[i].radius > canvas.height) {
+                    items.splice(i,1);
+                }
+            }
+        }
+
+        function handleCollision(item) {
+            if (item.type.type === 'good') {
+                score += item.type.points;
+                if (item.type.emoji === '🌱') score += 5; // bonus
+            } else {
+                lives--;
+                score = Math.max(0, score + item.type.points);
+                if (lives <= 0) {
+                    gameOver();
+                }
+            }
+            updateHUD();
+        }
+
+        function updateHUD() {
+            scoreDisplay.textContent = score;
+            livesDisplay.textContent = lives;
+        }
+
+        function gameOver() {
+            gameActive = false;
+            clearInterval(gameInterval);
+            clearInterval(spawnInterval);
+            cancelAnimationFrame(frameId);
+            restartBtn.style.display = 'block';
+            // Mostrar mensaje
+            ctx.fillStyle = 'rgba(0,0,0,0.7)';
+            ctx.fillRect(0, canvas.height/2-40, canvas.width, 80);
+            ctx.fillStyle = '#FF0033';
+            ctx.font = '14px "Press Start 2P"';
+            ctx.textAlign = 'center';
+            ctx.fillText('GAME OVER', canvas.width/2, canvas.height/2);
+        }
+
+        function gameLoop() {
+            if (!gameActive) return;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Dibujar fondo estrellado simple
+            ctx.fillStyle = '#0a0a1a';
+            ctx.fillRect(0,0,canvas.width,canvas.height);
+            for(let i=0; i<30; i++) {
+                ctx.fillStyle = 'white';
+                ctx.fillRect(Math.random()*canvas.width, Math.random()*canvas.height, 2,2);
+            }
+
+            drawItems();
+            drawPlayer();
+            updateItems();
+            frameId = requestAnimationFrame(gameLoop);
+        }
+
+        function startTimer() {
+            gameInterval = setInterval(() => {
+                timeLeft--;
+                timeDisplay.textContent = timeLeft;
+                if (timeLeft <= 0) {
+                    gameOver();
+                }
+            }, 1000);
+        }
+
+        function restartGame() {
+            // Reset variables
+            items = [];
+            score = 0;
+            lives = 3;
+            timeLeft = 60;
+            gameActive = true;
+            restartBtn.style.display = 'none';
+            updateHUD();
+            timeDisplay.textContent = timeLeft;
+            // Reiniciar loops
+            clearInterval(gameInterval);
+            clearInterval(spawnInterval);
+            if (frameId) cancelAnimationFrame(frameId);
+            startTimer();
+            spawnInterval = setInterval(spawnItem, 800);
+            frameId = requestAnimationFrame(gameLoop);
+        }
+
+        // Controles
+        function movePlayer(e) {
+            if (!gameActive) return;
+            let clientX;
+            if (e.touches) {
+                clientX = e.touches[0].clientX;
+                e.preventDefault();
+            } else {
+                clientX = e.clientX;
+            }
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const relativeX = (clientX - rect.left) * scaleX;
+            player.x = Math.max(0, Math.min(canvas.width - player.width, relativeX - player.width/2));
+        }
+
+        // Event listeners
+        canvas.addEventListener('mousemove', movePlayer);
+        canvas.addEventListener('touchmove', movePlayer, { passive: false });
+        canvas.addEventListener('touchstart', movePlayer, { passive: false });
+        document.addEventListener('keydown', (e) => {
+            if (!gameActive) return;
+            if (e.key === 'ArrowLeft') player.x = Math.max(0, player.x - 20);
+            if (e.key === 'ArrowRight') player.x = Math.min(canvas.width - player.width, player.x + 20);
+        });
+
+        // Iniciar
+        function init() {
+            updateHUD();
+            timeDisplay.textContent = timeLeft;
+            startTimer();
+            spawnInterval = setInterval(spawnItem, 800);
+            frameId = requestAnimationFrame(gameLoop);
+        }
+
+        init();
+
+        // Ajustar canvas en resize (opcional)
+        window.addEventListener('resize', () => {
+            // Mantener dimensiones fijas, solo ajustar visualización CSS
+        });
+    </script>
+</body>
+</html>
