@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Eco Collector · ODS 6 y 12</title>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <script src="shared.js"></script>
     <style>
         :root {
             --neon-cyan: #00FFFF; --neon-pink: #FF00FF; --neon-green: #39FF14;
@@ -17,11 +18,10 @@
             font-family: 'Press Start 2P', cursive; color: white;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
         }
-        /* Fondo animado con gradiente */
         body::before {
             content: ''; position: fixed; inset: 0; z-index: 0;
-            background: radial-gradient(ellipse at 50% 30%, rgba(0,255,255,0.1) 0%, transparent 50%),
-                        radial-gradient(ellipse at 80% 70%, rgba(57,255,20,0.1) 0%, transparent 50%);
+            background: radial-gradient(ellipse at 50% 30%, rgba(0,255,255,0.15) 0%, transparent 50%),
+                        radial-gradient(ellipse at 80% 70%, rgba(57,255,20,0.15) 0%, transparent 50%);
             animation: gradientShift 8s ease-in-out infinite;
         }
         @keyframes gradientShift {
@@ -47,7 +47,7 @@
             font-size: 5px; color: var(--gold); text-align: center; margin: 5px 0;
             text-shadow: 0 0 6px var(--gold);
         }
-        .button-row { display: flex; gap: 10px; margin-top: 8px; width: 100%; justify-content: center; }
+        .button-row { display: flex; gap: 10px; margin-top: 8px; width: 100%; justify-content: center; flex-wrap: wrap; }
         .btn {
             font-family: 'Press Start 2P', cursive; font-size: 7px; padding: 10px 18px;
             border: none; border-radius: 8px; cursor: pointer; color: white;
@@ -67,8 +67,7 @@
         .shop-content {
             background: var(--card-bg); border: 2px solid var(--neon-pink);
             border-radius: 12px; padding: 20px; width: 90%; max-width: 380px;
-            box-shadow: 0 0 30px rgba(255,0,255,0.4);
-            text-align: center;
+            box-shadow: 0 0 30px rgba(255,0,255,0.4); text-align: center;
         }
         .shop-content h3 { font-size: 10px; color: var(--neon-pink); margin-bottom: 15px; text-shadow: 0 0 10px var(--neon-pink); }
         .shop-item {
@@ -96,7 +95,8 @@
         <div class="hud-item">❤️ <span id="livesDisplay">3</span></div>
         <div class="hud-item">🛡️ <span id="shieldIndicator">0</span></div>
         <div class="hud-item">⏱️ <span id="timeDisplay">60</span></div>
-        <div class="hud-item">💰 <span id="globalCoinsDisplay">0</span></div>
+        <div class="hud-item">🌐 <span id="globalCoinsDisplay">0</span></div>
+        <div class="hud-item" style="color:var(--neon-yellow);">💰 <span id="localCoinsDisplay">0</span></div>
     </div>
     <canvas id="gameCanvas" width="400" height="600"></canvas>
     <div class="ods-badge">🌍 ODS 6: Agua limpia · ODS 12: Reciclaje responsable</div>
@@ -105,7 +105,7 @@
     </div>
 </div>
 
-<!-- Tienda modal -->
+<!-- Modal de tienda -->
 <div class="shop-modal" id="shopModal">
     <div class="shop-content">
         <h3>🛒 TIENDA ECO</h3>
@@ -114,12 +114,13 @@
     </div>
 </div>
 
-<script src="shared.js"></script>
 <script>
+    // ═══════════════════════════════════════
+    //  VARIABLES DEL JUEGO
+    // ═══════════════════════════════════════
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
 
-    // Variables de juego
     let player = { x: canvas.width/2 - 25, y: canvas.height - 70, width: 50, height: 30 };
     let items = [];
     let score = 0;
@@ -130,11 +131,12 @@
     let gameInterval;
     let spawnInterval;
     let frameId;
-    let shieldActive = false;       // escudo comprado
-    let magnetActive = false;      // imán activo
-    let magnetTimer = 0;
-    let slowActive = false;        // cámara lenta
-    let slowTimer = 0;
+    // Power-ups comprados
+    let shieldActive = false;
+    let magnetActive = false, magnetTimer = 0;
+    let slowActive = false, slowTimer = 0;
+    // Monedas locales del juego
+    let localCoins = 0;
 
     // Elementos HUD
     const scoreDisplay = document.getElementById('scoreDisplay');
@@ -142,12 +144,13 @@
     const timeDisplay = document.getElementById('timeDisplay');
     const shieldIndicator = document.getElementById('shieldIndicator');
     const globalCoinsDisplay = document.getElementById('globalCoinsDisplay');
+    const localCoinsDisplay = document.getElementById('localCoinsDisplay');
     const shopBtn = document.getElementById('shopBtn');
     const shopModal = document.getElementById('shopModal');
     const closeShopBtn = document.getElementById('closeShopBtn');
     const shopItemsContainer = document.getElementById('shopItemsContainer');
 
-    // Tipos de objetos (mismos)
+    // Tipos de objetos
     const itemTypes = [
         { type:'good', emoji:'💧', points:10, color:'#00BFFF' },
         { type:'good', emoji:'♻️', points:15, color:'#4CAF50' },
@@ -155,19 +158,46 @@
         { type:'good', emoji:'🌱', points:20, color:'#8BC34A' }
     ];
 
-    // Power-ups de tienda
+    // Power-ups de la tienda (precios en monedas locales)
     const shopItems = [
         { id:'shield', name:'🛡️ Escudo', desc:'Bloquea 1 contaminante', price:30, action:()=>{ shieldActive = true; shieldIndicator.textContent = '1'; } },
         { id:'life',   name:'❤️ Vida extra', desc:'+1 vida (máx 5)', price:50, action:()=>{ if(lives<5){ lives++; updateHUD(); } } },
-        { id:'magnet', name:'🧲 Imán 15s', desc:'Atrae objetos buenos', price:40, action:()=>{ magnetActive = true; magnetTimer = 15*60; } }, // 15s en frames
+        { id:'magnet', name:'🧲 Imán 15s', desc:'Atrae objetos buenos', price:40, action:()=>{ magnetActive = true; magnetTimer = 15*60; } },
         { id:'slow',   name:'🐢 Cámara lenta 10s', desc:'Reduce velocidad 50%', price:25, action:()=>{ slowActive = true; slowTimer = 10*60; } }
     ];
 
-    function updateGlobalCoinsDisplay() {
-        const coins = Tecnomath.getCoins();
-        globalCoinsDisplay.textContent = coins;
+    // ═══════════════════════════════════════
+    //  FUNCIONES DE MONEDAS
+    // ═══════════════════════════════════════
+    function loadLocalCoins() {
+        if (typeof Tecnomath !== 'undefined' && Tecnomath.getCurrentUser()) {
+            localCoins = Tecnomath.getGameCoins('eco-collector');
+        } else {
+            localCoins = 0;
+        }
     }
 
+    function saveLocalCoins() {
+        if (typeof Tecnomath !== 'undefined' && Tecnomath.getCurrentUser()) {
+            Tecnomath.setGameCoins('eco-collector', localCoins);
+        }
+    }
+
+    function updateGlobalCoinsDisplay() {
+        const user = (typeof Tecnomath !== 'undefined') ? Tecnomath.getCurrentUser() : null;
+        globalCoinsDisplay.textContent = user ? Tecnomath.getCoins() : '0';
+    }
+
+    function updateHUD() {
+        scoreDisplay.textContent = score;
+        livesDisplay.textContent = lives;
+        localCoinsDisplay.textContent = localCoins;
+        updateGlobalCoinsDisplay();
+    }
+
+    // ═══════════════════════════════════════
+    //  SPAWN DE OBJETOS
+    // ═══════════════════════════════════════
     function spawnItem() {
         if (!gameActive || gamePaused) return;
         const typeIndex = Math.random() < 0.3 ? 2 : Math.floor(Math.random() * 3);
@@ -179,8 +209,10 @@
         });
     }
 
+    // ═══════════════════════════════════════
+    //  DIBUJO
+    // ═══════════════════════════════════════
     function drawBackground() {
-        // Fondo estrellado
         for(let i=0; i<40; i++) {
             ctx.fillStyle = `rgba(255,255,255,${Math.random()*0.6+0.2})`;
             ctx.beginPath();
@@ -197,11 +229,9 @@
         ctx.roundRect(player.x, player.y, player.width, player.height, 6);
         ctx.fill();
         ctx.shadowBlur = 0;
-        ctx.shadowColor = 'transparent';
-        // Pequeño detalle
         ctx.fillStyle = '#fff';
-        ctx.font = '12px "Press Start 2P"';
-        ctx.fillText('🛸', player.x+15, player.y+20);
+        ctx.font = '14px "Press Start 2P"';
+        ctx.fillText('🛸', player.x+12, player.y+22);
     }
 
     function drawItems() {
@@ -213,7 +243,6 @@
             ctx.shadowBlur = 10;
             ctx.fill();
             ctx.shadowBlur = 0;
-            ctx.shadowColor = 'transparent';
             ctx.fillStyle = 'white';
             ctx.font = '18px "Press Start 2P"';
             ctx.textAlign = 'center';
@@ -222,16 +251,19 @@
         });
     }
 
+    // ═══════════════════════════════════════
+    //  ACTUALIZACIÓN Y COLISIONES
+    // ═══════════════════════════════════════
     function updateItems() {
         for (let i=items.length-1; i>=0; i--) {
             items[i].y += items[i].speed;
-            // Efecto imán: atraer buenos cercanos hacia el jugador
+            // Efecto imán
             if (magnetActive && items[i].type.type === 'good' && items[i].y > canvas.height/2) {
                 if (Math.abs(items[i].x - (player.x+player.width/2)) < 80) {
                     items[i].x += (player.x+player.width/2 - items[i].x) * 0.05;
                 }
             }
-            // Colisión con jugador
+            // Colisión
             if (items[i].y + items[i].radius > player.y &&
                 items[i].x > player.x && items[i].x < player.x + player.width) {
                 handleCollision(items[i]);
@@ -246,11 +278,13 @@
         if (item.type.type === 'good') {
             score += item.type.points;
             if (item.type.emoji === '🌱') score += 5;
-        } else { // bad
+            // Pequeña recompensa en monedas locales
+            localCoins += Math.floor(item.type.points / 5);
+            saveLocalCoins();
+        } else {
             if (shieldActive) {
                 shieldActive = false;
                 shieldIndicator.textContent = '0';
-                // mostrar feedback
             } else {
                 lives--;
                 if (lives <= 0) { gameOver(); return; }
@@ -259,24 +293,22 @@
         updateHUD();
     }
 
-    function updateHUD() {
-        scoreDisplay.textContent = score;
-        livesDisplay.textContent = lives;
-    }
-
+    // ═══════════════════════════════════════
+    //  GAME OVER Y REINICIO
+    // ═══════════════════════════════════════
     function gameOver() {
         gameActive = false;
         clearInterval(gameInterval);
         clearInterval(spawnInterval);
         cancelAnimationFrame(frameId);
         // Recompensa global
-        if (Tecnomath.getCurrentUser()) {
+        if (typeof Tecnomath !== 'undefined' && Tecnomath.getCurrentUser()) {
             const reward = Math.floor(score / 2);
             Tecnomath.addCoins(reward);
             Tecnomath.updateHighScore('eco-collector', score);
             updateGlobalCoinsDisplay();
         }
-        // Dibujar pantalla final
+        // Pantalla final
         ctx.fillStyle = 'rgba(0,0,0,0.7)';
         ctx.fillRect(0, canvas.height/2-60, canvas.width, 120);
         ctx.fillStyle = '#FF0033';
@@ -286,8 +318,9 @@
         ctx.fillStyle = '#fff';
         ctx.font = '8px "Press Start 2P"';
         ctx.fillText('Puntaje: '+score, canvas.width/2, canvas.height/2+20);
-        // Mostrar botón reinicio
-        document.getElementById('restartBtn')?.remove();
+        // Botón reiniciar
+        const oldBtn = document.getElementById('restartBtn');
+        if (oldBtn) oldBtn.remove();
         const btn = document.createElement('button');
         btn.id = 'restartBtn';
         btn.className = 'btn btn-restart';
@@ -296,9 +329,37 @@
         document.querySelector('.button-row').appendChild(btn);
     }
 
+    function restartGame() {
+        items = [];
+        score = 0;
+        lives = 3;
+        timeLeft = 60;
+        gameActive = true;
+        gamePaused = false;
+        shieldActive = false; shieldIndicator.textContent = '0';
+        magnetActive = false; magnetTimer = 0;
+        slowActive = false; slowTimer = 0;
+        // Cargar monedas locales de nuevo (por si cambiaron)
+        loadLocalCoins();
+        updateHUD();
+        timeDisplay.textContent = timeLeft;
+        // Limpiar intervalos anteriores
+        clearInterval(gameInterval);
+        clearInterval(spawnInterval);
+        if (frameId) cancelAnimationFrame(frameId);
+        startTimer();
+        spawnInterval = setInterval(spawnItem, 800);
+        frameId = requestAnimationFrame(gameLoop);
+        // Quitar botón reiniciar si existe
+        const oldBtn = document.getElementById('restartBtn');
+        if (oldBtn) oldBtn.remove();
+    }
+
+    // ═══════════════════════════════════════
+    //  TIENDA
+    // ═══════════════════════════════════════
     function toggleShop(open) {
         if (open) {
-            // Pausar juego
             if (gameActive) { gamePaused = true; clearInterval(gameInterval); clearInterval(spawnInterval); cancelAnimationFrame(frameId); }
             renderShopItems();
             shopModal.classList.add('open');
@@ -315,32 +376,67 @@
 
     function renderShopItems() {
         shopItemsContainer.innerHTML = '';
-        const user = Tecnomath.getCurrentUser();
-        const coins = user ? Tecnomath.getCoins() : 0;
         shopItems.forEach(item => {
             const div = document.createElement('div');
             div.className = 'shop-item';
             div.innerHTML = `<span>${item.name} - ${item.desc}</span><span style="color:var(--gold)">${item.price} 💰</span>`;
             const buyBtn = document.createElement('button');
             buyBtn.textContent = 'Comprar';
-            buyBtn.disabled = coins < item.price;
+            buyBtn.disabled = localCoins < item.price;
             buyBtn.onclick = () => {
-                if (Tecnomath.spendCoins(item.price)) {
+                if (localCoins >= item.price) {
+                    localCoins -= item.price;
                     item.action();
-                    updateGlobalCoinsDisplay();
+                    saveLocalCoins();
+                    updateHUD();
                     renderShopItems();
                 }
             };
             div.appendChild(buyBtn);
             shopItemsContainer.appendChild(div);
         });
+        // Botón extra para convertir monedas globales
+        const exchangeDiv = document.createElement('div');
+        exchangeDiv.className = 'shop-item';
+        exchangeDiv.innerHTML = '<span>💱 Convertir 🌐 → 💰</span><span style="color:var(--gold)">10% com</span>';
+        const exchangeBtn = document.createElement('button');
+        exchangeBtn.textContent = 'Convertir';
+        exchangeBtn.onclick = () => openExchangeModal();
+        exchangeDiv.appendChild(exchangeBtn);
+        shopItemsContainer.appendChild(exchangeDiv);
     }
 
+    function openExchangeModal() {
+        if (typeof Tecnomath === 'undefined' || !Tecnomath.getCurrentUser()) {
+            alert('Inicia sesión para convertir monedas');
+            return;
+        }
+        const globalCoins = Tecnomath.getCoins();
+        const amountStr = prompt(`Tienes ${globalCoins} 🌐 monedas globales.\n¿Cuántas deseas convertir a monedas locales de Eco Collector? (10% comisión)`);
+        if (amountStr === null) return;
+        const amount = parseInt(amountStr);
+        if (isNaN(amount) || amount <= 0) {
+            alert('Cantidad inválida');
+            return;
+        }
+        if (Tecnomath.exchangeGlobalToLocal('eco-collector', amount)) {
+            localCoins = Tecnomath.getGameCoins('eco-collector');
+            saveLocalCoins();
+            updateHUD();
+            renderShopItems();
+            alert('Conversión exitosa');
+        } else {
+            alert('Fondos insuficientes');
+        }
+    }
+
+    // ═══════════════════════════════════════
+    //  TEMPORIZADOR Y LOOP
+    // ═══════════════════════════════════════
     function startTimer() {
         gameInterval = setInterval(() => {
             timeLeft--;
             timeDisplay.textContent = timeLeft;
-            // Temporizadores de power-ups
             if (magnetActive) {
                 magnetTimer--;
                 if (magnetTimer <= 0) magnetActive = false;
@@ -350,7 +446,7 @@
                 if (slowTimer <= 0) slowActive = false;
             }
             if (timeLeft <= 0) gameOver();
-        }, 1000/60);
+        }, 1000);
     }
 
     function gameLoop() {
@@ -363,30 +459,9 @@
         frameId = requestAnimationFrame(gameLoop);
     }
 
-    function restartGame() {
-        // Limpiar estado anterior
-        clearInterval(gameInterval); clearInterval(spawnInterval); cancelAnimationFrame(frameId);
-        const oldBtn = document.getElementById('restartBtn');
-        if (oldBtn) oldBtn.remove();
-        // Reset variables
-        items = [];
-        score = 0;
-        lives = 3;
-        timeLeft = 60;
-        gameActive = true;
-        gamePaused = false;
-        shieldActive = false; shieldIndicator.textContent = '0';
-        magnetActive = false; magnetTimer = 0;
-        slowActive = false; slowTimer = 0;
-        updateHUD();
-        timeDisplay.textContent = timeLeft;
-        updateGlobalCoinsDisplay();
-        startTimer();
-        spawnInterval = setInterval(spawnItem, 800);
-        frameId = requestAnimationFrame(gameLoop);
-    }
-
-    // Controles
+    // ═══════════════════════════════════════
+    //  CONTROLES
+    // ═══════════════════════════════════════
     function movePlayer(e) {
         if (!gameActive || gamePaused) return;
         let clientX;
@@ -414,11 +489,13 @@
     shopBtn.addEventListener('click', () => toggleShop(true));
     closeShopBtn.addEventListener('click', () => toggleShop(false));
 
-    // Iniciar
+    // ═══════════════════════════════════════
+    //  INICIAR
+    // ═══════════════════════════════════════
     function init() {
+        loadLocalCoins();
         updateHUD();
         timeDisplay.textContent = timeLeft;
-        updateGlobalCoinsDisplay();
         startTimer();
         spawnInterval = setInterval(spawnItem, 800);
         frameId = requestAnimationFrame(gameLoop);
