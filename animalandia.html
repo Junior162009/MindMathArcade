@@ -24,7 +24,6 @@
             display:flex; flex-direction:column; background:rgba(255,255,255,0.3);
             position:relative; overflow:hidden;
         }
-        /* HUD */
         .hud {
             display:flex; justify-content:space-between; align-items:center;
             padding:8px 12px; background:rgba(255,255,255,0.85);
@@ -37,6 +36,12 @@
         .shield { color:#2196F3; }
         .coins { color:#8B4513; font-size:12px; }
         .global-coins { color:#FFD700; font-size:12px; }
+        .admin-btn {
+            font-size:20px; cursor:pointer; background:none; border:none;
+            color:var(--neon-pink); text-shadow:0 0 8px var(--neon-pink);
+            transition:0.2s; padding:4px 8px;
+        }
+        .admin-btn:hover { transform:scale(1.2); }
         .category-tabs {
             display:flex; overflow-x:auto; gap:6px; padding:6px 10px;
             background:rgba(255,255,255,0.7); flex-shrink:0;
@@ -55,7 +60,6 @@
         .cat-tab.locked {
             opacity:0.5; cursor:not-allowed; background:#EEE;
         }
-        /* Área principal */
         .main-area {
             flex:1; display:flex; flex-direction:column; align-items:center;
             justify-content:center; gap:15px; padding:10px; overflow-y:auto;
@@ -107,7 +111,6 @@
         .level-indicator {
             font-size:16px; font-weight:700; color:#5D4037; text-align:center;
         }
-        /* Botones inferiores */
         .bottom-bar {
             display:flex; gap:10px; padding:8px; justify-content:center;
             background:rgba(255,255,255,0.7); flex-shrink:0;
@@ -122,7 +125,6 @@
         .btn-star { background:#E91E63; }
         .btn:active { transform:scale(0.95); }
         .btn:disabled { opacity:0.5; cursor:not-allowed; }
-        /* Tienda modal */
         .shop-modal {
             position:fixed; top:0; left:0; width:100%; height:100%;
             background:rgba(0,0,0,0.6); z-index:100;
@@ -175,6 +177,7 @@
         <div class="hud-right">
             <span class="global-coins">🌐 <span id="globalCoinsDisplay">0</span></span>
             <span class="coins">💰 <span id="localCoinsDisplay">0</span></span>
+            <button class="admin-btn" id="adminBtn" title="Admin">☁️</button>
         </div>
     </div>
 
@@ -185,7 +188,7 @@
         <div class="animal-card" id="animalCard">
             <div class="animal-emoji" id="animalEmoji">🐮</div>
             <div class="animal-name" id="animalName">Vaca Lola</div>
-            <div class="animal-request" id="animalRequest">¡Quiero pasto! 🌿</div>
+            <div class="animal-request" id="animalRequest">¡Quiero pasto!</div>
         </div>
         <div class="food-options" id="foodOptions"></div>
     </div>
@@ -210,6 +213,11 @@
 </div>
 
 <script>
+    // ═══════════════════════════════════
+    //  CÓDIGOS DE ADMIN
+    // ═══════════════════════════════════
+    const ADMINS = { "1983":"Junior", "2024":"Nicole", "7777":"Mateo", "8888":"Jaider", "ods2026":"ODS Master" };
+
     // ═══════════════════════════════════
     //  ANIMALES POR CATEGORÍA
     // ═══════════════════════════════════
@@ -282,7 +290,7 @@
     let stats = {
         currentCategory: 0,
         currentAnimalIndex: 0,
-        unlockedCategories: 1, // Comienza con granja desbloqueada
+        unlockedCategories: 1,
         lives: 3,
         shields: 0,
         stars: 0,
@@ -292,7 +300,7 @@
     };
 
     let canInteract = true;
-    let wrongAttempts = 0; // Intentos fallidos en el mismo nivel
+    let wrongAttempts = 0;
     const MAX_WRONG = 3;
 
     // Elementos DOM
@@ -310,6 +318,7 @@
     const shopBtn = document.getElementById('shopBtn');
     const hintBtn = document.getElementById('hintBtn');
     const starBtn = document.getElementById('starBtn');
+    const adminBtn = document.getElementById('adminBtn');
     const shopModal = document.getElementById('shopModal');
     const closeShopBtn = document.getElementById('closeShopBtn');
     const shopItemsContainer = document.getElementById('shopItemsContainer');
@@ -324,10 +333,9 @@
         if (saved) {
             try { stats = { ...stats, ...JSON.parse(saved) }; } catch(e) {}
         }
-        // Cargar monedas locales del sistema central
         if (typeof Tecnomath !== 'undefined' && Tecnomath.getCurrentUser()) {
             stats.localCoins = Tecnomath.getGameCoins('animalandia');
-            stats.isAdmin = Tecnomath.isAdmin();
+            stats.isAdmin = stats.isAdmin || Tecnomath.isAdmin();
         }
         updateHUD();
         renderCategories();
@@ -344,7 +352,6 @@
             hints: stats.hints,
             isAdmin: stats.isAdmin
         }));
-        // Guardar monedas locales en sistema central
         if (typeof Tecnomath !== 'undefined' && Tecnomath.getCurrentUser()) {
             Tecnomath.setGameCoins('animalandia', stats.localCoins);
         }
@@ -354,18 +361,18 @@
         starsCount.textContent = stats.stars;
         livesCount.textContent = stats.isAdmin ? '∞' : stats.lives;
         shieldCount.textContent = stats.shields;
-        localCoinsDisplay.textContent = stats.localCoins;
+        localCoinsDisplay.textContent = stats.isAdmin ? '∞' : stats.localCoins;
         if (typeof Tecnomath !== 'undefined' && Tecnomath.getCurrentUser()) {
             globalCoinsDisplay.textContent = stats.isAdmin ? '∞' : Tecnomath.getCoins();
         } else {
             globalCoinsDisplay.textContent = '0';
         }
-        hintBtn.disabled = stats.localCoins < 20;
-        starBtn.disabled = stats.localCoins < 50;
+        hintBtn.disabled = !stats.isAdmin && stats.localCoins < 20;
+        starBtn.disabled = !stats.isAdmin && stats.localCoins < 50;
     }
 
     // ═══════════════════════════════════
-    //  SONIDOS (sintetizados)
+    //  SONIDOS
     // ═══════════════════════════════════
     function playTone(freq, duration, type='square', volume=0.1) {
         try {
@@ -385,6 +392,26 @@
     function playCorrectSound() { playTone(800, 0.2, 'square', 0.1); setTimeout(()=>playTone(1200, 0.25, 'square', 0.1), 200); }
     function playWrongSound() { playTone(200, 0.3, 'sawtooth', 0.08); }
     function playClickSound() { playTone(600, 0.1, 'sine', 0.05); }
+
+    // ═══════════════════════════════════
+    //  ADMIN
+    // ═══════════════════════════════════
+    function openAdminPanel() {
+        const code = prompt('CÓDIGO ADMIN:');
+        if (ADMINS[code]) {
+            stats.isAdmin = true;
+            if (typeof Tecnomath !== 'undefined' && Tecnomath.getCurrentUser()) {
+                Tecnomath.setAdmin(Tecnomath.getCurrentUser().username);
+            }
+            saveStats();
+            updateHUD();
+            showMessage(`⚡ ${ADMINS[code].toUpperCase()} · RECURSOS INFINITOS`);
+        } else if (code) {
+            showMessage('🔒 ACCESO DENEGADO');
+        }
+    }
+
+    adminBtn.addEventListener('click', openAdminPanel);
 
     // ═══════════════════════════════════
     //  CATEGORÍAS Y NAVEGACIÓN
@@ -424,35 +451,45 @@
             animalRequest.textContent = 'Has alimentado a todos';
             foodOptions.innerHTML = '';
             levelIndicator.textContent = '¡Excelente!';
+
+            // Desbloquear siguiente categoría si no es la última
+            if (stats.unlockedCategories < CATEGORIES.length && stats.unlockedCategories === stats.currentCategory + 1) {
+                // Ya estaba desbloqueada? No, si unlockedCategories es menor que la actual+1
+            }
             if (stats.currentCategory + 1 > stats.unlockedCategories && stats.currentCategory + 1 < CATEGORIES.length) {
                 stats.unlockedCategories = stats.currentCategory + 1;
                 showMessage('🔓 ¡Nueva categoría desbloqueada!');
             }
+
             // Recompensa global
             if (typeof Tecnomath !== 'undefined' && Tecnomath.getCurrentUser()) {
                 const reward = stats.stars * 5;
                 Tecnomath.addCoins(reward);
                 Tecnomath.updateHighScore('animalandia', stats.stars);
-                showMessage(`🌟 Ganaste ${reward} monedas globales`);
             }
             saveStats();
-            // Pasar a siguiente categoría automáticamente después de unos segundos
+            renderCategories();
+
+            // Avanzar automáticamente a la siguiente categoría si existe y está desbloqueada
             setTimeout(() => {
                 if (stats.currentCategory + 1 < CATEGORIES.length && stats.currentCategory + 1 < stats.unlockedCategories) {
                     stats.currentCategory++;
+                } else if (stats.currentCategory + 1 >= CATEGORIES.length) {
+                    // Ya completó todo, volver al inicio
+                    stats.currentCategory = 0;
                 }
                 stats.currentAnimalIndex = 0;
                 renderCategories();
                 loadAnimal();
                 saveStats();
-            }, 3000);
+            }, 2500);
             return;
         }
 
         const animal = cat.animals[stats.currentAnimalIndex];
         animalEmoji.textContent = animal.emoji;
         animalName.textContent = animal.name;
-        animalRequest.textContent = `¡Quiero ${animal.foodName}! ${animal.food}`;
+        animalRequest.textContent = `¡Quiero ${animal.foodName}!`;  // Sin emoji
         levelIndicator.textContent = `${cat.label} · Nivel ${stats.currentAnimalIndex + 1}/${totalAnimals}`;
 
         const options = [animal.food, ...animal.altFoods].sort(() => Math.random() - 0.5);
@@ -484,7 +521,7 @@
         if (food === correct) {
             btn.classList.add('correct-pick');
             stats.stars++;
-            stats.localCoins += 5;
+            if (!stats.isAdmin) stats.localCoins += 5;
             wrongAttempts = 0;
             playCorrectSound();
             showMessage('🎉 ¡Muy bien! 🎉');
@@ -500,11 +537,10 @@
             wrongAttempts++;
             playWrongSound();
             if (wrongAttempts >= MAX_WRONG) {
-                // Perder una vida si no se tiene escudo
                 if (stats.shields > 0) {
                     stats.shields--;
-                    showMessage('🛡️ ¡Escudo usado! Sigue intentando');
                     wrongAttempts = 0;
+                    showMessage('🛡️ ¡Escudo usado! Sigue intentando');
                 } else {
                     if (!stats.isAdmin) stats.lives--;
                     updateHUD();
@@ -519,7 +555,6 @@
                 }
                 saveStats();
                 updateHUD();
-                // Recargar mismo animal
                 setTimeout(() => {
                     loadAnimal();
                 }, 600);
@@ -534,11 +569,11 @@
     }
 
     function useHint() {
-        if (stats.localCoins < 20 || !canInteract) return;
-        stats.localCoins -= 20;
+        if (!canInteract) return;
+        if (!stats.isAdmin && stats.localCoins < 20) return;
+        if (!stats.isAdmin) stats.localCoins -= 20;
         saveStats();
         updateHUD();
-        // Resaltar opción correcta
         const cat = CATEGORIES[stats.currentCategory];
         const animal = cat.animals[stats.currentAnimalIndex];
         const buttons = foodOptions.querySelectorAll('.food-btn');
@@ -555,13 +590,13 @@
     }
 
     function useStar() {
-        if (stats.localCoins < 50 || !canInteract) return;
-        stats.localCoins -= 50;
+        if (!canInteract) return;
+        if (!stats.isAdmin && stats.localCoins < 50) return;
+        if (!stats.isAdmin) stats.localCoins -= 50;
         saveStats();
         updateHUD();
-        // Completar nivel automáticamente
         stats.stars += 5;
-        stats.localCoins += 5;
+        if (!stats.isAdmin) stats.localCoins += 5;
         showMessage('🌟 ¡Estrella fugaz! Nivel completado');
         playCorrectSound();
         setTimeout(() => {
@@ -596,20 +631,21 @@
             div.innerHTML = `<span>${item.name}</span><span>${item.price} 💰</span>`;
             const buyBtn = document.createElement('button');
             buyBtn.textContent = 'Comprar';
-            buyBtn.disabled = stats.localCoins < item.price;
+            buyBtn.disabled = !stats.isAdmin && stats.localCoins < item.price;
             buyBtn.addEventListener('click', () => {
-                if (stats.localCoins >= item.price || stats.isAdmin) {
-                    if (!stats.isAdmin) stats.localCoins -= item.price;
+                if (stats.isAdmin) { item.action(); }
+                else if (stats.localCoins >= item.price) {
+                    stats.localCoins -= item.price;
                     item.action();
-                    saveStats();
-                    updateHUD();
-                    renderShopItems();
                 }
+                saveStats();
+                updateHUD();
+                renderShopItems();
             });
             div.appendChild(buyBtn);
             shopItemsContainer.appendChild(div);
         });
-        // Conversión
+        // Conversión de monedas
         const exchDiv = document.createElement('div');
         exchDiv.className = 'shop-item';
         exchDiv.innerHTML = '<span>💱 Convertir 🌐 → 💰 (10% com)</span>';
@@ -618,6 +654,13 @@
         exchBtn.addEventListener('click', () => {
             if (typeof Tecnomath === 'undefined' || !Tecnomath.getCurrentUser()) {
                 alert('Inicia sesión para convertir');
+                return;
+            }
+            if (stats.isAdmin) {
+                stats.localCoins += 1000;
+                saveStats();
+                updateHUD();
+                renderShopItems();
                 return;
             }
             const amount = prompt('Cantidad de monedas globales a convertir:');
