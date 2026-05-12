@@ -4,40 +4,67 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Animalandia · Alimenta a tus amigos</title>
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&family=Press+Start+2P&display=swap" rel="stylesheet">
     <script src="shared.js"></script>
     <style>
         :root {
             --sky: #87CEEB; --grass: #7CFC00; --sun: #FFD700;
             --card-bg: #FFF8E1; --wood: #DEB887;
+            --neon-pink: #FF00FF; --neon-cyan: #00FFFF; --gold: #FFD700;
         }
         * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; user-select:none; }
         html, body {
             height:100%; width:100%; overflow:hidden;
-            background: linear-gradient(180deg, var(--sky) 0%, #B0E0E6 70%, var(--grass) 100%);
+            background: linear-gradient(180deg, #87CEEB 0%, #B0E0E6 70%, #7CFC00 100%);
             font-family: 'Nunito', sans-serif; color:#4A3728;
             display:flex; align-items:center; justify-content:center;
         }
         .game-wrapper {
-            width:100%; max-width:480px; height:100vh;
-            display:flex; flex-direction:column; padding:10px; gap:8px;
+            width:100%; max-width:500px; height:100vh;
+            display:flex; flex-direction:column; background:rgba(255,255,255,0.3);
+            position:relative; overflow:hidden;
         }
+        /* HUD */
         .hud {
             display:flex; justify-content:space-between; align-items:center;
-            padding:8px 14px; background:rgba(255,255,255,0.8);
-            border-radius:20px; font-weight:700; font-size:16px;
-            box-shadow:0 4px 12px rgba(0,0,0,0.1); flex-shrink:0;
+            padding:8px 12px; background:rgba(255,255,255,0.85);
+            font-weight:700; font-size:14px; flex-shrink:0;
+            box-shadow:0 2px 8px rgba(0,0,0,0.1); z-index:2;
         }
-        .stars-display { color:#FF8C00; }
-        .coins-display { color:#8B4513; font-size:13px; }
-        .animal-area {
+        .hud-left, .hud-right { display:flex; gap:12px; align-items:center; }
+        .stars { color:#FF8C00; }
+        .lives { color:#FF5252; }
+        .shield { color:#2196F3; }
+        .coins { color:#8B4513; font-size:12px; }
+        .global-coins { color:#FFD700; font-size:12px; }
+        .category-tabs {
+            display:flex; overflow-x:auto; gap:6px; padding:6px 10px;
+            background:rgba(255,255,255,0.7); flex-shrink:0;
+            scrollbar-width:none;
+        }
+        .category-tabs::-webkit-scrollbar { display:none; }
+        .cat-tab {
+            font-family:'Press Start 2P', cursive; font-size:8px; padding:8px 12px;
+            background:white; border:2px solid #CCC; border-radius:20px;
+            cursor:pointer; transition:0.2s; white-space:nowrap; color:#4A3728;
+        }
+        .cat-tab.active {
+            background:var(--sun); border-color:#FF8C00; color:#4A3728;
+            box-shadow:0 4px 10px rgba(255,140,0,0.4);
+        }
+        .cat-tab.locked {
+            opacity:0.5; cursor:not-allowed; background:#EEE;
+        }
+        /* Área principal */
+        .main-area {
             flex:1; display:flex; flex-direction:column; align-items:center;
-            justify-content:center; gap:15px; min-height:0;
+            justify-content:center; gap:15px; padding:10px; overflow-y:auto;
         }
         .animal-card {
             background:var(--card-bg); border-radius:30px; padding:20px 25px;
             box-shadow:0 8px 20px rgba(0,0,0,0.2); text-align:center;
-            transition:0.3s; width:90%; max-width:300px;
+            transition:0.3s; width:90%; max-width:320px;
+            position:relative;
         }
         .animal-emoji {
             font-size:80px; animation: bounce 0.8s ease-in-out infinite;
@@ -48,7 +75,7 @@
             50%{ transform:translateY(0); }
         }
         .animal-name {
-            font-size:28px; font-weight:900; color:#5D4037; margin:8px 0;
+            font-size:26px; font-weight:900; color:#5D4037; margin:8px 0;
         }
         .animal-request {
             font-size:20px; font-weight:700; color:#FF6F00; margin:5px 0;
@@ -65,8 +92,12 @@
             aspect-ratio:1; min-height:0;
         }
         .food-btn:active { transform:scale(0.9); border-color:#FFD700; }
-        .food-btn.correct-pick { border-color:#4CAF50; background:#E8F5E9; animation: popCorrect 0.5s; }
-        .food-btn.wrong-pick { border-color:#FF5252; background:#FFEBEE; animation: shake 0.4s; }
+        .food-btn.correct-pick {
+            border-color:#4CAF50; background:#E8F5E9; animation: popCorrect 0.5s;
+        }
+        .food-btn.wrong-pick {
+            border-color:#FF5252; background:#FFEBEE; animation: shake 0.4s;
+        }
         @keyframes popCorrect {
             0%{ transform:scale(1); } 50%{ transform:scale(1.2); } 100%{ transform:scale(1); }
         }
@@ -74,12 +105,56 @@
             0%,100%{ transform:translateX(0); } 25%{ transform:translateX(-10px); } 75%{ transform:translateX(10px); }
         }
         .level-indicator {
-            font-size:14px; font-weight:700; color:#5D4037; text-align:center;
+            font-size:16px; font-weight:700; color:#5D4037; text-align:center;
+        }
+        /* Botones inferiores */
+        .bottom-bar {
+            display:flex; gap:10px; padding:8px; justify-content:center;
+            background:rgba(255,255,255,0.7); flex-shrink:0;
+        }
+        .btn {
+            font-family:'Press Start 2P', cursive; font-size:8px; padding:10px 16px;
+            border:none; border-radius:25px; cursor:pointer; color:white;
+            box-shadow:0 4px 10px rgba(0,0,0,0.2); transition:0.2s;
+        }
+        .btn-shop { background:#FF9800; }
+        .btn-hint { background:#2196F3; }
+        .btn-star { background:#E91E63; }
+        .btn:active { transform:scale(0.95); }
+        .btn:disabled { opacity:0.5; cursor:not-allowed; }
+        /* Tienda modal */
+        .shop-modal {
+            position:fixed; top:0; left:0; width:100%; height:100%;
+            background:rgba(0,0,0,0.6); z-index:100;
+            display:flex; align-items:center; justify-content:center;
+            visibility:hidden; opacity:0; transition:0.3s;
+        }
+        .shop-modal.open { visibility:visible; opacity:1; }
+        .shop-content {
+            background:white; border-radius:30px; padding:20px; width:90%; max-width:380px;
+            box-shadow:0 10px 30px rgba(0,0,0,0.3); text-align:center;
+        }
+        .shop-content h3 { font-size:22px; color:#5D4037; margin-bottom:15px; }
+        .shop-item {
+            display:flex; justify-content:space-between; align-items:center;
+            padding:12px; border:2px solid #EEE; border-radius:20px; margin-bottom:10px;
+            background:#FFFDE7; font-weight:700;
+        }
+        .shop-item button {
+            font-family:'Press Start 2P', cursive; font-size:8px; padding:6px 12px;
+            background:#4CAF50; color:white; border:none; border-radius:15px;
+            cursor:pointer; box-shadow:0 2px 6px rgba(0,0,0,0.2);
+        }
+        .shop-item button:disabled { background:#CCC; }
+        .close-shop {
+            margin-top:15px; background:#FF5252; color:white; border:none;
+            font-family:'Press Start 2P', cursive; font-size:8px;
+            padding:8px 16px; border-radius:15px; cursor:pointer;
         }
         .message-popup {
             position:fixed; top:30%; left:50%; transform:translate(-50%,-50%);
             background:white; border-radius:25px; padding:30px; text-align:center;
-            box-shadow:0 10px 30px rgba(0,0,0,0.3); z-index:100;
+            box-shadow:0 10px 30px rgba(0,0,0,0.3); z-index:200;
             display:none; font-weight:700; font-size:24px;
         }
         .message-popup.show { display:block; animation: popIn 0.5s; }
@@ -92,22 +167,42 @@
 <body>
 <div class="game-wrapper">
     <div class="hud">
-        <span class="stars-display">⭐ <span id="starsCount">0</span></span>
-        <span class="coins-display">🌐 <span id="globalCoins">0</span></span>
-        <span class="coins-display">🐾 <span id="localCoins">0</span></span>
+        <div class="hud-left">
+            <span class="stars">⭐ <span id="starsCount">0</span></span>
+            <span class="lives">❤️ <span id="livesCount">3</span></span>
+            <span class="shield">🛡️ <span id="shieldCount">0</span></span>
+        </div>
+        <div class="hud-right">
+            <span class="global-coins">🌐 <span id="globalCoinsDisplay">0</span></span>
+            <span class="coins">💰 <span id="localCoinsDisplay">0</span></span>
+        </div>
     </div>
 
-    <div class="level-indicator" id="levelIndicator">Nivel 1 · ¡Conoce a los animales!</div>
+    <div class="category-tabs" id="categoryTabs"></div>
 
-    <div class="animal-area">
+    <div class="main-area">
+        <div class="level-indicator" id="levelIndicator">Nivel 1</div>
         <div class="animal-card" id="animalCard">
             <div class="animal-emoji" id="animalEmoji">🐮</div>
             <div class="animal-name" id="animalName">Vaca Lola</div>
             <div class="animal-request" id="animalRequest">¡Quiero pasto! 🌿</div>
         </div>
+        <div class="food-options" id="foodOptions"></div>
     </div>
 
-    <div class="food-options" id="foodOptions"></div>
+    <div class="bottom-bar">
+        <button class="btn btn-shop" id="shopBtn">🛒 TIENDA</button>
+        <button class="btn btn-hint" id="hintBtn">💡 PISTA (20💰)</button>
+        <button class="btn btn-star" id="starBtn">🌟 ESTRELLA (50💰)</button>
+    </div>
+</div>
+
+<div class="shop-modal" id="shopModal">
+    <div class="shop-content">
+        <h3>🛒 TIENDA</h3>
+        <div id="shopItemsContainer"></div>
+        <button class="close-shop" id="closeShopBtn">CERRAR</button>
+    </div>
 </div>
 
 <div class="message-popup" id="messagePopup">
@@ -116,25 +211,89 @@
 
 <script>
     // ═══════════════════════════════════
-    //  DATOS DEL JUEGO
+    //  ANIMALES POR CATEGORÍA
     // ═══════════════════════════════════
-    const animals = [
-        { emoji:'🐮', name:'Vaca Lola', food:'🌿', foodName:'pasto', altFoods:['🌽','🍎','🥕'] },
-        { emoji:'🐷', name:'Cerdito Pancho', food:'🌽', foodName:'maíz', altFoods:['🌿','🍎','🧀'] },
-        { emoji:'🐔', name:'Gallina Coco', food:'🌾', foodName:'granos', altFoods:['🍎','🥕','🌿'] },
-        { emoji:'🐑', name:'Oveja Nube', food:'🍎', foodName:'manzana', altFoods:['🌿','🌽','🥕'] },
-        { emoji:'🐴', name:'Caballo Relincho', food:'🥕', foodName:'zanahoria', altFoods:['🌿','🌽','🍎'] },
-        { emoji:'🐰', name:'Conejo Saltarín', food:'🥬', foodName:'lechuga', altFoods:['🥕','🍎','🌽'] },
-        { emoji:'🐶', name:'Perro Guau', food:'🍖', foodName:'hueso', altFoods:['🌿','🍎','🥕'] },
-        { emoji:'🐱', name:'Gato Michi', food:'🐟', foodName:'pescado', altFoods:['🌿','🍎','🥕'] },
-        { emoji:'🐸', name:'Rana Saltos', food:'🦗', foodName:'insectos', altFoods:['🌿','🍎','🥕'] },
-        { emoji:'🦆', name:'Pato Cuac', food:'🌾', foodName:'semillas', altFoods:['🐟','🍎','🌿'] }
+    const CATEGORIES = [
+        { id:'farm', label:'🐄 Granja', icon:'🐄', animals:[
+            { emoji:'🐮', name:'Vaca Lola', food:'🌿', foodName:'pasto', altFoods:['🌽','🍎','🥕'] },
+            { emoji:'🐷', name:'Cerdito Pancho', food:'🌽', foodName:'maíz', altFoods:['🌿','🍎','🧀'] },
+            { emoji:'🐔', name:'Gallina Coco', food:'🌾', foodName:'granos', altFoods:['🍎','🥕','🌿'] },
+            { emoji:'🐑', name:'Oveja Nube', food:'🍎', foodName:'manzana', altFoods:['🌿','🌽','🥕'] },
+            { emoji:'🐴', name:'Caballo Relincho', food:'🥕', foodName:'zanahoria', altFoods:['🌿','🌽','🍎'] },
+            { emoji:'🐰', name:'Conejo Saltarín', food:'🥬', foodName:'lechuga', altFoods:['🥕','🍎','🌽'] },
+            { emoji:'🐶', name:'Perro Guau', food:'🍖', foodName:'hueso', altFoods:['🌿','🍎','🥕'] },
+            { emoji:'🐱', name:'Gato Michi', food:'🐟', foodName:'pescado', altFoods:['🌿','🍎','🥕'] },
+            { emoji:'🐸', name:'Rana Saltos', food:'🦗', foodName:'insectos', altFoods:['🌿','🍎','🥕'] },
+            { emoji:'🦆', name:'Pato Cuac', food:'🌾', foodName:'semillas', altFoods:['🐟','🍎','🌿'] }
+        ]},
+        { id:'jungle', label:'🐒 Selva', icon:'🐒', animals:[
+            { emoji:'🦁', name:'León Rey', food:'🥩', foodName:'carne', altFoods:['🌿','🍎','🥕'] },
+            { emoji:'🐘', name:'Elefante Trompita', food:'🌿', foodName:'hojas', altFoods:['🍎','🥕','🌽'] },
+            { emoji:'🐒', name:'Mono Saltarín', food:'🍌', foodName:'plátano', altFoods:['🥕','🍎','🌿'] },
+            { emoji:'🦒', name:'Jirafa Manchas', food:'🌿', foodName:'acacias', altFoods:['🍎','🌽','🥕'] },
+            { emoji:'🦓', name:'Cebra Rayas', food:'🌾', foodName:'hierba', altFoods:['🍎','🥕','🌿'] },
+            { emoji:'🐯', name:'Tigre Rayas', food:'🥩', foodName:'carne', altFoods:['🌿','🍎','🥕'] },
+            { emoji:'🦍', name:'Gorila Fuerte', food:'🍌', foodName:'frutas', altFoods:['🌿','🥕','🍎'] },
+            { emoji:'🦜', name:'Loro Hablador', food:'🌰', foodName:'semillas', altFoods:['🍎','🌿','🥕'] },
+            { emoji:'🐍', name:'Serpiente Silbido', food:'🥚', foodName:'huevos', altFoods:['🌿','🍎','🥕'] },
+            { emoji:'🦥', name:'Perezoso Lento', food:'🌿', foodName:'hojas', altFoods:['🍎','🥕','🌽'] }
+        ]},
+        { id:'ocean', label:'🐠 Océano', icon:'🐠', animals:[
+            { emoji:'🐬', name:'Delfín Saltarín', food:'🐟', foodName:'peces', altFoods:['🌿','🍎','🥕'] },
+            { emoji:'🦈', name:'Tiburón Toto', food:'🥩', foodName:'carne', altFoods:['🌿','🍎','🥕'] },
+            { emoji:'🐙', name:'Pulpo Tentáculos', food:'🦀', foodName:'cangrejos', altFoods:['🌿','🍎','🥕'] },
+            { emoji:'🐢', name:'Tortuga Marina', food:'🌿', foodName:'algas', altFoods:['🍎','🥕','🐟'] },
+            { emoji:'🐳', name:'Ballena Gigante', food:'🦐', foodName:'krill', altFoods:['🌿','🍎','🥕'] },
+            { emoji:'🦭', name:'Foca Amigable', food:'🐟', foodName:'peces', altFoods:['🌿','🍎','🥕'] },
+            { emoji:'🐠', name:'Pez Payaso', food:'🌿', foodName:'plancton', altFoods:['🍎','🥕','🐟'] },
+            { emoji:'🦀', name:'Cangrejo Pinzas', food:'🐚', foodName:'moluscos', altFoods:['🌿','🍎','🥕'] },
+            { emoji:'🐡', name:'Pez Globo', food:'🦐', foodName:'camarones', altFoods:['🌿','🍎','🥕'] },
+            { emoji:'🦑', name:'Calamar Veloz', food:'🐟', foodName:'peces pequeños', altFoods:['🌿','🍎','🥕'] }
+        ]},
+        { id:'pets', label:'🐱 Mascotas', icon:'🐱', animals:[
+            { emoji:'🐕', name:'Cachorro Guau', food:'🍖', foodName:'croquetas', altFoods:['🌿','🍎','🥕'] },
+            { emoji:'🐈', name:'Gatito Michi', food:'🐟', foodName:'atún', altFoods:['🌿','🍎','🥕'] },
+            { emoji:'🐹', name:'Hámster Rueda', food:'🥕', foodName:'verduras', altFoods:['🌿','🍎','🌽'] },
+            { emoji:'🐰', name:'Conejito Pompón', food:'🥬', foodName:'heno', altFoods:['🥕','🍎','🌽'] },
+            { emoji:'🐦', name:'Pajarito Pío', food:'🌾', foodName:'alpiste', altFoods:['🍎','🥕','🌿'] },
+            { emoji:'🐠', name:'Pez Dorado', food:'🐟', foodName:'escamas', altFoods:['🌿','🍎','🥕'] },
+            { emoji:'🦎', name:'Lagartija Sol', food:'🦗', foodName:'insectos', altFoods:['🌿','🍎','🥕'] },
+            { emoji:'🐢', name:'Tortuguita Casco', food:'🥬', foodName:'lechuga', altFoods:['🥕','🍎','🐟'] },
+            { emoji:'🐩', name:'Caniche Rizo', food:'🍖', foodName:'premios', altFoods:['🌿','🍎','🥕'] },
+            { emoji:'🐇', name:'Liebre Saltos', food:'🥕', foodName:'zanahoria', altFoods:['🌿','🍎','🌽'] }
+        ]},
+        { id:'insects', label:'🐞 Insectos', icon:'🐞', animals:[
+            { emoji:'🐝', name:'Abeja Maya', food:'🌸', foodName:'polen', altFoods:['🌿','🍎','🥕'] },
+            { emoji:'🐞', name:'Mariquita Puntos', food:'🌿', foodName:'hojas', altFoods:['🍎','🥕','🌽'] },
+            { emoji:'🦋', name:'Mariposa Alas', food:'🌸', foodName:'néctar', altFoods:['🌿','🍎','🥕'] },
+            { emoji:'🐜', name:'Hormiga Trabajadora', food:'🍎', foodName:'frutas', altFoods:['🌿','🌽','🥕'] },
+            { emoji:'🐛', name:'Oruga Verde', food:'🌿', foodName:'hojas', altFoods:['🍎','🥕','🌽'] },
+            { emoji:'🦗', name:'Grillo Cantor', food:'🌾', foodName:'plantas', altFoods:['🍎','🥕','🌿'] },
+            { emoji:'🦟', name:'Mosquito Zumbón', food:'🌸', foodName:'néctar', altFoods:['🌿','🍎','🥕'] },
+            { emoji:'🐌', name:'Caracol Lento', food:'🥬', foodName:'lechuga', altFoods:['🥕','🍎','🌿'] },
+            { emoji:'🦂', name:'Escorpión Picadura', food:'🦗', foodName:'insectos', altFoods:['🌿','🍎','🥕'] },
+            { emoji:'🐞', name:'Chinche Apestosa', food:'🌿', foodName:'savia', altFoods:['🍎','🥕','🌽'] }
+        ]}
     ];
 
-    let currentLevel = 0;
-    let stars = 0;
-    let localCoins = 0;
+    // ═══════════════════════════════════
+    //  ESTADO GLOBAL DEL JUEGO
+    // ═══════════════════════════════════
+    let stats = {
+        currentCategory: 0,
+        currentAnimalIndex: 0,
+        unlockedCategories: 1, // Comienza con granja desbloqueada
+        lives: 3,
+        shields: 0,
+        stars: 0,
+        hints: 0,
+        localCoins: 0,
+        isAdmin: false
+    };
+
     let canInteract = true;
+    let wrongAttempts = 0; // Intentos fallidos en el mismo nivel
+    const MAX_WRONG = 3;
 
     // Elementos DOM
     const animalEmoji = document.getElementById('animalEmoji');
@@ -142,77 +301,160 @@
     const animalRequest = document.getElementById('animalRequest');
     const foodOptions = document.getElementById('foodOptions');
     const starsCount = document.getElementById('starsCount');
-    const globalCoins = document.getElementById('globalCoins');
-    const localCoinsDisplay = document.getElementById('localCoins');
+    const livesCount = document.getElementById('livesCount');
+    const shieldCount = document.getElementById('shieldCount');
+    const globalCoinsDisplay = document.getElementById('globalCoinsDisplay');
+    const localCoinsDisplay = document.getElementById('localCoinsDisplay');
     const levelIndicator = document.getElementById('levelIndicator');
+    const categoryTabs = document.getElementById('categoryTabs');
+    const shopBtn = document.getElementById('shopBtn');
+    const hintBtn = document.getElementById('hintBtn');
+    const starBtn = document.getElementById('starBtn');
+    const shopModal = document.getElementById('shopModal');
+    const closeShopBtn = document.getElementById('closeShopBtn');
+    const shopItemsContainer = document.getElementById('shopItemsContainer');
     const messagePopup = document.getElementById('messagePopup');
     const popupContent = document.getElementById('popupContent');
 
-    // Monedas
-    function loadLocalCoins() {
-        if (typeof Tecnomath !== 'undefined' && Tecnomath.getCurrentUser()) {
-            localCoins = Tecnomath.getGameCoins('animalandia');
-        } else {
-            localCoins = 0;
+    // ═══════════════════════════════════
+    //  FUNCIONES DE MONEDAS Y GUARDADO
+    // ═══════════════════════════════════
+    function loadStats() {
+        const saved = localStorage.getItem('animalandia_stats');
+        if (saved) {
+            try { stats = { ...stats, ...JSON.parse(saved) }; } catch(e) {}
         }
-    }
-    function saveLocalCoins() {
+        // Cargar monedas locales del sistema central
         if (typeof Tecnomath !== 'undefined' && Tecnomath.getCurrentUser()) {
-            Tecnomath.setGameCoins('animalandia', localCoins);
+            stats.localCoins = Tecnomath.getGameCoins('animalandia');
+            stats.isAdmin = Tecnomath.isAdmin();
         }
+        updateHUD();
+        renderCategories();
     }
-    function updateDisplay() {
-        starsCount.textContent = stars;
-        localCoinsDisplay.textContent = localCoins;
+
+    function saveStats() {
+        localStorage.setItem('animalandia_stats', JSON.stringify({
+            currentCategory: stats.currentCategory,
+            currentAnimalIndex: stats.currentAnimalIndex,
+            unlockedCategories: stats.unlockedCategories,
+            lives: stats.lives,
+            shields: stats.shields,
+            stars: stats.stars,
+            hints: stats.hints,
+            isAdmin: stats.isAdmin
+        }));
+        // Guardar monedas locales en sistema central
         if (typeof Tecnomath !== 'undefined' && Tecnomath.getCurrentUser()) {
-            globalCoins.textContent = Tecnomath.getCoins();
-        } else {
-            globalCoins.textContent = '0';
+            Tecnomath.setGameCoins('animalandia', stats.localCoins);
         }
     }
 
-    // Mostrar popup temporal
-    function showMessage(html, duration = 1500) {
-        popupContent.innerHTML = html;
-        messagePopup.classList.add('show');
-        setTimeout(() => messagePopup.classList.remove('show'), duration);
+    function updateHUD() {
+        starsCount.textContent = stats.stars;
+        livesCount.textContent = stats.isAdmin ? '∞' : stats.lives;
+        shieldCount.textContent = stats.shields;
+        localCoinsDisplay.textContent = stats.localCoins;
+        if (typeof Tecnomath !== 'undefined' && Tecnomath.getCurrentUser()) {
+            globalCoinsDisplay.textContent = stats.isAdmin ? '∞' : Tecnomath.getCoins();
+        } else {
+            globalCoinsDisplay.textContent = '0';
+        }
+        hintBtn.disabled = stats.localCoins < 20;
+        starBtn.disabled = stats.localCoins < 50;
     }
 
-    // Cargar nivel
-    function loadLevel() {
-        if (currentLevel >= animals.length) {
-            // Juego completado
+    // ═══════════════════════════════════
+    //  SONIDOS (sintetizados)
+    // ═══════════════════════════════════
+    function playTone(freq, duration, type='square', volume=0.1) {
+        try {
+            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = type;
+            osc.frequency.value = freq;
+            gain.gain.value = volume;
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start();
+            osc.stop(ctx.currentTime + duration);
+        } catch(e) {}
+    }
+
+    function playCorrectSound() { playTone(800, 0.2, 'square', 0.1); setTimeout(()=>playTone(1200, 0.25, 'square', 0.1), 200); }
+    function playWrongSound() { playTone(200, 0.3, 'sawtooth', 0.08); }
+    function playClickSound() { playTone(600, 0.1, 'sine', 0.05); }
+
+    // ═══════════════════════════════════
+    //  CATEGORÍAS Y NAVEGACIÓN
+    // ═══════════════════════════════════
+    function renderCategories() {
+        categoryTabs.innerHTML = '';
+        CATEGORIES.forEach((cat, idx) => {
+            const tab = document.createElement('div');
+            tab.className = 'cat-tab';
+            tab.textContent = cat.label;
+            if (idx === stats.currentCategory) tab.classList.add('active');
+            if (idx >= stats.unlockedCategories) tab.classList.add('locked');
+            else tab.addEventListener('click', () => switchCategory(idx));
+            categoryTabs.appendChild(tab);
+        });
+    }
+
+    function switchCategory(idx) {
+        if (idx >= stats.unlockedCategories) return;
+        stats.currentCategory = idx;
+        stats.currentAnimalIndex = 0;
+        renderCategories();
+        loadAnimal();
+        saveStats();
+    }
+
+    // ═══════════════════════════════════
+    //  CARGA DE ANIMAL Y OPCIONES
+    // ═══════════════════════════════════
+    function loadAnimal() {
+        const cat = CATEGORIES[stats.currentCategory];
+        const totalAnimals = cat.animals.length;
+        if (stats.currentAnimalIndex >= totalAnimals) {
+            // Categoría completada
             animalEmoji.textContent = '🎉';
-            animalName.textContent = '¡Genial!';
-            animalRequest.textContent = 'Alimentaste a todos los animales';
+            animalName.textContent = '¡Categoría completada!';
+            animalRequest.textContent = 'Has alimentado a todos';
             foodOptions.innerHTML = '';
-            levelIndicator.textContent = '¡JUEGO COMPLETADO!';
-            if (typeof Tecnomath !== 'undefined' && Tecnomath.getCurrentUser()) {
-                Tecnomath.updateHighScore('animalandia', stars);
-                const reward = stars * 5;
-                Tecnomath.addCoins(reward);
-                showMessage(`🌟 ¡Ganaste ${reward} monedas globales!`);
+            levelIndicator.textContent = '¡Excelente!';
+            if (stats.currentCategory + 1 > stats.unlockedCategories && stats.currentCategory + 1 < CATEGORIES.length) {
+                stats.unlockedCategories = stats.currentCategory + 1;
+                showMessage('🔓 ¡Nueva categoría desbloqueada!');
             }
-            updateDisplay();
-            // Reiniciar
+            // Recompensa global
+            if (typeof Tecnomath !== 'undefined' && Tecnomath.getCurrentUser()) {
+                const reward = stats.stars * 5;
+                Tecnomath.addCoins(reward);
+                Tecnomath.updateHighScore('animalandia', stats.stars);
+                showMessage(`🌟 Ganaste ${reward} monedas globales`);
+            }
+            saveStats();
+            // Pasar a siguiente categoría automáticamente después de unos segundos
             setTimeout(() => {
-                currentLevel = 0;
-                stars = 0;
-                localCoins = 0;
-                saveLocalCoins();
-                updateDisplay();
-                loadLevel();
+                if (stats.currentCategory + 1 < CATEGORIES.length && stats.currentCategory + 1 < stats.unlockedCategories) {
+                    stats.currentCategory++;
+                }
+                stats.currentAnimalIndex = 0;
+                renderCategories();
+                loadAnimal();
+                saveStats();
             }, 3000);
             return;
         }
 
-        const animal = animals[currentLevel];
+        const animal = cat.animals[stats.currentAnimalIndex];
         animalEmoji.textContent = animal.emoji;
         animalName.textContent = animal.name;
         animalRequest.textContent = `¡Quiero ${animal.foodName}! ${animal.food}`;
-        levelIndicator.textContent = `Nivel ${currentLevel + 1} · ¿Qué come ${animal.name.split(' ')[0]}?`;
+        levelIndicator.textContent = `${cat.label} · Nivel ${stats.currentAnimalIndex + 1}/${totalAnimals}`;
 
-        // Preparar opciones de comida (una correcta + tres incorrectas)
         const options = [animal.food, ...animal.altFoods].sort(() => Math.random() - 0.5);
         foodOptions.innerHTML = '';
         options.forEach(food => {
@@ -222,42 +464,221 @@
             btn.addEventListener('click', () => handleFoodPick(food, btn));
             foodOptions.appendChild(btn);
         });
+
+        wrongAttempts = 0;
         canInteract = true;
     }
 
+    // ═══════════════════════════════════
+    //  LÓGICA PRINCIPAL
+    // ═══════════════════════════════════
     function handleFoodPick(food, btn) {
         if (!canInteract) return;
         canInteract = false;
+        playClickSound();
 
-        const correct = animals[currentLevel].food;
+        const cat = CATEGORIES[stats.currentCategory];
+        const animal = cat.animals[stats.currentAnimalIndex];
+        const correct = animal.food;
+
         if (food === correct) {
-            // ¡Correcto!
             btn.classList.add('correct-pick');
-            stars++;
-            localCoins += 5;
-            saveLocalCoins();
-            updateDisplay();
+            stats.stars++;
+            stats.localCoins += 5;
+            wrongAttempts = 0;
+            playCorrectSound();
             showMessage('🎉 ¡Muy bien! 🎉');
+            saveStats();
+            updateHUD();
             setTimeout(() => {
-                currentLevel++;
-                loadLevel();
-            }, 1000);
-        } else {
-            // Error - animación y reintento
-            btn.classList.add('wrong-pick');
-            showMessage('😊 ¡Inténtalo otra vez!', 800);
-            setTimeout(() => {
-                btn.classList.remove('wrong-pick');
-                canInteract = true;
+                stats.currentAnimalIndex++;
+                loadAnimal();
+                saveStats();
             }, 800);
+        } else {
+            btn.classList.add('wrong-pick');
+            wrongAttempts++;
+            playWrongSound();
+            if (wrongAttempts >= MAX_WRONG) {
+                // Perder una vida si no se tiene escudo
+                if (stats.shields > 0) {
+                    stats.shields--;
+                    showMessage('🛡️ ¡Escudo usado! Sigue intentando');
+                    wrongAttempts = 0;
+                } else {
+                    if (!stats.isAdmin) stats.lives--;
+                    updateHUD();
+                    if (stats.lives <= 0) {
+                        showMessage('😞 Sin vidas... Reinicia el juego');
+                        setTimeout(() => resetGame(), 2000);
+                        return;
+                    } else {
+                        showMessage('💔 Perdiste una vida. ¡Sigue!');
+                        wrongAttempts = 0;
+                    }
+                }
+                saveStats();
+                updateHUD();
+                // Recargar mismo animal
+                setTimeout(() => {
+                    loadAnimal();
+                }, 600);
+            } else {
+                showMessage(`😊 Inténtalo otra vez (${MAX_WRONG - wrongAttempts} intentos)`, 800);
+                setTimeout(() => {
+                    btn.classList.remove('wrong-pick');
+                    canInteract = true;
+                }, 600);
+            }
         }
     }
 
-    // Inicio
+    function useHint() {
+        if (stats.localCoins < 20 || !canInteract) return;
+        stats.localCoins -= 20;
+        saveStats();
+        updateHUD();
+        // Resaltar opción correcta
+        const cat = CATEGORIES[stats.currentCategory];
+        const animal = cat.animals[stats.currentAnimalIndex];
+        const buttons = foodOptions.querySelectorAll('.food-btn');
+        buttons.forEach(btn => {
+            if (btn.textContent === animal.food) {
+                btn.style.borderColor = '#4CAF50';
+                btn.style.background = '#E8F5E9';
+                setTimeout(() => {
+                    btn.style.borderColor = '#DDD';
+                    btn.style.background = 'white';
+                }, 1500);
+            }
+        });
+    }
+
+    function useStar() {
+        if (stats.localCoins < 50 || !canInteract) return;
+        stats.localCoins -= 50;
+        saveStats();
+        updateHUD();
+        // Completar nivel automáticamente
+        stats.stars += 5;
+        stats.localCoins += 5;
+        showMessage('🌟 ¡Estrella fugaz! Nivel completado');
+        playCorrectSound();
+        setTimeout(() => {
+            stats.currentAnimalIndex++;
+            loadAnimal();
+            saveStats();
+        }, 500);
+    }
+
+    // ═══════════════════════════════════
+    //  TIENDA
+    // ═══════════════════════════════════
+    function openShop() {
+        renderShopItems();
+        shopModal.classList.add('open');
+    }
+
+    function closeShop() {
+        shopModal.classList.remove('open');
+    }
+
+    function renderShopItems() {
+        shopItemsContainer.innerHTML = '';
+        const items = [
+            { name:'❤️ Vida', price:30, action:() => { stats.lives++; saveStats(); updateHUD(); } },
+            { name:'🛡️ Escudo', price:40, action:() => { stats.shields++; saveStats(); updateHUD(); } },
+            { name:'💡 Pista x3', price:25, action:() => { stats.hints += 3; saveStats(); } }
+        ];
+        items.forEach(item => {
+            const div = document.createElement('div');
+            div.className = 'shop-item';
+            div.innerHTML = `<span>${item.name}</span><span>${item.price} 💰</span>`;
+            const buyBtn = document.createElement('button');
+            buyBtn.textContent = 'Comprar';
+            buyBtn.disabled = stats.localCoins < item.price;
+            buyBtn.addEventListener('click', () => {
+                if (stats.localCoins >= item.price || stats.isAdmin) {
+                    if (!stats.isAdmin) stats.localCoins -= item.price;
+                    item.action();
+                    saveStats();
+                    updateHUD();
+                    renderShopItems();
+                }
+            });
+            div.appendChild(buyBtn);
+            shopItemsContainer.appendChild(div);
+        });
+        // Conversión
+        const exchDiv = document.createElement('div');
+        exchDiv.className = 'shop-item';
+        exchDiv.innerHTML = '<span>💱 Convertir 🌐 → 💰 (10% com)</span>';
+        const exchBtn = document.createElement('button');
+        exchBtn.textContent = 'Convertir';
+        exchBtn.addEventListener('click', () => {
+            if (typeof Tecnomath === 'undefined' || !Tecnomath.getCurrentUser()) {
+                alert('Inicia sesión para convertir');
+                return;
+            }
+            const amount = prompt('Cantidad de monedas globales a convertir:');
+            if (!amount) return;
+            const num = parseInt(amount);
+            if (isNaN(num) || num <= 0) return;
+            if (Tecnomath.exchangeGlobalToLocal('animalandia', num)) {
+                stats.localCoins = Tecnomath.getGameCoins('animalandia');
+                saveStats();
+                updateHUD();
+                renderShopItems();
+            } else {
+                alert('Fondos insuficientes');
+            }
+        });
+        exchDiv.appendChild(exchBtn);
+        shopItemsContainer.appendChild(exchDiv);
+    }
+
+    // ═══════════════════════════════════
+    //  RESETEO
+    // ═══════════════════════════════════
+    function resetGame() {
+        stats.lives = 3;
+        stats.shields = 0;
+        stats.currentCategory = 0;
+        stats.currentAnimalIndex = 0;
+        stats.stars = 0;
+        stats.localCoins = 0;
+        saveStats();
+        updateHUD();
+        renderCategories();
+        loadAnimal();
+        messagePopup.classList.remove('show');
+    }
+
+    // ═══════════════════════════════════
+    //  MENSAJES
+    // ═══════════════════════════════════
+    function showMessage(html, duration = 1500) {
+        popupContent.innerHTML = html;
+        messagePopup.classList.add('show');
+        setTimeout(() => messagePopup.classList.remove('show'), duration);
+    }
+
+    // ═══════════════════════════════════
+    //  EVENTOS
+    // ═══════════════════════════════════
+    shopBtn.addEventListener('click', openShop);
+    closeShopBtn.addEventListener('click', closeShop);
+    hintBtn.addEventListener('click', useHint);
+    starBtn.addEventListener('click', useStar);
+
+    // ═══════════════════════════════════
+    //  INICIO
+    // ═══════════════════════════════════
     function init() {
-        loadLocalCoins();
-        updateDisplay();
-        loadLevel();
+        loadStats();
+        renderCategories();
+        loadAnimal();
+        updateHUD();
     }
 
     init();
