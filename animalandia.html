@@ -19,10 +19,44 @@
             font-family: 'Nunito', sans-serif; color:#4A3728;
             display:flex; align-items:center; justify-content:center;
         }
+        /* Fondo animado con nubes flotantes */
+        .sky-bg {
+            position:absolute; top:0; left:0; width:100%; height:100%;
+            pointer-events:none; z-index:0; overflow:hidden;
+        }
+        .cloud {
+            position:absolute; background:white; border-radius:50%;
+            opacity:0.8; animation: floatCloud linear infinite;
+        }
+        .cloud::before, .cloud::after {
+            content:''; position:absolute; background:white; border-radius:50%;
+        }
+        .cloud1 { width:100px; height:40px; top:10%; left:-100px; animation-duration:25s; }
+        .cloud1::before { width:50px; height:50px; top:-25px; left:20px; }
+        .cloud1::after { width:60px; height:40px; top:-15px; left:50px; }
+        .cloud2 { width:120px; height:50px; top:20%; left:-120px; animation-duration:30s; animation-delay:5s; }
+        .cloud2::before { width:60px; height:60px; top:-30px; left:25px; }
+        .cloud2::after { width:70px; height:45px; top:-20px; left:60px; }
+        .cloud3 { width:90px; height:35px; top:5%; left:-90px; animation-duration:22s; animation-delay:10s; }
+        .cloud3::before { width:45px; height:45px; top:-22px; left:18px; }
+        .cloud3::after { width:55px; height:35px; top:-12px; left:45px; }
+        @keyframes floatCloud {
+            from { transform:translateX(0); }
+            to { transform:translateX(calc(100vw + 200px)); }
+        }
+        .bee {
+            position:absolute; font-size:24px; animation: flyBee 8s linear infinite;
+        }
+        @keyframes flyBee {
+            0%{ top:80%; left:0%; }
+            25%{ top:60%; left:25%; }
+            50%{ top:50%; left:50%; }
+            75%{ top:40%; left:75%; }
+            100%{ top:30%; left:100%; }
+        }
         .game-wrapper {
-            width:100%; max-width:500px; height:100vh;
+            position:relative; z-index:1; width:100%; max-width:500px; height:100vh;
             display:flex; flex-direction:column; background:rgba(255,255,255,0.3);
-            position:relative; overflow:hidden;
         }
         .hud {
             display:flex; justify-content:space-between; align-items:center;
@@ -64,11 +98,17 @@
             flex:1; display:flex; flex-direction:column; align-items:center;
             justify-content:center; gap:15px; padding:10px; overflow-y:auto;
         }
+        .story-box {
+            background:white; border-radius:20px; padding:12px; margin:5px 0;
+            box-shadow:0 4px 10px rgba(0,0,0,0.1); font-size:16px;
+            text-align:center; font-weight:700; color:#5D4037;
+            display:flex; align-items:center; gap:10px;
+        }
+        .story-owl { font-size:40px; }
         .animal-card {
             background:var(--card-bg); border-radius:30px; padding:20px 25px;
             box-shadow:0 8px 20px rgba(0,0,0,0.2); text-align:center;
             transition:0.3s; width:90%; max-width:320px;
-            position:relative;
         }
         .animal-emoji {
             font-size:80px; animation: bounce 0.8s ease-in-out infinite;
@@ -113,7 +153,7 @@
         }
         .bottom-bar {
             display:flex; gap:10px; padding:8px; justify-content:center;
-            background:rgba(255,255,255,0.7); flex-shrink:0;
+            background:rgba(255,255,255,0.7); flex-shrink:0; flex-wrap:wrap;
         }
         .btn {
             font-family:'Press Start 2P', cursive; font-size:8px; padding:10px 16px;
@@ -123,20 +163,28 @@
         .btn-shop { background:#FF9800; }
         .btn-hint { background:#2196F3; }
         .btn-star { background:#E91E63; }
+        .btn-reset { background:#9E9E9E; }
+        .btn-help { background:#795548; }
         .btn:active { transform:scale(0.95); }
         .btn:disabled { opacity:0.5; cursor:not-allowed; }
-        .shop-modal {
+        /* Modal genérico */
+        .modal-overlay {
             position:fixed; top:0; left:0; width:100%; height:100%;
             background:rgba(0,0,0,0.6); z-index:100;
             display:flex; align-items:center; justify-content:center;
             visibility:hidden; opacity:0; transition:0.3s;
         }
-        .shop-modal.open { visibility:visible; opacity:1; }
-        .shop-content {
+        .modal-overlay.open { visibility:visible; opacity:1; }
+        .modal-content {
             background:white; border-radius:30px; padding:20px; width:90%; max-width:380px;
             box-shadow:0 10px 30px rgba(0,0,0,0.3); text-align:center;
         }
-        .shop-content h3 { font-size:22px; color:#5D4037; margin-bottom:15px; }
+        .modal-content h3 { font-size:22px; color:#5D4037; margin-bottom:15px; }
+        .modal-content button {
+            margin-top:15px; background:#FF5252; color:white; border:none;
+            font-family:'Press Start 2P', cursive; font-size:8px;
+            padding:8px 16px; border-radius:15px; cursor:pointer;
+        }
         .shop-item {
             display:flex; justify-content:space-between; align-items:center;
             padding:12px; border:2px solid #EEE; border-radius:20px; margin-bottom:10px;
@@ -148,11 +196,6 @@
             cursor:pointer; box-shadow:0 2px 6px rgba(0,0,0,0.2);
         }
         .shop-item button:disabled { background:#CCC; }
-        .close-shop {
-            margin-top:15px; background:#FF5252; color:white; border:none;
-            font-family:'Press Start 2P', cursive; font-size:8px;
-            padding:8px 16px; border-radius:15px; cursor:pointer;
-        }
         .message-popup {
             position:fixed; top:30%; left:50%; transform:translate(-50%,-50%);
             background:white; border-radius:25px; padding:30px; text-align:center;
@@ -164,9 +207,30 @@
             from{ opacity:0; transform:translate(-50%,-50%) scale(0.5); }
             to{ opacity:1; transform:translate(-50%,-50%) scale(1); }
         }
+        .achievement-popup {
+            position:fixed; bottom:20px; left:50%; transform:translateX(-50%);
+            background:#FFD700; color:#4A3728; font-weight:900; font-size:20px;
+            padding:15px 25px; border-radius:30px; box-shadow:0 6px 20px rgba(0,0,0,0.3);
+            z-index:150; display:none; animation: slideUp 0.5s, fadeOut 2s 2.5s forwards;
+        }
+        @keyframes slideUp {
+            from{ bottom:0; opacity:0; } to{ bottom:20px; opacity:1; }
+        }
+        @keyframes fadeOut {
+            to{ opacity:0; }
+        }
     </style>
 </head>
 <body>
+<!-- Fondo animado -->
+<div class="sky-bg">
+    <div class="cloud cloud1"></div>
+    <div class="cloud cloud2"></div>
+    <div class="cloud cloud3"></div>
+    <div class="bee" style="top:70%; left:5%; animation-delay:0s;">🐝</div>
+    <div class="bee" style="top:50%; left:10%; animation-delay:3s;">🦋</div>
+</div>
+
 <div class="game-wrapper">
     <div class="hud">
         <div class="hud-left">
@@ -184,6 +248,10 @@
     <div class="category-tabs" id="categoryTabs"></div>
 
     <div class="main-area">
+        <div class="story-box" id="storyBox">
+            <span class="story-owl">🦉</span>
+            <span id="storyText">¡Bienvenido a la granja! Alimenta a los animales.</span>
+        </div>
         <div class="level-indicator" id="levelIndicator">Nivel 1</div>
         <div class="animal-card" id="animalCard">
             <div class="animal-emoji" id="animalEmoji">🐮</div>
@@ -197,32 +265,56 @@
         <button class="btn btn-shop" id="shopBtn">🛒 TIENDA</button>
         <button class="btn btn-hint" id="hintBtn">💡 PISTA (20💰)</button>
         <button class="btn btn-star" id="starBtn">🌟 ESTRELLA (50💰)</button>
+        <button class="btn btn-reset" id="resetBtn">🔄 REINICIAR</button>
+        <button class="btn btn-help" id="helpBtn">❓ AYUDA</button>
     </div>
 </div>
 
-<div class="shop-modal" id="shopModal">
-    <div class="shop-content">
+<!-- Tienda Modal -->
+<div class="modal-overlay" id="shopModal">
+    <div class="modal-content">
         <h3>🛒 TIENDA</h3>
         <div id="shopItemsContainer"></div>
-        <button class="close-shop" id="closeShopBtn">CERRAR</button>
+        <button id="closeShopBtn">CERRAR</button>
     </div>
 </div>
 
+<!-- Ayuda Modal -->
+<div class="modal-overlay" id="helpModal">
+    <div class="modal-content">
+        <h3>❓ CÓMO JUGAR</h3>
+        <p style="font-size:16px; text-align:left; line-height:1.6;">
+            🐾 Toca el alimento que el animal te pide.<br>
+            ⭐ Gana estrellas y monedas.<br>
+            ❤️ Tienes 3 vidas; si fallas 3 veces en un nivel, pierdes una vida.<br>
+            🛡️ Los escudos te protegen.<br>
+            🛒 Compra vidas y escudos en la tienda.<br>
+            🔓 Completa una categoría para desbloquear la siguiente.<br>
+            👑 Usa el botón ☁️ para administrador.
+        </p>
+        <button id="closeHelpBtn">ENTENDIDO</button>
+    </div>
+</div>
+
+<!-- Logro emergente -->
+<div class="achievement-popup" id="achievementPopup"></div>
+
+<!-- Mensaje temporal -->
 <div class="message-popup" id="messagePopup">
     <div id="popupContent"></div>
 </div>
 
 <script>
     // ═══════════════════════════════════
-    //  CÓDIGOS DE ADMIN
+    // CÓDIGOS DE ADMIN
     // ═══════════════════════════════════
     const ADMINS = { "1983":"Junior", "2024":"Nicole", "7777":"Mateo", "8888":"Jaider", "ods2026":"ODS Master" };
 
     // ═══════════════════════════════════
-    //  ANIMALES POR CATEGORÍA
+    // ANIMALES POR CATEGORÍA (60 animales)
     // ═══════════════════════════════════
     const CATEGORIES = [
-        { id:'farm', label:'🐄 Granja', icon:'🐄', animals:[
+        { id:'farm', label:'🐄 Granja', icon:'🐄', story:'¡Bienvenido a la granja!', animals:[
             { emoji:'🐮', name:'Vaca Lola', food:'🌿', foodName:'pasto', altFoods:['🌽','🍎','🥕'] },
             { emoji:'🐷', name:'Cerdito Pancho', food:'🌽', foodName:'maíz', altFoods:['🌿','🍎','🧀'] },
             { emoji:'🐔', name:'Gallina Coco', food:'🌾', foodName:'granos', altFoods:['🍎','🥕','🌿'] },
@@ -232,9 +324,11 @@
             { emoji:'🐶', name:'Perro Guau', food:'🍖', foodName:'hueso', altFoods:['🌿','🍎','🥕'] },
             { emoji:'🐱', name:'Gato Michi', food:'🐟', foodName:'pescado', altFoods:['🌿','🍎','🥕'] },
             { emoji:'🐸', name:'Rana Saltos', food:'🦗', foodName:'insectos', altFoods:['🌿','🍎','🥕'] },
-            { emoji:'🦆', name:'Pato Cuac', food:'🌾', foodName:'semillas', altFoods:['🐟','🍎','🌿'] }
+            { emoji:'🦆', name:'Pato Cuac', food:'🌾', foodName:'semillas', altFoods:['🐟','🍎','🌿'] },
+            { emoji:'🐐', name:'Cabra Trepa', food:'🌿', foodName:'hierba', altFoods:['🥕','🍎','🌽'] },
+            { emoji:'🐿️', name:'Ardilla Saltarina', food:'🌰', foodName:'nueces', altFoods:['🍎','🥕','🌿'] }
         ]},
-        { id:'jungle', label:'🐒 Selva', icon:'🐒', animals:[
+        { id:'jungle', label:'🐒 Selva', icon:'🐒', story:'Explora la selva tropical.', animals:[
             { emoji:'🦁', name:'León Rey', food:'🥩', foodName:'carne', altFoods:['🌿','🍎','🥕'] },
             { emoji:'🐘', name:'Elefante Trompita', food:'🌿', foodName:'hojas', altFoods:['🍎','🥕','🌽'] },
             { emoji:'🐒', name:'Mono Saltarín', food:'🍌', foodName:'plátano', altFoods:['🥕','🍎','🌿'] },
@@ -244,9 +338,11 @@
             { emoji:'🦍', name:'Gorila Fuerte', food:'🍌', foodName:'frutas', altFoods:['🌿','🥕','🍎'] },
             { emoji:'🦜', name:'Loro Hablador', food:'🌰', foodName:'semillas', altFoods:['🍎','🌿','🥕'] },
             { emoji:'🐍', name:'Serpiente Silbido', food:'🥚', foodName:'huevos', altFoods:['🌿','🍎','🥕'] },
-            { emoji:'🦥', name:'Perezoso Lento', food:'🌿', foodName:'hojas', altFoods:['🍎','🥕','🌽'] }
+            { emoji:'🦥', name:'Perezoso Lento', food:'🌿', foodName:'hojas', altFoods:['🍎','🥕','🌽'] },
+            { emoji:'🐆', name:'Leopardo Veloz', food:'🥩', foodName:'carne', altFoods:['🌿','🍎','🥕'] },
+            { emoji:'🦩', name:'Flamenco Rosa', food:'🦐', foodName:'camarones', altFoods:['🌿','🍎','🥕'] }
         ]},
-        { id:'ocean', label:'🐠 Océano', icon:'🐠', animals:[
+        { id:'ocean', label:'🐠 Océano', icon:'🐠', story:'Sumérgete en el océano.', animals:[
             { emoji:'🐬', name:'Delfín Saltarín', food:'🐟', foodName:'peces', altFoods:['🌿','🍎','🥕'] },
             { emoji:'🦈', name:'Tiburón Toto', food:'🥩', foodName:'carne', altFoods:['🌿','🍎','🥕'] },
             { emoji:'🐙', name:'Pulpo Tentáculos', food:'🦀', foodName:'cangrejos', altFoods:['🌿','🍎','🥕'] },
@@ -256,9 +352,11 @@
             { emoji:'🐠', name:'Pez Payaso', food:'🌿', foodName:'plancton', altFoods:['🍎','🥕','🐟'] },
             { emoji:'🦀', name:'Cangrejo Pinzas', food:'🐚', foodName:'moluscos', altFoods:['🌿','🍎','🥕'] },
             { emoji:'🐡', name:'Pez Globo', food:'🦐', foodName:'camarones', altFoods:['🌿','🍎','🥕'] },
-            { emoji:'🦑', name:'Calamar Veloz', food:'🐟', foodName:'peces pequeños', altFoods:['🌿','🍎','🥕'] }
+            { emoji:'🦑', name:'Calamar Veloz', food:'🐟', foodName:'peces pequeños', altFoods:['🌿','🍎','🥕'] },
+            { emoji:'🐚', name:'Estrella de Mar', food:'🦪', foodName:'ostras', altFoods:['🌿','🍎','🥕'] },
+            { emoji:'🐋', name:'Orca Blanca', food:'🥩', foodName:'carne', altFoods:['🌿','🍎','🥕'] }
         ]},
-        { id:'pets', label:'🐱 Mascotas', icon:'🐱', animals:[
+        { id:'pets', label:'🐱 Mascotas', icon:'🐱', story:'Conoce a las mascotas.', animals:[
             { emoji:'🐕', name:'Cachorro Guau', food:'🍖', foodName:'croquetas', altFoods:['🌿','🍎','🥕'] },
             { emoji:'🐈', name:'Gatito Michi', food:'🐟', foodName:'atún', altFoods:['🌿','🍎','🥕'] },
             { emoji:'🐹', name:'Hámster Rueda', food:'🥕', foodName:'verduras', altFoods:['🌿','🍎','🌽'] },
@@ -268,9 +366,11 @@
             { emoji:'🦎', name:'Lagartija Sol', food:'🦗', foodName:'insectos', altFoods:['🌿','🍎','🥕'] },
             { emoji:'🐢', name:'Tortuguita Casco', food:'🥬', foodName:'lechuga', altFoods:['🥕','🍎','🐟'] },
             { emoji:'🐩', name:'Caniche Rizo', food:'🍖', foodName:'premios', altFoods:['🌿','🍎','🥕'] },
-            { emoji:'🐇', name:'Liebre Saltos', food:'🥕', foodName:'zanahoria', altFoods:['🌿','🍎','🌽'] }
+            { emoji:'🐇', name:'Liebre Saltos', food:'🥕', foodName:'zanahoria', altFoods:['🌿','🍎','🌽'] },
+            { emoji:'🐕‍🦺', name:'Perro Guía', food:'🍖', foodName:'croquetas', altFoods:['🌿','🍎','🥕'] },
+            { emoji:'🐈‍⬛', name:'Gato Negro', food:'🐟', foodName:'salmón', altFoods:['🌿','🍎','🥕'] }
         ]},
-        { id:'insects', label:'🐞 Insectos', icon:'🐞', animals:[
+        { id:'insects', label:'🐞 Insectos', icon:'🐞', story:'El mundo de los insectos.', animals:[
             { emoji:'🐝', name:'Abeja Maya', food:'🌸', foodName:'polen', altFoods:['🌿','🍎','🥕'] },
             { emoji:'🐞', name:'Mariquita Puntos', food:'🌿', foodName:'hojas', altFoods:['🍎','🥕','🌽'] },
             { emoji:'🦋', name:'Mariposa Alas', food:'🌸', foodName:'néctar', altFoods:['🌿','🍎','🥕'] },
@@ -280,7 +380,9 @@
             { emoji:'🦟', name:'Mosquito Zumbón', food:'🌸', foodName:'néctar', altFoods:['🌿','🍎','🥕'] },
             { emoji:'🐌', name:'Caracol Lento', food:'🥬', foodName:'lechuga', altFoods:['🥕','🍎','🌿'] },
             { emoji:'🦂', name:'Escorpión Picadura', food:'🦗', foodName:'insectos', altFoods:['🌿','🍎','🥕'] },
-            { emoji:'🐞', name:'Chinche Apestosa', food:'🌿', foodName:'savia', altFoods:['🍎','🥕','🌽'] }
+            { emoji:'🐞', name:'Chinche Apestosa', food:'🌿', foodName:'savia', altFoods:['🍎','🥕','🌽'] },
+            { emoji:'🪲', name:'Escarabajo Brillante', food:'🌿', foodName:'hojas', altFoods:['🍎','🥕','🌽'] },
+            { emoji:'🐜', name:'Termita Madera', food:'🪵', foodName:'madera', altFoods:['🌿','🍎','🥕'] }
         ]}
     ];
 
@@ -296,14 +398,15 @@
         stars: 0,
         hints: 0,
         localCoins: 0,
-        isAdmin: false
+        isAdmin: false,
+        animalsCompleted: 0  // contador total de animales alimentados
     };
 
     let canInteract = true;
     let wrongAttempts = 0;
     const MAX_WRONG = 3;
 
-    // Elementos DOM
+    // Elementos DOM principales
     const animalEmoji = document.getElementById('animalEmoji');
     const animalName = document.getElementById('animalName');
     const animalRequest = document.getElementById('animalRequest');
@@ -315,24 +418,31 @@
     const localCoinsDisplay = document.getElementById('localCoinsDisplay');
     const levelIndicator = document.getElementById('levelIndicator');
     const categoryTabs = document.getElementById('categoryTabs');
+    const storyText = document.getElementById('storyText');
     const shopBtn = document.getElementById('shopBtn');
     const hintBtn = document.getElementById('hintBtn');
     const starBtn = document.getElementById('starBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const helpBtn = document.getElementById('helpBtn');
     const adminBtn = document.getElementById('adminBtn');
     const shopModal = document.getElementById('shopModal');
     const closeShopBtn = document.getElementById('closeShopBtn');
     const shopItemsContainer = document.getElementById('shopItemsContainer');
+    const helpModal = document.getElementById('helpModal');
+    const closeHelpBtn = document.getElementById('closeHelpBtn');
     const messagePopup = document.getElementById('messagePopup');
     const popupContent = document.getElementById('popupContent');
+    const achievementPopup = document.getElementById('achievementPopup');
 
     // ═══════════════════════════════════
     //  FUNCIONES DE MONEDAS Y GUARDADO
     // ═══════════════════════════════════
     function loadStats() {
-        const saved = localStorage.getItem('animalandia_stats');
+        const saved = localStorage.getItem('animalandia_v2_stats');
         if (saved) {
             try { stats = { ...stats, ...JSON.parse(saved) }; } catch(e) {}
         }
+        // Sincronizar con el sistema central
         if (typeof Tecnomath !== 'undefined' && Tecnomath.getCurrentUser()) {
             stats.localCoins = Tecnomath.getGameCoins('animalandia');
             stats.isAdmin = stats.isAdmin || Tecnomath.isAdmin();
@@ -342,7 +452,7 @@
     }
 
     function saveStats() {
-        localStorage.setItem('animalandia_stats', JSON.stringify({
+        localStorage.setItem('animalandia_v2_stats', JSON.stringify({
             currentCategory: stats.currentCategory,
             currentAnimalIndex: stats.currentAnimalIndex,
             unlockedCategories: stats.unlockedCategories,
@@ -350,7 +460,8 @@
             shields: stats.shields,
             stars: stats.stars,
             hints: stats.hints,
-            isAdmin: stats.isAdmin
+            isAdmin: stats.isAdmin,
+            animalsCompleted: stats.animalsCompleted
         }));
         if (typeof Tecnomath !== 'undefined' && Tecnomath.getCurrentUser()) {
             Tecnomath.setGameCoins('animalandia', stats.localCoins);
@@ -372,7 +483,7 @@
     }
 
     // ═══════════════════════════════════
-    //  SONIDOS
+    //  SONIDOS (Web Audio API)
     // ═══════════════════════════════════
     function playTone(freq, duration, type='square', volume=0.1) {
         try {
@@ -391,7 +502,7 @@
 
     function playCorrectSound() { playTone(800, 0.2, 'square', 0.1); setTimeout(()=>playTone(1200, 0.25, 'square', 0.1), 200); }
     function playWrongSound() { playTone(200, 0.3, 'sawtooth', 0.08); }
-    function playClickSound() { playTone(600, 0.1, 'sine', 0.05); }
+    function playUnlockSound() { playTone(500, 0.1, 'sine'); setTimeout(()=>playTone(700, 0.1, 'sine'), 100); setTimeout(()=>playTone(900, 0.15, 'sine'), 200); }
 
     // ═══════════════════════════════════
     //  ADMIN
@@ -431,21 +542,25 @@
 
     function switchCategory(idx) {
         if (idx >= stats.unlockedCategories) return;
+        playClickSound();
         stats.currentCategory = idx;
         stats.currentAnimalIndex = 0;
+        storyText.textContent = CATEGORIES[idx].story;
         renderCategories();
         loadAnimal();
         saveStats();
     }
 
+    function playClickSound() { playTone(600, 0.1, 'sine', 0.05); }
+
     // ═══════════════════════════════════
-    //  CARGA DE ANIMAL Y OPCIONES
+    //  CARGA DE ANIMAL
     // ═══════════════════════════════════
     function loadAnimal() {
         const cat = CATEGORIES[stats.currentCategory];
         const totalAnimals = cat.animals.length;
         if (stats.currentAnimalIndex >= totalAnimals) {
-            // Categoría completada
+            // ¡Categoría completada!
             animalEmoji.textContent = '🎉';
             animalName.textContent = '¡Categoría completada!';
             animalRequest.textContent = 'Has alimentado a todos';
@@ -453,14 +568,11 @@
             levelIndicator.textContent = '¡Excelente!';
 
             // Desbloquear siguiente categoría si no es la última
-            if (stats.unlockedCategories < CATEGORIES.length && stats.unlockedCategories === stats.currentCategory + 1) {
-                // Ya estaba desbloqueada? No, si unlockedCategories es menor que la actual+1
-            }
-            if (stats.currentCategory + 1 > stats.unlockedCategories && stats.currentCategory + 1 < CATEGORIES.length) {
+            if (stats.currentCategory + 1 < CATEGORIES.length && stats.currentCategory + 1 >= stats.unlockedCategories) {
                 stats.unlockedCategories = stats.currentCategory + 1;
-                showMessage('🔓 ¡Nueva categoría desbloqueada!');
+                showAchievement(`🔓 ¡${CATEGORIES[stats.currentCategory + 1].label} desbloqueada!`);
+                playUnlockSound();
             }
-
             // Recompensa global
             if (typeof Tecnomath !== 'undefined' && Tecnomath.getCurrentUser()) {
                 const reward = stats.stars * 5;
@@ -470,15 +582,16 @@
             saveStats();
             renderCategories();
 
-            // Avanzar automáticamente a la siguiente categoría si existe y está desbloqueada
+            // Avanzar automáticamente después de 2.5 segundos
             setTimeout(() => {
                 if (stats.currentCategory + 1 < CATEGORIES.length && stats.currentCategory + 1 < stats.unlockedCategories) {
                     stats.currentCategory++;
                 } else if (stats.currentCategory + 1 >= CATEGORIES.length) {
-                    // Ya completó todo, volver al inicio
+                    // Reiniciar ciclo
                     stats.currentCategory = 0;
                 }
                 stats.currentAnimalIndex = 0;
+                storyText.textContent = CATEGORIES[stats.currentCategory].story;
                 renderCategories();
                 loadAnimal();
                 saveStats();
@@ -489,7 +602,7 @@
         const animal = cat.animals[stats.currentAnimalIndex];
         animalEmoji.textContent = animal.emoji;
         animalName.textContent = animal.name;
-        animalRequest.textContent = `¡Quiero ${animal.foodName}!`;  // Sin emoji
+        animalRequest.textContent = `¡Quiero ${animal.foodName}!`;  // Sin emoji en el texto
         levelIndicator.textContent = `${cat.label} · Nivel ${stats.currentAnimalIndex + 1}/${totalAnimals}`;
 
         const options = [animal.food, ...animal.altFoods].sort(() => Math.random() - 0.5);
@@ -521,6 +634,7 @@
         if (food === correct) {
             btn.classList.add('correct-pick');
             stats.stars++;
+            stats.animalsCompleted++;
             if (!stats.isAdmin) stats.localCoins += 5;
             wrongAttempts = 0;
             playCorrectSound();
@@ -541,6 +655,7 @@
                     stats.shields--;
                     wrongAttempts = 0;
                     showMessage('🛡️ ¡Escudo usado! Sigue intentando');
+                    saveStats();
                 } else {
                     if (!stats.isAdmin) stats.lives--;
                     updateHUD();
@@ -553,11 +668,9 @@
                         wrongAttempts = 0;
                     }
                 }
-                saveStats();
                 updateHUD();
-                setTimeout(() => {
-                    loadAnimal();
-                }, 600);
+                saveStats();
+                setTimeout(() => loadAnimal(), 600);
             } else {
                 showMessage(`😊 Inténtalo otra vez (${MAX_WRONG - wrongAttempts} intentos)`, 800);
                 setTimeout(() => {
@@ -568,6 +681,9 @@
         }
     }
 
+    // ═══════════════════════════════════
+    //  POWER-UPS
+    // ═══════════════════════════════════
     function useHint() {
         if (!canInteract) return;
         if (!stats.isAdmin && stats.localCoins < 20) return;
@@ -613,7 +729,6 @@
         renderShopItems();
         shopModal.classList.add('open');
     }
-
     function closeShop() {
         shopModal.classList.remove('open');
     }
@@ -623,18 +738,37 @@
         const items = [
             { name:'❤️ Vida', price:30, action:() => { stats.lives++; saveStats(); updateHUD(); } },
             { name:'🛡️ Escudo', price:40, action:() => { stats.shields++; saveStats(); updateHUD(); } },
-            { name:'💡 Pista x3', price:25, action:() => { stats.hints += 3; saveStats(); } }
+            { name:'💡 Pista x3', price:25, action:() => { stats.hints += 3; saveStats(); } },
+            { name:'🗝️ Poción Categoría', price:100, action:() => { 
+                if (stats.unlockedCategories < CATEGORIES.length) {
+                    stats.unlockedCategories++;
+                    showAchievement('🔓 ¡Nueva categoría desbloqueada!');
+                    playUnlockSound();
+                    renderCategories();
+                } else {
+                    showMessage('Ya tienes todas las categorías');
+                }
+            }},
+            { name:'💱 Convertir 🌐→💰', price:0, action:() => { openExchange(); } }
         ];
         items.forEach(item => {
             const div = document.createElement('div');
             div.className = 'shop-item';
-            div.innerHTML = `<span>${item.name}</span><span>${item.price} 💰</span>`;
+            div.innerHTML = `<span>${item.name}</span><span>${item.price > 0 ? item.price+' 💰' : '10% com'}</span>`;
             const buyBtn = document.createElement('button');
             buyBtn.textContent = 'Comprar';
-            buyBtn.disabled = !stats.isAdmin && stats.localCoins < item.price;
+            if (item.price === 0) {
+                buyBtn.disabled = false;
+                buyBtn.textContent = 'Convertir';
+            } else {
+                buyBtn.disabled = !stats.isAdmin && stats.localCoins < item.price;
+            }
             buyBtn.addEventListener('click', () => {
-                if (stats.isAdmin) { item.action(); }
-                else if (stats.localCoins >= item.price) {
+                if (stats.isAdmin && item.price > 0) {
+                    item.action();
+                } else if (item.price === 0) {
+                    item.action();
+                } else if (stats.localCoins >= item.price) {
                     stats.localCoins -= item.price;
                     item.action();
                 }
@@ -645,39 +779,32 @@
             div.appendChild(buyBtn);
             shopItemsContainer.appendChild(div);
         });
-        // Conversión de monedas
-        const exchDiv = document.createElement('div');
-        exchDiv.className = 'shop-item';
-        exchDiv.innerHTML = '<span>💱 Convertir 🌐 → 💰 (10% com)</span>';
-        const exchBtn = document.createElement('button');
-        exchBtn.textContent = 'Convertir';
-        exchBtn.addEventListener('click', () => {
-            if (typeof Tecnomath === 'undefined' || !Tecnomath.getCurrentUser()) {
-                alert('Inicia sesión para convertir');
-                return;
-            }
-            if (stats.isAdmin) {
-                stats.localCoins += 1000;
-                saveStats();
-                updateHUD();
-                renderShopItems();
-                return;
-            }
-            const amount = prompt('Cantidad de monedas globales a convertir:');
-            if (!amount) return;
-            const num = parseInt(amount);
-            if (isNaN(num) || num <= 0) return;
-            if (Tecnomath.exchangeGlobalToLocal('animalandia', num)) {
-                stats.localCoins = Tecnomath.getGameCoins('animalandia');
-                saveStats();
-                updateHUD();
-                renderShopItems();
-            } else {
-                alert('Fondos insuficientes');
-            }
-        });
-        exchDiv.appendChild(exchBtn);
-        shopItemsContainer.appendChild(exchDiv);
+    }
+
+    function openExchange() {
+        if (typeof Tecnomath === 'undefined' || !Tecnomath.getCurrentUser()) {
+            alert('Inicia sesión para convertir');
+            return;
+        }
+        if (stats.isAdmin) {
+            stats.localCoins += 1000;
+            saveStats();
+            updateHUD();
+            renderShopItems();
+            return;
+        }
+        const amount = prompt('Cantidad de monedas globales a convertir:');
+        if (!amount) return;
+        const num = parseInt(amount);
+        if (isNaN(num) || num <= 0) return;
+        if (Tecnomath.exchangeGlobalToLocal('animalandia', num)) {
+            stats.localCoins = Tecnomath.getGameCoins('animalandia');
+            saveStats();
+            updateHUD();
+            renderShopItems();
+        } else {
+            alert('Fondos insuficientes');
+        }
     }
 
     // ═══════════════════════════════════
@@ -690,6 +817,9 @@
         stats.currentAnimalIndex = 0;
         stats.stars = 0;
         stats.localCoins = 0;
+        stats.unlockedCategories = 1;
+        stats.animalsCompleted = 0;
+        storyText.textContent = CATEGORIES[0].story;
         saveStats();
         updateHUD();
         renderCategories();
@@ -698,7 +828,7 @@
     }
 
     // ═══════════════════════════════════
-    //  MENSAJES
+    //  MENSAJES Y LOGROS
     // ═══════════════════════════════════
     function showMessage(html, duration = 1500) {
         popupContent.innerHTML = html;
@@ -706,19 +836,41 @@
         setTimeout(() => messagePopup.classList.remove('show'), duration);
     }
 
+    function showAchievement(text) {
+        achievementPopup.textContent = text;
+        achievementPopup.style.display = 'block';
+        setTimeout(() => {
+            achievementPopup.style.display = 'none';
+        }, 3500);
+    }
+
     // ═══════════════════════════════════
-    //  EVENTOS
+    //  AYUDA
+    // ═══════════════════════════════════
+    function openHelp() {
+        helpModal.classList.add('open');
+    }
+    function closeHelp() {
+        helpModal.classList.remove('open');
+    }
+
+    // ═══════════════════════════════════
+    //  ASIGNACIÓN DE EVENTOS
     // ═══════════════════════════════════
     shopBtn.addEventListener('click', openShop);
     closeShopBtn.addEventListener('click', closeShop);
     hintBtn.addEventListener('click', useHint);
     starBtn.addEventListener('click', useStar);
+    resetBtn.addEventListener('click', resetGame);
+    helpBtn.addEventListener('click', openHelp);
+    closeHelpBtn.addEventListener('click', closeHelp);
 
     // ═══════════════════════════════════
     //  INICIO
     // ═══════════════════════════════════
     function init() {
         loadStats();
+        storyText.textContent = CATEGORIES[stats.currentCategory].story;
         renderCategories();
         loadAnimal();
         updateHUD();
