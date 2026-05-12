@@ -3,500 +3,263 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Orbit Cleaner · ODS 13</title>
-    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <title>Animalandia · Alimenta a tus amigos</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
     <script src="shared.js"></script>
     <style>
         :root {
-            --neon-cyan: #00FFFF; --neon-pink: #FF00FF; --neon-green: #39FF14;
-            --gold: #FFD700; --retro-bg: #060610; --card-bg: #0d0d1a;
+            --sky: #87CEEB; --grass: #7CFC00; --sun: #FFD700;
+            --card-bg: #FFF8E1; --wood: #DEB887;
         }
         * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; user-select:none; }
         html, body {
             height:100%; width:100%; overflow:hidden;
-            background:var(--retro-bg); font-family:'Press Start 2P', cursive; color:white;
+            background: linear-gradient(180deg, var(--sky) 0%, #B0E0E6 70%, var(--grass) 100%);
+            font-family: 'Nunito', sans-serif; color:#4A3728;
             display:flex; align-items:center; justify-content:center;
         }
-        body::before {
-            content:''; position:fixed; inset:0; z-index:0;
-            background: radial-gradient(ellipse at 50% 50%, rgba(0,255,255,0.1) 0%, transparent 60%),
-                        radial-gradient(ellipse at 20% 80%, rgba(255,0,255,0.08) 0%, transparent 40%);
-            animation: spacePulse 4s ease-in-out infinite;
-        }
-        @keyframes spacePulse {
-            0%,100%{ opacity:0.8; } 50%{ opacity:1; }
-        }
         .game-wrapper {
-            position:relative; z-index:1; width:100%; max-width:500px; height:100vh;
-            display:flex; flex-direction:column; padding:8px; gap:6px;
+            width:100%; max-width:480px; height:100vh;
+            display:flex; flex-direction:column; padding:10px; gap:8px;
         }
         .hud {
             display:flex; justify-content:space-between; align-items:center;
-            font-size:6px; padding:6px 10px; background:rgba(0,0,0,0.7);
-            border-radius:8px; flex-shrink:0; flex-wrap:wrap; gap:4px;
-            color:var(--neon-green); text-shadow:0 0 6px var(--neon-green);
+            padding:8px 14px; background:rgba(255,255,255,0.8);
+            border-radius:20px; font-weight:700; font-size:16px;
+            box-shadow:0 4px 12px rgba(0,0,0,0.1); flex-shrink:0;
         }
-        canvas {
-            border:2px solid var(--neon-cyan); box-shadow:0 0 15px var(--neon-cyan);
-            border-radius:8px; width:100%; aspect-ratio:3/4; background:#010114;
-            flex-shrink:0; touch-action:none;
+        .stars-display { color:#FF8C00; }
+        .coins-display { color:#8B4513; font-size:13px; }
+        .animal-area {
+            flex:1; display:flex; flex-direction:column; align-items:center;
+            justify-content:center; gap:15px; min-height:0;
         }
-        .button-row {
-            display:flex; gap:8px; flex-shrink:0; justify-content:center; flex-wrap:wrap;
+        .animal-card {
+            background:var(--card-bg); border-radius:30px; padding:20px 25px;
+            box-shadow:0 8px 20px rgba(0,0,0,0.2); text-align:center;
+            transition:0.3s; width:90%; max-width:300px;
         }
-        .btn {
-            font-family:'Press Start 2P', cursive; font-size:6px; padding:8px 14px;
-            border:none; border-radius:6px; cursor:pointer; color:white;
-            box-shadow:0 0 10px currentColor; transition:0.2s;
+        .animal-emoji {
+            font-size:80px; animation: bounce 0.8s ease-in-out infinite;
         }
-        .btn-shop { background:var(--neon-pink); }
-        .btn-restart { background:var(--neon-cyan); color:#000; }
-        .btn:hover { transform:scale(1.05); }
-        .shop-modal {
-            position:fixed; top:0; left:0; width:100%; height:100%;
-            background:rgba(0,0,0,0.85); z-index:100;
+        @keyframes bounce {
+            0%,100%{ transform:translateY(0); }
+            30%{ transform:translateY(-15px); }
+            50%{ transform:translateY(0); }
+        }
+        .animal-name {
+            font-size:28px; font-weight:900; color:#5D4037; margin:8px 0;
+        }
+        .animal-request {
+            font-size:20px; font-weight:700; color:#FF6F00; margin:5px 0;
+        }
+        .food-options {
+            display:grid; grid-template-columns:repeat(2,1fr); gap:12px;
+            width:100%; max-width:380px; padding:0 10px; flex-shrink:0;
+        }
+        .food-btn {
+            background:white; border:4px solid #DDD; border-radius:25px;
+            padding:18px 10px; font-size:45px; cursor:pointer;
+            transition:0.2s; box-shadow:0 4px 10px rgba(0,0,0,0.1);
             display:flex; align-items:center; justify-content:center;
-            visibility:hidden; opacity:0; transition:0.3s;
+            aspect-ratio:1; min-height:0;
         }
-        .shop-modal.open { visibility:visible; opacity:1; }
-        .shop-content {
-            background:var(--card-bg); border:2px solid var(--neon-pink);
-            border-radius:12px; padding:20px; width:90%; max-width:360px;
-            box-shadow:0 0 30px rgba(255,0,255,0.4); text-align:center;
+        .food-btn:active { transform:scale(0.9); border-color:#FFD700; }
+        .food-btn.correct-pick { border-color:#4CAF50; background:#E8F5E9; animation: popCorrect 0.5s; }
+        .food-btn.wrong-pick { border-color:#FF5252; background:#FFEBEE; animation: shake 0.4s; }
+        @keyframes popCorrect {
+            0%{ transform:scale(1); } 50%{ transform:scale(1.2); } 100%{ transform:scale(1); }
         }
-        .shop-content h3 { font-size:10px; color:var(--neon-pink); margin-bottom:15px; text-shadow:0 0 10px var(--neon-pink); }
-        .shop-item {
-            display:flex; justify-content:space-between; align-items:center;
-            padding:10px; border:1px solid #333; border-radius:8px; margin-bottom:8px;
-            background:rgba(255,255,255,0.03); font-size:5px;
+        @keyframes shake {
+            0%,100%{ transform:translateX(0); } 25%{ transform:translateX(-10px); } 75%{ transform:translateX(10px); }
         }
-        .shop-item button {
-            font-family:'Press Start 2P', cursive; font-size:5px; padding:6px 10px;
-            background:var(--neon-cyan); color:black; border:none; border-radius:6px;
-            cursor:pointer; box-shadow:0 0 8px var(--neon-cyan);
+        .level-indicator {
+            font-size:14px; font-weight:700; color:#5D4037; text-align:center;
         }
-        .shop-item button:disabled { opacity:0.5; cursor:not-allowed; }
-        .close-shop {
-            margin-top:15px; background:transparent; border:1px solid var(--neon-pink);
-            color:var(--neon-pink); font-family:'Press Start 2P', cursive;
-            font-size:7px; padding:8px 16px; cursor:pointer; border-radius:6px;
+        .message-popup {
+            position:fixed; top:30%; left:50%; transform:translate(-50%,-50%);
+            background:white; border-radius:25px; padding:30px; text-align:center;
+            box-shadow:0 10px 30px rgba(0,0,0,0.3); z-index:100;
+            display:none; font-weight:700; font-size:24px;
         }
-        .game-over-popup {
-            position:fixed; top:50%; left:50%; transform:translate(-50%,-50%) scale(0);
-            background:var(--card-bg); border:2px solid var(--gold); padding:20px;
-            text-align:center; z-index:200; border-radius:10px;
-            box-shadow:0 0 30px rgba(255,215,0,0.4); transition:0.3s;
+        .message-popup.show { display:block; animation: popIn 0.5s; }
+        @keyframes popIn {
+            from{ opacity:0; transform:translate(-50%,-50%) scale(0.5); }
+            to{ opacity:1; transform:translate(-50%,-50%) scale(1); }
         }
-        .game-over-popup.show { transform:translate(-50%,-50%) scale(1); }
     </style>
 </head>
 <body>
 <div class="game-wrapper">
     <div class="hud">
-        <span>💥 <span id="scoreDisplay">0</span></span>
-        <span>🛡️ <span id="shieldDisplay">3</span></span>
-        <span>🌐 <span id="globalCoinsDisplay">0</span></span>
-        <span>💰 <span id="localCoinsDisplay">0</span></span>
+        <span class="stars-display">⭐ <span id="starsCount">0</span></span>
+        <span class="coins-display">🌐 <span id="globalCoins">0</span></span>
+        <span class="coins-display">🐾 <span id="localCoins">0</span></span>
     </div>
-    <canvas id="gameCanvas" width="360" height="480"></canvas>
-    <div class="button-row">
-        <button class="btn btn-shop" id="shopBtn">🛒 TIENDA</button>
+
+    <div class="level-indicator" id="levelIndicator">Nivel 1 · ¡Conoce a los animales!</div>
+
+    <div class="animal-area">
+        <div class="animal-card" id="animalCard">
+            <div class="animal-emoji" id="animalEmoji">🐮</div>
+            <div class="animal-name" id="animalName">Vaca Lola</div>
+            <div class="animal-request" id="animalRequest">¡Quiero pasto! 🌿</div>
+        </div>
     </div>
+
+    <div class="food-options" id="foodOptions"></div>
 </div>
 
-<div class="shop-modal" id="shopModal">
-    <div class="shop-content">
-        <h3>🛒 TIENDA ORBITAL</h3>
-        <div id="shopItemsContainer"></div>
-        <button class="close-shop" id="closeShopBtn">CERRAR</button>
-    </div>
-</div>
-
-<div class="game-over-popup" id="gameOverPopup">
-    <h2 style="font-size:10px; color:var(--gold); margin-bottom:10px;" id="popupTitle"></h2>
-    <p style="font-size:6px; color:#aaa; margin-bottom:15px;" id="popupMsg"></p>
-    <button class="btn btn-restart" onclick="restartGame()">🔄 REINICIAR</button>
+<div class="message-popup" id="messagePopup">
+    <div id="popupContent"></div>
 </div>
 
 <script>
-    const canvas = document.getElementById('gameCanvas');
-    const ctx = canvas.getContext('2d');
-
-    // Estado del juego
-    let ship = { x: canvas.width/2, y: canvas.height - 50, radius: 15, speed: 5 };
-    let bullets = [];
-    let enemies = [];
-    let score = 0;
-    let shields = 3;
-    let gameActive = true;
-    let gamePaused = false;
-    let localCoins = 0;
-    let spawnRate = 50; // frames entre spawns
-    let spawnTimer = 0;
-    let frameId = null;
-    let gameLoopRunning = false;
-    let bulletCooldown = 0;
-
-    // Mejoras comprables
-    let upgrades = {
-        bulletSpeed: 8,
-        fireRate: 1,      // balas por frame (cada N frames)
-        speed: 5,
-        shieldMax: 3,
-        bulletDamage: 1   // daño por bala
-    };
-    let shopItems = [
-        { id:'speed', name:'🚀 Velocidad', desc:'+2 velocidad nave', price:60, effect:()=>{ upgrades.speed += 2; ship.speed = upgrades.speed; } },
-        { id:'fireRate', name:'🔫 Cadencia', desc:'Dispara más rápido', price:80, effect:()=>{ upgrades.fireRate = Math.max(1, upgrades.fireRate - 1); bulletCooldown = 0; } },
-        { id:'bulletSpeed', name:'💨 Balas rápidas', desc:'+4 velocidad bala', price:50, effect:()=>{ upgrades.bulletSpeed += 4; } },
-        { id:'shield', name:'🛡️ Escudo extra', desc:'+1 escudo (máx 5)', price:100, effect:()=>{ if(shields < 5){ shields++; updateHUD(); } } }
+    // ═══════════════════════════════════
+    //  DATOS DEL JUEGO
+    // ═══════════════════════════════════
+    const animals = [
+        { emoji:'🐮', name:'Vaca Lola', food:'🌿', foodName:'pasto', altFoods:['🌽','🍎','🥕'] },
+        { emoji:'🐷', name:'Cerdito Pancho', food:'🌽', foodName:'maíz', altFoods:['🌿','🍎','🧀'] },
+        { emoji:'🐔', name:'Gallina Coco', food:'🌾', foodName:'granos', altFoods:['🍎','🥕','🌿'] },
+        { emoji:'🐑', name:'Oveja Nube', food:'🍎', foodName:'manzana', altFoods:['🌿','🌽','🥕'] },
+        { emoji:'🐴', name:'Caballo Relincho', food:'🥕', foodName:'zanahoria', altFoods:['🌿','🌽','🍎'] },
+        { emoji:'🐰', name:'Conejo Saltarín', food:'🥬', foodName:'lechuga', altFoods:['🥕','🍎','🌽'] },
+        { emoji:'🐶', name:'Perro Guau', food:'🍖', foodName:'hueso', altFoods:['🌿','🍎','🥕'] },
+        { emoji:'🐱', name:'Gato Michi', food:'🐟', foodName:'pescado', altFoods:['🌿','🍎','🥕'] },
+        { emoji:'🐸', name:'Rana Saltos', food:'🦗', foodName:'insectos', altFoods:['🌿','🍎','🥕'] },
+        { emoji:'🦆', name:'Pato Cuac', food:'🌾', foodName:'semillas', altFoods:['🐟','🍎','🌿'] }
     ];
 
-    // Elementos HUD
-    const scoreDisplay = document.getElementById('scoreDisplay');
-    const shieldDisplay = document.getElementById('shieldDisplay');
-    const globalCoinsDisplay = document.getElementById('globalCoinsDisplay');
-    const localCoinsDisplay = document.getElementById('localCoinsDisplay');
-    const shopBtn = document.getElementById('shopBtn');
-    const shopModal = document.getElementById('shopModal');
-    const closeShopBtn = document.getElementById('closeShopBtn');
-    const shopItemsContainer = document.getElementById('shopItemsContainer');
-    const gameOverPopup = document.getElementById('gameOverPopup');
-    const popupTitle = document.getElementById('popupTitle');
-    const popupMsg = document.getElementById('popupMsg');
+    let currentLevel = 0;
+    let stars = 0;
+    let localCoins = 0;
+    let canInteract = true;
 
-    // Funciones de monedas
+    // Elementos DOM
+    const animalEmoji = document.getElementById('animalEmoji');
+    const animalName = document.getElementById('animalName');
+    const animalRequest = document.getElementById('animalRequest');
+    const foodOptions = document.getElementById('foodOptions');
+    const starsCount = document.getElementById('starsCount');
+    const globalCoins = document.getElementById('globalCoins');
+    const localCoinsDisplay = document.getElementById('localCoins');
+    const levelIndicator = document.getElementById('levelIndicator');
+    const messagePopup = document.getElementById('messagePopup');
+    const popupContent = document.getElementById('popupContent');
+
+    // Monedas
     function loadLocalCoins() {
         if (typeof Tecnomath !== 'undefined' && Tecnomath.getCurrentUser()) {
-            localCoins = Tecnomath.getGameCoins('orbit-cleaner');
+            localCoins = Tecnomath.getGameCoins('animalandia');
         } else {
             localCoins = 0;
         }
     }
     function saveLocalCoins() {
         if (typeof Tecnomath !== 'undefined' && Tecnomath.getCurrentUser()) {
-            Tecnomath.setGameCoins('orbit-cleaner', localCoins);
+            Tecnomath.setGameCoins('animalandia', localCoins);
         }
     }
-    function updateGlobalDisplay() {
-        if (typeof Tecnomath !== 'undefined' && Tecnomath.getCurrentUser()) {
-            globalCoinsDisplay.textContent = Tecnomath.getCoins();
-        } else {
-            globalCoinsDisplay.textContent = '0';
-        }
-    }
-    function updateHUD() {
-        scoreDisplay.textContent = score;
-        shieldDisplay.textContent = shields;
+    function updateDisplay() {
+        starsCount.textContent = stars;
         localCoinsDisplay.textContent = localCoins;
-        updateGlobalDisplay();
-    }
-
-    // Clases
-    class Bullet {
-        constructor(x, y, speed) {
-            this.x = x; this.y = y; this.speed = speed; this.radius = 4;
-        }
-        update() {
-            this.y -= this.speed;
-            return this.y > -10;
-        }
-        draw(ctx) {
-            ctx.fillStyle = '#FFD700';
-            ctx.shadowBlur = 8; ctx.shadowColor = '#FFD700';
-            ctx.beginPath(); ctx.arc(this.x, this.y, this.radius, 0, Math.PI*2); ctx.fill();
-            ctx.shadowBlur = 0;
-        }
-    }
-
-    class Enemy {
-        constructor(x, y, type) {
-            this.x = x; this.y = y;
-            this.radius = type === 'big' ? 22 : 14;
-            this.speed = type === 'big' ? 1.5 : 2.5;
-            this.points = type === 'big' ? 30 : 10;
-            this.damage = type === 'big' ? 2 : 1;
-            this.color = type === 'big' ? '#FF0033' : '#FF9800';
-        }
-        update() {
-            this.y += this.speed;
-            return this.y < canvas.height + 30;
-        }
-        draw(ctx) {
-            ctx.fillStyle = this.color;
-            ctx.shadowBlur = 10; ctx.shadowColor = this.color;
-            ctx.beginPath(); ctx.arc(this.x, this.y, this.radius, 0, Math.PI*2); ctx.fill();
-            ctx.shadowBlur = 0;
-            // Emoji
-            ctx.fillStyle = 'white';
-            ctx.font = '16px "Press Start 2P"';
-            ctx.textAlign = 'center';
-            ctx.fillText(this.radius > 18 ? '☄️' : '🛢️', this.x, this.y+5);
-        }
-    }
-
-    // Spawn enemigos
-    function spawnEnemy() {
-        if (!gameActive || gamePaused) return;
-        const x = Math.random() * (canvas.width - 40) + 20;
-        const type = Math.random() < 0.25 ? 'big' : 'small';
-        enemies.push(new Enemy(x, -30, type));
-    }
-
-    // Disparo
-    function shoot() {
-        if (!gameActive || gamePaused) return;
-        if (bulletCooldown > 0) return;
-        bullets.push(new Bullet(ship.x, ship.y - ship.radius, upgrades.bulletSpeed));
-        bulletCooldown = upgrades.fireRate;
-    }
-
-    // Colisiones
-    function checkCollisions() {
-        // Balas vs enemigos
-        for (let b = bullets.length-1; b >= 0; b--) {
-            let bullet = bullets[b];
-            for (let e = enemies.length-1; e >= 0; e--) {
-                let enemy = enemies[e];
-                const dx = bullet.x - enemy.x;
-                const dy = bullet.y - enemy.y;
-                const dist = Math.sqrt(dx*dx + dy*dy);
-                if (dist < bullet.radius + enemy.radius) {
-                    bullets.splice(b,1);
-                    enemy.damageTaken = (enemy.damageTaken || 0) + upgrades.bulletDamage;
-                    if (enemy.damageTaken >= (enemy.radius > 18 ? 3 : 1)) {
-                        enemies.splice(e,1);
-                        score += enemy.points;
-                        localCoins += Math.floor(enemy.points / 2);
-                        saveLocalCoins();
-                        updateHUD();
-                    }
-                    break;
-                }
-            }
-        }
-        // Nave vs enemigos
-        for (let e = enemies.length-1; e >= 0; e--) {
-            let enemy = enemies[e];
-            const dx = ship.x - enemy.x;
-            const dy = ship.y - enemy.y;
-            const dist = Math.sqrt(dx*dx + dy*dy);
-            if (dist < ship.radius + enemy.radius) {
-                shields -= enemy.damage;
-                enemies.splice(e,1);
-                updateHUD();
-                if (shields <= 0) {
-                    gameOver();
-                    return;
-                }
-            }
-        }
-    }
-
-    function gameOver() {
-        gameActive = false;
-        gamePaused = false;
-        // Recompensa global
         if (typeof Tecnomath !== 'undefined' && Tecnomath.getCurrentUser()) {
-            const reward = Math.floor(score / 5);
-            Tecnomath.addCoins(reward);
-            Tecnomath.updateHighScore('orbit-cleaner', score);
-            updateGlobalDisplay();
-        }
-        popupTitle.textContent = '🌌 GAME OVER';
-        popupMsg.textContent = `Puntaje: ${score}\nMonedas locales: ${localCoins}`;
-        gameOverPopup.classList.add('show');
-    }
-
-    function restartGame() {
-        // Reset
-        ship = { x: canvas.width/2, y: canvas.height - 50, radius:15, speed: upgrades.speed };
-        bullets = [];
-        enemies = [];
-        score = 0;
-        shields = upgrades.shieldMax;
-        gameActive = true;
-        gamePaused = false;
-        spawnTimer = 0;
-        bulletCooldown = 0;
-        updateHUD();
-        gameOverPopup.classList.remove('show');
-        shopModal.classList.remove('open');
-        if (!gameLoopRunning) {
-            gameLoopRunning = true;
-            requestAnimationFrame(gameLoop);
-        }
-    }
-
-    // Tienda
-    function toggleShop(open) {
-        if (open) {
-            gamePaused = true;
-            renderShopItems();
-            shopModal.classList.add('open');
+            globalCoins.textContent = Tecnomath.getCoins();
         } else {
-            shopModal.classList.remove('open');
-            gamePaused = false;
+            globalCoins.textContent = '0';
         }
     }
 
-    function renderShopItems() {
-        shopItemsContainer.innerHTML = '';
-        shopItems.forEach(item => {
-            const div = document.createElement('div');
-            div.className = 'shop-item';
-            div.innerHTML = `<span>${item.name} - ${item.id}</span><span style="color:var(--gold)">${item.price} 💰</span>`;
-            const buyBtn = document.createElement('button');
-            buyBtn.textContent = 'Comprar';
-            buyBtn.disabled = localCoins < item.price;
-            buyBtn.onclick = () => {
-                if (localCoins >= item.price) {
-                    localCoins -= item.price;
-                    item.effect();
-                    saveLocalCoins();
-                    updateHUD();
-                    renderShopItems();
-                }
-            };
-            div.appendChild(buyBtn);
-            shopItemsContainer.appendChild(div);
-        });
-        // Botón de conversión
-        const exchangeDiv = document.createElement('div');
-        exchangeDiv.className = 'shop-item';
-        exchangeDiv.innerHTML = '<span>💱 Convertir 🌐 → 💰</span><span style="color:var(--gold)">10% com</span>';
-        const exchangeBtn = document.createElement('button');
-        exchangeBtn.textContent = 'Convertir';
-        exchangeBtn.onclick = () => {
-            if (typeof Tecnomath === 'undefined' || !Tecnomath.getCurrentUser()) {
-                alert('Inicia sesión para convertir');
-                return;
+    // Mostrar popup temporal
+    function showMessage(html, duration = 1500) {
+        popupContent.innerHTML = html;
+        messagePopup.classList.add('show');
+        setTimeout(() => messagePopup.classList.remove('show'), duration);
+    }
+
+    // Cargar nivel
+    function loadLevel() {
+        if (currentLevel >= animals.length) {
+            // Juego completado
+            animalEmoji.textContent = '🎉';
+            animalName.textContent = '¡Genial!';
+            animalRequest.textContent = 'Alimentaste a todos los animales';
+            foodOptions.innerHTML = '';
+            levelIndicator.textContent = '¡JUEGO COMPLETADO!';
+            if (typeof Tecnomath !== 'undefined' && Tecnomath.getCurrentUser()) {
+                Tecnomath.updateHighScore('animalandia', stars);
+                const reward = stars * 5;
+                Tecnomath.addCoins(reward);
+                showMessage(`🌟 ¡Ganaste ${reward} monedas globales!`);
             }
-            const amount = prompt('Cantidad de monedas globales a convertir:');
-            if (!amount) return;
-            const num = parseInt(amount);
-            if (isNaN(num) || num <= 0) return;
-            if (Tecnomath.exchangeGlobalToLocal('orbit-cleaner', num)) {
-                localCoins = Tecnomath.getGameCoins('orbit-cleaner');
+            updateDisplay();
+            // Reiniciar
+            setTimeout(() => {
+                currentLevel = 0;
+                stars = 0;
+                localCoins = 0;
                 saveLocalCoins();
-                updateHUD();
-                renderShopItems();
-            } else {
-                alert('Fondos insuficientes');
-            }
-        };
-        exchangeDiv.appendChild(exchangeBtn);
-        shopItemsContainer.appendChild(exchangeDiv);
-    }
-
-    shopBtn.addEventListener('click', () => toggleShop(true));
-    closeShopBtn.addEventListener('click', () => toggleShop(false));
-
-    // Controles
-    function handleMove(e) {
-        if (!gameActive || gamePaused) return;
-        let clientX, clientY;
-        if (e.touches) {
-            clientX = e.touches[0].clientX;
-            clientY = e.touches[0].clientY;
-            e.preventDefault();
-        } else {
-            clientX = e.clientX;
-            clientY = e.clientY;
-        }
-        const rect = canvas.getBoundingClientRect();
-        const scaleX = canvas.width / rect.width;
-        const scaleY = canvas.height / rect.height;
-        const relativeX = (clientX - rect.left) * scaleX;
-        const relativeY = (clientY - rect.top) * scaleY;
-        ship.x = Math.max(ship.radius, Math.min(canvas.width - ship.radius, relativeX));
-        ship.y = Math.max(ship.radius, Math.min(canvas.height - ship.radius, relativeY));
-    }
-
-    canvas.addEventListener('mousemove', handleMove);
-    canvas.addEventListener('touchmove', handleMove, { passive: false });
-    canvas.addEventListener('touchstart', handleMove, { passive: false });
-    canvas.addEventListener('click', (e) => {
-        if (!gameActive || gamePaused) return;
-        shoot();
-    });
-    canvas.addEventListener('touchstart', (e) => {
-        if (!gameActive || gamePaused) return;
-        shoot();
-    });
-    document.addEventListener('keydown', (e) => {
-        if (!gameActive || gamePaused) return;
-        if (e.key === 'ArrowLeft') ship.x = Math.max(ship.radius, ship.x - ship.speed);
-        if (e.key === 'ArrowRight') ship.x = Math.min(canvas.width - ship.radius, ship.x + ship.speed);
-        if (e.key === 'ArrowUp') ship.y = Math.max(ship.radius, ship.y - ship.speed);
-        if (e.key === 'ArrowDown') ship.y = Math.min(canvas.height - ship.radius, ship.y + ship.speed);
-        if (e.key === ' ' || e.key === 'Space') {
-            e.preventDefault();
-            shoot();
-        }
-    });
-
-    // Game loop
-    function gameLoop() {
-        if (!gameActive || gamePaused) {
-            gameLoopRunning = false;
+                updateDisplay();
+                loadLevel();
+            }, 3000);
             return;
         }
-        gameLoopRunning = true;
 
-        // Spawn enemigos
-        spawnTimer++;
-        if (spawnTimer >= spawnRate) {
-            spawnTimer = 0;
-            spawnEnemy();
-            spawnRate = Math.max(20, spawnRate - 0.5); // Aumenta dificultad
-        }
+        const animal = animals[currentLevel];
+        animalEmoji.textContent = animal.emoji;
+        animalName.textContent = animal.name;
+        animalRequest.textContent = `¡Quiero ${animal.foodName}! ${animal.food}`;
+        levelIndicator.textContent = `Nivel ${currentLevel + 1} · ¿Qué come ${animal.name.split(' ')[0]}?`;
 
-        // Cooldown disparo
-        if (bulletCooldown > 0) bulletCooldown--;
-
-        // Actualizar balas
-        bullets = bullets.filter(b => b.update());
-        // Actualizar enemigos
-        enemies = enemies.filter(e => e.update());
-
-        checkCollisions();
-
-        // Dibujar
-        ctx.clearRect(0,0,canvas.width,canvas.height);
-        // Fondo estrellado
-        ctx.fillStyle = 'rgba(255,255,255,0.1)';
-        for(let i=0;i<20;i++) {
-            ctx.fillRect(Math.random()*canvas.width, Math.random()*canvas.height, 2,2);
-        }
-        // Nave
-        ctx.fillStyle = '#00FFFF';
-        ctx.shadowBlur = 12; ctx.shadowColor = '#00FFFF';
-        ctx.beginPath(); ctx.arc(ship.x, ship.y, ship.radius, 0, Math.PI*2); ctx.fill();
-        ctx.shadowBlur = 0;
-        ctx.fillStyle = 'white';
-        ctx.font = '12px "Press Start 2P"';
-        ctx.textAlign = 'center';
-        ctx.fillText('🛰️', ship.x, ship.y+4);
-
-        // Balas
-        bullets.forEach(b => b.draw(ctx));
-        // Enemigos
-        enemies.forEach(e => e.draw(ctx));
-
-        updateHUD();
-        frameId = requestAnimationFrame(gameLoop);
+        // Preparar opciones de comida (una correcta + tres incorrectas)
+        const options = [animal.food, ...animal.altFoods].sort(() => Math.random() - 0.5);
+        foodOptions.innerHTML = '';
+        options.forEach(food => {
+            const btn = document.createElement('div');
+            btn.className = 'food-btn';
+            btn.textContent = food;
+            btn.addEventListener('click', () => handleFoodPick(food, btn));
+            foodOptions.appendChild(btn);
+        });
+        canInteract = true;
     }
 
-    // Inicializar
+    function handleFoodPick(food, btn) {
+        if (!canInteract) return;
+        canInteract = false;
+
+        const correct = animals[currentLevel].food;
+        if (food === correct) {
+            // ¡Correcto!
+            btn.classList.add('correct-pick');
+            stars++;
+            localCoins += 5;
+            saveLocalCoins();
+            updateDisplay();
+            showMessage('🎉 ¡Muy bien! 🎉');
+            setTimeout(() => {
+                currentLevel++;
+                loadLevel();
+            }, 1000);
+        } else {
+            // Error - animación y reintento
+            btn.classList.add('wrong-pick');
+            showMessage('😊 ¡Inténtalo otra vez!', 800);
+            setTimeout(() => {
+                btn.classList.remove('wrong-pick');
+                canInteract = true;
+            }, 800);
+        }
+    }
+
+    // Inicio
     function init() {
         loadLocalCoins();
-        ship.speed = upgrades.speed;
-        shields = upgrades.shieldMax;
-        updateHUD();
-        gameLoopRunning = true;
-        requestAnimationFrame(gameLoop);
+        updateDisplay();
+        loadLevel();
     }
+
     init();
 </script>
 </body>
