@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Eco-Marine Cleaner · ODS 14</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <script src="shared.js"></script>
+    <style>
+        :root {
+            --neon-cyan: #00FFFF; --neon-pink: #FF00FF; --neon-green: #39FF14;
+            --gold: #FFD700; --retro-bg: #060610; --card-bg: #0d0d1a;
+            --ocean-deep: #0a1628; --ocean-mid: #0d2137; --ocean-light: #1a4a6e;
+        }
+        * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; user-select:none; }
+        html, body {
+            height:100%; width:100%; overflow:hidden;
+            background:var(--ocean-deep);
+            font-family:'Press Start 2P', cursive; color:white;
+            display:flex; align-items:center; justify-content:center;
+        }
+        body::before {
+            content:''; position:fixed; inset:0; z-index:0;
+            background: radial-gradient(ellipse at 30% 50%, rgba(0,150,255,0.15) 0%, transparent 50%),
+                        radial-gradient(ellipse at 70% 80%, rgba(0,255,200,0.08) 0%, transparent 50%);
+            animation: oceanPulse 5s ease-in-out infinite;
+        }
+        @keyframes oceanPulse {
+            0%,100%{ opacity:0.8; } 50%{ opacity:1; }
+        }
+        .game-wrapper {
+            position:relative; z-index:1; width:100%; max-width:500px; height:100vh;
+            display:flex; flex-direction:column; padding:8px; gap:6px;
+        }
+        .hud {
+            display:flex; justify-content:space-between; align-items:center;
+            font-size:6px; padding:6px 10px; background:rgba(0,0,0,0.7);
+            border-radius:8px; flex-shrink:0; flex-wrap:wrap; gap:4px;
+            color:var(--neon-green); text-shadow:0 0 6px var(--neon-green);
+        }
+        .hud-item { display:flex; align-items:center; gap:4px; }
+        .hud-item span { color:var(--gold); }
+        .btn-admin {
+            font-size:16px; cursor:pointer; background:none; border:none;
+            color:var(--neon-pink); text-shadow:0 0 8px var(--neon-pink);
+            transition:0.2s;
+        }
+        .btn-admin:hover { transform:scale(1.2); }
+        canvas {
+            border:2px solid var(--neon-cyan); box-shadow:0 0 15px var(--neon-cyan), 0 0 30px rgba(0,255,255,0.3);
+            border-radius:8px; width:100%; aspect-ratio:4/5; background:linear-gradient(180deg, #0a1628 0%, #0d2137 50%, #1a4a6e 100%);
+            flex-shrink:0;
+        }
+        .message-area {
+            text-align:center; font-size:7px; color:var(--gold); text-shadow:0 0 8px var(--gold);
+            min-height:20px; flex-shrink:0;
+        }
+        .button-row {
+            display:flex; gap:8px; flex-shrink:0; justify-content:center; flex-wrap:wrap;
+        }
+        .btn {
+            font-family:'Press Start 2P', cursive; font-size:6px; padding:8px 12px;
+            border:none; border-radius:6px; cursor:pointer; color:white;
+            box-shadow:0 0 10px currentColor; transition:0.2s;
+        }
+        .btn-shop { background:var(--neon-pink); }
+        .btn-restart { background:var(--neon-cyan); color:#000; }
+        .btn:active { transform:scale(0.95); }
+        .btn:disabled { opacity:0.5; cursor:not-allowed; }
+        .shop-modal {
+            position:fixed; top:0; left:0; width:100%; height:100%;
+            background:rgba(0,0,0,0.85); z-index:100;
+            display:flex; align-items:center; justify-content:center;
+            visibility:hidden; opacity:0; transition:0.3s;
+        }
+        .shop-modal.open { visibility:visible; opacity:1; }
+        .shop-content {
+            background:var(--card-bg); border:2px solid var(--neon-pink);
+            border-radius:12px; padding:20px; width:90%; max-width:380px;
+            box-shadow:0 0 30px rgba(255,0,255,0.4); text-align:center;
+        }
+        .shop-content h3 { font-size:10px; color:var(--neon-pink); margin-bottom:15px; text-shadow:0 0 10px var(--neon-pink); }
+        .shop-item {
+            display:flex; justify-content:space-between; align-items:center;
+            padding:10px; border:1px solid #333; border-radius:8px; margin-bottom:8px;
+            background:rgba(255,255,255,0.03); font-size:5px;
+        }
+        .shop-item button {
+            font-family:'Press Start 2P', cursive; font-size:5px; padding:6px 10px;
+            background:var(--neon-cyan); color:black; border:none; border-radius:6px;
+            cursor:pointer; box-shadow:0 0 8px var(--neon-cyan);
+        }
+        .shop-item button:disabled { opacity:0.5; cursor:not-allowed; }
+        .close-shop {
+            margin-top:15px; background:transparent; border:1px solid var(--neon-pink);
+            color:var(--neon-pink); font-family:'Press Start 2P', cursive;
+            font-size:7px; padding:8px 16px; cursor:pointer; border-radius:6px;
+        }
+        .level-popup {
+            position:fixed; top:50%; left:50%; transform:translate(-50%,-50%) scale(0);
+            background:var(--card-bg); border:2px solid var(--gold); padding:20px;
+            text-align:center; z-index:200; border-radius:10px;
+            box-shadow:0 0 30px rgba(255,215,0,0.4); transition:0.3s;
+        }
+        .level-popup.show { transform:translate(-50%,-50%) scale(1); }
+    </style>
+</head>
+<body>
+<div class="game-wrapper">
+    <div class="hud">
+        <div class="hud-item">🧹 Nivel <span id="levelDisplay">1</span></div>
+        <div class="hud-item">⭐ Puntos: <span id="scoreDisplay">0</span></div>
+        <div class="hud-item">🛡️ <span id="shieldDisplay">0</span></div>
+        <div class="hud-item">🌐 <span id="globalCoinsDisplay">0</span></div>
+        <div class="hud-item">💰 <span id="localCoinsDisplay">0</span></div>
+        <button class="btn-admin" id="adminBtn" title="Admin">☁️</button>
+    </div>
+
+    <canvas id="gameCanvas" width="400" height="500"></canvas>
+
+    <div class="message-area" id="messageArea">Recoge la basura del océano 🌊</div>
+
+    <div class="button-row">
+        <button class="btn btn-shop" id="shopBtn">🛒 TIENDA</button>
+        <button class="btn btn-restart" id="restartBtn">🔄 REINICIAR</button>
+    </div>
+</div>
+
+<div class="shop-modal" id="shopModal">
+    <div class="shop-content">
+        <h3>🛒 TIENDA MARINA</h3>
+        <div id="shopItemsContainer"></div>
+        <button class="close-shop" id="closeShopBtn">CERRAR</button>
+    </div>
+</div>
+
+<div class="level-popup" id="levelPopup">
+    <h2 id="popupTitle" style="font-size:10px; margin-bottom:10px;"></h2>
+    <p id="popupMsg" style="font-size:6px; color:#aaa; margin-bottom:15px;"></p>
+    <button class="btn btn-restart" id="popupBtn">CONTINUAR</button>
+</div>
+
+<script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+
+    // ═══════════════════════════════════════
+    //  ESTADO DEL JUEGO
+    // ═══════════════════════════════════════
+    let boat = { x: canvas.width/2 - 25, y: canvas.height - 60, width: 50, height: 30, speed: 5 };
+    let trashItems = [];
+    let score = 0;
+    let level = 1;
+    let localCoins = 0;
+    let shieldActive = 0;
+    let magnetActive = false;
+    let magnetTimer = 0;
+    let speedBoostActive = false;
+    let speedBoostTimer = 0;
+    let gameActive = true;
+    let gamePaused = false;
+    let gameLoopId = null;
+
+    // Elementos DOM
+    const levelDisplay = document.getElementById('levelDisplay');
+    const scoreDisplay = document.getElementById('scoreDisplay');
+    const shieldDisplay = document.getElementById('shieldDisplay');
+    const globalCoinsDisplay = document.getElementById('globalCoinsDisplay');
+    const localCoinsDisplay = document.getElementById('localCoinsDisplay');
+    const messageArea = document.getElementById('messageArea');
+    const shopModal = document.getElementById('shopModal');
+    const closeShopBtn = document.getElementById('closeShopBtn');
+    const shopItemsContainer = document.getElementById('shopItemsContainer');
+    const levelPopup = document.getElementById('levelPopup');
+    const popupTitle = document.getElementById('popupTitle');
+    const popupMsg = document.getElementById('popupMsg');
+    const popupBtn = document.getElementById('popupBtn');
+    const adminBtn = document.getElementById('adminBtn');
+
+    // ═══════════════════════════════════════
+    //  TIPOS DE BASURA (ODS 14)
+    // ═══════════════════════════════════════
+    const trashTypes = [
+        { emoji:'🍾', name:'Botella', points:10, color:'#8BC34A', speed:1.5 },
+        { emoji:'🛍️', name:'Bolsa', points:5, color:'#9E9E9E', speed:2 },
+        { emoji:'🥤', name:'Vaso plástico', points:8, color:'#FF9800', speed:1.8 },
+        { emoji:'🧴', name:'Envase', points:12, color:'#2196F3', speed:1.2 },
+        { emoji:'🪣', name:'Balde roto', points:15, color:'#FF5722', speed:1 },
+        { emoji:'👢', name:'Bota vieja', points:3, color:'#795548', speed:2.5 },
+        { emoji:'📦', name:'Caja', points:6, color:'#607D8B', speed:1.6 }
+    ];
+
+    // ═══════════════════════════════════════
+    //  FUNCIONES DE MONEDAS Y GUARDADO
+    // ═══════════════════════════════════════
+    function loadStats() {
+        if (typeof Tecnomath !== 'undefined' && Tecnomath.getCurrentUser()) {
+            localCoins = Tecnomath.getGameCoins('marine-cleaner');
+        } else {
+            localCoins = 0;
+        }
+        updateHUD();
+    }
+
+    function saveStats() {
+        if (typeof Tecnomath !== 'undefined' && Tecnomath.getCurrentUser()) {
+            Tecnomath.setGameCoins('marine-cleaner', localCoins);
+        }
+    }
+
+    function updateHUD() {
+        levelDisplay.textContent = level;
+        scoreDisplay.textContent = score;
+        shieldDisplay.textContent = shieldActive;
+        localCoinsDisplay.textContent = (typeof Tecnomath !== 'undefined' && Tecnomath.isAdmin()) ? '∞' : localCoins;
+        if (typeof Tecnomath !== 'undefined' && Tecnomath.getCurrentUser()) {
+            globalCoinsDisplay.textContent = (typeof Tecnomath !== 'undefined' && Tecnomath.isAdmin()) ? '∞' : Tecnomath.getCoins();
+        } else {
+            globalCoinsDisplay.textContent = '0';
+        }
+    }
+
+    function addLocalCoins(amount) {
+        if (typeof Tecnomath !== 'undefined' && Tecnomath.isAdmin()) return;
+        localCoins += amount;
+        saveStats();
+        updateHUD();
+    }
+
+    function spendLocalCoins(amount) {
+        if (typeof Tecnomath !== 'undefined' && Tecnomath.isAdmin()) return true;
+        if (localCoins < amount) return false;
+        localCoins -= amount;
+        saveStats();
+        updateHUD();
+        return true;
+    }
+
+    // ═══════════════════════════════════════
+    //  SPAWN DE BASURA
+    // ═══════════════════════════════════════
+    function spawnTrash() {
+        const type = trashTypes[Math.floor(Math.random() * trashTypes.length)];
+        const x = Math.random() * (canvas.width - 30) + 15;
+        const y = Math.random() * (canvas.height * 0.4);
+        const dir = Math.random() * Math.PI * 2;
+        trashItems.push({
+            x: x,
+            y: y,
+            radius: 16,
+            type: type,
+            dx: Math.cos(dir) * type.speed * (0.5 + Math.random()),
+            dy: Math.sin(dir) * type.speed * (0.5 + Math.random()),
+            collected: false
+        });
+    }
+
+    function spawnInitialTrash() {
+        trashItems = [];
+        const count = 5 + level * 2;
+        for (let i = 0; i < count; i++) {
+            spawnTrash();
+        }
+    }
+
+    // ═══════════════════════════════════════
+    //  DIBUJO
+    // ═══════════════════════════════════════
+    function drawBackground() {
+        // Burbujas
+        for (let i = 0; i < 20; i++) {
+            ctx.fillStyle = `rgba(255,255,255,${Math.random() * 0.15 + 0.05})`;
+            ctx.beginPath();
+            ctx.arc(Math.random() * canvas.width, Math.random() * canvas.height, Math.random() * 3 + 1, 0, Math.PI * 2);
+            ctx.fill();
+        }
+        // Peces
+        ctx.fillStyle = '#FFD700';
+        ctx.font = '16px "Press Start 2P"';
+        ctx.fillText('🐟', 30, 60);
+        ctx.fillText('🐠', canvas.width - 50, 80);
+        ctx.fillText('🐡', 60, canvas.height - 100);
+    }
+
+    function drawBoat() {
+        ctx.fillStyle = '#E0E0E0';
+        ctx.shadowColor = '#FFFFFF';
+        ctx.shadowBlur = 8;
+        ctx.fillRect(boat.x, boat.y, boat.width, boat.height);
+        ctx.shadowBlur = 0;
+        ctx.fillStyle = '#555';
+        ctx.fillRect(boat.x + 5, boat.y - 8, 8, 10);
+        ctx.fillRect(boat.x + 35, boat.y - 8, 8, 10);
+        ctx.fillStyle = '#FFF';
+        ctx.font = '18px "Press Start 2P"';
+        ctx.fillText('🚢', boat.x + 10, boat.y + 22);
+    }
+
+    function drawTrash() {
+        trashItems.forEach(item => {
+            if (item.collected) return;
+            ctx.fillStyle = item.type.color;
+            ctx.shadowColor = item.type.color;
+            ctx.shadowBlur = 6;
+            ctx.beginPath();
+            ctx.arc(item.x, item.y, item.radius, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.shadowBlur = 0;
+            ctx.fillStyle = 'white';
+            ctx.font = '18px "Press Start 2P"';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(item.type.emoji, item.x, item.y);
+        });
+    }
+
+    function drawMagnetEffect() {
+        if (!magnetActive) return;
+        ctx.strokeStyle = 'rgba(255,215,0,0.6)';
+        ctx.lineWidth = 2;
+        ctx.setLineDash([5, 10]);
+        ctx.beginPath();
+        ctx.arc(boat.x + boat.width/2, boat.y + boat.height/2, 80, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.setLineDash([]);
+    }
+
+    // ═══════════════════════════════════════
+    //  ACTUALIZACIÓN
+    // ═══════════════════════════════════════
+    function updateTrash() {
+        trashItems.forEach(item => {
+            if (item.collected) return;
+            // Movimiento errático
+            item.x += item.dx;
+            item.y += item.dy;
+            // Rebotar en bordes
+            if (item.x < item.radius || item.x > canvas.width - item.radius) item.dx *= -1;
+            if (item.y < item.radius || item.y > canvas.height - item.radius) item.dy *= -1;
+            // Efecto imán
+            if (magnetActive) {
+                const dx = (boat.x + boat.width/2) - item.x;
+                const dy = (boat.y + boat.height/2) - item.y;
+                const dist = Math.sqrt(dx*dx + dy*dy);
+                if (dist < 120) {
+                    item.x += dx * 0.03;
+                    item.y += dy * 0.03;
+                }
+            }
+            // Colisión con barco
+            if (!item.collected &&
+                item.x + item.radius > boat.x &&
+                item.x - item.radius < boat.x + boat.width &&
+                item.y + item.radius > boat.y &&
+                item.y - item.radius < boat.y + boat.height) {
+                item.collected = true;
+                score += item.type.points;
+                addLocalCoins(Math.floor(item.type.points / 2));
+                updateHUD();
+            }
+        });
+
+        // Limpiar recolectados
+        trashItems = trashItems.filter(item => {
+            if (item.collected && shieldActive > 0 && Math.random() < 0.1) {
+                shieldActive--;
+                updateHUD();
+            }
+            return !item.collected;
+        });
+
+        // Verificar nivel completado
+        if (trashItems.length === 0) {
+            levelComplete();
+        }
+    }
+
+    function updateTimers() {
+        if (magnetActive) {
+            magnetTimer--;
+            if (magnetTimer <= 0) magnetActive = false;
+        }
+        if (speedBoostActive) {
+            speedBoostTimer--;
+            if (speedBoostTimer <= 0) {
+                speedBoostActive = false;
+                boat.speed = 5;
+            }
+        }
+    }
+
+    function levelComplete() {
+        gameActive = false;
+        const bonus = level * 50;
+        score += bonus;
+        addLocalCoins(Math.floor(bonus / 2));
+        if (typeof Tecnomath !== 'undefined' && Tecnomath.getCurrentUser()) {
+            Tecnomath.addCoins(Math.floor(bonus / 5));
+            Tecnomath.updateHighScore('marine-cleaner', score);
+        }
+        updateHUD();
+        popupTitle.textContent = '🌊 ¡NIVEL LIMPIO!';
+        popupMsg.textContent = `Puntos: ${score}\nBono: +${bonus}\nSiguiente nivel: ${level + 1}`;
+        levelPopup.classList.add('show');
+        popupBtn.textContent = 'SIGUIENTE NIVEL';
+        popupBtn.onclick = () => {
+            levelPopup.classList.remove('show');
+            level++;
+            localCoins += Math.floor(level * 5);
+            saveStats();
+            startLevel();
+        };
+    }
+
+    function startLevel() {
+        gameActive = true;
+        boat.x = canvas.width/2 - boat.width/2;
+        boat.y = canvas.height - 60;
+        spawnInitialTrash();
+        messageArea.textContent = `Nivel ${level}: Recoge ${trashItems.length} basuras`;
+        updateHUD();
+        if (!gameLoopId) {
+            gameLoopId = requestAnimationFrame(gameLoop);
+        }
+    }
+
+    function restartGame() {
+        level = 1;
+        score = 0;
+        shieldActive = 0;
+        magnetActive = false;
+        speedBoostActive = false;
+        boat.speed = 5;
+        gameActive = true;
+        gamePaused = false;
+        if (gameLoopId) {
+            cancelAnimationFrame(gameLoopId);
+            gameLoopId = null;
+        }
+        startLevel();
+        updateHUD();
+    }
+
+    // ═══════════════════════════════════════
+    //  TIENDA
+    // ═══════════════════════════════════════
+    function openShop() {
+        gamePaused = true;
+        renderShopItems();
+        shopModal.classList.add('open');
+    }
+
+    function closeShop() {
+        shopModal.classList.remove('open');
+        gamePaused = false;
+        if (!gameLoopId) {
+            gameLoopId = requestAnimationFrame(gameLoop);
+        }
+    }
+
+    function renderShopItems() {
+        shopItemsContainer.innerHTML = '';
+        const items = [
+            { name:'🛡️ Escudo (10s)', desc:'Protege de perder basura', price:30, action:() => { shieldActive = Math.min(shieldActive + 1, 5); updateHUD(); } },
+            { name:'🧲 Imán (15s)', desc:'Atrae basura cercana', price:40, action:() => { magnetActive = true; magnetTimer = 900; } },
+            { name:'⚡ Turbo (10s)', desc:'Velocidad x2 del barco', price:50, action:() => { speedBoostActive = true; speedBoostTimer = 600; boat.speed = 10; } },
+            { name:'💱 Convertir 🌐→💰', desc:'10% comisión', price:0, action:() => { openExchange(); } }
+        ];
+        items.forEach(item => {
+            const div = document.createElement('div');
+            div.className = 'shop-item';
+            div.innerHTML = `<span>${item.name}<br><small style="color:#888;">${item.desc}</small></span><span style="color:var(--gold)">${item.price > 0 ? item.price+' 💰' : '10% com'}</span>`;
+            const buyBtn = document.createElement('button');
+            buyBtn.textContent = 'Comprar';
+            if (item.price === 0) {
+                buyBtn.disabled = false;
+                buyBtn.textContent = 'Convertir';
+            } else {
+                buyBtn.disabled = !(typeof Tecnomath !== 'undefined' && Tecnomath.isAdmin()) && localCoins < item.price;
+            }
+            buyBtn.addEventListener('click', () => {
+                if (item.price === 0) {
+                    item.action();
+                } else if (typeof Tecnomath !== 'undefined' && Tecnomath.isAdmin()) {
+                    item.action();
+                } else if (spendLocalCoins(item.price)) {
+                    item.action();
+                }
+                updateHUD();
+                renderShopItems();
+            });
+            div.appendChild(buyBtn);
+            shopItemsContainer.appendChild(div);
+        });
+    }
+
+    function openExchange() {
+        if (typeof Tecnomath === 'undefined' || !Tecnomath.getCurrentUser()) {
+            alert('Inicia sesión para convertir');
+            return;
+        }
+        if (typeof Tecnomath !== 'undefined' && Tecnomath.isAdmin()) {
+            localCoins += 500;
+            saveStats();
+            updateHUD();
+            renderShopItems();
+            return;
+        }
+        const amount = prompt('Cantidad de monedas globales a convertir:');
+        if (!amount) return;
+        const num = parseInt(amount);
+        if (isNaN(num) || num <= 0) return;
+        if (Tecnomath.exchangeGlobalToLocal('marine-cleaner', num)) {
+            localCoins = Tecnomath.getGameCoins('marine-cleaner');
+            saveStats();
+            updateHUD();
+            renderShopItems();
+        } else {
+            alert('Fondos insuficientes');
+        }
+    }
+
+    // ═══════════════════════════════════════
+    //  ADMIN
+    // ═══════════════════════════════════════
+    const ADMINS = { "1983":"Junior", "2024":"Nicole", "7777":"Mateo", "8888":"Jaider", "ods2026":"ODS Master" };
+    function openAdminPanel() {
+        const code = prompt('CÓDIGO ADMIN:');
+        if (ADMINS[code]) {
+            if (typeof Tecnomath !== 'undefined' && Tecnomath.getCurrentUser()) {
+                Tecnomath.setAdmin(Tecnomath.getCurrentUser().username);
+            }
+            updateHUD();
+            alert(`⚡ ${ADMINS[code].toUpperCase()} · ADMIN ACTIVADO`);
+        } else if (code) {
+            alert('🔒 ACCESO DENEGADO');
+        }
+    }
+
+    // ═══════════════════════════════════════
+    //  CONTROLES
+    // ═══════════════════════════════════════
+    let keys = {};
+    document.addEventListener('keydown', (e) => { keys[e.key] = true; });
+    document.addEventListener('keyup', (e) => { keys[e.key] = false; });
+
+    function handleInput() {
+        if (!gameActive || gamePaused) return;
+        if (keys['ArrowLeft'] || keys['a']) boat.x = Math.max(0, boat.x - boat.speed);
+        if (keys['ArrowRight'] || keys['d']) boat.x = Math.min(canvas.width - boat.width, boat.x + boat.speed);
+        if (keys['ArrowUp'] || keys['w']) boat.y = Math.max(0, boat.y - boat.speed);
+        if (keys['ArrowDown'] || keys['s']) boat.y = Math.min(canvas.height - boat.height, boat.y + boat.speed);
+    }
+
+    // Controles táctiles
+    let touchActive = false;
+    canvas.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        touchActive = true;
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+        const touchX = (e.touches[0].clientX - rect.left) * scaleX;
+        const touchY = (e.touches[0].clientY - rect.top) * scaleY;
+        boat.x = Math.max(0, Math.min(canvas.width - boat.width, touchX - boat.width/2));
+        boat.y = Math.max(0, Math.min(canvas.height - boat.height, touchY - boat.height/2));
+    });
+    canvas.addEventListener('touchmove', (e) => {
+        e.preventDefault();
+        if (!touchActive) return;
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+        const touchX = (e.touches[0].clientX - rect.left) * scaleX;
+        const touchY = (e.touches[0].clientY - rect.top) * scaleY;
+        boat.x = Math.max(0, Math.min(canvas.width - boat.width, touchX - boat.width/2));
+        boat.y = Math.max(0, Math.min(canvas.height - boat.height, touchY - boat.height/2));
+    });
+    canvas.addEventListener('touchend', () => { touchActive = false; });
+
+    // ═══════════════════════════════════════
+    //  GAME LOOP
+    // ═══════════════════════════════════════
+    function gameLoop() {
+        if (!gameActive || gamePaused) {
+            gameLoopId = null;
+            return;
+        }
+
+        handleInput();
+        updateTrash();
+        updateTimers();
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        drawBackground();
+        drawTrash();
+        drawMagnetEffect();
+        drawBoat();
+
+        gameLoopId = requestAnimationFrame(gameLoop);
+    }
+
+    // ═══════════════════════════════════════
+    //  BOTONES
+    // ═══════════════════════════════════════
+    document.getElementById('shopBtn').addEventListener('click', openShop);
+    closeShopBtn.addEventListener('click', closeShop);
+    document.getElementById('restartBtn').addEventListener('click', restartGame);
+    adminBtn.addEventListener('click', openAdminPanel);
+
+    // ═══════════════════════════════════════
+    //  INICIO
+    // ═══════════════════════════════════════
+    function init() {
+        loadStats();
+        startLevel();
+        gameLoopId = requestAnimationFrame(gameLoop);
+    }
+
+    init();
+</script>
+</body>
+</html>
