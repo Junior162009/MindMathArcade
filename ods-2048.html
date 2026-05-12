@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>ODS-2048 · Fusiona los Objetivos Sostenibles</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <script src="shared.js"></script>
+    <style>
+        :root {
+            --neon-cyan: #00FFFF; --neon-pink: #FF00FF; --gold: #FFD700;
+            --retro-bg: #060610; --card-bg: #0d0d1a;
+        }
+        * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; user-select:none; }
+        html, body {
+            height:100%; width:100%; overflow:hidden;
+            background:var(--retro-bg);
+            font-family:'Press Start 2P', cursive; color:white;
+            display:flex; align-items:center; justify-content:center;
+        }
+        body::before {
+            content:''; position:fixed; inset:0; z-index:0;
+            background: radial-gradient(ellipse at 50% 30%, rgba(0,255,255,0.1) 0%, transparent 50%),
+                        radial-gradient(ellipse at 70% 70%, rgba(255,215,0,0.08) 0%, transparent 50%);
+            animation: bgPulse 4s ease-in-out infinite;
+        }
+        @keyframes bgPulse {
+            0%,100%{ opacity:0.7; } 50%{ opacity:1; }
+        }
+        .game-wrapper {
+            position:relative; z-index:1; width:100%; max-width:480px; height:100vh;
+            display:flex; flex-direction:column; padding:10px; gap:8px;
+        }
+        .hud {
+            display:flex; justify-content:space-between; align-items:center;
+            font-size:6px; padding:6px 10px; background:rgba(0,0,0,0.7);
+            border-radius:8px; flex-shrink:0; flex-wrap:wrap; gap:4px;
+            color:var(--neon-green); text-shadow:0 0 6px var(--neon-green);
+        }
+        .hud-item { display:flex; align-items:center; gap:4px; }
+        .hud-item span { color:var(--gold); }
+        .btn-admin {
+            font-size:16px; cursor:pointer; background:none; border:none;
+            color:var(--neon-pink); text-shadow:0 0 8px var(--neon-pink);
+        }
+        .grid-container {
+            flex:1; display:flex; align-items:center; justify-content:center;
+        }
+        .grid {
+            display:grid; grid-template-columns:repeat(4,1fr); gap:8px;
+            background:#0a0a1a; padding:10px; border-radius:12px;
+            border:2px solid var(--neon-cyan); box-shadow:0 0 15px var(--neon-cyan);
+            width:100%; aspect-ratio:1; max-width:340px;
+        }
+        .cell {
+            background:#111; border-radius:8px; display:flex;
+            align-items:center; justify-content:center; font-size:24px;
+            transition:all 0.15s; color:white;
+        }
+        .cell[data-value="1"]{ background:#1a0a2e; }
+        .cell[data-value="2"]{ background:#0a1a2e; }
+        .cell[data-value="3"]{ background:#2e1a0a; }
+        .cell[data-value="4"]{ background:#0a2e1a; }
+        .cell[data-value="5"]{ background:#1a1a0a; }
+        .cell[data-value="6"]{ background:#2e0a0a; }
+        .cell[data-value="7"]{ background:#0a0a2e; }
+        .cell[data-value="8"]{ background:#1a0a1a; }
+        .cell[data-value="9"]{ background:#0a1a1a; }
+        .button-row {
+            display:flex; gap:8px; flex-shrink:0; justify-content:center; flex-wrap:wrap;
+        }
+        .btn {
+            font-family:'Press Start 2P', cursive; font-size:6px; padding:8px 12px;
+            border:none; border-radius:6px; cursor:pointer; color:white;
+            box-shadow:0 0 10px currentColor; transition:0.2s;
+        }
+        .btn-shop { background:var(--neon-pink); }
+        .btn-undo { background:#FF9800; }
+        .btn-bomb { background:#FF0033; }
+        .btn-reset { background:#9E9E9E; }
+        .btn:active { transform:scale(0.95); }
+        .btn:disabled { opacity:0.5; cursor:not-allowed; }
+        .shop-modal {
+            position:fixed; top:0; left:0; width:100%; height:100%;
+            background:rgba(0,0,0,0.85); z-index:100;
+            display:flex; align-items:center; justify-content:center;
+            visibility:hidden; opacity:0; transition:0.3s;
+        }
+        .shop-modal.open { visibility:visible; opacity:1; }
+        .shop-content {
+            background:var(--card-bg); border:2px solid var(--neon-pink);
+            border-radius:12px; padding:20px; width:90%; max-width:360px;
+            box-shadow:0 0 30px rgba(255,0,255,0.4); text-align:center;
+        }
+        .shop-content h3 { font-size:10px; color:var(--neon-pink); margin-bottom:15px; text-shadow:0 0 10px var(--neon-pink); }
+        .shop-item {
+            display:flex; justify-content:space-between; align-items:center;
+            padding:10px; border:1px solid #333; border-radius:8px; margin-bottom:8px;
+            background:rgba(255,255,255,0.03); font-size:5px;
+        }
+        .shop-item button {
+            font-family:'Press Start 2P', cursive; font-size:5px; padding:6px 10px;
+            background:var(--neon-cyan); color:black; border:none; border-radius:6px;
+            cursor:pointer; box-shadow:0 0 8px var(--neon-cyan);
+        }
+        .shop-item button:disabled { opacity:0.5; cursor:not-allowed; }
+        .close-shop {
+            margin-top:15px; background:transparent; border:1px solid var(--neon-pink);
+            color:var(--neon-pink); font-family:'Press Start 2P', cursive;
+            font-size:7px; padding:8px 16px; cursor:pointer; border-radius:6px;
+        }
+        .game-over-popup {
+            position:fixed; top:50%; left:50%; transform:translate(-50%,-50%) scale(0);
+            background:var(--card-bg); border:2px solid var(--gold); padding:20px;
+            text-align:center; z-index:200; border-radius:10px;
+            box-shadow:0 0 30px rgba(255,215,0,0.4); transition:0.3s;
+        }
+        .game-over-popup.show { transform:translate(-50%,-50%) scale(1); }
+    </style>
+</head>
+<body>
+<div class="game-wrapper">
+    <div class="hud">
+        <div class="hud-item">🏆 <span id="scoreDisplay">0</span></div>
+        <div class="hud-item">⭐ Mejor: <span id="highScoreDisplay">0</span></div>
+        <div class="hud-item">🌐 <span id="globalCoinsDisplay">0</span></div>
+        <div class="hud-item">💰 <span id="localCoinsDisplay">0</span></div>
+        <button class="btn-admin" id="adminBtn" title="Admin">☁️</button>
+    </div>
+
+    <div class="grid-container">
+        <div class="grid" id="gridContainer"></div>
+    </div>
+
+    <div class="button-row">
+        <button class="btn btn-shop" id="shopBtn">🛒 TIENDA</button>
+        <button class="btn btn-undo" id="undoBtn">↩ DESHACER (20💰)</button>
+        <button class="btn btn-bomb" id="bombBtn">💣 BOMBA (30💰)</button>
+        <button class="btn btn-reset" id="resetBtn">🔄 NUEVO</button>
+    </div>
+</div>
+
+<div class="shop-modal" id="shopModal">
+    <div class="shop-content">
+        <h3>🛒 TIENDA 2048</h3>
+        <div id="shopItemsContainer"></div>
+        <button class="close-shop" id="closeShopBtn">CERRAR</button>
+    </div>
+</div>
+
+<div class="game-over-popup" id="gameOverPopup">
+    <h2 id="popupTitle" style="font-size:10px; margin-bottom:10px;"></h2>
+    <p id="popupMsg" style="font-size:6px; color:#aaa; margin-bottom:15px;"></p>
+    <button class="btn btn-reset" onclick="restartGame()">🔄 JUGAR OTRA VEZ</button>
+</div>
+
+<script>
+    // ═══════════════════════════════════════
+    //  CONFIGURACIÓN ODS
+    // ═══════════════════════════════════════
+    const ODS_EMOJIS = [
+        '🏠', '🍎', '⚕️', '📚', '⚖️', '💧', '⚡', '🏗️', '🏭', '🤝',
+        '🏙️', '♻️', '🌡️', '🐟', '🌳', '🕊️', '🌐'
+    ];
+    const ODS_NAMES = [
+        'Fin pobreza', 'Hambre cero', 'Salud', 'Educación', 'Igualdad género',
+        'Agua limpia', 'Energía', 'Trabajo', 'Industria', 'Reducción desigualdad',
+        'Ciudades sost.', 'Consumo resp.', 'Acción climática', 'Vida submarina',
+        'Vida terrestre', 'Paz y justicia', 'Alianzas'
+    ];
+
+    // ═══════════════════════════════════════
+    //  ESTADO DEL JUEGO
+    // ═══════════════════════════════════════
+    let grid = [];
+    let score = 0;
+    let highScore = 0;
+    let localCoins = 0;
+    let gameOver = false;
+    let history = []; // para deshacer
+    let bombActive = false; // modo bomba (siguiente clic elimina celda)
+    let admin = false;
+
+    // Elementos DOM
+    const gridContainer = document.getElementById('gridContainer');
+    const scoreDisplay = document.getElementById('scoreDisplay');
+    const highScoreDisplay = document.getElementById('highScoreDisplay');
+    const globalCoinsDisplay = document.getElementById('globalCoinsDisplay');
+    const localCoinsDisplay = document.getElementById('localCoinsDisplay');
+    const shopModal = document.getElementById('shopModal');
+    const closeShopBtn = document.getElementById('closeShopBtn');
+    const shopItemsContainer = document.getElementById('shopItemsContainer');
+    const gameOverPopup = document.getElementById('gameOverPopup');
+    const popupTitle = document.getElementById('popupTitle');
+    const popupMsg = document.getElementById('popupMsg');
+    const adminBtn = document.getElementById('adminBtn');
+
+    // ═══════════════════════════════════════
+    //  FUNCIONES DE MONEDAS Y GUARDADO
+    // ═══════════════════════════════════════
+    function loadStats() {
+        const saved = localStorage.getItem('ods2048_stats');
+        if (saved) {
+            try {
+                const data = JSON.parse(saved);
+                highScore = data.highScore || 0;
+            } catch(e) {}
+        }
+        if (typeof Tecnomath !== 'undefined' && Tecnomath.getCurrentUser()) {
+            localCoins = Tecnomath.getGameCoins('ods2048');
+            admin = Tecnomath.isAdmin();
+        }
+        updateHUD();
+    }
+
+    function saveStats() {
+        localStorage.setItem('ods2048_stats', JSON.stringify({
+            highScore: highScore
+        }));
+        if (typeof Tecnomath !== 'undefined' && Tecnomath.getCurrentUser()) {
+            Tecnomath.setGameCoins('ods2048', localCoins);
+        }
+    }
+
+    function updateHUD() {
+        scoreDisplay.textContent = score;
+        highScoreDisplay.textContent = highScore;
+        localCoinsDisplay.textContent = admin ? '∞' : localCoins;
+        if (typeof Tecnomath !== 'undefined' && Tecnomath.getCurrentUser()) {
+            globalCoinsDisplay.textContent = admin ? '∞' : Tecnomath.getCoins();
+        } else {
+            globalCoinsDisplay.textContent = '0';
+        }
+        document.getElementById('undoBtn').disabled = history.length === 0 || (!admin && localCoins < 20);
+        document.getElementById('bombBtn').disabled = !admin && localCoins < 30;
+    }
+
+    function addCoins(amount) {
+        if (admin) return;
+        localCoins += amount;
+        saveStats();
+    }
+
+    function spendCoins(amount) {
+        if (admin) return true;
+        if (localCoins < amount) return false;
+        localCoins -= amount;
+        saveStats();
+        return true;
+    }
+
+    // ═══════════════════════════════════════
+    //  LÓGICA DEL 2048
+    // ═══════════════════════════════════════
+    function emptyGrid() {
+        return Array.from({length:4}, () => Array(4).fill(0));
+    }
+
+    function cloneGrid(g) {
+        return g.map(row => [...row]);
+    }
+
+    function addRandomTile() {
+        const empty = [];
+        for (let r=0; r<4; r++) {
+            for (let c=0; c<4; c++) {
+                if (grid[r][c] === 0) empty.push({r,c});
+            }
+        }
+        if (empty.length === 0) return false;
+        const {r,c} = empty[Math.floor(Math.random() * empty.length)];
+        grid[r][c] = Math.random() < 0.9 ? 1 : 2; // 90% ODS1, 10% ODS2
+        return true;
+    }
+
+    function slideAndMerge(row) {
+        let filtered = row.filter(v => v !== 0);
+        let merged = [];
+        let skip = false;
+        for (let i=0; i<filtered.length; i++) {
+            if (skip) { skip = false; continue; }
+            if (i+1 < filtered.length && filtered[i] === filtered[i+1]) {
+                const newValue = filtered[i] + 1;
+                merged.push(newValue);
+                const points = newValue * 10;
+                score += points;
+                addCoins(Math.floor(points / 5));
+                skip = true;
+            } else {
+                merged.push(filtered[i]);
+            }
+        }
+        while (merged.length < 4) merged.push(0);
+        return merged;
+    }
+
+    function move(direction) {
+        if (gameOver && !bombActive) return;
+        const oldGrid = cloneGrid(grid);
+        let moved = false;
+
+        if (direction === 'left') {
+            for (let r=0; r<4; r++) {
+                const oldRow = [...grid[r]];
+                grid[r] = slideAndMerge(grid[r]);
+                if (grid[r].join(',') !== oldRow.join(',')) moved = true;
+            }
+        } else if (direction === 'right') {
+            for (let r=0; r<4; r++) {
+                const reversed = [...grid[r]].reverse();
+                const merged = slideAndMerge(reversed).reverse();
+                if (grid[r].join(',') !== merged.join(',')) moved = true;
+                grid[r] = merged;
+            }
+        } else if (direction === 'up') {
+            for (let c=0; c<4; c++) {
+                const col = [grid[0][c], grid[1][c], grid[2][c], grid[3][c]];
+                const merged = slideAndMerge(col);
+                for (let r=0; r<4; r++) {
+                    if (grid[r][c] !== merged[r]) moved = true;
+                    grid[r][c] = merged[r];
+                }
+            }
+        } else if (direction === 'down') {
+            for (let c=0; c<4; c++) {
+                const col = [grid[3][c], grid[2][c], grid[1][c], grid[0][c]];
+                const merged = slideAndMerge(col).reverse();
+                for (let r=0; r<4; r++) {
+                    if (grid[r][c] !== merged[r]) moved = true;
+                    grid[r][c] = merged[r];
+                }
+            }
+        }
+
+        if (moved) {
+            history.push(oldGrid);
+            if (!addRandomTile()) {
+                checkGameOver();
+            }
+            renderGrid();
+            if (score > highScore) {
+                highScore = score;
+                if (typeof Tecnomath !== 'undefined' && Tecnomath.getCurrentUser()) {
+                    Tecnomath.updateHighScore('ods2048', highScore);
+                }
+            }
+            saveStats();
+            updateHUD();
+        }
+    }
+
+    function canMove() {
+        for (let r=0; r<4; r++) {
+            for (let c=0; c<4; c++) {
+                if (grid[r][c] === 0) return true;
+                if (c<3 && grid[r][c] === grid[r][c+1]) return true;
+                if (r<3 && grid[r][c] === grid[r+1][c]) return true;
+            }
+        }
+        return false;
+    }
+
+    function checkGameOver() {
+        if (!canMove()) {
+            gameOver = true;
+            if (typeof Tecnomath !== 'undefined' && Tecnomath.getCurrentUser()) {
+                const reward = Math.floor(score / 10);
+                Tecnomath.addCoins(reward);
+                Tecnomath.updateHighScore('ods2048', highScore);
+                updateHUD();
+            }
+            popupTitle.textContent = '🎮 JUEGO TERMINADO';
+            popupMsg.textContent = `Puntaje: ${score}\nMejor: ${highScore}`;
+            gameOverPopup.classList.add('show');
+        }
+    }
+
+    function renderGrid() {
+        gridContainer.innerHTML = '';
+        for (let r=0; r<4; r++) {
+            for (let c=0; c<4; c++) {
+                const cell = document.createElement('div');
+                cell.className = 'cell';
+                const val = grid[r][c];
+                if (val > 0) {
+                    cell.textContent = ODS_EMOJIS[val-1] || '?';
+                    cell.dataset.value = val;
+                    cell.style.fontSize = val > 10 ? '18px' : '24px';
+                }
+                cell.addEventListener('click', () => {
+                    if (bombActive && grid[r][c] > 0) {
+                        grid[r][c] = 0;
+                        bombActive = false;
+                        renderGrid();
+                        updateHUD();
+                    }
+                });
+                gridContainer.appendChild(cell);
+            }
+        }
+    }
+
+    function startGame() {
+        grid = emptyGrid();
+        score = 0;
+        gameOver = false;
+        bombActive = false;
+        history = [];
+        addRandomTile();
+        addRandomTile();
+        renderGrid();
+        updateHUD();
+        gameOverPopup.classList.remove('show');
+    }
+
+    function restartGame() {
+        startGame();
+        saveStats();
+    }
+
+    function undoMove() {
+        if (history.length === 0) return;
+        if (!spendCoins(20)) {
+            alert('Monedas insuficientes');
+            return;
+        }
+        grid = history.pop();
+        score = Math.max(0, score - 20); // penalización pequeña
+        renderGrid();
+        updateHUD();
+        saveStats();
+    }
+
+    function useBomb() {
+        if (!spendCoins(30)) {
+            alert('Monedas insuficientes');
+            return;
+        }
+        bombActive = true;
+        alert('Toca una ficha para eliminarla');
+    }
+
+    // ═══════════════════════════════════════
+    //  TIENDA
+    // ═══════════════════════════════════════
+    function openShop() {
+        renderShopItems();
+        shopModal.classList.add('open');
+    }
+    function closeShop() {
+        shopModal.classList.remove('open');
+    }
+
+    function renderShopItems() {
+        shopItemsContainer.innerHTML = '';
+        const items = [
+            { name:'💡 Deshacer extra', price:20, action:() => { undoMove(); } },
+            { name:'💣 Bomba extra', price:30, action:() => { useBomb(); } },
+            { name:'💱 Convertir 🌐→💰', price:0, action:() => { openExchange(); } }
+        ];
+        items.forEach(item => {
+            const div = document.createElement('div');
+            div.className = 'shop-item';
+            div.innerHTML = `<span>${item.name}</span><span>${item.price > 0 ? item.price+' 💰' : '10% com'}</span>`;
+            const buyBtn = document.createElement('button');
+            buyBtn.textContent = 'Comprar';
+            if (item.price === 0) {
+                buyBtn.disabled = false;
+                buyBtn.textContent = 'Convertir';
+            } else {
+                buyBtn.disabled = !admin && localCoins < item.price;
+            }
+            buyBtn.addEventListener('click', () => {
+                if (item.price === 0) {
+                    item.action();
+                } else if (admin || localCoins >= item.price) {
+                    if (!admin) { localCoins -= item.price; saveStats(); }
+                    item.action();
+                }
+                updateHUD();
+                renderShopItems();
+            });
+            div.appendChild(buyBtn);
+            shopItemsContainer.appendChild(div);
+        });
+    }
+
+    function openExchange() {
+        if (typeof Tecnomath === 'undefined' || !Tecnomath.getCurrentUser()) {
+            alert('Inicia sesión para convertir');
+            return;
+        }
+        if (admin) {
+            localCoins += 500;
+            saveStats();
+            updateHUD();
+            renderShopItems();
+            return;
+        }
+        const amount = prompt('Cantidad de monedas globales a convertir:');
+        if (!amount) return;
+        const num = parseInt(amount);
+        if (isNaN(num) || num <= 0) return;
+        if (Tecnomath.exchangeGlobalToLocal('ods2048', num)) {
+            localCoins = Tecnomath.getGameCoins('ods2048');
+            saveStats();
+            updateHUD();
+            renderShopItems();
+        } else {
+            alert('Fondos insuficientes');
+        }
+    }
+
+    // ═══════════════════════════════════════
+    //  ADMIN
+    // ═══════════════════════════════════════
+    const ADMINS = { "1983":"Junior", "2024":"Nicole", "7777":"Mateo", "8888":"Jaider", "ods2026":"ODS Master" };
+    function openAdminPanel() {
+        const code = prompt('CÓDIGO ADMIN:');
+        if (ADMINS[code]) {
+            admin = true;
+            if (typeof Tecnomath !== 'undefined' && Tecnomath.getCurrentUser()) {
+                Tecnomath.setAdmin(Tecnomath.getCurrentUser().username);
+            }
+            updateHUD();
+            alert(`⚡ ${ADMINS[code].toUpperCase()} · ADMIN ACTIVADO`);
+        } else if (code) {
+            alert('🔒 ACCESO DENEGADO');
+        }
+    }
+
+    // ═══════════════════════════════════════
+    //  CONTROLES
+    // ═══════════════════════════════════════
+    let touchStartX = 0, touchStartY = 0;
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowLeft') move('left');
+        else if (e.key === 'ArrowRight') move('right');
+        else if (e.key === 'ArrowUp') move('up');
+        else if (e.key === 'ArrowDown') move('down');
+    });
+
+    gridContainer.addEventListener('touchstart', (e) => {
+        touchStartX = e.touches[0].clientX;
+        touchStartY = e.touches[0].clientY;
+    }, {passive: true});
+
+    gridContainer.addEventListener('touchend', (e) => {
+        const dx = e.changedTouches[0].clientX - touchStartX;
+        const dy = e.changedTouches[0].clientY - touchStartY;
+        if (Math.abs(dx) > Math.abs(dy)) {
+            if (dx > 30) move('right');
+            else if (dx < -30) move('left');
+        } else {
+            if (dy > 30) move('down');
+            else if (dy < -30) move('up');
+        }
+    });
+
+    // Botones
+    document.getElementById('shopBtn').addEventListener('click', openShop);
+    closeShopBtn.addEventListener('click', closeShop);
+    document.getElementById('undoBtn').addEventListener('click', undoMove);
+    document.getElementById('bombBtn').addEventListener('click', useBomb);
+    document.getElementById('resetBtn').addEventListener('click', restartGame);
+    adminBtn.addEventListener('click', openAdminPanel);
+
+    // ═══════════════════════════════════════
+    //  INICIO
+    // ═══════════════════════════════════════
+    function init() {
+        loadStats();
+        startGame();
+    }
+
+    init();
+</script>
+</body>
+</html>
