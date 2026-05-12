@@ -105,7 +105,10 @@
         .sponsor-icon {
             width: 60px; height: 60px; border-radius: 12px; background: #0a0a1a;
             border: 2px solid #333; display: flex; align-items: center; justify-content: center;
-            font-size: 28px;
+            font-size: 28px; overflow: hidden;
+        }
+        .sponsor-icon img {
+            width: 100%; height: 100%; object-fit: cover; border-radius: 12px;
         }
         .sponsor-name {
             font-size: 5px; color: white;
@@ -149,7 +152,7 @@
 
     <script>
         // ═══════════════════════════════════════
-        // PATROCINADORES ALEATORIOS
+        // PATROCINADORES ALEATORIOS CON IMÁGENES
         // ═══════════════════════════════════════
         const allSponsorsPortal = [
             { name: "Juan Pérez",      phone: "+573001112233", image: "👨‍💼", imageUrl: "" },
@@ -159,22 +162,43 @@
             { name: "EcoWorld",        phone: "+573006667788", image: "🌱", imageUrl: "" },
             { name: "NeuroLab",        phone: "+573007778899", image: "🧠", imageUrl: "" }
         ];
+
         (function renderSponsors() {
             const selected = [...allSponsorsPortal].sort(() => Math.random() - 0.5).slice(0, 4);
             const area = document.getElementById('sponsorsArea');
             selected.forEach(sponsor => {
                 const card = document.createElement('div');
                 card.className = 'sponsor-card';
+
+                // Contenedor de la imagen/emoji
                 const icon = document.createElement('div');
                 icon.className = 'sponsor-icon';
-                icon.textContent = sponsor.image;
+
+                // Si hay una URL de imagen, intentamos cargarla
+                if (sponsor.imageUrl && sponsor.imageUrl.trim() !== '') {
+                    const img = document.createElement('img');
+                    img.src = sponsor.imageUrl;
+                    img.alt = sponsor.name;
+                    img.onerror = function() {
+                        // Si la imagen falla, mostramos el emoji
+                        this.remove();
+                        icon.textContent = sponsor.image || '🖼️';
+                    };
+                    icon.appendChild(img);
+                } else {
+                    // Sin imagen, usamos el emoji
+                    icon.textContent = sponsor.image || '🖼️';
+                }
+
                 const name = document.createElement('div');
                 name.className = 'sponsor-name';
                 name.textContent = sponsor.name;
+
                 const phone = document.createElement('a');
                 phone.className = 'sponsor-phone';
                 phone.href = 'tel:' + sponsor.phone;
                 phone.textContent = sponsor.phone;
+
                 card.appendChild(icon);
                 card.appendChild(name);
                 card.appendChild(phone);
@@ -222,14 +246,12 @@
             const card = document.createElement('a');
             card.className = 'project-card';
             card.href = proj.url;
-            // Si es un enlace interno, abrir en la misma pestaña
             card.target = (proj.url.endsWith('.html') && !proj.url.startsWith('http')) ? '_self' : '_blank';
             card.rel = "noopener";
 
             const iconDiv = document.createElement('div');
             iconDiv.className = 'project-icon';
 
-            // Lógica de imagen vs emoji
             if (proj.imageUrl && proj.imageUrl.trim() !== '') {
                 const img = document.createElement('img');
                 img.src = proj.imageUrl;
