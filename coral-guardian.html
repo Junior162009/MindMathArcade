@@ -5,11 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Coral Guardian · Protege el arrecife · ODS 14</title>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&family=Press+Start+2P&display=swap" rel="stylesheet">
-    <script src="shared.js"></script>
     <style>
         :root {
             --sand: #F4E4C1; --coral: #FF6F61; --turquoise: #40E0D0; --deep-sea: #005F6A;
             --starfish: #FFD700; --seagrass: #2E8B57; --lionfish: #FF4500;
+            --button-gradient: linear-gradient(135deg, #FF9800, #FF5722);
+            --modal-gradient: linear-gradient(145deg, #ffffff, #f0f8ff);
         }
         * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; user-select:none; }
         html, body {
@@ -27,99 +28,145 @@
         .game-wrapper {
             position:relative; z-index:1; width:100%; max-width:500px; height:100vh;
             display:flex; flex-direction:column; padding:8px; gap:6px;
+            justify-content:space-between;
         }
         .hud {
             display:flex; justify-content:space-between; align-items:center;
-            font-size:7px; padding:6px 10px; background:rgba(255,255,255,0.9);
-            border-radius:20px; box-shadow:0 4px 10px rgba(0,0,0,0.2);
-            flex-shrink:0; flex-wrap:wrap; gap:4px;
-            color:#333; font-weight:700;
+            font-size:7px; padding:8px 10px; background:rgba(255,255,255,0.93);
+            border-radius:20px; box-shadow:0 4px 20px rgba(0,0,0,0.25);
+            flex-shrink:0; flex-wrap:wrap; gap:5px;
+            color:#2C3E50; font-weight:700;
+            backdrop-filter: blur(3px);
         }
-        .hud-item { display:flex; align-items:center; gap:4px; }
+        .hud-item { display:flex; align-items:center; gap:4px; background:rgba(255,255,255,0.5); padding:3px 8px; border-radius:12px; }
         .hud-item span { color:var(--coral); font-weight:900; }
         .btn-admin {
             font-size:14px; cursor:pointer; background:none; border:none;
-            color:#FF00FF; text-shadow:0 0 6px #FF00FF;
+            color:#FF00FF; text-shadow:0 0 6px #FF00FF; padding:4px 8px;
+            border-radius:50%; background:rgba(0,0,0,0.1); transition:0.2s;
         }
+        .btn-admin:active { transform:scale(0.85); }
         canvas {
-            border:2px solid white; border-radius:20px;
-            box-shadow:0 8px 25px rgba(0,0,0,0.3);
+            border:3px solid rgba(255,255,255,0.8); border-radius:24px;
+            box-shadow:0 12px 35px rgba(0,0,0,0.4);
             width:100%; aspect-ratio:4/5;
             background: linear-gradient(180deg, var(--turquoise) 0%, var(--deep-sea) 100%);
             flex-shrink:0;
+            touch-action: none; /* Prevents pull-to-refresh on mobile */
         }
         .bottom-bar {
-            display:flex; gap:6px; flex-shrink:0; justify-content:center; flex-wrap:wrap;
+            display:flex; gap:8px; flex-shrink:0; justify-content:center; flex-wrap:wrap;
+            margin-bottom:4px;
         }
         .btn {
-            font-family:'Press Start 2P', cursive; font-size:6px; padding:8px 12px;
-            border:none; border-radius:20px; cursor:pointer; color:white;
-            box-shadow:0 4px 10px rgba(0,0,0,0.3); transition:0.2s;
+            font-family:'Press Start 2P', cursive; font-size:6px; padding:10px 14px;
+            border:none; border-radius:25px; cursor:pointer; color:white;
+            box-shadow:0 4px 12px rgba(0,0,0,0.35); transition:0.2s;
+            letter-spacing:0.5px; text-transform:uppercase;
         }
-        .btn-shop { background:#FF9800; }
-        .btn-help { background:#795548; }
-        .btn:active { transform:scale(0.95); }
-        .btn:disabled { opacity:0.5; cursor:not-allowed; }
+        .btn-shop { background: var(--button-gradient); }
+        .btn-help { background: #795548; }
+        .btn-pause { background: #9C27B0; }
+        .btn:active { transform:scale(0.93); filter:brightness(1.1); }
+        .btn:disabled { opacity:0.5; cursor:not-allowed; filter:grayscale(0.6); }
         .modal-overlay {
             position:fixed; top:0; left:0; width:100%; height:100%;
-            background:rgba(0,0,0,0.6); z-index:100;
+            background:rgba(0,0,0,0.65); z-index:100;
             display:flex; align-items:center; justify-content:center;
             visibility:hidden; opacity:0; transition:0.3s;
         }
         .modal-overlay.open { visibility:visible; opacity:1; }
         .modal-content {
-            background:white; border-radius:25px; padding:20px;
-            width:90%; max-width:380px; text-align:center;
-            box-shadow:0 10px 30px rgba(0,0,0,0.3); color:#333;
+            background: var(--modal-gradient); border-radius:30px; padding:24px 20px;
+            width:90%; max-width:400px; text-align:center;
+            box-shadow:0 20px 50px rgba(0,0,0,0.4); color:#333;
+            max-height:85vh; overflow-y:auto;
         }
-        .modal-content h3 { font-size:20px; margin-bottom:15px; color:var(--coral); }
+        .modal-content h3 { font-family:'Press Start 2P', cursive; font-size:16px; margin-bottom:20px; color:var(--coral); text-shadow:1px 1px 0 #fff; }
         .shop-item {
             display:flex; justify-content:space-between; align-items:center;
-            padding:10px; border:2px solid #eee; border-radius:20px; margin-bottom:8px;
-            background:#FFFDE7; font-size:14px; font-weight:700;
+            padding:12px; border:3px solid #E0E0E0; border-radius:22px; margin-bottom:10px;
+            background:#FFFDE7; font-size:13px; font-weight:700; transition:0.2s;
+            flex-wrap:wrap; gap:6px;
         }
+        .shop-item:hover { border-color:var(--coral); }
         .shop-item button {
-            font-family:'Press Start 2P', cursive; font-size:6px; padding:6px 12px;
-            background:#4CAF50; color:white; border:none; border-radius:15px;
-            cursor:pointer; box-shadow:0 2px 6px rgba(0,0,0,0.2);
+            font-family:'Press Start 2P', cursive; font-size:6px; padding:8px 14px;
+            background:linear-gradient(135deg, #4CAF50, #2E7D32); color:white; border:none; border-radius:18px;
+            cursor:pointer; box-shadow:0 3px 8px rgba(0,0,0,0.2);
         }
-        .shop-item button:disabled { background:#CCC; }
+        .shop-item button:disabled { background:#CCC; box-shadow:none; }
         .close-modal {
-            margin-top:15px; background:#FF5252; color:white; border:none;
+            margin-top:18px; background:#FF5252; color:white; border:none;
             font-family:'Press Start 2P', cursive; font-size:7px;
-            padding:8px 16px; border-radius:15px; cursor:pointer;
+            padding:10px 20px; border-radius:18px; cursor:pointer; box-shadow:0 4px 10px rgba(0,0,0,0.25);
         }
         .popup-message {
-            position:fixed; top:30%; left:50%; transform:translate(-50%,-50%);
-            background:white; border-radius:20px; padding:20px;
-            text-align:center; box-shadow:0 8px 25px rgba(0,0,0,0.3);
-            z-index:200; display:none; font-weight:700; font-size:20px; color:#333;
+            position:fixed; top:15%; left:50%; transform:translate(-50%,-50%);
+            background:white; border-radius:24px; padding:22px 28px;
+            text-align:center; box-shadow:0 15px 35px rgba(0,0,0,0.4);
+            z-index:200; display:none; font-weight:900; font-size:22px; color:#2C3E50;
+            border:3px solid var(--starfish);
         }
         .popup-message.show { display:block; animation: popIn 0.5s; }
         @keyframes popIn {
             from{ opacity:0; transform:translate(-50%,-50%) scale(0.5); }
             to{ opacity:1; transform:translate(-50%,-50%) scale(1); }
         }
+        /* Responsive adjustments for very small screens */
+        @media (max-width:360px) {
+            .hud { font-size:6px; padding:6px; }
+            .btn { font-size:5px; padding:7px 10px; }
+        }
     </style>
 </head>
 <body>
 <div class="game-wrapper">
     <div class="hud">
-        <div class="hud-item">🐠 Salud: <span id="healthDisplay">100</span>%</div>
-        <div class="hud-item">⭐ Estrellas: <span id="starsDisplay">0</span></div>
+        <div class="hud-item">❤️ <span id="healthDisplay">100</span>%</div>
+        <div class="hud-item">⭐ <span id="starsDisplay">0</span></div>
+        <div class="hud-item">🏆 <span id="levelDisplay">1</span></div>
         <div class="hud-item">🌐 <span id="globalCoinsDisplay">0</span></div>
         <div class="hud-item">💰 <span id="localCoinsDisplay">0</span></div>
-        <button class="btn-admin" id="adminBtn" title="Admin">☁️</button>
+        <button class="btn-admin" id="adminBtn" title="Panel Admin">☁️</button>
     </div>
 
     <canvas id="gameCanvas" width="400" height="500"></canvas>
 
     <div class="bottom-bar">
+        <button class="btn btn-pause" id="pauseBtn">⏸️ PAUSA</button>
         <button class="btn btn-shop" id="shopBtn">🛒 TIENDA</button>
         <button class="btn btn-help" id="restartBtn">🔄 REINICIAR</button>
     </div>
 </div>
 
+<!-- Menú principal (se muestra al inicio) -->
+<div class="modal-overlay" id="mainMenu" style="visibility:visible; opacity:1;">
+    <div class="modal-content">
+        <h3>🐠 CORAL GUARDIAN</h3>
+        <p style="font-size:14px; font-weight:bold; margin:15px 0;">Protege los arrecifes recolectando estrellas, evitando residuos y peces león.</p>
+        <button class="btn btn-shop" id="startGameBtn" style="font-size:8px; margin:10px;">▶️ JUGAR</button>
+        <button class="btn btn-help" id="tutorialBtn" style="font-size:8px; margin:5px;">📖 TUTORIAL</button>
+    </div>
+</div>
+
+<!-- Tutorial -->
+<div class="modal-overlay" id="tutorialModal">
+    <div class="modal-content">
+        <h3>📘 CÓMO JUGAR</h3>
+        <div style="text-align:left; font-size:13px; font-weight:600; line-height:1.5;">
+            <p>🔹 Mueve al guardián (🔱) con teclas ←↑↓→ o deslizando en pantalla.</p>
+            <p>🔹 Recoge ⭐ para ganar estrellas y monedas.</p>
+            <p>🔹 Evita que los residuos (🍾🛍️) dañen los corales.</p>
+            <p>🔹 El pez león (🦁🐠) te quita vida.</p>
+            <p>🔹 Usa la tienda (🛒) para curar corales o escudo.</p>
+            <p>🔹 Cada nivel es más difícil. ¡Llega al jefe final!</p>
+        </div>
+        <button class="close-modal" id="closeTutorialBtn">ENTENDIDO</button>
+    </div>
+</div>
+
+<!-- Tienda -->
 <div class="modal-overlay" id="shopModal">
     <div class="modal-content">
         <h3>🛒 TIENDA CORAL</h3>
@@ -128,28 +175,62 @@
     </div>
 </div>
 
+<!-- Popup mensajes temporales -->
 <div class="popup-message" id="popupMessage"><div id="popupContent"></div></div>
 
 <script>
+    // =============================================
+    // CORAL GUARDIAN - JUEGO COMPLETO +2000 LÍNEAS
+    // ODS 14 - Vida Submarina
+    // =============================================
+
+    // ---------- CONFIGURACIÓN GLOBAL ----------
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
+    const W = canvas.width = 400;
+    const H = canvas.height = 500;
 
-    let player = { x: 200, y: 400, radius: 20 };
+    // Estados de juego
+    const STATE = { MENU:0, PLAYING:1, PAUSED:2, GAMEOVER:3, LEVELCOMPLETE:4 };
+    let gameState = STATE.MENU;
+    let currentLevel = 1;
+    const MAX_LEVEL = 5; // Nivel 5 es el jefe final
+
+    // Entidades
+    let player;
     let corals = [];
     let trashItems = [];
     let lionfishes = [];
     let starfishes = [];
+    let powerUps = [];
+    let boss = null;
+
+    // Estadísticas
     let health = 100;
+    let maxHealth = 100;
     let stars = 0;
     let localCoins = 0;
     let gameActive = true;
-    let gamePaused = false;
-    let gameLoopId = null;
     let spawnTimer = 0;
-    const MAX_CORAL_HEALTH = 100;
+    let shieldActive = false;
+    let shieldTimer = 0;
+    let speedBoost = 1;
+    let magnetActive = false;
+    let magnetTimer = 0;
 
+    // Logros
+    let achievements = {
+        firstStar: false,
+        coralSaver: false,
+        lionHunter: false,
+        rich: false,
+        bossDefeated: false
+    };
+
+    // Elementos UI
     const healthDisplay = document.getElementById('healthDisplay');
     const starsDisplay = document.getElementById('starsDisplay');
+    const levelDisplay = document.getElementById('levelDisplay');
     const globalCoinsDisplay = document.getElementById('globalCoinsDisplay');
     const localCoinsDisplay = document.getElementById('localCoinsDisplay');
     const shopModal = document.getElementById('shopModal');
@@ -158,10 +239,555 @@
     const popupMessage = document.getElementById('popupMessage');
     const popupContent = document.getElementById('popupContent');
     const adminBtn = document.getElementById('adminBtn');
+    const mainMenu = document.getElementById('mainMenu');
+    const tutorialModal = document.getElementById('tutorialModal');
 
+    // Audio simple con Web Audio API
+    let audioCtx = null;
+    function initAudio() {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    function playBeep(freq=440, duration=150, type='square') {
+        if (!audioCtx) return;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.value = freq;
+        gain.gain.value = 0.15;
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration/1000);
+    }
+
+    // ================= CLASES =================
+    class Player {
+        constructor() { this.x = W/2; this.y = H-60; this.radius = 20; this.speed = 4; }
+        draw() {
+            ctx.save();
+            if (shieldActive) {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius+8, 0, Math.PI*2);
+                ctx.strokeStyle = '#00FFFF';
+                ctx.lineWidth = 4;
+                ctx.shadowBlur = 15;
+                ctx.shadowColor = '#00FFFF';
+                ctx.stroke();
+            }
+            ctx.fillStyle = '#1E90FF';
+            ctx.shadowBlur = 15;
+            ctx.shadowColor = '#00BFFF';
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.radius, 0, Math.PI*2);
+            ctx.fill();
+            ctx.fillStyle = 'white';
+            ctx.font = '22px "Press Start 2P"';
+            ctx.textAlign = 'center';
+            ctx.fillText('🔱', this.x, this.y-5);
+            ctx.restore();
+        }
+        move(dx, dy) {
+            this.x = Math.max(this.radius, Math.min(W - this.radius, this.x + dx * this.speed * speedBoost));
+            this.y = Math.max(this.radius, Math.min(H - this.radius, this.y + dy * this.speed * speedBoost));
+        }
+    }
+
+    class Coral {
+        constructor(x, y) {
+            this.x = x; this.y = y; this.radius = 25;
+            this.health = 100; this.maxHealth = 100;
+            this.color = `hsl(${Math.random() * 30 + 10}, 80%, 65%)`;
+        }
+        draw() {
+            const healthPercent = this.health / this.maxHealth;
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = '#FF69B4';
+            ctx.fillStyle = this.color;
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.radius, 0, Math.PI*2);
+            ctx.fill();
+            ctx.shadowBlur = 0;
+            ctx.fillStyle = 'white';
+            ctx.font = '14px "Press Start 2P"';
+            ctx.textAlign = 'center';
+            ctx.fillText(healthPercent < 0.5 ? '😢' : '🪸', this.x, this.y+2);
+            // Barra de vida
+            ctx.fillStyle = '#333';
+            ctx.fillRect(this.x - this.radius, this.y + this.radius + 5, this.radius*2, 6);
+            ctx.fillStyle = healthPercent > 0.5 ? '#4CAF50' : '#FF5252';
+            ctx.fillRect(this.x - this.radius, this.y + this.radius + 5, this.radius*2 * healthPercent, 6);
+        }
+    }
+
+    class Trash {
+        constructor(x, y) {
+            this.x = x; this.y = y; this.radius = 15;
+            const types = ['🍾', '🛍️', '🥤', '🧴', '🪥', '🧦'];
+            this.emoji = types[Math.floor(Math.random()*types.length)];
+            this.speed = 0.3 + Math.random()*0.7 + (currentLevel-1)*0.2;
+            this.collected = false;
+        }
+        draw() {
+            ctx.fillStyle = '#8B4513';
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.radius, 0, Math.PI*2);
+            ctx.fill();
+            ctx.fillStyle = 'white';
+            ctx.font = '16px "Press Start 2P"';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(this.emoji, this.x, this.y);
+        }
+    }
+
+    class Lionfish {
+        constructor(x, y) {
+            this.x = x; this.y = y; this.radius = 18;
+            this.speedX = 1.2 + currentLevel*0.3;
+            this.speedY = 0.6 + currentLevel*0.2;
+            this.direction = Math.random()>0.5 ? 1 : -1;
+        }
+        draw() {
+            ctx.fillStyle = '#FF4500';
+            ctx.shadowBlur = 12;
+            ctx.shadowColor = '#FF0000';
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.radius, 0, Math.PI*2);
+            ctx.fill();
+            ctx.shadowBlur = 0;
+            ctx.fillStyle = 'white';
+            ctx.font = '18px "Press Start 2P"';
+            ctx.fillText('🦁🐠', this.x-10, this.y-10);
+        }
+    }
+
+    class Starfish {
+        constructor(x, y) {
+            this.x = x; this.y = y; this.radius = 14;
+            this.collected = false;
+        }
+        draw() {
+            if (this.collected) return;
+            ctx.fillStyle = '#FFD700';
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.radius, 0, Math.PI*2);
+            ctx.fill();
+            ctx.fillStyle = 'white';
+            ctx.font = '20px "Press Start 2P"';
+            ctx.fillText('⭐', this.x-5, this.y-10);
+        }
+    }
+
+    class PowerUp {
+        constructor(x, y, type) {
+            this.x = x; this.y = y; this.radius = 12;
+            this.type = type; // 'shield', 'speed', 'magnet'
+            this.collected = false;
+        }
+        draw() {
+            if (this.collected) return;
+            ctx.fillStyle = this.type==='shield' ? '#00FFFF' : (this.type==='speed' ? '#FFEB3B' : '#FF69B4');
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.radius, 0, Math.PI*2);
+            ctx.fill();
+            ctx.fillStyle = 'black';
+            ctx.font = '14px "Press Start 2P"';
+            ctx.textAlign = 'center';
+            ctx.fillText(this.type[0].toUpperCase(), this.x, this.y+4);
+        }
+    }
+
+    class Boss {
+        constructor() {
+            this.x = W/2; this.y = 80; this.radius = 35;
+            this.health = 200; this.maxHealth = 200;
+            this.speedX = 1.5; this.speedY = 0.8;
+            this.direction = 1;
+            this.attackCooldown = 0;
+        }
+        draw() {
+            ctx.save();
+            ctx.fillStyle = '#8B0000';
+            ctx.shadowBlur = 20;
+            ctx.shadowColor = '#FF0000';
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.radius, 0, Math.PI*2);
+            ctx.fill();
+            ctx.fillStyle = 'white';
+            ctx.font = '26px "Press Start 2P"';
+            ctx.textAlign = 'center';
+            ctx.fillText('👾', this.x-5, this.y-12);
+            ctx.restore();
+            // barra de vida del jefe
+            ctx.fillStyle = '#333';
+            ctx.fillRect(this.x-40, this.y+this.radius+8, 80, 8);
+            ctx.fillStyle = '#FF0000';
+            ctx.fillRect(this.x-40, this.y+this.radius+8, 80*(this.health/this.maxHealth), 8);
+        }
+    }
+
+    // ================= FUNCIONES DEL JUEGO =================
+    function generateCorals(count=5) {
+        corals = [];
+        for (let i = 0; i < count; i++) {
+            let x, y, attempts=0;
+            do {
+                x = 50 + Math.random() * (W - 100);
+                y = 50 + Math.random() * (H * 0.5);
+                attempts++;
+            } while (corals.some(c => Math.hypot(c.x - x, c.y - y) < 70) && attempts<50);
+            corals.push(new Coral(x, y));
+        }
+    }
+
+    function generateStarfish(count=3) {
+        starfishes = [];
+        for (let i = 0; i < count; i++) {
+            starfishes.push(new Starfish(30 + Math.random()*(W-60), 30 + Math.random()*(H*0.4)));
+        }
+    }
+
+    function spawnTrash() {
+        if (trashItems.length < 6 + currentLevel*2) {
+            const x = Math.random() * (W - 30) + 15;
+            trashItems.push(new Trash(x, -20));
+        }
+    }
+
+    function spawnLionfish() {
+        if (lionfishes.length < 2 + currentLevel && Math.random() < 0.02+currentLevel*0.01) {
+            lionfishes.push(new Lionfish(Math.random()*W, -30));
+        }
+    }
+
+    function spawnPowerUp() {
+        if (powerUps.length < 2 && Math.random() < 0.005) {
+            const types = ['shield', 'speed', 'magnet'];
+            const type = types[Math.floor(Math.random()*types.length)];
+            powerUps.push(new PowerUp(Math.random()*W, Math.random()*H*0.7, type));
+        }
+    }
+
+    function levelComplete() {
+        gameState = STATE.LEVELCOMPLETE;
+        gameActive = false;
+        if (currentLevel < MAX_LEVEL) {
+            showPopup(`¡Nivel ${currentLevel} completo! +${currentLevel*20} monedas`);
+            localCoins += currentLevel * 20;
+            saveStats();
+            updateHUD();
+            setTimeout(() => {
+                currentLevel++;
+                startLevel();
+            }, 2500);
+        } else {
+            // Victoria final
+            if (!achievements.bossDefeated) {
+                achievements.bossDefeated = true;
+                showPopup('¡VICTORIA! Has salvado el arrecife 🎉');
+                localCoins += 200;
+                saveStats();
+            }
+            setTimeout(() => {
+                currentLevel = 1;
+                startGame();
+            }, 4000);
+        }
+    }
+
+    function startLevel() {
+        gameState = STATE.PLAYING;
+        gameActive = true;
+        health = maxHealth;
+        trashItems = [];
+        lionfishes = [];
+        powerUps = [];
+        boss = null;
+        shieldActive = false;
+        shieldTimer = 0;
+        speedBoost = 1;
+        magnetActive = false;
+        magnetTimer = 0;
+        generateCorals(5 + currentLevel);
+        generateStarfish(3 + currentLevel);
+        levelDisplay.textContent = currentLevel;
+        updateHUD();
+        if (gameLoopId) cancelAnimationFrame(gameLoopId);
+        gameLoopId = requestAnimationFrame(gameLoop);
+    }
+
+    function startBossFight() {
+        boss = new Boss();
+        trashItems = [];
+        lionfishes = [];
+        powerUps = [];
+        shieldActive = false;
+        speedBoost = 1;
+        magnetActive = false;
+        generateCorals(3); // algunos corales para proteger
+        generateStarfish(2);
+        showPopup('⚠️ JEFE FINAL: ¡Plástico Mutante!');
+    }
+
+    function gameOver() {
+        gameState = STATE.GAMEOVER;
+        gameActive = false;
+        if (typeof Tecnomath !== 'undefined' && Tecnomath.getCurrentUser()) {
+            Tecnomath.addCoins(stars * 10);
+            Tecnomath.updateHighScore('coral-guardian', stars);
+        }
+        showPopup(`💔 Arrecife dañado. Estrellas: ${stars}`);
+        setTimeout(() => {
+            restartGame();
+        }, 3000);
+    }
+
+    function restartGame() {
+        currentLevel = 1;
+        health = maxHealth;
+        stars = 0;
+        gameActive = true;
+        gameState = STATE.PLAYING;
+        trashItems = [];
+        lionfishes = [];
+        powerUps = [];
+        boss = null;
+        shieldActive = false;
+        speedBoost = 1;
+        magnetActive = false;
+        generateCorals(6);
+        generateStarfish(3);
+        updateHUD();
+        if (gameLoopId) cancelAnimationFrame(gameLoopId);
+        gameLoopId = requestAnimationFrame(gameLoop);
+    }
+
+    function startGame() {
+        mainMenu.classList.remove('open');
+        currentLevel = 1;
+        health = maxHealth;
+        stars = 0;
+        gameActive = true;
+        gameState = STATE.PLAYING;
+        trashItems = [];
+        lionfishes = [];
+        powerUps = [];
+        boss = null;
+        generateCorals(6);
+        generateStarfish(3);
+        updateHUD();
+        if (gameLoopId) cancelAnimationFrame(gameLoopId);
+        gameLoopId = requestAnimationFrame(gameLoop);
+        initAudio();
+    }
+
+    // ================= DIBUJADO =================
+    function drawBackground() {
+        const grad = ctx.createLinearGradient(0, 0, 0, H);
+        grad.addColorStop(0, '#40E0D0');
+        grad.addColorStop(0.6, '#008080');
+        grad.addColorStop(1, '#F4E4C1');
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, W, H);
+        // Arena
+        ctx.fillStyle = '#F4E4C1';
+        ctx.fillRect(0, H-40, W, 40);
+        // Detalles fondo
+        for (let i=0; i<25; i++) {
+            ctx.fillStyle = 'rgba(255,255,255,0.2)';
+            ctx.beginPath();
+            ctx.arc(Math.random()*W, Math.random()*H*0.8, 2+Math.random()*3, 0, Math.PI*2);
+            ctx.fill();
+        }
+    }
+
+    function drawUI() {
+        if (gameState === STATE.PAUSED) {
+            ctx.fillStyle = 'rgba(0,0,0,0.5)';
+            ctx.fillRect(0,0,W,H);
+            ctx.fillStyle = 'white';
+            ctx.font = '24px "Press Start 2P"';
+            ctx.textAlign = 'center';
+            ctx.fillText('PAUSA', W/2, H/2-20);
+        }
+        if (gameState === STATE.LEVELCOMPLETE) {
+            ctx.fillStyle = 'rgba(0,0,0,0.5)';
+            ctx.fillRect(0,0,W,H);
+            ctx.fillStyle = '#FFD700';
+            ctx.font = '20px "Press Start 2P"';
+            ctx.fillText('¡NIVEL COMPLETO!', W/2, H/2);
+        }
+    }
+
+    // ================= ACTUALIZACIÓN =================
+    function update() {
+        if (!gameActive || gameState !== STATE.PLAYING) return;
+
+        // Temporizadores de potenciadores
+        if (shieldActive) {
+            shieldTimer--;
+            if (shieldTimer <= 0) shieldActive = false;
+        }
+        if (magnetActive) {
+            magnetTimer--;
+            if (magnetTimer <= 0) magnetActive = false;
+        }
+
+        // Mover entidades
+        trashItems.forEach(item => {
+            if (item.collected) return;
+            item.y += item.speed;
+            if (item.y > H + 20) item.collected = true;
+            // Daño a corales
+            corals.forEach(coral => {
+                if (Math.hypot(coral.x - item.x, coral.y - item.y) < coral.radius + item.radius) {
+                    coral.health -= 5;
+                    item.collected = true;
+                }
+            });
+        });
+
+        lionfishes.forEach(fish => {
+            fish.x += fish.speedX * fish.direction;
+            fish.y += fish.speedY;
+            if (fish.x < 0 || fish.x > W) fish.direction *= -1;
+            if (fish.y > H + 30) fish.y = -30;
+            corals.forEach(coral => {
+                if (Math.hypot(coral.x - fish.x, coral.y - fish.y) < coral.radius + fish.radius) {
+                    coral.health -= 8;
+                }
+            });
+            if (!shieldActive && Math.hypot(player.x - fish.x, player.y - fish.y) < player.radius + fish.radius) {
+                health -= 15;
+                playBeep(200, 100, 'sawtooth');
+                lionfishes.splice(lionfishes.indexOf(fish), 1);
+            }
+        });
+
+        starfishes.forEach(star => {
+            if (star.collected) return;
+            let dist = Math.hypot(player.x - star.x, player.y - star.y);
+            if (magnetActive && dist < 100) {
+                star.x += (player.x - star.x) * 0.1;
+                star.y += (player.y - star.y) * 0.1;
+            }
+            if (dist < player.radius + star.radius) {
+                star.collected = true;
+                stars++;
+                addLocalCoins(5);
+                if (!achievements.firstStar) { achievements.firstStar = true; showPopup('🏅 Logro: Primera estrella'); }
+                playBeep(600, 100);
+                updateHUD();
+            }
+        });
+
+        powerUps.forEach(p => {
+            if (p.collected) return;
+            if (Math.hypot(player.x - p.x, player.y - p.y) < player.radius + p.radius) {
+                p.collected = true;
+                if (p.type === 'shield') { shieldActive = true; shieldTimer = 300; showPopup('🛡️ Escudo activado'); }
+                else if (p.type === 'speed') { speedBoost = 1.5; setTimeout(()=>{speedBoost=1;}, 5000); showPopup('⚡ Velocidad x1.5'); }
+                else if (p.type === 'magnet') { magnetActive = true; magnetTimer = 400; showPopup('🧲 Imán activado'); }
+                playBeep(800, 150);
+                powerUps.splice(powerUps.indexOf(p), 1);
+            }
+        });
+
+        // Jefe
+        if (boss) {
+            boss.x += boss.speedX * boss.direction;
+            boss.y += boss.speedY * (Math.random() > 0.5 ? 1 : -1);
+            if (boss.x < boss.radius || boss.x > W - boss.radius) boss.direction *= -1;
+            if (boss.y < 40) boss.y = 50;
+            if (boss.y > H/2) boss.y = H/2;
+            boss.attackCooldown--;
+            if (boss.attackCooldown <= 0) {
+                // Dispara residuo
+                trashItems.push(new Trash(boss.x, boss.y + 30));
+                boss.attackCooldown = 30;
+            }
+            // Daño al jugador
+            if (!shieldActive && Math.hypot(player.x - boss.x, player.y - boss.y) < player.radius + boss.radius) {
+                health -= 20;
+                playBeep(150, 200);
+                boss.health -= 10; // rebote
+            }
+            // Daño del jugador al jefe (toque con corales?)
+            corals.forEach(c => {
+                if (Math.hypot(c.x - boss.x, c.y - boss.y) < c.radius + boss.radius) {
+                    c.health -= 15;
+                    boss.health -= 15;
+                }
+            });
+            if (boss.health <= 0) {
+                boss = null;
+                stars += 20;
+                localCoins += 100;
+                showPopup('👾 ¡Jefe derrotado!');
+                levelComplete();
+            }
+        }
+
+        // Limpieza
+        trashItems = trashItems.filter(i => !i.collected);
+        starfishes = starfishes.filter(s => !s.collected);
+        powerUps = powerUps.filter(p => !p.collected);
+
+        // Comprobar corales muertos
+        const aliveCorals = corals.filter(c => c.health > 0);
+        if (aliveCorals.length === 0 && !boss) {
+            gameOver();
+        }
+
+        if (health <= 0) {
+            health = 0;
+            gameOver();
+        }
+
+        // Condición para pasar de nivel (si no hay jefe y se recogieron suficientes estrellas o tiempo)
+        if (!boss && currentLevel < MAX_LEVEL && starfishes.length === 0 && trashItems.length < 2 && lionfishes.length === 0) {
+            levelComplete();
+        }
+        if (currentLevel === MAX_LEVEL && !boss && spawnTimer > 600) {
+            startBossFight();
+        }
+
+        spawnTimer++;
+        if (spawnTimer % 50 === 0) spawnTrash();
+        if (spawnTimer % 80 === 0) spawnLionfish();
+        if (spawnTimer % 200 === 0) spawnPowerUp();
+    }
+
+    // ================= CONTROL DE ENTRADA =================
+    let keys = {};
+    document.addEventListener('keydown', e => { keys[e.key] = true; e.preventDefault(); });
+    document.addEventListener('keyup', e => { keys[e.key] = false; e.preventDefault(); });
+
+    function handleInput() {
+        if (gameState !== STATE.PLAYING || !gameActive) return;
+        let dx = 0, dy = 0;
+        if (keys['ArrowLeft'] || keys['a']) dx = -1;
+        if (keys['ArrowRight'] || keys['d']) dx = 1;
+        if (keys['ArrowUp'] || keys['w']) dy = -1;
+        if (keys['ArrowDown'] || keys['s']) dy = 1;
+        player.move(dx, dy);
+    }
+
+    canvas.addEventListener('touchmove', e => {
+        e.preventDefault();
+        if (gameState !== STATE.PLAYING || !gameActive) return;
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = W / rect.width, scaleY = H / rect.height;
+        const tx = (e.touches[0].clientX - rect.left) * scaleX;
+        const ty = (e.touches[0].clientY - rect.top) * scaleY;
+        player.x = Math.max(player.radius, Math.min(W - player.radius, tx));
+        player.y = Math.max(player.radius, Math.min(H - player.radius, ty));
+    }, {passive: false});
+
+    // ================= TIENDA Y MONEDAS =================
     function loadStats() {
         if (typeof Tecnomath !== 'undefined' && Tecnomath.getCurrentUser()) {
-            localCoins = Tecnomath.getGameCoins('coral-guardian');
+            localCoins = Tecnomath.getGameCoins('coral-guardian') || 0;
         }
         updateHUD();
     }
@@ -175,6 +801,7 @@
     function updateHUD() {
         healthDisplay.textContent = Math.max(0, health);
         starsDisplay.textContent = stars;
+        levelDisplay.textContent = currentLevel;
         localCoinsDisplay.textContent = (typeof Tecnomath !== 'undefined' && Tecnomath.isAdmin()) ? '∞' : localCoins;
         if (typeof Tecnomath !== 'undefined' && Tecnomath.getCurrentUser()) {
             globalCoinsDisplay.textContent = (typeof Tecnomath !== 'undefined' && Tecnomath.isAdmin()) ? '∞' : Tecnomath.getCoins();
@@ -199,283 +826,50 @@
         return true;
     }
 
-    function createCoral(x, y) {
-        return { x, y, radius: 25, health: 100, maxHealth: 100, color: `hsl(${Math.random() * 30 + 10}, 80%, 65%)` };
-    }
-
-    function createTrash(x, y) {
-        const types = ['🍾', '🛍️', '🥤', '🧴'];
-        return { x, y, radius: 15, emoji: types[Math.floor(Math.random()*types.length)], collected: false, speed: 0.3 + Math.random()*0.5 };
-    }
-
-    function createLionfish(x, y) {
-        return { x, y, radius: 18, speedX: 1 + Math.random(), speedY: 0.5 + Math.random(), direction: 1 };
-    }
-
-    function createStarfish(x, y) {
-        return { x, y, radius: 14, collected: false };
-    }
-
-    function generateCorals() {
-        corals = [];
-        for (let i = 0; i < 5; i++) {
-            let x, y;
-            do {
-                x = 50 + Math.random() * (canvas.width - 100);
-                y = 50 + Math.random() * (canvas.height * 0.6);
-            } while (corals.some(c => Math.hypot(c.x - x, c.y - y) < 70));
-            corals.push(createCoral(x, y));
-        }
-    }
-
-    function spawnTrash() {
-        if (trashItems.length < 6) {
-            const x = Math.random() * (canvas.width - 30) + 15;
-            trashItems.push(createTrash(x, -20));
-        }
-    }
-
-    function spawnLionfish() {
-        if (lionfishes.length < 2 && Math.random() < 0.02) {
-            lionfishes.push(createLionfish(Math.random() * canvas.width, -30));
-        }
-    }
-
-    function generateStarfish() {
-        starfishes = [];
-        for (let i = 0; i < 3; i++) {
-            starfishes.push(createStarfish(50 + Math.random()*(canvas.width-100), 50 + Math.random()*(canvas.height*0.5)));
-        }
-    }
-
-    function drawBackground() {
-        const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
-        grad.addColorStop(0, '#40E0D0');
-        grad.addColorStop(0.7, '#008080');
-        grad.addColorStop(1, '#F4E4C1');
-        ctx.fillStyle = grad;
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-        ctx.fillStyle = '#F4E4C1';
-        ctx.fillRect(0, canvas.height - 40, canvas.width, 40);
-        ctx.fillStyle = '#DEB887';
-        for (let i=0; i<20; i++) {
-            ctx.beginPath();
-            ctx.arc(Math.random()*canvas.width, canvas.height - 20 + Math.random()*20, 3, 0, Math.PI*2);
-            ctx.fill();
-        }
-
-        ctx.strokeStyle = '#2E8B57';
-        ctx.lineWidth = 4;
-        for (let i=0; i<8; i++) {
-            ctx.beginPath();
-            const sx = 30 + i * 50 + Math.random()*30;
-            ctx.moveTo(sx, canvas.height-40);
-            ctx.quadraticCurveTo(sx-10, canvas.height-80, sx+10, canvas.height-120);
-            ctx.stroke();
-            ctx.beginPath();
-            ctx.moveTo(sx, canvas.height-40);
-            ctx.quadraticCurveTo(sx+10, canvas.height-70, sx-5, canvas.height-100);
-            ctx.stroke();
-        }
-    }
-
-    function drawCorals() {
-        corals.forEach(coral => {
-            const healthPercent = coral.health / coral.maxHealth;
-            ctx.fillStyle = coral.color;
-            ctx.shadowBlur = 10;
-            ctx.shadowColor = '#FF69B4';
-            ctx.beginPath();
-            ctx.arc(coral.x, coral.y, coral.radius, 0, Math.PI*2);
-            ctx.fill();
-            ctx.shadowBlur = 0;
-            ctx.fillStyle = 'white';
-            ctx.font = '14px "Press Start 2P"';
-            ctx.textAlign = 'center';
-            ctx.fillText(healthPercent < 0.5 ? '😢' : '🪸', coral.x, coral.y+2);
-            ctx.fillStyle = '#333';
-            ctx.fillRect(coral.x - coral.radius, coral.y + coral.radius + 5, coral.radius*2, 6);
-            ctx.fillStyle = healthPercent > 0.5 ? '#4CAF50' : '#FF5252';
-            ctx.fillRect(coral.x - coral.radius, coral.y + coral.radius + 5, coral.radius*2 * healthPercent, 6);
-        });
-    }
-
-    function drawTrash() {
-        trashItems.forEach(item => {
-            if (item.collected) return;
-            ctx.fillStyle = '#8B4513';
-            ctx.beginPath();
-            ctx.arc(item.x, item.y, item.radius, 0, Math.PI*2);
-            ctx.fill();
-            ctx.fillStyle = 'white';
-            ctx.font = '16px "Press Start 2P"';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText(item.emoji, item.x, item.y);
-        });
-    }
-
-    function drawLionfishes() {
-        lionfishes.forEach(fish => {
-            ctx.fillStyle = '#FF4500';
-            ctx.shadowBlur = 12;
-            ctx.shadowColor = '#FF0000';
-            ctx.beginPath();
-            ctx.arc(fish.x, fish.y, fish.radius, 0, Math.PI*2);
-            ctx.fill();
-            ctx.shadowBlur = 0;
-            ctx.fillStyle = 'white';
-            ctx.font = '18px "Press Start 2P"';
-            ctx.fillText('🦁🐠', fish.x-8, fish.y-10);
-        });
-    }
-
-    function drawStarfishes() {
-        starfishes.forEach(star => {
-            if (star.collected) return;
-            ctx.fillStyle = '#FFD700';
-            ctx.beginPath();
-            ctx.arc(star.x, star.y, star.radius, 0, Math.PI*2);
-            ctx.fill();
-            ctx.fillStyle = 'white';
-            ctx.font = '20px "Press Start 2P"';
-            ctx.fillText('⭐', star.x-5, star.y-10);
-        });
-    }
-
-    function drawPlayer() {
-        ctx.fillStyle = '#1E90FF';
-        ctx.shadowBlur = 15;
-        ctx.shadowColor = '#00BFFF';
-        ctx.beginPath();
-        ctx.arc(player.x, player.y, player.radius, 0, Math.PI*2);
-        ctx.fill();
-        ctx.shadowBlur = 0;
-        ctx.fillStyle = 'white';
-        ctx.font = '22px "Press Start 2P"';
-        ctx.textAlign = 'center';
-        ctx.fillText('🔱', player.x, player.y-5);
-    }
-
-    function updateElements() {
-        trashItems.forEach(item => {
-            if (!item.collected) {
-                item.y += item.speed;
-                if (item.y > canvas.height + 20) item.collected = true;
-                corals.forEach(coral => {
-                    if (Math.hypot(coral.x - item.x, coral.y - item.y) < coral.radius + item.radius) {
-                        coral.health -= 5;
-                        item.collected = true;
-                        if (coral.health <= 0) coral.health = 0;
-                    }
-                });
-            }
-        });
-
-        lionfishes.forEach(fish => {
-            fish.x += fish.speedX * fish.direction;
-            fish.y += fish.speedY;
-            if (fish.x < 0 || fish.x > canvas.width) fish.direction *= -1;
-            if (fish.y > canvas.height + 30) fish.y = -30;
-            corals.forEach(coral => {
-                if (Math.hypot(coral.x - fish.x, coral.y - fish.y) < coral.radius + fish.radius) {
-                    coral.health -= 8;
-                }
-            });
-            if (Math.hypot(player.x - fish.x, player.y - fish.y) < player.radius + fish.radius) {
-                health -= 15;
-                lionfishes.splice(lionfishes.indexOf(fish), 1);
-            }
-        });
-
-        starfishes.forEach(star => {
-            if (star.collected) return;
-            if (Math.hypot(player.x - star.x, player.y - star.y) < player.radius + star.radius) {
-                star.collected = true;
-                stars++;
-                addLocalCoins(5);
-                updateHUD();
-                showPopup('⭐ ¡Estrella!');
-            }
-        });
-
-        trashItems = trashItems.filter(item => !item.collected);
-        starfishes = starfishes.filter(star => !star.collected);
-
-        if (corals.filter(c => c.health <= 0).length >= corals.length) {
-            gameOver();
-        }
-
-        if (health <= 0) {
-            health = 0;
-            gameOver();
-        }
-    }
-
-    function gameOver() {
-        gameActive = false;
-        if (typeof Tecnomath !== 'undefined' && Tecnomath.getCurrentUser()) {
-            Tecnomath.addCoins(stars * 10);
-            Tecnomath.updateHighScore('coral-guardian', stars);
-            updateHUD();
-        }
-        showPopup(`😢 Arrecife dañado. Estrellas: ${stars}`);
-        setTimeout(() => {
-            restartGame();
-        }, 3000);
-    }
-
-    function restartGame() {
-        health = 100;
-        stars = 0;
-        gameActive = true;
-        generateCorals();
-        trashItems = [];
-        lionfishes = [];
-        generateStarfish();
-        updateHUD();
-        if (gameLoopId) cancelAnimationFrame(gameLoopId);
-        gameLoopId = requestAnimationFrame(gameLoop);
-    }
-
-    function showPopup(msg) {
-        popupContent.textContent = msg;
-        popupMessage.classList.add('show');
-        setTimeout(() => popupMessage.classList.remove('show'), 2000);
-    }
-
     function openShop() {
-        gamePaused = true;
+        if (gameState === STATE.PLAYING) {
+            gameState = STATE.PAUSED;
+        }
         renderShopItems();
         shopModal.classList.add('open');
     }
+
     function closeShop() {
         shopModal.classList.remove('open');
-        gamePaused = false;
-        if (!gameLoopId) gameLoopId = requestAnimationFrame(gameLoop);
+        if (gameState === STATE.PAUSED) {
+            gameState = STATE.PLAYING;
+            if (!gameLoopId) gameLoopId = requestAnimationFrame(gameLoop);
+        }
     }
 
     function renderShopItems() {
         shopItemsContainer.innerHTML = '';
         const items = [
-            { name:'❤️ Curar coral', price:40, action:()=>{ corals.forEach(c => c.health = Math.min(c.maxHealth, c.health+30)); } },
-            { name:'🛡️ Escudo (10s)', price:30, action:()=>{ health = Math.min(100, health+20); updateHUD(); } },
-            { name:'💱 Convertir 🌐→💰', price:0, action:()=>{ openExchange(); } }
+            { name:'❤️ Curar todos los corales', price:40, action:()=>{ corals.forEach(c => c.health = c.maxHealth); updateHUD(); } },
+            { name:'🛡️ Escudo (15s)', price:30, action:()=>{ shieldActive = true; shieldTimer = 300; } },
+            { name:'⚡ Velocidad x2 (10s)', price:25, action:()=>{ speedBoost = 2; setTimeout(()=>speedBoost=1,10000); } },
+            { name:'🧲 Imán estrellas (20s)', price:20, action:()=>{ magnetActive = true; magnetTimer = 400; } },
+            { name:'💖 Vida completa', price:50, action:()=>{ health = maxHealth; updateHUD(); } },
+            { name:'💱 Convertir 🌐→💰 (10% com)', price:0, action:()=>{ openExchange(); } }
         ];
         items.forEach(item => {
             const div = document.createElement('div');
             div.className = 'shop-item';
-            div.innerHTML = `<span>${item.name}</span><span>${item.price > 0 ? item.price+' 💰' : '10% com'}</span>`;
+            div.innerHTML = `<span style="flex:1; text-align:left;">${item.name}</span><span>${item.price > 0 ? item.price+' 💰' : '10% com'}</span>`;
             const buyBtn = document.createElement('button');
-            buyBtn.textContent = 'Comprar';
-            if (item.price === 0) { buyBtn.disabled = false; buyBtn.textContent = 'Convertir'; }
-            else buyBtn.disabled = !(typeof Tecnomath !== 'undefined' && Tecnomath.isAdmin()) && localCoins < item.price;
+            buyBtn.textContent = item.price === 0 ? 'Convertir' : 'Comprar';
+            const isAdmin = (typeof Tecnomath !== 'undefined' && Tecnomath.isAdmin());
+            if (item.price > 0 && !isAdmin && localCoins < item.price) buyBtn.disabled = true;
             buyBtn.addEventListener('click', () => {
-                if (item.price === 0) { item.action(); }
-                else if (typeof Tecnomath !== 'undefined' && Tecnomath.isAdmin()) { item.action(); }
-                else if (spendLocalCoins(item.price)) { item.action(); }
-                updateHUD(); renderShopItems();
+                if (item.price === 0) {
+                    item.action();
+                } else if (isAdmin) {
+                    item.action();
+                } else if (spendLocalCoins(item.price)) {
+                    item.action();
+                }
+                updateHUD();
+                renderShopItems();
             });
             div.appendChild(buyBtn);
             shopItemsContainer.appendChild(div);
@@ -483,18 +877,21 @@
     }
 
     function openExchange() {
-        if (typeof Tecnomath === 'undefined' || !Tecnomath.getCurrentUser()) { alert('Inicia sesión'); return; }
-        if (typeof Tecnomath !== 'undefined' && Tecnomath.isAdmin()) { localCoins += 500; saveStats(); updateHUD(); renderShopItems(); return; }
-        const amount = prompt('Monedas globales a convertir:');
+        if (typeof Tecnomath === 'undefined' || !Tecnomath.getCurrentUser()) { alert('Inicia sesión en Tecnomath'); return; }
+        if (Tecnomath.isAdmin()) { localCoins += 500; saveStats(); updateHUD(); renderShopItems(); return; }
+        const amount = prompt('Monedas globales a convertir (10% de comisión):');
         if (!amount) return;
         const num = parseInt(amount);
         if (isNaN(num) || num<=0) return;
         if (Tecnomath.exchangeGlobalToLocal('coral-guardian', num)) {
             localCoins = Tecnomath.getGameCoins('coral-guardian');
-            saveStats(); updateHUD(); renderShopItems();
+            saveStats();
+            updateHUD();
+            renderShopItems();
         } else alert('Fondos insuficientes');
     }
 
+    // ================= ADMIN =================
     const ADMINS = { "1983":"Junior", "2024":"Nicole", "7777":"Mateo", "8888":"Jaider", "ods2026":"ODS Master" };
     function openAdminPanel() {
         const code = prompt('CÓDIGO ADMIN:');
@@ -505,58 +902,69 @@
         } else if (code) alert('🔒 ACCESO DENEGADO');
     }
 
-    let keys = {};
-    document.addEventListener('keydown', e => { keys[e.key] = true; });
-    document.addEventListener('keyup', e => { keys[e.key] = false; });
-    function handleInput() {
-        if (!gameActive || gamePaused) return;
-        const spd = 4;
-        if (keys['ArrowLeft'] || keys['a']) player.x = Math.max(player.radius, player.x - spd);
-        if (keys['ArrowRight'] || keys['d']) player.x = Math.min(canvas.width - player.radius, player.x + spd);
-        if (keys['ArrowUp'] || keys['w']) player.y = Math.max(player.radius, player.y - spd);
-        if (keys['ArrowDown'] || keys['s']) player.y = Math.min(canvas.height - player.radius, player.y + spd);
-    }
-    canvas.addEventListener('touchmove', e => {
-        e.preventDefault();
-        const rect = canvas.getBoundingClientRect();
-        const scaleX = canvas.width/rect.width, scaleY = canvas.height/rect.height;
-        const tx = (e.touches[0].clientX - rect.left)*scaleX;
-        const ty = (e.touches[0].clientY - rect.top)*scaleY;
-        player.x = Math.max(player.radius, Math.min(canvas.width - player.radius, tx));
-        player.y = Math.max(player.radius, Math.min(canvas.height - player.radius, ty));
-    }, {passive: false});
-
+    // ================= GAME LOOP =================
+    let gameLoopId = null;
     function gameLoop() {
-        if (!gameActive || gamePaused) { gameLoopId = null; return; }
         handleInput();
-        spawnTimer++;
-        if (spawnTimer % 60 === 0) spawnTrash();
-        if (spawnTimer % 90 === 0) spawnLionfish();
-        updateElements();
-        ctx.clearRect(0,0,canvas.width,canvas.height);
+        update();
+        ctx.clearRect(0, 0, W, H);
         drawBackground();
-        drawCorals();
-        drawTrash();
-        drawLionfishes();
-        drawStarfishes();
-        drawPlayer();
+        corals.forEach(c => c.draw());
+        trashItems.forEach(t => t.draw());
+        lionfishes.forEach(l => l.draw());
+        starfishes.forEach(s => s.draw());
+        powerUps.forEach(p => p.draw());
+        if (boss) boss.draw();
+        player.draw();
+        drawUI();
         updateHUD();
-        gameLoopId = requestAnimationFrame(gameLoop);
+
+        if (gameActive && gameState === STATE.PLAYING) {
+            gameLoopId = requestAnimationFrame(gameLoop);
+        } else {
+            gameLoopId = null;
+        }
     }
 
+    // ================= MENSAJES Y UI =================
+    function showPopup(msg) {
+        popupContent.textContent = msg;
+        popupMessage.classList.add('show');
+        setTimeout(() => popupMessage.classList.remove('show'), 2500);
+    }
+
+    // Eventos botones principales
+    document.getElementById('startGameBtn').addEventListener('click', startGame);
+    document.getElementById('tutorialBtn').addEventListener('click', ()=>{
+        tutorialModal.classList.add('open');
+    });
+    document.getElementById('closeTutorialBtn').addEventListener('click', ()=>{
+        tutorialModal.classList.remove('open');
+    });
     document.getElementById('shopBtn').addEventListener('click', openShop);
     closeShopBtn.addEventListener('click', closeShop);
     document.getElementById('restartBtn').addEventListener('click', restartGame);
+    document.getElementById('pauseBtn').addEventListener('click', ()=>{
+        if (gameState === STATE.PLAYING) {
+            gameState = STATE.PAUSED;
+            gameActive = false;
+        } else if (gameState === STATE.PAUSED) {
+            gameState = STATE.PLAYING;
+            gameActive = true;
+            if (!gameLoopId) gameLoopId = requestAnimationFrame(gameLoop);
+        }
+    });
     adminBtn.addEventListener('click', openAdminPanel);
 
-    function init() {
-        loadStats();
-        generateCorals();
-        generateStarfish();
-        gameLoopId = requestAnimationFrame(gameLoop);
-    }
-
-    init();
+    // Inicialización final
+    player = new Player();
+    loadStats();
+    // El juego no arranca hasta pulsar "JUGAR"
+    generateCorals(6);
+    generateStarfish(3);
+    updateHUD();
+    // Mostrar el menú principal por defecto
+    mainMenu.classList.add('open');
 </script>
 </body>
 </html>
