@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Eco-Marine Cleaner · ODS 14</title>
+    <title>Marine Tech Cleaner · USV & ROV · ODS 14 + 9</title>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <script src="shared.js"></script>
     <style>
@@ -34,37 +34,52 @@
         }
         .hud {
             display:flex; justify-content:space-between; align-items:center;
-            font-size:6px; padding:6px 10px; background:rgba(0,0,0,0.7);
+            font-size:5px; padding:6px 10px; background:rgba(0,0,0,0.7);
             border-radius:8px; flex-shrink:0; flex-wrap:wrap; gap:4px;
             color:var(--neon-green); text-shadow:0 0 6px var(--neon-green);
         }
-        .hud-item { display:flex; align-items:center; gap:4px; }
+        .hud-item { display:flex; align-items:center; gap:3px; }
         .hud-item span { color:var(--gold); }
         .btn-admin {
-            font-size:16px; cursor:pointer; background:none; border:none;
+            font-size:14px; cursor:pointer; background:none; border:none;
             color:var(--neon-pink); text-shadow:0 0 8px var(--neon-pink);
-            transition:0.2s;
         }
-        .btn-admin:hover { transform:scale(1.2); }
+        .vehicle-selector {
+            display:flex; gap:6px; flex-shrink:0; overflow-x:auto;
+            padding:4px 0; scrollbar-width:none;
+        }
+        .vehicle-selector::-webkit-scrollbar { display:none; }
+        .vehicle-btn {
+            font-family:'Press Start 2P', cursive; font-size:4px; padding:6px 10px;
+            background:#0d0d1a; border:1px solid #333; color:#888; border-radius:6px;
+            cursor:pointer; white-space:nowrap; transition:0.2s;
+        }
+        .vehicle-btn.active {
+            border-color:var(--neon-cyan); color:var(--neon-cyan);
+            background:rgba(0,255,255,0.1); text-shadow:0 0 6px var(--neon-cyan);
+        }
+        .vehicle-btn.locked { opacity:0.5; cursor:not-allowed; }
         canvas {
-            border:2px solid var(--neon-cyan); box-shadow:0 0 15px var(--neon-cyan), 0 0 30px rgba(0,255,255,0.3);
-            border-radius:8px; width:100%; aspect-ratio:4/5; background:linear-gradient(180deg, #0a1628 0%, #0d2137 50%, #1a4a6e 100%);
+            border:2px solid var(--neon-cyan); box-shadow:0 0 15px var(--neon-cyan);
+            border-radius:8px; width:100%; aspect-ratio:4/5;
+            background:linear-gradient(180deg, #0a1628 0%, #0d2137 50%, #1a4a6e 100%);
             flex-shrink:0;
         }
-        .message-area {
-            text-align:center; font-size:7px; color:var(--gold); text-shadow:0 0 8px var(--gold);
-            min-height:20px; flex-shrink:0;
+        .status-bar {
+            font-size:5px; color:var(--neon-green); text-align:center;
+            text-shadow:0 0 6px var(--neon-green); flex-shrink:0;
         }
         .button-row {
-            display:flex; gap:8px; flex-shrink:0; justify-content:center; flex-wrap:wrap;
+            display:flex; gap:6px; flex-shrink:0; justify-content:center; flex-wrap:wrap;
         }
         .btn {
-            font-family:'Press Start 2P', cursive; font-size:6px; padding:8px 12px;
+            font-family:'Press Start 2P', cursive; font-size:5px; padding:8px 12px;
             border:none; border-radius:6px; cursor:pointer; color:white;
             box-shadow:0 0 10px currentColor; transition:0.2s;
         }
         .btn-shop { background:var(--neon-pink); }
-        .btn-restart { background:var(--neon-cyan); color:#000; }
+        .btn-drone { background:#FF9800; }
+        .btn-rov { background:#4CAF50; }
         .btn:active { transform:scale(0.95); }
         .btn:disabled { opacity:0.5; cursor:not-allowed; }
         .shop-modal {
@@ -96,48 +111,52 @@
             color:var(--neon-pink); font-family:'Press Start 2P', cursive;
             font-size:7px; padding:8px 16px; cursor:pointer; border-radius:6px;
         }
-        .level-popup {
+        .popup {
             position:fixed; top:50%; left:50%; transform:translate(-50%,-50%) scale(0);
             background:var(--card-bg); border:2px solid var(--gold); padding:20px;
             text-align:center; z-index:200; border-radius:10px;
             box-shadow:0 0 30px rgba(255,215,0,0.4); transition:0.3s;
         }
-        .level-popup.show { transform:translate(-50%,-50%) scale(1); }
+        .popup.show { transform:translate(-50%,-50%) scale(1); }
     </style>
 </head>
 <body>
 <div class="game-wrapper">
     <div class="hud">
+        <div class="hud-item">⚓ USV: <span id="usvName">Seacat 1.0</span></div>
         <div class="hud-item">🧹 Nivel <span id="levelDisplay">1</span></div>
-        <div class="hud-item">⭐ Puntos: <span id="scoreDisplay">0</span></div>
+        <div class="hud-item">⭐ <span id="scoreDisplay">0</span></div>
         <div class="hud-item">🛡️ <span id="shieldDisplay">0</span></div>
         <div class="hud-item">🌐 <span id="globalCoinsDisplay">0</span></div>
         <div class="hud-item">💰 <span id="localCoinsDisplay">0</span></div>
         <button class="btn-admin" id="adminBtn" title="Admin">☁️</button>
     </div>
 
+    <div class="vehicle-selector" id="vehicleSelector"></div>
+
     <canvas id="gameCanvas" width="400" height="500"></canvas>
 
-    <div class="message-area" id="messageArea">Recoge la basura del océano 🌊</div>
+    <div class="status-bar" id="statusBar">USV Seacat 1.0 activo. Sin drones.</div>
 
     <div class="button-row">
         <button class="btn btn-shop" id="shopBtn">🛒 TIENDA</button>
-        <button class="btn btn-restart" id="restartBtn">🔄 REINICIAR</button>
+        <button class="btn btn-drone" id="droneBtn">🚁 DRONE (30💰)</button>
+        <button class="btn btn-rov" id="rovBtn">🤖 ROV (50💰)</button>
     </div>
 </div>
 
 <div class="shop-modal" id="shopModal">
     <div class="shop-content">
-        <h3>🛒 TIENDA MARINA</h3>
+        <h3>🛒 TIENDA NAVAL</h3>
         <div id="shopItemsContainer"></div>
         <button class="close-shop" id="closeShopBtn">CERRAR</button>
     </div>
 </div>
 
-<div class="level-popup" id="levelPopup">
+<div class="popup" id="popup">
     <h2 id="popupTitle" style="font-size:10px; margin-bottom:10px;"></h2>
     <p id="popupMsg" style="font-size:6px; color:#aaa; margin-bottom:15px;"></p>
-    <button class="btn btn-restart" id="popupBtn">CONTINUAR</button>
+    <button class="btn btn-drone" id="popupBtn" onclick="closePopup()">CONTINUAR</button>
 </div>
 
 <script>
@@ -145,9 +164,18 @@
     const ctx = canvas.getContext('2d');
 
     // ═══════════════════════════════════════
-    //  ESTADO DEL JUEGO
+    //  VEHÍCULOS DISPONIBLES
     // ═══════════════════════════════════════
-    let boat = { x: canvas.width/2 - 25, y: canvas.height - 60, width: 50, height: 30, speed: 5 };
+    const vehicles = [
+        { id:'seacat1', name:'USV Seacat 1.0', speed:4, color:'#A0A0A0', price:0, unlockLevel:1 },
+        { id:'seacat2', name:'USV Seacat 2.0', speed:6, color:'#C0C0C0', price:150, unlockLevel:2 },
+        { id:'seacat10', name:'USV Seacat 10.0', speed:9, color:'#E0E0E0', price:400, unlockLevel:5 },
+        { id:'usv_tender', name:'USV Tender', speed:7, color:'#FFD700', price:300, unlockLevel:4, special:'tender' },
+    ];
+
+    let currentVehicleIndex = 0;
+    let unlockedVehicles = [0]; // índice del vehículo desbloqueado (Seacat 1.0)
+    let boat = { x: canvas.width/2-25, y: canvas.height-60, width:50, height:30 };
     let trashItems = [];
     let score = 0;
     let level = 1;
@@ -155,31 +183,16 @@
     let shieldActive = 0;
     let magnetActive = false;
     let magnetTimer = 0;
-    let speedBoostActive = false;
-    let speedBoostTimer = 0;
+    let droneActive = false;
+    let droneTimer = 0;
+    let droneCollectRadius = 40;
+    let rovActive = false;
+    let rovTimer = 0;
+    let rovCollectInterval = 0;
     let gameActive = true;
     let gamePaused = false;
     let gameLoopId = null;
 
-    // Elementos DOM
-    const levelDisplay = document.getElementById('levelDisplay');
-    const scoreDisplay = document.getElementById('scoreDisplay');
-    const shieldDisplay = document.getElementById('shieldDisplay');
-    const globalCoinsDisplay = document.getElementById('globalCoinsDisplay');
-    const localCoinsDisplay = document.getElementById('localCoinsDisplay');
-    const messageArea = document.getElementById('messageArea');
-    const shopModal = document.getElementById('shopModal');
-    const closeShopBtn = document.getElementById('closeShopBtn');
-    const shopItemsContainer = document.getElementById('shopItemsContainer');
-    const levelPopup = document.getElementById('levelPopup');
-    const popupTitle = document.getElementById('popupTitle');
-    const popupMsg = document.getElementById('popupMsg');
-    const popupBtn = document.getElementById('popupBtn');
-    const adminBtn = document.getElementById('adminBtn');
-
-    // ═══════════════════════════════════════
-    //  TIPOS DE BASURA (ODS 14)
-    // ═══════════════════════════════════════
     const trashTypes = [
         { emoji:'🍾', name:'Botella', points:10, color:'#8BC34A', speed:1.5 },
         { emoji:'🛍️', name:'Bolsa', points:5, color:'#9E9E9E', speed:2 },
@@ -190,25 +203,54 @@
         { emoji:'📦', name:'Caja', points:6, color:'#607D8B', speed:1.6 }
     ];
 
+    // Elementos DOM
+    const usvNameEl = document.getElementById('usvName');
+    const levelDisplay = document.getElementById('levelDisplay');
+    const scoreDisplay = document.getElementById('scoreDisplay');
+    const shieldDisplay = document.getElementById('shieldDisplay');
+    const globalCoinsDisplay = document.getElementById('globalCoinsDisplay');
+    const localCoinsDisplay = document.getElementById('localCoinsDisplay');
+    const vehicleSelector = document.getElementById('vehicleSelector');
+    const statusBar = document.getElementById('statusBar');
+    const shopModal = document.getElementById('shopModal');
+    const closeShopBtn = document.getElementById('closeShopBtn');
+    const shopItemsContainer = document.getElementById('shopItemsContainer');
+    const popup = document.getElementById('popup');
+    const popupTitle = document.getElementById('popupTitle');
+    const popupMsg = document.getElementById('popupMsg');
+    const adminBtn = document.getElementById('adminBtn');
+
     // ═══════════════════════════════════════
     //  FUNCIONES DE MONEDAS Y GUARDADO
     // ═══════════════════════════════════════
     function loadStats() {
+        const saved = localStorage.getItem('marine_tech_stats');
+        if (saved) {
+            try {
+                const data = JSON.parse(saved);
+                if (data.unlockedVehicles) unlockedVehicles = data.unlockedVehicles;
+                if (data.currentVehicleIndex !== undefined) currentVehicleIndex = data.currentVehicleIndex;
+            } catch(e) {}
+        }
         if (typeof Tecnomath !== 'undefined' && Tecnomath.getCurrentUser()) {
-            localCoins = Tecnomath.getGameCoins('marine-cleaner');
-        } else {
-            localCoins = 0;
+            localCoins = Tecnomath.getGameCoins('marine-tech');
         }
         updateHUD();
+        renderVehicleSelector();
     }
 
     function saveStats() {
+        localStorage.setItem('marine_tech_stats', JSON.stringify({
+            unlockedVehicles: unlockedVehicles,
+            currentVehicleIndex: currentVehicleIndex
+        }));
         if (typeof Tecnomath !== 'undefined' && Tecnomath.getCurrentUser()) {
-            Tecnomath.setGameCoins('marine-cleaner', localCoins);
+            Tecnomath.setGameCoins('marine-tech', localCoins);
         }
     }
 
     function updateHUD() {
+        usvNameEl.textContent = vehicles[currentVehicleIndex].name;
         levelDisplay.textContent = level;
         scoreDisplay.textContent = score;
         shieldDisplay.textContent = shieldActive;
@@ -218,6 +260,8 @@
         } else {
             globalCoinsDisplay.textContent = '0';
         }
+        document.getElementById('droneBtn').disabled = !(typeof Tecnomath !== 'undefined' && Tecnomath.isAdmin()) && localCoins < 30;
+        document.getElementById('rovBtn').disabled = !(typeof Tecnomath !== 'undefined' && Tecnomath.isAdmin()) && localCoins < 50;
     }
 
     function addLocalCoins(amount) {
@@ -237,6 +281,39 @@
     }
 
     // ═══════════════════════════════════════
+    //  SELECTOR DE VEHÍCULOS
+    // ═══════════════════════════════════════
+    function renderVehicleSelector() {
+        vehicleSelector.innerHTML = '';
+        vehicles.forEach((v, idx) => {
+            const btn = document.createElement('div');
+            btn.className = 'vehicle-btn';
+            btn.textContent = v.name.split(' ').pop(); // muestra "Seacat 1.0"
+            if (idx === currentVehicleIndex) btn.classList.add('active');
+            if (!unlockedVehicles.includes(idx)) btn.classList.add('locked');
+            else btn.addEventListener('click', () => switchVehicle(idx));
+            vehicleSelector.appendChild(btn);
+        });
+    }
+
+    function switchVehicle(idx) {
+        if (!unlockedVehicles.includes(idx)) return;
+        currentVehicleIndex = idx;
+        boat.speed = vehicles[idx].speed;
+        renderVehicleSelector();
+        updateStatusBar();
+        saveStats();
+    }
+
+    function unlockVehicle(idx) {
+        if (!unlockedVehicles.includes(idx)) {
+            unlockedVehicles.push(idx);
+            renderVehicleSelector();
+            saveStats();
+        }
+    }
+
+    // ═══════════════════════════════════════
     //  SPAWN DE BASURA
     // ═══════════════════════════════════════
     function spawnTrash() {
@@ -245,10 +322,7 @@
         const y = Math.random() * (canvas.height * 0.4);
         const dir = Math.random() * Math.PI * 2;
         trashItems.push({
-            x: x,
-            y: y,
-            radius: 16,
-            type: type,
+            x: x, y: y, radius: 16, type: type,
             dx: Math.cos(dir) * type.speed * (0.5 + Math.random()),
             dy: Math.sin(dir) * type.speed * (0.5 + Math.random()),
             collected: false
@@ -258,42 +332,66 @@
     function spawnInitialTrash() {
         trashItems = [];
         const count = 5 + level * 2;
-        for (let i = 0; i < count; i++) {
-            spawnTrash();
-        }
+        for (let i=0; i<count; i++) spawnTrash();
     }
 
     // ═══════════════════════════════════════
     //  DIBUJO
     // ═══════════════════════════════════════
     function drawBackground() {
-        // Burbujas
-        for (let i = 0; i < 20; i++) {
-            ctx.fillStyle = `rgba(255,255,255,${Math.random() * 0.15 + 0.05})`;
+        for (let i=0; i<20; i++) {
+            ctx.fillStyle = `rgba(255,255,255,${Math.random()*0.15+0.05})`;
             ctx.beginPath();
-            ctx.arc(Math.random() * canvas.width, Math.random() * canvas.height, Math.random() * 3 + 1, 0, Math.PI * 2);
+            ctx.arc(Math.random()*canvas.width, Math.random()*canvas.height, Math.random()*3+1, 0, Math.PI*2);
             ctx.fill();
         }
-        // Peces
         ctx.fillStyle = '#FFD700';
-        ctx.font = '16px "Press Start 2P"';
-        ctx.fillText('🐟', 30, 60);
-        ctx.fillText('🐠', canvas.width - 50, 80);
-        ctx.fillText('🐡', 60, canvas.height - 100);
+        ctx.font = '14px "Press Start 2P"';
+        ctx.fillText('🐟', 20, 50);
+        ctx.fillText('🐠', canvas.width-40, 70);
     }
 
-    function drawBoat() {
-        ctx.fillStyle = '#E0E0E0';
-        ctx.shadowColor = '#FFFFFF';
-        ctx.shadowBlur = 8;
+    function drawUSV() {
+        const veh = vehicles[currentVehicleIndex];
+        ctx.fillStyle = veh.color;
+        ctx.shadowColor = veh.color;
+        ctx.shadowBlur = 10;
         ctx.fillRect(boat.x, boat.y, boat.width, boat.height);
+        ctx.fillStyle = '#333';
+        ctx.fillRect(boat.x+5, boat.y-6, 8, 8);
+        ctx.fillRect(boat.x+35, boat.y-6, 8, 8);
         ctx.shadowBlur = 0;
-        ctx.fillStyle = '#555';
-        ctx.fillRect(boat.x + 5, boat.y - 8, 8, 10);
-        ctx.fillRect(boat.x + 35, boat.y - 8, 8, 10);
         ctx.fillStyle = '#FFF';
-        ctx.font = '18px "Press Start 2P"';
-        ctx.fillText('🚢', boat.x + 10, boat.y + 22);
+        ctx.font = '10px "Press Start 2P"';
+        ctx.fillText('USV', boat.x+5, boat.y+20);
+        if (veh.special === 'tender') {
+            ctx.fillStyle = '#FFD700';
+            ctx.font = '8px "Press Start 2P"';
+            ctx.fillText('TENDER', boat.x, boat.y-10);
+        }
+    }
+
+    function drawDroneEffect() {
+        if (!droneActive) return;
+        ctx.strokeStyle = 'rgba(255,165,0,0.7)';
+        ctx.setLineDash([4, 8]);
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.arc(boat.x+boat.width/2, boat.y+boat.height/2, droneCollectRadius, 0, Math.PI*2);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.fillStyle = '#FF9800';
+        ctx.font = '16px "Press Start 2P"';
+        const droneX = boat.x + boat.width/2 + Math.sin(Date.now()/300)*30;
+        const droneY = boat.y - 30 + Math.cos(Date.now()/400)*10;
+        ctx.fillText('🚁', droneX-8, droneY);
+    }
+
+    function drawROV() {
+        if (!rovActive) return;
+        ctx.fillStyle = '#4CAF50';
+        ctx.font = '14px "Press Start 2P"';
+        ctx.fillText('🤖', boat.x+5, boat.y-15);
     }
 
     function drawTrash() {
@@ -303,7 +401,7 @@
             ctx.shadowColor = item.type.color;
             ctx.shadowBlur = 6;
             ctx.beginPath();
-            ctx.arc(item.x, item.y, item.radius, 0, Math.PI * 2);
+            ctx.arc(item.x, item.y, item.radius, 0, Math.PI*2);
             ctx.fill();
             ctx.shadowBlur = 0;
             ctx.fillStyle = 'white';
@@ -314,40 +412,35 @@
         });
     }
 
-    function drawMagnetEffect() {
-        if (!magnetActive) return;
-        ctx.strokeStyle = 'rgba(255,215,0,0.6)';
-        ctx.lineWidth = 2;
-        ctx.setLineDash([5, 10]);
-        ctx.beginPath();
-        ctx.arc(boat.x + boat.width/2, boat.y + boat.height/2, 80, 0, Math.PI * 2);
-        ctx.stroke();
-        ctx.setLineDash([]);
-    }
-
     // ═══════════════════════════════════════
     //  ACTUALIZACIÓN
     // ═══════════════════════════════════════
     function updateTrash() {
         trashItems.forEach(item => {
             if (item.collected) return;
-            // Movimiento errático
             item.x += item.dx;
             item.y += item.dy;
-            // Rebotar en bordes
             if (item.x < item.radius || item.x > canvas.width - item.radius) item.dx *= -1;
             if (item.y < item.radius || item.y > canvas.height - item.radius) item.dy *= -1;
-            // Efecto imán
             if (magnetActive) {
                 const dx = (boat.x + boat.width/2) - item.x;
                 const dy = (boat.y + boat.height/2) - item.y;
                 const dist = Math.sqrt(dx*dx + dy*dy);
-                if (dist < 120) {
-                    item.x += dx * 0.03;
-                    item.y += dy * 0.03;
+                if (dist < 120) { item.x += dx*0.03; item.y += dy*0.03; }
+            }
+            // Drone auto-recolección
+            if (droneActive && !item.collected) {
+                const dx = (boat.x + boat.width/2) - item.x;
+                const dy = (boat.y + boat.height/2) - item.y;
+                if (Math.sqrt(dx*dx+dy*dy) < droneCollectRadius) {
+                    item.collected = true;
+                    score += item.type.points;
+                    addLocalCoins(Math.floor(item.type.points/2));
+                    updateHUD();
+                    return;
                 }
             }
-            // Colisión con barco
+            // Colisión USV
             if (!item.collected &&
                 item.x + item.radius > boat.x &&
                 item.x - item.radius < boat.x + boat.width &&
@@ -355,61 +448,64 @@
                 item.y - item.radius < boat.y + boat.height) {
                 item.collected = true;
                 score += item.type.points;
-                addLocalCoins(Math.floor(item.type.points / 2));
+                addLocalCoins(Math.floor(item.type.points/2));
                 updateHUD();
             }
         });
-
-        // Limpiar recolectados
-        trashItems = trashItems.filter(item => {
-            if (item.collected && shieldActive > 0 && Math.random() < 0.1) {
-                shieldActive--;
-                updateHUD();
+        // ROV autónomo
+        if (rovActive) {
+            rovCollectInterval++;
+            if (rovCollectInterval >= 60) { // cada segundo
+                rovCollectInterval = 0;
+                const near = trashItems.find(item => !item.collected &&
+                    Math.abs(item.x - (boat.x+boat.width/2)) < 60 &&
+                    Math.abs(item.y - (boat.y+boat.height/2)) < 60);
+                if (near) {
+                    near.collected = true;
+                    score += near.type.points;
+                    addLocalCoins(Math.floor(near.type.points/2));
+                    updateHUD();
+                }
             }
-            return !item.collected;
-        });
-
-        // Verificar nivel completado
-        if (trashItems.length === 0) {
-            levelComplete();
         }
+        trashItems = trashItems.filter(item => !item.collected);
+        if (trashItems.length === 0) levelComplete();
     }
 
     function updateTimers() {
-        if (magnetActive) {
-            magnetTimer--;
-            if (magnetTimer <= 0) magnetActive = false;
-        }
-        if (speedBoostActive) {
-            speedBoostTimer--;
-            if (speedBoostTimer <= 0) {
-                speedBoostActive = false;
-                boat.speed = 5;
-            }
-        }
+        if (magnetActive) { magnetTimer--; if (magnetTimer<=0) magnetActive = false; }
+        if (droneActive) { droneTimer--; if (droneTimer<=0) droneActive = false; }
+        if (rovActive) { rovTimer--; if (rovTimer<=0) rovActive = false; }
     }
 
     function levelComplete() {
         gameActive = false;
         const bonus = level * 50;
         score += bonus;
-        addLocalCoins(Math.floor(bonus / 2));
+        addLocalCoins(Math.floor(bonus/2));
         if (typeof Tecnomath !== 'undefined' && Tecnomath.getCurrentUser()) {
-            Tecnomath.addCoins(Math.floor(bonus / 5));
-            Tecnomath.updateHighScore('marine-cleaner', score);
+            Tecnomath.addCoins(Math.floor(bonus/5));
+            Tecnomath.updateHighScore('marine-tech', score);
         }
         updateHUD();
-        popupTitle.textContent = '🌊 ¡NIVEL LIMPIO!';
-        popupMsg.textContent = `Puntos: ${score}\nBono: +${bonus}\nSiguiente nivel: ${level + 1}`;
-        levelPopup.classList.add('show');
-        popupBtn.textContent = 'SIGUIENTE NIVEL';
-        popupBtn.onclick = () => {
-            levelPopup.classList.remove('show');
-            level++;
-            localCoins += Math.floor(level * 5);
-            saveStats();
-            startLevel();
-        };
+        popupTitle.textContent = '🌊 ¡ZONA LIMPIA!';
+        popupMsg.textContent = `Puntos: ${score} | Bono: +${bonus}\nNivel ${level+1} disponible`;
+        popup.classList.add('show');
+    }
+
+    function closePopup() {
+        popup.classList.remove('show');
+        level++;
+        addLocalCoins(level*5);
+        // Desbloquear vehículos por nivel
+        vehicles.forEach((v, idx) => {
+            if (v.unlockLevel <= level && !unlockedVehicles.includes(idx)) {
+                unlockVehicle(idx);
+                showMessage(`🔓 ${v.name} desbloqueado!`);
+            }
+        });
+        saveStats();
+        startLevel();
     }
 
     function startLevel() {
@@ -417,77 +513,52 @@
         boat.x = canvas.width/2 - boat.width/2;
         boat.y = canvas.height - 60;
         spawnInitialTrash();
-        messageArea.textContent = `Nivel ${level}: Recoge ${trashItems.length} basuras`;
+        updateStatusBar();
         updateHUD();
-        if (!gameLoopId) {
-            gameLoopId = requestAnimationFrame(gameLoop);
-        }
+        if (!gameLoopId) gameLoopId = requestAnimationFrame(gameLoop);
     }
 
-    function restartGame() {
-        level = 1;
-        score = 0;
-        shieldActive = 0;
-        magnetActive = false;
-        speedBoostActive = false;
-        boat.speed = 5;
-        gameActive = true;
-        gamePaused = false;
-        if (gameLoopId) {
-            cancelAnimationFrame(gameLoopId);
-            gameLoopId = null;
-        }
-        startLevel();
-        updateHUD();
+    function updateStatusBar() {
+        const parts = [`USV ${vehicles[currentVehicleIndex].name.split(' ').pop()}`];
+        if (droneActive) parts.push('🚁 Drone activo');
+        if (rovActive) parts.push('🤖 ROV activo');
+        if (magnetActive) parts.push('🧲 Imán');
+        if (shieldActive) parts.push(`🛡️ x${shieldActive}`);
+        statusBar.textContent = parts.join(' · ');
     }
 
     // ═══════════════════════════════════════
     //  TIENDA
     // ═══════════════════════════════════════
-    function openShop() {
-        gamePaused = true;
-        renderShopItems();
-        shopModal.classList.add('open');
-    }
-
-    function closeShop() {
-        shopModal.classList.remove('open');
-        gamePaused = false;
-        if (!gameLoopId) {
-            gameLoopId = requestAnimationFrame(gameLoop);
-        }
-    }
+    function openShop() { gamePaused = true; renderShopItems(); shopModal.classList.add('open'); }
+    function closeShop() { shopModal.classList.remove('open'); gamePaused = false; if (!gameLoopId) gameLoopId = requestAnimationFrame(gameLoop); }
 
     function renderShopItems() {
         shopItemsContainer.innerHTML = '';
         const items = [
-            { name:'🛡️ Escudo (10s)', desc:'Protege de perder basura', price:30, action:() => { shieldActive = Math.min(shieldActive + 1, 5); updateHUD(); } },
-            { name:'🧲 Imán (15s)', desc:'Atrae basura cercana', price:40, action:() => { magnetActive = true; magnetTimer = 900; } },
-            { name:'⚡ Turbo (10s)', desc:'Velocidad x2 del barco', price:50, action:() => { speedBoostActive = true; speedBoostTimer = 600; boat.speed = 10; } },
-            { name:'💱 Convertir 🌐→💰', desc:'10% comisión', price:0, action:() => { openExchange(); } }
+            { name:'🛡️ Escudo (10s)', price:30, action:() => { shieldActive = Math.min(shieldActive+1,5); updateHUD(); } },
+            { name:'🧲 Imán (15s)', price:40, action:() => { magnetActive = true; magnetTimer = 900; } },
+            { name:'🚁 Drone (20s)', price:60, action:() => { droneActive = true; droneTimer = 1200; } },
+            { name:'🤖 ROV (30s)', price:90, action:() => { rovActive = true; rovTimer = 1800; rovCollectInterval = 0; } },
+            { name:'⚡ Seacat 2.0', price:150, unlock:'seacat2', action:() => { unlockVehicle(1); switchVehicle(1); } },
+            { name:'⚡ Seacat 10.0', price:400, unlock:'seacat10', action:() => { unlockVehicle(2); switchVehicle(2); } },
+            { name:'⚡ USV Tender', price:300, unlock:'usv_tender', action:() => { unlockVehicle(3); switchVehicle(3); } },
+            { name:'💱 Convertir 🌐→💰', price:0, action:() => { openExchange(); } }
         ];
         items.forEach(item => {
+            if (item.unlock && unlockedVehicles.includes(vehicles.findIndex(v=>v.id===item.unlock))) return; // ya desbloqueado
             const div = document.createElement('div');
             div.className = 'shop-item';
-            div.innerHTML = `<span>${item.name}<br><small style="color:#888;">${item.desc}</small></span><span style="color:var(--gold)">${item.price > 0 ? item.price+' 💰' : '10% com'}</span>`;
+            div.innerHTML = `<span>${item.name}</span><span style="color:var(--gold)">${item.price > 0 ? item.price+' 💰' : '10% com'}</span>`;
             const buyBtn = document.createElement('button');
             buyBtn.textContent = 'Comprar';
-            if (item.price === 0) {
-                buyBtn.disabled = false;
-                buyBtn.textContent = 'Convertir';
-            } else {
-                buyBtn.disabled = !(typeof Tecnomath !== 'undefined' && Tecnomath.isAdmin()) && localCoins < item.price;
-            }
+            if (item.price === 0) { buyBtn.disabled = false; buyBtn.textContent = 'Convertir'; }
+            else buyBtn.disabled = !(typeof Tecnomath !== 'undefined' && Tecnomath.isAdmin()) && localCoins < item.price;
             buyBtn.addEventListener('click', () => {
-                if (item.price === 0) {
-                    item.action();
-                } else if (typeof Tecnomath !== 'undefined' && Tecnomath.isAdmin()) {
-                    item.action();
-                } else if (spendLocalCoins(item.price)) {
-                    item.action();
-                }
-                updateHUD();
-                renderShopItems();
+                if (item.price === 0) { item.action(); }
+                else if (typeof Tecnomath !== 'undefined' && Tecnomath.isAdmin()) { item.action(); }
+                else if (spendLocalCoins(item.price)) { item.action(); }
+                updateHUD(); renderShopItems();
             });
             div.appendChild(buyBtn);
             shopItemsContainer.appendChild(div);
@@ -495,29 +566,16 @@
     }
 
     function openExchange() {
-        if (typeof Tecnomath === 'undefined' || !Tecnomath.getCurrentUser()) {
-            alert('Inicia sesión para convertir');
-            return;
-        }
-        if (typeof Tecnomath !== 'undefined' && Tecnomath.isAdmin()) {
-            localCoins += 500;
-            saveStats();
-            updateHUD();
-            renderShopItems();
-            return;
-        }
-        const amount = prompt('Cantidad de monedas globales a convertir:');
+        if (typeof Tecnomath === 'undefined' || !Tecnomath.getCurrentUser()) { alert('Inicia sesión'); return; }
+        if (typeof Tecnomath !== 'undefined' && Tecnomath.isAdmin()) { localCoins += 500; saveStats(); updateHUD(); renderShopItems(); return; }
+        const amount = prompt('Monedas globales a convertir:');
         if (!amount) return;
         const num = parseInt(amount);
-        if (isNaN(num) || num <= 0) return;
-        if (Tecnomath.exchangeGlobalToLocal('marine-cleaner', num)) {
-            localCoins = Tecnomath.getGameCoins('marine-cleaner');
-            saveStats();
-            updateHUD();
-            renderShopItems();
-        } else {
-            alert('Fondos insuficientes');
-        }
+        if (isNaN(num) || num<=0) return;
+        if (Tecnomath.exchangeGlobalToLocal('marine-tech', num)) {
+            localCoins = Tecnomath.getGameCoins('marine-tech');
+            saveStats(); updateHUD(); renderShopItems();
+        } else alert('Fondos insuficientes');
     }
 
     // ═══════════════════════════════════════
@@ -527,76 +585,51 @@
     function openAdminPanel() {
         const code = prompt('CÓDIGO ADMIN:');
         if (ADMINS[code]) {
-            if (typeof Tecnomath !== 'undefined' && Tecnomath.getCurrentUser()) {
-                Tecnomath.setAdmin(Tecnomath.getCurrentUser().username);
-            }
+            if (typeof Tecnomath !== 'undefined' && Tecnomath.getCurrentUser()) Tecnomath.setAdmin(Tecnomath.getCurrentUser().username);
             updateHUD();
             alert(`⚡ ${ADMINS[code].toUpperCase()} · ADMIN ACTIVADO`);
-        } else if (code) {
-            alert('🔒 ACCESO DENEGADO');
-        }
+        } else if (code) alert('🔒 ACCESO DENEGADO');
     }
 
     // ═══════════════════════════════════════
     //  CONTROLES
     // ═══════════════════════════════════════
     let keys = {};
-    document.addEventListener('keydown', (e) => { keys[e.key] = true; });
-    document.addEventListener('keyup', (e) => { keys[e.key] = false; });
-
+    document.addEventListener('keydown', e => { keys[e.key] = true; });
+    document.addEventListener('keyup', e => { keys[e.key] = false; });
     function handleInput() {
         if (!gameActive || gamePaused) return;
-        if (keys['ArrowLeft'] || keys['a']) boat.x = Math.max(0, boat.x - boat.speed);
-        if (keys['ArrowRight'] || keys['d']) boat.x = Math.min(canvas.width - boat.width, boat.x + boat.speed);
-        if (keys['ArrowUp'] || keys['w']) boat.y = Math.max(0, boat.y - boat.speed);
-        if (keys['ArrowDown'] || keys['s']) boat.y = Math.min(canvas.height - boat.height, boat.y + boat.speed);
+        const spd = vehicles[currentVehicleIndex].speed;
+        if (keys['ArrowLeft'] || keys['a']) boat.x = Math.max(0, boat.x - spd);
+        if (keys['ArrowRight'] || keys['d']) boat.x = Math.min(canvas.width-boat.width, boat.x + spd);
+        if (keys['ArrowUp'] || keys['w']) boat.y = Math.max(0, boat.y - spd);
+        if (keys['ArrowDown'] || keys['s']) boat.y = Math.min(canvas.height-boat.height, boat.y + spd);
     }
-
-    // Controles táctiles
-    let touchActive = false;
-    canvas.addEventListener('touchstart', (e) => {
+    canvas.addEventListener('touchmove', e => {
         e.preventDefault();
-        touchActive = true;
         const rect = canvas.getBoundingClientRect();
-        const scaleX = canvas.width / rect.width;
-        const scaleY = canvas.height / rect.height;
-        const touchX = (e.touches[0].clientX - rect.left) * scaleX;
-        const touchY = (e.touches[0].clientY - rect.top) * scaleY;
-        boat.x = Math.max(0, Math.min(canvas.width - boat.width, touchX - boat.width/2));
-        boat.y = Math.max(0, Math.min(canvas.height - boat.height, touchY - boat.height/2));
-    });
-    canvas.addEventListener('touchmove', (e) => {
-        e.preventDefault();
-        if (!touchActive) return;
-        const rect = canvas.getBoundingClientRect();
-        const scaleX = canvas.width / rect.width;
-        const scaleY = canvas.height / rect.height;
-        const touchX = (e.touches[0].clientX - rect.left) * scaleX;
-        const touchY = (e.touches[0].clientY - rect.top) * scaleY;
-        boat.x = Math.max(0, Math.min(canvas.width - boat.width, touchX - boat.width/2));
-        boat.y = Math.max(0, Math.min(canvas.height - boat.height, touchY - boat.height/2));
-    });
-    canvas.addEventListener('touchend', () => { touchActive = false; });
+        const scaleX = canvas.width/rect.width, scaleY = canvas.height/rect.height;
+        const tx = (e.touches[0].clientX - rect.left)*scaleX;
+        const ty = (e.touches[0].clientY - rect.top)*scaleY;
+        boat.x = Math.max(0, Math.min(canvas.width-boat.width, tx - boat.width/2));
+        boat.y = Math.max(0, Math.min(canvas.height-boat.height, ty - boat.height/2));
+    }, {passive: false});
 
     // ═══════════════════════════════════════
     //  GAME LOOP
     // ═══════════════════════════════════════
     function gameLoop() {
-        if (!gameActive || gamePaused) {
-            gameLoopId = null;
-            return;
-        }
-
+        if (!gameActive || gamePaused) { gameLoopId = null; return; }
         handleInput();
         updateTrash();
         updateTimers();
-
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.clearRect(0,0,canvas.width,canvas.height);
         drawBackground();
         drawTrash();
-        drawMagnetEffect();
-        drawBoat();
-
+        drawDroneEffect();
+        drawROV();
+        drawUSV();
+        updateStatusBar();
         gameLoopId = requestAnimationFrame(gameLoop);
     }
 
@@ -605,18 +638,25 @@
     // ═══════════════════════════════════════
     document.getElementById('shopBtn').addEventListener('click', openShop);
     closeShopBtn.addEventListener('click', closeShop);
-    document.getElementById('restartBtn').addEventListener('click', restartGame);
+    document.getElementById('droneBtn').addEventListener('click', () => {
+        if (typeof Tecnomath !== 'undefined' && Tecnomath.isAdmin()) { droneActive = true; droneTimer = 1200; }
+        else if (spendLocalCoins(30)) { droneActive = true; droneTimer = 1200; }
+        updateHUD();
+    });
+    document.getElementById('rovBtn').addEventListener('click', () => {
+        if (typeof Tecnomath !== 'undefined' && Tecnomath.isAdmin()) { rovActive = true; rovTimer = 1800; }
+        else if (spendLocalCoins(50)) { rovActive = true; rovTimer = 1800; }
+        updateHUD();
+    });
     adminBtn.addEventListener('click', openAdminPanel);
 
-    // ═══════════════════════════════════════
-    //  INICIO
-    // ═══════════════════════════════════════
+    function showMessage(msg) { /* opcional */ }
+
     function init() {
         loadStats();
         startLevel();
         gameLoopId = requestAnimationFrame(gameLoop);
     }
-
     init();
 </script>
 </body>
