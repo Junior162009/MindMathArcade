@@ -9,6 +9,8 @@
         :root {
             --neon-cyan: #00FFFF; --neon-pink: #FF00FF; --neon-green: #39FF14;
             --neon-yellow: #FFE600; --gold: #FFD700; --retro-bg: #060610; --card-bg: #0d0d1a;
+            --grid-cols: 2;
+            --card-min-width: 140px;
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         html, body {
@@ -22,16 +24,16 @@
             background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.12) 2px, rgba(0,0,0,0.12) 4px);
         }
         header {
-            padding: 15px; border-bottom: 2px solid var(--neon-pink);
+            padding: clamp(10px, 2vw, 15px); border-bottom: 2px solid var(--neon-pink);
             background: linear-gradient(90deg, rgba(255,0,255,0.05), transparent, rgba(0,255,255,0.05));
             position: relative;
         }
         .header-content {
-            display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;
+            display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: clamp(6px, 1vw, 10px);
         }
         .logo-area { text-align: left; }
         h1 {
-            font-size: clamp(14px, 5vw, 22px); color: var(--neon-cyan);
+            font-size: clamp(12px, 4vw, 22px); color: var(--neon-cyan);
             text-shadow: 0 0 10px var(--neon-cyan), 0 0 30px var(--neon-cyan);
             letter-spacing: 2px; animation: titlePulse 2s ease-in-out infinite; margin: 0;
         }
@@ -39,26 +41,30 @@
             0%,100%{ text-shadow: 0 0 10px var(--neon-cyan), 0 0 30px var(--neon-cyan); }
             50%{ text-shadow: 0 0 20px var(--neon-pink), 0 0 50px var(--neon-pink); }
         }
-        .subtitle { font-size: 6px; color: var(--neon-pink); text-shadow: 0 0 8px var(--neon-pink); margin-top: 5px; }
+        .subtitle { font-size: clamp(4px, 1.5vw, 6px); color: var(--neon-pink); text-shadow: 0 0 8px var(--neon-pink); margin-top: 5px; }
         .user-area {
-            display: flex; align-items: center; gap: 15px;
+            display: flex; align-items: center; gap: clamp(8px, 2vw, 15px);
         }
-        #userDisplay { font-size: 6px; color: var(--neon-green); text-shadow: 0 0 6px var(--neon-green); }
+        #userDisplay { font-size: clamp(4px, 1.5vw, 6px); color: var(--neon-green); text-shadow: 0 0 6px var(--neon-green); }
         .auth-link {
-            font-size: 6px; color: var(--neon-pink); text-decoration: none;
+            font-size: clamp(4px, 1.5vw, 6px); color: var(--neon-pink); text-decoration: none;
             border: 1px solid var(--neon-pink); padding: 4px 8px; border-radius: 4px;
             transition: 0.2s;
         }
         .auth-link:hover { background: rgba(255,0,255,0.1); box-shadow: 0 0 10px var(--neon-pink); }
+
         .container {
-            max-width: 700px; margin: 20px auto; padding: 10px;
-            display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px;
+            max-width: 900px; margin: 20px auto; padding: 10px;
+            display: grid;
+            grid-template-columns: repeat(var(--grid-cols), minmax(var(--card-min-width), 1fr));
+            gap: clamp(8px, 2vw, 15px);
         }
         .project-card {
             background: var(--card-bg); border: 2px solid #1a1a2e; border-radius: 12px;
-            padding: 15px 10px; text-align: center; cursor: pointer; transition: all 0.3s;
+            padding: clamp(10px, 2vw, 15px) clamp(6px, 1.5vw, 10px);
+            text-align: center; cursor: pointer; transition: all 0.3s;
             text-decoration: none; display: flex; flex-direction: column; align-items: center;
-            gap: 10px; opacity: 0; animation: fadeIn 0.6s ease-out forwards;
+            gap: clamp(6px, 1.5vw, 10px); opacity: 0; animation: fadeIn 0.6s ease-out forwards;
         }
         .project-card:nth-child(1) { animation-delay: 0.1s; }
         .project-card:nth-child(2) { animation-delay: 0.2s; }
@@ -74,7 +80,8 @@
             transform: translateY(-5px);
         }
         .project-icon {
-            width: 70px; height: 70px; background: #0a0a1a; border-radius: 16px;
+            width: clamp(50px, 12vw, 70px); height: clamp(50px, 12vw, 70px);
+            background: #0a0a1a; border-radius: 16px;
             display: flex; align-items: center; justify-content: center;
             border: 2px solid #333; transition: 0.3s; overflow: hidden;
         }
@@ -84,42 +91,86 @@
         .project-icon img {
             width: 100%; height: 100%; object-fit: cover; border-radius: 12px;
         }
-        .project-icon span { font-size: 36px; }
-        .project-name { font-size: 6px; color: white; text-shadow: 0 0 5px rgba(255,255,255,0.5); }
-        .project-desc { font-size: 4px; color: #aaa; line-height: 1.4; }
-        /* Estilos para patrocinadores */
+        .project-icon span { font-size: clamp(24px, 6vw, 36px); }
+        .project-name { font-size: clamp(4px, 1.5vw, 6px); color: white; text-shadow: 0 0 5px rgba(255,255,255,0.5); }
+        .project-desc { font-size: clamp(3px, 1vw, 4px); color: #aaa; line-height: 1.4; }
+
+        /* Patrocinadores */
         .sponsors-section {
-            max-width: 700px; margin: 20px auto; padding: 10px;
+            max-width: 900px; margin: 20px auto; padding: 10px;
         }
         .sponsors-label {
-            font-size: 6px; color: #888; text-align: center; margin-bottom: 15px; letter-spacing: 2px;
+            font-size: clamp(4px, 1.5vw, 6px); color: #888; text-align: center;
+            margin-bottom: 15px; letter-spacing: 2px;
         }
         .sponsors-grid {
-            display: flex; flex-wrap: wrap; justify-content: center; gap: 20px;
+            display: flex; flex-wrap: wrap; justify-content: center; gap: clamp(10px, 2vw, 20px);
         }
         .sponsor-card {
             background: var(--card-bg); border: 2px solid #1a1a2e; border-radius: 12px;
-            padding: 12px; text-align: center; width: 140px;
+            padding: clamp(8px, 1.5vw, 12px); text-align: center;
+            width: clamp(100px, 20vw, 140px);
             display: flex; flex-direction: column; align-items: center; gap: 8px;
         }
         .sponsor-icon {
-            width: 60px; height: 60px; border-radius: 12px; background: #0a0a1a;
+            width: clamp(40px, 8vw, 60px); height: clamp(40px, 8vw, 60px);
+            border-radius: 12px; background: #0a0a1a;
             border: 2px solid #333; display: flex; align-items: center; justify-content: center;
-            font-size: 28px; overflow: hidden;
+            font-size: clamp(20px, 5vw, 28px); overflow: hidden;
         }
         .sponsor-icon img {
             width: 100%; height: 100%; object-fit: cover; border-radius: 12px;
         }
         .sponsor-name {
-            font-size: 5px; color: white;
+            font-size: clamp(3px, 1.2vw, 5px); color: white;
         }
         .sponsor-phone {
-            font-size: 5px; color: var(--gold); text-decoration: none;
+            font-size: clamp(3px, 1.2vw, 5px); color: var(--gold); text-decoration: none;
             font-family: 'Orbitron', monospace;
         }
+
+        /* Indicador de dispositivo */
+        .device-indicator {
+            position: fixed; bottom: 10px; left: 10px;
+            font-size: 8px; color: #444; z-index: 10000;
+            background: rgba(0,0,0,0.5); padding: 4px 8px; border-radius: 4px;
+            display: none;
+        }
+        .device-indicator.show { display: block; }
+
         footer {
-            text-align: center; padding: 15px; color: #444; font-size: 5px;
+            text-align: center; padding: 15px; color: #444;
+            font-size: clamp(3px, 1vw, 5px);
             border-top: 1px solid #1a1a2e; margin-top: 20px;
+        }
+
+        /* Media queries para ajustar columnas según dispositivo */
+        @media (max-width: 480px) {
+            :root {
+                --grid-cols: 2;
+                --card-min-width: 120px;
+            }
+            .header-content { flex-direction: column; align-items: flex-start; }
+            .user-area { width: 100%; justify-content: space-between; }
+        }
+        @media (min-width: 481px) and (max-width: 768px) {
+            :root {
+                --grid-cols: 3;
+                --card-min-width: 140px;
+            }
+        }
+        @media (min-width: 769px) {
+            :root {
+                --grid-cols: 4;
+                --card-min-width: 150px;
+            }
+        }
+        @media (min-width: 1200px) {
+            :root {
+                --grid-cols: 5;
+                --card-min-width: 160px;
+            }
+            .container { max-width: 1100px; }
         }
     </style>
 </head>
@@ -137,7 +188,6 @@
         </div>
     </header>
 
-    <!-- SECCIÓN DE PATROCINADORES -->
     <div class="sponsors-section">
         <div class="sponsors-label">— PATROCINADORES —</div>
         <div class="sponsors-grid" id="sponsorsArea"></div>
@@ -145,12 +195,83 @@
 
     <div class="container" id="projectsContainer"></div>
 
+    <div class="device-indicator" id="deviceIndicator"></div>
+
     <footer>© 2026 Tecnomath · Powered by GitHub Pages</footer>
 
-    <!-- Librería central de usuarios/monedas -->
     <script src="shared.js"></script>
 
     <script>
+        // ═══════════════════════════════════════
+        // DETECCIÓN DE DISPOSITIVO
+        // ═══════════════════════════════════════
+        function detectDevice() {
+            const ua = navigator.userAgent;
+            const width = window.innerWidth;
+            let deviceType = 'desktop';
+            let orientation = 'landscape';
+
+            if (width < window.innerHeight) orientation = 'portrait';
+
+            if (/Mobi|Android|iPhone|iPad|iPod|webOS/i.test(ua)) {
+                if (/iPad|Tablet|PlayBook/i.test(ua) || (width >= 768 && /Mobile/i.test(ua))) {
+                    deviceType = 'tablet';
+                } else {
+                    deviceType = 'mobile';
+                }
+            } else if (width < 768) {
+                deviceType = 'small-desktop';
+            } else if (width >= 1200) {
+                deviceType = 'large-desktop';
+            }
+
+            document.body.dataset.device = deviceType;
+            document.body.dataset.orientation = orientation;
+
+            // Ajustar variables CSS según dispositivo
+            const root = document.documentElement;
+            switch (deviceType) {
+                case 'mobile':
+                    root.style.setProperty('--grid-cols', orientation === 'landscape' ? 3 : 2);
+                    root.style.setProperty('--card-min-width', '110px');
+                    break;
+                case 'tablet':
+                    root.style.setProperty('--grid-cols', orientation === 'landscape' ? 4 : 3);
+                    root.style.setProperty('--card-min-width', '140px');
+                    break;
+                case 'small-desktop':
+                    root.style.setProperty('--grid-cols', 3);
+                    root.style.setProperty('--card-min-width', '150px');
+                    break;
+                case 'large-desktop':
+                    root.style.setProperty('--grid-cols', 5);
+                    root.style.setProperty('--card-min-width', '160px');
+                    break;
+                default:
+                    root.style.setProperty('--grid-cols', 4);
+                    root.style.setProperty('--card-min-width', '150px');
+            }
+
+            // Mostrar indicador de dispositivo (solo en desarrollo)
+            const indicator = document.getElementById('deviceIndicator');
+            if (indicator) {
+                indicator.textContent = `${deviceType} · ${orientation} · ${width}px`;
+                indicator.classList.add('show');
+            }
+
+            return { deviceType, orientation, width };
+        }
+
+        const deviceInfo = detectDevice();
+        window.addEventListener('resize', () => {
+            detectDevice();
+            // Re-renderizar patrocinadores con nuevo tamaño si es necesario
+            renderSponsors();
+        });
+        window.addEventListener('orientationchange', () => {
+            setTimeout(detectDevice, 300);
+        });
+
         // ═══════════════════════════════════════
         // PATROCINADORES ALEATORIOS CON IMÁGENES
         // ═══════════════════════════════════════
@@ -160,33 +281,33 @@
             { name: "Carlos Ruiz",     phone: "+573003334455", image: "👨‍🏫", imageUrl: "" },
             { name: "Laura Díaz",      phone: "+573004445566", image: "👩‍💻", imageUrl: "" },
             { name: "EcoWorld",        phone: "+573006667788", image: "🌱", imageUrl: "" },
-            { name: "NeuroLab",        phone: "+573007778899", image: "🧠", imageUrl: "" }
+            { name: "NeuroLab",        phone: "+573007778899", image: "🧠", imageUrl: "" },
+            { name: "Oceanix",         phone: "+573008889900", image: "🌊", imageUrl: "" },
+            { name: "GreenTech",       phone: "+573009990011", image: "🌿", imageUrl: "" }
         ];
 
-        (function renderSponsors() {
+        function renderSponsors() {
             const selected = [...allSponsorsPortal].sort(() => Math.random() - 0.5).slice(0, 4);
             const area = document.getElementById('sponsorsArea');
+            if (!area) return;
+            area.innerHTML = '';
             selected.forEach(sponsor => {
                 const card = document.createElement('div');
                 card.className = 'sponsor-card';
 
-                // Contenedor de la imagen/emoji
                 const icon = document.createElement('div');
                 icon.className = 'sponsor-icon';
 
-                // Si hay una URL de imagen, intentamos cargarla
                 if (sponsor.imageUrl && sponsor.imageUrl.trim() !== '') {
                     const img = document.createElement('img');
                     img.src = sponsor.imageUrl;
                     img.alt = sponsor.name;
                     img.onerror = function() {
-                        // Si la imagen falla, mostramos el emoji
                         this.remove();
                         icon.textContent = sponsor.image || '🖼️';
                     };
                     icon.appendChild(img);
                 } else {
-                    // Sin imagen, usamos el emoji
                     icon.textContent = sponsor.image || '🖼️';
                 }
 
@@ -204,7 +325,9 @@
                 card.appendChild(phone);
                 area.appendChild(card);
             });
-        })();
+        }
+
+        renderSponsors();
 
         // ═══════════════════════════════════════
         // LISTA DE PROYECTOS
@@ -223,13 +346,6 @@
                 url: "eco-collector.html",
                 imageUrl: "img/ecorecolector.png",
                 icon: "🌍"
-            },
-            {
-                name: "Dragon Ball",
-                desc: "Goku",
-                url: "https://github.com/enjoy-games/html5-goku-en-javascript/blob/gh-pages/index.html",
-                imageUrl: "",
-                icon: "🧠"
             },
             {
                 name: "Eco-Barrio 2030",
@@ -258,7 +374,21 @@
                 url: "coral-guardian.html",
                 imageUrl: "",
                 icon: "🪸"
-            }          
+            },
+            {
+                name: "Orbit Cleaner",
+                desc: "Limpia el espacio y protege la capa de ozono. ODS 13",
+                url: "orbit-cleaner.html",
+                imageUrl: "",
+                icon: "🛰️"
+            },
+            {
+                name: "Marine Tech Cleaner",
+                desc: "USV y ROV para limpiar el océano. ODS 14",
+                url: "marine-cleaner.html",
+                imageUrl: "",
+                icon: "🌊"
+            }
         ];
 
         const container = document.getElementById('projectsContainer');
@@ -305,7 +435,6 @@
         });
     </script>
 
-    <!-- Actualizar barra de usuario -->
     <script>
         (function updateUserBar() {
             const userDisplay = document.getElementById('userDisplay');
