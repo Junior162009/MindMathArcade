@@ -53,6 +53,37 @@
         }
         .auth-link:hover { background: rgba(255,0,255,0.1); box-shadow: 0 0 10px var(--neon-pink); }
 
+        /* NUEVA SECCIÓN HÉROE */
+        .hero {
+            text-align: center; padding: clamp(20px, 4vw, 30px) 10px;
+            background: rgba(0,0,0,0.3);
+            border-bottom: 1px solid #1a1a2e;
+        }
+        .hero h2 {
+            font-size: clamp(8px, 2.5vw, 14px); color: var(--neon-yellow);
+            text-shadow: 0 0 12px var(--neon-yellow);
+            margin-bottom: 10px;
+        }
+        .hero p {
+            font-size: clamp(4px, 1.2vw, 6px); color: #aaa; max-width: 600px;
+            margin: 0 auto; line-height: 1.8;
+        }
+
+        /* FILTROS */
+        .filters {
+            display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;
+            padding: 10px; max-width: 800px; margin: 0 auto;
+        }
+        .filter-btn {
+            font-family: 'Press Start 2P', cursive; font-size: clamp(4px, 1vw, 6px);
+            padding: 6px 12px; background: #111; border: 1px solid #333; color: #888;
+            border-radius: 20px; cursor: pointer; transition: 0.2s;
+        }
+        .filter-btn.active, .filter-btn:hover {
+            border-color: var(--neon-cyan); color: var(--neon-cyan);
+            background: rgba(0,255,255,0.1); text-shadow: 0 0 6px var(--neon-cyan);
+        }
+
         .container {
             max-width: 900px; margin: 20px auto; padding: 10px;
             display: grid;
@@ -95,7 +126,7 @@
         .project-name { font-size: clamp(4px, 1.5vw, 6px); color: white; text-shadow: 0 0 5px rgba(255,255,255,0.5); }
         .project-desc { font-size: clamp(3px, 1vw, 4px); color: #aaa; line-height: 1.4; }
 
-        /* Patrocinadores */
+        /* PATROCINADORES */
         .sponsors-section {
             max-width: 900px; margin: 20px auto; padding: 10px;
         }
@@ -129,47 +160,26 @@
             font-family: 'Orbitron', monospace;
         }
 
-        /* Indicador de dispositivo */
-        .device-indicator {
-            position: fixed; bottom: 10px; left: 10px;
-            font-size: 8px; color: #444; z-index: 10000;
-            background: rgba(0,0,0,0.5); padding: 4px 8px; border-radius: 4px;
-            display: none;
-        }
-        .device-indicator.show { display: block; }
-
         footer {
             text-align: center; padding: 15px; color: #444;
             font-size: clamp(3px, 1vw, 5px);
             border-top: 1px solid #1a1a2e; margin-top: 20px;
         }
 
-        /* Media queries para ajustar columnas según dispositivo */
+        /* MEDIA QUERIES PARA COLUMNAS */
         @media (max-width: 480px) {
-            :root {
-                --grid-cols: 2;
-                --card-min-width: 120px;
-            }
+            :root { --grid-cols: 2; --card-min-width: 120px; }
             .header-content { flex-direction: column; align-items: flex-start; }
             .user-area { width: 100%; justify-content: space-between; }
         }
         @media (min-width: 481px) and (max-width: 768px) {
-            :root {
-                --grid-cols: 3;
-                --card-min-width: 140px;
-            }
+            :root { --grid-cols: 3; --card-min-width: 140px; }
         }
         @media (min-width: 769px) {
-            :root {
-                --grid-cols: 4;
-                --card-min-width: 150px;
-            }
+            :root { --grid-cols: 4; --card-min-width: 150px; }
         }
         @media (min-width: 1200px) {
-            :root {
-                --grid-cols: 5;
-                --card-min-width: 160px;
-            }
+            :root { --grid-cols: 5; --card-min-width: 160px; }
             .container { max-width: 1100px; }
         }
     </style>
@@ -188,14 +198,19 @@
         </div>
     </header>
 
+    <div class="hero">
+        <h2>🎮 EXPLORA Y JUEGA</h2>
+        <p>Descubre minijuegos educativos sobre los ODS. Matemáticas, ciencias, ecología y mucho más. ¡Gana monedas y desbloquea logros!</p>
+    </div>
+
+    <div class="filters" id="filtersContainer"></div>
+
     <div class="sponsors-section">
         <div class="sponsors-label">— PATROCINADORES —</div>
         <div class="sponsors-grid" id="sponsorsArea"></div>
     </div>
 
     <div class="container" id="projectsContainer"></div>
-
-    <div class="device-indicator" id="deviceIndicator"></div>
 
     <footer>© 2026 Tecnomath · Powered by GitHub Pages</footer>
 
@@ -208,27 +223,18 @@
         function detectDevice() {
             const ua = navigator.userAgent;
             const width = window.innerWidth;
+            const height = window.innerHeight;
             let deviceType = 'desktop';
-            let orientation = 'landscape';
-
-            if (width < window.innerHeight) orientation = 'portrait';
+            let orientation = (width > height) ? 'landscape' : 'portrait';
 
             if (/Mobi|Android|iPhone|iPad|iPod|webOS/i.test(ua)) {
-                if (/iPad|Tablet|PlayBook/i.test(ua) || (width >= 768 && /Mobile/i.test(ua))) {
-                    deviceType = 'tablet';
-                } else {
-                    deviceType = 'mobile';
-                }
+                deviceType = (/iPad|Tablet|PlayBook/i.test(ua) || (width >= 768 && /Mobile/i.test(ua))) ? 'tablet' : 'mobile';
             } else if (width < 768) {
                 deviceType = 'small-desktop';
             } else if (width >= 1200) {
                 deviceType = 'large-desktop';
             }
 
-            document.body.dataset.device = deviceType;
-            document.body.dataset.orientation = orientation;
-
-            // Ajustar variables CSS según dispositivo
             const root = document.documentElement;
             switch (deviceType) {
                 case 'mobile':
@@ -251,21 +257,12 @@
                     root.style.setProperty('--grid-cols', 4);
                     root.style.setProperty('--card-min-width', '150px');
             }
-
-            // Mostrar indicador de dispositivo (solo en desarrollo)
-            const indicator = document.getElementById('deviceIndicator');
-            if (indicator) {
-                indicator.textContent = `${deviceType} · ${orientation} · ${width}px`;
-                indicator.classList.add('show');
-            }
-
             return { deviceType, orientation, width };
         }
 
         const deviceInfo = detectDevice();
         window.addEventListener('resize', () => {
             detectDevice();
-            // Re-renderizar patrocinadores con nuevo tamaño si es necesario
             renderSponsors();
         });
         window.addEventListener('orientationchange', () => {
@@ -273,7 +270,7 @@
         });
 
         // ═══════════════════════════════════════
-        // PATROCINADORES ALEATORIOS CON IMÁGENES
+        // PATROCINADORES
         // ═══════════════════════════════════════
         const allSponsorsPortal = [
             { name: "HappyBander",     phone: "+573001112233", image: "👨‍💼", imageUrl: "img/happybander.jpg" },
@@ -294,10 +291,8 @@
             selected.forEach(sponsor => {
                 const card = document.createElement('div');
                 card.className = 'sponsor-card';
-
                 const icon = document.createElement('div');
                 icon.className = 'sponsor-icon';
-
                 if (sponsor.imageUrl && sponsor.imageUrl.trim() !== '') {
                     const img = document.createElement('img');
                     img.src = sponsor.imageUrl;
@@ -310,132 +305,103 @@
                 } else {
                     icon.textContent = sponsor.image || '🖼️';
                 }
-
                 const name = document.createElement('div');
                 name.className = 'sponsor-name';
                 name.textContent = sponsor.name;
-
                 const phone = document.createElement('a');
                 phone.className = 'sponsor-phone';
                 phone.href = 'tel:' + sponsor.phone;
                 phone.textContent = sponsor.phone;
-
                 card.appendChild(icon);
                 card.appendChild(name);
                 card.appendChild(phone);
                 area.appendChild(card);
             });
         }
-
         renderSponsors();
 
         // ═══════════════════════════════════════
         // LISTA DE PROYECTOS
         // ═══════════════════════════════════════
         const projects = [
-            {
-                name: "MindMath Arcade",
-                desc: "Juego de matemáticas retro con 60+ niveles",
-                url: "game.html",
-                imageUrl: "img/mindmath.png",
-                icon: "🧮"
-            },
-            {
-                name: "Eco Recolector",
-                desc: "Atrapa agua y reciclables. ODS 6 y 12",
-                url: "eco-collector.html",
-                imageUrl: "img/ecorecolector.png",
-                icon: "🌍"
-            },
-            {
-                name: "Eco-Barrio 2030",
-                desc: "Simulador de ciudad sostenible. ODS 11,12,13,7",
-                url: "eco-barrio.html",
-                imageUrl: "",
-                icon: "🏙️"
-            },
-            {
-                name: "Animalandia",
-                desc: "Alimenta a los animales. Para niños pequeños",
-                url: "animalandia.html",
-                imageUrl: "",
-                icon: "🐮"
-            },
-            {
-                name: "ODS-2048",
-                desc: "Fusiona los 17 ODS. Juego de puzzle adictivo",
-                url: "ods-2048.html",
-                imageUrl: "",
-                icon: "🌐"
-            },
-            {
-                name: "Coral Guardian",
-                desc: "Protege el arrecife de basura y especies invasoras",
-                url: "coral-guardian.html",
-                imageUrl: "",
-                icon: "🪸"
-            },
-            {
-                name: "Orbit Cleaner",
-                desc: "Limpia el espacio y protege la capa de ozono. ODS 13",
-                url: "orbit-cleaner.html",
-                imageUrl: "",
-                icon: "🛰️"
-            },
-            {
-                name: "Marine Tech Cleaner",
-                desc: "USV y ROV para limpiar el océano. ODS 14",
-                url: "marine-cleaner.html",
-                imageUrl: "",
-                icon: "🌊"
-            }
+            { name: "MindMath Arcade", desc: "Juego de matemáticas retro con 60+ niveles", url: "game.html", imageUrl: "img/mindmath.png", icon: "🧮", category: "mates" },
+            { name: "Eco Recolector", desc: "Atrapa agua y reciclables. ODS 6 y 12", url: "eco-collector.html", imageUrl: "img/ecorecolector.png", icon: "🌍", category: "eco" },
+            { name: "Eco-Barrio 2030", desc: "Simulador de ciudad sostenible. ODS 11,12,13,7", url: "eco-barrio.html", imageUrl: "", icon: "🏙️", category: "eco" },
+            { name: "Animalandia", desc: "Alimenta a los animales. Para niños pequeños", url: "animalandia.html", imageUrl: "", icon: "🐮", category: "kids" },
+            { name: "ODS-2048", desc: "Fusiona los 17 ODS. Juego de puzzle adictivo", url: "ods-2048.html", imageUrl: "", icon: "🌐", category: "puzzle" },
+            { name: "Coral Guardian", desc: "Protege el arrecife de basura y especies invasoras", url: "coral-guardian.html", imageUrl: "", icon: "🪸", category: "eco" },
+            { name: "Orbit Cleaner", desc: "Limpia el espacio y protege la capa de ozono. ODS 13", url: "orbit-cleaner.html", imageUrl: "", icon: "🛰️", category: "eco" },
+            { name: "Marine Tech Cleaner", desc: "USV y ROV para limpiar el océano. ODS 14", url: "marine-cleaner.html", imageUrl: "", icon: "🌊", category: "eco" }
         ];
 
-        const container = document.getElementById('projectsContainer');
+        // Construir filtros dinámicamente
+        const categories = ['todos', ...new Set(projects.map(p => p.category))];
+        const filtersContainer = document.getElementById('filtersContainer');
+        categories.forEach(cat => {
+            const btn = document.createElement('button');
+            btn.className = 'filter-btn' + (cat === 'todos' ? ' active' : '');
+            btn.textContent = cat === 'todos' ? '🌍 TODOS' : 
+                              cat === 'mates' ? '➕ MATES' :
+                              cat === 'eco' ? '🌿 ECOLOGÍA' :
+                              cat === 'kids' ? '🐣 INFANTIL' :
+                              cat === 'puzzle' ? '🧩 PUZZLE' : cat.toUpperCase();
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                renderProjects(cat === 'todos' ? null : cat);
+            });
+            filtersContainer.appendChild(btn);
+        });
 
-        projects.forEach(proj => {
-            const card = document.createElement('a');
-            card.className = 'project-card';
-            card.href = proj.url;
-            card.target = (proj.url.endsWith('.html') && !proj.url.startsWith('http')) ? '_self' : '_blank';
-            card.rel = "noopener";
+        function renderProjects(filterCategory = null) {
+            const container = document.getElementById('projectsContainer');
+            container.innerHTML = '';
+            const filtered = filterCategory ? projects.filter(p => p.category === filterCategory) : projects;
 
-            const iconDiv = document.createElement('div');
-            iconDiv.className = 'project-icon';
+            filtered.forEach(proj => {
+                const card = document.createElement('a');
+                card.className = 'project-card';
+                card.href = proj.url;
+                card.target = (proj.url.endsWith('.html') && !proj.url.startsWith('http')) ? '_self' : '_blank';
+                card.rel = "noopener";
 
-            if (proj.imageUrl && proj.imageUrl.trim() !== '') {
-                const img = document.createElement('img');
-                img.src = proj.imageUrl;
-                img.alt = proj.name;
-                img.onerror = function() {
-                    this.remove();
+                const iconDiv = document.createElement('div');
+                iconDiv.className = 'project-icon';
+                if (proj.imageUrl && proj.imageUrl.trim() !== '') {
+                    const img = document.createElement('img');
+                    img.src = proj.imageUrl;
+                    img.alt = proj.name;
+                    img.onerror = function() {
+                        this.remove();
+                        const span = document.createElement('span');
+                        span.textContent = proj.icon || '🕹️';
+                        iconDiv.appendChild(span);
+                    };
+                    iconDiv.appendChild(img);
+                } else {
                     const span = document.createElement('span');
                     span.textContent = proj.icon || '🕹️';
                     iconDiv.appendChild(span);
-                };
-                iconDiv.appendChild(img);
-            } else {
-                const span = document.createElement('span');
-                span.textContent = proj.icon || '🕹️';
-                iconDiv.appendChild(span);
-            }
+                }
 
-            const nameDiv = document.createElement('div');
-            nameDiv.className = 'project-name';
-            nameDiv.textContent = proj.name;
+                const nameDiv = document.createElement('div');
+                nameDiv.className = 'project-name';
+                nameDiv.textContent = proj.name;
 
-            const descDiv = document.createElement('div');
-            descDiv.className = 'project-desc';
-            descDiv.textContent = proj.desc;
+                const descDiv = document.createElement('div');
+                descDiv.className = 'project-desc';
+                descDiv.textContent = proj.desc;
 
-            card.appendChild(iconDiv);
-            card.appendChild(nameDiv);
-            card.appendChild(descDiv);
-            container.appendChild(card);
-        });
-    </script>
+                card.appendChild(iconDiv);
+                card.appendChild(nameDiv);
+                card.appendChild(descDiv);
+                container.appendChild(card);
+            });
+        }
 
-    <script>
+        renderProjects();
+
+        // Actualizar barra de usuario
         (function updateUserBar() {
             const userDisplay = document.getElementById('userDisplay');
             if (!userDisplay) return;
