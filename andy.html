@@ -2,416 +2,513 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes">
-    <title>🧮 Suma Visual con Emojis | Aprende a sumar jugando</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes, viewport-fit=cover">
+    <title>🧮 EmojiMath Pro | Aprende mates con emojis</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+    <script src="shared.js"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        :root {
+            --neon-cyan: #00FFFF; --neon-pink: #FF00FF; --neon-green: #39FF14;
+            --gold: #FFD700; --retro-bg: #060610; --card-bg: #0d0d1a;
+            --coral: #FF6F61; --ocean: #2b6c91;
         }
-
-        body {
+        * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; user-select:none; }
+        html, body {
+            height:100%; width:100%; overflow:hidden;
             background: linear-gradient(145deg, #2b6c91 0%, #1e4b66 40%, #163e54 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-family: 'Segoe UI', 'Fredoka', 'Poppins', system-ui, -apple-system, sans-serif;
-            padding: 1rem;
-            margin: 0;
-            box-shadow: inset 0 0 80px rgba(0, 0, 0, 0.3);
+            font-family: 'Nunito', sans-serif; color:white;
+            display:flex; align-items:center; justify-content:center;
+            box-shadow: inset 0 0 80px rgba(0,0,0,0.3);
         }
-
-        .contenedor-juego {
-            max-width: 750px;
-            width: 100%;
-            background: rgba(255, 248, 235, 0.9);
-            backdrop-filter: blur(20px);
-            background: #fef9e6;
-            border-radius: 70px 70px 60px 60px;
-            padding: 2.5rem 2rem 2.2rem;
-            box-shadow: 0 35px 50px rgba(0, 0, 0, 0.5), 0 10px 25px rgba(0, 0, 0, 0.4), inset 0 2px 10px rgba(255, 255, 200, 0.8);
-            text-align: center;
-            border: 3px solid #ffcf9a;
-            transition: all 0.2s ease;
+        .game-wrapper {
+            width:100%; max-width:550px; height:100vh;
+            display:flex; flex-direction:column; padding:10px; gap:8px;
+            background: rgba(255,248,235,0.05); backdrop-filter:blur(5px);
+            border-radius:30px; overflow:hidden;
         }
-
-        h1 {
-            font-size: 2.8rem;
-            font-weight: 700;
-            color: #2d4059;
-            margin-bottom: 0.25rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            flex-wrap: wrap;
-            text-shadow: 2px 2px 0 #ffe3b0;
-            letter-spacing: -0.5px;
+        /* HUD */
+        .hud {
+            display:flex; justify-content:space-between; align-items:center;
+            background:rgba(0,0,0,0.5); padding:8px 14px; border-radius:30px;
+            font-family:'Press Start 2P', cursive; font-size:7px;
+            color:var(--neon-green); text-shadow:0 0 8px var(--neon-green);
+            flex-wrap:wrap; gap:6px;
         }
-        h1 span {
-            background: #ffb347;
-            color: white;
-            font-size: 2.2rem;
-            padding: 0.2rem 1rem;
-            border-radius: 60px;
-            text-shadow: none;
-            box-shadow: 0 6px 0 #c16f1a;
-            background: linear-gradient(180deg, #ff9f2f 0%, #f57c00 100%);
+        .hud-item { display:flex; align-items:center; gap:4px; }
+        .hud-item span { color:var(--gold); }
+        .btn-admin {
+            font-size:16px; background:none; border:none; color:var(--neon-pink);
+            cursor:pointer; text-shadow:0 0 8px var(--neon-pink);
         }
-
-        .zona-suma {
-            background: #fff5e6;
-            border-radius: 100px;
-            padding: 1.8rem 1.2rem;
-            margin: 1.8rem 0 1.5rem;
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            justify-content: center;
-            gap: 1rem 1.8rem;
-            background: #fffaee;
-            box-shadow: inset 0 8px 20px rgba(180, 120, 40, 0.15), 0 18px 25px -8px rgba(0,0,0,0.25);
-            border: 2px solid #e7b87a;
-            transition: 0.2s;
+        /* Selector de operación */
+        .mode-selector {
+            display:flex; gap:6px; flex-wrap:wrap; justify-content:center;
         }
-
-        .grupo-emojis {
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            justify-content: center;
-            gap: 0.25rem;
-            background: #ffffffd6;
-            padding: 1rem 1.2rem;
-            border-radius: 80px;
-            box-shadow: 0 8px 12px rgba(0,0,0,0.1);
-            min-width: 90px;
-            transition: all 0.2s;
+        .mode-btn {
+            font-family:'Press Start 2P', cursive; font-size:6px; padding:8px 14px;
+            background:#0d0d1a; border:2px solid #333; color:#888; border-radius:25px;
+            cursor:pointer; transition:0.2s;
         }
-
+        .mode-btn.active {
+            border-color:var(--neon-cyan); color:var(--neon-cyan);
+            background:rgba(0,255,255,0.1); text-shadow:0 0 6px var(--neon-cyan);
+        }
+        /* Área del juego */
+        .game-area {
+            flex:1; display:flex; flex-direction:column; align-items:center;
+            justify-content:center; gap:15px; background:rgba(255,255,255,0.1);
+            border-radius:30px; padding:15px;
+        }
+        .visual-sum {
+            display:flex; flex-wrap:wrap; align-items:center; justify-content:center;
+            gap:0.8rem;
+        }
+        .emoji-group {
+            display:flex; flex-wrap:wrap; gap:4px; justify-content:center;
+            background:rgba(255,255,255,0.2); padding:10px; border-radius:30px;
+            min-width:80px;
+        }
         .emoji-item {
-            font-size: 2.8rem;
-            line-height: 1;
-            filter: drop-shadow(2px 4px 5px rgba(0,0,0,0.25));
-            transition: transform 0.2s ease;
-            display: inline-block;
-            animation: pop 0.4s ease-out;
+            font-size:2.5rem; filter:drop-shadow(2px 4px 5px rgba(0,0,0,0.4));
+            animation: popIn 0.3s ease-out;
         }
-
-        @keyframes pop {
-            0% { transform: scale(0.2); opacity: 0; }
-            80% { transform: scale(1.2); }
-            100% { transform: scale(1); opacity: 1; }
+        @keyframes popIn {
+            0%{ transform:scale(0); opacity:0; } 70%{ transform:scale(1.2); } 100%{ transform:scale(1); opacity:1; }
         }
-
-        .signo-mas {
-            font-size: 3.5rem;
-            font-weight: 800;
-            color: #e76f51;
-            background: #fae3d9;
-            width: 70px;
-            height: 70px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-            box-shadow: 0 8px 0 #c14c30, 0 10px 15px rgba(0,0,0,0.2);
+        .operator-sign {
+            font-size:3rem; font-weight:900; width:55px; height:55px;
+            display:flex; align-items:center; justify-content:center;
             background: radial-gradient(circle at 30% 30%, #ffb38b, #e76f51);
-            color: white;
-            text-shadow: 0 2px 4px black;
-            line-height: 1;
+            border-radius:50%; box-shadow:0 6px 0 #c14c30; color:white;
+            text-shadow:0 2px 4px black;
         }
-
-        .signo-igual {
-            font-size: 3.5rem;
-            font-weight: 800;
-            color: #2a9d8f;
-            background: #d4f0e8;
-            width: 70px;
-            height: 70px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-            box-shadow: 0 8px 0 #1e6b5e, 0 10px 15px rgba(0,0,0,0.2);
-            background: radial-gradient(circle at 30% 30%, #6fd4c0, #2a9d8f);
-            color: white;
-            text-shadow: 0 2px 4px black;
+        .input-area {
+            display:flex; flex-direction:column; align-items:center; gap:8px;
         }
-
-        .caja-respuesta {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 0.8rem;
+        .answer-input {
+            font-size:2rem; width:110px; text-align:center; padding:8px;
+            border:4px dashed #f4a261; border-radius:30px; background:#fffef5;
+            font-weight:bold; color:#264653; font-family:'Nunito', sans-serif;
+            outline:none;
         }
-
-        .input-respuesta {
-            font-size: 2.4rem;
-            width: 120px;
-            text-align: center;
-            padding: 0.5rem 0.2rem;
-            border: 4px dashed #f4a261;
-            border-radius: 40px;
-            background: #fffef5;
-            font-weight: bold;
-            color: #264653;
-            outline: none;
-            box-shadow: 0 6px 12px rgba(0,0,0,0.1);
-            transition: 0.2s;
-            font-family: 'Fredoka', sans-serif;
+        .answer-input:focus { border-color:var(--neon-cyan); }
+        .result-emojis {
+            display:flex; flex-wrap:wrap; gap:4px; justify-content:center;
         }
-
-        .input-respuesta:focus {
-            border-color: #e76f51;
-            box-shadow: 0 0 0 5px rgba(231, 111, 81, 0.4);
+        .message {
+            font-size:1.2rem; font-weight:700; min-height:2rem; text-align:center;
+            color:#FFD700; text-shadow:0 0 8px rgba(255,215,0,0.7);
         }
-
-        .botones {
-            display: flex;
-            gap: 1.2rem;
-            flex-wrap: wrap;
-            align-items: center;
-            justify-content: center;
-            margin: 0.8rem 0 0.5rem;
+        /* Botones inferiores */
+        .bottom-bar {
+            display:flex; gap:8px; flex-wrap:wrap; justify-content:center;
         }
-
         .btn {
-            background: #ffcd94;
-            border: none;
-            font-weight: bold;
-            font-size: 1.4rem;
-            padding: 0.9rem 1.8rem;
-            border-radius: 50px;
-            background: #ffb347;
-            color: white;
-            text-shadow: 0 1px 2px black;
-            box-shadow: 0 7px 0 #c16f1a, 0 8px 14px rgba(0,0,0,0.3);
-            cursor: pointer;
-            transition: all 0.08s ease;
-            display: flex;
-            align-items: center;
-            gap: 0.3rem;
-            letter-spacing: 0.5px;
-            background: linear-gradient(180deg, #ffae42 0%, #f57c00 100%);
-            border: 2px solid #ffe5b9;
+            font-family:'Press Start 2P', cursive; font-size:7px; padding:10px 16px;
+            border:none; border-radius:25px; cursor:pointer; color:white;
+            box-shadow:0 4px 10px rgba(0,0,0,0.3); transition:0.2s;
         }
-
-        .btn:active {
-            transform: translateY(5px);
-            box-shadow: 0 2px 0 #c16f1a, 0 5px 10px rgba(0,0,0,0.3);
+        .btn-check { background:#4CAF50; }
+        .btn-new { background:#FF9800; }
+        .btn-shop { background:var(--neon-pink); }
+        .btn:active { transform:scale(0.95); }
+        .btn:disabled { opacity:0.5; cursor:not-allowed; }
+        /* Tienda modal */
+        .modal {
+            position:fixed; top:0; left:0; width:100%; height:100%;
+            background:rgba(0,0,0,0.7); z-index:100;
+            display:flex; align-items:center; justify-content:center;
+            visibility:hidden; opacity:0; transition:0.3s;
         }
-
-        .btn-verde {
-            background: linear-gradient(180deg, #6abf69 0%, #388e3c 100%);
-            box-shadow: 0 7px 0 #1e5621, 0 8px 14px rgba(0,0,0,0.3);
-            border-color: #b9e6b0;
+        .modal.open { visibility:visible; opacity:1; }
+        .modal-content {
+            background:white; border-radius:30px; padding:20px; width:90%;
+            max-width:380px; text-align:center; color:#333;
         }
-
-        .btn-azul {
-            background: linear-gradient(180deg, #5d9cec 0%, #2c5f9e 100%);
-            box-shadow: 0 7px 0 #173e6b, 0 8px 14px rgba(0,0,0,0.3);
-            border-color: #b0d4ff;
+        .modal-content h3 { font-size:20px; margin-bottom:15px; color:var(--coral); }
+        .shop-item {
+            display:flex; justify-content:space-between; align-items:center;
+            padding:10px; border:2px solid #eee; border-radius:20px; margin-bottom:8px;
+            background:#FFFDE7; font-weight:700; font-size:14px;
         }
-
-        .mensaje {
-            font-size: 1.7rem;
-            font-weight: bold;
-            margin-top: 0.8rem;
-            min-height: 3.5rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.4rem;
-            flex-wrap: wrap;
-            color: #2d3e50;
+        .shop-item button {
+            font-family:'Press Start 2P', cursive; font-size:6px; padding:6px 12px;
+            background:#4CAF50; color:white; border:none; border-radius:15px;
+            cursor:pointer; box-shadow:0 2px 6px rgba(0,0,0,0.2);
         }
-
-        .resultado-emojis {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 0.2rem;
-            margin: 0.5rem 0;
-        }
-
-        footer {
-            margin-top: 1.8rem;
-            color: #5c4b3c;
-            font-weight: 500;
-            display: flex;
-            justify-content: center;
-            gap: 1rem;
-            font-size: 1rem;
-        }
-
-        @media (max-width: 550px) {
-            .contenedor-juego {
-                padding: 1.5rem 1rem;
-            }
-            .emoji-item {
-                font-size: 2rem;
-            }
-            .signo-mas, .signo-igual {
-                width: 55px;
-                height: 55px;
-                font-size: 2.5rem;
-            }
+        .shop-item button:disabled { background:#CCC; }
+        .close-modal {
+            margin-top:15px; background:#FF5252; color:white; border:none;
+            font-family:'Press Start 2P', cursive; font-size:7px;
+            padding:8px 16px; border-radius:15px; cursor:pointer;
         }
     </style>
 </head>
 <body>
-    <div class="contenedor-juego">
-        <h1>
-            ➕ Suma con <span>Emojis</span> 🧸
-        </h1>
-
-        <!-- Visualización de la suma -->
-        <div class="zona-suma" id="zonaSuma">
-            <div class="grupo-emojis" id="grupo1"></div>
-            <div class="signo-mas">+</div>
-            <div class="grupo-emojis" id="grupo2"></div>
-            <div class="signo-igual">=</div>
-            <div class="caja-respuesta">
-                <input type="number" id="respuestaInput" class="input-respuesta" placeholder="?" min="0" max="20" inputmode="numeric">
-                <div class="resultado-emojis" id="resultadoEmojis"></div>
-            </div>
-        </div>
-
-        <div class="mensaje" id="mensaje"></div>
-
-        <div class="botones">
-            <button class="btn btn-verde" id="btnComprobar">✅ Comprobar</button>
-            <button class="btn btn-azul" id="btnNuevaSuma">🔄 Nueva suma</button>
-        </div>
-        <footer>
-            <span>🐼🐨🦊</span> <span>¡Tú puedes!</span> <span>🐸🐙🐣</span>
-        </footer>
+<div class="game-wrapper">
+    <div class="hud">
+        <div class="hud-item">⭐ <span id="starsDisplay">0</span></div>
+        <div class="hud-item">❤️ <span id="livesDisplay">3</span></div>
+        <div class="hud-item">🛡️ <span id="shieldDisplay">0</span></div>
+        <div class="hud-item">🌐 <span id="globalCoinsDisplay">0</span></div>
+        <div class="hud-item">💰 <span id="localCoinsDisplay">0</span></div>
+        <button class="btn-admin" id="adminBtn" title="Admin">☁️</button>
     </div>
 
-    <script>
-        (function() {
-            // Emojis divertidos para representar cantidades
-            const listaEmojis = ['🍎', '🐶', '🐱', '🌟', '🍕', '🎈', '🐸', '🌻', '🦊', '🍇', '🐼', '🚗', '🐙', '🍒', '🐨', '🎵', '🐣', '🍊', '🐝', '🧸'];
-            
-            // Estado actual
-            let numero1 = 3;
-            let numero2 = 2;
-            let emojiActual = '🍎';
+    <div class="mode-selector" id="modeSelector">
+        <button class="mode-btn active" data-mode="sum">➕ Suma</button>
+        <button class="mode-btn" data-mode="subtract">➖ Resta</button>
+        <button class="mode-btn" data-mode="count">🔢 Conteo</button>
+    </div>
 
-            // Elementos del DOM
-            const grupo1 = document.getElementById('grupo1');
-            const grupo2 = document.getElementById('grupo2');
-            const respuestaInput = document.getElementById('respuestaInput');
-            const resultadoEmojis = document.getElementById('resultadoEmojis');
-            const mensajeDiv = document.getElementById('mensaje');
-            const btnComprobar = document.getElementById('btnComprobar');
-            const btnNuevaSuma = document.getElementById('btnNuevaSuma');
+    <div class="game-area">
+        <div class="visual-sum" id="visualSum"></div>
+        <div class="message" id="messageArea"></div>
+    </div>
 
-            // Elegir emoji aleatorio diferente
-            function obtenerEmojiAleatorio() {
-                return listaEmojis[Math.floor(Math.random() * listaEmojis.length)];
+    <div class="bottom-bar">
+        <button class="btn btn-check" id="checkBtn">✅ COMPROBAR</button>
+        <button class="btn btn-new" id="newBtn">🔄 NUEVA</button>
+        <button class="btn btn-shop" id="shopBtn">🛒 TIENDA</button>
+    </div>
+</div>
+
+<div class="modal" id="shopModal">
+    <div class="modal-content">
+        <h3>🛒 TIENDA EMOJI</h3>
+        <div id="shopItemsContainer"></div>
+        <button class="close-modal" id="closeShopBtn">CERRAR</button>
+    </div>
+</div>
+
+<script>
+    // ═══════════════════════════════════════
+    //  CONFIGURACIÓN
+    // ═══════════════════════════════════════
+    const EMOJIS = ['🍎','🐶','🐱','🌟','🍕','🎈','🐸','🌻','🦊','🍇','🐼','🚗','🐙','🍒','🐨','🎵','🐣','🍊','🐝','🧸'];
+    const ADMINS = {"1983":"Junior","2024":"Nicole","7777":"Mateo","8888":"Jaider","ods2026":"ODS Master"};
+
+    let currentMode = 'sum';
+    let num1 = 3, num2 = 2, correctAnswer = 5;
+    let currentEmoji = '🍎';
+    let score = 0, lives = 3, shields = 0, streak = 0;
+    let localCoins = 0, adminActive = false;
+    let level = 1;
+
+    // DOM Elements
+    const visualSum = document.getElementById('visualSum');
+    const messageArea = document.getElementById('messageArea');
+    const starsDisplay = document.getElementById('starsDisplay');
+    const livesDisplay = document.getElementById('livesDisplay');
+    const shieldDisplay = document.getElementById('shieldDisplay');
+    const globalCoinsDisplay = document.getElementById('globalCoinsDisplay');
+    const localCoinsDisplay = document.getElementById('localCoinsDisplay');
+    const shopModal = document.getElementById('shopModal');
+    const closeShopBtn = document.getElementById('closeShopBtn');
+    const shopItemsContainer = document.getElementById('shopItemsContainer');
+    const checkBtn = document.getElementById('checkBtn');
+    const newBtn = document.getElementById('newBtn');
+    const shopBtn = document.getElementById('shopBtn');
+    const adminBtn = document.getElementById('adminBtn');
+    const modeButtons = document.querySelectorAll('.mode-btn');
+
+    // ═══════════════════════════════════════
+    //  FUNCIONES DE DATOS
+    // ═══════════════════════════════════════
+    function loadStats() {
+        const saved = localStorage.getItem('emojimath_stats');
+        if (saved) { try {
+            const data = JSON.parse(saved);
+            lives = data.lives ?? 3;
+            shields = data.shields ?? 0;
+            score = data.score ?? 0;
+            level = data.level ?? 1;
+        } catch(e){} }
+        if (typeof Tecnomath !== 'undefined' && Tecnomath.getCurrentUser()) {
+            localCoins = Tecnomath.getGameCoins('emojimath');
+            adminActive = Tecnomath.isAdmin();
+        }
+        updateHUD();
+    }
+
+    function saveStats() {
+        localStorage.setItem('emojimath_stats', JSON.stringify({
+            lives, shields, score, level
+        }));
+        if (typeof Tecnomath !== 'undefined' && Tecnomath.getCurrentUser()) {
+            Tecnomath.setGameCoins('emojimath', localCoins);
+        }
+    }
+
+    function updateHUD() {
+        starsDisplay.textContent = score;
+        livesDisplay.textContent = adminActive ? '∞' : lives;
+        shieldDisplay.textContent = shields;
+        localCoinsDisplay.textContent = adminActive ? '∞' : localCoins;
+        if (typeof Tecnomath !== 'undefined' && Tecnomath.getCurrentUser()) {
+            globalCoinsDisplay.textContent = adminActive ? '∞' : Tecnomath.getCoins();
+        } else {
+            globalCoinsDisplay.textContent = '0';
+        }
+    }
+
+    function addLocalCoins(amount) {
+        if (adminActive) return;
+        localCoins += amount;
+        saveStats();
+        updateHUD();
+    }
+
+    function spendLocalCoins(amount) {
+        if (adminActive) return true;
+        if (localCoins < amount) return false;
+        localCoins -= amount;
+        saveStats();
+        updateHUD();
+        return true;
+    }
+
+    // ═══════════════════════════════════════
+    //  GENERACIÓN DE PREGUNTAS
+    // ═══════════════════════════════════════
+    function generateQuestion() {
+        currentEmoji = EMOJIS[Math.floor(Math.random() * EMOJIS.length)];
+        const maxNum = Math.min(6 + level, 12);
+        if (currentMode === 'sum') {
+            num1 = Math.floor(Math.random() * maxNum) + 1;
+            num2 = Math.floor(Math.random() * maxNum) + 1;
+            correctAnswer = num1 + num2;
+        } else if (currentMode === 'subtract') {
+            num1 = Math.floor(Math.random() * maxNum) + 2;
+            num2 = Math.floor(Math.random() * num1) + 1;
+            correctAnswer = num1 - num2;
+        } else if (currentMode === 'count') {
+            num1 = Math.floor(Math.random() * maxNum) + 1;
+            num2 = 0;
+            correctAnswer = num1;
+        }
+        renderVisual();
+    }
+
+    function renderVisual() {
+        visualSum.innerHTML = '';
+
+        const group1 = document.createElement('div');
+        group1.className = 'emoji-group';
+        for (let i=0; i<num1; i++) {
+            const span = document.createElement('span');
+            span.className = 'emoji-item';
+            span.textContent = currentEmoji;
+            group1.appendChild(span);
+        }
+
+        const opSign = document.createElement('div');
+        opSign.className = 'operator-sign';
+        if (currentMode === 'sum') opSign.textContent = '+';
+        else if (currentMode === 'subtract') opSign.textContent = '−';
+        else if (currentMode === 'count') opSign.textContent = '🔍';
+
+        visualSum.appendChild(group1);
+        visualSum.appendChild(opSign);
+
+        if (currentMode !== 'count') {
+            const group2 = document.createElement('div');
+            group2.className = 'emoji-group';
+            for (let i=0; i<num2; i++) {
+                const span = document.createElement('span');
+                span.className = 'emoji-item';
+                span.textContent = currentEmoji;
+                group2.appendChild(span);
             }
+            visualSum.appendChild(group2);
+        }
 
-            // Renderizar emojis en un contenedor según cantidad
-            function renderizarEmojis(contenedor, cantidad, emoji) {
-                contenedor.innerHTML = '';
-                for (let i = 0; i < cantidad; i++) {
-                    const span = document.createElement('span');
-                    span.className = 'emoji-item';
-                    span.textContent = emoji;
-                    // Pequeño retraso para animación escalonada (opcional)
-                    span.style.animationDelay = `${i * 0.05}s`;
-                    contenedor.appendChild(span);
-                }
+        const inputDiv = document.createElement('div');
+        inputDiv.className = 'input-area';
+        const input = document.createElement('input');
+        input.type = 'number';
+        input.className = 'answer-input';
+        input.placeholder = '?';
+        input.id = 'answerInput';
+        const resultDiv = document.createElement('div');
+        resultDiv.className = 'result-emojis';
+        resultDiv.id = 'resultEmojis';
+        inputDiv.appendChild(input);
+        inputDiv.appendChild(resultDiv);
+        visualSum.appendChild(inputDiv);
+
+        // Focus automático
+        setTimeout(() => input.focus(), 100);
+
+        messageArea.innerHTML = '';
+    }
+
+    // ═══════════════════════════════════════
+    //  COMPROBACIÓN
+    // ═══════════════════════════════════════
+    function checkAnswer() {
+        const input = document.getElementById('answerInput');
+        if (!input) return;
+        const val = input.value.trim();
+        if (val === '') {
+            messageArea.innerHTML = '🤔 Escribe un número...';
+            return;
+        }
+        const answer = parseInt(val);
+        if (isNaN(answer) || answer < 0) {
+            messageArea.innerHTML = '🔢 Solo números positivos';
+            return;
+        }
+
+        const resultDiv = document.getElementById('resultEmojis');
+        if (answer === correctAnswer) {
+            streak++;
+            score++;
+            const reward = 5 + Math.floor(level/2);
+            addLocalCoins(reward);
+            if (typeof Tecnomath !== 'undefined' && Tecnomath.getCurrentUser()) {
+                Tecnomath.addCoins(reward);
+                Tecnomath.updateHighScore('emojimath', score);
             }
-
-            // Actualizar toda la interfaz con números y emoji
-            function actualizarVisualizacion() {
-                renderizarEmojis(grupo1, numero1, emojiActual);
-                renderizarEmojis(grupo2, numero2, emojiActual);
-                
-                // Limpiar resultado y mensaje previo
-                resultadoEmojis.innerHTML = '';
-                mensajeDiv.innerHTML = '';
-                respuestaInput.value = '';
-                respuestaInput.focus();
+            if (streak % 5 === 0 && level < 15) level++;
+            messageArea.innerHTML = `🎉 ¡Correcto! +${reward}💰 Racha: ${streak}🔥`;
+            resultDiv.innerHTML = '';
+            for (let i=0; i<correctAnswer; i++) {
+                const span = document.createElement('span');
+                span.className = 'emoji-item';
+                span.textContent = currentEmoji;
+                resultDiv.appendChild(span);
             }
-
-            // Generar nueva suma aleatoria (números del 1 al 6 para niños, suma máxima 12)
-            function generarNuevaSuma() {
-                numero1 = Math.floor(Math.random() * 6) + 1; // 1-6
-                numero2 = Math.floor(Math.random() * 6) + 1; // 1-6
-                emojiActual = obtenerEmojiAleatorio();
-                actualizarVisualizacion();
-            }
-
-            // Mostrar resultado visual con emojis (la suma correcta)
-            function mostrarResultadoVisual(suma) {
-                resultadoEmojis.innerHTML = '';
-                for (let i = 0; i < suma; i++) {
-                    const span = document.createElement('span');
-                    span.className = 'emoji-item';
-                    span.textContent = emojiActual;
-                    span.style.animationDelay = `${i * 0.04}s`;
-                    resultadoEmojis.appendChild(span);
-                }
-            }
-
-            // Manejar comprobación de respuesta
-            function comprobarRespuesta() {
-                const valorInput = respuestaInput.value.trim();
-                if (valorInput === '') {
-                    mensajeDiv.innerHTML = '🤔 Escribe un número en el recuadro...';
-                    return;
-                }
-                const respuestaUsuario = Number(valorInput);
-                if (isNaN(respuestaUsuario) || !Number.isInteger(respuestaUsuario) || respuestaUsuario < 0) {
-                    mensajeDiv.innerHTML = '🔢 ¡Usa un número entero positivo!';
-                    respuestaInput.value = '';
-                    return;
-                }
-
-                const sumaCorrecta = numero1 + numero2;
-                
-                if (respuestaUsuario === sumaCorrecta) {
-                    // ¡Correcto!
-                    mostrarResultadoVisual(sumaCorrecta);
-                    mensajeDiv.innerHTML = `🎉 ¡Muy bien! ${numero1} + ${numero2} = ${sumaCorrecta} 🎉 ${emojiActual.repeat(2)}`;
+            saveStats();
+            updateHUD();
+            setTimeout(generateQuestion, 1200);
+        } else {
+            streak = 0;
+            if (shields > 0) {
+                shields--;
+                messageArea.innerHTML = `🛡️ Escudo usado. La respuesta era ${correctAnswer}`;
+            } else {
+                if (!adminActive) lives--;
+                if (lives <= 0) {
+                    lives = 3;
+                    score = Math.max(0, score - 3);
+                    messageArea.innerHTML = '😞 Sin vidas. Reiniciando...';
                 } else {
-                    // Incorrecto: mostrar ayuda visual y mensaje
-                    mostrarResultadoVisual(sumaCorrecta);
-                    mensajeDiv.innerHTML = `😲 ¡Casi! Mira los emojis: ${numero1} + ${numero2} = <strong>${sumaCorrecta}</strong> ${emojiActual}`;
-                    // Resaltar el input para reintentar
-                    respuestaInput.style.borderColor = '#e76f51';
-                    setTimeout(() => {
-                        respuestaInput.style.borderColor = '#f4a261';
-                    }, 600);
+                    messageArea.innerHTML = `❌ Era ${correctAnswer}. Vidas: ${lives}`;
                 }
             }
+            resultDiv.innerHTML = '';
+            for (let i=0; i<correctAnswer; i++) {
+                const span = document.createElement('span');
+                span.className = 'emoji-item';
+                span.textContent = currentEmoji;
+                resultDiv.appendChild(span);
+            }
+            saveStats();
+            updateHUD();
+            setTimeout(generateQuestion, 1500);
+        }
+    }
 
-            // Event listeners
-            btnComprobar.addEventListener('click', comprobarRespuesta);
+    // ═══════════════════════════════════════
+    //  TIENDA
+    // ═══════════════════════════════════════
+    function openShop() {
+        renderShopItems();
+        shopModal.classList.add('open');
+    }
+    function closeShop() {
+        shopModal.classList.remove('open');
+    }
 
-            btnNuevaSuma.addEventListener('click', () => {
-                generarNuevaSuma();
-                // Restaurar estilo de input
-                respuestaInput.style.borderColor = '#f4a261';
+    function renderShopItems() {
+        shopItemsContainer.innerHTML = '';
+        const items = [
+            { name:'❤️ Vida', price:30, action:() => { lives++; saveStats(); updateHUD(); } },
+            { name:'🛡️ Escudo', price:25, action:() => { shields++; saveStats(); updateHUD(); } },
+            { name:'⭐ Pista', price:15, action:() => { messageArea.innerHTML = `🔍 La respuesta es ${correctAnswer}`; } },
+            { name:'💱 Convertir 🌐→💰', price:0, action:() => { openExchange(); } }
+        ];
+        items.forEach(item => {
+            const div = document.createElement('div');
+            div.className = 'shop-item';
+            div.innerHTML = `<span>${item.name}</span><span>${item.price > 0 ? item.price+' 💰' : '10% com'}</span>`;
+            const buyBtn = document.createElement('button');
+            buyBtn.textContent = 'Comprar';
+            if (item.price === 0) { buyBtn.disabled = false; buyBtn.textContent = 'Convertir'; }
+            else buyBtn.disabled = !adminActive && localCoins < item.price;
+            buyBtn.addEventListener('click', () => {
+                if (item.price === 0) { item.action(); }
+                else if (adminActive || spendLocalCoins(item.price)) { item.action(); }
+                updateHUD(); renderShopItems();
             });
+            div.appendChild(buyBtn);
+            shopItemsContainer.appendChild(div);
+        });
+    }
 
-            // Permitir comprobar con tecla Enter
-            respuestaInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    comprobarRespuesta();
-                }
-            });
+    function openExchange() {
+        if (typeof Tecnomath === 'undefined' || !Tecnomath.getCurrentUser()) { alert('Inicia sesión'); return; }
+        if (adminActive) { localCoins += 500; saveStats(); updateHUD(); renderShopItems(); return; }
+        const amount = prompt('Monedas globales a convertir:');
+        if (!amount) return;
+        const num = parseInt(amount);
+        if (isNaN(num) || num<=0) return;
+        if (Tecnomath.exchangeGlobalToLocal('emojimath', num)) {
+            localCoins = Tecnomath.getGameCoins('emojimath');
+            saveStats(); updateHUD(); renderShopItems();
+        } else alert('Fondos insuficientes');
+    }
 
-            // Inicializar al cargar
-            generarNuevaSuma();
-        })();
-    </script>
+    // ═══════════════════════════════════════
+    //  ADMIN
+    // ═══════════════════════════════════════
+    function openAdminPanel() {
+        const code = prompt('CÓDIGO ADMIN:');
+        if (ADMINS[code]) {
+            adminActive = true;
+            if (typeof Tecnomath !== 'undefined' && Tecnomath.getCurrentUser()) {
+                Tecnomath.setAdmin(Tecnomath.getCurrentUser().username);
+            }
+            updateHUD();
+            alert(`⚡ ${ADMINS[code].toUpperCase()} · ADMIN ACTIVADO`);
+        } else if (code) alert('🔒 ACCESO DENEGADO');
+    }
+
+    // ═══════════════════════════════════════
+    //  EVENTOS
+    // ═══════════════════════════════════════
+    modeButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            modeButtons.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentMode = btn.dataset.mode;
+            generateQuestion();
+        });
+    });
+
+    checkBtn.addEventListener('click', checkAnswer);
+    newBtn.addEventListener('click', generateQuestion);
+    shopBtn.addEventListener('click', openShop);
+    closeShopBtn.addEventListener('click', closeShop);
+    adminBtn.addEventListener('click', openAdminPanel);
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            checkAnswer();
+        }
+    });
+
+    // ═══════════════════════════════════════
+    //  INICIO
+    // ═══════════════════════════════════════
+    function init() {
+        loadStats();
+        generateQuestion();
+    }
+
+    init();
+</script>
 </body>
 </html>
