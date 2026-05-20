@@ -4,6 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Tecnomath · Portal de Proyectos</title>
+
+    <!-- PWA: Manifest para instalar como app -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#060610">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Tecnomath">
+
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -53,23 +61,19 @@
         }
         .auth-link:hover { background: rgba(255,0,255,0.1); box-shadow: 0 0 10px var(--neon-pink); }
 
-        /* NUEVA SECCIÓN HÉROE */
         .hero {
             text-align: center; padding: clamp(20px, 4vw, 30px) 10px;
-            background: rgba(0,0,0,0.3);
-            border-bottom: 1px solid #1a1a2e;
+            background: rgba(0,0,0,0.3); border-bottom: 1px solid #1a1a2e;
         }
         .hero h2 {
             font-size: clamp(8px, 2.5vw, 14px); color: var(--neon-yellow);
-            text-shadow: 0 0 12px var(--neon-yellow);
-            margin-bottom: 10px;
+            text-shadow: 0 0 12px var(--neon-yellow); margin-bottom: 10px;
         }
         .hero p {
             font-size: clamp(4px, 1.2vw, 6px); color: #aaa; max-width: 600px;
             margin: 0 auto; line-height: 1.8;
         }
 
-        /* FILTROS */
         .filters {
             display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;
             padding: 10px; max-width: 800px; margin: 0 auto;
@@ -126,7 +130,7 @@
         .project-name { font-size: clamp(4px, 1.5vw, 6px); color: white; text-shadow: 0 0 5px rgba(255,255,255,0.5); }
         .project-desc { font-size: clamp(3px, 1vw, 4px); color: #aaa; line-height: 1.4; }
 
-        /* PATROCINADORES */
+        /* Patrocinadores */
         .sponsors-section {
             max-width: 900px; margin: 20px auto; padding: 10px;
         }
@@ -166,7 +170,6 @@
             border-top: 1px solid #1a1a2e; margin-top: 20px;
         }
 
-        /* MEDIA QUERIES PARA COLUMNAS */
         @media (max-width: 480px) {
             :root { --grid-cols: 2; --card-min-width: 120px; }
             .header-content { flex-direction: column; align-items: flex-start; }
@@ -214,9 +217,19 @@
 
     <footer>© 2026 Tecnomath · Powered by GitHub Pages</footer>
 
+    <!-- Librería central de usuarios/monedas -->
     <script src="shared.js"></script>
 
     <script>
+        // ═══════════════════════════════════════
+        // REGISTRO DEL SERVICE WORKER (PWA)
+        // ═══════════════════════════════════════
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js').catch(() => {});
+            });
+        }
+
         // ═══════════════════════════════════════
         // DETECCIÓN DE DISPOSITIVO
         // ═══════════════════════════════════════
@@ -325,22 +338,23 @@
         // ═══════════════════════════════════════
         const projects = [
             { name: "MindMath Arcade", desc: "Juego de matemáticas retro con 60+ niveles", url: "game.html", imageUrl: "img/mindmath.png", icon: "🧮", category: "mates" },
+            { name: "EmojiMath Pro", desc: "Suma, resta y cuenta con emojis. Para niños", url: "emoji-math.html", imageUrl: "", icon: "🧸", category: "mates" },
             { name: "Eco Recolector", desc: "Atrapa agua y reciclables. ODS 6 y 12", url: "eco-collector.html", imageUrl: "img/ecorecolector.png", icon: "🌍", category: "eco" },
             { name: "Eco-Barrio 2030", desc: "Simulador de ciudad sostenible. ODS 11,12,13,7", url: "eco-barrio.html", imageUrl: "", icon: "🏙️", category: "eco" },
-            { name: "Animalandia", desc: "Alimenta a los animales. Para niños pequeños", url: "animalandia.html", imageUrl: "", icon: "🐮", category: "kids" },
-            { name: "Emojis Math Pro", desc: "Fusiona los 17 ODS. Juego de puzzle adictivo", url: "andy.html", imageUrl: "", icon: "😛", category: "puzzle" },
             { name: "Coral Guardian", desc: "Protege el arrecife de basura y especies invasoras", url: "coral-guardian.html", imageUrl: "", icon: "🪸", category: "eco" },
             { name: "Orbit Cleaner", desc: "Limpia el espacio y protege la capa de ozono. ODS 13", url: "orbit-cleaner.html", imageUrl: "", icon: "🛰️", category: "eco" },
-            { name: "AI HUMANIZER Cleaner", desc: "USV y ROV para limpiar el océano. ODS 14", url: "https://junior162009.github.io/AIHumanizer/", imageUrl: "", icon: "🤖", category: "eco" }
+            { name: "Marine Tech Cleaner", desc: "USV y ROV para limpiar el océano. ODS 14", url: "marine-cleaner.html", imageUrl: "", icon: "🌊", category: "eco" },
+            { name: "Animalandia", desc: "Alimenta a los animales. Para niños pequeños", url: "animalandia.html", imageUrl: "", icon: "🐮", category: "kids" },
+            { name: "ODS-2048", desc: "Fusiona los 17 ODS. Juego de puzzle adictivo", url: "ods-2048.html", imageUrl: "", icon: "🌐", category: "puzzle" }
         ];
 
-        // Construir filtros dinámicamente
+        // Construir filtros
         const categories = ['todos', ...new Set(projects.map(p => p.category))];
         const filtersContainer = document.getElementById('filtersContainer');
         categories.forEach(cat => {
             const btn = document.createElement('button');
             btn.className = 'filter-btn' + (cat === 'todos' ? ' active' : '');
-            btn.textContent = cat === 'todos' ? '🌍 TODOS' : 
+            btn.textContent = cat === 'todos' ? '🌍 TODOS' :
                               cat === 'mates' ? '➕ MATES' :
                               cat === 'eco' ? '🌿 ECOLOGÍA' :
                               cat === 'kids' ? '🐣 INFANTIL' :
