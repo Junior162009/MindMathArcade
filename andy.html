@@ -4,41 +4,62 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes, viewport-fit=cover">
     <title>🧮 EmojiMath Pro | Aprende mates con emojis</title>
-    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&family=Press+Start+2P&display=swap" rel="stylesheet">
     <script src="shared.js"></script>
     <style>
         :root {
-            --neon-cyan: #00FFFF; --neon-pink: #FF00FF; --neon-green: #39FF14;
-            --gold: #FFD700; --retro-bg: #060610; --card-bg: #0d0d1a;
-            --coral: #FF6F61; --ocean: #2b6c91;
+            --sky: #87CEEB; --grass: #7CFC00; --sun: #FFD700;
+            --card-bg: #FFF8E1; --wood: #DEB887;
+            --neon-pink: #FF00FF; --neon-cyan: #00FFFF; --gold: #FFD700;
+            --coral: #FF6F61; --peach: #FFDAB9; --mint: #B2EBF2;
         }
         * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; user-select:none; }
         html, body {
             height:100%; width:100%; overflow:hidden;
-            background: linear-gradient(145deg, #2b6c91 0%, #1e4b66 40%, #163e54 100%);
-            font-family: 'Nunito', sans-serif; color:white;
+            background: linear-gradient(180deg, #87CEEB 0%, #B0E0E6 70%, #7CFC00 100%);
+            font-family: 'Nunito', sans-serif; color:#4A3728;
             display:flex; align-items:center; justify-content:center;
-            box-shadow: inset 0 0 80px rgba(0,0,0,0.3);
+        }
+        /* Fondo animado con nubes */
+        .sky-bg {
+            position:absolute; top:0; left:0; width:100%; height:100%;
+            pointer-events:none; z-index:0; overflow:hidden;
+        }
+        .cloud {
+            position:absolute; background:white; border-radius:50%;
+            opacity:0.8; animation: floatCloud linear infinite;
+        }
+        .cloud::before, .cloud::after {
+            content:''; position:absolute; background:white; border-radius:50%;
+        }
+        .cloud1 { width:100px; height:40px; top:10%; left:-100px; animation-duration:25s; }
+        .cloud1::before { width:50px; height:50px; top:-25px; left:20px; }
+        .cloud1::after { width:60px; height:40px; top:-15px; left:50px; }
+        .cloud2 { width:120px; height:50px; top:20%; left:-120px; animation-duration:30s; animation-delay:5s; }
+        .cloud2::before { width:60px; height:60px; top:-30px; left:25px; }
+        .cloud2::after { width:70px; height:45px; top:-20px; left:60px; }
+        @keyframes floatCloud {
+            from { transform:translateX(0); }
+            to { transform:translateX(calc(100vw + 200px)); }
         }
         .game-wrapper {
-            width:100%; max-width:550px; height:100vh;
+            position:relative; z-index:1; width:100%; max-width:550px; height:100vh;
             display:flex; flex-direction:column; padding:10px; gap:8px;
-            background: rgba(255,248,235,0.05); backdrop-filter:blur(5px);
-            border-radius:30px; overflow:hidden;
+            background:rgba(255,255,255,0.3); border-radius:30px;
         }
         /* HUD */
         .hud {
             display:flex; justify-content:space-between; align-items:center;
-            background:rgba(0,0,0,0.5); padding:8px 14px; border-radius:30px;
+            padding:8px 14px; background:rgba(255,255,255,0.85);
+            border-radius:30px; box-shadow:0 4px 12px rgba(0,0,0,0.1);
             font-family:'Press Start 2P', cursive; font-size:7px;
-            color:var(--neon-green); text-shadow:0 0 8px var(--neon-green);
-            flex-wrap:wrap; gap:6px;
+            color:#4A3728; flex-wrap:wrap; gap:6px;
         }
         .hud-item { display:flex; align-items:center; gap:4px; }
-        .hud-item span { color:var(--gold); }
+        .hud-item span { color:var(--coral); font-weight:900; }
         .btn-admin {
-            font-size:16px; background:none; border:none; color:var(--neon-pink);
-            cursor:pointer; text-shadow:0 0 8px var(--neon-pink);
+            font-size:16px; background:none; border:none;
+            color:var(--neon-pink); cursor:pointer; text-shadow:0 0 8px var(--neon-pink);
         }
         /* Selector de operación */
         .mode-selector {
@@ -46,90 +67,101 @@
         }
         .mode-btn {
             font-family:'Press Start 2P', cursive; font-size:6px; padding:8px 14px;
-            background:#0d0d1a; border:2px solid #333; color:#888; border-radius:25px;
-            cursor:pointer; transition:0.2s;
+            background:white; border:2px solid #DDD; color:#888; border-radius:25px;
+            cursor:pointer; transition:0.2s; box-shadow:0 4px 8px rgba(0,0,0,0.1);
         }
         .mode-btn.active {
-            border-color:var(--neon-cyan); color:var(--neon-cyan);
-            background:rgba(0,255,255,0.1); text-shadow:0 0 6px var(--neon-cyan);
+            border-color:var(--coral); color:var(--coral);
+            background:var(--peach); text-shadow:0 0 6px var(--coral);
         }
         /* Área del juego */
         .game-area {
             flex:1; display:flex; flex-direction:column; align-items:center;
-            justify-content:center; gap:15px; background:rgba(255,255,255,0.1);
-            border-radius:30px; padding:15px;
+            justify-content:center; gap:20px; background:var(--card-bg);
+            border-radius:30px; padding:20px; box-shadow:0 8px 20px rgba(0,0,0,0.2);
         }
+        .owl-guide {
+            display:flex; align-items:center; gap:10px;
+            background:white; border-radius:20px; padding:10px 18px;
+            box-shadow:0 4px 10px rgba(0,0,0,0.1); font-size:18px;
+        }
+        .owl-emoji { font-size:40px; }
         .visual-sum {
             display:flex; flex-wrap:wrap; align-items:center; justify-content:center;
-            gap:0.8rem;
+            gap:12px; background:rgba(255,255,255,0.6); padding:20px;
+            border-radius:30px; box-shadow:inset 0 4px 12px rgba(0,0,0,0.1);
         }
         .emoji-group {
-            display:flex; flex-wrap:wrap; gap:4px; justify-content:center;
-            background:rgba(255,255,255,0.2); padding:10px; border-radius:30px;
-            min-width:80px;
+            display:flex; flex-wrap:wrap; gap:6px; justify-content:center;
+            background:white; padding:12px; border-radius:25px;
+            box-shadow:0 4px 10px rgba(0,0,0,0.1); min-width:80px;
         }
         .emoji-item {
-            font-size:2.5rem; filter:drop-shadow(2px 4px 5px rgba(0,0,0,0.4));
+            font-size:2.5rem; filter:drop-shadow(2px 4px 5px rgba(0,0,0,0.2));
             animation: popIn 0.3s ease-out;
         }
         @keyframes popIn {
             0%{ transform:scale(0); opacity:0; } 70%{ transform:scale(1.2); } 100%{ transform:scale(1); opacity:1; }
         }
         .operator-sign {
-            font-size:3rem; font-weight:900; width:55px; height:55px;
+            font-size:3rem; font-weight:900; width:65px; height:65px;
             display:flex; align-items:center; justify-content:center;
-            background: radial-gradient(circle at 30% 30%, #ffb38b, #e76f51);
-            border-radius:50%; box-shadow:0 6px 0 #c14c30; color:white;
-            text-shadow:0 2px 4px black;
+            background: var(--sun); border-radius:50%;
+            box-shadow:0 8px 0 #e6a800, 0 10px 15px rgba(0,0,0,0.2);
+            color:white; text-shadow:0 2px 4px rgba(0,0,0,0.3);
         }
         .input-area {
-            display:flex; flex-direction:column; align-items:center; gap:8px;
+            display:flex; flex-direction:column; align-items:center; gap:10px;
         }
         .answer-input {
-            font-size:2rem; width:110px; text-align:center; padding:8px;
-            border:4px dashed #f4a261; border-radius:30px; background:#fffef5;
+            font-size:2.2rem; width:130px; text-align:center; padding:10px;
+            border:4px dashed #f4a261; border-radius:30px; background:#FFFEF5;
             font-weight:bold; color:#264653; font-family:'Nunito', sans-serif;
-            outline:none;
+            outline:none; box-shadow:0 4px 10px rgba(0,0,0,0.1);
         }
-        .answer-input:focus { border-color:var(--neon-cyan); }
+        .answer-input:focus { border-color:var(--coral); }
         .result-emojis {
-            display:flex; flex-wrap:wrap; gap:4px; justify-content:center;
+            display:flex; flex-wrap:wrap; gap:6px; justify-content:center;
+            background:rgba(255,255,255,0.8); padding:10px; border-radius:20px;
         }
         .message {
-            font-size:1.2rem; font-weight:700; min-height:2rem; text-align:center;
-            color:#FFD700; text-shadow:0 0 8px rgba(255,215,0,0.7);
+            font-size:1.3rem; font-weight:700; min-height:2rem; text-align:center;
+            color:var(--coral); background:white; padding:8px 20px;
+            border-radius:20px; box-shadow:0 4px 10px rgba(0,0,0,0.1);
         }
         /* Botones inferiores */
         .bottom-bar {
-            display:flex; gap:8px; flex-wrap:wrap; justify-content:center;
+            display:flex; gap:10px; flex-wrap:wrap; justify-content:center;
         }
         .btn {
-            font-family:'Press Start 2P', cursive; font-size:7px; padding:10px 16px;
+            font-family:'Press Start 2P', cursive; font-size:7px; padding:10px 18px;
             border:none; border-radius:25px; cursor:pointer; color:white;
-            box-shadow:0 4px 10px rgba(0,0,0,0.3); transition:0.2s;
+            box-shadow:0 6px 0 rgba(0,0,0,0.2), 0 8px 15px rgba(0,0,0,0.2);
+            transition:0.1s; text-transform:uppercase;
         }
         .btn-check { background:#4CAF50; }
         .btn-new { background:#FF9800; }
         .btn-shop { background:var(--neon-pink); }
-        .btn:active { transform:scale(0.95); }
+        .btn:active { transform:translateY(4px); box-shadow:0 2px 0 rgba(0,0,0,0.2); }
         .btn:disabled { opacity:0.5; cursor:not-allowed; }
         /* Tienda modal */
         .modal {
             position:fixed; top:0; left:0; width:100%; height:100%;
-            background:rgba(0,0,0,0.7); z-index:100;
+            background:rgba(0,0,0,0.6); z-index:100;
             display:flex; align-items:center; justify-content:center;
             visibility:hidden; opacity:0; transition:0.3s;
         }
         .modal.open { visibility:visible; opacity:1; }
         .modal-content {
             background:white; border-radius:30px; padding:20px; width:90%;
-            max-width:380px; text-align:center; color:#333;
+            max-width:380px; text-align:center; color:#4A3728;
+            box-shadow:0 10px 30px rgba(0,0,0,0.3);
         }
-        .modal-content h3 { font-size:20px; margin-bottom:15px; color:var(--coral); }
+        .modal-content h3 { font-size:22px; margin-bottom:15px; color:var(--coral); }
         .shop-item {
             display:flex; justify-content:space-between; align-items:center;
-            padding:10px; border:2px solid #eee; border-radius:20px; margin-bottom:8px;
-            background:#FFFDE7; font-weight:700; font-size:14px;
+            padding:12px; border:2px solid #EEE; border-radius:20px; margin-bottom:8px;
+            background:#FFFDE7; font-weight:700; font-size:15px;
         }
         .shop-item button {
             font-family:'Press Start 2P', cursive; font-size:6px; padding:6px 12px;
@@ -142,9 +174,28 @@
             font-family:'Press Start 2P', cursive; font-size:7px;
             padding:8px 16px; border-radius:15px; cursor:pointer;
         }
+        /* Logro emergente */
+        .achievement-popup {
+            position:fixed; bottom:20px; left:50%; transform:translateX(-50%);
+            background:var(--sun); color:#4A3728; font-weight:900; font-size:18px;
+            padding:15px 25px; border-radius:30px;
+            box-shadow:0 6px 20px rgba(0,0,0,0.3);
+            z-index:150; display:none; animation: slideUp 0.5s, fadeOut 2s 2.5s forwards;
+        }
+        @keyframes slideUp {
+            from{ bottom:0; opacity:0; } to{ bottom:20px; opacity:1; }
+        }
+        @keyframes fadeOut {
+            to{ opacity:0; }
+        }
     </style>
 </head>
 <body>
+<div class="sky-bg">
+    <div class="cloud cloud1"></div>
+    <div class="cloud cloud2"></div>
+</div>
+
 <div class="game-wrapper">
     <div class="hud">
         <div class="hud-item">⭐ <span id="starsDisplay">0</span></div>
@@ -162,8 +213,12 @@
     </div>
 
     <div class="game-area">
+        <div class="owl-guide" id="owlGuide">
+            <span class="owl-emoji">🦉</span>
+            <span id="owlText">¿Cuántos emojis hay en total?</span>
+        </div>
         <div class="visual-sum" id="visualSum"></div>
-        <div class="message" id="messageArea"></div>
+        <div class="message" id="messageArea">¡Vamos a jugar!</div>
     </div>
 
     <div class="bottom-bar">
@@ -180,6 +235,8 @@
         <button class="close-modal" id="closeShopBtn">CERRAR</button>
     </div>
 </div>
+
+<div class="achievement-popup" id="achievementPopup"></div>
 
 <script>
     // ═══════════════════════════════════════
@@ -198,6 +255,7 @@
     // DOM Elements
     const visualSum = document.getElementById('visualSum');
     const messageArea = document.getElementById('messageArea');
+    const owlText = document.getElementById('owlText');
     const starsDisplay = document.getElementById('starsDisplay');
     const livesDisplay = document.getElementById('livesDisplay');
     const shieldDisplay = document.getElementById('shieldDisplay');
@@ -211,6 +269,7 @@
     const shopBtn = document.getElementById('shopBtn');
     const adminBtn = document.getElementById('adminBtn');
     const modeButtons = document.querySelectorAll('.mode-btn');
+    const achievementPopup = document.getElementById('achievementPopup');
 
     // ═══════════════════════════════════════
     //  FUNCIONES DE DATOS
@@ -268,6 +327,12 @@
         return true;
     }
 
+    function showAchievement(text) {
+        achievementPopup.textContent = text;
+        achievementPopup.style.display = 'block';
+        setTimeout(() => { achievementPopup.style.display = 'none'; }, 3500);
+    }
+
     // ═══════════════════════════════════════
     //  GENERACIÓN DE PREGUNTAS
     // ═══════════════════════════════════════
@@ -278,14 +343,17 @@
             num1 = Math.floor(Math.random() * maxNum) + 1;
             num2 = Math.floor(Math.random() * maxNum) + 1;
             correctAnswer = num1 + num2;
+            owlText.textContent = `¿Cuánto es ${num1} + ${num2}?`;
         } else if (currentMode === 'subtract') {
             num1 = Math.floor(Math.random() * maxNum) + 2;
             num2 = Math.floor(Math.random() * num1) + 1;
             correctAnswer = num1 - num2;
+            owlText.textContent = `¿Cuánto es ${num1} - ${num2}?`;
         } else if (currentMode === 'count') {
             num1 = Math.floor(Math.random() * maxNum) + 1;
             num2 = 0;
             correctAnswer = num1;
+            owlText.textContent = `¿Cuántos emojis hay?`;
         }
         renderVisual();
     }
@@ -337,10 +405,8 @@
         inputDiv.appendChild(resultDiv);
         visualSum.appendChild(inputDiv);
 
-        // Focus automático
         setTimeout(() => input.focus(), 100);
-
-        messageArea.innerHTML = '';
+        messageArea.innerHTML = 'Escribe tu respuesta ✏️';
     }
 
     // ═══════════════════════════════════════
@@ -370,7 +436,10 @@
                 Tecnomath.addCoins(reward);
                 Tecnomath.updateHighScore('emojimath', score);
             }
-            if (streak % 5 === 0 && level < 15) level++;
+            if (streak % 5 === 0 && level < 15) {
+                level++;
+                showAchievement(`🎈 ¡Subiste al nivel ${level}!`);
+            }
             messageArea.innerHTML = `🎉 ¡Correcto! +${reward}💰 Racha: ${streak}🔥`;
             resultDiv.innerHTML = '';
             for (let i=0; i<correctAnswer; i++) {
@@ -386,13 +455,17 @@
             streak = 0;
             if (shields > 0) {
                 shields--;
-                messageArea.innerHTML = `🛡️ Escudo usado. La respuesta era ${correctAnswer}`;
+                messageArea.innerHTML = `🛡️ Escudo usado. Era ${correctAnswer}`;
             } else {
                 if (!adminActive) lives--;
                 if (lives <= 0) {
                     lives = 3;
                     score = Math.max(0, score - 3);
                     messageArea.innerHTML = '😞 Sin vidas. Reiniciando...';
+                    setTimeout(generateQuestion, 1500);
+                    saveStats();
+                    updateHUD();
+                    return;
                 } else {
                     messageArea.innerHTML = `❌ Era ${correctAnswer}. Vidas: ${lives}`;
                 }
@@ -406,7 +479,7 @@
             }
             saveStats();
             updateHUD();
-            setTimeout(generateQuestion, 1500);
+            setTimeout(generateQuestion, 1800);
         }
     }
 
@@ -426,7 +499,7 @@
         const items = [
             { name:'❤️ Vida', price:30, action:() => { lives++; saveStats(); updateHUD(); } },
             { name:'🛡️ Escudo', price:25, action:() => { shields++; saveStats(); updateHUD(); } },
-            { name:'⭐ Pista', price:15, action:() => { messageArea.innerHTML = `🔍 La respuesta es ${correctAnswer}`; } },
+            { name:'💡 Pista', price:15, action:() => { messageArea.innerHTML = `🦉 La respuesta es ${correctAnswer}`; } },
             { name:'💱 Convertir 🌐→💰', price:0, action:() => { openExchange(); } }
         ];
         items.forEach(item => {
