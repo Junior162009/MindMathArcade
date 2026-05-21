@@ -1,11 +1,11 @@
 {
   "name": "Tecnomath - Portal de Juegos Educativos ODS",
   "short_name": "Tecnomath",
-  "description": "Portal de minijuegos educativos sobre los ODS. Matemáticas, ciencias, ecología y mucho más. ¡Gana monedas y desbloquea logros!",
+  "description": "Portal de minijuegos educativos sobre los ODS. Matemáticas, ciencias, ecología y mucho más.",
   "start_url": "/index.html",
   "scope": "/",
   "display": "standalone",
-  "display_override": ["standalone", "fullscreen", "minimal-ui"],
+  "display_override": ["standalone", "fullscreen"],
   "orientation": "portrait",
   "lang": "es-ES",
   "dir": "ltr",
@@ -19,60 +19,17 @@
       "type": "image/png",
       "form_factor": "narrow",
       "label": "Pantalla principal del portal Tecnomath"
-    },
-    {
-      "src": "img/screenshot-2.png",
-      "sizes": "1080x1920",
-      "type": "image/png",
-      "form_factor": "narrow",
-      "label": "Juego MindMath Arcade"
     }
   ],
   "icons": [
-    {
-      "src": "img/icon-48.png",
-      "sizes": "48x48",
-      "type": "image/png"
-    },
-    {
-      "src": "img/icon-72.png",
-      "sizes": "72x72",
-      "type": "image/png"
-    },
-    {
-      "src": "img/icon-96.png",
-      "sizes": "96x96",
-      "type": "image/png"
-    },
-    {
-      "src": "img/icon-144.png",
-      "sizes": "144x144",
-      "type": "image/png"
-    },
-    {
-      "src": "img/icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "img/icon-256.png",
-      "sizes": "256x256",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "img/icon-384.png",
-      "sizes": "384x384",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "img/icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
-    }
+    { "src": "img/icon-48.png", "sizes": "48x48", "type": "image/png" },
+    { "src": "img/icon-72.png", "sizes": "72x72", "type": "image/png" },
+    { "src": "img/icon-96.png", "sizes": "96x96", "type": "image/png" },
+    { "src": "img/icon-144.png", "sizes": "144x144", "type": "image/png" },
+    { "src": "img/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "img/icon-256.png", "sizes": "256x256", "type": "image/png", "purpose": "any maskable" },
+    { "src": "img/icon-384.png", "sizes": "384x384", "type": "image/png", "purpose": "any maskable" },
+    { "src": "img/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
   ],
   "shortcuts": [
     {
@@ -80,54 +37,21 @@
       "short_name": "MindMath",
       "description": "Juego de matemáticas retro",
       "url": "/game.html",
-      "icons": [
-        {
-          "src": "img/mindmath.png",
-          "sizes": "96x96",
-          "type": "image/png"
-        }
-      ]
+      "icons": [{ "src": "img/mindmath.png", "sizes": "96x96", "type": "image/png" }]
     },
     {
       "name": "Eco Recolector",
       "short_name": "Eco",
       "description": "Atrapa agua y reciclables",
       "url": "/eco-collector.html",
-      "icons": [
-        {
-          "src": "img/ecorecolector.png",
-          "sizes": "96x96",
-          "type": "image/png"
-        }
-      ]
+      "icons": [{ "src": "img/ecorecolector.png", "sizes": "96x96", "type": "image/png" }]
     },
     {
       "name": "Animalandia",
       "short_name": "Animales",
       "description": "Alimenta a los animales",
       "url": "/animalandia.html",
-      "icons": [
-        {
-          "src": "img/animalandia.png",
-          "sizes": "96x96",
-          "type": "image/png"
-        }
-      ]
+      "icons": [{ "src": "img/animalandia.png", "sizes": "96x96", "type": "image/png" }]
     }
-  ],
-  "related_applications": [
-    {
-      "platform": "webapp",
-      "url": "https://tecnomath.online/manifest.json"
-    }
-  ],
-  "prefer_related_applications": false,
-  "iarc_rating_id": "",
-  "edge_side_panel": {
-    "preferred_width": 400
-  },
-  "handle_links": "preferred",
-  "launch_handler": {
-    "client_mode": "focus-existing"
-  }
+  ]
 }
