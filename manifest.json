@@ -5,13 +5,14 @@
   "start_url": "/index.html",
   "scope": "/",
   "display": "standalone",
-  "display_override": ["standalone", "fullscreen"],
+  "display_override": ["standalone", "fullscreen", "minimal-ui"],
   "orientation": "portrait",
   "lang": "es-ES",
   "dir": "ltr",
   "background_color": "#060610",
   "theme_color": "#060610",
   "categories": ["education", "games", "kids"],
+  "iarc_rating_id": "",
   "screenshots": [
     {
       "src": "img/screenshot-1.png",
@@ -53,5 +54,67 @@
       "url": "/animalandia.html",
       "icons": [{ "src": "img/animalandia.png", "sizes": "96x96", "type": "image/png" }]
     }
-  ]
+  ],
+  "file_handlers": [
+    {
+      "action": "/index.html",
+      "accept": {
+        "application/pdf": [".pdf"],
+        "image/png": [".png"],
+        "image/jpeg": [".jpg", ".jpeg"],
+        "text/plain": [".txt"]
+      }
+    }
+  ],
+  "launch_handler": {
+    "client_mode": "auto"
+  },
+  "protocol_handlers": [
+    {
+      "protocol": "web+tecnomath",
+      "url": "/index.html?data=%s"
+    }
+  ],
+  "share_target": {
+    "action": "/index.html",
+    "method": "GET",
+    "enctype": "application/x-www-form-urlencoded",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url"
+    }
+  },
+  "widgets": [
+    {
+      "name": "Tecnomath Widget",
+      "tag": "tecnomath-widget",
+      "ms_ac_template": "widgets/tecnomath.json"
+    }
+  ],
+  "edge_side_panel": {
+    "preferred_width": 400
+  },
+  "window_controls_overlay": {
+    "enabled": true
+  },
+  "tabbed_display": {
+    "enabled": true
+  },
+  "note_taking": {
+    "new_note_url": "/index.html"
+  },
+  "scope_extensions": [
+    {
+      "origin": "https://tecnomath.online"
+    }
+  ],
+  "related_applications": [
+    {
+      "platform": "webapp",
+      "url": "https://tecnomath.online/manifest.json"
+    }
+  ],
+  "prefer_related_applications": false,
+  "handle_links": "preferred"
 }
