@@ -2,6 +2,7 @@
   "name": "Tecnomath - Portal de Juegos Educativos ODS",
   "short_name": "Tecnomath",
   "description": "Portal de minijuegos educativos sobre los ODS. Matemáticas, ciencias, ecología y mucho más.",
+  "id": "https://tecnomath.online/",
   "start_url": "/index.html",
   "scope": "/",
   "display": "standalone",
@@ -89,7 +90,15 @@
     {
       "name": "Tecnomath Widget",
       "tag": "tecnomath-widget",
-      "ms_ac_template": "widgets/tecnomath.json"
+      "ms_ac_template": "widgets/tecnomath.json",
+      "data": {
+        "url": "/"
+      }
+    }
+  ],
+  "scope_extensions": [
+    {
+      "origin": "https://tecnomath.online"
     }
   ],
   "edge_side_panel": {
@@ -99,16 +108,14 @@
     "enabled": true
   },
   "tabbed_display": {
-    "enabled": true
+    "enabled": true,
+    "home_tab": {
+      "scope": "/"
+    }
   },
   "note_taking": {
     "new_note_url": "/index.html"
   },
-  "scope_extensions": [
-    {
-      "origin": "https://tecnomath.online"
-    }
-  ],
   "related_applications": [
     {
       "platform": "webapp",
