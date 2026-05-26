@@ -2212,7 +2212,29 @@
                 showPopup('🔒 ACCESO', 'DENEGADO');
             }
         }
-
+        function updateAdminButton() {
+            const exitBtn = document.getElementById('exitAdminBtnGame');
+            if (!exitBtn) return;
+            const user = Tecnomath.getCurrentUser();
+            if (user && Tecnomath.isAdmin()) {
+                exitBtn.style.display = 'inline-block';
+            } else {
+                exitBtn.style.display = 'none';
+            }
+        }
+        
+        function exitAdminMode() {
+            const user = Tecnomath.getCurrentUser();
+            if (user && Tecnomath.isAdmin()) {
+                Tecnomath.unsetAdmin(user.username);
+                alert('Has salido del modo administrador. La página se recargará.');
+                location.reload();
+            }
+        }
+        
+        // Asegúrate de llamar a updateAdminButton() en la función updateHUD()
+        // Busca la función updateHUD() y al final añade:
+        //   updateAdminButton();
         // ════════════════════════════════════════════
         //  UTILS
         // ════════════════════════════════════════════
