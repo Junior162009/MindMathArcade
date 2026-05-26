@@ -418,16 +418,38 @@
 
         // Actualizar barra de usuario
         (function updateUserBar() {
-            const userDisplay = document.getElementById('userDisplay');
-            if (!userDisplay) return;
-            const user = Tecnomath.getCurrentUser();
-            if (user) {
-                const coins = Tecnomath.getCoins();
-                userDisplay.textContent = `${user.username} · 💰 ${coins}`;
-            } else {
-                userDisplay.textContent = 'Invitado';
-            }
-        })();
+                const userDisplay = document.getElementById('userDisplay');
+                const exitAdminBtn = document.getElementById('exitAdminBtn');
+                const authLink = document.getElementById('authLink');
+                if (!userDisplay) return;
+                const user = Tecnomath.getCurrentUser();
+                if (user) {
+                    const coins = Tecnomath.getCoins();
+                    userDisplay.textContent = `${user.username} · 💰 ${coins}`;
+                    // Mostrar botón de salir admin si es admin
+                    if (Tecnomath.isAdmin()) {
+                        exitAdminBtn.style.display = 'inline-block';
+                        authLink.style.display = 'none';
+                    } else {
+                        exitAdminBtn.style.display = 'none';
+                        authLink.style.display = 'inline-block';
+                    }
+                } else {
+                    userDisplay.textContent = 'Invitado';
+                    exitAdminBtn.style.display = 'none';
+                    authLink.style.display = 'inline-block';
+                }
+            })();
+
+            // Evento para salir del admin
+            document.getElementById('exitAdminBtn').addEventListener('click', () => {
+                const user = Tecnomath.getCurrentUser();
+                if (user && Tecnomath.isAdmin()) {
+                    Tecnomath.unsetAdmin(user.username);
+                    alert('Has salido del modo administrador. La página se recargará.');
+                    location.reload();
+                }
+            });
     </script>
 </body>
 </html>
