@@ -6,24 +6,20 @@
   const GAME_COINS_PREFIX = 'tecnomath_gamecoins_';
   const PROGRESS_PREFIX = 'tecnomath_progress_';
 
-  // Obtener lista de usuarios
   function getUsers() {
     const data = localStorage.getItem(STORAGE_KEY);
     return data ? JSON.parse(data) : [];
   }
 
-  // Guardar lista de usuarios
   function saveUsers(users) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(users));
   }
 
-  // Buscar usuario por nombre
   function findUser(username) {
     const users = getUsers();
     return users.find(u => u.username === username);
   }
 
-  // Crear o actualizar usuario
   function upsertUser(username, password) {
     const users = getUsers();
     let user = findUser(username);
@@ -36,16 +32,13 @@
       };
       users.push(user);
     } else {
-      // actualizar contraseña si es distinta
       user.password = password;
     }
     saveUsers(users);
     return user;
   }
 
-  // API pública
   window.Tecnomath = {
-    // ─── Sesión ─────────────────────────────────
     login: function(username, password) {
       if (!username || !password) return { success: false, message: 'Usuario y contraseña requeridos' };
       const user = upsertUser(username, password);
@@ -69,7 +62,7 @@
       }
     },
 
-    // ─── Admin ──────────────────────────────────
+    // Comprueba si el usuario actual es administrador
     isAdmin: function() {
       const user = this.getCurrentUser();
       if (!user) return false;
@@ -77,6 +70,7 @@
       return currentUser && currentUser.isAdmin === true;
     },
 
+    // Convierte a un usuario en administrador
     setAdmin: function(username) {
       const users = getUsers();
       const user = users.find(u => u.username === username);
@@ -86,7 +80,16 @@
       }
     },
 
-    // ─── Monedas globales ───────────────────────
+    // NUEVA FUNCIÓN: Quita los privilegios de administrador
+    unsetAdmin: function(username) {
+      const users = getUsers();
+      const user = users.find(u => u.username === username);
+      if (user) {
+        user.isAdmin = false;
+        saveUsers(users);
+      }
+    },
+
     getCoins: function() {
       if (this.isAdmin()) return Infinity;
       const user = this.getCurrentUser();
@@ -114,7 +117,6 @@
       return true;
     },
 
-    // ─── Monedas por juego ──────────────────────
     getGameCoins: function(gameId) {
       if (this.isAdmin()) return Infinity;
       const user = this.getCurrentUser();
@@ -132,10 +134,9 @@
       localStorage.setItem(key, amount);
     },
 
-    // ─── Intercambio con comisión (10%) ────────
     exchangeGlobalToLocal: function(gameId, globalAmount) {
       if (this.isAdmin()) return true;
-      const rate = 0.9; // 10% comisión
+      const rate = 0.9;
       const localAmount = Math.floor(globalAmount * rate);
       if (this.getCoins() < globalAmount) return false;
       if (!this.spendCoins(globalAmount)) return false;
@@ -155,7 +156,6 @@
       return true;
     },
 
-    // ─── Progreso ──────────────────────────────
     getProgress: function(gameId) {
       const user = this.getCurrentUser();
       if (!user) return {};
