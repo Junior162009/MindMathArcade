@@ -346,8 +346,16 @@
             { name: "Orbit Cleaner", desc: "Limpia el espacio y protege la capa de ozono. ODS 13", url: "orbit-cleaner.html", imageUrl: "", icon: "🛰️", category: "eco" },
             { name: "Marine Tech Cleaner", desc: "USV y ROV para limpiar el océano. ODS 14", url: "marine-cleaner.html", imageUrl: "", icon: "🌊", category: "eco" },
             { name: "Animalandia", desc: "Alimenta a los animales. Para niños pequeños", url: "animalandia.html", imageUrl: "", icon: "🐮", category: "kids" },
-            { name: "ODS-2048", desc: "Fusiona los 17 ODS. Juego de puzzle adictivo", url: "ods-2048.html", imageUrl: "", icon: "🌐", category: "puzzle" }
-        ];
+            { name: "ODS-2048", desc: "Fusiona los 17 ODS. Juego de puzzle adictivo", url: "ods-2048.html", imageUrl: "", icon: "🌐", category: "puzzle" },
+        {
+            name: "Pacman-Master",
+            desc: "Juego importado desde ZIP",
+            url: "pacman-master/pacman-master/index.html",
+            imageUrl: "",
+            icon: "🎮",
+            category: "retro"
+        }
+    ];
 
         // Construir filtros
         const categories = ['todos', ...new Set(projects.map(p => p.category))];
