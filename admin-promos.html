@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Promociones · Tecnomath</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        :root { --neon-cyan:#00FFFF; --neon-pink:#FF00FF; --gold:#FFD700; --bg:#060610; --card:#0d0d1a; }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { background:var(--bg); color:white; font-family:'Press Start 2P', cursive; padding:20px; }
+        h1 { text-align:center; color:var(--neon-cyan); font-size:14px; margin-bottom:20px; text-shadow:0 0 10px var(--neon-cyan); }
+        .promo-form { background:var(--card); padding:20px; border-radius:12px; max-width:600px; margin:0 auto 30px; }
+        .promo-form input, .promo-form textarea { 
+            width:100%; padding:8px; margin:6px 0; background:#0a0a1a; border:2px solid #333; 
+            color:var(--neon-green); font-family:'Press Start 2P', cursive; font-size:7px; border-radius:8px;
+        }
+        .btn { font-family:'Press Start 2P', cursive; font-size:7px; padding:10px 16px; border:none; border-radius:8px; cursor:pointer; color:white; box-shadow:0 4px 0 rgba(0,0,0,0.3); }
+        .btn-add { background:var(--neon-pink); }
+        .btn-save { background:#4CAF50; }
+        .list { max-width:600px; margin:0 auto; }
+        .item { background:var(--card); padding:15px; border-radius:10px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; }
+        .item button { background:#FF5252; color:white; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; font-family:'Press Start 2P', cursive; font-size:6px; }
+    </style>
+</head>
+<body>
+    <h1>🔧 Gestionar Promociones</h1>
+    
+    <div class="promo-form">
+        <h3 style="font-size:10px; color:var(--gold); margin-bottom:10px;">Agregar / Editar Promoción</h3>
+        <input type="text" id="nombre" placeholder="Nombre del juego">
+        <input type="text" id="descripcion" placeholder="Descripción breve">
+        <input type="text" id="url" placeholder="URL del juego">
+        <input type="text" id="imagen" placeholder="Ruta de imagen (ej: img/promo.png)">
+        <input type="date" id="fechaInicio">
+        <input type="date" id="fechaFin">
+        <label style="font-size:6px; margin:10px 0;"><input type="checkbox" id="activo" checked> Activo</label>
+        <button class="btn btn-add" onclick="agregarPromocion()">➕ Agregar</button>
+    </div>
+
+    <div class="list" id="listaPromos"></div>
+
+    <script>
+        const OWNER = 'Junior162009';
+        const REPO = 'MindMathArcade';
+        const FILE = 'promociones.json';
+        const API = `https://api.github.com/repos/${OWNER}/${REPO}/contents/${FILE}`;
+        const BRANCH = 'main';
+        let token = localStorage.getItem('tecnomath_github_token') || prompt('Token de GitHub:');
+        if (!token) alert('Se requiere token');
+        localStorage.setItem('tecnomath_github_token', token);
+        let currentSHA = null;
+
+        async function cargarLista() {
+            const resp = await fetch(API, { headers: { Authorization: `token ${token}` } });
+            const data = await resp.json();
+            currentSHA = data.sha;
+            const promos = JSON.parse(atob(data.content));
+            renderLista(promos);
+        }
+
+        function renderLista(promos) {
+            const cont = document.getElementById('listaPromos');
+            cont.innerHTML = promos.map((p,i) => `
+                <div class="item">
+                    <span>${p.nombre}</span>
+                    <button onclick="eliminar(${i})">🗑️</button>
+                </div>
+            `).join('');
+        }
+
+        async function guardar(promos, mensaje) {
+            const body = {
+                message: mensaje,
+                content: btoa(unescape(encodeURIComponent(JSON.stringify(promos, null, 2)))),
+                sha: currentSHA,
+                branch: BRANCH
+            };
+            const resp = await fetch(API, {
+                method: 'PUT',
+                headers: { Authorization: `token ${token}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
+            });
+            const data = await resp.json();
+            currentSHA = data.content.sha;
+            cargarLista();
+        }
+
+        async function agregarPromocion() {
+            const promos = await obtenerPromosActuales();
+            const nueva = {
+                nombre: document.getElementById('nombre').value,
+                descripcion: document.getElementById('descripcion').value,
+                url: document.getElementById('url').value,
+                imagen: document.getElementById('imagen').value,
+                fechaInicio: document.getElementById('fechaInicio').value,
+                fechaFin: document.getElementById('fechaFin').value,
+                activo: document.getElementById('activo').checked
+            };
+            promos.push(nueva);
+            await guardar(promos, `Agregar promoción ${nueva.nombre}`);
+        }
+
+        async function eliminar(index) {
+            const promos = await obtenerPromosActuales();
+            const eliminado = promos.splice(index, 1)[0];
+            await guardar(promos, `Eliminar promoción ${eliminado.nombre}`);
+        }
+
+        async function obtenerPromosActuales() {
+            const resp = await fetch(API, { headers: { Authorization: `token ${token}` } });
+            const data = await resp.json();
+            return JSON.parse(atob(data.content));
+        }
+
+        cargarLista();
+    </script>
+</body>
+</html>
