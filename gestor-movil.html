@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Tecnomath Móvil · Gestor de Juegos</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --neon-cyan: #00FFFF; --neon-pink: #FF00FF; --neon-green: #39FF14;
+            --gold: #FFD700; --retro-bg: #060610; --card-bg: #0d0d1a;
+            --danger: #FF5252; --success: #4CAF50;
+        }
+        * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+        html, body {
+            height:100%; width:100%; overflow-y:auto;
+            background:var(--retro-bg); font-family:'Press Start 2P', cursive; color:white;
+            background-image: radial-gradient(ellipse at 20% 50%, rgba(0,68,255,0.07) 0%, transparent 50%),
+                            radial-gradient(ellipse at 80% 20%, rgba(255,0,255,0.07) 0%, transparent 50%);
+        }
+        body::before {
+            content:''; position:fixed; inset:0; pointer-events:none; z-index:9999;
+            background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.12) 2px, rgba(0,0,0,0.12) 4px);
+        }
+        .app-container {
+            max-width:500px; margin:0 auto; padding:10px; min-height:100vh;
+            display:flex; flex-direction:column; gap:15px;
+        }
+        header {
+            text-align:center; padding:15px 0; border-bottom:2px solid var(--neon-pink);
+            background:linear-gradient(90deg, rgba(255,0,255,0.05), transparent, rgba(0,255,255,0.05));
+            border-radius:12px;
+        }
+        h1 { font-size:14px; color:var(--neon-cyan); text-shadow:0 0 10px var(--neon-cyan); letter-spacing:2px; }
+        .subtitle { font-size:6px; color:var(--neon-pink); text-shadow:0 0 8px var(--neon-pink); margin-top:5px; }
+
+        /* Panel de token */
+        .token-panel {
+            background:var(--card-bg); border:2px solid #1a1a2e; border-radius:12px;
+            padding:15px; display:flex; flex-direction:column; gap:10px;
+        }
+        .token-panel label { font-size:7px; color:#aaa; }
+        .token-panel input {
+            font-family:'Orbitron', monospace; font-size:10px; padding:10px;
+            background:#0a0a1a; border:2px solid #333; color:var(--neon-green);
+            border-radius:8px; outline:none;
+        }
+        .token-panel input:focus { border-color:var(--neon-cyan); }
+
+        /* Botones */
+        .btn {
+            font-family:'Press Start 2P', cursive; font-size:7px; padding:10px 16px;
+            border:none; border-radius:8px; cursor:pointer; color:white;
+            box-shadow:0 4px 0 rgba(0,0,0,0.3); transition:0.1s; text-align:center;
+            text-transform:uppercase;
+        }
+        .btn:active { transform:translateY(2px); box-shadow:0 1px 0 rgba(0,0,0,0.3); }
+        .btn-cyan { background:var(--neon-cyan); color:#000; }
+        .btn-pink { background:var(--neon-pink); }
+        .btn-green { background:var(--success); }
+        .btn-red { background:var(--danger); }
+        .btn-gold { background:var(--gold); color:#000; }
+
+        /* Lista de juegos */
+        .game-list {
+            display:flex; flex-direction:column; gap:8px;
+        }
+        .game-card {
+            background:var(--card-bg); border:2px solid #1a1a2e; border-radius:10px;
+            padding:12px; display:flex; align-items:center; gap:10px;
+            transition:0.2s;
+        }
+        .game-card:active { border-color:var(--neon-cyan); }
+        .game-icon { font-size:28px; min-width:40px; text-align:center; }
+        .game-info { flex:1; }
+        .game-name { font-size:6px; color:white; text-shadow:0 0 5px rgba(255,255,255,0.5); }
+        .game-desc { font-size:4px; color:#aaa; margin-top:4px; }
+        .game-url { font-size:3px; color:#666; margin-top:3px; word-break:break-all; }
+        .game-delete {
+            background:none; border:1px solid var(--danger); color:var(--danger);
+            font-size:6px; padding:6px 10px; border-radius:6px; cursor:pointer;
+            font-family:'Press Start 2P', cursive;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position:fixed; top:0; left:0; width:100%; height:100%;
+            background:rgba(0,0,0,0.85); z-index:100;
+            display:flex; align-items:center; justify-content:center;
+            visibility:hidden; opacity:0; transition:0.3s;
+        }
+        .modal-overlay.open { visibility:visible; opacity:1; }
+        .modal-content {
+            background:var(--card-bg); border:2px solid var(--neon-pink);
+            border-radius:15px; padding:20px; width:90%; max-width:400px;
+            box-shadow:0 0 30px rgba(255,0,255,0.4);
+            display:flex; flex-direction:column; gap:10px;
+        }
+        .modal-content h3 { font-size:10px; color:var(--neon-pink); text-align:center; text-shadow:0 0 10px var(--neon-pink); }
+        .modal-content label { font-size:5px; color:#888; }
+        .modal-content input, .modal-content select {
+            font-family:'Press Start 2P', cursive; font-size:6px; padding:8px;
+            background:#0a0a1a; border:2px solid #333; color:var(--neon-green);
+            border-radius:6px; outline:none;
+        }
+        .modal-content input:focus, .modal-content select:focus { border-color:var(--neon-cyan); }
+        .modal-content select { color:var(--neon-cyan); }
+        .modal-buttons { display:flex; gap:8px; justify-content:center; margin-top:10px; }
+
+        .status-bar {
+            font-size:5px; color:var(--neon-green); text-align:center;
+            text-shadow:0 0 6px var(--neon-green); padding:8px;
+            background:rgba(0,255,0,0.1); border-radius:8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <header>
+            <h1>TECNOMATH</h1>
+            <div class="subtitle">GESTOR MÓVIL</div>
+        </header>
+
+        <!-- Pantalla de configuración del token (se oculta si ya está guardado) -->
+        <div id="tokenPanel" class="token-panel">
+            <label>🔐 Token de GitHub (con permisos repo)</label>
+            <input type="password" id="tokenInput" placeholder="ghp_...">
+            <button class="btn btn-cyan" onclick="guardarToken()">💾 CONECTAR</button>
+            <div style="font-size:4px; color:#666;">El token se guarda solo en este dispositivo</div>
+        </div>
+
+        <!-- Lista de juegos -->
+        <div class="game-list" id="gameList"></div>
+
+        <!-- Barra de estado -->
+        <div class="status-bar" id="statusBar">Listo para conectar</div>
+
+        <!-- Botones inferiores -->
+        <div style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap;">
+            <button class="btn btn-pink" onclick="abrirModalAgregar()">➕ NUEVO JUEGO</button>
+            <button class="btn btn-gold" onclick="cargarJuegos()">🔄 RECARGAR</button>
+        </div>
+    </div>
+
+    <!-- Modal para agregar juego -->
+    <div class="modal-overlay" id="modalAgregar">
+        <div class="modal-content">
+            <h3>➕ AGREGAR JUEGO</h3>
+            <label>Nombre</label>
+            <input type="text" id="inputNombre" placeholder="Snake clásico">
+            <label>Descripción</label>
+            <input type="text" id="inputDesc" placeholder="Juego retro de la serpiente">
+            <label>URL (archivo local o externa)</label>
+            <input type="text" id="inputUrl" placeholder="snake.html o https://...">
+            <label>Emoji</label>
+            <input type="text" id="inputEmoji" placeholder="🐍" maxlength="4">
+            <label>Categoría</label>
+            <select id="inputCategoria">
+                <option value="retro">retro</option>
+                <option value="mates">mates</option>
+                <option value="eco">eco</option>
+                <option value="kids">kids</option>
+                <option value="puzzle">puzzle</option>
+                <option value="runners">runners</option>
+                <option value="otros">otros</option>
+            </select>
+            <label>Imagen (opcional)</label>
+            <input type="text" id="inputImagen" placeholder="img/icono.png">
+            <div class="modal-buttons">
+                <button class="btn btn-green" onclick="agregarJuego()">✅ GUARDAR</button>
+                <button class="btn btn-red" onclick="cerrarModal('modalAgregar')">CANCELAR</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ═══════════════════════════════
+        // CONFIGURACIÓN
+        // ═══════════════════════════════
+        const OWNER = 'Junior162009';
+        const REPO = 'MindMathArcade';
+        const FILE_PATH = 'index.html';
+        const BRANCH = 'main';
+        const API_BASE = `https://api.github.com/repos/${OWNER}/${REPO}/contents/${FILE_PATH}`;
+
+        let token = localStorage.getItem('tecnomath_github_token') || '';
+        let currentSHA = null;
+        let juegosActuales = [];
+
+        // ═══════════════════════════════
+        // INICIALIZACIÓN
+        // ═══════════════════════════════
+        window.addEventListener('load', () => {
+            if (token) {
+                document.getElementById('tokenPanel').style.display = 'none';
+                document.getElementById('tokenInput').value = token;
+                cargarJuegos();
+            } else {
+                document.getElementById('statusBar').textContent = 'Ingresa tu token de GitHub';
+            }
+        });
+
+        // ═══════════════════════════════
+        // TOKEN
+        // ═══════════════════════════════
+        function guardarToken() {
+            token = document.getElementById('tokenInput').value.trim();
+            if (!token) {
+                alert('Escribe el token');
+                return;
+            }
+            localStorage.setItem('tecnomath_github_token', token);
+            document.getElementById('tokenPanel').style.display = 'none';
+            cargarJuegos();
+        }
+
+        // ═══════════════════════════════
+        // CARGAR JUEGOS DESDE GITHUB
+        // ═══════════════════════════════
+        async function cargarJuegos() {
+            if (!token) {
+                document.getElementById('statusBar').textContent = '⚠️ Token no configurado';
+                return;
+            }
+            document.getElementById('statusBar').textContent = '⏳ Cargando juegos...';
+            try {
+                const response = await fetch(API_BASE + `?ref=${BRANCH}`, {
+                    headers: { 'Authorization': `token ${token}` }
+                });
+                if (!response.ok) {
+                    if (response.status === 401) throw new Error('Token inválido o expirado');
+                    if (response.status === 404) throw new Error('Repositorio no encontrado');
+                    throw new Error(`Error ${response.status}`);
+                }
+                const data = await response.json();
+                currentSHA = data.sha;
+                // Decodificar contenido base64
+                const contenido = atob(data.content.replace(/\n/g, ''));
+                juegosActuales = extraerJuegos(contenido);
+                renderizarJuegos();
+                document.getElementById('statusBar').textContent = `✅ ${juegosActuales.length} juegos cargados`;
+            } catch (error) {
+                document.getElementById('statusBar').textContent = `❌ ${error.message}`;
+            }
+        }
+
+        // ═══════════════════════════════
+        // EXTRAER JUEGOS DEL index.html
+        // ═══════════════════════════════
+        function extraerJuegos(html) {
+            const juegos = [];
+            // Buscar el arreglo 'projects'
+            const regex = /const projects = \[([\s\S]*?)\];/;
+            const match = html.match(regex);
+            if (!match) return juegos;
+
+            const bloque = match[1];
+            // Buscar cada objeto
+            const objRegex = /\{([^}]+)\}/g;
+            let objMatch;
+            while ((objMatch = objRegex.exec(bloque)) !== null) {
+                const objStr = objMatch[1];
+                const juego = {};
+                // Extraer propiedades
+                juego.name = extraerValor(objStr, 'name');
+                juego.desc = extraerValor(objStr, 'desc');
+                juego.url = extraerValor(objStr, 'url');
+                juego.imageUrl = extraerValor(objStr, 'imageUrl');
+                juego.icon = extraerValor(objStr, 'icon');
+                juego.category = extraerValor(objStr, 'category');
+                if (juego.name) juegos.push(juego);
+            }
+            return juegos;
+        }
+
+        function extraerValor(str, propiedad) {
+            const regex = new RegExp(`${propiedad}:\\s*"([^"]*)"`);
+            const match = str.match(regex);
+            return match ? match[1] : '';
+        }
+
+        // ═══════════════════════════════
+        // RENDERIZAR LISTA
+        // ═══════════════════════════════
+        function renderizarJuegos() {
+            const container = document.getElementById('gameList');
+            container.innerHTML = '';
+            juegosActuales.forEach((juego, index) => {
+                const card = document.createElement('div');
+                card.className = 'game-card';
+                card.innerHTML = `
+                    <div class="game-icon">${juego.icon || '🎮'}</div>
+                    <div class="game-info">
+                        <div class="game-name">${juego.name}</div>
+                        <div class="game-desc">${juego.desc || ''}</div>
+                        <div class="game-url">${juego.url}</div>
+                    </div>
+                    <button class="game-delete" onclick="eliminarJuego(${index})">🗑️</button>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // ═══════════════════════════════
+        // AGREGAR JUEGO
+        // ═══════════════════════════════
+        function abrirModalAgregar() {
+            if (!token) {
+                alert('Configura primero el token');
+                return;
+            }
+            document.getElementById('modalAgregar').classList.add('open');
+        }
+
+        function cerrarModal(id) {
+            document.getElementById(id).classList.remove('open');
+        }
+
+        function obtenerTexto(id) {
+            return document.getElementById(id).value.trim();
+        }
+
+        async function agregarJuego() {
+            const nuevo = {
+                name: obtenerTexto('inputNombre'),
+                desc: obtenerTexto('inputDesc'),
+                url: obtenerTexto('inputUrl'),
+                icon: obtenerTexto('inputEmoji'),
+                category: obtenerTexto('inputCategoria'),
+                imageUrl: obtenerTexto('inputImagen')
+            };
+
+            if (!nuevo.name || !nuevo.url || !nuevo.icon) {
+                alert('Nombre, URL y emoji son obligatorios');
+                return;
+            }
+
+            document.getElementById('statusBar').textContent = '⏳ Guardando...';
+
+            // Agregar al arreglo local
+            juegosActuales.push(nuevo);
+
+            // Reconstruir el index.html
+            const nuevoContenido = reconstruirIndex(juegosActuales);
+
+            // Subir a GitHub
+            try {
+                const body = {
+                    message: `Agregar ${nuevo.name} desde gestor móvil`,
+                    content: btoa(unescape(encodeURIComponent(nuevoContenido))),
+                    sha: currentSHA,
+                    branch: BRANCH
+                };
+
+                const response = await fetch(API_BASE, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `token ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(body)
+                });
+
+                if (!response.ok) throw new Error('Error al guardar');
+
+                const data = await response.json();
+                currentSHA = data.content.sha;
+
+                cerrarModal('modalAgregar');
+                limpiarFormulario();
+                renderizarJuegos();
+                document.getElementById('statusBar').textContent = `✅ "${nuevo.name}" agregado correctamente`;
+            } catch (error) {
+                document.getElementById('statusBar').textContent = `❌ ${error.message}`;
+                // Revertir el cambio local
+                juegosActuales.pop();
+            }
+        }
+
+        function limpiarFormulario() {
+            ['inputNombre','inputDesc','inputUrl','inputEmoji','inputImagen'].forEach(id => {
+                document.getElementById(id).value = '';
+            });
+            document.getElementById('inputCategoria').value = 'retro';
+        }
+
+        // ═══════════════════════════════
+        // ELIMINAR JUEGO
+        // ═══════════════════════════════
+        async function eliminarJuego(index) {
+            if (!confirm(`¿Eliminar "${juegosActuales[index].name}"?`)) return;
+            const eliminado = juegosActuales.splice(index, 1)[0];
+            const nuevoContenido = reconstruirIndex(juegosActuales);
+
+            try {
+                const body = {
+                    message: `Eliminar ${eliminado.name} desde gestor móvil`,
+                    content: btoa(unescape(encodeURIComponent(nuevoContenido))),
+                    sha: currentSHA,
+                    branch: BRANCH
+                };
+
+                const response = await fetch(API_BASE, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `token ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(body)
+                });
+
+                if (!response.ok) throw new Error('Error al eliminar');
+
+                const data = await response.json();
+                currentSHA = data.content.sha;
+                renderizarJuegos();
+                document.getElementById('statusBar').textContent = `🗑️ "${eliminado.name}" eliminado`;
+            } catch (error) {
+                // Revertir
+                juegosActuales.splice(index, 0, eliminado);
+                document.getElementById('statusBar').textContent = `❌ ${error.message}`;
+            }
+        }
+
+        // ═══════════════════════════════
+        // RECONSTRUIR index.html
+        // ═══════════════════════════════
+        function reconstruirIndex(juegos) {
+            const entradas = juegos.map(j => `        {
+            name: "${j.name}",
+            desc: "${j.desc}",
+            url: "${j.url}",
+            imageUrl: "${j.imageUrl}",
+            icon: "${j.icon}",
+            category: "${j.category}"
+        }`).join(',\n');
+
+            return `<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Tecnomath · Portal de Proyectos</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#060610">
+    <style>
+        :root {
+            --neon-cyan: #00FFFF; --neon-pink: #FF00FF; --neon-green: #39FF14;
+            --neon-yellow: #FFE600; --gold: #FFD700; --retro-bg: #060610; --card-bg: #0d0d1a;
+            --grid-cols: 2; --card-min-width: 140px;
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        html, body {
+            height:100%; overflow-y:auto; background:var(--retro-bg);
+            font-family:'Press Start 2P', cursive; color:white;
+            background-image: radial-gradient(ellipse at 20% 50%, rgba(0,68,255,0.07) 0%, transparent 50%),
+                            radial-gradient(ellipse at 80% 20%, rgba(255,0,255,0.07) 0%, transparent 50%);
+        }
+        body::before {
+            content:''; position:fixed; inset:0; pointer-events:none; z-index:9999;
+            background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.12) 2px, rgba(0,0,0,0.12) 4px);
+        }
+        header {
+            padding:15px; border-bottom:2px solid var(--neon-pink);
+            background:linear-gradient(90deg, rgba(255,0,255,0.05), transparent, rgba(0,255,255,0.05));
+            position:relative;
+        }
+        .header-content {
+            display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;
+        }
+        .logo-area { text-align:left; }
+        h1 {
+            font-size:clamp(14px, 5vw, 22px); color:var(--neon-cyan);
+            text-shadow:0 0 10px var(--neon-cyan), 0 0 30px var(--neon-cyan);
+            letter-spacing:2px; animation:titlePulse 2s ease-in-out infinite; margin:0;
+        }
+        @keyframes titlePulse {
+            0%,100%{ text-shadow:0 0 10px var(--neon-cyan), 0 0 30px var(--neon-cyan); }
+            50%{ text-shadow:0 0 20px var(--neon-pink), 0 0 50px var(--neon-pink); }
+        }
+        .subtitle { font-size:6px; color:var(--neon-pink); text-shadow:0 0 8px var(--neon-pink); margin-top:5px; }
+        .user-area {
+            display:flex; align-items:center; gap:15px;
+        }
+        #userDisplay { font-size:6px; color:var(--neon-green); text-shadow:0 0 6px var(--neon-green); }
+        .auth-link {
+            font-size:6px; color:var(--neon-pink); text-decoration:none;
+            border:1px solid var(--neon-pink); padding:4px 8px; border-radius:4px;
+            transition:0.2s;
+        }
+        .auth-link:hover { background:rgba(255,0,255,0.1); box-shadow:0 0 10px var(--neon-pink); }
+        .btn-exit-admin {
+            font-family:'Press Start 2P', cursive; font-size:6px;
+            background:#c0392b; color:white; border:none;
+            padding:4px 8px; border-radius:4px; cursor:pointer;
+        }
+        .container {
+            max-width:900px; margin:20px auto; padding:10px;
+            display:grid; grid-template-columns:repeat(var(--grid-cols), minmax(var(--card-min-width), 1fr));
+            gap:15px;
+        }
+        .project-card {
+            background:var(--card-bg); border:2px solid #1a1a2e; border-radius:12px;
+            padding:15px 10px; text-align:center; cursor:pointer; transition:all 0.3s;
+            text-decoration:none; display:flex; flex-direction:column; align-items:center;
+            gap:10px; opacity:0; animation:fadeIn 0.6s ease-out forwards;
+        }
+        .project-card:nth-child(1){ animation-delay:0.1s; }
+        .project-card:nth-child(2){ animation-delay:0.2s; }
+        .project-card:nth-child(3){ animation-delay:0.3s; }
+        .project-card:nth-child(4){ animation-delay:0.4s; }
+        .project-card:nth-child(5){ animation-delay:0.5s; }
+        @keyframes fadeIn {
+            from{ opacity:0; transform:translateY(20px); }
+            to{ opacity:1; transform:translateY(0); }
+        }
+        .project-card:hover {
+            border-color:var(--neon-cyan); box-shadow:0 0 15px rgba(0,255,255,0.3);
+            transform:translateY(-5px);
+        }
+        .project-icon {
+            width:70px; height:70px; background:#0a0a1a; border-radius:16px;
+            display:flex; align-items:center; justify-content:center;
+            border:2px solid #333; transition:0.3s; overflow:hidden;
+        }
+        .project-card:hover .project-icon {
+            border-color:var(--neon-pink); box-shadow:0 0 15px rgba(255,0,255,0.5);
+        }
+        .project-icon img { width:100%; height:100%; object-fit:cover; border-radius:12px; }
+        .project-icon span { font-size:36px; }
+        .project-name { font-size:6px; color:white; text-shadow:0 0 5px rgba(255,255,255,0.5); }
+        .project-desc { font-size:4px; color:#aaa; line-height:1.4; }
+        footer {
+            text-align:center; padding:15px; color:#444; font-size:5px;
+            border-top:1px solid #1a1a2e; margin-top:20px;
+        }
+        @media (max-width:480px) {
+            :root { --grid-cols:2; --card-min-width:120px; }
+            .header-content { flex-direction:column; align-items:flex-start; }
+            .user-area { width:100%; justify-content:space-between; }
+        }
+        @media (min-width:481px) and (max-width:768px) {
+            :root { --grid-cols:3; --card-min-width:140px; }
+        }
+        @media (min-width:769px) {
+            :root { --grid-cols:4; --card-min-width:150px; }
+        }
+        @media (min-width:1200px) {
+            :root { --grid-cols:5; --card-min-width:160px; }
+            .container { max-width:1100px; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <div class="logo-area">
+                <h1>TECNOMATH</h1>
+                <div class="subtitle">PORTAL DE PROYECTOS</div>
+            </div>
+            <div class="user-area">
+                <span id="userDisplay">Invitado</span>
+                <a href="auth.html" class="auth-link" id="authLink">🔑 ACCEDER</a>
+                <button class="btn-exit-admin" id="exitAdminBtn" style="display:none;">🚪 SALIR ADMIN</button>
+            </div>
+        </div>
+    </header>
+
+    <div class="container" id="projectsContainer"></div>
+
+    <footer>© 2026 Tecnomath · Powered by GitHub Pages</footer>
+
+    <script src="shared.js"></script>
+    <script>
+        const projects = [
+${entradas}
+        ];
+
+        const container = document.getElementById('projectsContainer');
+        projects.forEach(proj => {
+            const card = document.createElement('a');
+            card.className = 'project-card';
+            card.href = proj.url;
+            card.target = (proj.url.endsWith('.html') && !proj.url.startsWith('http')) ? '_self' : '_blank';
+            card.rel = "noopener";
+
+            const iconDiv = document.createElement('div');
+            iconDiv.className = 'project-icon';
+            if (proj.imageUrl && proj.imageUrl.trim() !== '') {
+                const img = document.createElement('img');
+                img.src = proj.imageUrl;
+                img.alt = proj.name;
+                img.onerror = function() {
+                    this.remove();
+                    const span = document.createElement('span');
+                    span.textContent = proj.icon || '🕹️';
+                    iconDiv.appendChild(span);
+                };
+                iconDiv.appendChild(img);
+            } else {
+                const span = document.createElement('span');
+                span.textContent = proj.icon || '🕹️';
+                iconDiv.appendChild(span);
+            }
+
+            const nameDiv = document.createElement('div');
+            nameDiv.className = 'project-name';
+            nameDiv.textContent = proj.name;
+
+            const descDiv = document.createElement('div');
+            descDiv.className = 'project-desc';
+            descDiv.textContent = proj.desc;
+
+            card.appendChild(iconDiv);
+            card.appendChild(nameDiv);
+            card.appendChild(descDiv);
+            container.appendChild(card);
+        });
+    </script>
+    <script>
+        (function updateUserBar() {
+            const userDisplay = document.getElementById('userDisplay');
+            const exitAdminBtn = document.getElementById('exitAdminBtn');
+            const authLink = document.getElementById('authLink');
+            if (!userDisplay) return;
+            const user = Tecnomath.getCurrentUser();
+            if (user) {
+                const coins = Tecnomath.getCoins();
+                userDisplay.textContent = `${user.username} · 💰 ${coins}`;
+                if (Tecnomath.isAdmin()) {
+                    exitAdminBtn.style.display = 'inline-block';
+                    authLink.style.display = 'none';
+                } else {
+                    exitAdminBtn.style.display = 'none';
+                    authLink.style.display = 'inline-block';
+                }
+            } else {
+                userDisplay.textContent = 'Invitado';
+                exitAdminBtn.style.display = 'none';
+                authLink.style.display = 'inline-block';
+            }
+        })();
+        document.getElementById('exitAdminBtn').addEventListener('click', () => {
+            const user = Tecnomath.getCurrentUser();
+            if (user && Tecnomath.isAdmin()) {
+                Tecnomath.unsetAdmin(user.username);
+                alert('Has salido del modo administrador. La página se recargará.');
+                location.reload();
+            }
+        });
+    </script>
+</body>
+</html>`;
+        }
+    </script>
+</body>
+</html>
