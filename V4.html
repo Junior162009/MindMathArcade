@@ -1,0 +1,1370 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🤖 CodeMath Adventure – Menú de dificultades</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #1a1a2e;
+            --panel-bg: #16213e;
+            --card-bg: #0f3460;
+            --accent: #e94560;
+            --gold: #f5c518;
+            --success: #27ae60;
+            --error: #e74c3c;
+            --text: #e0e0e0;
+            --text-light: #b0b0b0;
+            --cell-free: #e8f0fe;
+            --cell-wall: #2c3e50;
+            --cell-robot: #4da6ff;
+            --cell-goal: #ffeaa7;
+            --cell-obstacle: #f39c12;
+            --border-radius: 16px;
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+            --cell-size: 62px;
+            --cell-size-mobile: 50px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 40%, #0f3460 100%);
+            font-family: 'Nunito', 'Segoe UI', Tahoma, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 16px;
+            color: var(--text);
+            background-attachment: fixed;
+        }
+
+        /* Menú principal */
+        .menu-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            backdrop-filter: blur(8px);
+        }
+        .menu-container {
+            background: var(--panel-bg);
+            border-radius: 24px;
+            padding: 32px 24px;
+            max-width: 440px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.6);
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            animation: fadeInUp 0.5s ease-out;
+        }
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .menu-container h2 {
+            font-size: 1.8rem;
+            color: #fff;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .menu-container p {
+            color: var(--text-light);
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+        .difficulty-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+        .btn-difficulty {
+            padding: 16px 20px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            border-radius: 16px;
+            border: 2px solid transparent;
+            cursor: pointer;
+            background: var(--card-bg);
+            color: #fff;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            letter-spacing: 0.4px;
+            font-family: inherit;
+        }
+        .btn-difficulty.easy:hover {
+            background: #27ae60;
+            border-color: #2ecc71;
+            box-shadow: 0 8px 20px rgba(46, 204, 113, 0.4);
+            transform: translateY(-3px);
+        }
+        .btn-difficulty.medium:hover {
+            background: #f39c12;
+            border-color: #f1c40f;
+            box-shadow: 0 8px 20px rgba(241, 196, 15, 0.4);
+            transform: translateY(-3px);
+        }
+        .btn-difficulty.hard:hover {
+            background: #e74c3c;
+            border-color: #c0392b;
+            box-shadow: 0 8px 20px rgba(231, 76, 60, 0.4);
+            transform: translateY(-3px);
+        }
+        .difficulty-desc {
+            font-size: 0.8rem;
+            color: var(--text-light);
+            font-weight: 400;
+            display: block;
+        }
+
+        /* Contenedor del juego (oculto al principio) */
+        .game-wrapper {
+            display: none;
+            width: 100%;
+            max-width: 520px;
+        }
+        .game-container {
+            background: var(--panel-bg);
+            border-radius: 20px;
+            padding: 24px 20px 20px;
+            width: 100%;
+            box-shadow: var(--shadow), 0 0 0 1px rgba(255, 255, 255, 0.06);
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 14px 18px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+        .header .title-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .header .robot-icon {
+            font-size: 2rem;
+            animation: bounce 1.8s ease-in-out infinite;
+        }
+        @keyframes bounce {
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+            30% {
+                transform: translateY(-10px);
+            }
+            50% {
+                transform: translateY(0);
+            }
+            70% {
+                transform: translateY(-5px);
+            }
+            85% {
+                transform: translateY(0);
+            }
+        }
+        .header h1 {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: #fff;
+            letter-spacing: 0.3px;
+        }
+        .header .subtitle {
+            font-size: 0.78rem;
+            color: var(--text-light);
+            font-weight: 600;
+            letter-spacing: 0.4px;
+            text-transform: uppercase;
+        }
+        .header .stats {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .stat-badge {
+            background: rgba(255, 255, 255, 0.07);
+            border-radius: 10px;
+            padding: 8px 14px;
+            text-align: center;
+            min-width: 55px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+        }
+        .stat-badge .stat-value {
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: var(--gold);
+        }
+        .stat-badge .stat-label {
+            font-size: 0.6rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-light);
+            font-weight: 700;
+        }
+
+        .math-panel {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 16px 18px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            border-left: 4px solid var(--accent);
+            transition: border-color 0.4s;
+        }
+        .math-panel.solved {
+            border-left-color: var(--success);
+        }
+        .math-panel .question {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #fff;
+            white-space: nowrap;
+        }
+        .math-panel input {
+            width: 70px;
+            padding: 9px 10px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            text-align: center;
+            border-radius: 10px;
+            border: 2px solid rgba(255, 255, 255, 0.25);
+            background: rgba(255, 255, 255, 0.06);
+            color: #fff;
+            outline: none;
+            font-family: inherit;
+            transition: all 0.25s;
+        }
+        .math-panel input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(233, 68, 96, 0.25);
+            background: rgba(255, 255, 255, 0.1);
+        }
+        .math-panel input:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+        .math-panel .btn-check {
+            padding: 9px 16px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            background: var(--accent);
+            color: #fff;
+            letter-spacing: 0.3px;
+            font-family: inherit;
+            transition: all 0.25s;
+            white-space: nowrap;
+        }
+        .math-panel .btn-check:hover:not(:disabled) {
+            background: #ff5a7a;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(233, 68, 96, 0.4);
+        }
+        .math-panel .btn-check:disabled {
+            background: #666;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .board-wrapper {
+            display: flex;
+            justify-content: center;
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 16px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(5, var(--cell-size));
+            grid-template-rows: repeat(5, var(--cell-size));
+            gap: 4px;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 5px;
+            border-radius: 12px;
+        }
+        .cell {
+            width: var(--cell-size);
+            height: var(--cell-size);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            transition: all 0.2s ease;
+            user-select: none;
+            border: 2px solid transparent;
+        }
+        .cell.free {
+            background: var(--cell-free);
+            border-color: #d0dbe8;
+        }
+        .cell.wall {
+            background: var(--cell-wall);
+            border-color: #1a2733;
+            box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.4);
+        }
+        .cell.robot {
+            background: #4da6ff;
+            border-color: #2980b9;
+            animation: cellPulse 1.2s infinite;
+            box-shadow: 0 0 16px rgba(77, 166, 255, 0.55);
+            z-index: 2;
+        }
+        .cell.goal {
+            background: #ffeaa7;
+            border-color: #f0c040;
+            animation: goalGlow 1.5s infinite;
+            box-shadow: 0 0 14px rgba(245, 197, 24, 0.5);
+        }
+        .cell.robot-reached-goal {
+            background: #2ecc71 !important;
+            border-color: #27ae60 !important;
+            box-shadow: 0 0 22px rgba(46, 204, 113, 0.7);
+            animation: victoryPulse 0.6s infinite;
+        }
+        .cell.obstacle {
+            background: #f39c12;
+            border-color: #d68910;
+            color: #fff;
+            font-size: 1.3rem;
+        }
+        .cell.obstacle-solved {
+            background: #a5d6a5;
+            border-color: #66bb6a;
+        }
+
+        @keyframes cellPulse {
+            0%,
+            100% {
+                box-shadow: 0 0 12px rgba(77, 166, 255, 0.45);
+            }
+            50% {
+                box-shadow: 0 0 24px rgba(77, 166, 255, 0.75);
+            }
+        }
+        @keyframes goalGlow {
+            0%,
+            100% {
+                box-shadow: 0 0 10px rgba(245, 197, 24, 0.4);
+            }
+            50% {
+                box-shadow: 0 0 22px rgba(245, 197, 24, 0.7);
+            }
+        }
+        @keyframes victoryPulse {
+            0%,
+            100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.08);
+            }
+        }
+
+        .movement-panel {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .dpad {
+            display: grid;
+            grid-template-columns: repeat(3, 56px);
+            grid-template-rows: repeat(3, 56px);
+            gap: 6px;
+        }
+        .dpad button {
+            width: 56px;
+            height: 56px;
+            border-radius: 12px;
+            border: none;
+            font-size: 1.4rem;
+            cursor: pointer;
+            background: #3a4f6b;
+            color: #fff;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);
+        }
+        .dpad button:hover:not(:disabled) {
+            background: #4f6d8c;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.35);
+        }
+        .dpad button:active:not(:disabled) {
+            transform: scale(0.93);
+            background: #2c3e50;
+        }
+        .dpad button:disabled {
+            background: #444;
+            cursor: not-allowed;
+            opacity: 0.45;
+            box-shadow: none;
+        }
+        .dpad .btn-up {
+            grid-column: 2;
+            grid-row: 1;
+        }
+        .dpad .btn-left {
+            grid-column: 1;
+            grid-row: 2;
+        }
+        .dpad .btn-center {
+            grid-column: 2;
+            grid-row: 2;
+            background: transparent;
+            box-shadow: none;
+            cursor: default;
+            pointer-events: none;
+            font-size: 0.8rem;
+            color: #777;
+            border: 1px dashed rgba(255, 255, 255, 0.15);
+        }
+        .dpad .btn-right {
+            grid-column: 3;
+            grid-row: 2;
+        }
+        .dpad .btn-down {
+            grid-column: 2;
+            grid-row: 3;
+        }
+
+        .steps-counter {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 12px 18px;
+            text-align: center;
+            font-weight: 700;
+            font-size: 1.1rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+        .steps-counter .steps-number {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--gold);
+            display: inline-block;
+            min-width: 40px;
+        }
+        .steps-counter.warning .steps-number {
+            color: #f39c12;
+            animation: blink 0.7s infinite;
+        }
+        .steps-counter.danger .steps-number {
+            color: var(--error);
+            animation: blink 0.4s infinite;
+        }
+        @keyframes blink {
+            0%,
+            100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.4;
+            }
+        }
+
+        .message-area {
+            background: rgba(255, 255, 255, 0.04);
+            border-radius: 12px;
+            padding: 12px 16px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 0.95rem;
+            min-height: 46px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid transparent;
+            transition: all 0.3s;
+        }
+        .message-area.success {
+            background: rgba(39, 174, 96, 0.15);
+            border-color: rgba(39, 174, 96, 0.4);
+            color: #2ecc71;
+        }
+        .message-area.error {
+            background: rgba(231, 76, 60, 0.15);
+            border-color: rgba(231, 76, 60, 0.4);
+            color: #e74c3c;
+        }
+        .message-area.info {
+            background: rgba(77, 166, 255, 0.1);
+            border-color: rgba(77, 166, 255, 0.3);
+            color: #85c1ff;
+        }
+        .message-area.warning-msg {
+            background: rgba(243, 156, 18, 0.12);
+            border-color: rgba(243, 156, 18, 0.35);
+            color: #f5c518;
+        }
+
+        .obstacle-panel {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 16px 18px;
+            display: none;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            border-left: 4px solid #f39c12;
+            animation: fadeInUp 0.3s ease-out;
+        }
+        .obstacle-panel.active {
+            display: flex;
+        }
+        .obstacle-panel .obstacle-question {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #fff;
+        }
+        .obstacle-panel input {
+            width: 70px;
+            padding: 9px 10px;
+            font-size: 1rem;
+            font-weight: 700;
+            text-align: center;
+            border-radius: 10px;
+            border: 2px solid rgba(255, 255, 255, 0.25);
+            background: rgba(255, 255, 255, 0.06);
+            color: #fff;
+            outline: none;
+            font-family: inherit;
+        }
+        .obstacle-panel .btn-solve {
+            padding: 9px 16px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            background: #f39c12;
+            color: #000;
+            font-family: inherit;
+        }
+
+        .actions-row {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .btn-reset,
+        .btn-next,
+        .btn-restart,
+        .btn-menu {
+            padding: 12px 20px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            border-radius: 12px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            cursor: pointer;
+            background: transparent;
+            color: #fff;
+            letter-spacing: 0.4px;
+            font-family: inherit;
+            transition: all 0.25s;
+        }
+        .btn-reset:hover,
+        .btn-next:hover,
+        .btn-restart:hover,
+        .btn-menu:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.55);
+        }
+        .btn-next {
+            background: var(--success);
+            border-color: var(--success);
+        }
+        .btn-next:hover {
+            background: #2ecc71;
+        }
+        .btn-restart {
+            background: var(--accent);
+            border-color: var(--accent);
+        }
+        .btn-restart:hover {
+            background: #ff5a7a;
+        }
+        .btn-menu {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .shortest-path-info {
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--text-light);
+            font-weight: 600;
+        }
+        .shortest-path-info span {
+            color: var(--gold);
+            font-weight: 800;
+        }
+
+        @media (max-width: 500px) {
+            .grid {
+                grid-template-columns: repeat(5, var(--cell-size-mobile));
+                grid-template-rows: repeat(5, var(--cell-size-mobile));
+                gap: 3px;
+                padding: 3px;
+            }
+            .cell {
+                width: var(--cell-size-mobile);
+                height: var(--cell-size-mobile);
+                font-size: 1.1rem;
+            }
+            .game-container {
+                padding: 14px 10px 12px;
+            }
+            .dpad button {
+                width: 44px;
+                height: 44px;
+                font-size: 1.1rem;
+            }
+            .dpad {
+                grid-template-columns: repeat(3, 44px);
+                grid-template-rows: repeat(3, 44px);
+                gap: 4px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Menú principal -->
+    <div class="menu-overlay" id="menuOverlay">
+        <div class="menu-container">
+            <h2>🤖 CodeMath Adventure</h2>
+            <p>Selecciona la dificultad para comenzar</p>
+            <div class="difficulty-buttons">
+                <button class="btn-difficulty easy" onclick="startGame('easy')">
+                    🌱 Fácil <span class="difficulty-desc">12 pasos · Operaciones básicas</span>
+                </button>
+                <button class="btn-difficulty medium" onclick="startGame('medium')">
+                    ⚡ Medio <span class="difficulty-desc">10 pasos · Mayor dificultad</span>
+                </button>
+                <button class="btn-difficulty hard" onclick="startGame('hard')">
+                    🔥 Difícil <span class="difficulty-desc">8 pasos · ¡Solo para valientes!</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Juego (inicialmente oculto) -->
+    <div class="game-wrapper" id="gameWrapper">
+        <div class="game-container">
+            <div class="header">
+                <div class="title-group">
+                    <span class="robot-icon">🤖</span>
+                    <div>
+                        <h1>CodeMath Adventure</h1>
+                        <div class="subtitle" id="levelDisplay">Nivel 1 · Fácil</div>
+                    </div>
+                </div>
+                <div class="stats">
+                    <div class="stat-badge">
+                        <div class="stat-value" id="scoreDisplay">0</div>
+                        <div class="stat-label">Puntuación</div>
+                    </div>
+                    <div class="stat-badge">
+                        <div class="stat-value" id="attemptsDisplay">1</div>
+                        <div class="stat-label">Intento</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="math-panel" id="mathPanel">
+                <span class="question" id="activationQuestion">🧮 3 × 4 = ?</span>
+                <input type="number" id="answerInput" placeholder="?" aria-label="Tu respuesta">
+                <button class="btn-check" id="btnCheck" onclick="checkActivationAnswer()">Comprobar</button>
+            </div>
+
+            <div class="board-wrapper">
+                <div class="grid" id="gridContainer"></div>
+            </div>
+
+            <div class="shortest-path-info" id="shortestPathInfo">
+                📏 Distancia mínima hasta 🏁: <span id="minDistance">8</span> pasos
+            </div>
+
+            <div class="movement-panel">
+                <div class="dpad">
+                    <button class="btn-up" id="btnUp" onclick="moveRobot(0, -1)" disabled title="Arriba">⬆️</button>
+                    <button class="btn-left" id="btnLeft" onclick="moveRobot(-1, 0)" disabled title="Izquierda">⬅️</button>
+                    <div class="btn-center">🎮</div>
+                    <button class="btn-right" id="btnRight" onclick="moveRobot(1, 0)" disabled title="Derecha">➡️</button>
+                    <button class="btn-down" id="btnDown" onclick="moveRobot(0, 1)" disabled title="Abajo">⬇️</button>
+                </div>
+            </div>
+
+            <div class="steps-counter" id="stepsCounter">
+                Pasos restantes: <span class="steps-number" id="stepsDisplay">--</span>
+            </div>
+
+            <div class="message-area info" id="messageArea">
+                🔐 Resuelve la operación para empezar
+            </div>
+
+            <div class="obstacle-panel" id="obstaclePanel">
+                <span class="obstacle-question" id="obstacleQuestionText">🔒 5 + 3 = ?</span>
+                <input type="number" id="obstacleAnswerInput" placeholder="?">
+                <button class="btn-solve" onclick="solveObstacle()">Desbloquear</button>
+            </div>
+
+            <div class="actions-row">
+                <button class="btn-reset" id="btnReset" onclick="resetCurrentLevel()">🔄 Reiniciar nivel</button>
+                <button class="btn-next" id="btnNext" style="display: none;" onclick="goToNextLevel()">▶️ Siguiente nivel</button>
+                <button class="btn-restart" id="btnRestartGame" style="display: none;" onclick="restartFullGame()">🏠 Reiniciar juego</button>
+                <button class="btn-menu" onclick="returnToMenu()">📋 Menú principal</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            // ==================== BASE DE DATOS DE NIVELES POR DIFICULTAD ====================
+            const levelsByDifficulty = {
+                easy: [{
+                    name: "Fácil 1",
+                    activationQuestion: "3 × 4 = ?",
+                    activationAnswer: 12,
+                    steps: 12,
+                    walls: [
+                        [0, 0, 0, 0, 0],
+                        [0, 1, 1, 0, 0],
+                        [0, 1, 1, 1, 0],
+                        [0, 0, 1, 0, 0],
+                        [0, 0, 0, 0, 0]
+                    ],
+                    start: { row: 0, col: 0 },
+                    goal: { row: 4, col: 4 },
+                    obstacles: [
+                        { row: 2, col: 4, question: "5 + 3 = ?", answer: 8 },
+                        { row: 3, col: 3, question: "10 - 6 = ?", answer: 4 }
+                    ]
+                }, {
+                    name: "Fácil 2",
+                    activationQuestion: "6 + 2 = ?",
+                    activationAnswer: 8,
+                    steps: 12,
+                    walls: [
+                        [0, 0, 1, 0, 0],
+                        [0, 1, 0, 0, 0],
+                        [0, 1, 0, 1, 0],
+                        [0, 0, 0, 1, 0],
+                        [0, 0, 0, 0, 0]
+                    ],
+                    start: { row: 0, col: 0 },
+                    goal: { row: 4, col: 4 },
+                    obstacles: [
+                        { row: 2, col: 2, question: "4 × 2 = ?", answer: 8 },
+                        { row: 4, col: 1, question: "9 - 5 = ?", answer: 4 }
+                    ]
+                }, {
+                    name: "Fácil 3",
+                    activationQuestion: "2 × 5 = ?",
+                    activationAnswer: 10,
+                    steps: 12,
+                    walls: [
+                        [0, 0, 0, 0, 0],
+                        [0, 1, 0, 1, 0],
+                        [0, 0, 1, 0, 0],
+                        [0, 1, 0, 0, 0],
+                        [0, 0, 0, 0, 0]
+                    ],
+                    start: { row: 0, col: 0 },
+                    goal: { row: 4, col: 4 },
+                    obstacles: [
+                        { row: 1, col: 2, question: "3 + 3 = ?", answer: 6 },
+                        { row: 3, col: 3, question: "12 - 4 = ?", answer: 8 }
+                    ]
+                }],
+                medium: [{
+                    name: "Medio 1",
+                    activationQuestion: "7 + 8 = ?",
+                    activationAnswer: 15,
+                    steps: 10,
+                    walls: [
+                        [0, 1, 0, 0, 0],
+                        [0, 1, 0, 1, 0],
+                        [0, 0, 0, 1, 0],
+                        [0, 1, 1, 1, 0],
+                        [0, 0, 0, 0, 0]
+                    ],
+                    start: { row: 0, col: 0 },
+                    goal: { row: 4, col: 4 },
+                    obstacles: [
+                        { row: 1, col: 4, question: "6 × 2 = ?", answer: 12 },
+                        { row: 3, col: 0, question: "9 - 3 = ?", answer: 6 },
+                        { row: 2, col: 2, question: "16 ÷ 4 = ?", answer: 4 }
+                    ]
+                }, {
+                    name: "Medio 2",
+                    activationQuestion: "15 - 6 = ?",
+                    activationAnswer: 9,
+                    steps: 10,
+                    walls: [
+                        [0, 0, 0, 1, 0],
+                        [0, 1, 0, 0, 0],
+                        [0, 1, 1, 0, 1],
+                        [0, 0, 0, 0, 0],
+                        [0, 0, 1, 0, 0]
+                    ],
+                    start: { row: 0, col: 0 },
+                    goal: { row: 4, col: 4 },
+                    obstacles: [
+                        { row: 2, col: 3, question: "7 × 3 = ?", answer: 21 },
+                        { row: 4, col: 2, question: "18 ÷ 2 = ?", answer: 9 },
+                        { row: 1, col: 2, question: "5 + 6 = ?", answer: 11 }
+                    ]
+                }, {
+                    name: "Medio 3",
+                    activationQuestion: "4 × 4 = ?",
+                    activationAnswer: 16,
+                    steps: 10,
+                    walls: [
+                        [0, 0, 0, 0, 0],
+                        [1, 1, 0, 1, 0],
+                        [0, 0, 0, 0, 0],
+                        [0, 1, 0, 1, 0],
+                        [0, 0, 0, 0, 0]
+                    ],
+                    start: { row: 0, col: 0 },
+                    goal: { row: 4, col: 4 },
+                    obstacles: [
+                        { row: 2, col: 1, question: "20 - 9 = ?", answer: 11 },
+                        { row: 3, col: 3, question: "6 × 3 = ?", answer: 18 },
+                        { row: 1, col: 3, question: "12 ÷ 3 = ?", answer: 4 }
+                    ]
+                }],
+                hard: [{
+                    name: "Difícil 1",
+                    activationQuestion: "9 × 2 = ?",
+                    activationAnswer: 18,
+                    steps: 8,
+                    walls: [
+                        [0, 0, 0, 0, 1],
+                        [0, 1, 1, 0, 1],
+                        [0, 0, 0, 0, 0],
+                        [1, 0, 1, 1, 0],
+                        [0, 0, 0, 0, 0]
+                    ],
+                    start: { row: 0, col: 0 },
+                    goal: { row: 4, col: 4 },
+                    obstacles: [
+                        { row: 2, col: 2, question: "7 + 5 = ?", answer: 12 },
+                        { row: 4, col: 1, question: "3 × 3 = ?", answer: 9 },
+                        { row: 1, col: 3, question: "24 ÷ 3 = ?", answer: 8 },
+                        { row: 3, col: 1, question: "15 - 8 = ?", answer: 7 }
+                    ]
+                }, {
+                    name: "Difícil 2",
+                    activationQuestion: "25 ÷ 5 = ?",
+                    activationAnswer: 5,
+                    steps: 8,
+                    walls: [
+                        [0, 0, 1, 0, 0],
+                        [0, 0, 1, 0, 0],
+                        [0, 1, 0, 1, 0],
+                        [0, 1, 0, 0, 0],
+                        [0, 0, 0, 1, 0]
+                    ],
+                    start: { row: 0, col: 0 },
+                    goal: { row: 4, col: 4 },
+                    obstacles: [
+                        { row: 0, col: 3, question: "6 × 4 = ?", answer: 24 },
+                        { row: 2, col: 3, question: "17 - 9 = ?", answer: 8 },
+                        { row: 3, col: 1, question: "5 + 7 = ?", answer: 12 },
+                        { row: 4, col: 2, question: "36 ÷ 6 = ?", answer: 6 }
+                    ]
+                }, {
+                    name: "Difícil 3",
+                    activationQuestion: "8 + 9 = ?",
+                    activationAnswer: 17,
+                    steps: 8,
+                    walls: [
+                        [0, 0, 0, 1, 0],
+                        [0, 1, 0, 0, 0],
+                        [0, 0, 1, 0, 1],
+                        [0, 0, 0, 0, 0],
+                        [1, 0, 0, 0, 0]
+                    ],
+                    start: { row: 0, col: 0 },
+                    goal: { row: 4, col: 4 },
+                    obstacles: [
+                        { row: 1, col: 3, question: "9 × 3 = ?", answer: 27 },
+                        { row: 2, col: 1, question: "13 + 5 = ?", answer: 18 },
+                        { row: 3, col: 3, question: "40 ÷ 5 = ?", answer: 8 },
+                        { row: 0, col: 4, question: "6 - 2 = ?", answer: 4 }
+                    ]
+                }]
+            };
+
+            // ==================== ESTADO GLOBAL ====================
+            let currentDifficulty = null;
+            let currentLevels = [];
+            let currentLevelIndex = 0;
+            let robotPos = { row: 0, col: 0 };
+            let stepsRemaining = 0;
+            let totalSteps = 0;
+            let score = 0;
+            let attempts = 1;
+            let mathActivated = false;
+            let gameOver = false;
+            let gameResult = null;
+            let obstacleStates = [];
+            let isSolvingObstacle = false;
+            let pendingObstacleDelta = null;
+            let pendingObstacleObj = null;
+
+            // ==================== REFERENCIAS DOM ====================
+            const menuOverlay = document.getElementById('menuOverlay');
+            const gameWrapper = document.getElementById('gameWrapper');
+            const gridContainer = document.getElementById('gridContainer');
+            const scoreDisplay = document.getElementById('scoreDisplay');
+            const attemptsDisplay = document.getElementById('attemptsDisplay');
+            const stepsDisplay = document.getElementById('stepsDisplay');
+            const stepsCounter = document.getElementById('stepsCounter');
+            const messageArea = document.getElementById('messageArea');
+            const mathPanel = document.getElementById('mathPanel');
+            const activationQuestionSpan = document.getElementById('activationQuestion');
+            const answerInput = document.getElementById('answerInput');
+            const btnCheck = document.getElementById('btnCheck');
+            const minDistanceSpan = document.getElementById('minDistance');
+            const shortestPathInfo = document.getElementById('shortestPathInfo');
+            const levelDisplay = document.getElementById('levelDisplay');
+            const obstaclePanel = document.getElementById('obstaclePanel');
+            const obstacleQuestionText = document.getElementById('obstacleQuestionText');
+            const obstacleAnswerInput = document.getElementById('obstacleAnswerInput');
+            const btnReset = document.getElementById('btnReset');
+            const btnNext = document.getElementById('btnNext');
+            const btnRestartGame = document.getElementById('btnRestartGame');
+            const btnUp = document.getElementById('btnUp'),
+                btnDown = document.getElementById('btnDown');
+            const btnLeft = document.getElementById('btnLeft'),
+                btnRight = document.getElementById('btnRight');
+            const allMoveButtons = [btnUp, btnDown, btnLeft, btnRight];
+
+            // ==================== AUDIO ====================
+            let audioCtx = null;
+
+            function getAudioContext() { if (!audioCtx) audioCtx = new(window.AudioContext || window.webkitAudioContext)();
+                return audioCtx; }
+
+            function playTone(f, d, t = 'sine', v = 0.12) { try { const c = getAudioContext();
+                    const o = c.createOscillator();
+                    const g = c.createGain();
+                    o.type = t;
+                    o.frequency.setValueAtTime(f, c.currentTime);
+                    g.gain.setValueAtTime(v, c.currentTime);
+                    g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + d);
+                    o.connect(g);
+                    g.connect(c.destination);
+                    o.start();
+                    o.stop(c.currentTime + d); } catch (e) {} }
+
+            function sfxMoveValid() { playTone(520, 0.1);
+                playTone(680, 0.07); }
+
+            function sfxMoveInvalid() { playTone(150, 0.2, 'triangle', 0.1); }
+
+            function sfxActivation() { playTone(523, 0.12);
+                setTimeout(() => playTone(659, 0.12), 100);
+                setTimeout(() => playTone(784, 0.2), 200); }
+
+            function sfxVictory() { [523, 659, 784, 1047].forEach((f, i) => setTimeout(() => playTone(f, 0.25), i *
+                    120)); }
+
+            function sfxError() { playTone(200, 0.35, 'sawtooth', 0.08); }
+
+            function sfxObstacleSolved() { playTone(660, 0.1);
+                playTone(880, 0.15); }
+
+            // ==================== BFS ====================
+            function shortestPathDistance(row, col, walls, obstacles) {
+                const lvl = currentLevels[currentLevelIndex];
+                if (row === lvl.goal.row && col === lvl.goal.col) return 0;
+                const visited = Array.from({ length: 5 }, () => Array(5).fill(false));
+                const queue = [{ r: row, c: col, d: 0 }];
+                visited[row][col] = true;
+                const dirs = [
+                    [-1, 0],
+                    [1, 0],
+                    [0, -1],
+                    [0, 1]
+                ];
+                while (queue.length) {
+                    const cur = queue.shift();
+                    for (const [dr, dc] of dirs) {
+                        const nr = cur.r + dr,
+                            nc = cur.c + dc;
+                        if (nr < 0 || nr >= 5 || nc < 0 || nc >= 5 || visited[nr][nc]) continue;
+                        if (walls[nr][nc] === 1) continue;
+                        if (obstacles.some(o => o.row === nr && o.col === nc && !o.solved)) continue;
+                        if (nr === lvl.goal.row && nc === lvl.goal.col) return cur.d + 1;
+                        visited[nr][nc] = true;
+                        queue.push({ r: nr, c: nc, d: cur.d + 1 });
+                    }
+                }
+                return Infinity;
+            }
+
+            function updateShortestPathDisplay() {
+                const lvl = currentLevels[currentLevelIndex];
+                const dist = shortestPathDistance(robotPos.row, robotPos.col, lvl.walls, obstacleStates);
+                if (gameOver && gameResult === 'won') {
+                    minDistanceSpan.textContent = '0';
+                    shortestPathInfo.innerHTML = '🏆 ¡Has llegado a la salida!';
+                } else if (dist === Infinity) {
+                    minDistanceSpan.textContent = '--';
+                    shortestPathInfo.innerHTML = '⚠️ Sin ruta. Resuelve obstáculos.';
+                } else {
+                    minDistanceSpan.textContent = dist;
+                    shortestPathInfo.innerHTML = '📏 Distancia mínima hasta 🏁: <span>' + dist + '</span> pasos';
+                }
+            }
+
+            function renderGrid() {
+                const lvl = currentLevels[currentLevelIndex];
+                gridContainer.innerHTML = '';
+                for (let r = 0; r < 5; r++) {
+                    for (let c = 0; c < 5; c++) {
+                        const cell = document.createElement('div');
+                        cell.classList.add('cell');
+                        const isWall = lvl.walls[r][c] === 1;
+                        const isRobot = (robotPos.row === r && robotPos.col === c);
+                        const isGoal = (lvl.goal.row === r && lvl.goal.col === c);
+                        const obstacle = obstacleStates.find(o => o.row === r && o.col === c);
+                        if (isWall) { cell.classList.add('wall');
+                            cell.textContent = '🧱'; } else if (isRobot && isGoal) { cell.classList.add(
+                            'robot-reached-goal');
+                            cell.textContent = '🤖'; } else if (isRobot) { cell.classList.add('robot');
+                            cell.textContent = '🤖'; } else if (isGoal) { cell.classList.add('goal');
+                            cell.textContent = '🏁'; } else if (obstacle && !obstacle.solved) { cell.classList.add(
+                                'obstacle');
+                            cell.textContent = '🔒'; } else if (obstacle && obstacle.solved) { cell.classList.add(
+                                'obstacle-solved');
+                            cell.textContent = '✅'; } else { cell.classList.add('free');
+                            const dot = document.createElement('span');
+                            dot.style.cssText = 'color:#c0c8d4;font-size:0.6rem;opacity:0.4;';
+                            dot.textContent = '○';
+                            cell.appendChild(dot); }
+                        cell.title = `(${r},${c})`;
+                        gridContainer.appendChild(cell);
+                    }
+                }
+                updateShortestPathDisplay();
+                updateStepsDisplay();
+            }
+
+            function updateStepsDisplay() {
+                if (mathActivated && !gameOver) stepsDisplay.textContent = stepsRemaining;
+                else if (gameOver && gameResult === 'won') stepsDisplay.textContent = stepsRemaining;
+                else if (gameOver && gameResult === 'lost') stepsDisplay.textContent = '0';
+                else stepsDisplay.textContent = '--';
+                stepsCounter.classList.remove('warning', 'danger');
+                if (mathActivated && !gameOver && stepsRemaining <= Math.floor(totalSteps * 0.4) && stepsRemaining > 1)
+                    stepsCounter.classList.add('warning');
+                if (mathActivated && !gameOver && stepsRemaining <= 1) stepsCounter.classList.add('danger');
+            }
+
+            function setMovementEnabled(e) { allMoveButtons.forEach(b => b.disabled = !e); }
+
+            function showMessage(t, type = 'info') { messageArea.textContent = t;
+                messageArea.className = 'message-area ' + type; }
+
+            function hideObstaclePanel() { obstaclePanel.classList.remove('active');
+                obstacleAnswerInput.value = '';
+                isSolvingObstacle = false;
+                pendingObstacleDelta = null;
+                pendingObstacleObj = null;
+                setMovementEnabled(true); }
+
+            function showObstaclePanel(obstacle) { isSolvingObstacle = true;
+                obstacleQuestionText.textContent = '🔒 ' + obstacle.question;
+                obstacleAnswerInput.value = '';
+                obstaclePanel.classList.add('active');
+                setMovementEnabled(false);
+                obstacleAnswerInput.focus(); }
+
+            function getObstacleAt(r, c) { return obstacleStates.find(o => o.row === r && o.col === c); }
+
+            window.solveObstacle = function() {
+                if (!isSolvingObstacle || !pendingObstacleObj) return;
+                const ans = parseInt(obstacleAnswerInput.value.trim(), 10);
+                if (isNaN(ans)) { showMessage('⚠️ Ingresa un número', 'warning-msg');
+                    sfxError(); return; }
+                if (ans === pendingObstacleObj.answer) { pendingObstacleObj.solved = true;
+                    sfxObstacleSolved();
+                    showMessage('✅ ¡Obstáculo desbloqueado!', 'success');
+                    hideObstaclePanel();
+                    executePendingMove(); } else { showMessage('❌ Respuesta incorrecta', 'error');
+                    sfxError();
+                    obstacleAnswerInput.value = '';
+                    obstacleAnswerInput.focus(); }
+            };
+
+            function executePendingMove() {
+                if (!pendingObstacleDelta) return;
+                const dx = pendingObstacleDelta.dx,
+                    dy = pendingObstacleDelta.dy;
+                pendingObstacleDelta = null;
+                robotPos.row += dy;
+                robotPos.col += dx;
+                stepsRemaining--;
+                sfxMoveValid();
+                renderGrid();
+                updateStepsDisplay();
+                if (robotPos.row === currentLevels[currentLevelIndex].goal.row && robotPos.col === currentLevels[
+                        currentLevelIndex].goal.col) triggerVictory();
+                else if (stepsRemaining <= 0) triggerLoss();
+            }
+
+            window.checkActivationAnswer = function() {
+                if (mathActivated || gameOver) return;
+                const ans = parseInt(answerInput.value.trim(), 10);
+                if (isNaN(ans)) { showMessage('⚠️ Ingresa un número', 'warning-msg');
+                    sfxError(); return; }
+                const correct = currentLevels[currentLevelIndex].activationAnswer;
+                if (ans === correct) {
+                    mathActivated = true;
+                    stepsRemaining = totalSteps;
+                    setMovementEnabled(true);
+                    answerInput.disabled = true;
+                    btnCheck.disabled = true;
+                    mathPanel.classList.add('solved');
+                    showMessage('✅ ¡Correcto! Tienes ' + totalSteps + ' pasos.', 'success');
+                    sfxActivation();
+                    updateStepsDisplay();
+                    renderGrid();
+                } else { showMessage('❌ Respuesta incorrecta. Intenta de nuevo.', 'error');
+                    sfxError();
+                    answerInput.value = '';
+                    answerInput.focus(); }
+            };
+
+            window.moveRobot = function(dx, dy) {
+                if (!mathActivated) { showMessage('🔐 Primero resuelve la operación', 'info');
+                    sfxMoveInvalid(); return; }
+                if (gameOver || isSolvingObstacle) return;
+                if (stepsRemaining <= 0) { triggerLoss(); return; }
+                const nc = robotPos.col + dx,
+                    nr = robotPos.row + dy;
+                if (nc < 0 || nc >= 5 || nr < 0 || nr >= 5) { showMessage('🚫 Límite del mapa', 'warning-msg');
+                    sfxMoveInvalid(); return; }
+                if (currentLevels[currentLevelIndex].walls[nr][nc] === 1) { showMessage('🧱 ¡Hay una pared!',
+                        'warning-msg');
+                    sfxMoveInvalid(); return; }
+                const obs = getObstacleAt(nr, nc);
+                if (obs && !obs.solved) { pendingObstacleDelta = { dx, dy };
+                    pendingObstacleObj = obs;
+                    showObstaclePanel(obs);
+                    showMessage('🔒 Obstáculo bloqueado. Resuélvelo.', 'warning-msg'); return; }
+                robotPos.row = nr;
+                robotPos.col = nc;
+                stepsRemaining--;
+                sfxMoveValid();
+                renderGrid();
+                updateStepsDisplay();
+                if (robotPos.row === currentLevels[currentLevelIndex].goal.row && robotPos.col === currentLevels[
+                        currentLevelIndex].goal.col) triggerVictory();
+                else if (stepsRemaining <= 0) triggerLoss();
+            };
+
+            function triggerVictory() {
+                gameOver = true;
+                gameResult = 'won';
+                score += 100;
+                scoreDisplay.textContent = score;
+                setMovementEnabled(false);
+                stepsCounter.classList.remove('warning', 'danger');
+                showMessage('🏆 ¡Nivel completado! +100 puntos', 'success');
+                sfxVictory();
+                btnReset.style.display = 'none';
+                btnRestartGame.style.display = 'inline-block';
+                if (currentLevelIndex < currentLevels.length - 1) {
+                    btnNext.style.display = 'inline-block';
+                    btnNext.textContent = '▶️ Siguiente nivel';
+                    btnNext.onclick = goToNextLevel;
+                } else {
+                    btnNext.style.display = 'inline-block';
+                    btnNext.textContent = '🎉 ¡Todos los niveles completados!';
+                    btnNext.onclick = () => alert('¡Felicidades! Completaste todos los niveles de esta dificultad.');
+                }
+                updateShortestPathDisplay();
+                renderGrid();
+            }
+
+            function triggerLoss() {
+                gameOver = true;
+                gameResult = 'lost';
+                stepsRemaining = 0;
+                setMovementEnabled(false);
+                stepsCounter.classList.add('danger');
+                showMessage('💀 Te quedaste sin pasos. Usa Reiniciar nivel.', 'error');
+                sfxError();
+                btnReset.style.display = 'inline-block';
+                btnNext.style.display = 'none';
+                btnRestartGame.style.display = 'none';
+                updateShortestPathDisplay();
+                renderGrid();
+            }
+
+            function loadLevel(index) {
+                const lvl = currentLevels[index];
+                robotPos = { ...lvl.start };
+                stepsRemaining = 0;
+                mathActivated = false;
+                gameOver = false;
+                gameResult = null;
+                obstacleStates = lvl.obstacles.map(o => ({ ...o, solved: false }));
+                levelDisplay.textContent = `${lvl.name} · ${currentDifficulty}`;
+                activationQuestionSpan.textContent = '🧮 ' + lvl.activationQuestion;
+                answerInput.value = '';
+                answerInput.disabled = false;
+                btnCheck.disabled = false;
+                mathPanel.classList.remove('solved');
+                setMovementEnabled(false);
+                hideObstaclePanel();
+                stepsDisplay.textContent = '--';
+                stepsCounter.classList.remove('warning', 'danger');
+                showMessage('🔐 Resuelve la operación para empezar', 'info');
+                btnReset.style.display = 'inline-block';
+                btnNext.style.display = 'none';
+                btnRestartGame.style.display = 'none';
+                updateShortestPathDisplay();
+                renderGrid();
+                answerInput.focus();
+            }
+
+            window.resetCurrentLevel = function() { loadLevel(currentLevelIndex);
+                attempts++;
+                attemptsDisplay.textContent = attempts; };
+            window.goToNextLevel = function() {
+                if (currentLevelIndex < currentLevels.length - 1) {
+                    currentLevelIndex++;
+                    attempts = 1;
+                    attemptsDisplay.textContent = '1';
+                    loadLevel(currentLevelIndex);
+                    scoreDisplay.textContent = score;
+                } else alert('No hay más niveles.');
+            };
+            window.restartFullGame = function() {
+                currentLevelIndex = 0;
+                score = 0;
+                attempts = 1;
+                scoreDisplay.textContent = '0';
+                attemptsDisplay.textContent = '1';
+                loadLevel(0);
+            };
+
+            // ==================== INICIO DEL JUEGO DESDE EL MENÚ ====================
+            window.startGame = function(difficulty) {
+                currentDifficulty = difficulty;
+                currentLevels = levelsByDifficulty[difficulty];
+                totalSteps = currentLevels[0].steps; // todos los niveles de la misma dificultad tienen los mismos pasos
+                currentLevelIndex = 0;
+                score = 0;
+                attempts = 1;
+                scoreDisplay.textContent = '0';
+                attemptsDisplay.textContent = '1';
+                menuOverlay.style.display = 'none';
+                gameWrapper.style.display = 'block';
+                loadLevel(0);
+            };
+
+            window.returnToMenu = function() {
+                gameWrapper.style.display = 'none';
+                menuOverlay.style.display = 'flex';
+                // Resetear completamente
+                currentDifficulty = null;
+                currentLevels = [];
+                currentLevelIndex = 0;
+                gameOver = false;
+                mathActivated = false;
+                setMovementEnabled(false);
+                hideObstaclePanel();
+            };
+
+            // ==================== TECLADO ====================
+            document.addEventListener('keydown', function(e) {
+                if (!mathActivated || gameOver || isSolvingObstacle) return;
+                switch (e.key) {
+                    case 'ArrowUp':
+                        e.preventDefault();
+                        moveRobot(0, -1);
+                        break;
+                    case 'ArrowDown':
+                        e.preventDefault();
+                        moveRobot(0, 1);
+                        break;
+                    case 'ArrowLeft':
+                        e.preventDefault();
+                        moveRobot(-1, 0);
+                        break;
+                    case 'ArrowRight':
+                        e.preventDefault();
+                        moveRobot(1, 0);
+                        break;
+                }
+            });
+            answerInput.addEventListener('keydown', function(e) { if (e.key === 'Enter') { e.preventDefault();
+                    checkActivationAnswer(); } });
+            obstacleAnswerInput.addEventListener('keydown', function(e) { if (e.key === 'Enter') { e.preventDefault();
+                    solveObstacle(); } });
+
+            // Al cargar, mostrar menú
+            gameWrapper.style.display = 'none';
+            menuOverlay.style.display = 'flex';
+        })();
+    </script>
+</body>
+</html>
