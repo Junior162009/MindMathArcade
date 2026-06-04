@@ -7,14 +7,5 @@
     "fechaInicio": "2026-01-01",
     "fechaFin": "2026-12-31",
     "activo": true
-  },
-  {
-    "nombre": "Eco Recolector",
-    "descripcion": "Atrapa agua y reciclables. ODS 6 y 12",
-    "url": "eco-collector.html",
-    "imagen": "img/ecorecolector.png",
-    "fechaInicio": "2026-06-10",
-    "fechaFin": "2026-06-25",
-    "activo": true
   }
 ]
