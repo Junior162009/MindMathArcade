@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Tecnomath · Portal de Proyectos</title>
 
-    <!-- PWA: Manifest para instalar como app -->
+    <!-- PWA -->
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#060610">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -60,6 +60,97 @@
             transition: 0.2s;
         }
         .auth-link:hover { background: rgba(255,0,255,0.1); box-shadow: 0 0 10px var(--neon-pink); }
+
+        /* Nube de admin (oculta por defecto) */
+        #admin-cloud {
+            display: none;
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 500;
+            cursor: pointer;
+            background: var(--neon-pink);
+            color: white;
+            font-size: 28px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 50px;
+            box-shadow: 0 0 20px var(--neon-pink);
+            transition: 0.2s;
+        }
+        #admin-cloud:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 30px var(--neon-pink);
+        }
+
+        /* Panel desplegable de admin */
+        #admin-panel {
+            display: none;
+            position: fixed;
+            bottom: 80px;
+            right: 20px;
+            z-index: 500;
+            background: var(--card-bg);
+            border: 2px solid var(--neon-pink);
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: 0 0 25px rgba(255,0,255,0.4);
+            flex-direction: column;
+            gap: 10px;
+            min-width: 220px;
+        }
+        #admin-panel a, #admin-panel button {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 7px;
+            padding: 8px 12px;
+            border-radius: 8px;
+            text-decoration: none;
+            color: white;
+            background: var(--neon-pink);
+            text-align: center;
+            box-shadow: 0 4px 0 #c02660;
+            border: none;
+            cursor: pointer;
+            transition: 0.1s;
+        }
+        #admin-panel a:active, #admin-panel button:active {
+            transform: translateY(2px);
+            box-shadow: 0 1px 0 #c02660;
+        }
+        #admin-panel .btn-gold {
+            background: var(--gold);
+            color: black;
+            box-shadow: 0 4px 0 #b8860b;
+        }
+
+        /* Banner de anuncios */
+        #promo-banner {
+            max-width: 900px; margin: 15px auto; padding: 0 10px; display: none;
+        }
+        .promo-container {
+            position: relative; border-radius: 16px; overflow: hidden;
+            background: var(--card-bg); border: 2px solid var(--neon-pink);
+            box-shadow: 0 0 20px rgba(255,0,255,0.3);
+        }
+        .promo-container img {
+            width: 100%; height: auto; display: block; max-height: 200px; object-fit: cover;
+        }
+        .promo-info {
+            padding: 12px; text-align: center;
+        }
+        .promo-info h3 {
+            font-size: clamp(8px, 2vw, 12px); color: var(--neon-yellow);
+        }
+        .promo-info p {
+            font-size: clamp(5px, 1.5vw, 7px); color: #aaa; margin-top: 4px;
+        }
+        .promo-timer {
+            position: absolute; top: 8px; right: 12px;
+            background: rgba(0,0,0,0.7); color: var(--neon-green);
+            font-size: clamp(4px, 1.2vw, 6px); padding: 4px 8px; border-radius: 8px;
+        }
 
         .hero {
             text-align: center; padding: clamp(20px, 4vw, 30px) 10px;
@@ -197,10 +288,33 @@
             <div class="user-area">
                 <span id="userDisplay">Invitado</span>
                 <a href="auth.html" class="auth-link" id="authLink">🔑 ACCEDER</a>
-                <button id="exitAdminBtn" style="display:none; font-family:'Press Start 2P', cursive; font-size:6px; background:#c0392b; color:white; border:none; padding:4px 8px; border-radius:4px; cursor:pointer;">🚪 SALIR ADMIN</button>
             </div>
         </div>
     </header>
+
+    <!-- Nube de admin (solo visible para administradores) -->
+    <div id="admin-cloud" onclick="toggleAdminPanel()">☁️</div>
+
+    <!-- Panel desplegable de administración -->
+    <div id="admin-panel">
+        <a href="admin-promos.html" target="_blank">📢 GESTIONAR PROMOS</a>
+        <a href="gestor-movil.html" target="_blank" class="btn-gold">➕ AGREGAR JUEGO</a>
+        <button onclick="exitAdminMode()" style="background:#c0392b;">🚪 SALIR ADMIN</button>
+    </div>
+
+    <!-- Banner de promociones -->
+    <div id="promo-banner">
+        <div class="promo-container">
+            <a id="promo-link" href="#" target="_blank">
+                <img id="promo-img" src="" alt="Promoción">
+            </a>
+            <div class="promo-info">
+                <h3 id="promo-nombre"></h3>
+                <p id="promo-desc"></p>
+            </div>
+            <div class="promo-timer" id="promo-timer"></div>
+        </div>
+    </div>
 
     <div class="hero">
         <h2>🎮 EXPLORA Y JUEGA</h2>
@@ -335,11 +449,65 @@
         renderSponsors();
 
         // ═══════════════════════════════════════
+        // SISTEMA DE PROMOCIONES (BANNER)
+        // ═══════════════════════════════════════
+        async function cargarPromociones() {
+            try {
+                const response = await fetch('promociones.json');
+                if (!response.ok) return [];
+                const promos = await response.json();
+                const ahora = new Date();
+                return promos.filter(p => {
+                    if (!p.activo) return false;
+                    const inicio = new Date(p.fechaInicio);
+                    const fin = new Date(p.fechaFin);
+                    return ahora >= inicio && ahora <= fin;
+                });
+            } catch (e) {
+                console.warn('No se pudieron cargar promociones:', e);
+                return [];
+            }
+        }
+
+        let promoActual = 0;
+        let promosDisponibles = [];
+
+        async function iniciarPromociones() {
+            promosDisponibles = await cargarPromociones();
+            const banner = document.getElementById('promo-banner');
+            if (promosDisponibles.length === 0) {
+                banner.style.display = 'none';
+                return;
+            }
+            banner.style.display = 'block';
+            mostrarPromocion(0);
+            setInterval(() => {
+                promoActual = (promoActual + 1) % promosDisponibles.length;
+                mostrarPromocion(promoActual);
+            }, 5000);
+        }
+
+        function mostrarPromocion(index) {
+            const promo = promosDisponibles[index];
+            if (!promo) return;
+            document.getElementById('promo-img').src = promo.imagen || 'img/default-promo.png';
+            document.getElementById('promo-link').href = promo.url;
+            document.getElementById('promo-nombre').textContent = promo.nombre;
+            document.getElementById('promo-desc').textContent = promo.descripcion;
+            const fin = new Date(promo.fechaFin);
+            const ahora = new Date();
+            const diasRestantes = Math.ceil((fin - ahora) / (1000 * 60 * 60 * 24));
+            document.getElementById('promo-timer').textContent = `${diasRestantes} días`;
+        }
+
+        iniciarPromociones();
+
+        // ═══════════════════════════════════════
         // LISTA DE PROYECTOS
         // ═══════════════════════════════════════
         const projects = [
             { name: "MindMath Arcade", desc: "Juego de matemáticas retro con 60+ niveles", url: "game.html", imageUrl: "img/mindmath.png", icon: "🧮", category: "mates" },
-            { name: "EmojiMath Pro", desc: "Suma, resta y cuenta con emojis. Para niños", url: "andy.html", imageUrl: "", icon: "🧸", category: "mates" },
+            { name: "EmojiMath Pro", desc: "Suma, resta y cuenta con emojis. Para niños", url: "emoji-math.html", imageUrl: "", icon: "🧸", category: "mates" },
             { name: "Eco Recolector", desc: "Atrapa agua y reciclables. ODS 6 y 12", url: "eco-collector.html", imageUrl: "img/ecorecolector.png", icon: "🌍", category: "eco" },
             { name: "Eco-Barrio 2030", desc: "Simulador de ciudad sostenible. ODS 11,12,13,7", url: "eco-barrio.html", imageUrl: "", icon: "🏙️", category: "eco" },
             { name: "Coral Guardian", desc: "Protege el arrecife de basura y especies invasoras", url: "coral-guardian.html", imageUrl: "", icon: "🪸", category: "eco" },
@@ -347,31 +515,8 @@
             { name: "Marine Tech Cleaner", desc: "USV y ROV para limpiar el océano. ODS 14", url: "marine-cleaner.html", imageUrl: "", icon: "🌊", category: "eco" },
             { name: "Animalandia", desc: "Alimenta a los animales. Para niños pequeños", url: "animalandia.html", imageUrl: "", icon: "🐮", category: "kids" },
             { name: "ODS-2048", desc: "Fusiona los 17 ODS. Juego de puzzle adictivo", url: "ods-2048.html", imageUrl: "", icon: "🌐", category: "puzzle" },
-        {
-            name: "Pacman-Master",
-            desc: "Juego importado desde ZIP",
-            url: "pacman-master/pacman-master/index.html",
-            imageUrl: "",
-            icon: "🎮",
-            category: "retro"
-        },
-        {
-            name: "CodeMath",
-            desc: "Avanza y desbloquea niveles",
-            url: "V4.html",
-            imageUrl: "",
-            icon: "🤖",
-            category: "mates"
-        },
-        {
-            name: "admin-promos.html",
-            desc: "Administrar promociones en la pagina",
-            url: "admin-promos.html",
-            imageUrl: "",
-            icon: "🧑‍🔧",
-            category: "otros"
-        }
-    ];
+            { name: "Banana Kong Dash", desc: "Corre por la selva. 3 carriles, meta final y power-ups", url: "banana-dash.html", imageUrl: "", icon: "🍌", category: "runners" }
+        ];
 
         // Construir filtros
         const categories = ['todos', ...new Set(projects.map(p => p.category))];
@@ -383,7 +528,8 @@
                               cat === 'mates' ? '➕ MATES' :
                               cat === 'eco' ? '🌿 ECOLOGÍA' :
                               cat === 'kids' ? '🐣 INFANTIL' :
-                              cat === 'puzzle' ? '🧩 PUZZLE' : cat.toUpperCase();
+                              cat === 'puzzle' ? '🧩 PUZZLE' :
+                              cat === 'runners' ? '🏃 CARRERAS' : cat.toUpperCase();
             btn.addEventListener('click', () => {
                 document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
@@ -440,40 +586,51 @@
 
         renderProjects();
 
-        // Actualizar barra de usuario
-        (function updateUserBar() {
-                const userDisplay = document.getElementById('userDisplay');
-                const exitAdminBtn = document.getElementById('exitAdminBtn');
-                const authLink = document.getElementById('authLink');
-                if (!userDisplay) return;
-                const user = Tecnomath.getCurrentUser();
-                if (user) {
-                    const coins = Tecnomath.getCoins();
-                    userDisplay.textContent = `${user.username} · 💰 ${coins}`;
-                    // Mostrar botón de salir admin si es admin
-                    if (Tecnomath.isAdmin()) {
-                        exitAdminBtn.style.display = 'inline-block';
-                        authLink.style.display = 'none';
-                    } else {
-                        exitAdminBtn.style.display = 'none';
-                        authLink.style.display = 'inline-block';
-                    }
-                } else {
-                    userDisplay.textContent = 'Invitado';
-                    exitAdminBtn.style.display = 'none';
-                    authLink.style.display = 'inline-block';
-                }
-            })();
+        // ═══════════════════════════════════════
+        // ADMIN – NUBE + PANEL
+        // ═══════════════════════════════════════
+        function toggleAdminPanel() {
+            const panel = document.getElementById('admin-panel');
+            if (panel.style.display === 'flex') {
+                panel.style.display = 'none';
+            } else {
+                panel.style.display = 'flex';
+            }
+        }
 
-            // Evento para salir del admin
-            document.getElementById('exitAdminBtn').addEventListener('click', () => {
-                const user = Tecnomath.getCurrentUser();
-                if (user && Tecnomath.isAdmin()) {
-                    Tecnomath.unsetAdmin(user.username);
-                    alert('Has salido del modo administrador. La página se recargará.');
-                    location.reload();
+        function exitAdminMode() {
+            const user = Tecnomath.getCurrentUser();
+            if (user && Tecnomath.isAdmin()) {
+                Tecnomath.unsetAdmin(user.username);
+                alert('Has salido del modo administrador. La página se recargará.');
+                location.reload();
+            }
+        }
+
+        (function updateUserBar() {
+            const userDisplay = document.getElementById('userDisplay');
+            const authLink = document.getElementById('authLink');
+            const adminCloud = document.getElementById('admin-cloud');
+
+            if (!userDisplay) return;
+            const user = Tecnomath.getCurrentUser();
+            if (user) {
+                const coins = Tecnomath.getCoins();
+                userDisplay.textContent = `${user.username} · 💰 ${coins}`;
+                // Mostrar nube si es admin
+                if (Tecnomath.isAdmin()) {
+                    if (adminCloud) adminCloud.style.display = 'block';
+                    if (authLink) authLink.style.display = 'none';
+                } else {
+                    if (adminCloud) adminCloud.style.display = 'none';
+                    if (authLink) authLink.style.display = 'inline-block';
                 }
-            });
+            } else {
+                userDisplay.textContent = 'Invitado';
+                if (adminCloud) adminCloud.style.display = 'none';
+                if (authLink) authLink.style.display = 'inline-block';
+            }
+        })();
     </script>
 </body>
 </html>
