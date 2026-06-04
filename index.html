@@ -61,7 +61,7 @@
         }
         .auth-link:hover { background: rgba(255,0,255,0.1); box-shadow: 0 0 10px var(--neon-pink); }
 
-        /* Nube de admin (oculta por defecto) */
+        /* Nube de admin */
         #admin-cloud {
             display: none;
             position: fixed;
@@ -587,7 +587,7 @@
         renderProjects();
 
         // ═══════════════════════════════════════
-        // ADMIN – NUBE + PANEL
+        // ADMIN – NUBE + PANEL + ACCESO OCULTO
         // ═══════════════════════════════════════
         function toggleAdminPanel() {
             const panel = document.getElementById('admin-panel');
@@ -607,6 +607,7 @@
             }
         }
 
+        // ACTUALIZAR BARRA DE USUARIO
         (function updateUserBar() {
             const userDisplay = document.getElementById('userDisplay');
             const authLink = document.getElementById('authLink');
@@ -617,7 +618,6 @@
             if (user) {
                 const coins = Tecnomath.getCoins();
                 userDisplay.textContent = `${user.username} · 💰 ${coins}`;
-                // Mostrar nube si es admin
                 if (Tecnomath.isAdmin()) {
                     if (adminCloud) adminCloud.style.display = 'block';
                     if (authLink) authLink.style.display = 'none';
@@ -631,6 +631,55 @@
                 if (authLink) authLink.style.display = 'inline-block';
             }
         })();
+
+        // ═══════════════════════════════════════
+        // ACCESO OCULTO: DOBLE CLIC EN ESQUINA INFERIOR DERECHA
+        // ═══════════════════════════════════════
+        const ADMINS_PORTAL = {
+            "1983": "Junior", "2024": "Nicole", "7777": "Mateo",
+            "8888": "Jaider", "ods2026": "ODS Master"
+        };
+
+        // Zona invisible para doble clic
+        const secretZone = document.createElement('div');
+        secretZone.style.cssText = 'position:fixed; bottom:0; right:0; width:70px; height:70px; z-index:499;';
+        secretZone.addEventListener('dblclick', function(e) {
+            e.preventDefault();
+            const user = Tecnomath.getCurrentUser();
+            if (!user) {
+                alert('Debes iniciar sesión primero (usa el botón 🔑 ACCEDER).');
+                return;
+            }
+            const code = prompt('🔐 CÓDIGO ADMIN:');
+            if (ADMINS_PORTAL[code]) {
+                Tecnomath.setAdmin(user.username);
+                alert('⚡ ' + ADMINS_PORTAL[code].toUpperCase() + ' · ADMIN ACTIVADO');
+                location.reload();
+            } else if (code) {
+                alert('🔒 ACCESO DENEGADO');
+            }
+        });
+        document.body.appendChild(secretZone);
+
+        // También permitir Ctrl+Shift+A como alternativa rápida
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.shiftKey && e.key === 'A') {
+                e.preventDefault();
+                const user = Tecnomath.getCurrentUser();
+                if (!user) {
+                    alert('Debes iniciar sesión primero (usa el botón 🔑 ACCEDER).');
+                    return;
+                }
+                const code = prompt('🔐 CÓDIGO ADMIN:');
+                if (ADMINS_PORTAL[code]) {
+                    Tecnomath.setAdmin(user.username);
+                    alert('⚡ ' + ADMINS_PORTAL[code].toUpperCase() + ' · ADMIN ACTIVADO');
+                    location.reload();
+                } else if (code) {
+                    alert('🔒 ACCESO DENEGADO');
+                }
+            }
+        });
     </script>
 </body>
 </html>
