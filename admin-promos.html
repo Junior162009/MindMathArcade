@@ -2,40 +2,47 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Admin Promociones · Tecnomath</title>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <script src="shared.js"></script>
     <style>
         :root { --neon-cyan:#00FFFF; --neon-pink:#FF00FF; --gold:#FFD700; --bg:#060610; --card:#0d0d1a; }
         * { margin:0; padding:0; box-sizing:border-box; }
-        body { background:var(--bg); color:white; font-family:'Press Start 2P', cursive; padding:20px; }
+        body { background:var(--bg); color:white; font-family:'Press Start 2P', cursive; padding:20px; max-width:600px; margin:0 auto; }
         h1 { text-align:center; color:var(--neon-cyan); font-size:14px; margin-bottom:20px; text-shadow:0 0 10px var(--neon-cyan); }
-        .promo-form { background:var(--card); padding:20px; border-radius:12px; max-width:600px; margin:0 auto 30px; }
-        .promo-form input, .promo-form textarea { 
+        .form-box { background:var(--card); padding:20px; border-radius:12px; margin-bottom:20px; }
+        .form-box input, .form-box textarea { 
             width:100%; padding:8px; margin:6px 0; background:#0a0a1a; border:2px solid #333; 
             color:var(--neon-green); font-family:'Press Start 2P', cursive; font-size:7px; border-radius:8px;
         }
-        .btn { font-family:'Press Start 2P', cursive; font-size:7px; padding:10px 16px; border:none; border-radius:8px; cursor:pointer; color:white; box-shadow:0 4px 0 rgba(0,0,0,0.3); }
+        .btn { font-family:'Press Start 2P', cursive; font-size:7px; padding:10px 16px; border:none; border-radius:8px; cursor:pointer; color:white; box-shadow:0 4px 0 rgba(0,0,0,0.3); margin:5px; }
         .btn-add { background:var(--neon-pink); }
         .btn-save { background:#4CAF50; }
-        .list { max-width:600px; margin:0 auto; }
-        .item { background:var(--card); padding:15px; border-radius:10px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; }
-        .item button { background:#FF5252; color:white; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; font-family:'Press Start 2P', cursive; font-size:6px; }
+        .btn-del { background:#FF5252; }
+        .list { background:var(--card); border-radius:12px; padding:10px; }
+        .item { display:flex; justify-content:space-between; align-items:center; padding:10px; border-bottom:1px solid #333; }
+        .item:last-child { border-bottom:none; }
+        .status { text-align:center; margin-top:10px; font-size:7px; color:var(--gold); }
     </style>
 </head>
 <body>
-    <h1>🔧 Gestionar Promociones</h1>
-    
-    <div class="promo-form">
-        <h3 style="font-size:10px; color:var(--gold); margin-bottom:10px;">Agregar / Editar Promoción</h3>
+    <h1>📢 Gestionar Promociones</h1>
+    <div id="errorMsg" style="color:red; text-align:center; display:none;"></div>
+    <div class="status" id="statusMsg"></div>
+
+    <div class="form-box" id="formBox" style="display:none;">
+        <h3 style="font-size:10px; color:var(--gold); margin-bottom:10px;">Agregar / Editar</h3>
         <input type="text" id="nombre" placeholder="Nombre del juego">
         <input type="text" id="descripcion" placeholder="Descripción breve">
         <input type="text" id="url" placeholder="URL del juego">
         <input type="text" id="imagen" placeholder="Ruta de imagen (ej: img/promo.png)">
         <input type="date" id="fechaInicio">
         <input type="date" id="fechaFin">
-        <label style="font-size:6px; margin:10px 0;"><input type="checkbox" id="activo" checked> Activo</label>
+        <label style="font-size:6px;"><input type="checkbox" id="activo" checked> Activo</label>
         <button class="btn btn-add" onclick="agregarPromocion()">➕ Agregar</button>
+        <button class="btn btn-save" id="btnUpdate" style="display:none;" onclick="actualizarPromocion()">💾 Actualizar</button>
+        <button class="btn" onclick="cancelEdit()">Cancelar</button>
     </div>
 
     <div class="list" id="listaPromos"></div>
@@ -46,30 +53,45 @@
         const FILE = 'promociones.json';
         const API = `https://api.github.com/repos/${OWNER}/${REPO}/contents/${FILE}`;
         const BRANCH = 'main';
-        let token = localStorage.getItem('tecnomath_github_token') || prompt('Token de GitHub:');
-        if (!token) alert('Se requiere token');
-        localStorage.setItem('tecnomath_github_token', token);
+        let token = localStorage.getItem('tecnomath_github_token');
+        if (!token) {
+            token = prompt('Token de GitHub (necesario para guardar):');
+            if (!token) { document.body.innerHTML = '<h2 style="color:red;text-align:center;">Token requerido</h2>'; throw new Error('Token faltante'); }
+            localStorage.setItem('tecnomath_github_token', token);
+        }
         let currentSHA = null;
+        let promos = [];
+        let editingIndex = -1;
 
-        async function cargarLista() {
-            const resp = await fetch(API, { headers: { Authorization: `token ${token}` } });
-            const data = await resp.json();
-            currentSHA = data.sha;
-            const promos = JSON.parse(atob(data.content));
-            renderLista(promos);
+        async function cargarPromos() {
+            try {
+                const resp = await fetch(API, { headers: { Authorization: `token ${token}` } });
+                if (!resp.ok) throw new Error('Error al cargar: ' + resp.status);
+                const data = await resp.json();
+                currentSHA = data.sha;
+                promos = JSON.parse(atob(data.content));
+                renderLista();
+                document.getElementById('statusMsg').textContent = 'Promociones cargadas';
+            } catch (e) {
+                document.getElementById('errorMsg').textContent = 'Error al cargar: ' + e.message;
+                document.getElementById('errorMsg').style.display = 'block';
+            }
         }
 
-        function renderLista(promos) {
+        function renderLista() {
             const cont = document.getElementById('listaPromos');
-            cont.innerHTML = promos.map((p,i) => `
+            cont.innerHTML = promos.map((p, i) => `
                 <div class="item">
                     <span>${p.nombre}</span>
-                    <button onclick="eliminar(${i})">🗑️</button>
+                    <div>
+                        <button class="btn btn-save" onclick="editar(${i})">✏️</button>
+                        <button class="btn btn-del" onclick="eliminar(${i})">🗑️</button>
+                    </div>
                 </div>
             `).join('');
         }
 
-        async function guardar(promos, mensaje) {
+        async function guardarPromos(mensaje) {
             const body = {
                 message: mensaje,
                 content: btoa(unescape(encodeURIComponent(JSON.stringify(promos, null, 2)))),
@@ -81,39 +103,81 @@
                 headers: { Authorization: `token ${token}`, 'Content-Type': 'application/json' },
                 body: JSON.stringify(body)
             });
+            if (!resp.ok) throw new Error('Error al guardar: ' + resp.status);
             const data = await resp.json();
             currentSHA = data.content.sha;
-            cargarLista();
+            document.getElementById('statusMsg').textContent = 'Cambios guardados en GitHub';
+        }
+
+        function editar(index) {
+            editingIndex = index;
+            const p = promos[index];
+            document.getElementById('nombre').value = p.nombre;
+            document.getElementById('descripcion').value = p.descripcion;
+            document.getElementById('url').value = p.url;
+            document.getElementById('imagen').value = p.imagen || '';
+            document.getElementById('fechaInicio').value = p.fechaInicio;
+            document.getElementById('fechaFin').value = p.fechaFin;
+            document.getElementById('activo').checked = p.activo;
+            document.getElementById('formBox').style.display = 'block';
+            document.getElementById('btnUpdate').style.display = 'inline-block';
+        }
+
+        function cancelEdit() {
+            editingIndex = -1;
+            document.getElementById('formBox').style.display = 'none';
+            document.getElementById('btnUpdate').style.display = 'none';
+            limpiarForm();
+        }
+
+        function limpiarForm() {
+            ['nombre','descripcion','url','imagen','fechaInicio','fechaFin'].forEach(id => document.getElementById(id).value = '');
+            document.getElementById('activo').checked = true;
         }
 
         async function agregarPromocion() {
-            const promos = await obtenerPromosActuales();
             const nueva = {
-                nombre: document.getElementById('nombre').value,
-                descripcion: document.getElementById('descripcion').value,
-                url: document.getElementById('url').value,
-                imagen: document.getElementById('imagen').value,
+                nombre: document.getElementById('nombre').value.trim(),
+                descripcion: document.getElementById('descripcion').value.trim(),
+                url: document.getElementById('url').value.trim(),
+                imagen: document.getElementById('imagen').value.trim(),
                 fechaInicio: document.getElementById('fechaInicio').value,
                 fechaFin: document.getElementById('fechaFin').value,
                 activo: document.getElementById('activo').checked
             };
+            if (!nueva.nombre || !nueva.url) { alert('Nombre y URL son obligatorios'); return; }
             promos.push(nueva);
-            await guardar(promos, `Agregar promoción ${nueva.nombre}`);
+            await guardarPromos(`Agregar promoción ${nueva.nombre}`);
+            limpiarForm();
+            cancelEdit();
+            renderLista();
+        }
+
+        async function actualizarPromocion() {
+            if (editingIndex < 0) return;
+            promos[editingIndex] = {
+                nombre: document.getElementById('nombre').value.trim(),
+                descripcion: document.getElementById('descripcion').value.trim(),
+                url: document.getElementById('url').value.trim(),
+                imagen: document.getElementById('imagen').value.trim(),
+                fechaInicio: document.getElementById('fechaInicio').value,
+                fechaFin: document.getElementById('fechaFin').value,
+                activo: document.getElementById('activo').checked
+            };
+            await guardarPromos(`Actualizar promoción ${promos[editingIndex].nombre}`);
+            limpiarForm();
+            cancelEdit();
+            renderLista();
         }
 
         async function eliminar(index) {
-            const promos = await obtenerPromosActuales();
-            const eliminado = promos.splice(index, 1)[0];
-            await guardar(promos, `Eliminar promoción ${eliminado.nombre}`);
+            if (!confirm(`¿Eliminar "${promos[index].nombre}"?`)) return;
+            promos.splice(index, 1);
+            await guardarPromos(`Eliminar promoción`);
+            renderLista();
         }
 
-        async function obtenerPromosActuales() {
-            const resp = await fetch(API, { headers: { Authorization: `token ${token}` } });
-            const data = await resp.json();
-            return JSON.parse(atob(data.content));
-        }
-
-        cargarLista();
+        cargarPromos();
     </script>
 </body>
 </html>
