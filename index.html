@@ -63,94 +63,96 @@
 
         /* Nube de admin */
         #admin-cloud {
-            display: none;
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            z-index: 500;
-            cursor: pointer;
-            background: var(--neon-pink);
-            color: white;
-            font-size: 28px;
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            text-align: center;
-            line-height: 50px;
-            box-shadow: 0 0 20px var(--neon-pink);
+            display: none; position: fixed; bottom: 20px; right: 20px; z-index: 500;
+            cursor: pointer; background: var(--neon-pink); color: white;
+            font-size: 28px; width: 50px; height: 50px; border-radius: 50%;
+            text-align: center; line-height: 50px; box-shadow: 0 0 20px var(--neon-pink);
             transition: 0.2s;
         }
-        #admin-cloud:hover {
-            transform: scale(1.1);
-            box-shadow: 0 0 30px var(--neon-pink);
-        }
-
-        /* Panel desplegable de admin */
+        #admin-cloud:hover { transform: scale(1.1); box-shadow: 0 0 30px var(--neon-pink); }
         #admin-panel {
-            display: none;
-            position: fixed;
-            bottom: 80px;
-            right: 20px;
-            z-index: 500;
-            background: var(--card-bg);
-            border: 2px solid var(--neon-pink);
-            border-radius: 12px;
-            padding: 15px;
-            box-shadow: 0 0 25px rgba(255,0,255,0.4);
-            flex-direction: column;
-            gap: 10px;
-            min-width: 220px;
+            display: none; position: fixed; bottom: 80px; right: 20px; z-index: 500;
+            background: var(--card-bg); border: 2px solid var(--neon-pink);
+            border-radius: 12px; padding: 15px; box-shadow: 0 0 25px rgba(255,0,255,0.4);
+            flex-direction: column; gap: 10px; min-width: 220px;
         }
         #admin-panel a, #admin-panel button {
-            font-family: 'Press Start 2P', cursive;
-            font-size: 7px;
-            padding: 8px 12px;
-            border-radius: 8px;
-            text-decoration: none;
-            color: white;
-            background: var(--neon-pink);
-            text-align: center;
-            box-shadow: 0 4px 0 #c02660;
-            border: none;
-            cursor: pointer;
+            font-family: 'Press Start 2P', cursive; font-size: 7px; padding: 8px 12px;
+            border-radius: 8px; text-decoration: none; color: white; background: var(--neon-pink);
+            text-align: center; box-shadow: 0 4px 0 #c02660; border: none; cursor: pointer;
             transition: 0.1s;
         }
-        #admin-panel a:active, #admin-panel button:active {
-            transform: translateY(2px);
-            box-shadow: 0 1px 0 #c02660;
-        }
-        #admin-panel .btn-gold {
-            background: var(--gold);
-            color: black;
-            box-shadow: 0 4px 0 #b8860b;
-        }
+        #admin-panel a:active, #admin-panel button:active { transform: translateY(2px); box-shadow: 0 1px 0 #c02660; }
+        #admin-panel .btn-gold { background: var(--gold); color: black; box-shadow: 0 4px 0 #b8860b; }
 
-        /* Banner de anuncios */
-        #promo-banner {
-            max-width: 900px; margin: 15px auto; padding: 0 10px; display: none;
+        /* NUEVO SISTEMA DE ANUNCIOS: BURBUJAS FLOTANTES */
+        .promo-bubble-container {
+            max-width: 900px; margin: 20px auto; padding: 0 10px;
+            position: relative; min-height: 180px;
         }
-        .promo-container {
-            position: relative; border-radius: 16px; overflow: hidden;
-            background: var(--card-bg); border: 2px solid var(--neon-pink);
-            box-shadow: 0 0 20px rgba(255,0,255,0.3);
+        .promo-bubble {
+            position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+            width: 85%; max-width: 500px;
+            background: radial-gradient(circle at 30% 30%, rgba(255,0,255,0.2), var(--card-bg));
+            border: 3px solid var(--neon-pink);
+            border-radius: 50%;
+            padding: 25px 20px;
+            text-align: center;
+            box-shadow: 0 0 30px rgba(255,0,255,0.5), inset 0 0 20px rgba(255,0,255,0.1);
+            transition: all 0.8s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+            opacity: 0;
+            transform: translateX(-50%) scale(0.8);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            animation: floatBubble 3s ease-in-out infinite;
+            cursor: pointer;
+            text-decoration: none;
+            color: white;
         }
-        .promo-container img {
-            width: 100%; height: auto; display: block; max-height: 200px; object-fit: cover;
+        .promo-bubble.active {
+            opacity: 1;
+            transform: translateX(-50%) scale(1);
+            z-index: 2;
         }
-        .promo-info {
-            padding: 12px; text-align: center;
+        .promo-bubble.inactive {
+            opacity: 0;
+            transform: translateX(-50%) scale(0.7);
+            z-index: 1;
+            pointer-events: none;
         }
-        .promo-info h3 {
-            font-size: clamp(8px, 2vw, 12px); color: var(--neon-yellow);
+        @keyframes floatBubble {
+            0%, 100% { transform: translateX(-50%) translateY(0); }
+            50% { transform: translateX(-50%) translateY(-8px); }
         }
-        .promo-info p {
-            font-size: clamp(5px, 1.5vw, 7px); color: #aaa; margin-top: 4px;
+        .promo-bubble img {
+            width: 60px; height: 60px; border-radius: 50%; object-fit: cover;
+            border: 2px solid var(--gold); box-shadow: 0 0 15px var(--gold);
         }
-        .promo-timer {
-            position: absolute; top: 8px; right: 12px;
-            background: rgba(0,0,0,0.7); color: var(--neon-green);
-            font-size: clamp(4px, 1.2vw, 6px); padding: 4px 8px; border-radius: 8px;
+        .promo-bubble h3 {
+            font-size: clamp(10px, 3vw, 14px); color: var(--neon-yellow);
+            text-shadow: 0 0 10px var(--neon-yellow);
         }
+        .promo-bubble p {
+            font-size: clamp(6px, 2vw, 8px); color: #ddd;
+        }
+        .promo-bubble .timer-badge {
+            position: absolute; top: 15px; right: 25px;
+            background: rgba(0,0,0,0.8); color: var(--neon-green);
+            font-size: clamp(5px, 1.5vw, 7px); padding: 4px 10px;
+            border-radius: 20px; text-shadow: 0 0 6px var(--neon-green);
+        }
+        /* Puntos de navegación */
+        .promo-dots {
+            display: flex; justify-content: center; gap: 8px; margin-top: 15px;
+        }
+        .promo-dot {
+            width: 10px; height: 10px; border-radius: 50%; background: #555;
+            cursor: pointer; transition: 0.3s;
+        }
+        .promo-dot.active { background: var(--neon-pink); box-shadow: 0 0 10px var(--neon-pink); }
 
         .hero {
             text-align: center; padding: clamp(20px, 4vw, 30px) 10px;
@@ -221,7 +223,6 @@
         .project-name { font-size: clamp(4px, 1.5vw, 6px); color: white; text-shadow: 0 0 5px rgba(255,255,255,0.5); }
         .project-desc { font-size: clamp(3px, 1vw, 4px); color: #aaa; line-height: 1.4; }
 
-        /* Patrocinadores */
         .sponsors-section {
             max-width: 900px; margin: 20px auto; padding: 10px;
         }
@@ -247,9 +248,7 @@
         .sponsor-icon img {
             width: 100%; height: 100%; object-fit: cover; border-radius: 12px;
         }
-        .sponsor-name {
-            font-size: clamp(3px, 1.2vw, 5px); color: white;
-        }
+        .sponsor-name { font-size: clamp(3px, 1.2vw, 5px); color: white; }
         .sponsor-phone {
             font-size: clamp(3px, 1.2vw, 5px); color: var(--gold); text-decoration: none;
             font-family: 'Orbitron', monospace;
@@ -292,28 +291,18 @@
         </div>
     </header>
 
-    <!-- Nube de admin (solo visible para administradores) -->
     <div id="admin-cloud" onclick="toggleAdminPanel()">☁️</div>
-
-    <!-- Panel desplegable de administración -->
     <div id="admin-panel">
         <a href="admin-promos.html" target="_blank">📢 GESTIONAR PROMOS</a>
         <a href="gestor-movil.html" target="_blank" class="btn-gold">➕ AGREGAR JUEGO</a>
         <button onclick="exitAdminMode()" style="background:#c0392b;">🚪 SALIR ADMIN</button>
     </div>
 
-    <!-- Banner de promociones -->
-    <div id="promo-banner">
-        <div class="promo-container">
-            <a id="promo-link" href="#" target="_blank">
-                <img id="promo-img" src="" alt="Promoción">
-            </a>
-            <div class="promo-info">
-                <h3 id="promo-nombre"></h3>
-                <p id="promo-desc"></p>
-            </div>
-            <div class="promo-timer" id="promo-timer"></div>
-        </div>
+    <!-- NUEVOS ANUNCIOS ESTILO BURBUJA -->
+    <div class="promo-bubble-container" id="promoBubbleContainer">
+        <div class="promo-bubble inactive" id="promoBubble1"></div>
+        <div class="promo-bubble inactive" id="promoBubble2"></div>
+        <div class="promo-dots" id="promoDots"></div>
     </div>
 
     <div class="hero">
@@ -332,9 +321,7 @@
 
     <footer>© 2026 Tecnomath · Powered by GitHub Pages</footer>
 
-    <!-- Librería central de usuarios/monedas -->
     <script src="shared.js"></script>
-
     <script>
         // ═══════════════════════════════════════
         // REGISTRO DEL SERVICE WORKER (PWA)
@@ -354,7 +341,6 @@
             const height = window.innerHeight;
             let deviceType = 'desktop';
             let orientation = (width > height) ? 'landscape' : 'portrait';
-
             if (/Mobi|Android|iPhone|iPad|iPod|webOS/i.test(ua)) {
                 deviceType = (/iPad|Tablet|PlayBook/i.test(ua) || (width >= 768 && /Mobile/i.test(ua))) ? 'tablet' : 'mobile';
             } else if (width < 768) {
@@ -362,7 +348,6 @@
             } else if (width >= 1200) {
                 deviceType = 'large-desktop';
             }
-
             const root = document.documentElement;
             switch (deviceType) {
                 case 'mobile':
@@ -387,7 +372,6 @@
             }
             return { deviceType, orientation, width };
         }
-
         const deviceInfo = detectDevice();
         window.addEventListener('resize', () => {
             detectDevice();
@@ -410,7 +394,6 @@
             { name: "Oceanix",         phone: "+573008889900", image: "🌊", imageUrl: "" },
             { name: "GreenTech",       phone: "+573009990011", image: "🌿", imageUrl: "" }
         ];
-
         function renderSponsors() {
             const selected = [...allSponsorsPortal].sort(() => Math.random() - 0.5).slice(0, 4);
             const area = document.getElementById('sponsorsArea');
@@ -425,10 +408,7 @@
                     const img = document.createElement('img');
                     img.src = sponsor.imageUrl;
                     img.alt = sponsor.name;
-                    img.onerror = function() {
-                        this.remove();
-                        icon.textContent = sponsor.image || '🖼️';
-                    };
+                    img.onerror = function() { this.remove(); icon.textContent = sponsor.image || '🖼️'; };
                     icon.appendChild(img);
                 } else {
                     icon.textContent = sponsor.image || '🖼️';
@@ -440,67 +420,122 @@
                 phone.className = 'sponsor-phone';
                 phone.href = 'tel:' + sponsor.phone;
                 phone.textContent = sponsor.phone;
-                card.appendChild(icon);
-                card.appendChild(name);
-                card.appendChild(phone);
+                card.appendChild(icon); card.appendChild(name); card.appendChild(phone);
                 area.appendChild(card);
             });
         }
         renderSponsors();
 
         // ═══════════════════════════════════════
-        // SISTEMA DE PROMOCIONES (BANNER)
+        // NUEVO SISTEMA DE ANUNCIOS: BURBUJAS FLOTANTES
         // ═══════════════════════════════════════
+        let promosActivas = [];
+        let burbujaActual = 0;
+        let intervaloBurbujas = null;
+        const burbuja1 = document.getElementById('promoBubble1');
+        const burbuja2 = document.getElementById('promoBubble2');
+        const dotsContainer = document.getElementById('promoDots');
+        const container = document.getElementById('promoBubbleContainer');
+
         async function cargarPromociones() {
             try {
                 const response = await fetch('promociones.json');
-                if (!response.ok) return [];
-                const promos = await response.json();
+                if (!response.ok) throw new Error('No se pudo cargar');
+                const data = await response.json();
                 const ahora = new Date();
-                return promos.filter(p => {
+                promosActivas = data.filter(p => {
                     if (!p.activo) return false;
                     const inicio = new Date(p.fechaInicio);
                     const fin = new Date(p.fechaFin);
                     return ahora >= inicio && ahora <= fin;
                 });
+                if (promosActivas.length > 0) {
+                    container.style.display = 'block';
+                    crearDots();
+                    mostrarBurbuja(0);
+                    iniciarRotacion();
+                } else {
+                    container.style.display = 'none';
+                }
             } catch (e) {
-                console.warn('No se pudieron cargar promociones:', e);
-                return [];
+                console.warn('Promociones no disponibles:', e);
+                container.style.display = 'none';
             }
         }
 
-        let promoActual = 0;
-        let promosDisponibles = [];
-
-        async function iniciarPromociones() {
-            promosDisponibles = await cargarPromociones();
-            const banner = document.getElementById('promo-banner');
-            if (promosDisponibles.length === 0) {
-                banner.style.display = 'none';
-                return;
-            }
-            banner.style.display = 'block';
-            mostrarPromocion(0);
-            setInterval(() => {
-                promoActual = (promoActual + 1) % promosDisponibles.length;
-                mostrarPromocion(promoActual);
-            }, 5000);
+        function crearDots() {
+            dotsContainer.innerHTML = '';
+            promosActivas.forEach((_, i) => {
+                const dot = document.createElement('span');
+                dot.className = 'promo-dot' + (i === 0 ? ' active' : '');
+                dot.onclick = () => cambiarBurbuja(i);
+                dotsContainer.appendChild(dot);
+            });
         }
 
-        function mostrarPromocion(index) {
-            const promo = promosDisponibles[index];
-            if (!promo) return;
-            document.getElementById('promo-img').src = promo.imagen || 'img/default-promo.png';
-            document.getElementById('promo-link').href = promo.url;
-            document.getElementById('promo-nombre').textContent = promo.nombre;
-            document.getElementById('promo-desc').textContent = promo.descripcion;
-            const fin = new Date(promo.fechaFin);
+        function cambiarBurbuja(index) {
+            if (index === burbujaActual || promosActivas.length === 0) return;
+            // Ocultar burbuja activa y mostrar la nueva con transición
+            const oldBubble = burbujaActual % 2 === 0 ? burbuja1 : burbuja2;
+            const newBubble = index % 2 === 0 ? burbuja1 : burbuja2;
+            oldBubble.classList.remove('active');
+            oldBubble.classList.add('inactive');
+            burbujaActual = index;
+            llenarBurbuja(newBubble, promosActivas[index]);
+            newBubble.classList.remove('inactive');
+            newBubble.classList.add('active');
+            actualizarDots();
+            reiniciarRotacion();
+        }
+
+        function mostrarBurbuja(index) {
+            const bubble = index % 2 === 0 ? burbuja1 : burbuja2;
+            llenarBurbuja(bubble, promosActivas[index]);
+            bubble.classList.remove('inactive');
+            bubble.classList.add('active');
+            burbujaActual = index;
+            actualizarDots();
+        }
+
+        function llenarBurbuja(bubble, promo) {
+            bubble.innerHTML = `
+                <a href="${promo.url}" target="_blank" style="text-decoration:none; color:inherit; display:flex; flex-direction:column; align-items:center; gap:8px;">
+                    <img src="${promo.imagen || 'img/default-promo.png'}" alt="${promo.nombre}">
+                    <h3>${promo.nombre}</h3>
+                    <p>${promo.descripcion}</p>
+                </a>
+                <span class="timer-badge">${calcularDiasRestantes(promo.fechaFin)} días</span>
+            `;
+        }
+
+        function calcularDiasRestantes(fechaFin) {
+            const fin = new Date(fechaFin);
             const ahora = new Date();
-            const diasRestantes = Math.ceil((fin - ahora) / (1000 * 60 * 60 * 24));
-            document.getElementById('promo-timer').textContent = `${diasRestantes} días`;
+            return Math.ceil((fin - ahora) / (1000 * 60 * 60 * 24));
         }
 
-        iniciarPromociones();
+        function actualizarDots() {
+            const dots = dotsContainer.children;
+            for (let i = 0; i < dots.length; i++) {
+                dots[i].classList.toggle('active', i === burbujaActual);
+            }
+        }
+
+        function iniciarRotacion() {
+            if (promosActivas.length <= 1) return;
+            intervaloBurbujas = setInterval(() => {
+                let next = (burbujaActual + 1) % promosActivas.length;
+                cambiarBurbuja(next);
+            }, 6000);
+        }
+
+        function reiniciarRotacion() {
+            if (intervaloBurbujas) clearInterval(intervaloBurbujas);
+            iniciarRotacion();
+        }
+
+        // Cargar promociones al iniciar
+        cargarPromociones();
 
         // ═══════════════════════════════════════
         // LISTA DE PROYECTOS
@@ -518,7 +553,6 @@
             { name: "Banana Kong Dash", desc: "Corre por la selva. 3 carriles, meta final y power-ups", url: "banana-dash.html", imageUrl: "", icon: "🍌", category: "runners" }
         ];
 
-        // Construir filtros
         const categories = ['todos', ...new Set(projects.map(p => p.category))];
         const filtersContainer = document.getElementById('filtersContainer');
         categories.forEach(cat => {
@@ -542,62 +576,44 @@
             const container = document.getElementById('projectsContainer');
             container.innerHTML = '';
             const filtered = filterCategory ? projects.filter(p => p.category === filterCategory) : projects;
-
             filtered.forEach(proj => {
                 const card = document.createElement('a');
                 card.className = 'project-card';
                 card.href = proj.url;
                 card.target = (proj.url.endsWith('.html') && !proj.url.startsWith('http')) ? '_self' : '_blank';
                 card.rel = "noopener";
-
                 const iconDiv = document.createElement('div');
                 iconDiv.className = 'project-icon';
                 if (proj.imageUrl && proj.imageUrl.trim() !== '') {
                     const img = document.createElement('img');
                     img.src = proj.imageUrl;
                     img.alt = proj.name;
-                    img.onerror = function() {
-                        this.remove();
-                        const span = document.createElement('span');
-                        span.textContent = proj.icon || '🕹️';
-                        iconDiv.appendChild(span);
-                    };
+                    img.onerror = function() { this.remove(); const span = document.createElement('span'); span.textContent = proj.icon || '🕹️'; iconDiv.appendChild(span); };
                     iconDiv.appendChild(img);
                 } else {
                     const span = document.createElement('span');
                     span.textContent = proj.icon || '🕹️';
                     iconDiv.appendChild(span);
                 }
-
                 const nameDiv = document.createElement('div');
                 nameDiv.className = 'project-name';
                 nameDiv.textContent = proj.name;
-
                 const descDiv = document.createElement('div');
                 descDiv.className = 'project-desc';
                 descDiv.textContent = proj.desc;
-
-                card.appendChild(iconDiv);
-                card.appendChild(nameDiv);
-                card.appendChild(descDiv);
+                card.appendChild(iconDiv); card.appendChild(nameDiv); card.appendChild(descDiv);
                 container.appendChild(card);
             });
         }
-
         renderProjects();
 
         // ═══════════════════════════════════════
-        // ADMIN – NUBE + PANEL + ACCESO OCULTO
+        // ADMIN
         // ═══════════════════════════════════════
         function toggleAdminPanel() {
             const panel = document.getElementById('admin-panel');
-            if (panel.style.display === 'flex') {
-                panel.style.display = 'none';
-            } else {
-                panel.style.display = 'flex';
-            }
+            panel.style.display = panel.style.display === 'flex' ? 'none' : 'flex';
         }
-
         function exitAdminMode() {
             const user = Tecnomath.getCurrentUser();
             if (user && Tecnomath.isAdmin()) {
@@ -606,13 +622,10 @@
                 location.reload();
             }
         }
-
-        // ACTUALIZAR BARRA DE USUARIO
         (function updateUserBar() {
             const userDisplay = document.getElementById('userDisplay');
             const authLink = document.getElementById('authLink');
             const adminCloud = document.getElementById('admin-cloud');
-
             if (!userDisplay) return;
             const user = Tecnomath.getCurrentUser();
             if (user) {
@@ -632,54 +645,22 @@
             }
         })();
 
-        // ═══════════════════════════════════════
         // ACCESO OCULTO: DOBLE CLIC EN ESQUINA INFERIOR DERECHA
-        // ═══════════════════════════════════════
-        const ADMINS_PORTAL = {
-            "1983": "Junior", "2024": "Nicole", "7777": "Mateo",
-            "8888": "Jaider", "ods2026": "ODS Master"
-        };
-
-        // Zona invisible para doble clic
+        const ADMINS_PORTAL = { "1983": "Junior", "2024": "Nicole", "7777": "Mateo", "8888": "Jaider", "ods2026": "ODS Master" };
         const secretZone = document.createElement('div');
         secretZone.style.cssText = 'position:fixed; bottom:0; right:0; width:70px; height:70px; z-index:499;';
         secretZone.addEventListener('dblclick', function(e) {
             e.preventDefault();
             const user = Tecnomath.getCurrentUser();
-            if (!user) {
-                alert('Debes iniciar sesión primero (usa el botón 🔑 ACCEDER).');
-                return;
-            }
+            if (!user) { alert('Debes iniciar sesión primero (usa el botón 🔑 ACCEDER).'); return; }
             const code = prompt('🔐 CÓDIGO ADMIN:');
             if (ADMINS_PORTAL[code]) {
                 Tecnomath.setAdmin(user.username);
                 alert('⚡ ' + ADMINS_PORTAL[code].toUpperCase() + ' · ADMIN ACTIVADO');
                 location.reload();
-            } else if (code) {
-                alert('🔒 ACCESO DENEGADO');
-            }
+            } else if (code) { alert('🔒 ACCESO DENEGADO'); }
         });
         document.body.appendChild(secretZone);
-
-        // También permitir Ctrl+Shift+A como alternativa rápida
-        document.addEventListener('keydown', function(e) {
-            if (e.ctrlKey && e.shiftKey && e.key === 'A') {
-                e.preventDefault();
-                const user = Tecnomath.getCurrentUser();
-                if (!user) {
-                    alert('Debes iniciar sesión primero (usa el botón 🔑 ACCEDER).');
-                    return;
-                }
-                const code = prompt('🔐 CÓDIGO ADMIN:');
-                if (ADMINS_PORTAL[code]) {
-                    Tecnomath.setAdmin(user.username);
-                    alert('⚡ ' + ADMINS_PORTAL[code].toUpperCase() + ' · ADMIN ACTIVADO');
-                    location.reload();
-                } else if (code) {
-                    alert('🔒 ACCESO DENEGADO');
-                }
-            }
-        });
     </script>
 </body>
 </html>
