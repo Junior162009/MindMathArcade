@@ -5,47 +5,70 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Admin Promociones · Tecnomath</title>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
-    <script src="shared.js"></script>
     <style>
-        :root { --neon-cyan:#00FFFF; --neon-pink:#FF00FF; --gold:#FFD700; --bg:#060610; --card:#0d0d1a; }
+        :root { --neon-cyan:#00FFFF; --neon-pink:#FF00FF; --gold:#FFD700; --bg:#060610; --card:#0d0d1a; --danger:#FF5252; --success:#4CAF50; }
         * { margin:0; padding:0; box-sizing:border-box; }
-        body { background:var(--bg); color:white; font-family:'Press Start 2P', cursive; padding:20px; max-width:600px; margin:0 auto; }
-        h1 { text-align:center; color:var(--neon-cyan); font-size:14px; margin-bottom:20px; text-shadow:0 0 10px var(--neon-cyan); }
-        .form-box { background:var(--card); padding:20px; border-radius:12px; margin-bottom:20px; }
-        .form-box input, .form-box textarea { 
-            width:100%; padding:8px; margin:6px 0; background:#0a0a1a; border:2px solid #333; 
-            color:var(--neon-green); font-family:'Press Start 2P', cursive; font-size:7px; border-radius:8px;
+        body { background:var(--bg); color:white; font-family:'Press Start 2P', cursive; padding:15px; max-width:650px; margin:0 auto; }
+        h1 { text-align:center; color:var(--neon-cyan); font-size:16px; margin:20px 0; text-shadow:0 0 10px var(--neon-cyan); }
+        .card { background:var(--card); padding:20px; border-radius:12px; margin-bottom:15px; }
+        .card input, .card textarea, .card select {
+            width:100%; padding:10px; margin:6px 0; background:#0a0a1a; border:2px solid #333;
+            color:var(--neon-green); font-family:'Press Start 2P', cursive; font-size:8px; border-radius:8px;
         }
-        .btn { font-family:'Press Start 2P', cursive; font-size:7px; padding:10px 16px; border:none; border-radius:8px; cursor:pointer; color:white; box-shadow:0 4px 0 rgba(0,0,0,0.3); margin:5px; }
+        .btn {
+            font-family:'Press Start 2P', cursive; font-size:8px; padding:10px 16px; border:none;
+            border-radius:8px; cursor:pointer; color:white; box-shadow:0 4px 0 rgba(0,0,0,0.3); margin:4px;
+        }
         .btn-add { background:var(--neon-pink); }
-        .btn-save { background:#4CAF50; }
-        .btn-del { background:#FF5252; }
-        .list { background:var(--card); border-radius:12px; padding:10px; }
-        .item { display:flex; justify-content:space-between; align-items:center; padding:10px; border-bottom:1px solid #333; }
-        .item:last-child { border-bottom:none; }
-        .status { text-align:center; margin-top:10px; font-size:7px; color:var(--gold); }
+        .btn-save { background:var(--success); }
+        .btn-del { background:var(--danger); }
+        .btn-secondary { background:#555; }
+        .list-item {
+            display:flex; justify-content:space-between; align-items:center;
+            padding:12px; border-bottom:1px solid #333;
+        }
+        .list-item:last-child { border-bottom:none; }
+        .status { text-align:center; margin-top:10px; font-size:8px; color:var(--gold); }
+        .error { color:var(--danger); font-size:8px; text-align:center; margin-top:10px; }
+        .hidden { display:none; }
     </style>
 </head>
 <body>
     <h1>📢 Gestionar Promociones</h1>
-    <div id="errorMsg" style="color:red; text-align:center; display:none;"></div>
-    <div class="status" id="statusMsg"></div>
+    <div class="error" id="globalError"></div>
+    <div class="status" id="statusMsg">Cargando...</div>
 
-    <div class="form-box" id="formBox" style="display:none;">
-        <h3 style="font-size:10px; color:var(--gold); margin-bottom:10px;">Agregar / Editar</h3>
+    <!-- Formulario (inicialmente oculto) -->
+    <div class="card hidden" id="formCard">
+        <h3 id="formTitle" style="font-size:12px; margin-bottom:10px; color:var(--gold);">Nueva Promoción</h3>
         <input type="text" id="nombre" placeholder="Nombre del juego">
         <input type="text" id="descripcion" placeholder="Descripción breve">
-        <input type="text" id="url" placeholder="URL del juego">
-        <input type="text" id="imagen" placeholder="Ruta de imagen (ej: img/promo.png)">
-        <input type="date" id="fechaInicio">
-        <input type="date" id="fechaFin">
-        <label style="font-size:6px;"><input type="checkbox" id="activo" checked> Activo</label>
-        <button class="btn btn-add" onclick="agregarPromocion()">➕ Agregar</button>
-        <button class="btn btn-save" id="btnUpdate" style="display:none;" onclick="actualizarPromocion()">💾 Actualizar</button>
-        <button class="btn" onclick="cancelEdit()">Cancelar</button>
+        <input type="text" id="url" placeholder="URL o archivo local">
+        <input type="text" id="imagen" placeholder="Ruta de imagen (opcional)">
+        <div style="display:flex; gap:10px;">
+            <input type="date" id="fechaInicio" style="flex:1;">
+            <input type="date" id="fechaFin" style="flex:1;">
+        </div>
+        <label style="font-size:8px; margin:8px 0;"><input type="checkbox" id="activo" checked> Activo</label>
+        <button class="btn btn-add" id="btnSave" onclick="guardarPromocion()">💾 Guardar</button>
+        <button class="btn btn-secondary" onclick="cancelEdit()">Cancelar</button>
     </div>
 
-    <div class="list" id="listaPromos"></div>
+    <!-- Lista de promociones -->
+    <div class="card" id="listaPromos"></div>
+
+    <!-- Instrucciones si no hay token -->
+    <div id="tokenInstructions" class="card hidden">
+        <p style="font-size:8px; line-height:1.6;">
+            ⚠️ <strong>Token de GitHub no encontrado.</strong><br>
+            Necesitas un token con permiso <code>repo</code> para editar archivos.<br>
+            1. Ve a <a href="https://github.com/settings/tokens" target="_blank" style="color:var(--neon-cyan);">GitHub Settings → Tokens</a>.<br>
+            2. Genera un token clásico con el permiso <code>repo</code>.<br>
+            3. Pégalo en el cuadro de abajo y haz clic en <strong>Guardar Token</strong>.
+        </p>
+        <input type="password" id="tokenInput" placeholder="ghp_..." style="margin:8px 0;">
+        <button class="btn btn-save" onclick="guardarToken()">💾 Guardar Token</button>
+    </div>
 
     <script>
         const OWNER = 'Junior162009';
@@ -53,89 +76,93 @@
         const FILE = 'promociones.json';
         const API = `https://api.github.com/repos/${OWNER}/${REPO}/contents/${FILE}`;
         const BRANCH = 'main';
+
         let token = localStorage.getItem('tecnomath_github_token');
-        if (!token) {
-            token = prompt('Token de GitHub (necesario para guardar):');
-            if (!token) { document.body.innerHTML = '<h2 style="color:red;text-align:center;">Token requerido</h2>'; throw new Error('Token faltante'); }
-            localStorage.setItem('tecnomath_github_token', token);
-        }
         let currentSHA = null;
         let promos = [];
         let editingIndex = -1;
 
+        // Inicializar
+        function init() {
+            if (!token) {
+                document.getElementById('tokenInstructions').classList.remove('hidden');
+                document.getElementById('statusMsg').classList.add('hidden');
+                return;
+            }
+            document.getElementById('tokenInstructions').classList.add('hidden');
+            cargarPromos();
+        }
+
         async function cargarPromos() {
+            const status = document.getElementById('statusMsg');
+            status.textContent = 'Cargando promociones...';
+            status.className = 'status';
             try {
                 const resp = await fetch(API, { headers: { Authorization: `token ${token}` } });
-                if (!resp.ok) throw new Error('Error al cargar: ' + resp.status);
+                if (!resp.ok) {
+                    if (resp.status === 401) throw new Error('Token inválido o expirado. Genera uno nuevo.');
+                    if (resp.status === 404) throw new Error('El archivo promociones.json no existe en el repositorio. Crea uno primero.');
+                    throw new Error('Error HTTP ' + resp.status);
+                }
                 const data = await resp.json();
                 currentSHA = data.sha;
                 promos = JSON.parse(atob(data.content));
                 renderLista();
-                document.getElementById('statusMsg').textContent = 'Promociones cargadas';
+                status.textContent = 'Promociones cargadas (' + promos.length + ')';
             } catch (e) {
-                document.getElementById('errorMsg').textContent = 'Error al cargar: ' + e.message;
-                document.getElementById('errorMsg').style.display = 'block';
+                document.getElementById('globalError').textContent = '❌ ' + e.message;
+                status.textContent = 'Error al cargar.';
             }
         }
 
         function renderLista() {
             const cont = document.getElementById('listaPromos');
-            cont.innerHTML = promos.map((p, i) => `
-                <div class="item">
-                    <span>${p.nombre}</span>
-                    <div>
-                        <button class="btn btn-save" onclick="editar(${i})">✏️</button>
-                        <button class="btn btn-del" onclick="eliminar(${i})">🗑️</button>
+            if (promos.length === 0) {
+                cont.innerHTML = '<div style="text-align:center; padding:20px; font-size:8px; color:#888;">No hay promociones. Crea la primera.</div>';
+            } else {
+                cont.innerHTML = promos.map((p, i) => `
+                    <div class="list-item">
+                        <span style="font-size:7px;">${p.nombre} ${p.activo ? '✅' : '❌'}</span>
+                        <div>
+                            <button class="btn btn-save" onclick="editar(${i})" style="font-size:6px;">✏️</button>
+                            <button class="btn btn-del" onclick="eliminar(${i})" style="font-size:6px;">🗑️</button>
+                        </div>
                     </div>
-                </div>
-            `).join('');
+                `).join('');
+            }
+            // Botón para agregar siempre visible
+            cont.innerHTML += '<button class="btn btn-add" onclick="mostrarFormulario()" style="width:100%;">➕ Nueva promoción</button>';
         }
 
-        async function guardarPromos(mensaje) {
-            const body = {
-                message: mensaje,
-                content: btoa(unescape(encodeURIComponent(JSON.stringify(promos, null, 2)))),
-                sha: currentSHA,
-                branch: BRANCH
-            };
-            const resp = await fetch(API, {
-                method: 'PUT',
-                headers: { Authorization: `token ${token}`, 'Content-Type': 'application/json' },
-                body: JSON.stringify(body)
-            });
-            if (!resp.ok) throw new Error('Error al guardar: ' + resp.status);
-            const data = await resp.json();
-            currentSHA = data.content.sha;
-            document.getElementById('statusMsg').textContent = 'Cambios guardados en GitHub';
-        }
-
-        function editar(index) {
+        function mostrarFormulario(index = -1) {
             editingIndex = index;
-            const p = promos[index];
-            document.getElementById('nombre').value = p.nombre;
-            document.getElementById('descripcion').value = p.descripcion;
-            document.getElementById('url').value = p.url;
-            document.getElementById('imagen').value = p.imagen || '';
-            document.getElementById('fechaInicio').value = p.fechaInicio;
-            document.getElementById('fechaFin').value = p.fechaFin;
-            document.getElementById('activo').checked = p.activo;
-            document.getElementById('formBox').style.display = 'block';
-            document.getElementById('btnUpdate').style.display = 'inline-block';
+            document.getElementById('formCard').classList.remove('hidden');
+            document.getElementById('formTitle').textContent = index >= 0 ? 'Editar Promoción' : 'Nueva Promoción';
+            if (index >= 0) {
+                const p = promos[index];
+                document.getElementById('nombre').value = p.nombre;
+                document.getElementById('descripcion').value = p.descripcion;
+                document.getElementById('url').value = p.url;
+                document.getElementById('imagen').value = p.imagen || '';
+                document.getElementById('fechaInicio').value = p.fechaInicio;
+                document.getElementById('fechaFin').value = p.fechaFin;
+                document.getElementById('activo').checked = p.activo;
+            } else {
+                limpiarFormulario();
+            }
         }
 
         function cancelEdit() {
+            document.getElementById('formCard').classList.add('hidden');
             editingIndex = -1;
-            document.getElementById('formBox').style.display = 'none';
-            document.getElementById('btnUpdate').style.display = 'none';
-            limpiarForm();
         }
 
-        function limpiarForm() {
+        function limpiarFormulario() {
             ['nombre','descripcion','url','imagen','fechaInicio','fechaFin'].forEach(id => document.getElementById(id).value = '');
             document.getElementById('activo').checked = true;
         }
 
-        async function agregarPromocion() {
+        async function guardarPromocion() {
             const nueva = {
                 nombre: document.getElementById('nombre').value.trim(),
                 descripcion: document.getElementById('descripcion').value.trim(),
@@ -145,39 +172,80 @@
                 fechaFin: document.getElementById('fechaFin').value,
                 activo: document.getElementById('activo').checked
             };
-            if (!nueva.nombre || !nueva.url) { alert('Nombre y URL son obligatorios'); return; }
-            promos.push(nueva);
-            await guardarPromos(`Agregar promoción ${nueva.nombre}`);
-            limpiarForm();
-            cancelEdit();
-            renderLista();
+            if (!nueva.nombre || !nueva.url || !nueva.fechaInicio || !nueva.fechaFin) {
+                alert('Nombre, URL, fechas de inicio y fin son obligatorios.');
+                return;
+            }
+            if (editingIndex >= 0) {
+                promos[editingIndex] = nueva;
+            } else {
+                promos.push(nueva);
+            }
+            const mensaje = editingIndex >= 0 ? `Actualizar promoción ${nueva.nombre}` : `Agregar promoción ${nueva.nombre}`;
+            try {
+                const body = {
+                    message: mensaje,
+                    content: btoa(unescape(encodeURIComponent(JSON.stringify(promos, null, 2)))),
+                    sha: currentSHA,
+                    branch: BRANCH
+                };
+                const resp = await fetch(API, {
+                    method: 'PUT',
+                    headers: { Authorization: `token ${token}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+                if (!resp.ok) throw new Error('Error al guardar: ' + resp.status);
+                const data = await resp.json();
+                currentSHA = data.content.sha;
+                document.getElementById('statusMsg').textContent = '✅ Cambios guardados en GitHub';
+                cancelEdit();
+                renderLista();
+            } catch (e) {
+                alert('Error al guardar: ' + e.message);
+            }
         }
 
-        async function actualizarPromocion() {
-            if (editingIndex < 0) return;
-            promos[editingIndex] = {
-                nombre: document.getElementById('nombre').value.trim(),
-                descripcion: document.getElementById('descripcion').value.trim(),
-                url: document.getElementById('url').value.trim(),
-                imagen: document.getElementById('imagen').value.trim(),
-                fechaInicio: document.getElementById('fechaInicio').value,
-                fechaFin: document.getElementById('fechaFin').value,
-                activo: document.getElementById('activo').checked
-            };
-            await guardarPromos(`Actualizar promoción ${promos[editingIndex].nombre}`);
-            limpiarForm();
-            cancelEdit();
-            renderLista();
+        function editar(index) {
+            mostrarFormulario(index);
         }
 
         async function eliminar(index) {
             if (!confirm(`¿Eliminar "${promos[index].nombre}"?`)) return;
-            promos.splice(index, 1);
-            await guardarPromos(`Eliminar promoción`);
-            renderLista();
+            const eliminado = promos.splice(index, 1)[0];
+            try {
+                const body = {
+                    message: `Eliminar promoción ${eliminado.nombre}`,
+                    content: btoa(unescape(encodeURIComponent(JSON.stringify(promos, null, 2)))),
+                    sha: currentSHA,
+                    branch: BRANCH
+                };
+                const resp = await fetch(API, {
+                    method: 'PUT',
+                    headers: { Authorization: `token ${token}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+                if (!resp.ok) throw new Error('Error al eliminar: ' + resp.status);
+                const data = await resp.json();
+                currentSHA = data.content.sha;
+                document.getElementById('statusMsg').textContent = '🗑️ Promoción eliminada';
+                renderLista();
+            } catch (e) {
+                promos.push(eliminado); // revertir
+                alert('Error al eliminar: ' + e.message);
+            }
         }
 
-        cargarPromos();
+        function guardarToken() {
+            const t = document.getElementById('tokenInput').value.trim();
+            if (!t) return;
+            localStorage.setItem('tecnomath_github_token', t);
+            token = t;
+            document.getElementById('tokenInstructions').classList.add('hidden');
+            document.getElementById('statusMsg').classList.remove('hidden');
+            cargarPromos();
+        }
+
+        init();
     </script>
 </body>
 </html>
