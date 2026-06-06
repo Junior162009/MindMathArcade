@@ -1,10 +1,19 @@
 [
   {
     "nombre": "MindMath Arcade",
-    "descripcion": "Juego de matemÃ¡ticas retro con 60+ niveles",
+    "descripcion": "Juego de matemÃÂ¡ticas retro con 60+ niveles",
     "url": "game.html",
     "imagen": "img/mindmath.png",
     "fechaInicio": "2026-01-01",
+    "fechaFin": "2026-12-31",
+    "activo": true
+  },
+  {
+    "nombre": "BanderQuiz",
+    "descripcion": "Adivina Las Banderas Del Mundo",
+    "url": "https://junior162009.github.io/BanderQuiz/",
+    "imagen": "",
+    "fechaInicio": "2026-06-05",
     "fechaFin": "2026-12-31",
     "activo": true
   }
