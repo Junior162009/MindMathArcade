@@ -955,18 +955,347 @@
         let fairMode = false;
         let leaderboardInterval = null;
 
+        // ---- NUEVAS FUNCIONES VISUALES (GLOBOS, CONFETI, ETC) ----
+        let fairContainer = null;
+        let fairVisualIntervals = {
+            confetti: null,
+            balloons: null,
+            sparkles: null,
+            fireworks: null
+        };
+        let visualEffectsActive = false;
+
+        function createFairContainer() {
+            if (fairContainer) return;
+            fairContainer = document.createElement('div');
+            fairContainer.id = 'fair-effects-container';
+            fairContainer.style.cssText = `
+                position: fixed;
+                top: 0; left: 0;
+                width: 100%; height: 100%;
+                pointer-events: none;
+                z-index: 9998;
+                overflow: hidden;
+            `;
+            document.body.appendChild(fairContainer);
+        }
+
+        function injectFairCSS() {
+            if (document.getElementById('fair-dynamic-styles')) return;
+            const style = document.createElement('style');
+            style.id = 'fair-dynamic-styles';
+            style.textContent = `
+                @keyframes confettiFall {
+                    0% { transform: translateY(0) rotate(0deg) scale(1); opacity: 1; }
+                    100% { transform: translateY(110vh) rotate(720deg) scale(0.5); opacity: 0; }
+                }
+                @keyframes floatBalloon {
+                    0%, 100% { transform: translateY(0) rotate(-2deg); }
+                    50% { transform: translateY(-30px) rotate(2deg); }
+                }
+                @keyframes sparkleAnim {
+                    0%, 100% { opacity: 0; transform: scale(0); }
+                    50% { opacity: 1; transform: scale(1); }
+                }
+                @keyframes fireworkRay {
+                    0% { opacity: 1; transform: translate(-50%, -50%) rotate(0deg) scale(0.3); }
+                    100% { opacity: 0; transform: translate(-50%, -50%) rotate(0deg) scale(1); }
+                }
+                @keyframes notifPop {
+                    0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
+                    20% { transform: translate(-50%, -50%) scale(1.1); opacity: 1; }
+                    80% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+                    100% { transform: translate(-50%, -50%) scale(1); opacity: 0; }
+                }
+                .fair-promo-highlight {
+                    animation: promoPulse 1s ease-in-out infinite !important;
+                    border-color: #FFD700 !important;
+                    box-shadow: 0 0 40px rgba(255, 215, 0, 0.8) !important;
+                }
+                @keyframes promoPulse {
+                    0%, 100% { transform: scale(1); }
+                    50% { transform: scale(1.05); }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+
+        function createConfettiPiece() {
+            const el = document.createElement('div');
+            const colors = ['#FF3366', '#FFD700', '#00FF88', '#FF6600', '#00CCFF', '#FF00FF', '#39FF14'];
+            const color = colors[Math.floor(Math.random() * colors.length)];
+            const size = Math.random() * 10 + 5;
+            const left = Math.random() * 100;
+            const duration = Math.random() * 3 + 2;
+            const delay = Math.random() * 2;
+            const rotation = Math.random() * 720;
+            const shape = Math.random() > 0.5 ? '50%' : '2px';
+
+            el.style.cssText = `
+                position: absolute;
+                top: -20px;
+                left: ${left}%;
+                width: ${size}px;
+                height: ${size * 0.6}px;
+                background: ${color};
+                border-radius: ${shape};
+                opacity: 0.9;
+                transform: rotate(${rotation}deg);
+                animation: confettiFall ${duration}s ease-in ${delay}s forwards;
+            `;
+            return el;
+        }
+
+        function startConfetti() {
+            if (fairVisualIntervals.confetti) return;
+            fairVisualIntervals.confetti = setInterval(() => {
+                if (!fairContainer) return;
+                const count = Math.floor(Math.random() * 6) + 3;
+                for (let i = 0; i < count; i++) {
+                    const piece = createConfettiPiece();
+                    fairContainer.appendChild(piece);
+                    const duration = parseFloat(piece.style.animationDuration) || 3;
+                    setTimeout(() => { if (piece.parentNode) piece.remove(); }, (duration + 2) * 1000);
+                }
+            }, 300);
+        }
+
+        function stopConfetti() {
+            if (fairVisualIntervals.confetti) {
+                clearInterval(fairVisualIntervals.confetti);
+                fairVisualIntervals.confetti = null;
+            }
+            if (fairContainer) {
+                fairContainer.querySelectorAll('[style*="confettiFall"]').forEach(el => el.remove());
+            }
+        }
+
+        function createBalloon() {
+            const el = document.createElement('div');
+            const colors = ['#FF3366', '#FFD700', '#00FF88', '#FF6600', '#00CCFF', '#FF00FF', '#39FF14', '#FFA500', '#FF69B4'];
+            const color = colors[Math.floor(Math.random() * colors.length)];
+            const size = Math.random() * 40 + 40;
+            const left = Math.random() * 90 + 5;
+            const duration = Math.random() * 8 + 8;
+            const delay = Math.random() * 5;
+
+            el.style.cssText = `
+                position: absolute;
+                bottom: -80px;
+                left: ${left}%;
+                width: ${size * 0.8}px;
+                height: ${size}px;
+                background: radial-gradient(circle at 30% 30%, ${color}, ${color}dd);
+                border-radius: 50% 50% 50% 50% / 40% 40% 60% 60%;
+                box-shadow: inset -8px -8px 20px rgba(0,0,0,0.2), 0 4px 15px rgba(0,0,0,0.3);
+                animation: floatBalloon ${duration}s ease-in-out ${delay}s infinite alternate;
+                transform-origin: bottom center;
+            `;
+            // Hilo
+            const string = document.createElement('div');
+            string.style.cssText = `position:absolute; bottom:-30px; left:50%; width:2px; height:30px; background:rgba(255,255,255,0.3); transform:translateX(-50%);`;
+            el.appendChild(string);
+            // Brillo
+            const shine = document.createElement('div');
+            shine.style.cssText = `position:absolute; top:12%; left:20%; width:25%; height:20%; background:radial-gradient(circle, rgba(255,255,255,0.6) 0%, transparent 70%); border-radius:50%; opacity:0.7;`;
+            el.appendChild(shine);
+            // Cola
+            const tail = document.createElement('div');
+            tail.style.cssText = `position:absolute; bottom:-8px; left:50%; width:4px; height:12px; background:${color}; border-radius:0 0 4px 4px; transform:translateX(-50%); opacity:0.6;`;
+            el.appendChild(tail);
+
+            el.dataset.floatDuration = duration;
+            return el;
+        }
+
+        function startBalloons() {
+            if (fairVisualIntervals.balloons) return;
+            fairVisualIntervals.balloons = setInterval(() => {
+                if (!fairContainer) return;
+                const balloon = createBalloon();
+                fairContainer.appendChild(balloon);
+                const duration = parseFloat(balloon.dataset.floatDuration) || 12;
+                setTimeout(() => { if (balloon.parentNode) balloon.remove(); }, (duration + 5) * 1000);
+            }, 2500);
+        }
+
+        function stopBalloons() {
+            if (fairVisualIntervals.balloons) {
+                clearInterval(fairVisualIntervals.balloons);
+                fairVisualIntervals.balloons = null;
+            }
+            if (fairContainer) {
+                fairContainer.querySelectorAll('[style*="floatBalloon"]').forEach(el => el.remove());
+            }
+        }
+
+        function createSparkle() {
+            const el = document.createElement('div');
+            const size = Math.random() * 6 + 3;
+            const left = Math.random() * 100;
+            const top = Math.random() * 100;
+            const duration = Math.random() * 2 + 1.5;
+            const delay = Math.random() * 3;
+            const colors = ['#FFD700', '#00FFFF', '#FF00FF', '#39FF14', '#FF3366'];
+            el.style.cssText = `
+                position: absolute; top:${top}%; left:${left}%;
+                width:${size}px; height:${size}px;
+                background:${colors[Math.floor(Math.random() * colors.length)]};
+                border-radius:50%;
+                box-shadow:0 0 ${size*2}px currentColor;
+                animation:sparkleAnim ${duration}s ease-in-out ${delay}s infinite alternate;
+            `;
+            return el;
+        }
+
+        function startSparkles() {
+            if (fairVisualIntervals.sparkles) return;
+            fairVisualIntervals.sparkles = setInterval(() => {
+                if (!fairContainer) return;
+                const sparkle = createSparkle();
+                fairContainer.appendChild(sparkle);
+                setTimeout(() => { if (sparkle.parentNode) sparkle.remove(); }, 5000);
+            }, 1500);
+        }
+
+        function stopSparkles() {
+            if (fairVisualIntervals.sparkles) {
+                clearInterval(fairVisualIntervals.sparkles);
+                fairVisualIntervals.sparkles = null;
+            }
+            if (fairContainer) {
+                fairContainer.querySelectorAll('[style*="sparkleAnim"]').forEach(el => el.remove());
+            }
+        }
+
+        function createFirework() {
+            const el = document.createElement('div');
+            const x = Math.random() * 80 + 10;
+            const y = Math.random() * 50 + 10;
+            const colors = ['#FF3366', '#FFD700', '#00FF88', '#FF6600', '#00CCFF', '#FF00FF', '#39FF14'];
+            el.style.cssText = `position:absolute; top:${y}%; left:${x}%; width:8px; height:8px; background:transparent; pointer-events:none;`;
+            for (let i = 0; i < 12; i++) {
+                const angle = (i / 12) * 360;
+                const length = Math.random() * 60 + 40;
+                const color = colors[Math.floor(Math.random() * colors.length)];
+                const ray = document.createElement('div');
+                ray.style.cssText = `
+                    position:absolute; top:50%; left:50%;
+                    width:${length}px; height:3px;
+                    background:linear-gradient(to right, ${color}, transparent);
+                    transform:translate(-50%, -50%) rotate(${angle}deg);
+                    transform-origin:0 50%;
+                    opacity:0;
+                    animation:fireworkRay 0.8s ease-out forwards;
+                `;
+                el.appendChild(ray);
+            }
+            return el;
+        }
+
+        function startFireworks() {
+            if (fairVisualIntervals.fireworks) return;
+            fairVisualIntervals.fireworks = setInterval(() => {
+                if (!fairContainer) return;
+                const fw = createFirework();
+                fairContainer.appendChild(fw);
+                setTimeout(() => { if (fw.parentNode) fw.remove(); }, 2000);
+            }, 10000);
+        }
+
+        function stopFireworks() {
+            if (fairVisualIntervals.fireworks) {
+                clearInterval(fairVisualIntervals.fireworks);
+                fairVisualIntervals.fireworks = null;
+            }
+            if (fairContainer) {
+                fairContainer.querySelectorAll('[style*="fireworkRay"]').forEach(el => el.remove());
+            }
+        }
+
+        function highlightPromotions() {
+            document.querySelectorAll('.promo-bubble').forEach(b => b.classList.add('fair-promo-highlight'));
+            document.querySelectorAll('.promo-dot').forEach(d => {
+                d.style.transform = 'scale(1.3)';
+                d.style.boxShadow = '0 0 15px #FFD700';
+            });
+        }
+
+        function unhighlightPromotions() {
+            document.querySelectorAll('.promo-bubble').forEach(b => b.classList.remove('fair-promo-highlight'));
+            document.querySelectorAll('.promo-dot').forEach(d => {
+                d.style.transform = 'scale(1)';
+                d.style.boxShadow = 'none';
+            });
+        }
+
+        function showFairNotification(text) {
+            const notif = document.createElement('div');
+            notif.style.cssText = `
+                position:fixed; top:50%; left:50%; transform:translate(-50%,-50%);
+                background:rgba(0,0,0,0.85); color:#FFD700;
+                font-family:'Press Start 2P', cursive;
+                font-size:clamp(18px, 5vw, 40px);
+                padding:30px 50px; border-radius:30px;
+                border:4px solid #FFD700;
+                box-shadow:0 0 60px rgba(255,215,0,0.6);
+                z-index:99999; text-align:center;
+                animation:notifPop 2s ease-out forwards;
+                pointer-events:none;
+            `;
+            notif.textContent = text;
+            document.body.appendChild(notif);
+            setTimeout(() => { if (notif.parentNode) notif.remove(); }, 3000);
+        }
+
+        function activateVisualEffects() {
+            if (visualEffectsActive) return;
+            visualEffectsActive = true;
+            createFairContainer();
+            injectFairCSS();
+            startConfetti();
+            startBalloons();
+            startSparkles();
+            startFireworks();
+            highlightPromotions();
+            showFairNotification('🎉 ¡BIENVENIDO AL MODO FERIA! 🎈');
+        }
+
+        function deactivateVisualEffects() {
+            if (!visualEffectsActive) return;
+            visualEffectsActive = false;
+            stopConfetti();
+            stopBalloons();
+            stopSparkles();
+            stopFireworks();
+            unhighlightPromotions();
+            if (fairContainer) {
+                fairContainer.innerHTML = '';
+                fairContainer.style.display = 'none';
+            }
+        }
+
+        // ---- FUNCIONES PRINCIPALES DEL MODO FERIA (AHORA MEJORADAS) ----
         function activateFairMode() {
             if (fairMode) return;
             fairMode = true;
+
+            // Lógica original
             document.getElementById('newsTicker').style.display = 'block';
             document.getElementById('mainTitle').textContent = 'TECNOMATH FERIA';
             leaderboardInterval = setInterval(openLeaderboard, 30000);
+
+            // Nuevos efectos visuales
+            activateVisualEffects();
+
             alert('⚡ MODO FERIA ACTIVADO ⚡');
         }
 
         function deactivateFairMode() {
             if (!fairMode) return;
             fairMode = false;
+
+            // Lógica original
             document.getElementById('newsTicker').style.display = 'none';
             document.getElementById('mainTitle').textContent = 'TECNOMATH';
             if (leaderboardInterval) {
@@ -974,6 +1303,10 @@
                 leaderboardInterval = null;
             }
             document.getElementById('leaderboard-panel').style.display = 'none';
+
+            // Desactivar efectos visuales
+            deactivateVisualEffects();
+
             alert('🔕 MODO FERIA DESACTIVADO');
         }
 
@@ -1071,6 +1404,9 @@
             } else if (code) { alert('🔒 ACCESO DENEGADO'); }
         });
         document.body.appendChild(secretZone);
+
+        // Mensaje en consola para activar manualmente
+        console.log('🎈 Modo Feria mejorado cargado. Usa activateFairMode() o el código "feria2026".');
     </script>
 </body>
 </html>
