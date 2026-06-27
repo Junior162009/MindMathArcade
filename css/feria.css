@@ -1,0 +1,20 @@
+:root {
+    --theme-bg: #0a0a2a;
+    --theme-card: #1a1a3d;
+    --theme-border: #00ffff;
+    --theme-text: #ddffff;
+}
+body {
+    background: #0a0a2a !important;
+    color: #ddffff !important;
+}
+header { border-bottom-color: #00ffff !important; background: linear-gradient(90deg, rgba(0,255,255,0.1), rgba(255,0,255,0.1)) !important; }
+h1 { color: #00ffff !important; text-shadow: 0 0 30px #00ffff, 0 0 60px #ff00ff !important; }
+.project-card { background: #1a1a3d !important; border-color: #00ffff !important; }
+.project-card:hover { border-color: #ffdd00 !important; box-shadow: 0 0 20px #00ffff !important; }
+.hero { background: rgba(0,255,255,0.1) !important; border-bottom-color: #00ffff !important; }
+.filter-btn { border-color: #00ffff !important; color: #00ffff !important; }
+.filter-btn.active, .filter-btn:hover { background: rgba(0,255,255,0.2) !important; }
+.sponsor-card { background: #1a1a3d !important; border-color: #00ffff !important; }
+footer { border-top-color: #00ffff !important; }
+#admin-panel { border-color: #00ffff !important; }
