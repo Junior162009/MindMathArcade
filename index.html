@@ -26,11 +26,16 @@
             --neon-yellow: #FFE600; --gold: #FFD700; --retro-bg: #060610; --card-bg: #0d0d1a;
             --grid-cols: 2;
             --card-min-width: 140px;
+            --theme-bg: var(--retro-bg);
+            --theme-card: var(--card-bg);
+            --theme-border: #1a1a2e;
+            --theme-text: white;
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         html, body {
-            height: 100%; overflow-y: auto; background: var(--retro-bg);
-            font-family: 'Press Start 2P', cursive; color: white;
+            height: 100%; overflow-y: auto; background: var(--theme-bg);
+            font-family: 'Press Start 2P', cursive; color: var(--theme-text);
+            transition: background 0.6s, color 0.6s;
             background-image: radial-gradient(ellipse at 20% 50%, rgba(0,68,255,0.07) 0%, transparent 50%),
                             radial-gradient(ellipse at 80% 20%, rgba(255,0,255,0.07) 0%, transparent 50%);
         }
@@ -42,6 +47,7 @@
             padding: clamp(10px, 2vw, 15px); border-bottom: 2px solid var(--neon-pink);
             background: linear-gradient(90deg, rgba(255,0,255,0.05), transparent, rgba(0,255,255,0.05));
             position: relative;
+            transition: background 0.6s, border-color 0.6s;
         }
         .header-content {
             display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: clamp(6px, 1vw, 10px);
@@ -164,6 +170,7 @@
         .hero {
             text-align: center; padding: clamp(20px, 4vw, 30px) 10px;
             background: rgba(0,0,0,0.3); border-bottom: 1px solid #1a1a2e;
+            transition: background 0.6s, border-color 0.6s;
         }
         .hero h2 {
             font-size: clamp(8px, 2.5vw, 14px); color: var(--neon-yellow);
@@ -204,11 +211,13 @@
             gap: clamp(8px, 2vw, 15px);
         }
         .project-card {
-            background: var(--card-bg); border: 2px solid #1a1a2e; border-radius: 12px;
+            background: var(--card-bg); border: 2px solid var(--theme-border);
+            border-radius: 12px;
             padding: clamp(10px, 2vw, 15px) clamp(6px, 1.5vw, 10px);
             text-align: center; cursor: pointer; transition: all 0.3s;
             text-decoration: none; display: flex; flex-direction: column; align-items: center;
             gap: clamp(6px, 1.5vw, 10px); opacity: 0; animation: fadeIn 0.6s ease-out forwards;
+            color: var(--theme-text);
         }
         .project-card:nth-child(1) { animation-delay: 0.1s; }
         .project-card:nth-child(2) { animation-delay: 0.2s; }
@@ -250,7 +259,8 @@
             display: flex; flex-wrap: wrap; justify-content: center; gap: clamp(10px, 2vw, 20px);
         }
         .sponsor-card {
-            background: var(--card-bg); border: 2px solid #1a1a2e; border-radius: 12px;
+            background: var(--card-bg); border: 2px solid var(--theme-border);
+            border-radius: 12px;
             padding: clamp(8px, 1.5vw, 12px); text-align: center;
             width: clamp(100px, 20vw, 140px);
             display: flex; flex-direction: column; align-items: center; gap: 8px;
@@ -273,7 +283,8 @@
         footer {
             text-align: center; padding: 15px; color: #444;
             font-size: clamp(3px, 1vw, 5px);
-            border-top: 1px solid #1a1a2e; margin-top: 20px;
+            border-top: 1px solid var(--theme-border);
+            margin-top: 20px;
         }
 
         /* Overlay del reproductor Flash */
@@ -412,7 +423,6 @@
             <div class="user-area">
                 <span id="userDisplay">Invitado</span>
                 <a href="auth.html" class="auth-link" id="authLink">🔑 ACCEDER</a>
-                <!-- 🟢 NUEVO BOTÓN ADMIN -->
                 <button id="adminAccessBtn" class="auth-link" style="border-color: var(--gold); color: var(--gold); background: transparent; cursor: pointer; font-family: 'Press Start 2P', cursive; font-size: clamp(4px, 1.5vw, 6px); padding: 4px 8px; border-radius: 4px;">👑 ADMIN</button>
             </div>
         </div>
@@ -953,7 +963,7 @@
         renderProjects();
 
         // ════════════════════════════════════════════════════════
-        // 🎈 MODO FERIA MEJORADO + MÚLTIPLES CÓDIGOS DE EVENTOS
+        // 🎈 MODO FERIA MEJORADO + MÚLTIPLES CÓDIGOS DE EVENTOS + ESTILOS
         // ════════════════════════════════════════════════════════
 
         let fairMode = false;
@@ -961,6 +971,7 @@
         let fairContainer = null;
         let visualEffectsActive = false;
         let tempThemeTimeout = null;
+        let currentThemeStyleId = null; // Para rastrear el <style> inyectado
 
         let fairVisualIntervals = {
             confetti: null,
@@ -1012,7 +1023,6 @@
                     80% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
                     100% { transform: translate(-50%, -50%) scale(1); opacity: 0; }
                 }
-                /* 🟢 Corregido: solo borde y sombra, sin transform */
                 .fair-promo-highlight {
                     border-color: #FFD700 !important;
                     box-shadow: 0 0 40px rgba(255, 215, 0, 0.8) !important;
@@ -1021,7 +1031,134 @@
             document.head.appendChild(style);
         }
 
-        // ─── CONFETI ──────────────────────────────────────────────
+        // ─── ESTILOS TEMÁTICOS ──────────────────────────────────
+        function applyThemeStyles(themeName) {
+            // Eliminar estilos anteriores si existen
+            removeThemeStyles();
+
+            let css = '';
+            switch (themeName) {
+                case 'halloween':
+                    css = `
+                        :root {
+                            --theme-bg: #1a0e0e;
+                            --theme-card: #2d1a1a;
+                            --theme-border: #ff6600;
+                            --theme-text: #ffaa33;
+                        }
+                        body {
+                            background: #1a0e0e !important;
+                            color: #ffaa33 !important;
+                        }
+                        header { border-bottom-color: #ff6600 !important; background: rgba(255,102,0,0.1) !important; }
+                        h1 { color: #ff6600 !important; text-shadow: 0 0 20px #ff6600, 0 0 40px #ff3300 !important; }
+                        .project-card { background: #2d1a1a !important; border-color: #ff6600 !important; }
+                        .project-card:hover { border-color: #ffaa00 !important; box-shadow: 0 0 20px #ff6600 !important; }
+                        .hero { background: rgba(255,102,0,0.1) !important; border-bottom-color: #ff6600 !important; }
+                        .filter-btn { border-color: #ff6600 !important; color: #ff6600 !important; }
+                        .filter-btn.active, .filter-btn:hover { background: rgba(255,102,0,0.2) !important; }
+                        .sponsor-card { background: #2d1a1a !important; border-color: #ff6600 !important; }
+                        footer { border-top-color: #ff6600 !important; }
+                        #admin-panel { border-color: #ff6600 !important; }
+                    `;
+                    break;
+                case 'navidad':
+                    css = `
+                        :root {
+                            --theme-bg: #0a1a0a;
+                            --theme-card: #1a2d1a;
+                            --theme-border: #ff0000;
+                            --theme-text: #ffdddd;
+                        }
+                        body {
+                            background: #0a1a0a !important;
+                            color: #ffdddd !important;
+                        }
+                        header { border-bottom-color: #ff0000 !important; background: rgba(255,0,0,0.1) !important; }
+                        h1 { color: #ffdd00 !important; text-shadow: 0 0 20px #ffdd00, 0 0 40px #ff0000 !important; }
+                        .project-card { background: #1a2d1a !important; border-color: #ff0000 !important; }
+                        .project-card:hover { border-color: #ffdd00 !important; box-shadow: 0 0 20px #ff0000 !important; }
+                        .hero { background: rgba(255,0,0,0.1) !important; border-bottom-color: #ff0000 !important; }
+                        .filter-btn { border-color: #ff0000 !important; color: #ff0000 !important; }
+                        .filter-btn.active, .filter-btn:hover { background: rgba(255,0,0,0.2) !important; }
+                        .sponsor-card { background: #1a2d1a !important; border-color: #ff0000 !important; }
+                        footer { border-top-color: #ff0000 !important; }
+                        #admin-panel { border-color: #ff0000 !important; }
+                    `;
+                    break;
+                case 'cumpleanos':
+                    css = `
+                        :root {
+                            --theme-bg: #1a0a2a;
+                            --theme-card: #2d1a3d;
+                            --theme-border: #ff00ff;
+                            --theme-text: #ffddff;
+                        }
+                        body {
+                            background: #1a0a2a !important;
+                            color: #ffddff !important;
+                        }
+                        header { border-bottom-color: #ff00ff !important; background: linear-gradient(90deg, rgba(255,0,255,0.1), rgba(0,255,255,0.1), rgba(255,255,0,0.1)) !important; }
+                        h1 { color: #ff00ff !important; text-shadow: 0 0 20px #ff00ff, 0 0 40px #00ffff !important; }
+                        .project-card { background: #2d1a3d !important; border-color: #ff00ff !important; }
+                        .project-card:hover { border-color: #ffdd00 !important; box-shadow: 0 0 20px #ff00ff !important; }
+                        .hero { background: rgba(255,0,255,0.1) !important; border-bottom-color: #ff00ff !important; }
+                        .filter-btn { border-color: #ff00ff !important; color: #ff00ff !important; }
+                        .filter-btn.active, .filter-btn:hover { background: rgba(255,0,255,0.2) !important; }
+                        .sponsor-card { background: #2d1a3d !important; border-color: #ff00ff !important; }
+                        footer { border-top-color: #ff00ff !important; }
+                        #admin-panel { border-color: #ff00ff !important; }
+                    `;
+                    break;
+                case 'feria':
+                case 'feriaplus':
+                    css = `
+                        :root {
+                            --theme-bg: #0a0a2a;
+                            --theme-card: #1a1a3d;
+                            --theme-border: #00ffff;
+                            --theme-text: #ddffff;
+                        }
+                        body {
+                            background: #0a0a2a !important;
+                            color: #ddffff !important;
+                        }
+                        header { border-bottom-color: #00ffff !important; background: linear-gradient(90deg, rgba(0,255,255,0.1), rgba(255,0,255,0.1)) !important; }
+                        h1 { color: #00ffff !important; text-shadow: 0 0 30px #00ffff, 0 0 60px #ff00ff !important; }
+                        .project-card { background: #1a1a3d !important; border-color: #00ffff !important; }
+                        .project-card:hover { border-color: #ffdd00 !important; box-shadow: 0 0 20px #00ffff !important; }
+                        .hero { background: rgba(0,255,255,0.1) !important; border-bottom-color: #00ffff !important; }
+                        .filter-btn { border-color: #00ffff !important; color: #00ffff !important; }
+                        .filter-btn.active, .filter-btn:hover { background: rgba(0,255,255,0.2) !important; }
+                        .sponsor-card { background: #1a1a3d !important; border-color: #00ffff !important; }
+                        footer { border-top-color: #00ffff !important; }
+                        #admin-panel { border-color: #00ffff !important; }
+                    `;
+                    break;
+                default:
+                    return;
+            }
+
+            if (css) {
+                const styleEl = document.createElement('style');
+                styleEl.id = 'theme-styles-' + Date.now();
+                styleEl.textContent = css;
+                document.head.appendChild(styleEl);
+                currentThemeStyleId = styleEl.id;
+            }
+        }
+
+        function removeThemeStyles() {
+            if (currentThemeStyleId) {
+                const el = document.getElementById(currentThemeStyleId);
+                if (el) el.remove();
+                currentThemeStyleId = null;
+            }
+            // También limpiar cualquier style inyectado con 'theme-styles-'
+            document.querySelectorAll('style[id^="theme-styles-"]').forEach(el => el.remove());
+        }
+
+        // ─── CONFETI (sin cambios) ──────────────────────────────
         function createConfettiPiece(colors = null) {
             const el = document.createElement('div');
             const defaultColors = ['#FF3366', '#FFD700', '#00FF88', '#FF6600', '#00CCFF', '#FF00FF', '#39FF14'];
@@ -1074,7 +1211,7 @@
             }
         }
 
-        // ─── GLOBOS ───────────────────────────────────────────────
+        // ─── GLOBOS (sin cambios) ───────────────────────────────
         function createBalloon() {
             const el = document.createElement('div');
             const colors = ['#FF3366', '#FFD700', '#00FF88', '#FF6600', '#00CCFF', '#FF00FF', '#39FF14', '#FFA500', '#FF69B4'];
@@ -1132,7 +1269,7 @@
             }
         }
 
-        // ─── DESTELLOS ────────────────────────────────────────────
+        // ─── DESTELLOS (sin cambios) ────────────────────────────
         function createSparkle() {
             const el = document.createElement('div');
             const size = Math.random() * 6 + 3;
@@ -1172,7 +1309,7 @@
             }
         }
 
-        // ─── FUEGOS ARTIFICIALES ──────────────────────────────────
+        // ─── FUEGOS ARTIFICIALES (sin cambios) ──────────────────
         function createFirework() {
             const el = document.createElement('div');
             const x = Math.random() * 80 + 10;
@@ -1218,7 +1355,7 @@
             }
         }
 
-        // ─── DESTACAR PROMOCIONES (sin moverlas) ─────────────────
+        // ─── DESTACAR PROMOCIONES (sin mover) ────────────────────
         function highlightPromotions() {
             document.querySelectorAll('.promo-bubble').forEach(b => b.classList.add('fair-promo-highlight'));
             document.querySelectorAll('.promo-dot').forEach(d => {
@@ -1295,6 +1432,7 @@
             document.getElementById('mainTitle').textContent = 'TECNOMATH FERIA';
             leaderboardInterval = setInterval(openLeaderboard, 30000);
 
+            applyThemeStyles('feria');
             activateVisualEffects();
             showFairNotification('🎉 ¡BIENVENIDO AL MODO FERIA! 🎈');
             alert('⚡ MODO FERIA ACTIVADO ⚡');
@@ -1312,12 +1450,13 @@
             }
             document.getElementById('leaderboard-panel').style.display = 'none';
 
+            removeThemeStyles();
             deactivateVisualEffects();
             alert('🔕 MODO FERIA DESACTIVADO');
         }
 
         // ─── TEMAS TEMPORALES ──────────────────────────────────────
-        function activateTemporaryTheme(title, notification, confettiColors, duration = 20000) {
+        function activateTemporaryTheme(title, notification, confettiColors, themeName, duration = 20000) {
             if (fairMode) deactivateFairMode();
             if (tempThemeTimeout) {
                 clearTimeout(tempThemeTimeout);
@@ -1325,10 +1464,12 @@
             }
             document.getElementById('mainTitle').textContent = title;
             showFairNotification(notification);
+            applyThemeStyles(themeName);
             if (visualEffectsActive) deactivateVisualEffects();
             activateVisualEffects(confettiColors, 1);
             tempThemeTimeout = setTimeout(() => {
                 document.getElementById('mainTitle').textContent = 'TECNOMATH';
+                removeThemeStyles();
                 deactivateVisualEffects();
                 tempThemeTimeout = null;
             }, duration);
@@ -1340,6 +1481,7 @@
             document.getElementById('newsTicker').style.display = 'block';
             document.getElementById('mainTitle').textContent = '🔥 TECNOMATH MEGA FERIA 🔥';
             leaderboardInterval = setInterval(openLeaderboard, 15000);
+            applyThemeStyles('feriaplus');
             if (visualEffectsActive) deactivateVisualEffects();
             activateVisualEffects(null, 2);
             showFairNotification('🔥 ¡MEGA FERIA ACTIVADA! 🔥');
@@ -1364,6 +1506,7 @@
                         '🎃 TECNOMATH HALLOWEEN 🎃',
                         '🎃 ¡MODO HALLOWEEN ACTIVADO! 🦇',
                         ['#FF6600', '#FFA500', '#800080', '#000000', '#FF4500'],
+                        'halloween',
                         20000
                     );
                     break;
@@ -1372,6 +1515,7 @@
                         '🎄 TECNOMATH NAVIDAD 🎄',
                         '🎄 ¡FELIZ NAVIDAD! 🎅',
                         ['#FF0000', '#FFFFFF', '#00FF00', '#FFD700', '#008000'],
+                        'navidad',
                         20000
                     );
                     break;
@@ -1380,6 +1524,7 @@
                         '🥳 TECNOMATH CUMPLEAÑOS 🥳',
                         '🎂 ¡FELIZ CUMPLEAÑOS! 🎉',
                         null,
+                        'cumpleanos',
                         30000
                     );
                     break;
@@ -1389,6 +1534,7 @@
                 case 'stop':
                     if (fairMode) deactivateFairMode();
                     else {
+                        removeThemeStyles();
                         deactivateVisualEffects();
                         document.getElementById('mainTitle').textContent = 'TECNOMATH';
                         if (tempThemeTimeout) {
@@ -1513,7 +1659,7 @@
         });
         document.body.appendChild(secretZone);
 
-        console.log('🎈 Modo Feria mejorado con múltiples códigos de eventos cargado.');
+        console.log('🎈 Modo Feria mejorado con múltiples códigos de eventos y estilos temáticos cargado.');
         console.log('📌 Códigos disponibles: feria2026, feriaoff, halloween, navidad, cumpleanos, feriaplus, stop');
         console.log('👑 Acceso admin: clic en botón "👑 ADMIN" o doble clic en esquina inferior derecha.');
     </script>
