@@ -64,21 +64,7 @@
             0%,100%{ text-shadow: 0 0 10px var(--neon-cyan), 0 0 30px var(--neon-cyan); }
             50%{ text-shadow: 0 0 20px var(--neon-pink), 0 0 50px var(--neon-pink); }
         }
-        .subtitle {
-            font-size: clamp(4px, 1.5vw, 6px); color: var(--neon-pink); text-shadow: 0 0 8px var(--neon-pink); margin-top: 5px;
-        }
-        /* Badge del tema activo */
-        #active-theme-badge {
-            display: none;
-            font-size: clamp(6px, 1.2vw, 10px);
-            color: var(--gold);
-            background: rgba(0,0,0,0.6);
-            padding: 4px 12px;
-            border-radius: 20px;
-            border: 1px solid var(--gold);
-            margin-top: 4px;
-            text-shadow: 0 0 10px var(--gold);
-        }
+        .subtitle { font-size: clamp(4px, 1.5vw, 6px); color: var(--neon-pink); text-shadow: 0 0 8px var(--neon-pink); margin-top: 5px; }
         .user-area {
             display: flex; align-items: center; gap: clamp(8px, 2vw, 15px);
         }
@@ -437,12 +423,11 @@
             <div class="logo-area">
                 <h1 id="mainTitle">TECNOMATH</h1>
                 <div class="subtitle">PORTAL DE PROYECTOS</div>
-                <!-- Badge que muestra el tema activo -->
-                <div id="active-theme-badge"></div>
             </div>
             <div class="user-area">
                 <span id="userDisplay">Invitado</span>
                 <a href="auth.html" class="auth-link" id="authLink">🔑 ACCEDER</a>
+                <!-- Botón de acceso rápido a administrador -->
                 <button id="adminAccessBtn" class="auth-link" style="border-color: var(--gold); color: var(--gold); background: transparent; cursor: pointer; font-family: 'Press Start 2P', cursive; font-size: clamp(4px, 1.5vw, 6px); padding: 4px 8px; border-radius: 4px;">👑 ADMIN</button>
             </div>
         </div>
@@ -512,18 +497,18 @@
 
     <script src="shared.js"></script>
     <script>
-        // ═══════════════════════════════════════
+        // ============================================================
         // REGISTRO DEL SERVICE WORKER (PWA)
-        // ═══════════════════════════════════════
+        // ============================================================
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('/sw.js').catch(() => {});
             });
         }
 
-        // ═══════════════════════════════════════
+        // ============================================================
         // DETECCIÓN DE DISPOSITIVO
-        // ═══════════════════════════════════════
+        // ============================================================
         let currentDeviceCategory = 'desktop';
 
         function detectDevice() {
@@ -577,9 +562,9 @@
             setTimeout(detectDevice, 300);
         });
 
-        // ═══════════════════════════════════════
+        // ============================================================
         // PATROCINADORES
-        // ═══════════════════════════════════════
+        // ============================================================
         const allSponsorsPortal = [
             { name: "HappyBander",     phone: "+573001112233", image: "👨‍💼", imageUrl: "img/happybander.jpg" },
             { name: "Gomix",           phone: "+573002223344", image: "👩‍🔬", imageUrl: "img/gomix.png" },
@@ -622,9 +607,9 @@
         }
         renderSponsors();
 
-        // ═══════════════════════════════════════
+        // ============================================================
         // SISTEMA DE ANUNCIOS (BURBUJAS)
-        // ═══════════════════════════════════════
+        // ============================================================
         let promosActivas = [];
         let burbujaActual = 0;
         let intervaloBurbujas = null;
@@ -731,9 +716,9 @@
 
         cargarPromociones();
 
-        // ═══════════════════════════════════════
+        // ============================================================
         // SOPORTE PARA JUEGOS FLASH (Ruffle)
-        // ═══════════════════════════════════════
+        // ============================================================
         const flashOverlay = document.getElementById('flash-overlay');
         const flashPlayer = document.getElementById('flash-player');
 
@@ -759,9 +744,9 @@
             }
         });
 
-        // ═══════════════════════════════════════
+        // ============================================================
         // LISTA DE PROYECTOS (con propiedad "evento")
-        // ═══════════════════════════════════════
+        // ============================================================
         const projects = [
             { name: "MindMath Arcade", desc: "Juego de matemáticas retro con 60+ niveles", url: "game.html", imageUrl: "img/mindmath.png", icon: "🧮", category: "mates", deviceCompatibility: "both", evento: null },
             { name: "BanderQuiz", desc: "Adivina las banderas del mundo", url: "https://junior162009.github.io/BanderQuiz/", imageUrl: "img/banderquiz.png", icon: "🏳️🌎", category: "edu", deviceCompatibility: "both", evento: null },
@@ -824,27 +809,27 @@
             { name: "Worldle", desc: "Adivina el país por su forma", url: "https://worldle.teuteuf.fr/", imageUrl: "", icon: "🗺️", category: "edu", deviceCompatibility: "both", evento: null },
             { name: "Banana Kong Dash", desc: "Corre por la selva. 3 carriles, meta final y power-ups", url: "banana-dash.html", imageUrl: "", icon: "🍌", category: "runners", deviceCompatibility: "both", evento: null },
 
-            // 🎃 JUEGOS ESPECIALES DE HALLOWEEN (solo visibles con código "halloween")
+            // 🎃 JUEGOS ESPECIALES DE HALLOWEEN
             { name: "Caza de Calabazas", desc: "Dispara a los fantasmas y recoge calabazas", url: "halloween-game.html", imageUrl: "", icon: "🎃", category: "halloween", deviceCompatibility: "both", evento: "halloween" },
             { name: "Noche de Brujas", desc: "Escapa del cementerio encantado", url: "brujas-game.html", imageUrl: "", icon: "🧙", category: "halloween", deviceCompatibility: "both", evento: "halloween" },
 
-            // 🎄 JUEGOS ESPECIALES DE NAVIDAD (solo visibles con código "navidad")
+            // 🎄 JUEGOS ESPECIALES DE NAVIDAD
             { name: "Trineo Navideño", desc: "Recoge regalos mientras esquivas obstáculos", url: "navidad-game.html", imageUrl: "", icon: "🎄", category: "navidad", deviceCompatibility: "both", evento: "navidad" },
             { name: "Elfos Trabajadores", desc: "Ayuda a los elfos a empaquetar juguetes", url: "elfos-game.html", imageUrl: "", icon: "🧝", category: "navidad", deviceCompatibility: "both", evento: "navidad" },
 
-            // 🥳 JUEGOS ESPECIALES DE CUMPLEAÑOS (solo visibles con código "cumpleanos")
+            // 🥳 JUEGOS ESPECIALES DE CUMPLEAÑOS
             { name: "Fiesta Globos", desc: "Revienta globos y recoge regalos", url: "cumple-game.html", imageUrl: "", icon: "🎈", category: "cumpleanos", deviceCompatibility: "both", evento: "cumpleanos" },
             { name: "Pastel de Cumpleaños", desc: "Decora el pastel antes de que se acabe el tiempo", url: "pastel-game.html", imageUrl: "", icon: "🎂", category: "cumpleanos", deviceCompatibility: "both", evento: "cumpleanos" },
 
-            // 🔥 JUEGOS DE MEGA FERIA (solo visibles con código "feriaplus" o "feria")
+            // 🔥 JUEGOS DE MEGA FERIA
             { name: "Feria de Atracciones", desc: "Disfruta de juegos de feria clásicos", url: "feria-game.html", imageUrl: "", icon: "🎡", category: "feria", deviceCompatibility: "both", evento: "feria" },
             { name: "Carrera de Globos", desc: "Compite con otros jugadores en una carrera de globos", url: "globos-race.html", imageUrl: "", icon: "🏆", category: "feria", deviceCompatibility: "both", evento: "feria" },
             { name: "Mega Tiro al Blanco", desc: "Prueba tu puntería en el modo mega feria", url: "tiro-game.html", imageUrl: "", icon: "🎯", category: "feria", deviceCompatibility: "both", evento: "feriaplus" }
         ];
 
-        // ═══════════════════════════════════════
+        // ============================================================
         // FILTRO DE JUEGOS ROTOS (404)
-        // ═══════════════════════════════════════
+        // ============================================================
         const BROKEN_CACHE_KEY = 'tecnomath_broken_cache';
         let brokenCache = {};
 
@@ -902,9 +887,9 @@
             setTimeout(marcarJuegosRotos, 1000);
         });
 
-        // ═══════════════════════════════════════
+        // ============================================================
         // FILTROS Y RENDERIZADO (con soporte para eventos)
-        // ═══════════════════════════════════════
+        // ============================================================
         let currentActiveFilter = 'todos';
 
         // Variable que almacena el evento activo (ej: 'halloween', 'navidad', null)
@@ -915,25 +900,6 @@
             if (!activeEvent) return projects;
             // Si hay evento activo, solo mostrar juegos que no tengan evento o que coincidan
             return projects.filter(p => p.evento === null || p.evento === activeEvent);
-        }
-
-        // Función para actualizar el badge del tema activo
-        function updateThemeBadge() {
-            const badge = document.getElementById('active-theme-badge');
-            if (!badge) return;
-            if (activeEvent) {
-                const themeNames = {
-                    'halloween': '🎃 HALLOWEEN',
-                    'navidad': '🎄 NAVIDAD',
-                    'cumpleanos': '🥳 CUMPLEAÑOS',
-                    'feria': '🎡 FERIA',
-                    'feriaplus': '🔥 MEGA FERIA'
-                };
-                badge.textContent = 'TEMA: ' + (themeNames[activeEvent] || activeEvent.toUpperCase());
-                badge.style.display = 'block';
-            } else {
-                badge.style.display = 'none';
-            }
         }
 
         const categories = ['todos', ...new Set(projects.map(p => p.category))];
@@ -1036,9 +1002,9 @@
         }
         renderProjects();
 
-        // ════════════════════════════════════════════════════════
-        // 🎈 MODO FERIA MEJORADO + TEMAS PERMANENTES
-        // ════════════════════════════════════════════════════════
+        // ============================================================
+        // 🎈 MODO FERIA MEJORADO + LLUVIA DE EMOJIS + TEMAS PERMANENTES
+        // ============================================================
 
         let fairMode = false;
         let leaderboardInterval = null;
@@ -1049,7 +1015,8 @@
             confetti: null,
             balloons: null,
             sparkles: null,
-            fireworks: null
+            fireworks: null,
+            emojis: null
         };
 
         // ─── FUNCIONES PARA CSS EXTERNO ──────────────────────────
@@ -1109,6 +1076,10 @@
                     80% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
                     100% { transform: translate(-50%, -50%) scale(1); opacity: 0; }
                 }
+                @keyframes emojiFall {
+                    0% { transform: translateY(0) rotate(0deg) scale(1); opacity: 1; }
+                    100% { transform: translateY(110vh) rotate(360deg) scale(0.5); opacity: 0; }
+                }
                 .fair-promo-highlight {
                     border-color: #FFD700 !important;
                     box-shadow: 0 0 40px rgba(255, 215, 0, 0.8) !important;
@@ -1117,7 +1088,7 @@
             document.head.appendChild(style);
         }
 
-        // ─── CONFETI ──────────────────────────────────────────────
+        // ─── CONFETI (colores) ──────────────────────────────────
         function createConfettiPiece(colors = null) {
             const el = document.createElement('div');
             const defaultColors = ['#FF3366', '#FFD700', '#00FF88', '#FF6600', '#00CCFF', '#FF00FF', '#39FF14'];
@@ -1314,7 +1285,56 @@
             }
         }
 
-        // ─── DESTACAR PROMOCIONES (sin mover) ────────────────────
+        // ─── LLUVIA DE EMOJIS (NUEVO) ────────────────────────────
+        function createEmoji(emojis) {
+            const el = document.createElement('div');
+            const emoji = emojis[Math.floor(Math.random() * emojis.length)];
+            const size = Math.random() * 30 + 20; // 20-50px
+            const left = Math.random() * 100;
+            const duration = Math.random() * 5 + 4; // 4-9s
+            const delay = Math.random() * 3;
+
+            el.textContent = emoji;
+            el.style.cssText = `
+                position: absolute;
+                top: -50px;
+                left: ${left}%;
+                font-size: ${size}px;
+                animation: emojiFall ${duration}s ease-in ${delay}s forwards;
+                pointer-events: none;
+                filter: drop-shadow(0 0 5px rgba(255,255,255,0.3));
+            `;
+            return el;
+        }
+
+        function startEmojiRain(emojis, speedMultiplier = 1) {
+            if (fairVisualIntervals.emojis) clearInterval(fairVisualIntervals.emojis);
+            if (!emojis || emojis.length === 0) return;
+
+            const interval = 800 / speedMultiplier;
+            fairVisualIntervals.emojis = setInterval(() => {
+                if (!fairContainer) return;
+                const count = Math.floor(Math.random() * 4) + 2; // 2-5 emojis por tanda
+                for (let i = 0; i < count; i++) {
+                    const emojiEl = createEmoji(emojis);
+                    fairContainer.appendChild(emojiEl);
+                    const duration = parseFloat(emojiEl.style.animationDuration) || 5;
+                    setTimeout(() => { if (emojiEl.parentNode) emojiEl.remove(); }, (duration + 2) * 1000);
+                }
+            }, interval);
+        }
+
+        function stopEmojiRain() {
+            if (fairVisualIntervals.emojis) {
+                clearInterval(fairVisualIntervals.emojis);
+                fairVisualIntervals.emojis = null;
+            }
+            if (fairContainer) {
+                fairContainer.querySelectorAll('[style*="emojiFall"]').forEach(el => el.remove());
+            }
+        }
+
+        // ─── DESTACAR PROMOCIONES ─────────────────────────────────
         function highlightPromotions() {
             document.querySelectorAll('.promo-bubble').forEach(b => b.classList.add('fair-promo-highlight'));
             document.querySelectorAll('.promo-dot').forEach(d => {
@@ -1352,8 +1372,8 @@
         }
 
         // ─── ACTIVAR / DESACTIVAR EFECTOS VISUALES ──────────────
-        function activateVisualEffects(confettiColors = null, speed = 1) {
-            if (visualEffectsActive && !confettiColors) return;
+        function activateVisualEffects(confettiColors = null, emojis = null, speed = 1) {
+            if (visualEffectsActive && !confettiColors && !emojis) return;
             visualEffectsActive = true;
             createFairContainer();
             injectFairCSS();
@@ -1361,6 +1381,9 @@
             startBalloons(speed);
             startSparkles();
             startFireworks();
+            if (emojis && emojis.length > 0) {
+                startEmojiRain(emojis, speed);
+            }
             highlightPromotions();
         }
 
@@ -1371,6 +1394,7 @@
             stopBalloons();
             stopSparkles();
             stopFireworks();
+            stopEmojiRain();
             unhighlightPromotions();
             if (fairContainer) {
                 fairContainer.innerHTML = '';
@@ -1384,15 +1408,15 @@
             fairMode = true;
             activeEvent = 'feria';
             loadThemeCSS('feria');
-            updateThemeBadge();
 
             document.getElementById('newsTicker').style.display = 'block';
             document.getElementById('mainTitle').textContent = 'TECNOMATH FERIA';
             leaderboardInterval = setInterval(openLeaderboard, 30000);
 
-            activateVisualEffects();
+            const emojis = ['🎡', '🎠', '🎪', '🎟️', '🍿', '🎈', '🏆', '🎯'];
+            activateVisualEffects(null, emojis);
             showFairNotification('🎉 ¡BIENVENIDO AL MODO FERIA! 🎈');
-            alert('⚡ MODO FERIA ACTIVADO (permanente hasta que lo cambies) ⚡');
+            alert('⚡ MODO FERIA ACTIVADO ⚡');
             renderProjects(currentActiveFilter);
         }
 
@@ -1401,7 +1425,6 @@
             fairMode = false;
             activeEvent = null;
             loadThemeCSS(null);
-            updateThemeBadge();
 
             document.getElementById('newsTicker').style.display = 'none';
             document.getElementById('mainTitle').textContent = 'TECNOMATH';
@@ -1416,24 +1439,22 @@
             renderProjects(currentActiveFilter);
         }
 
-        // ─── TEMAS PERMANENTES ──────────────────────────────────
-        function activatePermanentTheme(title, notification, confettiColors, themeName) {
-            // Si hay modo feria activo, lo desactivamos
+        // ─── TEMAS PERMANENTES (sin temporizador) ──────────────
+        function activatePermanentTheme(title, notification, confettiColors, emojis, themeName) {
+            // Si hay un modo feria activo, lo desactivamos
             if (fairMode) deactivateFairMode();
 
-            // Si ya hay un tema activo, lo reemplazamos
+            // Eliminar cualquier tema anterior
             activeEvent = themeName;
             loadThemeCSS(themeName);
-            updateThemeBadge();
 
             document.getElementById('mainTitle').textContent = title;
             showFairNotification(notification);
 
-            // Activar efectos visuales
+            // Reiniciar efectos visuales con los nuevos emojis y colores
             if (visualEffectsActive) deactivateVisualEffects();
-            activateVisualEffects(confettiColors, 1);
+            activateVisualEffects(confettiColors, emojis, 1);
 
-            alert(`🎨 TEMA "${themeName.toUpperCase()}" ACTIVADO (permanente hasta que lo cambies)`);
             renderProjects(currentActiveFilter);
         }
 
@@ -1442,35 +1463,16 @@
             fairMode = true;
             activeEvent = 'feriaplus';
             loadThemeCSS('megaferia');
-            updateThemeBadge();
 
             document.getElementById('newsTicker').style.display = 'block';
             document.getElementById('mainTitle').textContent = '🔥 TECNOMATH MEGA FERIA 🔥';
             leaderboardInterval = setInterval(openLeaderboard, 15000);
-            if (visualEffectsActive) deactivateVisualEffects();
-            activateVisualEffects(null, 2);
-            showFairNotification('🔥 ¡MEGA FERIA ACTIVADA! 🔥');
-            alert('⚡ MEGA FERIA ACTIVADA (permanente hasta que la cambies) ⚡');
-            renderProjects(currentActiveFilter);
-        }
 
-        function resetToDefault() {
-            // Detener todo y volver al estado normal
-            if (fairMode) {
-                fairMode = false;
-                document.getElementById('newsTicker').style.display = 'none';
-                if (leaderboardInterval) {
-                    clearInterval(leaderboardInterval);
-                    leaderboardInterval = null;
-                }
-                document.getElementById('leaderboard-panel').style.display = 'none';
-            }
-            activeEvent = null;
-            loadThemeCSS(null);
-            updateThemeBadge();
-            deactivateVisualEffects();
-            document.getElementById('mainTitle').textContent = 'TECNOMATH';
-            showFairNotification('⏹️ VOLVIENDO AL ESTADO NORMAL');
+            const emojis = ['🔥', '🎡', '🎢', '🚀', '⭐', '🏆', '💥', '🎯'];
+            if (visualEffectsActive) deactivateVisualEffects();
+            activateVisualEffects(null, emojis, 2);
+            showFairNotification('🔥 ¡MEGA FERIA ACTIVADA! 🔥');
+            alert('⚡ MEGA FERIA ACTIVADA (¡el doble de rápido!) ⚡');
             renderProjects(currentActiveFilter);
         }
 
@@ -1492,6 +1494,7 @@
                         '🎃 TECNOMATH HALLOWEEN 🎃',
                         '🎃 ¡MODO HALLOWEEN ACTIVADO! 🦇',
                         ['#FF6600', '#FFA500', '#800080', '#000000', '#FF4500'],
+                        ['🎃', '🧛', '🦇', '🧙', '🕷️', '🕸️', '👻', '💀'],
                         'halloween'
                     );
                     break;
@@ -1500,6 +1503,7 @@
                         '🎄 TECNOMATH NAVIDAD 🎄',
                         '🎄 ¡FELIZ NAVIDAD! 🎅',
                         ['#FF0000', '#FFFFFF', '#00FF00', '#FFD700', '#008000'],
+                        ['🎄', '🎅', '🧝', '🎁', '⛄', '🦌', '🌟', '🔔'],
                         'navidad'
                     );
                     break;
@@ -1507,7 +1511,8 @@
                     activatePermanentTheme(
                         '🥳 TECNOMATH CUMPLEAÑOS 🥳',
                         '🎂 ¡FELIZ CUMPLEAÑOS! 🎉',
-                        null,
+                        ['#FF1493', '#FFD700', '#00BFFF', '#FF4500', '#32CD32'],
+                        ['🎂', '🎈', '🎉', '🥳', '🎁', '🎊', '🎵', '🕺'],
                         'cumpleanos'
                     );
                     break;
@@ -1515,7 +1520,15 @@
                     activateMegaFair();
                     break;
                 case 'stop':
-                    resetToDefault();
+                    if (fairMode) deactivateFairMode();
+                    else {
+                        activeEvent = null;
+                        loadThemeCSS(null);
+                        deactivateVisualEffects();
+                        document.getElementById('mainTitle').textContent = 'TECNOMATH';
+                        showFairNotification('⏹️ EVENTO FINALIZADO');
+                        renderProjects(currentActiveFilter);
+                    }
                     break;
                 default:
                     alert('❌ CÓDIGO INVÁLIDO');
@@ -1552,9 +1565,9 @@
             document.getElementById('leaderboard-panel').style.display = 'none';
         }
 
-        // ═══════════════════════════════════════
+        // ============================================================
         // ADMIN
-        // ═══════════════════════════════════════
+        // ============================================================
         function toggleAdminPanel() {
             const panel = document.getElementById('admin-panel');
             panel.style.display = panel.style.display === 'flex' ? 'none' : 'flex';
@@ -1590,9 +1603,9 @@
             }
         })();
 
-        // ═══════════════════════════════════════
+        // ============================================================
         // 🟢 BOTÓN DE ACCESO RÁPIDO A ADMIN
-        // ═══════════════════════════════════════
+        // ============================================================
         document.addEventListener('DOMContentLoaded', function() {
             const adminBtn = document.getElementById('adminAccessBtn');
             if (adminBtn) {
@@ -1632,15 +1645,12 @@
         });
         document.body.appendChild(secretZone);
 
-        // Inicializar badge
-        updateThemeBadge();
-
-        console.log('🎈 Modo Feria mejorado con TEMAS PERMANENTES cargado.');
+        console.log('🎈 Modo Feria mejorado con lluvia de emojis y temas permanentes cargado.');
         console.log('📌 Códigos disponibles: feria2026, feriaoff, halloween, navidad, cumpleanos, feriaplus, stop');
-        console.log('🔄 Los temas permanecen activos hasta que el administrador los cambie.');
         console.log('👑 Acceso admin: clic en botón "👑 ADMIN" o doble clic en esquina inferior derecha.');
-        console.log('🎨 Los estilos se cargan desde /css/{evento}.css');
+        console.log('🎨 Los estilos de cada evento se cargan desde /css/{evento}.css');
         console.log('🕹️ Los juegos con propiedad "evento" solo aparecen cuando ese evento está activo.');
+        console.log('✨ Los temas son permanentes hasta que se desactiven con feriaoff o stop.');
     </script>
 </body>
 </html>
