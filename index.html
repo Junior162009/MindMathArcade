@@ -1,3 +1,6 @@
+Aquí tienes el **`index.html` completo y definitivo**, con todas las funcionalidades acumuladas más el **Modo Feria** controlado desde el panel de administración.
+
+```html
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -393,7 +396,7 @@
     <header>
         <div class="header-content">
             <div class="logo-area">
-                <h1>TECNOMATH</h1>
+                <h1 id="mainTitle">TECNOMATH</h1>
                 <div class="subtitle">PORTAL DE PROYECTOS</div>
             </div>
             <div class="user-area">
@@ -412,6 +415,7 @@
     <div id="admin-panel">
         <a href="admin-promos.html" target="_blank">📢 GESTIONAR PROMOS</a>
         <a href="gestor-movil.html" target="_blank" class="btn-gold">➕ AGREGAR JUEGO</a>
+        <button onclick="showCodePrompt()" style="background: var(--neon-yellow); color: black; box-shadow: 0 4px 0 #b8860b;">🔢 CÓDIGOS</button>
         <button onclick="exitAdminMode()" style="background:#c0392b;">🚪 SALIR ADMIN</button>
     </div>
 
@@ -924,19 +928,42 @@
         renderProjects();
 
         // ═══════════════════════════════════════
-        // MODO FERIA
+        // MODO FERIA (ACTIVACIÓN POR CÓDIGO DESDE PANEL ADMIN)
         // ═══════════════════════════════════════
         let fairMode = false;
-        const FAIR_CODE = "feria2026";
+        let leaderboardInterval = null;
 
         function activateFairMode() {
             if (fairMode) return;
             fairMode = true;
-            localStorage.setItem('fairMode', 'true');
             document.getElementById('newsTicker').style.display = 'block';
-            document.querySelector('h1').textContent = 'TECNOMATH FERIA';
-            setInterval(openLeaderboard, 30000);
+            document.getElementById('mainTitle').textContent = 'TECNOMATH FERIA';
+            leaderboardInterval = setInterval(openLeaderboard, 30000);
             alert('⚡ MODO FERIA ACTIVADO ⚡');
+        }
+
+        function deactivateFairMode() {
+            if (!fairMode) return;
+            fairMode = false;
+            document.getElementById('newsTicker').style.display = 'none';
+            document.getElementById('mainTitle').textContent = 'TECNOMATH';
+            if (leaderboardInterval) {
+                clearInterval(leaderboardInterval);
+                leaderboardInterval = null;
+            }
+            document.getElementById('leaderboard-panel').style.display = 'none';
+            alert('🔕 MODO FERIA DESACTIVADO');
+        }
+
+        function showCodePrompt() {
+            const code = prompt('🔐 CÓDIGO DE EVENTO:');
+            if (code === 'feria2026') {
+                activateFairMode();
+            } else if (code === 'feriaoff') {
+                deactivateFairMode();
+            } else if (code) {
+                alert('❌ CÓDIGO INVÁLIDO');
+            }
         }
 
         function getLeaderboardData() {
@@ -966,10 +993,6 @@
 
         function closeLeaderboard() {
             document.getElementById('leaderboard-panel').style.display = 'none';
-        }
-
-        if (localStorage.getItem('fairMode') === 'true') {
-            activateFairMode();
         }
 
         // ═══════════════════════════════════════
@@ -1010,28 +1033,23 @@
             }
         })();
 
+        // ACCESO OCULTO: DOBLE CLIC EN ESQUINA INFERIOR DERECHA
         const ADMINS_PORTAL = { "1983": "Junior", "2024": "Nicole", "7777": "Mateo", "8888": "Jaider", "ods2026": "ODS Master" };
         const secretZone = document.createElement('div');
         secretZone.style.cssText = 'position:fixed; bottom:0; right:0; width:70px; height:70px; z-index:499;';
         secretZone.addEventListener('dblclick', function(e) {
             e.preventDefault();
             const user = Tecnomath.getCurrentUser();
-            const code = prompt('🔐 CÓDIGO:');
-            if (code === FAIR_CODE) {
-                activateFairMode();
-            } else if (ADMINS_PORTAL[code]) {
-                if (user) {
-                    Tecnomath.setAdmin(user.username);
-                    alert('⚡ ' + ADMINS_PORTAL[code].toUpperCase() + ' · ADMIN ACTIVADO');
-                    location.reload();
-                } else {
-                    alert('Debes iniciar sesión primero.');
-                }
-            } else if (code) {
-                alert('🔒 ACCESO DENEGADO');
-            }
+            if (!user) { alert('Debes iniciar sesión primero (usa el botón 🔑 ACCEDER).'); return; }
+            const code = prompt('🔐 CÓDIGO ADMIN:');
+            if (ADMINS_PORTAL[code]) {
+                Tecnomath.setAdmin(user.username);
+                alert('⚡ ' + ADMINS_PORTAL[code].toUpperCase() + ' · ADMIN ACTIVADO');
+                location.reload();
+            } else if (code) { alert('🔒 ACCESO DENEGADO'); }
         });
         document.body.appendChild(secretZone);
     </script>
 </body>
 </html>
+```
