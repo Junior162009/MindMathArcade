@@ -51,6 +51,7 @@
             font-size: clamp(12px, 4vw, 22px); color: var(--neon-cyan);
             text-shadow: 0 0 10px var(--neon-cyan), 0 0 30px var(--neon-cyan);
             letter-spacing: 2px; animation: titlePulse 2s ease-in-out infinite; margin: 0;
+            transition: all 0.3s;
         }
         @keyframes titlePulse {
             0%,100%{ text-shadow: 0 0 10px var(--neon-cyan), 0 0 30px var(--neon-cyan); }
@@ -949,22 +950,25 @@
         }
         renderProjects();
 
-        // ═══════════════════════════════════════
-        // MODO FERIA (ACTIVACIÓN POR CÓDIGO DESDE PANEL ADMIN)
-        // ═══════════════════════════════════════
+        // ════════════════════════════════════════════════════════
+        // 🎈 MODO FERIA MEJORADO + MÚLTIPLES CÓDIGOS DE EVENTOS
+        // ════════════════════════════════════════════════════════
+
         let fairMode = false;
         let leaderboardInterval = null;
-
-        // ---- NUEVAS FUNCIONES VISUALES (GLOBOS, CONFETI, ETC) ----
         let fairContainer = null;
+        let visualEffectsActive = false;
+        let tempThemeTimeout = null; // Para temporizadores de temas como Halloween
+
+        // Intervalos de efectos visuales
         let fairVisualIntervals = {
             confetti: null,
             balloons: null,
             sparkles: null,
             fireworks: null
         };
-        let visualEffectsActive = false;
 
+        // ─── CONTENEDOR Y CSS DINÁMICO ──────────────────────────
         function createFairContainer() {
             if (fairContainer) return;
             fairContainer = document.createElement('div');
@@ -1020,10 +1024,12 @@
             document.head.appendChild(style);
         }
 
-        function createConfettiPiece() {
+        // ─── CONFETI ──────────────────────────────────────────────
+        function createConfettiPiece(colors = null) {
             const el = document.createElement('div');
-            const colors = ['#FF3366', '#FFD700', '#00FF88', '#FF6600', '#00CCFF', '#FF00FF', '#39FF14'];
-            const color = colors[Math.floor(Math.random() * colors.length)];
+            const defaultColors = ['#FF3366', '#FFD700', '#00FF88', '#FF6600', '#00CCFF', '#FF00FF', '#39FF14'];
+            const palette = colors || defaultColors;
+            const color = palette[Math.floor(Math.random() * palette.length)];
             const size = Math.random() * 10 + 5;
             const left = Math.random() * 100;
             const duration = Math.random() * 3 + 2;
@@ -1046,18 +1052,19 @@
             return el;
         }
 
-        function startConfetti() {
-            if (fairVisualIntervals.confetti) return;
+        function startConfetti(colors = null, speedMultiplier = 1) {
+            if (fairVisualIntervals.confetti) clearInterval(fairVisualIntervals.confetti);
+            const interval = 300 / speedMultiplier;
             fairVisualIntervals.confetti = setInterval(() => {
                 if (!fairContainer) return;
                 const count = Math.floor(Math.random() * 6) + 3;
                 for (let i = 0; i < count; i++) {
-                    const piece = createConfettiPiece();
+                    const piece = createConfettiPiece(colors);
                     fairContainer.appendChild(piece);
                     const duration = parseFloat(piece.style.animationDuration) || 3;
                     setTimeout(() => { if (piece.parentNode) piece.remove(); }, (duration + 2) * 1000);
                 }
-            }, 300);
+            }, interval);
         }
 
         function stopConfetti() {
@@ -1070,6 +1077,7 @@
             }
         }
 
+        // ─── GLOBOS ───────────────────────────────────────────────
         function createBalloon() {
             const el = document.createElement('div');
             const colors = ['#FF3366', '#FFD700', '#00FF88', '#FF6600', '#00CCFF', '#FF00FF', '#39FF14', '#FFA500', '#FF69B4'];
@@ -1091,15 +1099,12 @@
                 animation: floatBalloon ${duration}s ease-in-out ${delay}s infinite alternate;
                 transform-origin: bottom center;
             `;
-            // Hilo
             const string = document.createElement('div');
             string.style.cssText = `position:absolute; bottom:-30px; left:50%; width:2px; height:30px; background:rgba(255,255,255,0.3); transform:translateX(-50%);`;
             el.appendChild(string);
-            // Brillo
             const shine = document.createElement('div');
             shine.style.cssText = `position:absolute; top:12%; left:20%; width:25%; height:20%; background:radial-gradient(circle, rgba(255,255,255,0.6) 0%, transparent 70%); border-radius:50%; opacity:0.7;`;
             el.appendChild(shine);
-            // Cola
             const tail = document.createElement('div');
             tail.style.cssText = `position:absolute; bottom:-8px; left:50%; width:4px; height:12px; background:${color}; border-radius:0 0 4px 4px; transform:translateX(-50%); opacity:0.6;`;
             el.appendChild(tail);
@@ -1108,15 +1113,16 @@
             return el;
         }
 
-        function startBalloons() {
-            if (fairVisualIntervals.balloons) return;
+        function startBalloons(speedMultiplier = 1) {
+            if (fairVisualIntervals.balloons) clearInterval(fairVisualIntervals.balloons);
+            const interval = 2500 / speedMultiplier;
             fairVisualIntervals.balloons = setInterval(() => {
                 if (!fairContainer) return;
                 const balloon = createBalloon();
                 fairContainer.appendChild(balloon);
                 const duration = parseFloat(balloon.dataset.floatDuration) || 12;
                 setTimeout(() => { if (balloon.parentNode) balloon.remove(); }, (duration + 5) * 1000);
-            }, 2500);
+            }, interval);
         }
 
         function stopBalloons() {
@@ -1129,6 +1135,7 @@
             }
         }
 
+        // ─── DESTELLOS ────────────────────────────────────────────
         function createSparkle() {
             const el = document.createElement('div');
             const size = Math.random() * 6 + 3;
@@ -1168,6 +1175,7 @@
             }
         }
 
+        // ─── FUEGOS ARTIFICIALES ──────────────────────────────────
         function createFirework() {
             const el = document.createElement('div');
             const x = Math.random() * 80 + 10;
@@ -1213,6 +1221,7 @@
             }
         }
 
+        // ─── DESTACAR PROMOCIONES ─────────────────────────────────
         function highlightPromotions() {
             document.querySelectorAll('.promo-bubble').forEach(b => b.classList.add('fair-promo-highlight'));
             document.querySelectorAll('.promo-dot').forEach(d => {
@@ -1229,6 +1238,7 @@
             });
         }
 
+        // ─── NOTIFICACIÓN ─────────────────────────────────────────
         function showFairNotification(text) {
             const notif = document.createElement('div');
             notif.style.cssText = `
@@ -1248,17 +1258,17 @@
             setTimeout(() => { if (notif.parentNode) notif.remove(); }, 3000);
         }
 
-        function activateVisualEffects() {
-            if (visualEffectsActive) return;
+        // ─── ACTIVAR / DESACTIVAR EFECTOS VISUALES ──────────────
+        function activateVisualEffects(confettiColors = null, speed = 1) {
+            if (visualEffectsActive && !confettiColors) return;
             visualEffectsActive = true;
             createFairContainer();
             injectFairCSS();
-            startConfetti();
-            startBalloons();
+            startConfetti(confettiColors, speed);
+            startBalloons(speed);
             startSparkles();
             startFireworks();
             highlightPromotions();
-            showFairNotification('🎉 ¡BIENVENIDO AL MODO FERIA! 🎈');
         }
 
         function deactivateVisualEffects() {
@@ -1273,21 +1283,24 @@
                 fairContainer.innerHTML = '';
                 fairContainer.style.display = 'none';
             }
+            // Limpiar temporizadores de temas
+            if (tempThemeTimeout) {
+                clearTimeout(tempThemeTimeout);
+                tempThemeTimeout = null;
+            }
         }
 
-        // ---- FUNCIONES PRINCIPALES DEL MODO FERIA (AHORA MEJORADAS) ----
+        // ─── FUNCIONES PRINCIPALES DEL MODO FERIA ────────────────
         function activateFairMode() {
             if (fairMode) return;
             fairMode = true;
 
-            // Lógica original
             document.getElementById('newsTicker').style.display = 'block';
             document.getElementById('mainTitle').textContent = 'TECNOMATH FERIA';
             leaderboardInterval = setInterval(openLeaderboard, 30000);
 
-            // Nuevos efectos visuales
             activateVisualEffects();
-
+            showFairNotification('🎉 ¡BIENVENIDO AL MODO FERIA! 🎈');
             alert('⚡ MODO FERIA ACTIVADO ⚡');
         }
 
@@ -1295,7 +1308,6 @@
             if (!fairMode) return;
             fairMode = false;
 
-            // Lógica original
             document.getElementById('newsTicker').style.display = 'none';
             document.getElementById('mainTitle').textContent = 'TECNOMATH';
             if (leaderboardInterval) {
@@ -1304,23 +1316,114 @@
             }
             document.getElementById('leaderboard-panel').style.display = 'none';
 
-            // Desactivar efectos visuales
             deactivateVisualEffects();
-
             alert('🔕 MODO FERIA DESACTIVADO');
         }
 
+        // ─── TEMAS TEMPORALES (Halloween, Navidad, Cumpleaños) ──
+        function activateTemporaryTheme(title, notification, confettiColors, duration = 20000) {
+            // Desactivar modo feria si está activo para no solapar
+            if (fairMode) deactivateFairMode();
+
+            // Limpiar cualquier tema temporal anterior
+            if (tempThemeTimeout) {
+                clearTimeout(tempThemeTimeout);
+                tempThemeTimeout = null;
+            }
+
+            // Aplicar cambios
+            document.getElementById('mainTitle').textContent = title;
+            showFairNotification(notification);
+
+            // Activar efectos visuales con los colores personalizados
+            // Si ya hay efectos activos, los reiniciamos
+            if (visualEffectsActive) deactivateVisualEffects();
+            activateVisualEffects(confettiColors, 1);
+
+            // Programar restauración
+            tempThemeTimeout = setTimeout(() => {
+                document.getElementById('mainTitle').textContent = 'TECNOMATH';
+                deactivateVisualEffects();
+                tempThemeTimeout = null;
+            }, duration);
+        }
+
+        // ─── MEGA FERIA (FERIAPLUS) ──────────────────────────────
+        function activateMegaFair() {
+            if (fairMode) deactivateFairMode();
+            // Forzar modo feria sin alerta doble
+            fairMode = true;
+            document.getElementById('newsTicker').style.display = 'block';
+            document.getElementById('mainTitle').textContent = '🔥 TECNOMATH MEGA FERIA 🔥';
+            leaderboardInterval = setInterval(openLeaderboard, 15000);
+
+            // Activar efectos con velocidad x2
+            if (visualEffectsActive) deactivateVisualEffects();
+            activateVisualEffects(null, 2); // speed = 2
+            showFairNotification('🔥 ¡MEGA FERIA ACTIVADA! 🔥');
+            alert('⚡ MEGA FERIA ACTIVADA (¡el doble de rápido!) ⚡');
+        }
+
+        // ─── CÓDIGOS DE EVENTOS (NUEVO) ──────────────────────────
         function showCodePrompt() {
             const code = prompt('🔐 CÓDIGO DE EVENTO:');
-            if (code === 'feria2026') {
-                activateFairMode();
-            } else if (code === 'feriaoff') {
-                deactivateFairMode();
-            } else if (code) {
-                alert('❌ CÓDIGO INVÁLIDO');
+            if (!code) return;
+
+            const lowerCode = code.toLowerCase();
+
+            switch (lowerCode) {
+                case 'feria2026':
+                    activateFairMode();
+                    break;
+                case 'feriaoff':
+                    deactivateFairMode();
+                    break;
+                case 'halloween':
+                    activateTemporaryTheme(
+                        '🎃 TECNOMATH HALLOWEEN 🎃',
+                        '🎃 ¡MODO HALLOWEEN ACTIVADO! 🦇',
+                        ['#FF6600', '#FFA500', '#800080', '#000000', '#FF4500'],
+                        20000
+                    );
+                    break;
+                case 'navidad':
+                    activateTemporaryTheme(
+                        '🎄 TECNOMATH NAVIDAD 🎄',
+                        '🎄 ¡FELIZ NAVIDAD! 🎅',
+                        ['#FF0000', '#FFFFFF', '#00FF00', '#FFD700', '#008000'],
+                        20000
+                    );
+                    break;
+                case 'cumpleanos':
+                    activateTemporaryTheme(
+                        '🥳 TECNOMATH CUMPLEAÑOS 🥳',
+                        '🎂 ¡FELIZ CUMPLEAÑOS! 🎉',
+                        null, // colores aleatorios
+                        30000 // dura 30 segundos
+                    );
+                    break;
+                case 'feriaplus':
+                    activateMegaFair();
+                    break;
+                case 'stop':
+                    // Detener todo
+                    if (fairMode) deactivateFairMode();
+                    else {
+                        deactivateVisualEffects();
+                        document.getElementById('mainTitle').textContent = 'TECNOMATH';
+                        if (tempThemeTimeout) {
+                            clearTimeout(tempThemeTimeout);
+                            tempThemeTimeout = null;
+                        }
+                        showFairNotification('⏹️ EVENTO FINALIZADO');
+                    }
+                    break;
+                default:
+                    alert('❌ CÓDIGO INVÁLIDO');
             }
         }
 
+        // ─── LEADERBOARD ──────────────────────────────────────────
         function getLeaderboardData() {
             const jugadores = [
                 { name: 'Junior162009', score: 9999, game: 'MindMath Arcade' },
@@ -1405,8 +1508,8 @@
         });
         document.body.appendChild(secretZone);
 
-        // Mensaje en consola para activar manualmente
-        console.log('🎈 Modo Feria mejorado cargado. Usa activateFairMode() o el código "feria2026".');
+        console.log('🎈 Modo Feria mejorado con múltiples códigos de eventos cargado.');
+        console.log('📌 Códigos disponibles: feria2026, feriaoff, halloween, navidad, cumpleanos, feriaplus, stop');
     </script>
 </body>
 </html>
