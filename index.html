@@ -958,9 +958,8 @@
         let leaderboardInterval = null;
         let fairContainer = null;
         let visualEffectsActive = false;
-        let tempThemeTimeout = null; // Para temporizadores de temas como Halloween
+        let tempThemeTimeout = null;
 
-        // Intervalos de efectos visuales
         let fairVisualIntervals = {
             confetti: null,
             balloons: null,
@@ -1011,14 +1010,11 @@
                     80% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
                     100% { transform: translate(-50%, -50%) scale(1); opacity: 0; }
                 }
+                /* ✨ CORRECCIÓN: ya NO usamos transform para no desplazar las promociones */
                 .fair-promo-highlight {
-                    animation: promoPulse 1s ease-in-out infinite !important;
                     border-color: #FFD700 !important;
                     box-shadow: 0 0 40px rgba(255, 215, 0, 0.8) !important;
-                }
-                @keyframes promoPulse {
-                    0%, 100% { transform: scale(1); }
-                    50% { transform: scale(1.05); }
+                    /* sin animation ni transform */
                 }
             `;
             document.head.appendChild(style);
@@ -1221,7 +1217,7 @@
             }
         }
 
-        // ─── DESTACAR PROMOCIONES ─────────────────────────────────
+        // ─── DESTACAR PROMOCIONES (SIN MOVERLAS) ─────────────────
         function highlightPromotions() {
             document.querySelectorAll('.promo-bubble').forEach(b => b.classList.add('fair-promo-highlight'));
             document.querySelectorAll('.promo-dot').forEach(d => {
@@ -1283,7 +1279,6 @@
                 fairContainer.innerHTML = '';
                 fairContainer.style.display = 'none';
             }
-            // Limpiar temporizadores de temas
             if (tempThemeTimeout) {
                 clearTimeout(tempThemeTimeout);
                 tempThemeTimeout = null;
@@ -1320,27 +1315,17 @@
             alert('🔕 MODO FERIA DESACTIVADO');
         }
 
-        // ─── TEMAS TEMPORALES (Halloween, Navidad, Cumpleaños) ──
+        // ─── TEMAS TEMPORALES ──────────────────────────────────────
         function activateTemporaryTheme(title, notification, confettiColors, duration = 20000) {
-            // Desactivar modo feria si está activo para no solapar
             if (fairMode) deactivateFairMode();
-
-            // Limpiar cualquier tema temporal anterior
             if (tempThemeTimeout) {
                 clearTimeout(tempThemeTimeout);
                 tempThemeTimeout = null;
             }
-
-            // Aplicar cambios
             document.getElementById('mainTitle').textContent = title;
             showFairNotification(notification);
-
-            // Activar efectos visuales con los colores personalizados
-            // Si ya hay efectos activos, los reiniciamos
             if (visualEffectsActive) deactivateVisualEffects();
             activateVisualEffects(confettiColors, 1);
-
-            // Programar restauración
             tempThemeTimeout = setTimeout(() => {
                 document.getElementById('mainTitle').textContent = 'TECNOMATH';
                 deactivateVisualEffects();
@@ -1348,27 +1333,22 @@
             }, duration);
         }
 
-        // ─── MEGA FERIA (FERIAPLUS) ──────────────────────────────
         function activateMegaFair() {
             if (fairMode) deactivateFairMode();
-            // Forzar modo feria sin alerta doble
             fairMode = true;
             document.getElementById('newsTicker').style.display = 'block';
             document.getElementById('mainTitle').textContent = '🔥 TECNOMATH MEGA FERIA 🔥';
             leaderboardInterval = setInterval(openLeaderboard, 15000);
-
-            // Activar efectos con velocidad x2
             if (visualEffectsActive) deactivateVisualEffects();
-            activateVisualEffects(null, 2); // speed = 2
+            activateVisualEffects(null, 2);
             showFairNotification('🔥 ¡MEGA FERIA ACTIVADA! 🔥');
             alert('⚡ MEGA FERIA ACTIVADA (¡el doble de rápido!) ⚡');
         }
 
-        // ─── CÓDIGOS DE EVENTOS (NUEVO) ──────────────────────────
+        // ─── CÓDIGOS DE EVENTOS ──────────────────────────────────
         function showCodePrompt() {
             const code = prompt('🔐 CÓDIGO DE EVENTO:');
             if (!code) return;
-
             const lowerCode = code.toLowerCase();
 
             switch (lowerCode) {
@@ -1398,15 +1378,14 @@
                     activateTemporaryTheme(
                         '🥳 TECNOMATH CUMPLEAÑOS 🥳',
                         '🎂 ¡FELIZ CUMPLEAÑOS! 🎉',
-                        null, // colores aleatorios
-                        30000 // dura 30 segundos
+                        null,
+                        30000
                     );
                     break;
                 case 'feriaplus':
                     activateMegaFair();
                     break;
                 case 'stop':
-                    // Detener todo
                     if (fairMode) deactivateFairMode();
                     else {
                         deactivateVisualEffects();
