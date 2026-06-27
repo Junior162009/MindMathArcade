@@ -64,7 +64,21 @@
             0%,100%{ text-shadow: 0 0 10px var(--neon-cyan), 0 0 30px var(--neon-cyan); }
             50%{ text-shadow: 0 0 20px var(--neon-pink), 0 0 50px var(--neon-pink); }
         }
-        .subtitle { font-size: clamp(4px, 1.5vw, 6px); color: var(--neon-pink); text-shadow: 0 0 8px var(--neon-pink); margin-top: 5px; }
+        .subtitle {
+            font-size: clamp(4px, 1.5vw, 6px); color: var(--neon-pink); text-shadow: 0 0 8px var(--neon-pink); margin-top: 5px;
+        }
+        /* Badge del tema activo */
+        #active-theme-badge {
+            display: none;
+            font-size: clamp(6px, 1.2vw, 10px);
+            color: var(--gold);
+            background: rgba(0,0,0,0.6);
+            padding: 4px 12px;
+            border-radius: 20px;
+            border: 1px solid var(--gold);
+            margin-top: 4px;
+            text-shadow: 0 0 10px var(--gold);
+        }
         .user-area {
             display: flex; align-items: center; gap: clamp(8px, 2vw, 15px);
         }
@@ -423,11 +437,12 @@
             <div class="logo-area">
                 <h1 id="mainTitle">TECNOMATH</h1>
                 <div class="subtitle">PORTAL DE PROYECTOS</div>
+                <!-- Badge que muestra el tema activo -->
+                <div id="active-theme-badge"></div>
             </div>
             <div class="user-area">
                 <span id="userDisplay">Invitado</span>
                 <a href="auth.html" class="auth-link" id="authLink">🔑 ACCEDER</a>
-                <!-- Botón de acceso rápido a administrador -->
                 <button id="adminAccessBtn" class="auth-link" style="border-color: var(--gold); color: var(--gold); background: transparent; cursor: pointer; font-family: 'Press Start 2P', cursive; font-size: clamp(4px, 1.5vw, 6px); padding: 4px 8px; border-radius: 4px;">👑 ADMIN</button>
             </div>
         </div>
@@ -902,6 +917,25 @@
             return projects.filter(p => p.evento === null || p.evento === activeEvent);
         }
 
+        // Función para actualizar el badge del tema activo
+        function updateThemeBadge() {
+            const badge = document.getElementById('active-theme-badge');
+            if (!badge) return;
+            if (activeEvent) {
+                const themeNames = {
+                    'halloween': '🎃 HALLOWEEN',
+                    'navidad': '🎄 NAVIDAD',
+                    'cumpleanos': '🥳 CUMPLEAÑOS',
+                    'feria': '🎡 FERIA',
+                    'feriaplus': '🔥 MEGA FERIA'
+                };
+                badge.textContent = 'TEMA: ' + (themeNames[activeEvent] || activeEvent.toUpperCase());
+                badge.style.display = 'block';
+            } else {
+                badge.style.display = 'none';
+            }
+        }
+
         const categories = ['todos', ...new Set(projects.map(p => p.category))];
         const filtersContainer = document.getElementById('filtersContainer');
 
@@ -1003,14 +1037,13 @@
         renderProjects();
 
         // ════════════════════════════════════════════════════════
-        // 🎈 MODO FERIA MEJORADO + MÚLTIPLES CÓDIGOS DE EVENTOS + CSS EXTERNO
+        // 🎈 MODO FERIA MEJORADO + TEMAS PERMANENTES
         // ════════════════════════════════════════════════════════
 
         let fairMode = false;
         let leaderboardInterval = null;
         let fairContainer = null;
         let visualEffectsActive = false;
-        let tempThemeTimeout = null;
 
         let fairVisualIntervals = {
             confetti: null,
@@ -1343,18 +1376,15 @@
                 fairContainer.innerHTML = '';
                 fairContainer.style.display = 'none';
             }
-            if (tempThemeTimeout) {
-                clearTimeout(tempThemeTimeout);
-                tempThemeTimeout = null;
-            }
         }
 
-        // ─── FUNCIONES PRINCIPALES DEL MODO FERIA ────────────────
+        // ─── FUNCIONES PRINCIPALES (TEMAS PERMANENTES) ──────────
         function activateFairMode() {
             if (fairMode) return;
             fairMode = true;
             activeEvent = 'feria';
             loadThemeCSS('feria');
+            updateThemeBadge();
 
             document.getElementById('newsTicker').style.display = 'block';
             document.getElementById('mainTitle').textContent = 'TECNOMATH FERIA';
@@ -1362,7 +1392,7 @@
 
             activateVisualEffects();
             showFairNotification('🎉 ¡BIENVENIDO AL MODO FERIA! 🎈');
-            alert('⚡ MODO FERIA ACTIVADO ⚡');
+            alert('⚡ MODO FERIA ACTIVADO (permanente hasta que lo cambies) ⚡');
             renderProjects(currentActiveFilter);
         }
 
@@ -1371,6 +1401,7 @@
             fairMode = false;
             activeEvent = null;
             loadThemeCSS(null);
+            updateThemeBadge();
 
             document.getElementById('newsTicker').style.display = 'none';
             document.getElementById('mainTitle').textContent = 'TECNOMATH';
@@ -1385,30 +1416,25 @@
             renderProjects(currentActiveFilter);
         }
 
-        // ─── TEMAS TEMPORALES ──────────────────────────────────────
-        function activateTemporaryTheme(title, notification, confettiColors, themeName, duration = 20000) {
+        // ─── TEMAS PERMANENTES ──────────────────────────────────
+        function activatePermanentTheme(title, notification, confettiColors, themeName) {
+            // Si hay modo feria activo, lo desactivamos
             if (fairMode) deactivateFairMode();
-            if (tempThemeTimeout) {
-                clearTimeout(tempThemeTimeout);
-                tempThemeTimeout = null;
-            }
+
+            // Si ya hay un tema activo, lo reemplazamos
             activeEvent = themeName;
             loadThemeCSS(themeName);
+            updateThemeBadge();
 
             document.getElementById('mainTitle').textContent = title;
             showFairNotification(notification);
+
+            // Activar efectos visuales
             if (visualEffectsActive) deactivateVisualEffects();
             activateVisualEffects(confettiColors, 1);
-            renderProjects(currentActiveFilter);
 
-            tempThemeTimeout = setTimeout(() => {
-                document.getElementById('mainTitle').textContent = 'TECNOMATH';
-                activeEvent = null;
-                loadThemeCSS(null);
-                deactivateVisualEffects();
-                renderProjects(currentActiveFilter);
-                tempThemeTimeout = null;
-            }, duration);
+            alert(`🎨 TEMA "${themeName.toUpperCase()}" ACTIVADO (permanente hasta que lo cambies)`);
+            renderProjects(currentActiveFilter);
         }
 
         function activateMegaFair() {
@@ -1416,6 +1442,7 @@
             fairMode = true;
             activeEvent = 'feriaplus';
             loadThemeCSS('megaferia');
+            updateThemeBadge();
 
             document.getElementById('newsTicker').style.display = 'block';
             document.getElementById('mainTitle').textContent = '🔥 TECNOMATH MEGA FERIA 🔥';
@@ -1423,7 +1450,27 @@
             if (visualEffectsActive) deactivateVisualEffects();
             activateVisualEffects(null, 2);
             showFairNotification('🔥 ¡MEGA FERIA ACTIVADA! 🔥');
-            alert('⚡ MEGA FERIA ACTIVADA (¡el doble de rápido!) ⚡');
+            alert('⚡ MEGA FERIA ACTIVADA (permanente hasta que la cambies) ⚡');
+            renderProjects(currentActiveFilter);
+        }
+
+        function resetToDefault() {
+            // Detener todo y volver al estado normal
+            if (fairMode) {
+                fairMode = false;
+                document.getElementById('newsTicker').style.display = 'none';
+                if (leaderboardInterval) {
+                    clearInterval(leaderboardInterval);
+                    leaderboardInterval = null;
+                }
+                document.getElementById('leaderboard-panel').style.display = 'none';
+            }
+            activeEvent = null;
+            loadThemeCSS(null);
+            updateThemeBadge();
+            deactivateVisualEffects();
+            document.getElementById('mainTitle').textContent = 'TECNOMATH';
+            showFairNotification('⏹️ VOLVIENDO AL ESTADO NORMAL');
             renderProjects(currentActiveFilter);
         }
 
@@ -1441,49 +1488,34 @@
                     deactivateFairMode();
                     break;
                 case 'halloween':
-                    activateTemporaryTheme(
+                    activatePermanentTheme(
                         '🎃 TECNOMATH HALLOWEEN 🎃',
                         '🎃 ¡MODO HALLOWEEN ACTIVADO! 🦇',
                         ['#FF6600', '#FFA500', '#800080', '#000000', '#FF4500'],
-                        'halloween',
-                        20000
+                        'halloween'
                     );
                     break;
                 case 'navidad':
-                    activateTemporaryTheme(
+                    activatePermanentTheme(
                         '🎄 TECNOMATH NAVIDAD 🎄',
                         '🎄 ¡FELIZ NAVIDAD! 🎅',
                         ['#FF0000', '#FFFFFF', '#00FF00', '#FFD700', '#008000'],
-                        'navidad',
-                        20000
+                        'navidad'
                     );
                     break;
                 case 'cumpleanos':
-                    activateTemporaryTheme(
+                    activatePermanentTheme(
                         '🥳 TECNOMATH CUMPLEAÑOS 🥳',
                         '🎂 ¡FELIZ CUMPLEAÑOS! 🎉',
                         null,
-                        'cumpleanos',
-                        30000
+                        'cumpleanos'
                     );
                     break;
                 case 'feriaplus':
                     activateMegaFair();
                     break;
                 case 'stop':
-                    if (fairMode) deactivateFairMode();
-                    else {
-                        activeEvent = null;
-                        loadThemeCSS(null);
-                        deactivateVisualEffects();
-                        document.getElementById('mainTitle').textContent = 'TECNOMATH';
-                        if (tempThemeTimeout) {
-                            clearTimeout(tempThemeTimeout);
-                            tempThemeTimeout = null;
-                        }
-                        showFairNotification('⏹️ EVENTO FINALIZADO');
-                        renderProjects(currentActiveFilter);
-                    }
+                    resetToDefault();
                     break;
                 default:
                     alert('❌ CÓDIGO INVÁLIDO');
@@ -1600,10 +1632,14 @@
         });
         document.body.appendChild(secretZone);
 
-        console.log('🎈 Modo Feria mejorado con estilos externos y juegos especiales cargado.');
+        // Inicializar badge
+        updateThemeBadge();
+
+        console.log('🎈 Modo Feria mejorado con TEMAS PERMANENTES cargado.');
         console.log('📌 Códigos disponibles: feria2026, feriaoff, halloween, navidad, cumpleanos, feriaplus, stop');
+        console.log('🔄 Los temas permanecen activos hasta que el administrador los cambie.');
         console.log('👑 Acceso admin: clic en botón "👑 ADMIN" o doble clic en esquina inferior derecha.');
-        console.log('🎨 Los estilos de cada evento se cargan desde /css/{evento}.css');
+        console.log('🎨 Los estilos se cargan desde /css/{evento}.css');
         console.log('🕹️ Los juegos con propiedad "evento" solo aparecen cuando ese evento está activo.');
     </script>
 </body>
