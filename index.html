@@ -12,6 +12,9 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Tecnomath">
 
+    <!-- Ruffle (emulador Flash) -->
+    <script src="https://unpkg.com/@ruffle-rs/ruffle"></script>
+
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -85,7 +88,7 @@
         #admin-panel a:active, #admin-panel button:active { transform: translateY(2px); box-shadow: 0 1px 0 #c02660; }
         #admin-panel .btn-gold { background: var(--gold); color: black; box-shadow: 0 4px 0 #b8860b; }
 
-        /* NUEVO SISTEMA DE ANUNCIOS: BURBUJAS FLOTANTES */
+        /* Burbujas de promociones */
         .promo-bubble-container {
             max-width: 900px; margin: 20px auto; padding: 0 10px;
             position: relative; min-height: 180px;
@@ -144,7 +147,6 @@
             font-size: clamp(5px, 1.5vw, 7px); padding: 4px 10px;
             border-radius: 20px; text-shadow: 0 0 6px var(--neon-green);
         }
-        /* Puntos de navegación */
         .promo-dots {
             display: flex; justify-content: center; gap: 8px; margin-top: 15px;
         }
@@ -231,9 +233,6 @@
         .project-icon span { font-size: clamp(24px, 6vw, 36px); }
         .project-name { font-size: clamp(4px, 1.5vw, 6px); color: white; text-shadow: 0 0 5px rgba(255,255,255,0.5); }
         .project-desc { font-size: clamp(3px, 1vw, 4px); color: #aaa; line-height: 1.4; }
-        .project-card.not-recommended {
-            opacity: 0.5;
-        }
 
         .sponsors-section {
             max-width: 900px; margin: 20px auto; padding: 10px;
@@ -270,6 +269,44 @@
             text-align: center; padding: 15px; color: #444;
             font-size: clamp(3px, 1vw, 5px);
             border-top: 1px solid #1a1a2e; margin-top: 20px;
+        }
+
+        /* Overlay del reproductor Flash */
+        #flash-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 1000;
+            background: rgba(0, 0, 0, 0.92);
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+        #flash-overlay.open { display: flex; }
+        #flash-player {
+            width: 800px;
+            height: 600px;
+            max-width: 95vw;
+            max-height: 80vh;
+            border: 4px solid var(--neon-pink);
+            box-shadow: 0 0 30px var(--neon-pink);
+            background: #000;
+        }
+        #flash-close {
+            margin-top: 20px;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 12px;
+            padding: 10px 20px;
+            background: var(--neon-pink);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 4px 0 #c02660;
+        }
+        #flash-close:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 0 #c02660;
         }
 
         @media (max-width: 480px) {
@@ -310,7 +347,13 @@
         <button onclick="exitAdminMode()" style="background:#c0392b;">🚪 SALIR ADMIN</button>
     </div>
 
-    <!-- NUEVOS ANUNCIOS ESTILO BURBUJA -->
+    <!-- Reproductor Flash oculto -->
+    <div id="flash-overlay">
+        <div id="flash-player"></div>
+        <button id="flash-close" onclick="closeFlash()">❌ CERRAR</button>
+    </div>
+
+    <!-- Burbujas de promociones -->
     <div class="promo-bubble-container" id="promoBubbleContainer">
         <div class="promo-bubble inactive" id="promoBubble1"></div>
         <div class="promo-bubble inactive" id="promoBubble2"></div>
@@ -347,7 +390,7 @@
         // ═══════════════════════════════════════
         // DETECCIÓN DE DISPOSITIVO
         // ═══════════════════════════════════════
-        let currentDeviceCategory = 'desktop'; // por defecto
+        let currentDeviceCategory = 'desktop';
 
         function detectDevice() {
             const ua = navigator.userAgent;
@@ -362,7 +405,6 @@
             } else if (width >= 1200) {
                 deviceType = 'large-desktop';
             }
-            // Determinar categoría para recomendaciones
             currentDeviceCategory = (deviceType === 'mobile' || deviceType === 'tablet') ? 'mobile' : 'desktop';
 
             const root = document.documentElement;
@@ -393,7 +435,6 @@
         window.addEventListener('resize', () => {
             detectDevice();
             renderSponsors();
-            // Si el filtro actual es 'recommended', re-renderizar para reflejar el nuevo dispositivo
             if (currentActiveFilter === 'recommended') {
                 renderProjects('recommended');
             }
@@ -448,7 +489,7 @@
         renderSponsors();
 
         // ═══════════════════════════════════════
-        // NUEVO SISTEMA DE ANUNCIOS: BURBUJAS FLOTANTES
+        // SISTEMA DE ANUNCIOS (BURBUJAS)
         // ═══════════════════════════════════════
         let promosActivas = [];
         let burbujaActual = 0;
@@ -496,7 +537,6 @@
 
         function cambiarBurbuja(index) {
             if (index === burbujaActual || promosActivas.length === 0) return;
-            // Ocultar burbuja activa y mostrar la nueva con transición
             const oldBubble = burbujaActual % 2 === 0 ? burbuja1 : burbuja2;
             const newBubble = index % 2 === 0 ? burbuja1 : burbuja2;
             oldBubble.classList.remove('active');
@@ -555,13 +595,40 @@
             iniciarRotacion();
         }
 
-        // Cargar promociones al iniciar
         cargarPromociones();
 
         // ═══════════════════════════════════════
-        // LISTA DE PROYECTOS (con deviceCompatibility)
+        // SOPORTE PARA JUEGOS FLASH (Ruffle)
         // ═══════════════════════════════════════
-         const projects = [
+        const flashOverlay = document.getElementById('flash-overlay');
+        const flashPlayer = document.getElementById('flash-player');
+
+        function openFlash(swfUrl) {
+            flashPlayer.innerHTML = '';
+            const ruffle = window.RufflePlayer.newest();
+            const player = ruffle.createPlayer();
+            player.style.width = '100%';
+            player.style.height = '100%';
+            flashPlayer.appendChild(player);
+            player.load({ url: swfUrl });
+            flashOverlay.classList.add('open');
+        }
+
+        function closeFlash() {
+            flashOverlay.classList.remove('open');
+            flashPlayer.innerHTML = '';
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && flashOverlay.classList.contains('open')) {
+                closeFlash();
+            }
+        });
+
+        // ═══════════════════════════════════════
+        // LISTA DE PROYECTOS
+        // ═══════════════════════════════════════
+        const projects = [
             { name: "MindMath Arcade", desc: "Juego de matemáticas retro con 60+ niveles", url: "game.html", imageUrl: "img/mindmath.png", icon: "🧮", category: "mates", deviceCompatibility: "both" },
             { name: "BanderQuiz", desc: "Adivina las banderas del mundo", url: "https://junior162009.github.io/BanderQuiz/", imageUrl: "img/banderquiz.png", icon: "🏳️🌎", category: "edu", deviceCompatibility: "both" },
             { name: "EmojiMath Pro", desc: "Suma, resta y cuenta con emojis. Para niños", url: "emoji-math.html", imageUrl: "", icon: "🧸", category: "mates", deviceCompatibility: "mobile" },
@@ -631,7 +698,6 @@
         const categories = ['todos', ...new Set(projects.map(p => p.category))];
         const filtersContainer = document.getElementById('filtersContainer');
 
-        // Construir botones de filtro
         categories.forEach(cat => {
             const btn = document.createElement('button');
             btn.className = 'filter-btn' + (cat === 'todos' ? ' active' : '');
@@ -648,7 +714,6 @@
             filtersContainer.appendChild(btn);
         });
 
-        // Botón de Recomendados según dispositivo
         const recommendBtn = document.createElement('button');
         recommendBtn.className = 'filter-btn recommend';
         recommendBtn.textContent = '🎯 RECOMENDADOS';
@@ -674,7 +739,6 @@
             container.innerHTML = '';
             let filtered;
             if (filterCategory === 'recommended') {
-                // Mostrar juegos compatibles con el dispositivo actual
                 filtered = projects.filter(p => p.deviceCompatibility === currentDeviceCategory || p.deviceCompatibility === 'both');
             } else if (filterCategory && filterCategory !== 'todos') {
                 filtered = projects.filter(p => p.category === filterCategory);
@@ -685,9 +749,18 @@
             filtered.forEach(proj => {
                 const card = document.createElement('a');
                 card.className = 'project-card';
-                card.href = proj.url;
-                card.target = (proj.url.endsWith('.html') && !proj.url.startsWith('http')) ? '_self' : '_blank';
+                if (proj.swfUrl) {
+                    card.href = '#';
+                    card.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        openFlash(proj.swfUrl);
+                    });
+                } else {
+                    card.href = proj.url;
+                    card.target = (proj.url.endsWith('.html') && !proj.url.startsWith('http')) ? '_self' : '_blank';
+                }
                 card.rel = "noopener";
+
                 const iconDiv = document.createElement('div');
                 iconDiv.className = 'project-icon';
                 if (proj.imageUrl && proj.imageUrl.trim() !== '') {
