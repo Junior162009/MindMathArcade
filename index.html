@@ -748,6 +748,9 @@
         // LISTA DE PROYECTOS (con propiedad "evento")
         // ============================================================
         const projects = [
+            // ==============================
+            // JUEGOS SIEMPRE VISIBLES (evento: null)
+            // ==============================
             { name: "MindMath Arcade", desc: "Juego de matemáticas retro con 60+ niveles", url: "game.html", imageUrl: "img/mindmath.png", icon: "🧮", category: "mates", deviceCompatibility: "both", evento: null },
             { name: "BanderQuiz", desc: "Adivina las banderas del mundo", url: "https://junior162009.github.io/BanderQuiz/", imageUrl: "img/banderquiz.png", icon: "🏳️🌎", category: "edu", deviceCompatibility: "both", evento: null },
             { name: "EmojiMath Pro", desc: "Suma, resta y cuenta con emojis. Para niños", url: "emoji-math.html", imageUrl: "", icon: "🧸", category: "mates", deviceCompatibility: "mobile", evento: null },
@@ -809,22 +812,39 @@
             { name: "Worldle", desc: "Adivina el país por su forma", url: "https://worldle.teuteuf.fr/", imageUrl: "", icon: "🗺️", category: "edu", deviceCompatibility: "both", evento: null },
             { name: "Banana Kong Dash", desc: "Corre por la selva. 3 carriles, meta final y power-ups", url: "banana-dash.html", imageUrl: "", icon: "🍌", category: "runners", deviceCompatibility: "both", evento: null },
 
-            // 🎃 JUEGOS ESPECIALES DE HALLOWEEN
+            // ==============================
+            // 🎃 JUEGOS EXCLUSIVOS DE HALLOWEEN (evento: "halloween")
+            // ==============================
             { name: "Caza de Calabazas", desc: "Dispara a los fantasmas y recoge calabazas", url: "halloween-game.html", imageUrl: "", icon: "🎃", category: "halloween", deviceCompatibility: "both", evento: "halloween" },
             { name: "Noche de Brujas", desc: "Escapa del cementerio encantado", url: "brujas-game.html", imageUrl: "", icon: "🧙", category: "halloween", deviceCompatibility: "both", evento: "halloween" },
+            { name: "Casa del Terror", desc: "Recorre la casa embrujada sin morir", url: "casa-terror.html", imageUrl: "", icon: "🏚️", category: "halloween", deviceCompatibility: "both", evento: "halloween" },
 
-            // 🎄 JUEGOS ESPECIALES DE NAVIDAD
+            // ==============================
+            // 🎄 JUEGOS EXCLUSIVOS DE NAVIDAD (evento: "navidad")
+            // ==============================
             { name: "Trineo Navideño", desc: "Recoge regalos mientras esquivas obstáculos", url: "navidad-game.html", imageUrl: "", icon: "🎄", category: "navidad", deviceCompatibility: "both", evento: "navidad" },
             { name: "Elfos Trabajadores", desc: "Ayuda a los elfos a empaquetar juguetes", url: "elfos-game.html", imageUrl: "", icon: "🧝", category: "navidad", deviceCompatibility: "both", evento: "navidad" },
+            { name: "Carrera de Renos", desc: "Guía a los renos en la carrera navideña", url: "renos-game.html", imageUrl: "", icon: "🦌", category: "navidad", deviceCompatibility: "both", evento: "navidad" },
 
-            // 🥳 JUEGOS ESPECIALES DE CUMPLEAÑOS
+            // ==============================
+            // 🥳 JUEGOS EXCLUSIVOS DE CUMPLEAÑOS (evento: "cumpleanos")
+            // ==============================
             { name: "Fiesta Globos", desc: "Revienta globos y recoge regalos", url: "cumple-game.html", imageUrl: "", icon: "🎈", category: "cumpleanos", deviceCompatibility: "both", evento: "cumpleanos" },
             { name: "Pastel de Cumpleaños", desc: "Decora el pastel antes de que se acabe el tiempo", url: "pastel-game.html", imageUrl: "", icon: "🎂", category: "cumpleanos", deviceCompatibility: "both", evento: "cumpleanos" },
+            { name: "Búsqueda del Tesoro", desc: "Encuentra los regalos escondidos", url: "tesoro-game.html", imageUrl: "", icon: "🔍", category: "cumpleanos", deviceCompatibility: "both", evento: "cumpleanos" },
 
-            // 🔥 JUEGOS DE MEGA FERIA
+            // ==============================
+            // 🎡 JUEGOS DE FERIA (evento: "feria" - aparecen con feria2026 y feriaplus)
+            // ==============================
             { name: "Feria de Atracciones", desc: "Disfruta de juegos de feria clásicos", url: "feria-game.html", imageUrl: "", icon: "🎡", category: "feria", deviceCompatibility: "both", evento: "feria" },
             { name: "Carrera de Globos", desc: "Compite con otros jugadores en una carrera de globos", url: "globos-race.html", imageUrl: "", icon: "🏆", category: "feria", deviceCompatibility: "both", evento: "feria" },
-            { name: "Mega Tiro al Blanco", desc: "Prueba tu puntería en el modo mega feria", url: "tiro-game.html", imageUrl: "", icon: "🎯", category: "feria", deviceCompatibility: "both", evento: "feriaplus" }
+            { name: "Tiro al Plato", desc: "Demuestra tu puntería en la feria", url: "tiro-plato.html", imageUrl: "", icon: "🍽️", category: "feria", deviceCompatibility: "both", evento: "feria" },
+
+            // ==============================
+            // 🔥 JUEGOS EXCLUSIVOS DE MEGA FERIA (evento: "feriaplus" - solo con feriaplus)
+            // ==============================
+            { name: "Mega Tiro al Blanco", desc: "Prueba tu puntería en el modo mega feria", url: "tiro-game.html", imageUrl: "", icon: "🎯", category: "feria", deviceCompatibility: "both", evento: "feriaplus" },
+            { name: "Carrera Extrema", desc: "Velocidad pura en la mega feria", url: "carrera-extrema.html", imageUrl: "", icon: "🚀", category: "feria", deviceCompatibility: "both", evento: "feriaplus" }
         ];
 
         // ============================================================
@@ -1285,7 +1305,7 @@
             }
         }
 
-        // ─── LLUVIA DE EMOJIS (NUEVO) ────────────────────────────
+        // ─── LLUVIA DE EMOJIS ────────────────────────────────────
         function createEmoji(emojis) {
             const el = document.createElement('div');
             const emoji = emojis[Math.floor(Math.random() * emojis.length)];
