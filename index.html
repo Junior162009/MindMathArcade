@@ -21,6 +21,7 @@
 
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
+        /* Estilos base (se sobrescriben con los temas) */
         :root {
             --neon-cyan: #00FFFF; --neon-pink: #FF00FF; --neon-green: #39FF14;
             --neon-yellow: #FFE600; --gold: #FFD700; --retro-bg: #060610; --card-bg: #0d0d1a;
@@ -169,7 +170,7 @@
 
         .hero {
             text-align: center; padding: clamp(20px, 4vw, 30px) 10px;
-            background: rgba(0,0,0,0.3); border-bottom: 1px solid #1a1a2e;
+            background: rgba(0,0,0,0.3); border-bottom: 1px solid var(--theme-border);
             transition: background 0.6s, border-color 0.6s;
         }
         .hero h2 {
@@ -187,7 +188,7 @@
         }
         .filter-btn {
             font-family: 'Press Start 2P', cursive; font-size: clamp(4px, 1vw, 6px);
-            padding: 6px 12px; background: #111; border: 1px solid #333; color: #888;
+            padding: 6px 12px; background: #111; border: 1px solid var(--theme-border); color: #888;
             border-radius: 20px; cursor: pointer; transition: 0.2s;
         }
         .filter-btn.active, .filter-btn:hover {
@@ -211,7 +212,8 @@
             gap: clamp(8px, 2vw, 15px);
         }
         .project-card {
-            background: var(--card-bg); border: 2px solid var(--theme-border);
+            background: var(--theme-card);
+            border: 2px solid var(--theme-border);
             border-radius: 12px;
             padding: clamp(10px, 2vw, 15px) clamp(6px, 1.5vw, 10px);
             text-align: center; cursor: pointer; transition: all 0.3s;
@@ -259,7 +261,8 @@
             display: flex; flex-wrap: wrap; justify-content: center; gap: clamp(10px, 2vw, 20px);
         }
         .sponsor-card {
-            background: var(--card-bg); border: 2px solid var(--theme-border);
+            background: var(--theme-card);
+            border: 2px solid var(--theme-border);
             border-radius: 12px;
             padding: clamp(8px, 1.5vw, 12px); text-align: center;
             width: clamp(100px, 20vw, 140px);
@@ -285,6 +288,7 @@
             font-size: clamp(3px, 1vw, 5px);
             border-top: 1px solid var(--theme-border);
             margin-top: 20px;
+            transition: border-color 0.6s;
         }
 
         /* Overlay del reproductor Flash */
@@ -423,6 +427,7 @@
             <div class="user-area">
                 <span id="userDisplay">Invitado</span>
                 <a href="auth.html" class="auth-link" id="authLink">🔑 ACCEDER</a>
+                <!-- Botón de acceso rápido a administrador -->
                 <button id="adminAccessBtn" class="auth-link" style="border-color: var(--gold); color: var(--gold); background: transparent; cursor: pointer; font-family: 'Press Start 2P', cursive; font-size: clamp(4px, 1.5vw, 6px); padding: 4px 8px; border-radius: 4px;">👑 ADMIN</button>
             </div>
         </div>
@@ -740,69 +745,86 @@
         });
 
         // ═══════════════════════════════════════
-        // LISTA DE PROYECTOS
+        // LISTA DE PROYECTOS (con propiedad "evento")
         // ═══════════════════════════════════════
         const projects = [
-            { name: "MindMath Arcade", desc: "Juego de matemáticas retro con 60+ niveles", url: "game.html", imageUrl: "img/mindmath.png", icon: "🧮", category: "mates", deviceCompatibility: "both" },
-            { name: "BanderQuiz", desc: "Adivina las banderas del mundo", url: "https://junior162009.github.io/BanderQuiz/", imageUrl: "img/banderquiz.png", icon: "🏳️🌎", category: "edu", deviceCompatibility: "both" },
-            { name: "EmojiMath Pro", desc: "Suma, resta y cuenta con emojis. Para niños", url: "emoji-math.html", imageUrl: "", icon: "🧸", category: "mates", deviceCompatibility: "mobile" },
-            { name: "Eco Recolector", desc: "Atrapa agua y reciclables. ODS 6 y 12", url: "eco-collector.html", imageUrl: "img/ecorecolector.png", icon: "🌍", category: "eco", deviceCompatibility: "both" },
-            { name: "Eco-Barrio 2030", desc: "Simulador de ciudad sostenible. ODS 11,12,13,7", url: "eco-barrio.html", imageUrl: "", icon: "🏙️", category: "eco", deviceCompatibility: "desktop" },
-            { name: "Coral Guardian", desc: "Protege el arrecife de basura y especies invasoras", url: "coral-guardian.html", imageUrl: "", icon: "🪸", category: "eco", deviceCompatibility: "both" },
-            { name: "Orbit Cleaner", desc: "Limpia el espacio y protege la capa de ozono. ODS 13", url: "orbit-cleaner.html", imageUrl: "", icon: "🛰️", category: "eco", deviceCompatibility: "both" },
-            { name: "Marine Tech Cleaner", desc: "USV y ROV para limpiar el océano. ODS 14", url: "marine-cleaner.html", imageUrl: "", icon: "🌊", category: "eco", deviceCompatibility: "both" },
-            { name: "Animalandia", desc: "Alimenta a los animales. Para niños pequeños", url: "animalandia.html", imageUrl: "", icon: "🐮", category: "kids", deviceCompatibility: "mobile" },
-            { name: "ODS-2048", desc: "Fusiona los 17 ODS. Juego de puzzle adictivo", url: "ods-2048.html", imageUrl: "", icon: "🌐", category: "puzzle", deviceCompatibility: "both" },
-            { name: "2048", desc: "Fusiona los números hasta 2048", url: "https://gabrielecirulli.github.io/2048/", imageUrl: "", icon: "🔢", category: "puzzle", deviceCompatibility: "both" },
-            { name: "Hextris", desc: "Juego de puzzle hexagonal rápido", url: "https://hextris.github.io/hextris/", imageUrl: "", icon: "⬡", category: "puzzle", deviceCompatibility: "both" },
-            { name: "Pacman", desc: "El clásico comecocos", url: "https://pacman.platzh1rsch.ch/", imageUrl: "", icon: "🟡", category: "retro", deviceCompatibility: "desktop" },
-            { name: "Clumsy Bird", desc: "Vuela esquivando tuberías (Flappy Bird)", url: "https://ellisonleao.github.io/clumsy-bird/", imageUrl: "", icon: "🐤", category: "retro", deviceCompatibility: "both" },
-            { name: "BrowserQuest", desc: "Aventura multijugador en el navegador", url: "https://browserquest.mozilla.org/", imageUrl: "", icon: "⚔️", category: "rpg", deviceCompatibility: "desktop" },
-            { name: "HexGL", desc: "Carrera futurista estilo Wipeout", url: "https://hexgl.bkcore.com/play/", imageUrl: "", icon: "🏎️", category: "runners", deviceCompatibility: "desktop" },
-            { name: "Astray", desc: "Laberinto 3D con bola", url: "https://wwwtyro.github.io/Astray/", imageUrl: "", icon: "🔮", category: "puzzle", deviceCompatibility: "desktop" },
-            { name: "Tetris Canvas", desc: "El famoso puzzle de bloques", url: "https://dionyziz.com/canvas-tetris/", imageUrl: "", icon: "🧱", category: "puzzle", deviceCompatibility: "desktop" },
-            { name: "Asteroids HTML5", desc: "Destruye asteroides en el espacio", url: "https://dougmcinnes.com/html-5-asteroids/", imageUrl: "", icon: "🌑", category: "retro", deviceCompatibility: "desktop" },
-            { name: "Tower Game", desc: "Construye una torre de bloques", url: "https://iamkun.github.io/tower_game/", imageUrl: "", icon: "🏗️", category: "puzzle", deviceCompatibility: "both" },
-            { name: "2048 (OpenArcade)", desc: "Versión alternativa del clásico", url: "https://openarcade.github.io/game/2048/", imageUrl: "", icon: "🔢", category: "puzzle", deviceCompatibility: "both" },
-            { name: "Snake (OpenArcade)", desc: "La serpiente come manzanas", url: "https://openarcade.github.io/game/snake/", imageUrl: "", icon: "🐍", category: "retro", deviceCompatibility: "both" },
-            { name: "Hextris (OpenArcade)", desc: "Puzzle hexagonal rápido", url: "https://openarcade.github.io/game/hextris/", imageUrl: "", icon: "⬡", category: "puzzle", deviceCompatibility: "both" },
-            { name: "Asteroids (OpenArcade)", desc: "Destruye asteroides", url: "https://openarcade.github.io/game/asteroids/", imageUrl: "", icon: "🌑", category: "retro", deviceCompatibility: "both" },
-            { name: "Tanx (OpenArcade)", desc: "Batalla de tanques", url: "https://openarcade.github.io/game/tanx/", imageUrl: "", icon: "🔫", category: "shooter", deviceCompatibility: "desktop" },
-            { name: "Soul Surfers (PlayCanvas)", desc: "Surf infinito en el espacio", url: "https://playcanv.as/p/JtL2iqIH/", imageUrl: "", icon: "🏄", category: "runners", deviceCompatibility: "desktop" },
-            { name: "Monkey God (PlayCanvas)", desc: "Aventura de plataformas", url: "https://playcanv.as/p/SA7hVBLt/", imageUrl: "", icon: "🐒", category: "runners", deviceCompatibility: "desktop" },
-            { name: "Blast Arena (PlayCanvas)", desc: "Dispara a los enemigos", url: "https://playcanv.as/p/8bDxzG5M/", imageUrl: "", icon: "💥", category: "shooter", deviceCompatibility: "desktop" },
-            { name: "Moto X3M (PlayCanvas)", desc: "Carrera de motos extrema", url: "https://playcanv.as/p/44MRmJRU/", imageUrl: "", icon: "🏍️", category: "runners", deviceCompatibility: "desktop" },
-            { name: "Matemáticas (Cokitos)", desc: "Juegos educativos de mates", url: "https://www.cokitos.com/tag/matematicas/", imageUrl: "", icon: "🧮", category: "mates", deviceCompatibility: "both" },
-            { name: "Lógica (Cokitos)", desc: "Juegos de lógica y razonamiento", url: "https://www.cokitos.com/tag/logica/", imageUrl: "", icon: "🧩", category: "puzzle", deviceCompatibility: "both" },
-            { name: "Memoria (Cokitos)", desc: "Juegos para entrenar la memoria", url: "https://www.cokitos.com/tag/memoria/", imageUrl: "", icon: "🧠", category: "memoria", deviceCompatibility: "both" },
-            { name: "Geografía (Cokitos)", desc: "Aprende geografía jugando", url: "https://www.cokitos.com/tag/geografia/", imageUrl: "", icon: "🌍", category: "edu", deviceCompatibility: "both" },
-            { name: "Ciencias (Cokitos)", desc: "Juegos de ciencias naturales", url: "https://www.cokitos.com/tag/ciencias/", imageUrl: "", icon: "🔬", category: "edu", deviceCompatibility: "both" },
-            { name: "Educaplay (Recursos)", desc: "Plataforma de actividades educativas", url: "https://es.educaplay.com/es/recursoseducativos/", imageUrl: "", icon: "📚", category: "edu", deviceCompatibility: "both" },
-            { name: "Educaplay (Mates)", desc: "Actividades de matemáticas", url: "https://es.educaplay.com/es/actividades/matematicas/", imageUrl: "", icon: "🧮", category: "mates", deviceCompatibility: "both" },
-            { name: "Educaplay (Lengua)", desc: "Actividades de lengua", url: "https://es.educaplay.com/es/actividades/lengua/", imageUrl: "", icon: "📖", category: "edu", deviceCompatibility: "both" },
-            { name: "Educaplay (Geo)", desc: "Actividades de geografía", url: "https://es.educaplay.com/es/actividades/geografia/", imageUrl: "", icon: "🌍", category: "edu", deviceCompatibility: "both" },
-            { name: "Educaplay (Ciencias)", desc: "Actividades de ciencias", url: "https://es.educaplay.com/es/actividades/ciencias/", imageUrl: "", icon: "🔬", category: "edu", deviceCompatibility: "both" },
-            { name: "Cookie Clicker", desc: "Haz clic para hacer galletas", url: "https://orteil.dashnet.org/cookieclicker/", imageUrl: "", icon: "🍪", category: "idle", deviceCompatibility: "both" },
-            { name: "Agar.io", desc: "Come células y hazte más grande", url: "https://agar.io/", imageUrl: "", icon: "🔴", category: "multiplayer", deviceCompatibility: "both" },
-            { name: "Slither.io", desc: "Serpiente multijugador masivo", url: "https://slither.io/", imageUrl: "", icon: "🐍", category: "multiplayer", deviceCompatibility: "both" },
-            { name: "Krunker.io", desc: "FPS multijugador en el navegador", url: "https://krunker.io/", imageUrl: "", icon: "🔫", category: "shooter", deviceCompatibility: "desktop" },
-            { name: "Ev.io", desc: "FPS futurista multijugador", url: "https://ev.io/", imageUrl: "", icon: "🤖", category: "shooter", deviceCompatibility: "desktop" },
-            { name: "Minecraft Classic", desc: "Construye y explora", url: "https://classic.minecraft.net/", imageUrl: "", icon: "⛏️", category: "sandbox", deviceCompatibility: "desktop" },
-            { name: "Tetr.io", desc: "Tetris competitivo online", url: "https://tetr.io/", imageUrl: "", icon: "🧱", category: "puzzle", deviceCompatibility: "desktop" },
-            { name: "Chess.com (CPU)", desc: "Ajedrez contra el ordenador", url: "https://chess.com/play/computer", imageUrl: "", icon: "♟️", category: "board", deviceCompatibility: "both" },
-            { name: "Lichess", desc: "Plataforma de ajedrez libre", url: "https://lichess.org/", imageUrl: "", icon: "♟️", category: "board", deviceCompatibility: "both" },
-            { name: "Sudoku.com", desc: "Resuelve puzles de sudoku", url: "https://sudoku.com/", imageUrl: "", icon: "🧮", category: "puzzle", deviceCompatibility: "both" },
-            { name: "Run 3", desc: "Corre por el espacio infinito", url: "https://www.coolmathgames.com/0-run-3", imageUrl: "", icon: "🏃", category: "runners", deviceCompatibility: "both" },
-            { name: "Fireboy & Watergirl", desc: "Aventura cooperativa de 2 jugadores", url: "https://www.coolmathgames.com/0-fireboy-and-watergirl-forest-temple", imageUrl: "", icon: "🔥💧", category: "puzzle", deviceCompatibility: "desktop" },
-            { name: "Bloxorz", desc: "Mueve el bloque al agujero", url: "https://www.coolmathgames.com/0-bloxorz", imageUrl: "", icon: "🧱", category: "puzzle", deviceCompatibility: "desktop" },
-            { name: "Papa's Freezeria", desc: "Gestiona una heladería", url: "https://www.coolmathgames.com/0-papas-freezeria", imageUrl: "", icon: "🍦", category: "simulation", deviceCompatibility: "desktop" },
-            { name: "Duck Life", desc: "Entrena a tu pato para carreras", url: "https://www.coolmathgames.com/0-duck-life", imageUrl: "", icon: "🦆", category: "simulation", deviceCompatibility: "both" },
-            { name: "Wordle (ES)", desc: "Adivina la palabra diaria", url: "https://wordlewebsite.com/", imageUrl: "", icon: "🟩", category: "puzzle", deviceCompatibility: "both" },
-            { name: "Squabble", desc: "Batalla multijugador de palabras", url: "https://squabble.me/", imageUrl: "", icon: "🔤", category: "puzzle", deviceCompatibility: "both" },
-            { name: "Quick, Draw!", desc: "Dibuja y la IA adivina", url: "https://quickdraw.withgoogle.com/", imageUrl: "", icon: "✍️", category: "puzzle", deviceCompatibility: "both" },
-            { name: "Semantle", desc: "Adivina la palabra por significado", url: "https://semantle.com/", imageUrl: "", icon: "🧠", category: "puzzle", deviceCompatibility: "both" },
-            { name: "Worldle", desc: "Adivina el país por su forma", url: "https://worldle.teuteuf.fr/", imageUrl: "", icon: "🗺️", category: "edu", deviceCompatibility: "both" },
-            { name: "Banana Kong Dash", desc: "Corre por la selva. 3 carriles, meta final y power-ups", url: "banana-dash.html", imageUrl: "", icon: "🍌", category: "runners", deviceCompatibility: "both" }
+            { name: "MindMath Arcade", desc: "Juego de matemáticas retro con 60+ niveles", url: "game.html", imageUrl: "img/mindmath.png", icon: "🧮", category: "mates", deviceCompatibility: "both", evento: null },
+            { name: "BanderQuiz", desc: "Adivina las banderas del mundo", url: "https://junior162009.github.io/BanderQuiz/", imageUrl: "img/banderquiz.png", icon: "🏳️🌎", category: "edu", deviceCompatibility: "both", evento: null },
+            { name: "EmojiMath Pro", desc: "Suma, resta y cuenta con emojis. Para niños", url: "emoji-math.html", imageUrl: "", icon: "🧸", category: "mates", deviceCompatibility: "mobile", evento: null },
+            { name: "Eco Recolector", desc: "Atrapa agua y reciclables. ODS 6 y 12", url: "eco-collector.html", imageUrl: "img/ecorecolector.png", icon: "🌍", category: "eco", deviceCompatibility: "both", evento: null },
+            { name: "Eco-Barrio 2030", desc: "Simulador de ciudad sostenible. ODS 11,12,13,7", url: "eco-barrio.html", imageUrl: "", icon: "🏙️", category: "eco", deviceCompatibility: "desktop", evento: null },
+            { name: "Coral Guardian", desc: "Protege el arrecife de basura y especies invasoras", url: "coral-guardian.html", imageUrl: "", icon: "🪸", category: "eco", deviceCompatibility: "both", evento: null },
+            { name: "Orbit Cleaner", desc: "Limpia el espacio y protege la capa de ozono. ODS 13", url: "orbit-cleaner.html", imageUrl: "", icon: "🛰️", category: "eco", deviceCompatibility: "both", evento: null },
+            { name: "Marine Tech Cleaner", desc: "USV y ROV para limpiar el océano. ODS 14", url: "marine-cleaner.html", imageUrl: "", icon: "🌊", category: "eco", deviceCompatibility: "both", evento: null },
+            { name: "Animalandia", desc: "Alimenta a los animales. Para niños pequeños", url: "animalandia.html", imageUrl: "", icon: "🐮", category: "kids", deviceCompatibility: "mobile", evento: null },
+            { name: "ODS-2048", desc: "Fusiona los 17 ODS. Juego de puzzle adictivo", url: "ods-2048.html", imageUrl: "", icon: "🌐", category: "puzzle", deviceCompatibility: "both", evento: null },
+            { name: "2048", desc: "Fusiona los números hasta 2048", url: "https://gabrielecirulli.github.io/2048/", imageUrl: "", icon: "🔢", category: "puzzle", deviceCompatibility: "both", evento: null },
+            { name: "Hextris", desc: "Juego de puzzle hexagonal rápido", url: "https://hextris.github.io/hextris/", imageUrl: "", icon: "⬡", category: "puzzle", deviceCompatibility: "both", evento: null },
+            { name: "Pacman", desc: "El clásico comecocos", url: "https://pacman.platzh1rsch.ch/", imageUrl: "", icon: "🟡", category: "retro", deviceCompatibility: "desktop", evento: null },
+            { name: "Clumsy Bird", desc: "Vuela esquivando tuberías (Flappy Bird)", url: "https://ellisonleao.github.io/clumsy-bird/", imageUrl: "", icon: "🐤", category: "retro", deviceCompatibility: "both", evento: null },
+            { name: "BrowserQuest", desc: "Aventura multijugador en el navegador", url: "https://browserquest.mozilla.org/", imageUrl: "", icon: "⚔️", category: "rpg", deviceCompatibility: "desktop", evento: null },
+            { name: "HexGL", desc: "Carrera futurista estilo Wipeout", url: "https://hexgl.bkcore.com/play/", imageUrl: "", icon: "🏎️", category: "runners", deviceCompatibility: "desktop", evento: null },
+            { name: "Astray", desc: "Laberinto 3D con bola", url: "https://wwwtyro.github.io/Astray/", imageUrl: "", icon: "🔮", category: "puzzle", deviceCompatibility: "desktop", evento: null },
+            { name: "Tetris Canvas", desc: "El famoso puzzle de bloques", url: "https://dionyziz.com/canvas-tetris/", imageUrl: "", icon: "🧱", category: "puzzle", deviceCompatibility: "desktop", evento: null },
+            { name: "Asteroids HTML5", desc: "Destruye asteroides en el espacio", url: "https://dougmcinnes.com/html-5-asteroids/", imageUrl: "", icon: "🌑", category: "retro", deviceCompatibility: "desktop", evento: null },
+            { name: "Tower Game", desc: "Construye una torre de bloques", url: "https://iamkun.github.io/tower_game/", imageUrl: "", icon: "🏗️", category: "puzzle", deviceCompatibility: "both", evento: null },
+            { name: "2048 (OpenArcade)", desc: "Versión alternativa del clásico", url: "https://openarcade.github.io/game/2048/", imageUrl: "", icon: "🔢", category: "puzzle", deviceCompatibility: "both", evento: null },
+            { name: "Snake (OpenArcade)", desc: "La serpiente come manzanas", url: "https://openarcade.github.io/game/snake/", imageUrl: "", icon: "🐍", category: "retro", deviceCompatibility: "both", evento: null },
+            { name: "Hextris (OpenArcade)", desc: "Puzzle hexagonal rápido", url: "https://openarcade.github.io/game/hextris/", imageUrl: "", icon: "⬡", category: "puzzle", deviceCompatibility: "both", evento: null },
+            { name: "Asteroids (OpenArcade)", desc: "Destruye asteroides", url: "https://openarcade.github.io/game/asteroids/", imageUrl: "", icon: "🌑", category: "retro", deviceCompatibility: "both", evento: null },
+            { name: "Tanx (OpenArcade)", desc: "Batalla de tanques", url: "https://openarcade.github.io/game/tanx/", imageUrl: "", icon: "🔫", category: "shooter", deviceCompatibility: "desktop", evento: null },
+            { name: "Soul Surfers (PlayCanvas)", desc: "Surf infinito en el espacio", url: "https://playcanv.as/p/JtL2iqIH/", imageUrl: "", icon: "🏄", category: "runners", deviceCompatibility: "desktop", evento: null },
+            { name: "Monkey God (PlayCanvas)", desc: "Aventura de plataformas", url: "https://playcanv.as/p/SA7hVBLt/", imageUrl: "", icon: "🐒", category: "runners", deviceCompatibility: "desktop", evento: null },
+            { name: "Blast Arena (PlayCanvas)", desc: "Dispara a los enemigos", url: "https://playcanv.as/p/8bDxzG5M/", imageUrl: "", icon: "💥", category: "shooter", deviceCompatibility: "desktop", evento: null },
+            { name: "Moto X3M (PlayCanvas)", desc: "Carrera de motos extrema", url: "https://playcanv.as/p/44MRmJRU/", imageUrl: "", icon: "🏍️", category: "runners", deviceCompatibility: "desktop", evento: null },
+            { name: "Matemáticas (Cokitos)", desc: "Juegos educativos de mates", url: "https://www.cokitos.com/tag/matematicas/", imageUrl: "", icon: "🧮", category: "mates", deviceCompatibility: "both", evento: null },
+            { name: "Lógica (Cokitos)", desc: "Juegos de lógica y razonamiento", url: "https://www.cokitos.com/tag/logica/", imageUrl: "", icon: "🧩", category: "puzzle", deviceCompatibility: "both", evento: null },
+            { name: "Memoria (Cokitos)", desc: "Juegos para entrenar la memoria", url: "https://www.cokitos.com/tag/memoria/", imageUrl: "", icon: "🧠", category: "memoria", deviceCompatibility: "both", evento: null },
+            { name: "Geografía (Cokitos)", desc: "Aprende geografía jugando", url: "https://www.cokitos.com/tag/geografia/", imageUrl: "", icon: "🌍", category: "edu", deviceCompatibility: "both", evento: null },
+            { name: "Ciencias (Cokitos)", desc: "Juegos de ciencias naturales", url: "https://www.cokitos.com/tag/ciencias/", imageUrl: "", icon: "🔬", category: "edu", deviceCompatibility: "both", evento: null },
+            { name: "Educaplay (Recursos)", desc: "Plataforma de actividades educativas", url: "https://es.educaplay.com/es/recursoseducativos/", imageUrl: "", icon: "📚", category: "edu", deviceCompatibility: "both", evento: null },
+            { name: "Educaplay (Mates)", desc: "Actividades de matemáticas", url: "https://es.educaplay.com/es/actividades/matematicas/", imageUrl: "", icon: "🧮", category: "mates", deviceCompatibility: "both", evento: null },
+            { name: "Educaplay (Lengua)", desc: "Actividades de lengua", url: "https://es.educaplay.com/es/actividades/lengua/", imageUrl: "", icon: "📖", category: "edu", deviceCompatibility: "both", evento: null },
+            { name: "Educaplay (Geo)", desc: "Actividades de geografía", url: "https://es.educaplay.com/es/actividades/geografia/", imageUrl: "", icon: "🌍", category: "edu", deviceCompatibility: "both", evento: null },
+            { name: "Educaplay (Ciencias)", desc: "Actividades de ciencias", url: "https://es.educaplay.com/es/actividades/ciencias/", imageUrl: "", icon: "🔬", category: "edu", deviceCompatibility: "both", evento: null },
+            { name: "Cookie Clicker", desc: "Haz clic para hacer galletas", url: "https://orteil.dashnet.org/cookieclicker/", imageUrl: "", icon: "🍪", category: "idle", deviceCompatibility: "both", evento: null },
+            { name: "Agar.io", desc: "Come células y hazte más grande", url: "https://agar.io/", imageUrl: "", icon: "🔴", category: "multiplayer", deviceCompatibility: "both", evento: null },
+            { name: "Slither.io", desc: "Serpiente multijugador masivo", url: "https://slither.io/", imageUrl: "", icon: "🐍", category: "multiplayer", deviceCompatibility: "both", evento: null },
+            { name: "Krunker.io", desc: "FPS multijugador en el navegador", url: "https://krunker.io/", imageUrl: "", icon: "🔫", category: "shooter", deviceCompatibility: "desktop", evento: null },
+            { name: "Ev.io", desc: "FPS futurista multijugador", url: "https://ev.io/", imageUrl: "", icon: "🤖", category: "shooter", deviceCompatibility: "desktop", evento: null },
+            { name: "Minecraft Classic", desc: "Construye y explora", url: "https://classic.minecraft.net/", imageUrl: "", icon: "⛏️", category: "sandbox", deviceCompatibility: "desktop", evento: null },
+            { name: "Tetr.io", desc: "Tetris competitivo online", url: "https://tetr.io/", imageUrl: "", icon: "🧱", category: "puzzle", deviceCompatibility: "desktop", evento: null },
+            { name: "Chess.com (CPU)", desc: "Ajedrez contra el ordenador", url: "https://chess.com/play/computer", imageUrl: "", icon: "♟️", category: "board", deviceCompatibility: "both", evento: null },
+            { name: "Lichess", desc: "Plataforma de ajedrez libre", url: "https://lichess.org/", imageUrl: "", icon: "♟️", category: "board", deviceCompatibility: "both", evento: null },
+            { name: "Sudoku.com", desc: "Resuelve puzles de sudoku", url: "https://sudoku.com/", imageUrl: "", icon: "🧮", category: "puzzle", deviceCompatibility: "both", evento: null },
+            { name: "Run 3", desc: "Corre por el espacio infinito", url: "https://www.coolmathgames.com/0-run-3", imageUrl: "", icon: "🏃", category: "runners", deviceCompatibility: "both", evento: null },
+            { name: "Fireboy & Watergirl", desc: "Aventura cooperativa de 2 jugadores", url: "https://www.coolmathgames.com/0-fireboy-and-watergirl-forest-temple", imageUrl: "", icon: "🔥💧", category: "puzzle", deviceCompatibility: "desktop", evento: null },
+            { name: "Bloxorz", desc: "Mueve el bloque al agujero", url: "https://www.coolmathgames.com/0-bloxorz", imageUrl: "", icon: "🧱", category: "puzzle", deviceCompatibility: "desktop", evento: null },
+            { name: "Papa's Freezeria", desc: "Gestiona una heladería", url: "https://www.coolmathgames.com/0-papas-freezeria", imageUrl: "", icon: "🍦", category: "simulation", deviceCompatibility: "desktop", evento: null },
+            { name: "Duck Life", desc: "Entrena a tu pato para carreras", url: "https://www.coolmathgames.com/0-duck-life", imageUrl: "", icon: "🦆", category: "simulation", deviceCompatibility: "both", evento: null },
+            { name: "Wordle (ES)", desc: "Adivina la palabra diaria", url: "https://wordlewebsite.com/", imageUrl: "", icon: "🟩", category: "puzzle", deviceCompatibility: "both", evento: null },
+            { name: "Squabble", desc: "Batalla multijugador de palabras", url: "https://squabble.me/", imageUrl: "", icon: "🔤", category: "puzzle", deviceCompatibility: "both", evento: null },
+            { name: "Quick, Draw!", desc: "Dibuja y la IA adivina", url: "https://quickdraw.withgoogle.com/", imageUrl: "", icon: "✍️", category: "puzzle", deviceCompatibility: "both", evento: null },
+            { name: "Semantle", desc: "Adivina la palabra por significado", url: "https://semantle.com/", imageUrl: "", icon: "🧠", category: "puzzle", deviceCompatibility: "both", evento: null },
+            { name: "Worldle", desc: "Adivina el país por su forma", url: "https://worldle.teuteuf.fr/", imageUrl: "", icon: "🗺️", category: "edu", deviceCompatibility: "both", evento: null },
+            { name: "Banana Kong Dash", desc: "Corre por la selva. 3 carriles, meta final y power-ups", url: "banana-dash.html", imageUrl: "", icon: "🍌", category: "runners", deviceCompatibility: "both", evento: null },
+
+            // 🎃 JUEGOS ESPECIALES DE HALLOWEEN (solo visibles con código "halloween")
+            { name: "Caza de Calabazas", desc: "Dispara a los fantasmas y recoge calabazas", url: "halloween-game.html", imageUrl: "", icon: "🎃", category: "halloween", deviceCompatibility: "both", evento: "halloween" },
+            { name: "Noche de Brujas", desc: "Escapa del cementerio encantado", url: "brujas-game.html", imageUrl: "", icon: "🧙", category: "halloween", deviceCompatibility: "both", evento: "halloween" },
+
+            // 🎄 JUEGOS ESPECIALES DE NAVIDAD (solo visibles con código "navidad")
+            { name: "Trineo Navideño", desc: "Recoge regalos mientras esquivas obstáculos", url: "navidad-game.html", imageUrl: "", icon: "🎄", category: "navidad", deviceCompatibility: "both", evento: "navidad" },
+            { name: "Elfos Trabajadores", desc: "Ayuda a los elfos a empaquetar juguetes", url: "elfos-game.html", imageUrl: "", icon: "🧝", category: "navidad", deviceCompatibility: "both", evento: "navidad" },
+
+            // 🥳 JUEGOS ESPECIALES DE CUMPLEAÑOS (solo visibles con código "cumpleanos")
+            { name: "Fiesta Globos", desc: "Revienta globos y recoge regalos", url: "cumple-game.html", imageUrl: "", icon: "🎈", category: "cumpleanos", deviceCompatibility: "both", evento: "cumpleanos" },
+            { name: "Pastel de Cumpleaños", desc: "Decora el pastel antes de que se acabe el tiempo", url: "pastel-game.html", imageUrl: "", icon: "🎂", category: "cumpleanos", deviceCompatibility: "both", evento: "cumpleanos" },
+
+            // 🔥 JUEGOS DE MEGA FERIA (solo visibles con código "feriaplus" o "feria")
+            { name: "Feria de Atracciones", desc: "Disfruta de juegos de feria clásicos", url: "feria-game.html", imageUrl: "", icon: "🎡", category: "feria", deviceCompatibility: "both", evento: "feria" },
+            { name: "Carrera de Globos", desc: "Compite con otros jugadores en una carrera de globos", url: "globos-race.html", imageUrl: "", icon: "🏆", category: "feria", deviceCompatibility: "both", evento: "feria" },
+            { name: "Mega Tiro al Blanco", desc: "Prueba tu puntería en el modo mega feria", url: "tiro-game.html", imageUrl: "", icon: "🎯", category: "feria", deviceCompatibility: "both", evento: "feriaplus" }
         ];
 
         // ═══════════════════════════════════════
@@ -866,9 +888,20 @@
         });
 
         // ═══════════════════════════════════════
-        // FILTROS Y RENDERIZADO
+        // FILTROS Y RENDERIZADO (con soporte para eventos)
         // ═══════════════════════════════════════
         let currentActiveFilter = 'todos';
+
+        // Variable que almacena el evento activo (ej: 'halloween', 'navidad', null)
+        let activeEvent = null;
+
+        // Función para obtener los proyectos filtrados por evento activo
+        function getFilteredProjects() {
+            if (!activeEvent) return projects;
+            // Si hay evento activo, solo mostrar juegos que no tengan evento o que coincidan
+            return projects.filter(p => p.evento === null || p.evento === activeEvent);
+        }
+
         const categories = ['todos', ...new Set(projects.map(p => p.category))];
         const filtersContainer = document.getElementById('filtersContainer');
 
@@ -880,7 +913,11 @@
                               cat === 'eco' ? '🌿 ECOLOGÍA' :
                               cat === 'kids' ? '🐣 INFANTIL' :
                               cat === 'puzzle' ? '🧩 PUZZLE' :
-                              cat === 'runners' ? '🏃 CARRERAS' : cat.toUpperCase();
+                              cat === 'runners' ? '🏃 CARRERAS' :
+                              cat === 'halloween' ? '🎃 HALLOWEEN' :
+                              cat === 'navidad' ? '🎄 NAVIDAD' :
+                              cat === 'cumpleanos' ? '🥳 CUMPLEAÑOS' :
+                              cat === 'feria' ? '🎡 FERIA' : cat.toUpperCase();
             btn.addEventListener('click', () => {
                 setActiveFilter(cat);
                 renderProjects(cat);
@@ -911,15 +948,18 @@
         function renderProjects(filterCategory = null) {
             const container = document.getElementById('projectsContainer');
             container.innerHTML = '';
-            let filtered;
+
+            // Obtener proyectos filtrados por evento activo
+            let filtered = getFilteredProjects();
+
+            // Aplicar filtro de categoría si corresponde
             if (filterCategory === 'recommended') {
-                filtered = projects.filter(p => (p.deviceCompatibility === currentDeviceCategory || p.deviceCompatibility === 'both'));
+                filtered = filtered.filter(p => (p.deviceCompatibility === currentDeviceCategory || p.deviceCompatibility === 'both'));
             } else if (filterCategory && filterCategory !== 'todos') {
-                filtered = projects.filter(p => p.category === filterCategory);
-            } else {
-                filtered = projects;
+                filtered = filtered.filter(p => p.category === filterCategory);
             }
 
+            // Eliminar juegos rotos
             filtered = filtered.filter(p => !p.broken);
 
             filtered.forEach(proj => {
@@ -963,7 +1003,7 @@
         renderProjects();
 
         // ════════════════════════════════════════════════════════
-        // 🎈 MODO FERIA MEJORADO + MÚLTIPLES CÓDIGOS DE EVENTOS + ESTILOS
+        // 🎈 MODO FERIA MEJORADO + MÚLTIPLES CÓDIGOS DE EVENTOS + CSS EXTERNO
         // ════════════════════════════════════════════════════════
 
         let fairMode = false;
@@ -971,7 +1011,6 @@
         let fairContainer = null;
         let visualEffectsActive = false;
         let tempThemeTimeout = null;
-        let currentThemeStyleId = null; // Para rastrear el <style> inyectado
 
         let fairVisualIntervals = {
             confetti: null,
@@ -980,7 +1019,21 @@
             fireworks: null
         };
 
-        // ─── CONTENEDOR Y CSS DINÁMICO ──────────────────────────
+        // ─── FUNCIONES PARA CSS EXTERNO ──────────────────────────
+        function loadThemeCSS(themeName) {
+            // Eliminar cualquier hoja de estilo temática anterior
+            document.querySelectorAll('link[data-theme]').forEach(el => el.remove());
+
+            if (!themeName) return;
+
+            const link = document.createElement('link');
+            link.rel = 'stylesheet';
+            link.href = `css/${themeName}.css`;
+            link.dataset.theme = themeName;
+            document.head.appendChild(link);
+        }
+
+        // ─── CONTENEDOR Y CSS DINÁMICO PARA EFECTOS ────────────
         function createFairContainer() {
             if (fairContainer) return;
             fairContainer = document.createElement('div');
@@ -1031,134 +1084,7 @@
             document.head.appendChild(style);
         }
 
-        // ─── ESTILOS TEMÁTICOS ──────────────────────────────────
-        function applyThemeStyles(themeName) {
-            // Eliminar estilos anteriores si existen
-            removeThemeStyles();
-
-            let css = '';
-            switch (themeName) {
-                case 'halloween':
-                    css = `
-                        :root {
-                            --theme-bg: #1a0e0e;
-                            --theme-card: #2d1a1a;
-                            --theme-border: #ff6600;
-                            --theme-text: #ffaa33;
-                        }
-                        body {
-                            background: #1a0e0e !important;
-                            color: #ffaa33 !important;
-                        }
-                        header { border-bottom-color: #ff6600 !important; background: rgba(255,102,0,0.1) !important; }
-                        h1 { color: #ff6600 !important; text-shadow: 0 0 20px #ff6600, 0 0 40px #ff3300 !important; }
-                        .project-card { background: #2d1a1a !important; border-color: #ff6600 !important; }
-                        .project-card:hover { border-color: #ffaa00 !important; box-shadow: 0 0 20px #ff6600 !important; }
-                        .hero { background: rgba(255,102,0,0.1) !important; border-bottom-color: #ff6600 !important; }
-                        .filter-btn { border-color: #ff6600 !important; color: #ff6600 !important; }
-                        .filter-btn.active, .filter-btn:hover { background: rgba(255,102,0,0.2) !important; }
-                        .sponsor-card { background: #2d1a1a !important; border-color: #ff6600 !important; }
-                        footer { border-top-color: #ff6600 !important; }
-                        #admin-panel { border-color: #ff6600 !important; }
-                    `;
-                    break;
-                case 'navidad':
-                    css = `
-                        :root {
-                            --theme-bg: #0a1a0a;
-                            --theme-card: #1a2d1a;
-                            --theme-border: #ff0000;
-                            --theme-text: #ffdddd;
-                        }
-                        body {
-                            background: #0a1a0a !important;
-                            color: #ffdddd !important;
-                        }
-                        header { border-bottom-color: #ff0000 !important; background: rgba(255,0,0,0.1) !important; }
-                        h1 { color: #ffdd00 !important; text-shadow: 0 0 20px #ffdd00, 0 0 40px #ff0000 !important; }
-                        .project-card { background: #1a2d1a !important; border-color: #ff0000 !important; }
-                        .project-card:hover { border-color: #ffdd00 !important; box-shadow: 0 0 20px #ff0000 !important; }
-                        .hero { background: rgba(255,0,0,0.1) !important; border-bottom-color: #ff0000 !important; }
-                        .filter-btn { border-color: #ff0000 !important; color: #ff0000 !important; }
-                        .filter-btn.active, .filter-btn:hover { background: rgba(255,0,0,0.2) !important; }
-                        .sponsor-card { background: #1a2d1a !important; border-color: #ff0000 !important; }
-                        footer { border-top-color: #ff0000 !important; }
-                        #admin-panel { border-color: #ff0000 !important; }
-                    `;
-                    break;
-                case 'cumpleanos':
-                    css = `
-                        :root {
-                            --theme-bg: #1a0a2a;
-                            --theme-card: #2d1a3d;
-                            --theme-border: #ff00ff;
-                            --theme-text: #ffddff;
-                        }
-                        body {
-                            background: #1a0a2a !important;
-                            color: #ffddff !important;
-                        }
-                        header { border-bottom-color: #ff00ff !important; background: linear-gradient(90deg, rgba(255,0,255,0.1), rgba(0,255,255,0.1), rgba(255,255,0,0.1)) !important; }
-                        h1 { color: #ff00ff !important; text-shadow: 0 0 20px #ff00ff, 0 0 40px #00ffff !important; }
-                        .project-card { background: #2d1a3d !important; border-color: #ff00ff !important; }
-                        .project-card:hover { border-color: #ffdd00 !important; box-shadow: 0 0 20px #ff00ff !important; }
-                        .hero { background: rgba(255,0,255,0.1) !important; border-bottom-color: #ff00ff !important; }
-                        .filter-btn { border-color: #ff00ff !important; color: #ff00ff !important; }
-                        .filter-btn.active, .filter-btn:hover { background: rgba(255,0,255,0.2) !important; }
-                        .sponsor-card { background: #2d1a3d !important; border-color: #ff00ff !important; }
-                        footer { border-top-color: #ff00ff !important; }
-                        #admin-panel { border-color: #ff00ff !important; }
-                    `;
-                    break;
-                case 'feria':
-                case 'feriaplus':
-                    css = `
-                        :root {
-                            --theme-bg: #0a0a2a;
-                            --theme-card: #1a1a3d;
-                            --theme-border: #00ffff;
-                            --theme-text: #ddffff;
-                        }
-                        body {
-                            background: #0a0a2a !important;
-                            color: #ddffff !important;
-                        }
-                        header { border-bottom-color: #00ffff !important; background: linear-gradient(90deg, rgba(0,255,255,0.1), rgba(255,0,255,0.1)) !important; }
-                        h1 { color: #00ffff !important; text-shadow: 0 0 30px #00ffff, 0 0 60px #ff00ff !important; }
-                        .project-card { background: #1a1a3d !important; border-color: #00ffff !important; }
-                        .project-card:hover { border-color: #ffdd00 !important; box-shadow: 0 0 20px #00ffff !important; }
-                        .hero { background: rgba(0,255,255,0.1) !important; border-bottom-color: #00ffff !important; }
-                        .filter-btn { border-color: #00ffff !important; color: #00ffff !important; }
-                        .filter-btn.active, .filter-btn:hover { background: rgba(0,255,255,0.2) !important; }
-                        .sponsor-card { background: #1a1a3d !important; border-color: #00ffff !important; }
-                        footer { border-top-color: #00ffff !important; }
-                        #admin-panel { border-color: #00ffff !important; }
-                    `;
-                    break;
-                default:
-                    return;
-            }
-
-            if (css) {
-                const styleEl = document.createElement('style');
-                styleEl.id = 'theme-styles-' + Date.now();
-                styleEl.textContent = css;
-                document.head.appendChild(styleEl);
-                currentThemeStyleId = styleEl.id;
-            }
-        }
-
-        function removeThemeStyles() {
-            if (currentThemeStyleId) {
-                const el = document.getElementById(currentThemeStyleId);
-                if (el) el.remove();
-                currentThemeStyleId = null;
-            }
-            // También limpiar cualquier style inyectado con 'theme-styles-'
-            document.querySelectorAll('style[id^="theme-styles-"]').forEach(el => el.remove());
-        }
-
-        // ─── CONFETI (sin cambios) ──────────────────────────────
+        // ─── CONFETI ──────────────────────────────────────────────
         function createConfettiPiece(colors = null) {
             const el = document.createElement('div');
             const defaultColors = ['#FF3366', '#FFD700', '#00FF88', '#FF6600', '#00CCFF', '#FF00FF', '#39FF14'];
@@ -1211,7 +1137,7 @@
             }
         }
 
-        // ─── GLOBOS (sin cambios) ───────────────────────────────
+        // ─── GLOBOS ───────────────────────────────────────────────
         function createBalloon() {
             const el = document.createElement('div');
             const colors = ['#FF3366', '#FFD700', '#00FF88', '#FF6600', '#00CCFF', '#FF00FF', '#39FF14', '#FFA500', '#FF69B4'];
@@ -1269,7 +1195,7 @@
             }
         }
 
-        // ─── DESTELLOS (sin cambios) ────────────────────────────
+        // ─── DESTELLOS ────────────────────────────────────────────
         function createSparkle() {
             const el = document.createElement('div');
             const size = Math.random() * 6 + 3;
@@ -1309,7 +1235,7 @@
             }
         }
 
-        // ─── FUEGOS ARTIFICIALES (sin cambios) ──────────────────
+        // ─── FUEGOS ARTIFICIALES ──────────────────────────────────
         function createFirework() {
             const el = document.createElement('div');
             const x = Math.random() * 80 + 10;
@@ -1427,20 +1353,24 @@
         function activateFairMode() {
             if (fairMode) return;
             fairMode = true;
+            activeEvent = 'feria';
+            loadThemeCSS('feria');
 
             document.getElementById('newsTicker').style.display = 'block';
             document.getElementById('mainTitle').textContent = 'TECNOMATH FERIA';
             leaderboardInterval = setInterval(openLeaderboard, 30000);
 
-            applyThemeStyles('feria');
             activateVisualEffects();
             showFairNotification('🎉 ¡BIENVENIDO AL MODO FERIA! 🎈');
             alert('⚡ MODO FERIA ACTIVADO ⚡');
+            renderProjects(currentActiveFilter);
         }
 
         function deactivateFairMode() {
             if (!fairMode) return;
             fairMode = false;
+            activeEvent = null;
+            loadThemeCSS(null);
 
             document.getElementById('newsTicker').style.display = 'none';
             document.getElementById('mainTitle').textContent = 'TECNOMATH';
@@ -1450,9 +1380,9 @@
             }
             document.getElementById('leaderboard-panel').style.display = 'none';
 
-            removeThemeStyles();
             deactivateVisualEffects();
             alert('🔕 MODO FERIA DESACTIVADO');
+            renderProjects(currentActiveFilter);
         }
 
         // ─── TEMAS TEMPORALES ──────────────────────────────────────
@@ -1462,15 +1392,21 @@
                 clearTimeout(tempThemeTimeout);
                 tempThemeTimeout = null;
             }
+            activeEvent = themeName;
+            loadThemeCSS(themeName);
+
             document.getElementById('mainTitle').textContent = title;
             showFairNotification(notification);
-            applyThemeStyles(themeName);
             if (visualEffectsActive) deactivateVisualEffects();
             activateVisualEffects(confettiColors, 1);
+            renderProjects(currentActiveFilter);
+
             tempThemeTimeout = setTimeout(() => {
                 document.getElementById('mainTitle').textContent = 'TECNOMATH';
-                removeThemeStyles();
+                activeEvent = null;
+                loadThemeCSS(null);
                 deactivateVisualEffects();
+                renderProjects(currentActiveFilter);
                 tempThemeTimeout = null;
             }, duration);
         }
@@ -1478,14 +1414,17 @@
         function activateMegaFair() {
             if (fairMode) deactivateFairMode();
             fairMode = true;
+            activeEvent = 'feriaplus';
+            loadThemeCSS('megaferia');
+
             document.getElementById('newsTicker').style.display = 'block';
             document.getElementById('mainTitle').textContent = '🔥 TECNOMATH MEGA FERIA 🔥';
             leaderboardInterval = setInterval(openLeaderboard, 15000);
-            applyThemeStyles('feriaplus');
             if (visualEffectsActive) deactivateVisualEffects();
             activateVisualEffects(null, 2);
             showFairNotification('🔥 ¡MEGA FERIA ACTIVADA! 🔥');
             alert('⚡ MEGA FERIA ACTIVADA (¡el doble de rápido!) ⚡');
+            renderProjects(currentActiveFilter);
         }
 
         // ─── CÓDIGOS DE EVENTOS ──────────────────────────────────
@@ -1534,7 +1473,8 @@
                 case 'stop':
                     if (fairMode) deactivateFairMode();
                     else {
-                        removeThemeStyles();
+                        activeEvent = null;
+                        loadThemeCSS(null);
                         deactivateVisualEffects();
                         document.getElementById('mainTitle').textContent = 'TECNOMATH';
                         if (tempThemeTimeout) {
@@ -1542,6 +1482,7 @@
                             tempThemeTimeout = null;
                         }
                         showFairNotification('⏹️ EVENTO FINALIZADO');
+                        renderProjects(currentActiveFilter);
                     }
                     break;
                 default:
@@ -1659,9 +1600,11 @@
         });
         document.body.appendChild(secretZone);
 
-        console.log('🎈 Modo Feria mejorado con múltiples códigos de eventos y estilos temáticos cargado.');
+        console.log('🎈 Modo Feria mejorado con estilos externos y juegos especiales cargado.');
         console.log('📌 Códigos disponibles: feria2026, feriaoff, halloween, navidad, cumpleanos, feriaplus, stop');
         console.log('👑 Acceso admin: clic en botón "👑 ADMIN" o doble clic en esquina inferior derecha.');
+        console.log('🎨 Los estilos de cada evento se cargan desde /css/{evento}.css');
+        console.log('🕹️ Los juegos con propiedad "evento" solo aparecen cuando ese evento está activo.');
     </script>
 </body>
 </html>
