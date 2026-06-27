@@ -12,6 +12,10 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Tecnomath">
 
+    <!-- Google AdSense -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9426294483156864"
+         crossorigin="anonymous"></script>
+
     <!-- Ruffle para Flash -->
     <script src="https://unpkg.com/@ruffle-rs/ruffle"></script>
 
@@ -372,6 +376,14 @@
             cursor: pointer;
         }
 
+        /* Anuncio AdSense */
+        .ad-container {
+            max-width: 900px;
+            margin: 20px auto;
+            padding: 10px;
+            text-align: center;
+        }
+
         @media (max-width: 480px) {
             :root { --grid-cols: 2; --card-min-width: 120px; }
             .header-content { flex-direction: column; align-items: flex-start; }
@@ -439,6 +451,19 @@
     <div class="sponsors-section">
         <div class="sponsors-label">— PATROCINADORES —</div>
         <div class="sponsors-grid" id="sponsorsArea"></div>
+    </div>
+
+    <!-- Anuncio Google AdSense (cambiar data-ad-slot por el tuyo) -->
+    <div class="ad-container">
+        <ins class="adsbygoogle"
+             style="display:block"
+             data-ad-client="ca-pub-9426294483156864"
+             data-ad-slot="1234567890"
+             data-ad-format="auto"
+             data-full-width-responsive="true"></ins>
+        <script>
+             (adsbygoogle = window.adsbygoogle || []).push({});
+        </script>
     </div>
 
     <div class="container" id="projectsContainer"></div>
