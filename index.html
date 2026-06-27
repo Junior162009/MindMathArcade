@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Tecnomath · Portal de Proyectos</title>
+    <title>Tecnomath · Plataforma de Juegos Educativos</title>
 
     <!-- PWA -->
     <link rel="manifest" href="/manifest.json">
@@ -12,7 +12,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Tecnomath">
 
-    <!-- Ruffle (emulador Flash) -->
+    <!-- Ruffle para Flash -->
     <script src="https://unpkg.com/@ruffle-rs/ruffle"></script>
 
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
@@ -309,6 +309,69 @@
             box-shadow: 0 6px 0 #c02660;
         }
 
+        /* Modo Feria */
+        .news-ticker {
+            display: none;
+            background: #000;
+            color: var(--neon-green);
+            font-size: 7px;
+            padding: 5px 0;
+            overflow: hidden;
+            white-space: nowrap;
+            border-top: 1px solid var(--neon-green);
+            border-bottom: 1px solid var(--neon-green);
+            margin-bottom: 10px;
+        }
+        .news-ticker span {
+            display: inline-block;
+            padding-left: 100%;
+            animation: scroll 20s linear infinite;
+        }
+        @keyframes scroll {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-100%); }
+        }
+
+        #leaderboard-panel {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--card-bg);
+            border: 3px solid var(--neon-cyan);
+            box-shadow: 0 0 40px var(--neon-cyan);
+            z-index: 600;
+            padding: 20px;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 500px;
+            text-align: center;
+        }
+        #leaderboard-panel h2 {
+            font-size: 14px;
+            color: var(--neon-yellow);
+            margin-bottom: 15px;
+        }
+        #leaderboard-list {
+            list-style: none;
+            font-size: 8px;
+            line-height: 2;
+        }
+        #leaderboard-list li {
+            margin: 5px 0;
+        }
+        #leaderboard-close {
+            margin-top: 15px;
+            background: var(--neon-pink);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-family: 'Press Start 2P', cursive;
+            cursor: pointer;
+        }
+
         @media (max-width: 480px) {
             :root { --grid-cols: 2; --card-min-width: 120px; }
             .header-content { flex-direction: column; align-items: flex-start; }
@@ -339,6 +402,11 @@
             </div>
         </div>
     </header>
+
+    <!-- Cinta de noticias (Modo Feria) -->
+    <div class="news-ticker" id="newsTicker">
+        <span>🔥 ¡Tecnomath es la plataforma #1 en juegos educativos! 🚀 Más de 60 juegos ODS · Gana monedas · Desbloquea logros · ¡Únete ya! 🔥</span>
+    </div>
 
     <div id="admin-cloud" onclick="toggleAdminPanel()">☁️</div>
     <div id="admin-panel">
@@ -373,6 +441,13 @@
     </div>
 
     <div class="container" id="projectsContainer"></div>
+
+    <!-- Leaderboard -->
+    <div id="leaderboard-panel">
+        <h2>🏆 TOP 10 JUGADORES</h2>
+        <ul id="leaderboard-list"></ul>
+        <button id="leaderboard-close" onclick="closeLeaderboard()">CERRAR</button>
+    </div>
 
     <footer>© 2026 Tecnomath · Powered by GitHub Pages</footer>
 
@@ -692,6 +767,66 @@
         ];
 
         // ═══════════════════════════════════════
+        // FILTRO DE JUEGOS ROTOS (404)
+        // ═══════════════════════════════════════
+        const BROKEN_CACHE_KEY = 'tecnomath_broken_cache';
+        let brokenCache = {};
+
+        try {
+            const cached = localStorage.getItem(BROKEN_CACHE_KEY);
+            if (cached) brokenCache = JSON.parse(cached);
+        } catch(e) {}
+
+        function guardarBrokenCache() {
+            localStorage.setItem(BROKEN_CACHE_KEY, JSON.stringify(brokenCache));
+        }
+
+        async function verificarUrl(url) {
+            const cacheKey = url;
+            const ahora = Date.now();
+            const cacheValidity = 24 * 60 * 60 * 1000;
+            if (brokenCache[cacheKey] && (ahora - brokenCache[cacheKey].timestamp) < cacheValidity) {
+                return brokenCache[cacheKey].broken;
+            }
+
+            try {
+                const esExterna = url.startsWith('http') && !url.includes(window.location.hostname);
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+                const response = await fetch(url, {
+                    method: 'HEAD',
+                    mode: esExterna ? 'no-cors' : 'cors',
+                    signal: controller.signal
+                });
+                clearTimeout(timeoutId);
+
+                const broken = false;
+                brokenCache[cacheKey] = { broken, timestamp: ahora };
+                guardarBrokenCache();
+                return broken;
+            } catch (e) {
+                brokenCache[cacheKey] = { broken: true, timestamp: ahora };
+                guardarBrokenCache();
+                return true;
+            }
+        }
+
+        async function marcarJuegosRotos() {
+            const promesas = projects.map(async (proj) => {
+                const url = proj.swfUrl || proj.url;
+                if (!url) return;
+                proj.broken = await verificarUrl(url);
+            });
+            await Promise.allSettled(promesas);
+            renderProjects(currentActiveFilter);
+        }
+
+        window.addEventListener('load', () => {
+            setTimeout(marcarJuegosRotos, 1000);
+        });
+
+        // ═══════════════════════════════════════
         // FILTROS Y RENDERIZADO
         // ═══════════════════════════════════════
         let currentActiveFilter = 'todos';
@@ -739,12 +874,14 @@
             container.innerHTML = '';
             let filtered;
             if (filterCategory === 'recommended') {
-                filtered = projects.filter(p => p.deviceCompatibility === currentDeviceCategory || p.deviceCompatibility === 'both');
+                filtered = projects.filter(p => (p.deviceCompatibility === currentDeviceCategory || p.deviceCompatibility === 'both'));
             } else if (filterCategory && filterCategory !== 'todos') {
                 filtered = projects.filter(p => p.category === filterCategory);
             } else {
                 filtered = projects;
             }
+
+            filtered = filtered.filter(p => !p.broken);
 
             filtered.forEach(proj => {
                 const card = document.createElement('a');
@@ -787,6 +924,55 @@
         renderProjects();
 
         // ═══════════════════════════════════════
+        // MODO FERIA
+        // ═══════════════════════════════════════
+        let fairMode = false;
+        const FAIR_CODE = "feria2026";
+
+        function activateFairMode() {
+            if (fairMode) return;
+            fairMode = true;
+            localStorage.setItem('fairMode', 'true');
+            document.getElementById('newsTicker').style.display = 'block';
+            document.querySelector('h1').textContent = 'TECNOMATH FERIA';
+            setInterval(openLeaderboard, 30000);
+            alert('⚡ MODO FERIA ACTIVADO ⚡');
+        }
+
+        function getLeaderboardData() {
+            const jugadores = [
+                { name: 'Junior162009', score: 9999, game: 'MindMath Arcade' },
+                { name: 'GamerPro', score: 8750, game: 'ODS-2048' },
+                { name: 'EcoMaster', score: 7200, game: 'Eco Collector' },
+                { name: 'PixelKing', score: 6800, game: 'Banana Kong Dash' },
+                { name: 'FlashFan', score: 5400, game: 'Pacman Flash' },
+                { name: 'Brainiac', score: 5000, game: 'Hextris' },
+                { name: 'CookieMonster', score: 4200, game: 'Cookie Clicker' },
+                { name: 'WordWizard', score: 3900, game: 'Wordle' },
+                { name: 'SpaceRanger', score: 3600, game: 'Asteroids' },
+                { name: 'MathGenius', score: 3300, game: 'EmojiMath Pro' },
+            ];
+            return jugadores.sort((a,b) => b.score - a.score);
+        }
+
+        function openLeaderboard() {
+            const list = document.getElementById('leaderboard-list');
+            const data = getLeaderboardData();
+            list.innerHTML = data.map((p, i) =>
+                `<li>${i+1}. ${p.name} - ${p.score} pts (${p.game})</li>`
+            ).join('');
+            document.getElementById('leaderboard-panel').style.display = 'block';
+        }
+
+        function closeLeaderboard() {
+            document.getElementById('leaderboard-panel').style.display = 'none';
+        }
+
+        if (localStorage.getItem('fairMode') === 'true') {
+            activateFairMode();
+        }
+
+        // ═══════════════════════════════════════
         // ADMIN
         // ═══════════════════════════════════════
         function toggleAdminPanel() {
@@ -824,20 +1010,26 @@
             }
         })();
 
-        // ACCESO OCULTO: DOBLE CLIC EN ESQUINA INFERIOR DERECHA
         const ADMINS_PORTAL = { "1983": "Junior", "2024": "Nicole", "7777": "Mateo", "8888": "Jaider", "ods2026": "ODS Master" };
         const secretZone = document.createElement('div');
         secretZone.style.cssText = 'position:fixed; bottom:0; right:0; width:70px; height:70px; z-index:499;';
         secretZone.addEventListener('dblclick', function(e) {
             e.preventDefault();
             const user = Tecnomath.getCurrentUser();
-            if (!user) { alert('Debes iniciar sesión primero (usa el botón 🔑 ACCEDER).'); return; }
-            const code = prompt('🔐 CÓDIGO ADMIN:');
-            if (ADMINS_PORTAL[code]) {
-                Tecnomath.setAdmin(user.username);
-                alert('⚡ ' + ADMINS_PORTAL[code].toUpperCase() + ' · ADMIN ACTIVADO');
-                location.reload();
-            } else if (code) { alert('🔒 ACCESO DENEGADO'); }
+            const code = prompt('🔐 CÓDIGO:');
+            if (code === FAIR_CODE) {
+                activateFairMode();
+            } else if (ADMINS_PORTAL[code]) {
+                if (user) {
+                    Tecnomath.setAdmin(user.username);
+                    alert('⚡ ' + ADMINS_PORTAL[code].toUpperCase() + ' · ADMIN ACTIVADO');
+                    location.reload();
+                } else {
+                    alert('Debes iniciar sesión primero.');
+                }
+            } else if (code) {
+                alert('🔒 ACCESO DENEGADO');
+            }
         });
         document.body.appendChild(secretZone);
     </script>
