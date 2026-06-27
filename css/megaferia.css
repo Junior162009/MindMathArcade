@@ -1,0 +1,24 @@
+:root {
+    --theme-bg: #0a0a1a;
+    --theme-card: #1a1a2a;
+    --theme-border: #ff00ff;
+    --theme-text: #ffddff;
+}
+body {
+    background: #0a0a1a !important;
+    color: #ffddff !important;
+}
+header { border-bottom-color: #ff00ff !important; background: linear-gradient(90deg, rgba(255,0,255,0.2), rgba(0,255,255,0.2)) !important; }
+h1 { color: #ff00ff !important; text-shadow: 0 0 30px #ff00ff, 0 0 60px #00ffff !important; animation: megaPulse 1s ease-in-out infinite !important; }
+@keyframes megaPulse {
+    0%,100%{ text-shadow: 0 0 30px #ff00ff, 0 0 60px #00ffff; }
+    50%{ text-shadow: 0 0 50px #ffff00, 0 0 80px #ff00ff; }
+}
+.project-card { background: #1a1a2a !important; border-color: #ff00ff !important; }
+.project-card:hover { border-color: #ffff00 !important; box-shadow: 0 0 30px #ff00ff !important; }
+.hero { background: rgba(255,0,255,0.15) !important; border-bottom-color: #ff00ff !important; }
+.filter-btn { border-color: #ff00ff !important; color: #ff00ff !important; }
+.filter-btn.active, .filter-btn:hover { background: rgba(255,0,255,0.3) !important; }
+.sponsor-card { background: #1a1a2a !important; border-color: #ff00ff !important; }
+footer { border-top-color: #ff00ff !important; }
+#admin-panel { border-color: #ff00ff !important; }
