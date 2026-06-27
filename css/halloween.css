@@ -9,7 +9,6 @@ body {
     color: #ffaa33 !important;
     position: relative;
 }
-/* Fondo de emojis */
 body::after {
     content: "🎃🧛🦇🧙🕷️🕸️👻💀🎃🧛🦇🧙🕷️🕸️👻💀";
     position: fixed;
