@@ -92,25 +92,39 @@
             }
         }
 
-        /* ========== WRAPPER DEL IFRAME (se adapta a todos los tamaños) ========== */
+        /* ========== WRAPPER DEL IFRAME ========== */
         .iframe-wrapper {
             position: relative;
             z-index: 1;
-            /* En móvil: ocupa casi todo el ancho; en escritorio: hasta 700px */
             width: min(92vw, 700px);
             max-width: 700px;
-            /* Proporción 2:3 (420/630 ≈ 0.666) */
-            padding-top: 150%;
+            padding-top: 150%; /* Proporción 2:3 */
             background: #0a0410;
             border-radius: clamp(12px, 3vw, 28px);
-            border: 2px solid rgba(255, 140, 0, 0.3);
+            border: 2px solid rgba(255, 140, 0, 0.4);
             box-shadow: 0 0 40px rgba(255, 140, 0, 0.15), inset 0 0 60px rgba(255, 140, 0, 0.05);
             overflow: hidden;
             transition: border-color 0.4s ease, box-shadow 0.4s ease;
         }
 
+        /* Para que se vea un fondo claro si el iframe no carga */
+        .iframe-wrapper::before {
+            content: '🎃 Cargando juego...';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: rgba(255, 255, 255, 0.3);
+            font-size: 1.2rem;
+            z-index: 1;
+            pointer-events: none;
+            text-align: center;
+            font-weight: 300;
+            letter-spacing: 1px;
+        }
+
         .iframe-wrapper:hover {
-            border-color: rgba(255, 140, 0, 0.7);
+            border-color: rgba(255, 140, 0, 0.8);
             box-shadow: 0 0 60px rgba(255, 140, 0, 0.3);
         }
 
@@ -122,8 +136,7 @@
             height: 100%;
             border: none;
             background: #000;
-            /* Evita que el iframe se desborde */
-            object-fit: contain;
+            z-index: 2;
         }
 
         /* ========== BOTÓN VOLVER ========== */
@@ -168,7 +181,7 @@
             flex-shrink: 0;
         }
 
-        /* ========== ORIENTACIÓN HORIZONTAL (landscape) ========== */
+        /* ========== ORIENTACIÓN HORIZONTAL ========== */
         @media (orientation: landscape) and (max-height: 500px) {
             .iframe-wrapper {
                 width: min(60vh, 70vw);
@@ -186,17 +199,17 @@
             }
         }
 
+        /* ========== MEJORA PARA PANTALLAS GRANDES ========== */
+        @media (min-width: 1200px) {
+            .iframe-wrapper {
+                max-width: 800px;
+            }
+        }
+
         /* ========== BLOQUEO DE ZOOM ========== */
         @supports (-webkit-touch-callout: none) {
             body {
                 -webkit-text-size-adjust: none;
-            }
-        }
-
-        /* ========== MEJORA PARA PANTALLAS MUY GRANDES (escritorio) ========== */
-        @media (min-width: 1200px) {
-            .iframe-wrapper {
-                max-width: 800px;
             }
         }
     </style>
@@ -220,11 +233,12 @@
         <!-- Iframe -->
         <div class="iframe-wrapper">
             <iframe
-                src="https://es.y8.com/embed/halloween_parade"
+                src="https://www.y8.com/embed/halloween_parade"
                 scrolling="no"
                 allowfullscreen
                 loading="lazy"
-                title="Halloween Parade Game">
+                title="Halloween Parade Game"
+                allow="autoplay; encrypted-media; fullscreen">
             </iframe>
         </div>
 
@@ -242,7 +256,26 @@
         document.addEventListener('gesturechange', function(e) { e.preventDefault(); });
         document.addEventListener('gestureend', function(e) { e.preventDefault(); });
         document.addEventListener('dblclick', function(e) { e.preventDefault(); }, { passive: false });
-        console.log('🎃 Halloween Parade cargado');
+
+        // Ocultar el mensaje "Cargando..." cuando el iframe cargue
+        const iframe = document.querySelector('iframe');
+        const wrapper = document.querySelector('.iframe-wrapper');
+        iframe.addEventListener('load', function() {
+            // Eliminar el pseudo-elemento que muestra "Cargando..."
+            // No se puede eliminar directamente, pero podemos ocultarlo añadiendo una clase
+            wrapper.classList.add('loaded');
+        });
+
+        // CSS adicional para ocultar el mensaje cuando el iframe cargue
+        const style = document.createElement('style');
+        style.textContent = `
+            .iframe-wrapper.loaded::before {
+                display: none;
+            }
+        `;
+        document.head.appendChild(style);
+
+        console.log('🎃 Halloween Parade cargado correctamente');
     </script>
 
 </body>
