@@ -1,0 +1,765 @@
+[
+    // ============================================================
+    // 🟢 JUEGOS NORMALES (SIEMPRE VISIBLES)
+    // ============================================================
+    {
+        "name": "MindMath Arcade",
+        "desc": "Juego de matemáticas retro con 60+ niveles",
+        "url": "game.html",
+        "imageUrl": "img/mindmath.png",
+        "icon": "🧮",
+        "category": "mates",
+        "deviceCompatibility": "both",
+        "evento": null
+    },
+    {
+        "name": "BanderQuiz",
+        "desc": "Adivina las banderas del mundo",
+        "url": "https://junior162009.github.io/BanderQuiz/",
+        "imageUrl": "img/banderquiz.png",
+        "icon": "🏳️🌎",
+        "category": "edu",
+        "deviceCompatibility": "both",
+        "evento": null
+    },
+    {
+        "name": "EmojiMath Pro",
+        "desc": "Suma, resta y cuenta con emojis. Para niños",
+        "url": "emoji-math.html",
+        "imageUrl": "",
+        "icon": "🧸",
+        "category": "mates",
+        "deviceCompatibility": "mobile",
+        "evento": null
+    },
+    {
+        "name": "Eco Recolector",
+        "desc": "Atrapa agua y reciclables. ODS 6 y 12",
+        "url": "eco-collector.html",
+        "imageUrl": "img/ecorecolector.png",
+        "icon": "🌍",
+        "category": "eco",
+        "deviceCompatibility": "both",
+        "evento": null
+    },
+    {
+        "name": "Eco-Barrio 2030",
+        "desc": "Simulador de ciudad sostenible. ODS 11,12,13,7",
+        "url": "eco-barrio.html",
+        "imageUrl": "",
+        "icon": "🏙️",
+        "category": "eco",
+        "deviceCompatibility": "desktop",
+        "evento": null
+    },
+    {
+        "name": "Coral Guardian",
+        "desc": "Protege el arrecife de basura y especies invasoras",
+        "url": "coral-guardian.html",
+        "imageUrl": "",
+        "icon": "🪸",
+        "category": "eco",
+        "deviceCompatibility": "both",
+        "evento": null
+    },
+    {
+        "name": "Orbit Cleaner",
+        "desc": "Limpia el espacio y protege la capa de ozono. ODS 13",
+        "url": "orbit-cleaner.html",
+        "imageUrl": "",
+        "icon": "🛰️",
+        "category": "eco",
+        "deviceCompatibility": "both",
+        "evento": null
+    },
+    {
+        "name": "Marine Tech Cleaner",
+        "desc": "USV y ROV para limpiar el océano. ODS 14",
+        "url": "marine-cleaner.html",
+        "imageUrl": "",
+        "icon": "🌊",
+        "category": "eco",
+        "deviceCompatibility": "both",
+        "evento": null
+    },
+    {
+        "name": "Animalandia",
+        "desc": "Alimenta a los animales. Para niños pequeños",
+        "url": "animalandia.html",
+        "imageUrl": "",
+        "icon": "🐮",
+        "category": "kids",
+        "deviceCompatibility": "mobile",
+        "evento": null
+    },
+    {
+        "name": "ODS-2048",
+        "desc": "Fusiona los 17 ODS. Juego de puzzle adictivo",
+        "url": "ods-2048.html",
+        "imageUrl": "",
+        "icon": "🌐",
+        "category": "puzzle",
+        "deviceCompatibility": "both",
+        "evento": null
+    },
+    {
+        "name": "2048",
+        "desc": "Fusiona los números hasta 2048",
+        "url": "https://gabrielecirulli.github.io/2048/",
+        "imageUrl": "",
+        "icon": "🔢",
+        "category": "puzzle",
+        "deviceCompatibility": "both",
+        "evento": null
+    },
+    {
+        "name": "Hextris",
+        "desc": "Juego de puzzle hexagonal rápido",
+        "url": "https://hextris.github.io/hextris/",
+        "imageUrl": "",
+        "icon": "⬡",
+        "category": "puzzle",
+        "deviceCompatibility": "both",
+        "evento": null
+    },
+    {
+        "name": "Pacman",
+        "desc": "El clásico comecocos",
+        "url": "https://pacman.platzh1rsch.ch/",
+        "imageUrl": "",
+        "icon": "🟡",
+        "category": "retro",
+        "deviceCompatibility": "desktop",
+        "evento": null
+    },
+    {
+        "name": "Clumsy Bird",
+        "desc": "Vuela esquivando tuberías (Flappy Bird)",
+        "url": "https://ellisonleao.github.io/clumsy-bird/",
+        "imageUrl": "",
+        "icon": "🐤",
+        "category": "retro",
+        "deviceCompatibility": "both",
+        "evento": null
+    },
+    {
+        "name": "BrowserQuest",
+        "desc": "Aventura multijugador en el navegador",
+        "url": "https://browserquest.mozilla.org/",
+        "imageUrl": "",
+        "icon": "⚔️",
+        "category": "rpg",
+        "deviceCompatibility": "desktop",
+        "evento": null
+    },
+    {
+        "name": "HexGL",
+        "desc": "Carrera futurista estilo Wipeout",
+        "url": "https://hexgl.bkcore.com/play/",
+        "imageUrl": "",
+        "icon": "🏎️",
+        "category": "runners",
+        "deviceCompatibility": "desktop",
+        "evento": null
+    },
+    {
+        "name": "Astray",
+        "desc": "Laberinto 3D con bola",
+        "url": "https://wwwtyro.github.io/Astray/",
+        "imageUrl": "",
+        "icon": "🔮",
+        "category": "puzzle",
+        "deviceCompatibility": "desktop",
+        "evento": null
+    },
+    {
+        "name": "Tetris Canvas",
+        "desc": "El famoso puzzle de bloques",
+        "url": "https://dionyziz.com/canvas-tetris/",
+        "imageUrl": "",
+        "icon": "🧱",
+        "category": "puzzle",
+        "deviceCompatibility": "desktop",
+        "evento": null
+    },
+    {
+        "name": "Asteroids HTML5",
+        "desc": "Destruye asteroides en el espacio",
+        "url": "https://dougmcinnes.com/html-5-asteroids/",
+        "imageUrl": "",
+        "icon": "🌑",
+        "category": "retro",
+        "deviceCompatibility": "desktop",
+        "evento": null
+    },
+    {
+        "name": "Tower Game",
+        "desc": "Construye una torre de bloques",
+        "url": "https://iamkun.github.io/tower_game/",
+        "imageUrl": "",
+        "icon": "🏗️",
+        "category": "puzzle",
+        "deviceCompatibility": "both",
+        "evento": null
+    },
+    {
+        "name": "2048 (OpenArcade)",
+        "desc": "Versión alternativa del clásico",
+        "url": "https://openarcade.github.io/game/2048/",
+        "imageUrl": "",
+        "icon": "🔢",
+        "category": "puzzle",
+        "deviceCompatibility": "both",
+        "evento": null
+    },
+    {
+        "name": "Snake (OpenArcade)",
+        "desc": "La serpiente come manzanas",
+        "url": "https://openarcade.github.io/game/snake/",
+        "imageUrl": "",
+        "icon": "🐍",
+        "category": "retro",
+        "deviceCompatibility": "both",
+        "evento": null
+    },
+    {
+        "name": "Hextris (OpenArcade)",
+        "desc": "Puzzle hexagonal rápido",
+        "url": "https://openarcade.github.io/game/hextris/",
+        "imageUrl": "",
+        "icon": "⬡",
+        "category": "puzzle",
+        "deviceCompatibility": "both",
+        "evento": null
+    },
+    {
+        "name": "Asteroids (OpenArcade)",
+        "desc": "Destruye asteroides",
+        "url": "https://openarcade.github.io/game/asteroids/",
+        "imageUrl": "",
+        "icon": "🌑",
+        "category": "retro",
+        "deviceCompatibility": "both",
+        "evento": null
+    },
+    {
+        "name": "Tanx (OpenArcade)",
+        "desc": "Batalla de tanques",
+        "url": "https://openarcade.github.io/game/tanx/",
+        "imageUrl": "",
+        "icon": "🔫",
+        "category": "shooter",
+        "deviceCompatibility": "desktop",
+        "evento": null
+    },
+    {
+        "name": "Soul Surfers (PlayCanvas)",
+        "desc": "Surf infinito en el espacio",
+        "url": "https://playcanv.as/p/JtL2iqIH/",
+        "imageUrl": "",
+        "icon": "🏄",
+        "category": "runners",
+        "deviceCompatibility": "desktop",
+        "evento": null
+    },
+    {
+        "name": "Monkey God (PlayCanvas)",
+        "desc": "Aventura de plataformas",
+        "url": "https://playcanv.as/p/SA7hVBLt/",
+        "imageUrl": "",
+        "icon": "🐒",
+        "category": "runners",
+        "deviceCompatibility": "desktop",
+        "evento": null
+    },
+    {
+        "name": "Blast Arena (PlayCanvas)",
+        "desc": "Dispara a los enemigos",
+        "url": "https://playcanv.as/p/8bDxzG5M/",
+        "imageUrl": "",
+        "icon": "💥",
+        "category": "shooter",
+        "deviceCompatibility": "desktop",
+        "evento": null
+    },
+    {
+        "name": "Moto X3M (PlayCanvas)",
+        "desc": "Carrera de motos extrema",
+        "url": "https://playcanv.as/p/44MRmJRU/",
+        "imageUrl": "",
+        "icon": "🏍️",
+        "category": "runners",
+        "deviceCompatibility": "desktop",
+        "evento": null
+    },
+    {
+        "name": "Matemáticas (Cokitos)",
+        "desc": "Juegos educativos de mates",
+        "url": "https://www.cokitos.com/tag/matematicas/",
+        "imageUrl": "",
+        "icon": "🧮",
+        "category": "mates",
+        "deviceCompatibility": "both",
+        "evento": null
+    },
+    {
+        "name": "Lógica (Cokitos)",
+        "desc": "Juegos de lógica y razonamiento",
+        "url": "https://www.cokitos.com/tag/logica/",
+        "imageUrl": "",
+        "icon": "🧩",
+        "category": "puzzle",
+        "deviceCompatibility": "both",
+        "evento": null
+    },
+    {
+        "name": "Memoria (Cokitos)",
+        "desc": "Juegos para entrenar la memoria",
+        "url": "https://www.cokitos.com/tag/memoria/",
+        "imageUrl": "",
+        "icon": "🧠",
+        "category": "memoria",
+        "deviceCompatibility": "both",
+        "evento": null
+    },
+    {
+        "name": "Geografía (Cokitos)",
+        "desc": "Aprende geografía jugando",
+        "url": "https://www.cokitos.com/tag/geografia/",
+        "imageUrl": "",
+        "icon": "🌍",
+        "category": "edu",
+        "deviceCompatibility": "both",
+        "evento": null
+    },
+    {
+        "name": "Ciencias (Cokitos)",
+        "desc": "Juegos de ciencias naturales",
+        "url": "https://www.cokitos.com/tag/ciencias/",
+        "imageUrl": "",
+        "icon": "🔬",
+        "category": "edu",
+        "deviceCompatibility": "both",
+        "evento": null
+    },
+    {
+        "name": "Educaplay (Recursos)",
+        "desc": "Plataforma de actividades educativas",
+        "url": "https://es.educaplay.com/es/recursoseducativos/",
+        "imageUrl": "",
+        "icon": "📚",
+        "category": "edu",
+        "deviceCompatibility": "both",
+        "evento": null
+    },
+    {
+        "name": "Educaplay (Mates)",
+        "desc": "Actividades de matemáticas",
+        "url": "https://es.educaplay.com/es/actividades/matematicas/",
+        "imageUrl": "",
+        "icon": "🧮",
+        "category": "mates",
+        "deviceCompatibility": "both",
+        "evento": null
+    },
+    {
+        "name": "Educaplay (Lengua)",
+        "desc": "Actividades de lengua",
+        "url": "https://es.educaplay.com/es/actividades/lengua/",
+        "imageUrl": "",
+        "icon": "📖",
+        "category": "edu",
+        "deviceCompatibility": "both",
+        "evento": null
+    },
+    {
+        "name": "Educaplay (Geo)",
+        "desc": "Actividades de geografía",
+        "url": "https://es.educaplay.com/es/actividades/geografia/",
+        "imageUrl": "",
+        "icon": "🌍",
+        "category": "edu",
+        "deviceCompatibility": "both",
+        "evento": null
+    },
+    {
+        "name": "Educaplay (Ciencias)",
+        "desc": "Actividades de ciencias",
+        "url": "https://es.educaplay.com/es/actividades/ciencias/",
+        "imageUrl": "",
+        "icon": "🔬",
+        "category": "edu",
+        "deviceCompatibility": "both",
+        "evento": null
+    },
+    {
+        "name": "Cookie Clicker",
+        "desc": "Haz clic para hacer galletas",
+        "url": "https://orteil.dashnet.org/cookieclicker/",
+        "imageUrl": "",
+        "icon": "🍪",
+        "category": "idle",
+        "deviceCompatibility": "both",
+        "evento": null
+    },
+    {
+        "name": "Agar.io",
+        "desc": "Come células y hazte más grande",
+        "url": "https://agar.io/",
+        "imageUrl": "",
+        "icon": "🔴",
+        "category": "multiplayer",
+        "deviceCompatibility": "both",
+        "evento": null
+    },
+    {
+        "name": "Slither.io",
+        "desc": "Serpiente multijugador masivo",
+        "url": "https://slither.io/",
+        "imageUrl": "",
+        "icon": "🐍",
+        "category": "multiplayer",
+        "deviceCompatibility": "both",
+        "evento": null
+    },
+    {
+        "name": "Krunker.io",
+        "desc": "FPS multijugador en el navegador",
+        "url": "https://krunker.io/",
+        "imageUrl": "",
+        "icon": "🔫",
+        "category": "shooter",
+        "deviceCompatibility": "desktop",
+        "evento": null
+    },
+    {
+        "name": "Ev.io",
+        "desc": "FPS futurista multijugador",
+        "url": "https://ev.io/",
+        "imageUrl": "",
+        "icon": "🤖",
+        "category": "shooter",
+        "deviceCompatibility": "desktop",
+        "evento": null
+    },
+    {
+        "name": "Minecraft Classic",
+        "desc": "Construye y explora",
+        "url": "https://classic.minecraft.net/",
+        "imageUrl": "",
+        "icon": "⛏️",
+        "category": "sandbox",
+        "deviceCompatibility": "desktop",
+        "evento": null
+    },
+    {
+        "name": "Tetr.io",
+        "desc": "Tetris competitivo online",
+        "url": "https://tetr.io/",
+        "imageUrl": "",
+        "icon": "🧱",
+        "category": "puzzle",
+        "deviceCompatibility": "desktop",
+        "evento": null
+    },
+    {
+        "name": "Chess.com (CPU)",
+        "desc": "Ajedrez contra el ordenador",
+        "url": "https://chess.com/play/computer",
+        "imageUrl": "",
+        "icon": "♟️",
+        "category": "board",
+        "deviceCompatibility": "both",
+        "evento": null
+    },
+    {
+        "name": "Lichess",
+        "desc": "Plataforma de ajedrez libre",
+        "url": "https://lichess.org/",
+        "imageUrl": "",
+        "icon": "♟️",
+        "category": "board",
+        "deviceCompatibility": "both",
+        "evento": null
+    },
+    {
+        "name": "Sudoku.com",
+        "desc": "Resuelve puzles de sudoku",
+        "url": "https://sudoku.com/",
+        "imageUrl": "",
+        "icon": "🧮",
+        "category": "puzzle",
+        "deviceCompatibility": "both",
+        "evento": null
+    },
+    {
+        "name": "Run 3",
+        "desc": "Corre por el espacio infinito",
+        "url": "https://www.coolmathgames.com/0-run-3",
+        "imageUrl": "",
+        "icon": "🏃",
+        "category": "runners",
+        "deviceCompatibility": "both",
+        "evento": null
+    },
+    {
+        "name": "Fireboy & Watergirl",
+        "desc": "Aventura cooperativa de 2 jugadores",
+        "url": "https://www.coolmathgames.com/0-fireboy-and-watergirl-forest-temple",
+        "imageUrl": "",
+        "icon": "🔥💧",
+        "category": "puzzle",
+        "deviceCompatibility": "desktop",
+        "evento": null
+    },
+    {
+        "name": "Bloxorz",
+        "desc": "Mueve el bloque al agujero",
+        "url": "https://www.coolmathgames.com/0-bloxorz",
+        "imageUrl": "",
+        "icon": "🧱",
+        "category": "puzzle",
+        "deviceCompatibility": "desktop",
+        "evento": null
+    },
+    {
+        "name": "Papa's Freezeria",
+        "desc": "Gestiona una heladería",
+        "url": "https://www.coolmathgames.com/0-papas-freezeria",
+        "imageUrl": "",
+        "icon": "🍦",
+        "category": "simulation",
+        "deviceCompatibility": "desktop",
+        "evento": null
+    },
+    {
+        "name": "Duck Life",
+        "desc": "Entrena a tu pato para carreras",
+        "url": "https://www.coolmathgames.com/0-duck-life",
+        "imageUrl": "",
+        "icon": "🦆",
+        "category": "simulation",
+        "deviceCompatibility": "both",
+        "evento": null
+    },
+    {
+        "name": "Wordle (ES)",
+        "desc": "Adivina la palabra diaria",
+        "url": "https://wordlewebsite.com/",
+        "imageUrl": "",
+        "icon": "🟩",
+        "category": "puzzle",
+        "deviceCompatibility": "both",
+        "evento": null
+    },
+    {
+        "name": "Squabble",
+        "desc": "Batalla multijugador de palabras",
+        "url": "https://squabble.me/",
+        "imageUrl": "",
+        "icon": "🔤",
+        "category": "puzzle",
+        "deviceCompatibility": "both",
+        "evento": null
+    },
+    {
+        "name": "Quick, Draw!",
+        "desc": "Dibuja y la IA adivina",
+        "url": "https://quickdraw.withgoogle.com/",
+        "imageUrl": "",
+        "icon": "✍️",
+        "category": "puzzle",
+        "deviceCompatibility": "both",
+        "evento": null
+    },
+    {
+        "name": "Semantle",
+        "desc": "Adivina la palabra por significado",
+        "url": "https://semantle.com/",
+        "imageUrl": "",
+        "icon": "🧠",
+        "category": "puzzle",
+        "deviceCompatibility": "both",
+        "evento": null
+    },
+    {
+        "name": "Worldle",
+        "desc": "Adivina el país por su forma",
+        "url": "https://worldle.teuteuf.fr/",
+        "imageUrl": "",
+        "icon": "🗺️",
+        "category": "edu",
+        "deviceCompatibility": "both",
+        "evento": null
+    },
+    {
+        "name": "Banana Kong Dash",
+        "desc": "Corre por la selva. 3 carriles, meta final y power-ups",
+        "url": "banana-dash.html",
+        "imageUrl": "",
+        "icon": "🍌",
+        "category": "runners",
+        "deviceCompatibility": "both",
+        "evento": null
+    },
+
+    // ============================================================
+    // 🎃 JUEGOS EXCLUSIVOS DE HALLOWEEN (evento: "halloween")
+    // ============================================================
+    {
+        "name": "Caza de Calabazas",
+        "desc": "Dispara a los fantasmas y recoge calabazas",
+        "url": "halloween-game.html",
+        "imageUrl": "",
+        "icon": "🎃",
+        "category": "halloween",
+        "deviceCompatibility": "both",
+        "evento": "halloween"
+    },
+    {
+        "name": "Noche de Brujas",
+        "desc": "Escapa del cementerio encantado",
+        "url": "brujas-game.html",
+        "imageUrl": "",
+        "icon": "🧙",
+        "category": "halloween",
+        "deviceCompatibility": "both",
+        "evento": "halloween"
+    },
+    {
+        "name": "Casa del Terror",
+        "desc": "Recorre la casa embrujada sin morir",
+        "url": "casa-terror.html",
+        "imageUrl": "",
+        "icon": "🏚️",
+        "category": "halloween",
+        "deviceCompatibility": "both",
+        "evento": "halloween"
+    },
+
+    // ============================================================
+    // 🎄 JUEGOS EXCLUSIVOS DE NAVIDAD (evento: "navidad")
+    // ============================================================
+    {
+        "name": "Trineo Navideño",
+        "desc": "Recoge regalos mientras esquivas obstáculos",
+        "url": "navidad-game.html",
+        "imageUrl": "",
+        "icon": "🎄",
+        "category": "navidad",
+        "deviceCompatibility": "both",
+        "evento": "navidad"
+    },
+    {
+        "name": "Elfos Trabajadores",
+        "desc": "Ayuda a los elfos a empaquetar juguetes",
+        "url": "elfos-game.html",
+        "imageUrl": "",
+        "icon": "🧝",
+        "category": "navidad",
+        "deviceCompatibility": "both",
+        "evento": "navidad"
+    },
+    {
+        "name": "Carrera de Renos",
+        "desc": "Guía a los renos en la carrera navideña",
+        "url": "renos-game.html",
+        "imageUrl": "",
+        "icon": "🦌",
+        "category": "navidad",
+        "deviceCompatibility": "both",
+        "evento": "navidad"
+    },
+
+    // ============================================================
+    // 🥳 JUEGOS EXCLUSIVOS DE CUMPLEAÑOS (evento: "cumpleanos")
+    // ============================================================
+    {
+        "name": "Fiesta Globos",
+        "desc": "Revienta globos y recoge regalos",
+        "url": "cumple-game.html",
+        "imageUrl": "",
+        "icon": "🎈",
+        "category": "cumpleanos",
+        "deviceCompatibility": "both",
+        "evento": "cumpleanos"
+    },
+    {
+        "name": "Pastel de Cumpleaños",
+        "desc": "Decora el pastel antes de que se acabe el tiempo",
+        "url": "pastel-game.html",
+        "imageUrl": "",
+        "icon": "🎂",
+        "category": "cumpleanos",
+        "deviceCompatibility": "both",
+        "evento": "cumpleanos"
+    },
+    {
+        "name": "Búsqueda del Tesoro",
+        "desc": "Encuentra los regalos escondidos",
+        "url": "tesoro-game.html",
+        "imageUrl": "",
+        "icon": "🔍",
+        "category": "cumpleanos",
+        "deviceCompatibility": "both",
+        "evento": "cumpleanos"
+    },
+
+    // ============================================================
+    // 🎡 JUEGOS DE FERIA (evento: "feria" - aparecen con feria2026 y feriaplus)
+    // ============================================================
+    {
+        "name": "Feria de Atracciones",
+        "desc": "Disfruta de juegos de feria clásicos",
+        "url": "feria-game.html",
+        "imageUrl": "",
+        "icon": "🎡",
+        "category": "feria",
+        "deviceCompatibility": "both",
+        "evento": "feria"
+    },
+    {
+        "name": "Carrera de Globos",
+        "desc": "Compite con otros jugadores en una carrera de globos",
+        "url": "globos-race.html",
+        "imageUrl": "",
+        "icon": "🏆",
+        "category": "feria",
+        "deviceCompatibility": "both",
+        "evento": "feria"
+    },
+    {
+        "name": "Tiro al Plato",
+        "desc": "Demuestra tu puntería en la feria",
+        "url": "tiro-plato.html",
+        "imageUrl": "",
+        "icon": "🍽️",
+        "category": "feria",
+        "deviceCompatibility": "both",
+        "evento": "feria"
+    },
+
+    // ============================================================
+    // 🔥 JUEGOS EXCLUSIVOS DE MEGA FERIA (evento: "feriaplus" - solo con feriaplus)
+    // ============================================================
+    {
+        "name": "Mega Tiro al Blanco",
+        "desc": "Prueba tu puntería en el modo mega feria",
+        "url": "tiro-game.html",
+        "imageUrl": "",
+        "icon": "🎯",
+        "category": "feria",
+        "deviceCompatibility": "both",
+        "evento": "feriaplus"
+    },
+    {
+        "name": "Carrera Extrema",
+        "desc": "Velocidad pura en la mega feria",
+        "url": "carrera-extrema.html",
+        "imageUrl": "",
+        "icon": "🚀",
+        "category": "feria",
+        "deviceCompatibility": "both",
+        "evento": "feriaplus"
+    }
+]
