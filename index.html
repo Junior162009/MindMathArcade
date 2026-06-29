@@ -1242,96 +1242,165 @@
         }
 
         // ============================================================
-        // 📱 GENERAR CÓDIGO QR CON LOGO DE TECNOMATH
+        // 📱 GENERAR CÓDIGO QR CON LOGO PERSONALIZABLE
         // ============================================================
-        function generarQRConLogo() {
-            const container = document.getElementById('qrcode');
-            if (!container) return;
+        (function() {
+            // ========== CONFIGURACIÓN PERSONALIZABLE ==========
+            const CONFIG = {
+                // ---- LOGO ----
+                // Puedes usar una URL de imagen (PNG con fondo transparente)
+                // Si pones null, usará el emoji 🎮 por defecto
+                logoImage: null, // Ejemplo: 'https://junior162009.github.io/MindMathArcade/img/mindmath-logo.png'
+                logoEmoji: '🎮',  // Emoji alternativo si no hay imagen
+                logoSize: 0.25,   // Tamaño del logo respecto al QR (0.25 = 25%)
+                logoBackground: 'white', // Fondo del logo (puede ser 'transparent')
+                logoBorderRadius: 0.15,  // Radio de borde del logo (0.15 = 15%)
+                logoShadow: true,        // Sombra alrededor del logo
 
-            // URL actual de la página
-            const url = window.location.href;
+                // ---- QR ----
+                qrSize: 160,            // Tamaño del QR en píxeles
+                qrColor: '#FFD700',     // Color del QR (neón cian)
+                qrBgColor: '#ffffff',   // Color de fondo del QR
 
-            // Generar QR
-            const qr = new QRCode(container, {
-                text: url,
-                width: 160,
-                height: 160,
-                colorDark: "#00FFFF",     // Color neón cian
-                colorLight: "#ffffff",    // Fondo blanco
-                correctLevel: QRCode.CorrectLevel.H // Alta corrección de errores
-            });
+                // ---- BORDE DEL LOGO ----
+                borderColor: 'rgba(0,255,255,0.3)',
+                borderWidth: 2,
 
-            // Obtener el canvas
-            const canvas = container.querySelector('canvas');
-            if (canvas) {
+                // ---- DESCARGA ----
+                downloadFileName: 'Tecnomath-QR.png'
+            };
+
+            // ========== FUNCIÓN PRINCIPAL ==========
+            function generarQRConLogo() {
+                const container = document.getElementById('qrcode');
+                if (!container) return;
+
+                const url = window.location.href;
+
+                // Limpiar contenedor (por si se regenera)
+                container.innerHTML = '';
+
+                // Generar QR
+                const qr = new QRCode(container, {
+                    text: url,
+                    width: CONFIG.qrSize,
+                    height: CONFIG.qrSize,
+                    colorDark: CONFIG.qrColor,
+                    colorLight: CONFIG.qrBgColor,
+                    correctLevel: QRCode.CorrectLevel.H
+                });
+
+                const canvas = container.querySelector('canvas');
+                if (!canvas) return;
+
                 // Esperar a que el QR se dibuje
                 setTimeout(() => {
                     const ctx = canvas.getContext('2d');
                     const size = canvas.width;
 
-                    // Crear el logo en un canvas auxiliar
-                    const logoSize = size * 0.25;
+                    const logoSize = size * CONFIG.logoSize;
+
+                    // Crear un canvas para el logo
                     const logoCanvas = document.createElement('canvas');
                     logoCanvas.width = logoSize;
                     logoCanvas.height = logoSize;
                     const logoCtx = logoCanvas.getContext('2d');
 
-                    // Fondo blanco redondeado para el logo
-                    const radius = logoSize * 0.15;
-                    logoCtx.beginPath();
-                    logoCtx.arc(logoSize/2, logoSize/2, logoSize/2 - radius, 0, Math.PI * 2);
-                    logoCtx.fillStyle = 'white';
-                    logoCtx.fill();
-                    logoCtx.shadowColor = 'rgba(0,0,0,0.2)';
-                    logoCtx.shadowBlur = 10;
+                    // Dibujar fondo del logo (si no es transparente)
+                    if (CONFIG.logoBackground !== 'transparent') {
+                        const radius = logoSize * CONFIG.logoBorderRadius;
+                        logoCtx.beginPath();
+                        logoCtx.arc(logoSize/2, logoSize/2, logoSize/2 - radius, 0, Math.PI * 2);
+                        logoCtx.fillStyle = CONFIG.logoBackground;
+                        logoCtx.fill();
+                    }
 
-                    // Dibujar el emoji de Tecnomath (🎮)
-                    logoCtx.textAlign = 'center';
-                    logoCtx.textBaseline = 'middle';
-                    logoCtx.font = `${logoSize * 0.6}px Arial`;
-                    logoCtx.fillStyle = '#00FFFF';
-                    logoCtx.shadowColor = '#00FFFF';
-                    logoCtx.shadowBlur = 15;
-                    logoCtx.fillText('🎮', logoSize/2, logoSize/2 + 2);
+                    // Si hay imagen de logo, cargarla; si no, usar emoji
+                    if (CONFIG.logoImage) {
+                        const img = new Image();
+                        img.crossOrigin = 'anonymous';
+                        img.src = CONFIG.logoImage;
+                        img.onload = function() {
+                            // Dibujar imagen centrada
+                            const padding = logoSize * 0.1;
+                            const imgSize = logoSize - padding * 2;
+                            logoCtx.drawImage(img, padding, padding, imgSize, imgSize);
+                            dibujarLogoEnQR(logoCanvas, canvas, size, logoSize);
+                        };
+                        img.onerror = function() {
+                            console.warn('⚠️ No se pudo cargar la imagen del logo. Usando emoji.');
+                            dibujarEmoji(logoCtx, logoSize);
+                            dibujarLogoEnQR(logoCanvas, canvas, size, logoSize);
+                        };
+                    } else {
+                        dibujarEmoji(logoCtx, logoSize);
+                        dibujarLogoEnQR(logoCanvas, canvas, size, logoSize);
+                    }
+                }, 200);
+            }
 
-                    // Dibujar el logo encima del QR
-                    const x = (size - logoSize) / 2;
-                    const y = (size - logoSize) / 2;
-                    ctx.drawImage(logoCanvas, x, y, logoSize, logoSize);
+            // Función para dibujar emoji
+            function dibujarEmoji(ctx, size) {
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.font = `${size * 0.6}px Arial`;
+                ctx.fillStyle = CONFIG.qrColor;
+                if (CONFIG.logoShadow) {
+                    ctx.shadowColor = CONFIG.qrColor;
+                    ctx.shadowBlur = 15;
+                }
+                ctx.fillText(CONFIG.logoEmoji, size/2, size/2 + 2);
+                ctx.shadowBlur = 0;
+            }
 
-                    // Borde alrededor del logo
+            // Función para dibujar el logo encima del QR
+            function dibujarLogoEnQR(logoCanvas, qrCanvas, qrSize, logoSize) {
+                const ctx = qrCanvas.getContext('2d');
+                const x = (qrSize - logoSize) / 2;
+                const y = (qrSize - logoSize) / 2;
+
+                // Dibujar logo
+                ctx.drawImage(logoCanvas, x, y, logoSize, logoSize);
+
+                // Borde alrededor del logo
+                if (CONFIG.borderWidth > 0) {
                     ctx.beginPath();
-                    ctx.arc(size/2, size/2, logoSize/2 + 2, 0, Math.PI * 2);
-                    ctx.strokeStyle = 'rgba(0,255,255,0.3)';
-                    ctx.lineWidth = 2;
+                    ctx.arc(qrSize/2, qrSize/2, logoSize/2 + CONFIG.borderWidth/2, 0, Math.PI * 2);
+                    ctx.strokeStyle = CONFIG.borderColor;
+                    ctx.lineWidth = CONFIG.borderWidth;
                     ctx.stroke();
-                }, 100);
-            }
-        }
+                }
 
-        function descargarQR() {
-            const canvas = document.querySelector('#qrcode canvas');
-            if (!canvas) {
-                alert('El QR aún no está listo. Espera un momento.');
-                return;
+                // Marcar como listo
+                qrCanvas.dataset.ready = 'true';
             }
-            const link = document.createElement('a');
-            link.download = 'Tecnomath-QR.png';
-            link.href = canvas.toDataURL('image/png');
-            link.click();
-        }
 
-        // Generar el QR al cargar la página
-        document.addEventListener('DOMContentLoaded', function() {
-            // Esperar un momento para que el DOM esté listo
-            setTimeout(generarQRConLogo, 500);
-
-            // Botón de descarga
-            const downloadBtn = document.getElementById('downloadQrBtn');
-            if (downloadBtn) {
-                downloadBtn.addEventListener('click', descargarQR);
+            // Función para descargar QR
+            function descargarQR() {
+                const canvas = document.querySelector('#qrcode canvas');
+                if (!canvas) {
+                    alert('El QR aún no está listo. Espera un momento.');
+                    return;
+                }
+                const link = document.createElement('a');
+                link.download = CONFIG.downloadFileName;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
             }
-        });
+
+            // Exponer funciones globalmente
+            window.generarQRConLogo = generarQRConLogo;
+            window.descargarQR = descargarQR;
+
+            // Ejecutar al cargar
+            document.addEventListener('DOMContentLoaded', function() {
+                setTimeout(generarQRConLogo, 600);
+                const downloadBtn = document.getElementById('downloadQrBtn');
+                if (downloadBtn) {
+                    downloadBtn.addEventListener('click', descargarQR);
+                }
+            });
+        })();
 
         // ============================================================
         // MODO FERIA, TEMAS PERMANENTES, FAVICON DINÁMICO
