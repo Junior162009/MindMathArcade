@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Juego · Tecnomath</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #060610;
+            font-family: 'Press Start 2P', cursive;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .game-header {
+            width: 100%;
+            max-width: 1000px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .game-title {
+            font-size: clamp(12px, 3vw, 24px);
+            color: #00FFFF;
+            text-shadow: 0 0 20px #00FFFF;
+            word-break: break-word;
+        }
+        .btn-back {
+            background: #FF00FF;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-family: 'Press Start 2P', cursive;
+            font-size: clamp(6px, 1.5vw, 12px);
+            cursor: pointer;
+            box-shadow: 0 4px 0 #a000a0;
+            transition: 0.1s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .btn-back:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 0 #a000a0;
+        }
+        .btn-back:active {
+            transform: translateY(2px);
+            box-shadow: 0 1px 0 #a000a0;
+        }
+        .iframe-container {
+            width: 100%;
+            max-width: 1000px;
+            background: #000;
+            border: 3px solid #FF00FF;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 0 40px rgba(255,0,255,0.3);
+            position: relative;
+            padding-bottom: 56.25%; /* Relación 16:9 */
+            height: 0;
+        }
+        .iframe-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        .error-message {
+            color: #FF4444;
+            font-size: clamp(8px, 1.5vw, 14px);
+            text-align: center;
+            margin-top: 20px;
+        }
+        @media (max-width: 600px) {
+            .game-header { flex-direction: column; align-items: flex-start; }
+            .btn-back { width: 100%; text-align: center; }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-header">
+        <h1 class="game-title" id="gameTitle">Cargando juego...</h1>
+        <a href="index.html" class="btn-back">⬅ VOLVER</a>
+    </div>
+    <div class="iframe-container" id="iframeContainer">
+        <iframe id="gameFrame" src="" allow="autoplay; fullscreen; gamepad; encrypted-media" allowfullscreen></iframe>
+    </div>
+    <div id="errorMessage" class="error-message"></div>
+
+    <script>
+        // Obtener parámetros de la URL
+        const params = new URLSearchParams(window.location.search);
+        const name = params.get('name') || 'Juego sin nombre';
+        const url = params.get('url');
+        const evento = params.get('evento') || '';
+
+        // Mostrar título
+        document.getElementById('gameTitle').textContent = name;
+
+        // Validar URL
+        if (!url || url === '') {
+            document.getElementById('errorMessage').textContent = '❌ Error: No se especificó una URL válida para este juego.';
+            document.getElementById('gameFrame').style.display = 'none';
+        } else {
+            // Cargar el iframe
+            const frame = document.getElementById('gameFrame');
+            frame.src = url;
+            // Si la URL no es válida, mostrar error
+            frame.onerror = function() {
+                document.getElementById('errorMessage').textContent = '❌ Error: No se pudo cargar el juego. Verifica la URL.';
+            };
+        }
+
+        // Cambiar el color del título según el evento (opcional)
+        const eventColors = {
+            'halloween': '#FF6600',
+            'navidad': '#FF0000',
+            'cumpleanos': '#FF00FF',
+            'feria': '#00FFFF',
+            'feriaplus': '#FF00FF'
+        };
+        if (evento && eventColors[evento]) {
+            document.getElementById('gameTitle').style.color = eventColors[evento];
+            document.getElementById('gameTitle').style.textShadow = `0 0 20px ${eventColors[evento]}`;
+        }
+    </script>
+</body>
+</html>
