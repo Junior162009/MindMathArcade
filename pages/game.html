@@ -162,7 +162,8 @@
             <div class="hud-stat"><span class="hud-label">ODS</span><span id="ods-progress" class="hud-val" style="color:#FFD700">0/17</span></div>
         </div>
 
-        <div id="menu-view" class="view active">
+        <!-- Vistas -->
+        <div id="menu-view" class="view">
             <div class="cat-tabs" id="cat-tabs"></div>
             <div id="game-grid" style="flex:1;overflow-y:auto;padding:8px;display:grid;grid-template-columns:repeat(auto-fill,minmax(78px,1fr));gap:8px;align-content:start;"></div>
         </div>
@@ -226,10 +227,7 @@
                     const old = parseInt(localStorage.getItem(key) || '0');
                     if (score > old) localStorage.setItem(key, score.toString());
                 },
-                getGameCoins: (game) => {
-                    // retorna las monedas locales desde stats
-                    return stats.coins || 0;
-                },
+                getGameCoins: (game) => stats.coins || 0,
                 exchangeGlobalToLocal: (game, amount) => {
                     const current = parseInt(localStorage.getItem('global_coins') || '0');
                     if (current < amount) return false;
@@ -577,7 +575,6 @@
         let fruitCards = [], fruitFlipped = [], fruitMatched = 0, fruitAttempts = 8, fruitProcessing = false;
         let mcqAnswered = false;
         let timerPaused = false;
-        let pauseTimeRemaining = 0;
 
         // ════════════════════════════════════════════
         //  CORE FUNCTIONS
@@ -643,6 +640,8 @@
                 grid.appendChild(div);
             });
         }
+
+        // ─── NAVEGACIÓN MEJORADA ──────────────────
         function switchTab(tab) {
             // Si hay juego activo y se cambia a otra pestaña, confirmar
             if (activeGame && tab !== 'game') {
@@ -651,22 +650,31 @@
                 }
                 exitGame();
             }
-            ['menu', 'shop', 'scores', 'ods'].forEach(t => {
-                const el = document.getElementById(t + '-view');
-                if (el) el.classList.toggle('hidden', t !== tab);
-                const btn = document.getElementById('tab-' + t);
-                if (btn) btn.classList.toggle('active-tab', t === tab);
-            });
-            if (tab === 'game') return;
-            document.getElementById('game-view').classList.add('hidden');
-            document.getElementById('game-view').classList.remove('active');
+            // Ocultar todas las vistas
+            document.querySelectorAll('.view').forEach(v => v.classList.add('hidden'));
+            // Mostrar la vista seleccionada
+            const viewMap = {
+                'menu': 'menu-view',
+                'shop': 'shop-view',
+                'scores': 'scores-view',
+                'ods': 'ods-view'
+            };
+            const viewId = viewMap[tab];
+            if (viewId) {
+                document.getElementById(viewId).classList.remove('hidden');
+            }
+            // Actualizar botones del footer
+            document.querySelectorAll('.footer-btn').forEach(btn => btn.classList.remove('active-tab'));
+            const tabBtn = document.getElementById('tab-' + tab);
+            if (tabBtn) tabBtn.classList.add('active-tab');
+            // Renderizar contenido según pestaña
             if (tab === 'scores') renderScores();
             if (tab === 'ods') renderODSDash();
-            if (tab === 'menu') { document.getElementById('menu-view').classList.add('active'); document.getElementById('menu-view').classList.remove('hidden'); renderMenu(); }
-            if (tab === 'shop') { document.getElementById('shop-view').classList.add('active'); document.getElementById('shop-view').classList.remove('hidden'); }
-            if (tab === 'scores') { document.getElementById('scores-view').classList.add('active'); document.getElementById('scores-view').classList.remove('hidden'); }
-            if (tab === 'ods') { document.getElementById('ods-view').classList.add('active'); document.getElementById('ods-view').classList.remove('hidden'); }
+            if (tab === 'menu') renderMenu();
+            // Asegurar que game-view esté oculto
+            document.getElementById('game-view').classList.add('hidden');
         }
+
         function renderScores() {
             const el = document.getElementById('scores-content');
             const total = GAMES.length, done = stats.completed.length;
@@ -693,23 +701,22 @@
             }).join('') + '</div>';
             el.innerHTML += '<div style="text-align:center;margin-top:10px;font-size:5px;color:#888;">Completa minijuegos ODS para desbloquear objetivos</div>';
         }
+
         function launchGame(g) {
             if (!stats.isAdmin && stats.lives <= 0) { showPopup('SIN VIDAS', 'Compra más en la tienda'); return; }
             if (!stats.isAdmin && g.cost > 0 && stats.coins < g.cost) { showPopup('SIN MONEDAS', `Necesitas ${g.cost} 💰`); return; }
             if (!stats.isAdmin && g.cost > 0) stats.coins -= g.cost;
             activeGame = g;
             mcqAnswered = false;
-            document.getElementById('menu-view').classList.add('hidden'); document.getElementById('menu-view').classList.remove('active');
-            document.getElementById('game-view').classList.remove('hidden'); document.getElementById('game-view').classList.add('active');
+            // Ocultar todas las vistas y mostrar game-view
+            document.querySelectorAll('.view').forEach(v => v.classList.add('hidden'));
+            document.getElementById('game-view').classList.remove('hidden');
             document.querySelectorAll('.footer-btn').forEach(b => b.classList.remove('active-tab'));
             buildGameUI(g); saveStats();
         }
         function exitGame() {
             clearInterval(gameTimer); activeGame = null; timerPaused = false;
-            document.getElementById('game-view').classList.add('hidden'); document.getElementById('game-view').classList.remove('active');
-            document.getElementById('menu-view').classList.remove('hidden'); document.getElementById('menu-view').classList.add('active');
-            document.getElementById('tab-menu').classList.add('active-tab');
-            renderMenu(); updateHUD();
+            switchTab('menu');
         }
         function buildGameUI(g) {
             const c = document.getElementById('game-content'); c.innerHTML = '';
@@ -1109,7 +1116,7 @@
         }
         function exitAdminMode() {
             stats.isAdmin = false;
-            stats.unlocked = 1; // o podrías restaurar el nivel real si lo guardas
+            stats.unlocked = 1; // o restaurar nivel real si se guarda
             saveStats();
             renderMenu();
             updateHUD();
