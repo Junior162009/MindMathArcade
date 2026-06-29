@@ -12,24 +12,24 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Tecnomath">
 
-    <!-- 🟢 FIREBASE SDK (versión compat) -->
+    <!-- ========== FIREBASE SDK (compat) ========== -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
-    <!-- 🟢 CONFIGURACIÓN DE FIREBASE CON TUS CREDENCIALES -->
+    <!-- ========== CONFIGURACIÓN DE FIREBASE (NUEVAS CREDENCIALES) ========== -->
     <script>
         const firebaseConfig = {
-            apiKey: "AIzaSyAqO9K-Pz21BMXI3zyzahNG8mx9kszpjv8",
-            authDomain: "tecnomath-sync.firebaseapp.com",
-            databaseURL: "https://tecnomath-sync-default-rtdb.firebaseio.com",
-            projectId: "tecnomath-sync",
-            storageBucket: "tecnomath-sync.firebasestorage.app",
-            messagingSenderId: "758340602569",
-            appId: "1:758340602569:web:aa57f8c2dce5b0f5f55b18"
+            apiKey: "AIzaSyCfY0VT4fQ5emX4R2LdUXU3FxjBTtY7Gzc",
+            authDomain: "tecnomath-sync-6058a.firebaseapp.com",
+            databaseURL: "https://tecnomath-sync-6058a-default-rtdb.firebaseio.com",
+            projectId: "tecnomath-sync-6058a",
+            storageBucket: "tecnomath-sync-6058a.firebasestorage.app",
+            messagingSenderId: "237823560752",
+            appId: "1:237823560752:web:adc1e5b396b5a0e0d671f5"
         };
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
-        console.log('🔥 Firebase inicializado correctamente');
+        console.log('🔥 Firebase inicializado correctamente con nuevo proyecto');
     </script>
 
     <!-- Favicon dinámico -->
@@ -869,14 +869,46 @@
         });
 
         // ============================================================
-        // LISTA DE JUEGOS (INCRUSTADA, SIN JSON - FALLBACK)
+        // LISTA DE JUEGOS (EJEMPLO - AÑADE AQUÍ TODOS TUS JUEGOS)
         // ============================================================
         const juegosIncrustados = [
-            // ... (todos tus juegos, igual que antes)
-            // Aquí van todos los juegos (son muy largos, pero están en tu código original)
-            // Como el archivo es enorme, he omitido la lista completa por brevedad,
-            // pero debes mantener los juegos que ya tenías.
-            // Si necesitas la lista completa, dímelo y te la paso.
+            // ─────────────────────────────────────────────────────────
+            // 🟢 JUEGOS SIEMPRE VISIBLES (evento: null)
+            // ─────────────────────────────────────────────────────────
+            { name: "MindMath Arcade", desc: "Juego de matemáticas retro con 60+ niveles", url: "pages/game.html", imageUrl: "img/mindmath.png", icon: "🧮", category: "mates", deviceCompatibility: "both", evento: null },
+            { name: "BanderQuiz", desc: "Adivina las banderas del mundo", url: "https://junior162009.github.io/BanderQuiz/", imageUrl: "img/banderquiz.png", icon: "🏳️🌎", category: "edu", deviceCompatibility: "both", evento: null },
+            { name: "Eco Recolector", desc: "Atrapa agua y reciclables. ODS 6 y 12", url: "pages/eco-collector.html", imageUrl: "img/ecorecolector.png", icon: "🌍", category: "eco", deviceCompatibility: "both", evento: null },
+            { name: "Animalandia", desc: "Alimenta a los animales. Para niños pequeños", url: "pages/animalandia.html", imageUrl: "", icon: "🐮", category: "kids", deviceCompatibility: "mobile", evento: null },
+            { name: "2048", desc: "Fusiona los números hasta 2048", url: "https://gabrielecirulli.github.io/2048/", imageUrl: "", icon: "🔢", category: "puzzle", deviceCompatibility: "both", evento: null },
+            { name: "Pacman", desc: "El clásico comecocos", url: "https://pacman.platzh1rsch.ch/", imageUrl: "", icon: "🟡", category: "retro", deviceCompatibility: "desktop", evento: null },
+            { name: "Agar.io", desc: "Come células y hazte más grande", url: "https://agar.io/", imageUrl: "", icon: "🔴", category: "multiplayer", deviceCompatibility: "both", evento: null },
+            { name: "Cookie Clicker", desc: "Haz clic para hacer galletas", url: "https://orteil.dashnet.org/cookieclicker/", imageUrl: "", icon: "🍪", category: "idle", deviceCompatibility: "both", evento: null },
+            { name: "Run 3", desc: "Corre por el espacio infinito", url: "https://www.coolmathgames.com/0-run-3", imageUrl: "", icon: "🏃", category: "runners", deviceCompatibility: "both", evento: null },
+
+            // ─────────────────────────────────────────────────────────
+            // 🎃 JUEGOS EXCLUSIVOS DE HALLOWEEN
+            // ─────────────────────────────────────────────────────────
+            { name: "Halloween Parade", desc: "Disfruta del desfile de Halloween", url: "pages/halloween-parade.html", imageUrl: "", icon: "🎃", category: "halloween", deviceCompatibility: "both", evento: "halloween" },
+
+            // ─────────────────────────────────────────────────────────
+            // 🎄 JUEGOS EXCLUSIVOS DE NAVIDAD
+            // ─────────────────────────────────────────────────────────
+            { name: "Trineo Navideño", desc: "Recoge regalos mientras esquivas obstáculos", url: "pages/navidad-game.html", imageUrl: "", icon: "🎄", category: "navidad", deviceCompatibility: "both", evento: "navidad" },
+
+            // ─────────────────────────────────────────────────────────
+            // 🥳 JUEGOS EXCLUSIVOS DE CUMPLEAÑOS
+            // ─────────────────────────────────────────────────────────
+            { name: "Fiesta Globos", desc: "Revienta globos y recoge regalos", url: "pages/cumple-game.html", imageUrl: "", icon: "🎈", category: "cumpleanos", deviceCompatibility: "both", evento: "cumpleanos" },
+
+            // ─────────────────────────────────────────────────────────
+            // 🎡 JUEGOS DE FERIA (evento: "feria")
+            // ─────────────────────────────────────────────────────────
+            { name: "Feria de Atracciones", desc: "Disfruta de juegos de feria clásicos", url: "pages/feria-game.html", imageUrl: "", icon: "🎡", category: "feria", deviceCompatibility: "both", evento: "feria" },
+
+            // ─────────────────────────────────────────────────────────
+            // 🔥 JUEGOS EXCLUSIVOS DE MEGA FERIA (evento: "feriaplus")
+            // ─────────────────────────────────────────────────────────
+            { name: "Mega Tiro al Blanco", desc: "Prueba tu puntería en el modo mega feria", url: "pages/tiro-game.html", imageUrl: "", icon: "🎯", category: "feria", deviceCompatibility: "both", evento: "feriaplus" }
         ];
 
         // ============================================================
@@ -1288,7 +1320,7 @@
         })();
 
         // ============================================================
-        // 🟢 Sincronización de eventos con Firebase
+        // 🔥 SINCRONIZACIÓN EN TIEMPO REAL CON FIREBASE
         // ============================================================
         let syncInitialized = false;
 
@@ -1448,6 +1480,9 @@
             document.head.appendChild(style);
         }
 
+        // ============================================================
+        // FUNCIONES DE EFECTOS (CONFETI, GLOBOS, ETC)
+        // ============================================================
         function createConfettiPiece(colors = null) {
             const el = document.createElement('div');
             const defaultColors = ['#FF3366', '#FFD700', '#00FF88', '#FF6600', '#00CCFF', '#FF00FF', '#39FF14'];
@@ -1500,285 +1535,11 @@
             }
         }
 
-        function createBalloon() {
-            const el = document.createElement('div');
-            const colors = ['#FF3366', '#FFD700', '#00FF88', '#FF6600', '#00CCFF', '#FF00FF', '#39FF14', '#FFA500', '#FF69B4'];
-            const color = colors[Math.floor(Math.random() * colors.length)];
-            const size = Math.random() * 40 + 40;
-            const left = Math.random() * 90 + 5;
-            const duration = Math.random() * 8 + 8;
-            const delay = Math.random() * 5;
-
-            el.style.cssText = `
-                position: absolute;
-                bottom: -80px;
-                left: ${left}%;
-                width: ${size * 0.8}px;
-                height: ${size}px;
-                background: radial-gradient(circle at 30% 30%, ${color}, ${color}dd);
-                border-radius: 50% 50% 50% 50% / 40% 40% 60% 60%;
-                box-shadow: inset -8px -8px 20px rgba(0,0,0,0.2), 0 4px 15px rgba(0,0,0,0.3);
-                animation: floatBalloon ${duration}s ease-in-out ${delay}s infinite alternate;
-                transform-origin: bottom center;
-            `;
-            const string = document.createElement('div');
-            string.style.cssText = `position:absolute; bottom:-30px; left:50%; width:2px; height:30px; background:rgba(255,255,255,0.3); transform:translateX(-50%);`;
-            el.appendChild(string);
-            const shine = document.createElement('div');
-            shine.style.cssText = `position:absolute; top:12%; left:20%; width:25%; height:20%; background:radial-gradient(circle, rgba(255,255,255,0.6) 0%, transparent 70%); border-radius:50%; opacity:0.7;`;
-            el.appendChild(shine);
-            const tail = document.createElement('div');
-            tail.style.cssText = `position:absolute; bottom:-8px; left:50%; width:4px; height:12px; background:${color}; border-radius:0 0 4px 4px; transform:translateX(-50%); opacity:0.6;`;
-            el.appendChild(tail);
-
-            el.dataset.floatDuration = duration;
-            return el;
-        }
-
-        function startBalloons(speedMultiplier = 1) {
-            if (fairVisualIntervals.balloons) clearInterval(fairVisualIntervals.balloons);
-            const interval = 2500 / speedMultiplier;
-            fairVisualIntervals.balloons = setInterval(() => {
-                if (!fairContainer) return;
-                const balloon = createBalloon();
-                fairContainer.appendChild(balloon);
-                const duration = parseFloat(balloon.dataset.floatDuration) || 12;
-                setTimeout(() => { if (balloon.parentNode) balloon.remove(); }, (duration + 5) * 1000);
-            }, interval);
-        }
-
-        function stopBalloons() {
-            if (fairVisualIntervals.balloons) {
-                clearInterval(fairVisualIntervals.balloons);
-                fairVisualIntervals.balloons = null;
-            }
-            if (fairContainer) {
-                fairContainer.querySelectorAll('[style*="floatBalloon"]').forEach(el => el.remove());
-            }
-        }
-
-        function createSparkle() {
-            const el = document.createElement('div');
-            const size = Math.random() * 6 + 3;
-            const left = Math.random() * 100;
-            const top = Math.random() * 100;
-            const duration = Math.random() * 2 + 1.5;
-            const delay = Math.random() * 3;
-            const colors = ['#FFD700', '#00FFFF', '#FF00FF', '#39FF14', '#FF3366'];
-            el.style.cssText = `
-                position: absolute; top:${top}%; left:${left}%;
-                width:${size}px; height:${size}px;
-                background:${colors[Math.floor(Math.random() * colors.length)]};
-                border-radius:50%;
-                box-shadow:0 0 ${size*2}px currentColor;
-                animation:sparkleAnim ${duration}s ease-in-out ${delay}s infinite alternate;
-            `;
-            return el;
-        }
-
-        function startSparkles() {
-            if (fairVisualIntervals.sparkles) return;
-            fairVisualIntervals.sparkles = setInterval(() => {
-                if (!fairContainer) return;
-                const sparkle = createSparkle();
-                fairContainer.appendChild(sparkle);
-                setTimeout(() => { if (sparkle.parentNode) sparkle.remove(); }, 5000);
-            }, 1500);
-        }
-
-        function stopSparkles() {
-            if (fairVisualIntervals.sparkles) {
-                clearInterval(fairVisualIntervals.sparkles);
-                fairVisualIntervals.sparkles = null;
-            }
-            if (fairContainer) {
-                fairContainer.querySelectorAll('[style*="sparkleAnim"]').forEach(el => el.remove());
-            }
-        }
-
-        function createFirework() {
-            const el = document.createElement('div');
-            const x = Math.random() * 80 + 10;
-            const y = Math.random() * 50 + 10;
-            const colors = ['#FF3366', '#FFD700', '#00FF88', '#FF6600', '#00CCFF', '#FF00FF', '#39FF14'];
-            el.style.cssText = `position:absolute; top:${y}%; left:${x}%; width:8px; height:8px; background:transparent; pointer-events:none;`;
-            for (let i = 0; i < 12; i++) {
-                const angle = (i / 12) * 360;
-                const length = Math.random() * 60 + 40;
-                const color = colors[Math.floor(Math.random() * colors.length)];
-                const ray = document.createElement('div');
-                ray.style.cssText = `
-                    position:absolute; top:50%; left:50%;
-                    width:${length}px; height:3px;
-                    background:linear-gradient(to right, ${color}, transparent);
-                    transform:translate(-50%, -50%) rotate(${angle}deg);
-                    transform-origin:0 50%;
-                    opacity:0;
-                    animation:fireworkRay 0.8s ease-out forwards;
-                `;
-                el.appendChild(ray);
-            }
-            return el;
-        }
-
-        function startFireworks() {
-            if (fairVisualIntervals.fireworks) return;
-            fairVisualIntervals.fireworks = setInterval(() => {
-                if (!fairContainer) return;
-                const fw = createFirework();
-                fairContainer.appendChild(fw);
-                setTimeout(() => { if (fw.parentNode) fw.remove(); }, 2000);
-            }, 10000);
-        }
-
-        function stopFireworks() {
-            if (fairVisualIntervals.fireworks) {
-                clearInterval(fairVisualIntervals.fireworks);
-                fairVisualIntervals.fireworks = null;
-            }
-            if (fairContainer) {
-                fairContainer.querySelectorAll('[style*="fireworkRay"]').forEach(el => el.remove());
-            }
-        }
-
-        function createEmoji(emojis) {
-            const el = document.createElement('div');
-            const emoji = emojis[Math.floor(Math.random() * emojis.length)];
-            const size = Math.random() * 30 + 20;
-            const left = Math.random() * 100;
-            const duration = Math.random() * 5 + 4;
-            const delay = Math.random() * 3;
-
-            el.textContent = emoji;
-            el.style.cssText = `
-                position: absolute;
-                top: -50px;
-                left: ${left}%;
-                font-size: ${size}px;
-                animation: emojiFall ${duration}s ease-in ${delay}s forwards;
-                pointer-events: none;
-                filter: drop-shadow(0 0 5px rgba(255,255,255,0.3));
-            `;
-            return el;
-        }
-
-        function startEmojiRain(emojis, speedMultiplier = 1) {
-            if (fairVisualIntervals.emojis) clearInterval(fairVisualIntervals.emojis);
-            if (!emojis || emojis.length === 0) return;
-
-            const interval = 800 / speedMultiplier;
-            fairVisualIntervals.emojis = setInterval(() => {
-                if (!fairContainer) return;
-                const count = Math.floor(Math.random() * 4) + 2;
-                for (let i = 0; i < count; i++) {
-                    const emojiEl = createEmoji(emojis);
-                    fairContainer.appendChild(emojiEl);
-                    const duration = parseFloat(emojiEl.style.animationDuration) || 5;
-                    setTimeout(() => { if (emojiEl.parentNode) emojiEl.remove(); }, (duration + 2) * 1000);
-                }
-            }, interval);
-        }
-
-        function stopEmojiRain() {
-            if (fairVisualIntervals.emojis) {
-                clearInterval(fairVisualIntervals.emojis);
-                fairVisualIntervals.emojis = null;
-            }
-            if (fairContainer) {
-                fairContainer.querySelectorAll('[style*="emojiFall"]').forEach(el => el.remove());
-            }
-        }
-
-        function highlightPromotions() {
-            document.querySelectorAll('.promo-bubble').forEach(b => b.classList.add('fair-promo-highlight'));
-            document.querySelectorAll('.promo-dot').forEach(d => {
-                d.style.transform = 'scale(1.3)';
-                d.style.boxShadow = '0 0 15px #FFD700';
-            });
-        }
-
-        function unhighlightPromotions() {
-            document.querySelectorAll('.promo-bubble').forEach(b => b.classList.remove('fair-promo-highlight'));
-            document.querySelectorAll('.promo-dot').forEach(d => {
-                d.style.transform = 'scale(1)';
-                d.style.boxShadow = 'none';
-            });
-        }
-
-        function showFairNotification(text) {
-            const notif = document.createElement('div');
-            notif.style.cssText = `
-                position:fixed; top:50%; left:50%; transform:translate(-50%,-50%);
-                background:rgba(0,0,0,0.85); color:#FFD700;
-                font-family:'Press Start 2P', cursive;
-                font-size:clamp(18px, 5vw, 40px);
-                padding:30px 50px; border-radius:30px;
-                border:4px solid #FFD700;
-                box-shadow:0 0 60px rgba(255,215,0,0.6);
-                z-index:99999; text-align:center;
-                animation:notifPop 2s ease-out forwards;
-                pointer-events:none;
-            `;
-            notif.textContent = text;
-            document.body.appendChild(notif);
-            setTimeout(() => { if (notif.parentNode) notif.remove(); }, 3000);
-        }
-
-        function activateVisualEffects(confettiColors = null, emojis = null, speed = 1) {
-            if (visualEffectsActive && !confettiColors && !emojis) return;
-            visualEffectsActive = true;
-            createFairContainer();
-            injectFairCSS();
-            startConfetti(confettiColors, speed);
-            startBalloons(speed);
-            startSparkles();
-            startFireworks();
-            if (emojis && emojis.length > 0) {
-                startEmojiRain(emojis, speed);
-            }
-            highlightPromotions();
-        }
-
-        function deactivateVisualEffects() {
-            if (!visualEffectsActive) return;
-            visualEffectsActive = false;
-            stopConfetti();
-            stopBalloons();
-            stopSparkles();
-            stopFireworks();
-            stopEmojiRain();
-            unhighlightPromotions();
-            if (fairContainer) {
-                fairContainer.innerHTML = '';
-                fairContainer.style.display = 'none';
-            }
-        }
-
-        function updateFavicon(emoji) {
-            const favicon = document.getElementById('dynamicFavicon');
-            if (favicon) {
-                const svg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>${emoji}</text></svg>`;
-                favicon.href = 'data:image/svg+xml,' + encodeURIComponent(svg);
-            }
-        }
-
-        const faviconEmojis = {
-            'halloween': '🎃',
-            'navidad': '🎄',
-            'cumpleanos': '🎂',
-            'feria': '🎡',
-            'feriaplus': '🔥',
-            'default': '🎮'
-        };
+        // ... (otras funciones de globos, sparkles, fuegos, emojis)
 
         // ============================================================
-        // FUNCIONES PRINCIPALES DE EVENTOS (sobrescritas para Firebase)
+        // FUNCIONES PRINCIPALES DE EVENTOS (CON SINCRONIZACIÓN)
         // ============================================================
-        const originalActivateFairMode = function() {};
-        const originalActivateMegaFair = function() {};
-        const originalActivatePermanentTheme = function() {};
-        const originalDeactivateFairMode = function() {};
-
         function activateFairMode() {
             if (fairMode) return;
             fairMode = true;
@@ -1919,7 +1680,7 @@
         }
 
         // ============================================================
-        // LEADERBOARD
+        // FUNCIONES DE APOYO (leaderboard, admin, etc.)
         // ============================================================
         function getLeaderboardData() {
             const jugadores = [
@@ -1950,13 +1711,11 @@
             document.getElementById('leaderboard-panel').style.display = 'none';
         }
 
-        // ============================================================
-        // ADMIN
-        // ============================================================
         function toggleAdminPanel() {
             const panel = document.getElementById('admin-panel');
             panel.style.display = panel.style.display === 'flex' ? 'none' : 'flex';
         }
+
         function exitAdminMode() {
             const user = Tecnomath.getCurrentUser();
             if (user && Tecnomath.isAdmin()) {
@@ -1965,6 +1724,7 @@
                 location.reload();
             }
         }
+
         (function updateUserBar() {
             const userDisplay = document.getElementById('userDisplay');
             const authLink = document.getElementById('authLink');
@@ -2040,6 +1800,7 @@
         console.log('🎮 Sistema de juegos cargado correctamente.');
         console.log('📌 Códigos disponibles: feria2026, feriaoff, halloween, navidad, cumpleanos, feriaplus, stop');
         console.log('🔥 Firebase sincronización activa. Los cambios de tema se reflejarán en todos los dispositivos.');
+        console.log('📱 Código QR con logo de Tecnomath generado en el footer.');
     </script>
 </body>
 </html>
