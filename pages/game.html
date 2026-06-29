@@ -39,7 +39,6 @@
         .cloud-btn { font-size: 15px; cursor: pointer; transition: transform .2s; flex-shrink: 0; }
         .cloud-btn:hover { transform: scale(1.3); }
         .coins-display { color: var(--gold); font-size: 7px; text-shadow: 0 0 8px var(--gold); flex-shrink: 0; text-align: right; }
-        /* Botón de salir admin */
         .btn-exit-admin-game {
             font-family: 'Press Start 2P', cursive; font-size: 7px;
             background: #c0392b; color: white; border: 1px solid #ff00ff;
@@ -211,6 +210,41 @@
     </div>
 
     <script>
+        // ════════════════════════════════════════════
+        //  PATCH: TECNOMATH MOCK (offline compatible)
+        // ════════════════════════════════════════════
+        if (typeof Tecnomath === 'undefined') {
+            window.Tecnomath = {
+                getCurrentUser: () => null,
+                getCoins: () => parseInt(localStorage.getItem('global_coins') || '0'),
+                addCoins: (amount) => {
+                    const current = parseInt(localStorage.getItem('global_coins') || '0');
+                    localStorage.setItem('global_coins', (current + amount).toString());
+                },
+                updateHighScore: (game, score) => {
+                    const key = 'highscore_' + game;
+                    const old = parseInt(localStorage.getItem(key) || '0');
+                    if (score > old) localStorage.setItem(key, score.toString());
+                },
+                getGameCoins: (game) => {
+                    // retorna las monedas locales desde stats
+                    return stats.coins || 0;
+                },
+                exchangeGlobalToLocal: (game, amount) => {
+                    const current = parseInt(localStorage.getItem('global_coins') || '0');
+                    if (current < amount) return false;
+                    localStorage.setItem('global_coins', (current - amount).toString());
+                    const gain = Math.floor(amount * 0.9);
+                    stats.coins += gain;
+                    saveStats();
+                    return true;
+                },
+                isAdmin: () => stats.isAdmin || false,
+                setAdmin: (username) => { stats.isAdmin = true; saveStats(); },
+                unsetAdmin: (username) => { stats.isAdmin = false; saveStats(); }
+            };
+        }
+
         // ════════════════════════════════════════════
         //  CATEGORÍAS (incluyendo ODS)
         // ════════════════════════════════════════════
@@ -535,12 +569,15 @@
         let currentCat = 'all', activeGame = null, gameTimer = null;
         let timeLeft = 0, timerTotal = 0;
         let mathAnswer = '', mathInput = '', mathFillEl;
-        let memCards = [], memFlipped = [], memMatched = 0;
+        let memCards = [], memFlipped = [], memMatched = 0, memProcessing = false;
         let simonSeq = [], simonPlayer = [], simonStep = 0, simonPlaying = false;
         let anagramWord = '', anagramSelected = [], anagramLetters = [];
         let orderItems = [], orderPlaced = [];
         let woWords = [], woSelected = [], woTarget = [];
-        let fruitCards = [], fruitFlipped = [], fruitMatched = 0, fruitAttempts = 8;
+        let fruitCards = [], fruitFlipped = [], fruitMatched = 0, fruitAttempts = 8, fruitProcessing = false;
+        let mcqAnswered = false;
+        let timerPaused = false;
+        let pauseTimeRemaining = 0;
 
         // ════════════════════════════════════════════
         //  CORE FUNCTIONS
@@ -582,7 +619,6 @@
                     } else { globalCoinEl.textContent = '0'; }
                 } catch (e) { globalCoinEl.textContent = '0'; }
             }
-            // ✅ LLAMADA CORREGIDA: ahora el botón de salir admin se actualiza siempre
             updateAdminButton();
         }
 
@@ -608,6 +644,13 @@
             });
         }
         function switchTab(tab) {
+            // Si hay juego activo y se cambia a otra pestaña, confirmar
+            if (activeGame && tab !== 'game') {
+                if (!confirm('¿Salir de la partida actual?')) {
+                    return;
+                }
+                exitGame();
+            }
             ['menu', 'shop', 'scores', 'ods'].forEach(t => {
                 const el = document.getElementById(t + '-view');
                 if (el) el.classList.toggle('hidden', t !== tab);
@@ -655,13 +698,14 @@
             if (!stats.isAdmin && g.cost > 0 && stats.coins < g.cost) { showPopup('SIN MONEDAS', `Necesitas ${g.cost} 💰`); return; }
             if (!stats.isAdmin && g.cost > 0) stats.coins -= g.cost;
             activeGame = g;
+            mcqAnswered = false;
             document.getElementById('menu-view').classList.add('hidden'); document.getElementById('menu-view').classList.remove('active');
             document.getElementById('game-view').classList.remove('hidden'); document.getElementById('game-view').classList.add('active');
             document.querySelectorAll('.footer-btn').forEach(b => b.classList.remove('active-tab'));
             buildGameUI(g); saveStats();
         }
         function exitGame() {
-            clearInterval(gameTimer); activeGame = null;
+            clearInterval(gameTimer); activeGame = null; timerPaused = false;
             document.getElementById('game-view').classList.add('hidden'); document.getElementById('game-view').classList.remove('active');
             document.getElementById('menu-view').classList.remove('hidden'); document.getElementById('menu-view').classList.add('active');
             document.getElementById('tab-menu').classList.add('active-tab');
@@ -721,6 +765,7 @@
             const c = document.getElementById('game-content'), pool = QB[g.subtype];
             if (!pool) { c.innerHTML = '<div style="color:#888;font-size:6px;text-align:center;padding:20px;">Contenido próximamente</div>'; return; }
             const q = pool[Math.floor(Math.random() * pool.length)], shuffled = shuffleOpts(q.opts, q.a);
+            mcqAnswered = false;
             c.innerHTML = `<div class="game-header"><div class="game-title">${g.emoji} ${g.name}</div></div>
             <div class="game-timer-bar"><div class="game-timer-fill" id="tfill" style="width:100%"></div></div>
             <div class="math-problem" style="font-size:9px;line-height:1.7;">${q.q}</div>
@@ -734,6 +779,8 @@
             return { opts: pairs.map(p => p.o), correct: pairs.findIndex(p => p.correct) };
         }
         function mcqPick(el, idx, correct) {
+            if (mcqAnswered) return;
+            mcqAnswered = true;
             clearInterval(gameTimer); document.querySelectorAll('.mcq-btn').forEach(b => b.style.pointerEvents = 'none');
             if (idx === correct) { el.classList.add('correct'); setTimeout(() => gameWin(activeGame), 600); }
             else { el.classList.add('wrong'); document.querySelectorAll('.mcq-btn')[correct].classList.add('correct'); setTimeout(() => gameFail(activeGame, '❌ ERROR'), 900); }
@@ -770,6 +817,8 @@
             startTimer(20 + stats.timeBoost, () => gameFail(g, '⏱️ TIEMPO'), document.getElementById('tfill')); stats.timeBoost = 0;
         }
         function fbPick(el, chosen, ans) {
+            if (mcqAnswered) return;
+            mcqAnswered = true;
             clearInterval(gameTimer); document.querySelectorAll('.mcq-btn').forEach(b => b.style.pointerEvents = 'none');
             if (chosen === ans) { el.classList.add('correct'); setTimeout(() => gameWin(activeGame), 600); }
             else { el.classList.add('wrong'); document.querySelectorAll('.mcq-btn').forEach(b => { if (b.innerText === ans) b.classList.add('correct'); }); setTimeout(() => gameFail(activeGame, '❌ ERROR'), 900); }
@@ -801,7 +850,7 @@
         const MEM_EMOJIS = ['🧮', '📐', '🔬', '🌍', '📚', '🏛️', '⚗️', '🧬'];
         function buildMemoryCards(g) {
             const c = document.getElementById('game-content');
-            memFlipped = []; memMatched = 0;
+            memFlipped = []; memMatched = 0; memProcessing = false;
             const pairs = [...MEM_EMOJIS, ...MEM_EMOJIS].sort(() => Math.random() - .5);
             memCards = pairs.map((e, i) => ({ id: i, emoji: e, revealed: false, matched: false }));
             c.innerHTML = `<div class="game-header"><div class="game-title">🃏 MEMORIA</div></div>
@@ -812,14 +861,16 @@
             startTimer(90, () => gameFail(g, '⏱️ TIEMPO'), document.getElementById('tfill'));
         }
         function flipCard(id) {
-            if (memFlipped.length >= 2) return; const mc = memCards[id]; if (mc.matched || mc.revealed) return;
+            if (memProcessing || memFlipped.length >= 2) return;
+            const mc = memCards[id]; if (mc.matched || mc.revealed) return;
             mc.revealed = true; memFlipped.push(id); document.getElementById('mc' + id).classList.remove('hidden');
             if (memFlipped.length === 2) {
+                memProcessing = true;
                 const [a, b] = memFlipped;
                 if (memCards[a].emoji === memCards[b].emoji) {
-                    setTimeout(() => { memCards[a].matched = memCards[b].matched = true; document.getElementById('mc' + a).classList.add('matched'); document.getElementById('mc' + b).classList.add('matched'); memFlipped = []; memMatched++; document.getElementById('mem-pairs').innerText = memMatched; if (memMatched === 8) { clearInterval(gameTimer); setTimeout(() => gameWin(activeGame), 400); } }, 400);
+                    setTimeout(() => { memCards[a].matched = memCards[b].matched = true; document.getElementById('mc' + a).classList.add('matched'); document.getElementById('mc' + b).classList.add('matched'); memFlipped = []; memMatched++; document.getElementById('mem-pairs').innerText = memMatched; memProcessing = false; if (memMatched === 8) { clearInterval(gameTimer); setTimeout(() => gameWin(activeGame), 400); } }, 400);
                 } else {
-                    setTimeout(() => { memCards[a].revealed = memCards[b].revealed = false; document.getElementById('mc' + a).classList.add('hidden'); document.getElementById('mc' + b).classList.add('hidden'); memFlipped = []; }, 700);
+                    setTimeout(() => { memCards[a].revealed = memCards[b].revealed = false; document.getElementById('mc' + a).classList.add('hidden'); document.getElementById('mc' + b).classList.add('hidden'); memFlipped = []; memProcessing = false; }, 700);
                 }
             }
         }
@@ -827,7 +878,7 @@
         // ─── MEMORY FRUITS ───────────────────────
         function buildMemoryFruits(g) {
             const c = document.getElementById('game-content');
-            fruitFlipped = []; fruitMatched = 0; fruitAttempts = 8;
+            fruitFlipped = []; fruitMatched = 0; fruitAttempts = 8; fruitProcessing = false;
             const pairs = [...FRUIT_EMOJIS, ...FRUIT_EMOJIS].sort(() => Math.random() - .5);
             fruitCards = pairs.map((e, i) => ({ id: i, emoji: e, revealed: false, matched: false }));
             c.innerHTML = `<div class="game-header"><div class="game-title">🍎 MEMORIA FRUTAS</div></div>
@@ -841,20 +892,22 @@
         }
         function hideAllFruitCards() { fruitCards.forEach(mc => { if (!mc.matched) { mc.revealed = false; document.getElementById('fc' + mc.id).classList.add('hidden'); } }); }
         function flipFruitCard(id) {
-            if (fruitFlipped.length >= 2 || fruitAttempts <= 0) return; const mc = fruitCards[id]; if (mc.matched || mc.revealed) return;
+            if (fruitProcessing || fruitFlipped.length >= 2 || fruitAttempts <= 0) return;
+            const mc = fruitCards[id]; if (mc.matched || mc.revealed) return;
             mc.revealed = true; fruitFlipped.push(id); document.getElementById('fc' + id).classList.remove('hidden');
             if (fruitFlipped.length === 2) {
+                fruitProcessing = true;
                 const [a, b] = fruitFlipped;
                 if (fruitCards[a].emoji === fruitCards[b].emoji) {
-                    setTimeout(() => { fruitCards[a].matched = fruitCards[b].matched = true; document.getElementById('fc' + a).classList.add('matched'); document.getElementById('fc' + b).classList.add('matched'); fruitFlipped = []; fruitMatched++; document.getElementById('fruit-pairs').innerText = fruitMatched; if (fruitMatched === 8) { clearInterval(gameTimer); setTimeout(() => gameWin(activeGame), 400); } }, 400);
+                    setTimeout(() => { fruitCards[a].matched = fruitCards[b].matched = true; document.getElementById('fc' + a).classList.add('matched'); document.getElementById('fc' + b).classList.add('matched'); fruitFlipped = []; fruitMatched++; document.getElementById('fruit-pairs').innerText = fruitMatched; fruitProcessing = false; if (fruitMatched === 8) { clearInterval(gameTimer); setTimeout(() => gameWin(activeGame), 400); } }, 400);
                 } else {
                     fruitAttempts--; document.getElementById('fruit-attempts').innerText = fruitAttempts;
-                    setTimeout(() => { fruitCards[a].revealed = fruitCards[b].revealed = false; document.getElementById('fc' + a).classList.add('hidden'); document.getElementById('fc' + b).classList.add('hidden'); fruitFlipped = []; if (fruitAttempts <= 0) { clearInterval(gameTimer); gameFail(activeGame, '❌ SIN INTENTOS'); } }, 700);
+                    setTimeout(() => { fruitCards[a].revealed = fruitCards[b].revealed = false; document.getElementById('fc' + a).classList.add('hidden'); document.getElementById('fc' + b).classList.add('hidden'); fruitFlipped = []; fruitProcessing = false; if (fruitAttempts <= 0) { clearInterval(gameTimer); gameFail(activeGame, '❌ SIN INTENTOS'); } }, 700);
                 }
             }
         }
         function resetFruitMemory() {
-            clearInterval(gameTimer); fruitFlipped = []; fruitMatched = 0; fruitAttempts = 8;
+            clearInterval(gameTimer); fruitFlipped = []; fruitMatched = 0; fruitAttempts = 8; fruitProcessing = false;
             const pairs = [...FRUIT_EMOJIS, ...FRUIT_EMOJIS].sort(() => Math.random() - .5);
             fruitCards = pairs.map((e, i) => ({ id: i, emoji: e, revealed: false, matched: false }));
             const grid = document.getElementById('fruit-grid');
@@ -869,11 +922,13 @@
             const nums = [1, 2, 3, 4, 5, 6, 7, 8, 9], len = 5 + Math.floor((g.id || 42) / 10);
             simonSeq = Array.from({ length: len }, () => nums[Math.floor(Math.random() * 9)]);
             c.innerHTML = `<div class="game-header"><div class="game-title">🔢 SIMON DICE</div></div>
+            <div class="game-timer-bar"><div class="game-timer-fill" id="tfill" style="width:100%"></div></div>
             <div style="font-size:6px;color:#888;">Memoriza y repite la secuencia</div>
             <div style="font-size:8px;color:var(--neon-yellow);margin-bottom:12px;text-align:center;" id="simon-seq-display">?</div>
             <div style="font-size:5px;color:#555;">Tu respuesta: <span id="simon-ans" style="color:var(--neon-green)"></span></div>
             <div class="numpad">${[1,2,3,4,5,6,7,8,9,'×','0','✓'].map(k=>`<div class="key" onclick="simonKey('${k}')">${k}</div>`).join('')}</div>
             <button class="btn-main" style="margin-top:10px;" onclick="showSimonSeq()">👁️ VER SECUENCIA</button>`;
+            startTimer(45 + stats.timeBoost, () => gameFail(g, '⏱️ TIEMPO'), document.getElementById('tfill')); stats.timeBoost = 0;
             setTimeout(showSimonSeq, 500);
         }
         function showSimonSeq() { simonPlaying = true; simonPlayer = []; simonStep = 0; document.getElementById('simon-ans').innerText = ''; const el = document.getElementById('simon-seq-display'); el.innerText = '▶ ' + simonSeq.join(' - '); setTimeout(() => { el.innerText = '?'; simonPlaying = false; }, simonSeq.length * 500 + 1000); }
@@ -914,6 +969,7 @@
             const c = document.getElementById('game-content'), shuffled = [...TIMELINE_DATA].sort(() => Math.random() - .5);
             const target = shuffled[Math.floor(Math.random() * shuffled.length)];
             const opts4 = [target, ...TIMELINE_DATA.filter(x => x !== target).sort(() => Math.random() - .5).slice(0, 3)].sort(() => Math.random() - .5);
+            mcqAnswered = false;
             c.innerHTML = `<div class="game-header"><div class="game-title">📅 LÍNEA DEL TIEMPO</div></div>
             <div class="game-timer-bar"><div class="game-timer-fill" id="tfill" style="width:100%"></div></div>
             <div style="font-size:7px;color:#aaa;text-align:center;">¿En qué fecha ocurrió?</div>
@@ -921,7 +977,13 @@
             <div class="mcq-options">${opts4.map(o=>`<div class="mcq-btn" onclick="tlPick(this,'${o.label}','${target.label}')">${o.label}</div>`).join('')}</div>`;
             startTimer(20, () => gameFail(g, '⏱️ TIEMPO'), document.getElementById('tfill'));
         }
-        function tlPick(el, chosen, ans) { clearInterval(gameTimer); document.querySelectorAll('.mcq-btn').forEach(b => b.style.pointerEvents = 'none'); if (chosen === ans) { el.classList.add('correct'); setTimeout(() => gameWin(activeGame), 600); } else { el.classList.add('wrong'); document.querySelectorAll('.mcq-btn').forEach(b => { if (b.innerText === ans) b.classList.add('correct'); }); setTimeout(() => gameFail(activeGame, '❌ ERROR'), 900); } }
+        function tlPick(el, chosen, ans) {
+            if (mcqAnswered) return;
+            mcqAnswered = true;
+            clearInterval(gameTimer); document.querySelectorAll('.mcq-btn').forEach(b => b.style.pointerEvents = 'none');
+            if (chosen === ans) { el.classList.add('correct'); setTimeout(() => gameWin(activeGame), 600); }
+            else { el.classList.add('wrong'); document.querySelectorAll('.mcq-btn').forEach(b => { if (b.innerText === ans) b.classList.add('correct'); }); setTimeout(() => gameFail(activeGame, '❌ ERROR'), 900); }
+        }
 
         // ─── READING ─────────────────────────────
         function buildReading(g) {
@@ -929,10 +991,13 @@
                 { p: "El agua cubre el 71% de la superficie terrestre. La mayor parte (97%) es salada. El 3% restante es agua dulce, aunque la mayoría está congelada.", q: "¿Qué porcentaje del agua es dulce?", opts: ["3%", "71%", "97%", "29%"], a: 0 },
                 { p: "La fotosíntesis convierte CO₂ y agua en glucosa usando energía solar. Ocurre en los cloroplastos y libera oxígeno.", q: "¿Qué producen las plantas?", opts: ["Glucosa y oxígeno", "Solo CO₂", "Agua y CO₂", "Solo glucosa"], a: 0 },
             ], t = texts[Math.floor(Math.random() * texts.length)], shuffled = shuffleOpts(t.opts, t.a);
+            mcqAnswered = false;
             c.innerHTML = `<div class="game-header"><div class="game-title">📖 COMPRENSIÓN</div></div>
+            <div class="game-timer-bar"><div class="game-timer-fill" id="tfill" style="width:100%"></div></div>
             <div style="background:#0d0d1a;border:1px solid #1a1a3a;padding:12px;font-size:6px;color:#ccc;line-height:1.8;border-radius:6px;max-width:340px;">${t.p}</div>
             <div style="font-size:7px;color:var(--neon-cyan);text-align:center;">${t.q}</div>
             <div class="mcq-options">${shuffled.opts.map((o,i)=>`<div class="mcq-btn" onclick="mcqPick(this,${i},${shuffled.correct})">${o}</div>`).join('')}</div>`;
+            startTimer(30, () => gameFail(g, '⏱️ TIEMPO'), document.getElementById('tfill'));
         }
 
         // ─── WORD ORDER ──────────────────────────
@@ -940,14 +1005,23 @@
             const c = document.getElementById('game-content'), phrases = [["Las","plantas","producen","oxígeno"],["El","sol","es","una","estrella"],["Colombia","está","en","América"],["La","mitosis","divide","células"],["El","agua","es","vida"]];
             woTarget = phrases[Math.floor(Math.random() * phrases.length)]; woWords = [...woTarget].sort(() => Math.random() - .5); woSelected = [];
             c.innerHTML = `<div class="game-header"><div class="game-title">🔤 ORDENA LA FRASE</div></div>
+            <div class="game-timer-bar"><div class="game-timer-fill" id="tfill" style="width:100%"></div></div>
             <div style="font-size:5px;color:#888;text-align:center;">Forma la oración correcta</div>
             <div class="word-answer" id="wo-answer" style="min-height:40px;padding:6px;border:1px dashed #333;width:100%;max-width:340px;border-radius:6px;"><span style="color:#555;font-size:5px;">Toca las palabras en orden</span></div>
             <div class="word-letters" id="wo-tiles">${woWords.map((w,i)=>`<div class="letter-tile" id="wt${i}" onclick="woPick(${i})" style="width:auto;padding:6px 8px;font-size:7px;">${w}</div>`).join('')}</div>
             <div style="display:flex;gap:6px;width:100%;max-width:340px;"><button class="btn-secondary" style="flex:1" onclick="woClear()">BORRAR</button><button class="btn-main" style="flex:1;margin:0;" onclick="woCheck()">✓ OK</button></div>`;
+            startTimer(30, () => gameFail(g, '⏱️ TIEMPO'), document.getElementById('tfill'));
         }
         function woPick(i) { const tile = document.getElementById('wt' + i); if (tile.classList.contains('selected')) return; tile.classList.add('selected'); woSelected.push(woWords[i]); const ans = document.getElementById('wo-answer'); if (woSelected.length === 1) ans.innerHTML = ''; const span = document.createElement('div'); span.style.cssText = 'background:#1a1a2e;border:2px solid var(--neon-pink);padding:5px 8px;font-size:7px;border-radius:4px;'; span.innerText = woWords[i]; ans.appendChild(span); }
         function woClear() { woSelected = []; document.querySelectorAll('#wo-tiles .letter-tile').forEach(t => t.classList.remove('selected')); document.getElementById('wo-answer').innerHTML = '<span style="color:#555;font-size:5px;">Toca las palabras en orden</span>'; }
-        function woCheck() { const ok = woSelected.join(' ') === woTarget.join(' '); ok ? gameWin(activeGame) : gameFail(activeGame, '❌ ORDEN INCORRECTO'); }
+        function woCheck() {
+            if (woSelected.length !== woTarget.length) {
+                showPopup('⚠️ INCOMPLETO', 'Selecciona todas las palabras');
+                return;
+            }
+            const ok = woSelected.join(' ') === woTarget.join(' ');
+            ok ? gameWin(activeGame) : gameFail(activeGame, '❌ ORDEN INCORRECTO');
+        }
 
         // ─── PATTERN ─────────────────────────────
         function buildPattern(g) {
@@ -957,6 +1031,7 @@
                 { seq: ['A','B','B','A','B','?'], ans:'B', opts:['B','A','C','D'] },
                 { seq: ['1','2','4','8','16','?'], ans:'32', opts:['32','24','20','18'] },
             ], p = patterns[Math.floor(Math.random() * patterns.length)], shuffled = shuffleOpts(p.opts, p.opts.indexOf(p.ans));
+            mcqAnswered = false;
             const c = document.getElementById('game-content');
             c.innerHTML = `<div class="game-header"><div class="game-title">♟️ PATRÓN</div></div>
             <div class="game-timer-bar"><div class="game-timer-fill" id="tfill" style="width:100%"></div></div>
@@ -987,7 +1062,24 @@
             else { showPopup(msg || 'ERROR', 'MODO ADMIN — sin penalización'); }
             saveStats(); setTimeout(exitGame, 1400);
         }
-        function startTimer(secs, onEnd, fillEl) { clearInterval(gameTimer); timeLeft = timerTotal = secs; gameTimer = setInterval(() => { timeLeft--; if (fillEl) fillEl.style.width = (timeLeft / timerTotal * 100) + '%'; if (timeLeft <= 3 && fillEl) fillEl.style.background = 'var(--red)'; if (timeLeft <= 0) { clearInterval(gameTimer); onEnd(); } }, 1000); }
+        function startTimer(secs, onEnd, fillEl) {
+            clearInterval(gameTimer);
+            timeLeft = timerTotal = secs;
+            timerPaused = false;
+            gameTimer = setInterval(() => {
+                if (timerPaused) return;
+                timeLeft--;
+                if (fillEl) {
+                    fillEl.style.width = (timeLeft / timerTotal * 100) + '%';
+                    if (timeLeft <= 3) fillEl.style.background = 'var(--red)';
+                    else fillEl.style.background = 'var(--neon-green)';
+                }
+                if (timeLeft <= 0) {
+                    clearInterval(gameTimer);
+                    onEnd();
+                }
+            }, 1000);
+        }
         function showPopup(title, sub) { const p = document.getElementById('score-popup'); document.getElementById('popup-title').innerText = title; document.getElementById('popup-sub').innerText = sub; p.classList.add('show'); setTimeout(() => p.classList.remove('show'), 1200); }
 
         // ════════════════════════════════════════════
@@ -1001,8 +1093,40 @@
         //  ADMIN (entrar y salir)
         // ════════════════════════════════════════════
         function openAdminPanel() { const code = prompt('CÓDIGO ADMIN:'); if (ADMINS[code]) { stats.isAdmin = true; stats.unlocked = 57; if (typeof Tecnomath !== 'undefined' && Tecnomath.getCurrentUser()) { Tecnomath.setAdmin(Tecnomath.getCurrentUser().username); } saveStats(); showPopup(`⚡ ${ADMINS[code].toUpperCase()}`, 'RECURSOS INFINITOS'); renderMenu(); } else if (code) { showPopup('🔒 ACCESO', 'DENEGADO'); } }
-        function updateAdminButton() { const exitBtn = document.getElementById('exitAdminBtnGame'); if (!exitBtn) return; const user = Tecnomath.getCurrentUser(); if (user && Tecnomath.isAdmin()) { exitBtn.style.display = 'inline-block'; } else { exitBtn.style.display = 'none'; } }
-        function exitAdminMode() { const user = Tecnomath.getCurrentUser(); if (user && Tecnomath.isAdmin()) { Tecnomath.unsetAdmin(user.username); alert('Has salido del modo administrador. La página se recargará.'); location.reload(); } }
+        function updateAdminButton() {
+            const exitBtn = document.getElementById('exitAdminBtnGame');
+            if (!exitBtn) return;
+            try {
+                const user = Tecnomath.getCurrentUser();
+                if (user && Tecnomath.isAdmin()) {
+                    exitBtn.style.display = 'inline-block';
+                } else {
+                    exitBtn.style.display = 'none';
+                }
+            } catch (e) {
+                exitBtn.style.display = 'none';
+            }
+        }
+        function exitAdminMode() {
+            stats.isAdmin = false;
+            stats.unlocked = 1; // o podrías restaurar el nivel real si lo guardas
+            saveStats();
+            renderMenu();
+            updateHUD();
+            document.getElementById('exitAdminBtnGame').style.display = 'none';
+            showPopup('👋 ADMIN', 'Modo administrador desactivado');
+        }
+
+        // ════════════════════════════════════════════
+        //  PAUSA AUTOMÁTICA AL CAMBIAR DE PESTAÑA
+        // ════════════════════════════════════════════
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden && activeGame) {
+                timerPaused = true;
+            } else if (!document.hidden && activeGame && timerPaused) {
+                timerPaused = false;
+            }
+        });
 
         // ════════════════════════════════════════════
         //  UTILS & INIT
