@@ -475,6 +475,8 @@
         <a href="pages/admin/admin-promos.html" target="_blank">📢 GESTIONAR PROMOS</a>
         <a href="pages/admin/gestor-movil.html" target="_blank" class="btn-gold">➕ AGREGAR JUEGO</a>
         <button onclick="showCodePrompt()" style="background: var(--neon-yellow); color: black; box-shadow: 0 4px 0 #b8860b;">🔢 CÓDIGOS</button>
+        <!-- 🟢 BOTÓN DE VERIFICAR ROTOS -->
+        <button onclick="verificarYMostrarRotos()" style="background: var(--neon-cyan); color: black; box-shadow: 0 4px 0 #008080;">🔍 VERIFICAR ROTOS</button>
         <button onclick="exitAdminMode()" style="background:#c0392b;">🚪 SALIR ADMIN</button>
     </div>
 
@@ -955,7 +957,8 @@
                 filtered = filtered.filter(p => p.category === filterCategory);
             }
 
-            filtered = filtered.filter(p => !p.broken);
+            // 🔴 AHORA NO FILTRAMOS LOS ROTOS, LOS MOSTRAMOS CON BORDE ROJO
+            // filtered = filtered.filter(p => !p.broken);  // <-- COMENTADO
 
             if (activeEvent) {
                 filtered.sort((a, b) => {
@@ -1000,6 +1003,16 @@
                 nameDiv.className = 'project-name';
                 nameDiv.textContent = proj.name;
 
+                // 🟢 MARCAR VISUALMENTE LOS JUEGOS ROTOS
+                if (proj.broken) {
+                    card.style.border = '3px solid red';
+                    card.style.opacity = '0.7';
+                    const badge = document.createElement('span');
+                    badge.textContent = '🚫 404';
+                    badge.style.cssText = 'background:red;color:white;padding:2px 8px;border-radius:4px;font-size:10px;margin-top:4px;display:inline-block;';
+                    nameDiv.appendChild(badge);
+                }
+
                 if (proj.evento && proj.evento !== null) {
                     const eventoEmojis = {
                         'halloween': '🎃',
@@ -1028,7 +1041,7 @@
         }
 
         // ============================================================
-        // FILTRO DE JUEGOS ROTOS (404)
+        // FILTRO DE JUEGOS ROTOS (404) - DETECCIÓN EN SEGUNDO PLANO
         // ============================================================
         const BROKEN_CACHE_KEY = 'tecnomath_broken_cache';
         let brokenCache = {};
@@ -1083,9 +1096,63 @@
             renderProjects(currentActiveFilter);
         }
 
+        // Escaneo automático al cargar (solo para marcarlos visualmente)
         window.addEventListener('load', () => {
-            setTimeout(marcarJuegosRotos, 1000);
+            setTimeout(marcarJuegosRotos, 1500);
         });
+
+        // ============================================================
+        // 🕵️ VERIFICAR JUEGOS ROTOS (MANUAL) - BOTÓN EN ADMIN
+        // ============================================================
+        async function verificarYMostrarRotos() {
+            console.log('🔍 Escaneando juegos en busca de enlaces rotos...');
+            const total = projects.length;
+            let rotos = [];
+            let verificados = 0;
+
+            for (const proj of projects) {
+                const url = proj.swfUrl || proj.url;
+                if (!url) continue;
+
+                try {
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), 5000);
+                    const response = await fetch(url, {
+                        method: 'HEAD',
+                        mode: 'cors',
+                        signal: controller.signal
+                    });
+                    clearTimeout(timeoutId);
+                    if (!response.ok) {
+                        rotos.push({ name: proj.name, url, status: response.status });
+                        console.warn(`❌ ${proj.name} -> ${url} (${response.status})`);
+                    } else {
+                        console.log(`✅ ${proj.name} -> OK`);
+                    }
+                } catch (e) {
+                    rotos.push({ name: proj.name, url, reason: 'Error de red o CORS' });
+                    console.warn(`⚠️ Posible problema con ${proj.name}: ${url}`, e);
+                }
+                verificados++;
+                if (verificados % 10 === 0) {
+                    console.log(`Progreso: ${verificados}/${total}`);
+                }
+            }
+
+            if (rotos.length === 0) {
+                alert('✅ ¡Todos los juegos verificados parecen estar bien!');
+                console.log('✅ ¡Todos los juegos verificados parecen estar bien!');
+            } else {
+                let mensaje = `⚠️ Se encontraron ${rotos.length} juegos con problemas:\n\n`;
+                rotos.forEach((r, i) => {
+                    mensaje += `${i+1}. ${r.name} -> ${r.url} (${r.status || r.reason || 'error'})\n`;
+                });
+                mensaje += '\n📝 Revisa la consola para más detalles.';
+                alert(mensaje);
+                console.warn('📋 Lista de juegos rotos:');
+                console.table(rotos);
+            }
+        }
 
         // ============================================================
         // MODO FERIA, TEMAS PERMANENTES, FAVICON DINÁMICO
@@ -1738,6 +1805,7 @@
         console.log('🏷️ Los juegos exclusivos tienen un badge con emoji identificativo.');
         console.log('📌 Los juegos exclusivos aparecen primero en la lista.');
         console.log('📁 Estructura: /pages/ para juegos, /js/ para scripts, /css/ para estilos.');
+        console.log('🕵️ Usa el botón "VERIFICAR ROTOS" en el panel admin para escanear 404.');
     </script>
 </body>
 </html>
