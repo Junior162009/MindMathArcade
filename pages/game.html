@@ -44,21 +44,36 @@
             background: #c0392b; color: white; border: 1px solid #ff00ff;
             padding: 4px 8px; border-radius: 12px; cursor: pointer; margin-left: 6px;
         }
-        .hud { display: flex; justify-content: space-around; background: rgba(0,0,0,0.6); padding: 6px; font-size: 5px; border-bottom: 1px solid #1a1a2e; flex-shrink: 0; gap: 4px; flex-wrap: wrap; }
+        .hud {
+            display: flex; justify-content: space-around; background: rgba(0,0,0,0.6);
+            padding: 6px; font-size: 5px; border-bottom: 1px solid #1a1a2e;
+            flex-shrink: 0; gap: 4px; flex-wrap: wrap;
+        }
         .hud-stat { display: flex; flex-direction: column; align-items: center; gap: 2px; }
         .hud-label { color: #666; font-size: 4px; }
         .hud-val { color: var(--neon-green); font-size: 8px; text-shadow: 0 0 6px var(--neon-green); }
-        .cat-tabs { display: flex; overflow-x: auto; gap: 4px; padding: 6px 8px; border-bottom: 1px solid #1a1a2e; flex-shrink: 0; scrollbar-width: none; }
+
+        .cat-tabs {
+            display: flex; overflow-x: auto; gap: 4px; padding: 6px 8px;
+            border-bottom: 1px solid #1a1a2e; flex-shrink: 0; scrollbar-width: none;
+        }
         .cat-tabs::-webkit-scrollbar { display: none; }
-        .cat-tab { white-space: nowrap; font-family: 'Press Start 2P', cursive; font-size: 4px; padding: 5px 8px; border: 1px solid #333; background: rgba(255,255,255,0.03); cursor: pointer; color: #888; transition: all .2s; flex-shrink: 0; border-radius: 3px; }
+        .cat-tab {
+            white-space: nowrap; font-family: 'Press Start 2P', cursive; font-size: 4px;
+            padding: 5px 8px; border: 1px solid #333; background: rgba(255,255,255,0.03);
+            cursor: pointer; color: #888; transition: all .2s; flex-shrink: 0; border-radius: 3px;
+        }
         .cat-tab.active { border-color: var(--neon-cyan); color: var(--neon-cyan); background: rgba(0,255,255,0.08); text-shadow: 0 0 6px var(--neon-cyan); }
         .cat-tab.ods-tab { border-color: #0267C1; }
         .cat-tab.ods-tab.active { border-color: #FFD700; color: #FFD700; background: rgba(255,215,0,0.1); text-shadow: 0 0 6px #FFD700; }
-        #menu-view { flex: 1; overflow-y: auto; padding: 10px; display: grid; grid-template-columns: repeat(auto-fill, minmax(78px, 1fr)); gap: 8px; align-content: start; }
-        #menu-view::-webkit-scrollbar { width: 3px; }
-        #menu-view::-webkit-scrollbar-track { background: #0a0a1a; }
-        #menu-view::-webkit-scrollbar-thumb { background: var(--neon-pink); border-radius: 3px; }
-        .game-slot { border: 1px solid #222; background: var(--card-bg); padding: 8px 5px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; font-size: 4px; text-align: center; gap: 4px; transition: all .2s; position: relative; overflow: hidden; min-height: 70px; border-radius: 6px; }
+
+        .game-slot {
+            border: 1px solid #222; background: var(--card-bg); padding: 8px 5px;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            cursor: pointer; font-size: 4px; text-align: center; gap: 4px;
+            transition: all .2s; position: relative; overflow: hidden;
+            min-height: 70px; border-radius: 6px;
+        }
         .game-slot:hover:not(.locked) { border-color: var(--neon-cyan); box-shadow: 0 0 12px rgba(0,255,255,0.2); transform: translateY(-2px); }
         .game-slot.locked { opacity: 0.25; filter: grayscale(1); cursor: not-allowed; }
         .game-slot .slot-emoji { font-size: 18px; }
@@ -68,59 +83,109 @@
         .game-slot.completed::after { content: '✓'; position: absolute; top: 3px; right: 3px; color: var(--neon-green); font-size: 7px; }
         .game-slot.ods-slot { border-color: #0267C1; background: #08081a; }
         .game-slot.ods-slot.completed { border-color: #FFD700; }
-        #game-view { display: none; flex: 1; flex-direction: column; overflow-y: auto; padding: 12px 10px; background: linear-gradient(180deg, #060610 0%, #0a0a1f 100%); }
-        #game-view.active { display: flex; }
-        #game-content { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+
+        .view {
+            flex: 1; display: flex; flex-direction: column;
+            overflow-y: auto;  /* <- scroll cuando sea necesario */
+            min-height: 0;     /* <- evita desbordamiento en flex */
+        }
+        .view.hidden { display: none !important; }
+
+        #menu-view .game-grid {
+            flex: 1;
+            overflow-y: auto;
+            padding: 8px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(78px, 1fr));
+            gap: 8px;
+            align-content: start;
+        }
+
+        #game-view {
+            padding: 12px 10px;
+            background: linear-gradient(180deg, #060610 0%, #0a0a1f 100%);
+        }
+        #game-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            overflow-y: auto;
+        }
         .game-header { text-align: center; width: 100%; }
         .game-title { font-size: 8px; color: var(--neon-cyan); text-shadow: 0 0 10px var(--neon-cyan); margin-bottom: 4px; }
-        .game-subtitle { font-size: 5px; color: #666; }
+
         .game-timer-bar { width: 100%; max-width: 340px; height: 5px; background: #111; border: 1px solid #333; border-radius: 3px; overflow: hidden; }
         .game-timer-fill { height: 100%; background: var(--neon-green); transition: width .1s linear; border-radius: 3px; }
-        .math-problem { font-size: 22px; text-align: center; color: white; text-shadow: 0 0 15px rgba(0,255,255,0.5); padding: 12px; border: 1px solid #1a1a3a; background: rgba(0,0,0,0.5); width: 100%; max-width: 340px; border-radius: 8px; }
+
+        .math-problem {
+            font-size: 22px; text-align: center; color: white;
+            text-shadow: 0 0 15px rgba(0,255,255,0.5); padding: 12px;
+            border: 1px solid #1a1a3a; background: rgba(0,0,0,0.5);
+            width: 100%; max-width: 340px; border-radius: 8px;
+        }
         .math-input { font-size: 20px; color: var(--neon-green); text-shadow: 0 0 10px var(--neon-green); min-height: 35px; text-align: center; }
         .numpad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; width: 100%; max-width: 250px; }
         .key { background: #111; border: 2px solid #333; padding: 12px 6px; text-align: center; cursor: pointer; font-family: 'Press Start 2P', cursive; font-size: 10px; color: white; transition: all .1s; user-select: none; border-radius: 4px; }
         .key:active { background: #222; border-color: var(--neon-cyan); transform: scale(0.95); }
+
         .mcq-options { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; width: 100%; max-width: 340px; }
-        .mcq-btn { background: #0d0d1a; border: 2px solid #222; padding: 10px 6px; cursor: pointer; font-family: 'Press Start 2P', cursive; font-size: 6px; color: white; text-align: center; transition: all .15s; line-height: 1.4; border-radius: 4px; }
+        .mcq-btn {
+            background: #0d0d1a; border: 2px solid #222; padding: 10px 6px;
+            cursor: pointer; font-family: 'Press Start 2P', cursive; font-size: 6px;
+            color: white; text-align: center; transition: all .15s; line-height: 1.4; border-radius: 4px;
+        }
         .mcq-btn:hover { border-color: var(--neon-cyan); background: rgba(0,255,255,0.08); }
         .mcq-btn.correct { border-color: var(--neon-green); background: rgba(57,255,20,0.15); color: var(--neon-green); }
         .mcq-btn.wrong { border-color: var(--red); background: rgba(255,0,51,0.15); color: var(--red); }
+
         .memory-grid { display: grid; gap: 6px; width: 100%; max-width: 340px; }
         .mem-card { aspect-ratio: 1; background: var(--purple); border: 2px solid #333; display: flex; align-items: center; justify-content: center; font-size: 20px; cursor: pointer; transition: all .25s; user-select: none; border-radius: 6px; }
         .mem-card.hidden { background: #1a0a2e; }
         .mem-card.hidden span { opacity: 0; }
         .mem-card.matched { background: #0a2e1a; border-color: var(--neon-green); cursor: default; }
+
         .word-letters { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; max-width: 340px; }
         .letter-tile { width: 34px; height: 34px; background: #1a1a2e; border: 2px solid #444; display: flex; align-items: center; justify-content: center; font-size: 12px; cursor: pointer; transition: all .15s; user-select: none; border-radius: 4px; }
         .letter-tile:hover { border-color: var(--neon-cyan); background: rgba(0,255,255,0.1); }
         .letter-tile.selected { border-color: var(--neon-pink); background: rgba(255,0,255,0.15); }
         .word-answer { display: flex; gap: 5px; min-height: 38px; flex-wrap: wrap; justify-content: center; align-items: center; }
         .answer-slot { width: 34px; height: 34px; background: #0d0d1a; border-bottom: 2px solid var(--neon-cyan); display: flex; align-items: center; justify-content: center; font-size: 12px; cursor: pointer; border-radius: 4px; }
+
         .feedback-box { padding: 10px; width: 100%; max-width: 340px; text-align: center; font-size: 7px; display: none; border-radius: 4px; }
         .feedback-box.win { display: block; color: var(--neon-green); border: 1px solid var(--neon-green); background: rgba(57,255,20,0.08); }
         .feedback-box.lose { display: block; color: var(--red); border: 1px solid var(--red); background: rgba(255,0,51,0.08); }
+
         .btn-main { background: linear-gradient(135deg, var(--neon-pink), var(--purple)); color: white; padding: 12px 16px; border: none; font-family: 'Press Start 2P', cursive; cursor: pointer; font-size: 6px; width: 100%; max-width: 340px; transition: all .2s; text-shadow: 0 0 5px rgba(255,255,255,0.5); border-radius: 6px; }
         .btn-main:hover { transform: scale(1.02); box-shadow: 0 0 15px rgba(255,0,255,0.4); }
         .btn-secondary { background: transparent; border: 1px solid #444; color: #888; padding: 8px; font-family: 'Press Start 2P', cursive; font-size: 5px; cursor: pointer; width: 100%; max-width: 340px; transition: all .2s; border-radius: 6px; text-align: center; }
         .btn-secondary:hover { border-color: #888; color: white; }
-        #shop-view { display: none; flex: 1; overflow-y: auto; padding: 12px; flex-direction: column; gap: 10px; position: relative; }
-        #shop-view.active { display: flex; }
+
+        #shop-view, #scores-view, #ods-view {
+            padding: 12px;
+            gap: 10px;
+            position: relative;
+        }
+        #shop-view.active, #scores-view.active, #ods-view.active {
+            display: flex;
+        }
         .shop-title { font-size: 10px; color: var(--neon-pink); text-align: center; text-shadow: 0 0 10px var(--neon-pink); }
         .shop-item { border: 1px solid #222; background: var(--card-bg); padding: 12px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: all .2s; font-size: 6px; border-radius: 6px; }
         .shop-item:hover { border-color: var(--gold); background: rgba(255,215,0,0.05); }
         .shop-item-name { color: white; }
         .shop-item-price { color: var(--gold); font-size: 7px; }
-        #scores-view { display: none; flex: 1; overflow-y: auto; padding: 12px; flex-direction: column; gap: 8px; position: relative; }
-        #scores-view.active { display: flex; }
+
         .score-popup { position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%) scale(0); background: #0d0d1a; border: 2px solid var(--gold); padding: 20px 25px; text-align: center; z-index: 200; transition: transform .3s cubic-bezier(0.175,0.885,0.32,1.275); box-shadow: 0 0 40px rgba(255,215,0,0.3); border-radius: 10px; pointer-events: none; }
         .score-popup.show { transform: translate(-50%,-50%) scale(1); }
         .score-popup h2 { color: var(--gold); font-size: 12px; margin-bottom: 6px; }
         .score-popup p { font-size: 6px; color: #aaa; }
+
         footer { padding: 6px 8px; border-top: 1px solid #1a1a2e; display: flex; gap: 6px; flex-shrink: 0; flex-wrap: wrap; }
         .footer-btn { flex: 1; background: #0d0d1a; border: 1px solid #222; color: white; font-family: 'Press Start 2P', cursive; font-size: 5px; padding: 8px 4px; cursor: pointer; transition: all .2s; border-radius: 4px; text-align: center; min-width: 0; }
         .footer-btn:hover { border-color: var(--neon-pink); color: var(--neon-pink); }
         .footer-btn.active-tab { border-color: var(--neon-cyan); color: var(--neon-cyan); }
+
         .admin-glow { color: var(--neon-pink) !important; text-shadow: 0 0 8px var(--neon-pink) !important; }
         .ods-badge-mini { background: #0267C1; color: white; font-size: 4px; padding: 2px 6px; border-radius: 10px; display: inline-block; margin: 2px 0; }
         .ods-badge-gold { background: #FFD700; color: #000; font-weight: 900; font-size: 4px; padding: 2px 6px; border-radius: 10px; }
@@ -129,21 +194,19 @@
         .seq-display { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }
         .seq-num { width: 38px; height: 38px; background: #111; border: 2px solid #333; display: flex; align-items: center; justify-content: center; font-size: 11px; color: var(--neon-cyan); border-radius: 4px; }
         .seq-question { color: var(--neon-yellow); border-color: var(--neon-yellow); }
-        .view { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
-        .view.hidden { display: none !important; }
-        .view.active { display: flex !important; }
+
         .ods-card { border: 2px solid #0267C1; background: #08081f; padding: 10px; border-radius: 8px; text-align: center; font-size: 5px; cursor: pointer; transition: all .2s; min-height: 65px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; }
         .ods-card.completed { border-color: #FFD700; background: #0a0a15; }
         .ods-card .ods-icon { font-size: 22px; }
         .dash-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)); gap: 6px; padding: 8px; }
+
         .close-btn {
             position: absolute; top: 8px; right: 12px; font-size: 18px; color: #888;
             cursor: pointer; transition: color .2s; z-index: 10;
             font-family: 'Press Start 2P', cursive;
         }
         .close-btn:hover { color: var(--neon-pink); }
-        #ods-view { display: none; flex: 1; overflow-y: auto; padding: 12px; flex-direction: column; gap: 8px; position: relative; }
-        #ods-view.active { display: flex; }
+
         @media (max-width:350px) {
             .header-title { font-size: 6px; } .cat-tab { font-size: 3px; padding: 4px 6px; } .game-slot { min-height: 55px; padding: 6px 3px; } .game-slot .slot-emoji { font-size: 14px; } .game-slot .slot-name { font-size: 3px; } .key { padding: 10px 4px; font-size: 8px; } .numpad { gap: 4px; max-width: 200px; } .math-problem { font-size: 16px; padding: 8px; } .footer-btn { font-size: 4px; padding: 6px 2px; } .close-btn { font-size: 14px; top: 4px; right: 8px; }
         }
@@ -173,18 +236,18 @@
         <!-- MENÚ -->
         <div id="menu-view" class="view">
             <div class="cat-tabs" id="cat-tabs"></div>
-            <div id="game-grid" style="flex:1;overflow-y:auto;padding:8px;display:grid;grid-template-columns:repeat(auto-fill,minmax(78px,1fr));gap:8px;align-content:start;"></div>
+            <div class="game-grid" id="game-grid"></div>
         </div>
 
         <!-- JUEGO -->
         <div id="game-view" class="view hidden">
-            <div id="game-content" style="flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;align-items:center;gap:10px;"></div>
+            <div id="game-content"></div>
             <div style="padding:8px;border-top:1px solid #1a1a2e;flex-shrink:0;">
                 <button class="btn-secondary" onclick="exitGame()">↩ RENDIRSE</button>
             </div>
         </div>
 
-        <!-- TIENDA con X -->
+        <!-- TIENDA -->
         <div id="shop-view" class="view hidden">
             <span class="close-btn" onclick="switchTab('menu')">✕</span>
             <div class="shop-title" style="margin-bottom:8px;">🛒 TIENDA ARCADE</div>
@@ -198,18 +261,18 @@
             </div>
         </div>
 
-        <!-- LOGROS con X -->
+        <!-- LOGROS -->
         <div id="scores-view" class="view hidden">
             <span class="close-btn" onclick="switchTab('menu')">✕</span>
             <div style="font-size:9px;color:var(--neon-cyan);text-align:center;margin-bottom:8px;">🏆 LOGROS</div>
-            <div id="scores-content" style="overflow-y:auto;padding:8px;"></div>
+            <div id="scores-content" style="flex:1;overflow-y:auto;padding:8px;"></div>
         </div>
 
-        <!-- ODS con X -->
+        <!-- ODS -->
         <div id="ods-view" class="view hidden">
             <span class="close-btn" onclick="switchTab('menu')">✕</span>
             <div style="font-size:8px;color:#FFD700;text-align:center;margin-bottom:8px;">🌍 OBJETIVOS ODS</div>
-            <div id="ods-dash-content" style="overflow-y:auto;padding:8px;flex:1;"></div>
+            <div id="ods-dash-content" style="flex:1;overflow-y:auto;padding:8px;"></div>
         </div>
 
         <footer>
@@ -658,16 +721,13 @@
 
         // ─── NAVEGACIÓN MEJORADA ──────────────────
         function switchTab(tab) {
-            // Si hay juego activo y se cambia a otra pestaña, confirmar
             if (activeGame && tab !== 'game') {
                 if (!confirm('¿Salir de la partida actual?')) {
                     return;
                 }
                 exitGame();
             }
-            // Ocultar todas las vistas
             document.querySelectorAll('.view').forEach(v => v.classList.add('hidden'));
-            // Mostrar la vista seleccionada
             const viewMap = {
                 'menu': 'menu-view',
                 'shop': 'shop-view',
@@ -678,15 +738,12 @@
             if (viewId) {
                 document.getElementById(viewId).classList.remove('hidden');
             }
-            // Actualizar botones del footer
             document.querySelectorAll('.footer-btn').forEach(btn => btn.classList.remove('active-tab'));
             const tabBtn = document.getElementById('tab-' + tab);
             if (tabBtn) tabBtn.classList.add('active-tab');
-            // Renderizar contenido según pestaña
             if (tab === 'scores') renderScores();
             if (tab === 'ods') renderODSDash();
             if (tab === 'menu') renderMenu();
-            // Asegurar que game-view esté oculto
             document.getElementById('game-view').classList.add('hidden');
         }
 
@@ -723,7 +780,6 @@
             if (!stats.isAdmin && g.cost > 0) stats.coins -= g.cost;
             activeGame = g;
             mcqAnswered = false;
-            // Ocultar todas las vistas y mostrar game-view
             document.querySelectorAll('.view').forEach(v => v.classList.add('hidden'));
             document.getElementById('game-view').classList.remove('hidden');
             document.querySelectorAll('.footer-btn').forEach(b => b.classList.remove('active-tab'));
@@ -1112,7 +1168,7 @@
         function openExchangeModal() { if (typeof Tecnomath === 'undefined' || !Tecnomath.getCurrentUser()) { showPopup('INICIA SESIÓN', 'Necesitas cuenta para convertir monedas'); return; } const globalCoins = Tecnomath.getCoins(); const amountStr = prompt(`Tienes ${globalCoins} 🌐 monedas globales.\n¿Cuántas deseas convertir a monedas de MindMath? (10% comisión)`); if (amountStr === null) return; const amount = parseInt(amountStr); if (isNaN(amount) || amount <= 0) { alert('Cantidad inválida'); return; } if (Tecnomath.exchangeGlobalToLocal('mindmath', amount)) { stats.coins = Tecnomath.getGameCoins('mindmath'); saveStats(); showPopup('✅ CONVERTIDO', `+${Math.floor(amount * 0.9)} 💰 locales`); } else { showPopup('❌ ERROR', 'Fondos globales insuficientes'); } }
 
         // ════════════════════════════════════════════
-        //  ADMIN (entrar y salir)
+        //  ADMIN
         // ════════════════════════════════════════════
         function openAdminPanel() { const code = prompt('CÓDIGO ADMIN:'); if (ADMINS[code]) { stats.isAdmin = true; stats.unlocked = 57; if (typeof Tecnomath !== 'undefined' && Tecnomath.getCurrentUser()) { Tecnomath.setAdmin(Tecnomath.getCurrentUser().username); } saveStats(); showPopup(`⚡ ${ADMINS[code].toUpperCase()}`, 'RECURSOS INFINITOS'); renderMenu(); } else if (code) { showPopup('🔒 ACCESO', 'DENEGADO'); } }
         function updateAdminButton() {
@@ -1131,7 +1187,7 @@
         }
         function exitAdminMode() {
             stats.isAdmin = false;
-            stats.unlocked = 1; // o restaurar nivel real si se guarda
+            stats.unlocked = 1;
             saveStats();
             renderMenu();
             updateHUD();
@@ -1140,7 +1196,7 @@
         }
 
         // ════════════════════════════════════════════
-        //  PAUSA AUTOMÁTICA AL CAMBIAR DE PESTAÑA
+        //  PAUSA AUTOMÁTICA
         // ════════════════════════════════════════════
         document.addEventListener('visibilitychange', () => {
             if (document.hidden && activeGame) {
