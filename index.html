@@ -1,9 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <!-- Favicon con emoji -->
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎮</text></svg>">        
-    
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Tecnomath · Plataforma de Juegos Educativos</title>
@@ -14,6 +11,9 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Tecnomath">
+
+    <!-- 🆕 FAVICON DINÁMICO -->
+    <link rel="icon" id="dynamicFavicon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎮</text></svg>">
 
     <!-- Google AdSense -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9426294483156864"
@@ -1492,7 +1492,31 @@
             }
         }
 
+        // ============================================================
+        // 🆕 FAVICON DINÁMICO (ACTUALIZA SEGÚN EVENTO)
+        // ============================================================
+        function updateFavicon(emoji) {
+            const favicon = document.getElementById('dynamicFavicon');
+            if (favicon) {
+                const svg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>${emoji}</text></svg>`;
+                favicon.href = 'data:image/svg+xml,' + encodeURIComponent(svg);
+            }
+        }
+
+        const faviconEmojis = {
+            'halloween': '🎃',
+            'navidad': '🎄',
+            'cumpleanos': '🎂',
+            'feria': '🎡',
+            'feriaplus': '🔥'
+        };
+
         // ─── FUNCIONES PRINCIPALES (TEMAS PERMANENTES) ──────────
+        // Guardamos referencias a las funciones originales
+        const originalActivateFairMode = window.activateFairMode;
+        const originalActivatePermanentTheme = window.activatePermanentTheme;
+        const originalDeactivateFairMode = window.deactivateFairMode;
+
         function activateFairMode() {
             if (fairMode) return;
             fairMode = true;
@@ -1508,6 +1532,9 @@
             showFairNotification('🎉 ¡BIENVENIDO AL MODO FERIA! 🎈');
             alert('⚡ MODO FERIA ACTIVADO ⚡');
             renderProjects(currentActiveFilter);
+
+            // 🆕 Actualizar favicon
+            updateFavicon('🎡');
         }
 
         function deactivateFairMode() {
@@ -1527,6 +1554,9 @@
             deactivateVisualEffects();
             alert('🔕 MODO FERIA DESACTIVADO');
             renderProjects(currentActiveFilter);
+
+            // 🆕 Volver al favicon por defecto
+            updateFavicon('🎮');
         }
 
         // ─── TEMAS PERMANENTES (sin temporizador) ──────────────
@@ -1546,6 +1576,9 @@
             activateVisualEffects(confettiColors, emojis, 1);
 
             renderProjects(currentActiveFilter);
+
+            // 🆕 Actualizar favicon según el tema
+            updateFavicon(faviconEmojis[themeName] || '🎮');
         }
 
         function activateMegaFair() {
@@ -1564,6 +1597,9 @@
             showFairNotification('🔥 ¡MEGA FERIA ACTIVADA! 🔥');
             alert('⚡ MEGA FERIA ACTIVADA (¡el doble de rápido!) ⚡');
             renderProjects(currentActiveFilter);
+
+            // 🆕 Actualizar favicon
+            updateFavicon('🔥');
         }
 
         // ─── CÓDIGOS DE EVENTOS ──────────────────────────────────
@@ -1618,6 +1654,8 @@
                         document.getElementById('mainTitle').textContent = 'TECNOMATH';
                         showFairNotification('⏹️ EVENTO FINALIZADO');
                         renderProjects(currentActiveFilter);
+                        // 🆕 Volver al favicon por defecto
+                        updateFavicon('🎮');
                     }
                     break;
                 default:
@@ -1743,6 +1781,7 @@
         console.log('✨ Los temas son permanentes hasta que se desactiven con feriaoff o stop.');
         console.log('🏷️ Los juegos exclusivos tienen un badge con emoji identificativo.');
         console.log('📌 Los juegos exclusivos aparecen primero en la lista.');
+        console.log('🖥️ El favicon cambia dinámicamente según el evento activo.');
     </script>
 </body>
 </html>
