@@ -12,7 +12,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Tecnomath">
 
-    <!-- Favicon dinámico -->
+    <!-- Favicon dinámico (se actualiza con JavaScript) -->
     <link rel="icon" id="dynamicFavicon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎮</text></svg>">
 
     <!-- Google AdSense -->
@@ -460,7 +460,7 @@
             </div>
             <div class="user-area">
                 <span id="userDisplay">Invitado</span>
-                <a href="auth.html" class="auth-link" id="authLink">🔑 ACCEDER</a>
+                <a href="pages/auth.html" class="auth-link" id="authLink">🔑 ACCEDER</a>
                 <button id="adminAccessBtn" class="auth-link" style="border-color: var(--gold); color: var(--gold); background: transparent; cursor: pointer; font-family: 'Press Start 2P', cursive; font-size: clamp(4px, 1.5vw, 6px); padding: 4px 8px; border-radius: 4px;">👑 ADMIN</button>
             </div>
         </div>
@@ -472,8 +472,8 @@
 
     <div id="admin-cloud" onclick="toggleAdminPanel()">☁️</div>
     <div id="admin-panel">
-        <a href="admin-promos.html" target="_blank">📢 GESTIONAR PROMOS</a>
-        <a href="gestor-movil.html" target="_blank" class="btn-gold">➕ AGREGAR JUEGO</a>
+        <a href="pages/admin/admin-promos.html" target="_blank">📢 GESTIONAR PROMOS</a>
+        <a href="pages/admin/gestor-movil.html" target="_blank" class="btn-gold">➕ AGREGAR JUEGO</a>
         <button onclick="showCodePrompt()" style="background: var(--neon-yellow); color: black; box-shadow: 0 4px 0 #b8860b;">🔢 CÓDIGOS</button>
         <button onclick="exitAdminMode()" style="background:#c0392b;">🚪 SALIR ADMIN</button>
     </div>
@@ -523,14 +523,14 @@
 
     <footer>© 2026 Tecnomath · Powered by GitHub Pages</footer>
 
-    <script src="shared.js"></script>
+    <script src="js/shared.js"></script>
     <script>
         // ============================================================
         // SERVICE WORKER, DETECCIÓN DE DISPOSITIVO, PATROCINADORES...
         // ============================================================
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js').catch(() => {});
+                navigator.serviceWorker.register('/js/sw.js').catch(() => {});
             });
         }
 
@@ -764,22 +764,22 @@
         });
 
         // ============================================================
-        // LISTA DE JUEGOS (INCRUSTADA, SIN JSON)
+        // LISTA DE JUEGOS (INCRUSTADA, SIN JSON - FALLBACK)
         // ============================================================
-        const projects = [
+        const juegosIncrustados = [
             // ==============================
-            // JUEGOS SIEMPRE VISIBLES (evento: null)
+            // JUEGOS SIEMPRE VISIBLES (evento: null) - Con rutas actualizadas a pages/
             // ==============================
-            { name: "MindMath Arcade", desc: "Juego de matemáticas retro con 60+ niveles", url: "game.html", imageUrl: "img/mindmath.png", icon: "🧮", category: "mates", deviceCompatibility: "both", evento: null },
+            { name: "MindMath Arcade", desc: "Juego de matemáticas retro con 60+ niveles", url: "pages/game.html", imageUrl: "img/mindmath.png", icon: "🧮", category: "mates", deviceCompatibility: "both", evento: null },
             { name: "BanderQuiz", desc: "Adivina las banderas del mundo", url: "https://junior162009.github.io/BanderQuiz/", imageUrl: "img/banderquiz.png", icon: "🏳️🌎", category: "edu", deviceCompatibility: "both", evento: null },
-            { name: "EmojiMath Pro", desc: "Suma, resta y cuenta con emojis. Para niños", url: "emoji-math.html", imageUrl: "", icon: "🧸", category: "mates", deviceCompatibility: "mobile", evento: null },
-            { name: "Eco Recolector", desc: "Atrapa agua y reciclables. ODS 6 y 12", url: "eco-collector.html", imageUrl: "img/ecorecolector.png", icon: "🌍", category: "eco", deviceCompatibility: "both", evento: null },
-            { name: "Eco-Barrio 2030", desc: "Simulador de ciudad sostenible. ODS 11,12,13,7", url: "eco-barrio.html", imageUrl: "", icon: "🏙️", category: "eco", deviceCompatibility: "desktop", evento: null },
-            { name: "Coral Guardian", desc: "Protege el arrecife de basura y especies invasoras", url: "coral-guardian.html", imageUrl: "", icon: "🪸", category: "eco", deviceCompatibility: "both", evento: null },
-            { name: "Orbit Cleaner", desc: "Limpia el espacio y protege la capa de ozono. ODS 13", url: "orbit-cleaner.html", imageUrl: "", icon: "🛰️", category: "eco", deviceCompatibility: "both", evento: null },
-            { name: "Marine Tech Cleaner", desc: "USV y ROV para limpiar el océano. ODS 14", url: "marine-cleaner.html", imageUrl: "", icon: "🌊", category: "eco", deviceCompatibility: "both", evento: null },
-            { name: "Animalandia", desc: "Alimenta a los animales. Para niños pequeños", url: "animalandia.html", imageUrl: "", icon: "🐮", category: "kids", deviceCompatibility: "mobile", evento: null },
-            { name: "ODS-2048", desc: "Fusiona los 17 ODS. Juego de puzzle adictivo", url: "ods-2048.html", imageUrl: "", icon: "🌐", category: "puzzle", deviceCompatibility: "both", evento: null },
+            { name: "EmojiMath Pro", desc: "Suma, resta y cuenta con emojis. Para niños", url: "pages/emoji-math.html", imageUrl: "", icon: "🧸", category: "mates", deviceCompatibility: "mobile", evento: null },
+            { name: "Eco Recolector", desc: "Atrapa agua y reciclables. ODS 6 y 12", url: "pages/eco-collector.html", imageUrl: "img/ecorecolector.png", icon: "🌍", category: "eco", deviceCompatibility: "both", evento: null },
+            { name: "Eco-Barrio 2030", desc: "Simulador de ciudad sostenible. ODS 11,12,13,7", url: "pages/eco-barrio.html", imageUrl: "", icon: "🏙️", category: "eco", deviceCompatibility: "desktop", evento: null },
+            { name: "Coral Guardian", desc: "Protege el arrecife de basura y especies invasoras", url: "pages/coral-guardian.html", imageUrl: "", icon: "🪸", category: "eco", deviceCompatibility: "both", evento: null },
+            { name: "Orbit Cleaner", desc: "Limpia el espacio y protege la capa de ozono. ODS 13", url: "pages/orbit-cleaner.html", imageUrl: "", icon: "🛰️", category: "eco", deviceCompatibility: "both", evento: null },
+            { name: "Marine Tech Cleaner", desc: "USV y ROV para limpiar el océano. ODS 14", url: "pages/marine-cleaner.html", imageUrl: "", icon: "🌊", category: "eco", deviceCompatibility: "both", evento: null },
+            { name: "Animalandia", desc: "Alimenta a los animales. Para niños pequeños", url: "pages/animalandia.html", imageUrl: "", icon: "🐮", category: "kids", deviceCompatibility: "mobile", evento: null },
+            { name: "ODS-2048", desc: "Fusiona los 17 ODS. Juego de puzzle adictivo", url: "pages/ods-2048.html", imageUrl: "", icon: "🌐", category: "puzzle", deviceCompatibility: "both", evento: null },
             { name: "2048", desc: "Fusiona los números hasta 2048", url: "https://gabrielecirulli.github.io/2048/", imageUrl: "", icon: "🔢", category: "puzzle", deviceCompatibility: "both", evento: null },
             { name: "Hextris", desc: "Juego de puzzle hexagonal rápido", url: "https://hextris.github.io/hextris/", imageUrl: "", icon: "⬡", category: "puzzle", deviceCompatibility: "both", evento: null },
             { name: "Pacman", desc: "El clásico comecocos", url: "https://pacman.platzh1rsch.ch/", imageUrl: "", icon: "🟡", category: "retro", deviceCompatibility: "desktop", evento: null },
@@ -829,32 +829,63 @@
             { name: "Quick, Draw!", desc: "Dibuja y la IA adivina", url: "https://quickdraw.withgoogle.com/", imageUrl: "", icon: "✍️", category: "puzzle", deviceCompatibility: "both", evento: null },
             { name: "Semantle", desc: "Adivina la palabra por significado", url: "https://semantle.com/", imageUrl: "", icon: "🧠", category: "puzzle", deviceCompatibility: "both", evento: null },
             { name: "Worldle", desc: "Adivina el país por su forma", url: "https://worldle.teuteuf.fr/", imageUrl: "", icon: "🗺️", category: "edu", deviceCompatibility: "both", evento: null },
-            { name: "Banana Kong Dash", desc: "Corre por la selva. 3 carriles, meta final y power-ups", url: "banana-dash.html", imageUrl: "", icon: "🍌", category: "runners", deviceCompatibility: "both", evento: null },
+            { name: "Banana Kong Dash", desc: "Corre por la selva. 3 carriles, meta final y power-ups", url: "pages/banana-dash.html", imageUrl: "", icon: "🍌", category: "runners", deviceCompatibility: "both", evento: null },
 
-            // 🎃 JUEGOS EXCLUSIVOS DE HALLOWEEN
-            { name: "Caza de Calabazas", desc: "Dispara a los fantasmas y recoge calabazas", url: "halloween-game.html", imageUrl: "", icon: "🎃", category: "halloween", deviceCompatibility: "both", evento: "halloween" },
-            { name: "Noche de Brujas", desc: "Escapa del cementerio encantado", url: "brujas-game.html", imageUrl: "", icon: "🧙", category: "halloween", deviceCompatibility: "both", evento: "halloween" },
-            { name: "Casa del Terror", desc: "Recorre la casa embrujada sin morir", url: "casa-terror.html", imageUrl: "", icon: "🏚️", category: "halloween", deviceCompatibility: "both", evento: "halloween" },
+            // ==============================
+            // 🎃 JUEGOS EXCLUSIVOS DE HALLOWEEN (evento: "halloween")
+            // ==============================
+            { name: "Caza de Calabazas", desc: "Dispara a los fantasmas y recoge calabazas", url: "pages/halloween-game.html", imageUrl: "", icon: "🎃", category: "halloween", deviceCompatibility: "both", evento: "halloween" },
+            { name: "Noche de Brujas", desc: "Escapa del cementerio encantado", url: "pages/brujas-game.html", imageUrl: "", icon: "🧙", category: "halloween", deviceCompatibility: "both", evento: "halloween" },
+            { name: "Casa del Terror", desc: "Recorre la casa embrujada sin morir", url: "pages/casa-terror.html", imageUrl: "", icon: "🏚️", category: "halloween", deviceCompatibility: "both", evento: "halloween" },
 
-            // 🎄 JUEGOS EXCLUSIVOS DE NAVIDAD
-            { name: "Trineo Navideño", desc: "Recoge regalos mientras esquivas obstáculos", url: "navidad-game.html", imageUrl: "", icon: "🎄", category: "navidad", deviceCompatibility: "both", evento: "navidad" },
-            { name: "Elfos Trabajadores", desc: "Ayuda a los elfos a empaquetar juguetes", url: "elfos-game.html", imageUrl: "", icon: "🧝", category: "navidad", deviceCompatibility: "both", evento: "navidad" },
-            { name: "Carrera de Renos", desc: "Guía a los renos en la carrera navideña", url: "renos-game.html", imageUrl: "", icon: "🦌", category: "navidad", deviceCompatibility: "both", evento: "navidad" },
+            // ==============================
+            // 🎄 JUEGOS EXCLUSIVOS DE NAVIDAD (evento: "navidad")
+            // ==============================
+            { name: "Trineo Navideño", desc: "Recoge regalos mientras esquivas obstáculos", url: "pages/navidad-game.html", imageUrl: "", icon: "🎄", category: "navidad", deviceCompatibility: "both", evento: "navidad" },
+            { name: "Elfos Trabajadores", desc: "Ayuda a los elfos a empaquetar juguetes", url: "pages/elfos-game.html", imageUrl: "", icon: "🧝", category: "navidad", deviceCompatibility: "both", evento: "navidad" },
+            { name: "Carrera de Renos", desc: "Guía a los renos en la carrera navideña", url: "pages/renos-game.html", imageUrl: "", icon: "🦌", category: "navidad", deviceCompatibility: "both", evento: "navidad" },
 
-            // 🥳 JUEGOS EXCLUSIVOS DE CUMPLEAÑOS
-            { name: "Fiesta Globos", desc: "Revienta globos y recoge regalos", url: "cumple-game.html", imageUrl: "", icon: "🎈", category: "cumpleanos", deviceCompatibility: "both", evento: "cumpleanos" },
-            { name: "Pastel de Cumpleaños", desc: "Decora el pastel antes de que se acabe el tiempo", url: "pastel-game.html", imageUrl: "", icon: "🎂", category: "cumpleanos", deviceCompatibility: "both", evento: "cumpleanos" },
-            { name: "Búsqueda del Tesoro", desc: "Encuentra los regalos escondidos", url: "tesoro-game.html", imageUrl: "", icon: "🔍", category: "cumpleanos", deviceCompatibility: "both", evento: "cumpleanos" },
+            // ==============================
+            // 🥳 JUEGOS EXCLUSIVOS DE CUMPLEAÑOS (evento: "cumpleanos")
+            // ==============================
+            { name: "Fiesta Globos", desc: "Revienta globos y recoge regalos", url: "pages/cumple-game.html", imageUrl: "", icon: "🎈", category: "cumpleanos", deviceCompatibility: "both", evento: "cumpleanos" },
+            { name: "Pastel de Cumpleaños", desc: "Decora el pastel antes de que se acabe el tiempo", url: "pages/pastel-game.html", imageUrl: "", icon: "🎂", category: "cumpleanos", deviceCompatibility: "both", evento: "cumpleanos" },
+            { name: "Búsqueda del Tesoro", desc: "Encuentra los regalos escondidos", url: "pages/tesoro-game.html", imageUrl: "", icon: "🔍", category: "cumpleanos", deviceCompatibility: "both", evento: "cumpleanos" },
 
-            // 🎡 JUEGOS DE FERIA
-            { name: "Feria de Atracciones", desc: "Disfruta de juegos de feria clásicos", url: "feria-game.html", imageUrl: "", icon: "🎡", category: "feria", deviceCompatibility: "both", evento: "feria" },
-            { name: "Carrera de Globos", desc: "Compite con otros jugadores en una carrera de globos", url: "globos-race.html", imageUrl: "", icon: "🏆", category: "feria", deviceCompatibility: "both", evento: "feria" },
-            { name: "Tiro al Plato", desc: "Demuestra tu puntería en la feria", url: "tiro-plato.html", imageUrl: "", icon: "🍽️", category: "feria", deviceCompatibility: "both", evento: "feria" },
+            // ==============================
+            // 🎡 JUEGOS DE FERIA (evento: "feria")
+            // ==============================
+            { name: "Feria de Atracciones", desc: "Disfruta de juegos de feria clásicos", url: "pages/feria-game.html", imageUrl: "", icon: "🎡", category: "feria", deviceCompatibility: "both", evento: "feria" },
+            { name: "Carrera de Globos", desc: "Compite con otros jugadores en una carrera de globos", url: "pages/globos-race.html", imageUrl: "", icon: "🏆", category: "feria", deviceCompatibility: "both", evento: "feria" },
+            { name: "Tiro al Plato", desc: "Demuestra tu puntería en la feria", url: "pages/tiro-plato.html", imageUrl: "", icon: "🍽️", category: "feria", deviceCompatibility: "both", evento: "feria" },
 
-            // 🔥 JUEGOS EXCLUSIVOS DE MEGA FERIA
-            { name: "Mega Tiro al Blanco", desc: "Prueba tu puntería en el modo mega feria", url: "tiro-game.html", imageUrl: "", icon: "🎯", category: "feria", deviceCompatibility: "both", evento: "feriaplus" },
-            { name: "Carrera Extrema", desc: "Velocidad pura en la mega feria", url: "carrera-extrema.html", imageUrl: "", icon: "🚀", category: "feria", deviceCompatibility: "both", evento: "feriaplus" }
+            // ==============================
+            // 🔥 JUEGOS EXCLUSIVOS DE MEGA FERIA (evento: "feriaplus")
+            // ==============================
+            { name: "Mega Tiro al Blanco", desc: "Prueba tu puntería en el modo mega feria", url: "pages/tiro-game.html", imageUrl: "", icon: "🎯", category: "feria", deviceCompatibility: "both", evento: "feriaplus" },
+            { name: "Carrera Extrema", desc: "Velocidad pura en la mega feria", url: "pages/carrera-extrema.html", imageUrl: "", icon: "🚀", category: "feria", deviceCompatibility: "both", evento: "feriaplus" }
         ];
+
+        // ============================================================
+        // CARGA DE JUEGOS (JSON + FALLBACK)
+        // ============================================================
+        let projects = [];
+
+        async function cargarJuegos() {
+            try {
+                const response = await fetch('juegos.json');
+                if (!response.ok) throw new Error('No se encontró juegos.json');
+                const data = await response.json();
+                projects = data;
+                console.log('✅ Juegos cargados desde JSON:', projects.length);
+            } catch (error) {
+                console.warn('⚠️ No se pudo cargar juegos.json, usando lista incrustada.');
+                projects = juegosIncrustados;
+            }
+            // Renderizar después de cargar
+            renderProjects(currentActiveFilter);
+            actualizarFiltros();
+        }
 
         // ============================================================
         // FILTROS Y RENDERIZADO
@@ -867,10 +898,9 @@
             return projects.filter(p => p.evento === null || p.evento === activeEvent);
         }
 
-        const categories = ['todos', ...new Set(projects.map(p => p.category))];
-        const filtersContainer = document.getElementById('filtersContainer');
-
         function actualizarFiltros() {
+            const categories = ['todos', ...new Set(projects.map(p => p.category))];
+            const filtersContainer = document.getElementById('filtersContainer');
             filtersContainer.innerHTML = '';
             categories.forEach(cat => {
                 const btn = document.createElement('button');
@@ -900,7 +930,6 @@
             });
             filtersContainer.appendChild(recommendBtn);
         }
-        actualizarFiltros();
 
         function setActiveFilter(filter) {
             currentActiveFilter = filter;
@@ -996,7 +1025,6 @@
                 container.appendChild(card);
             });
         }
-        renderProjects();
 
         // ============================================================
         // FILTRO DE JUEGOS ROTOS (404)
@@ -1697,12 +1725,18 @@
         });
         document.body.appendChild(secretZone);
 
+        // ============================================================
+        // INICIO
+        // ============================================================
+        cargarJuegos();
+
         console.log('🎮 Sistema de juegos cargado correctamente.');
         console.log('📌 Códigos disponibles: feria2026, feriaoff, halloween, navidad, cumpleanos, feriaplus, stop');
         console.log('👑 Acceso admin: clic en botón "👑 ADMIN" o doble clic en esquina inferior derecha.');
         console.log('🎨 Los estilos de cada evento se cargan desde /css/{evento}.css');
         console.log('🏷️ Los juegos exclusivos tienen un badge con emoji identificativo.');
         console.log('📌 Los juegos exclusivos aparecen primero en la lista.');
+        console.log('📁 Estructura: /pages/ para juegos, /js/ para scripts, /css/ para estilos.');
     </script>
 </body>
 </html>
