@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Tecnomath · Juego</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: #060610;
+            font-family: 'Press Start 2P', cursive;
+            color: white;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            background: rgba(0,0,0,0.8);
+            border-bottom: 2px solid #FF00FF;
+            flex-shrink: 0;
+            z-index: 10;
+        }
+        .header h1 {
+            font-size: 16px;
+            color: #00FFFF;
+            text-shadow: 0 0 10px #00FFFF;
+        }
+        .header .close-btn {
+            background: #FF00FF;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 12px;
+            cursor: pointer;
+            box-shadow: 0 0 15px #FF00FF;
+            transition: 0.2s;
+        }
+        .header .close-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 25px #FF00FF;
+        }
+        .game-container {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #000;
+            padding: 10px;
+        }
+        .game-container iframe {
+            width: 100%;
+            height: 100%;
+            max-width: 1200px;
+            max-height: 90vh;
+            border: none;
+            background: #000;
+            box-shadow: 0 0 30px rgba(0,255,255,0.3);
+        }
+        .loading {
+            color: #39FF14;
+            font-size: 14px;
+            text-shadow: 0 0 10px #39FF14;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+        @keyframes pulse {
+            0%,100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+        .footer {
+            text-align: center;
+            padding: 8px;
+            font-size: 8px;
+            color: #444;
+            border-top: 1px solid #1a1a2e;
+            flex-shrink: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1 id="gameTitle">🎮 Juego</h1>
+        <button class="close-btn" onclick="closeGame()">❌ CERRAR</button>
+    </div>
+    <div class="game-container" id="gameContainer">
+        <div class="loading" id="loadingText">Cargando juego...</div>
+        <iframe id="gameIframe" style="display:none;" allowfullscreen></iframe>
+    </div>
+    <div class="footer">Tecnomath · Juego en iframe</div>
+
+    <script>
+        // Obtener la URL de la query string
+        const urlParams = new URLSearchParams(window.location.search);
+        const gameUrl = urlParams.get('url');
+        const gameName = urlParams.get('name') || 'Juego';
+
+        if (gameUrl) {
+            document.getElementById('gameTitle').textContent = '🎮 ' + gameName;
+            const iframe = document.getElementById('gameIframe');
+            const loading = document.getElementById('loadingText');
+            
+            // Mostrar iframe y ocultar loading cuando cargue
+            iframe.onload = function() {
+                loading.style.display = 'none';
+                iframe.style.display = 'block';
+            };
+            iframe.src = gameUrl;
+        } else {
+            document.getElementById('loadingText').textContent = '⚠️ No se especificó ningún juego.';
+        }
+
+        function closeGame() {
+            // Volver a la página anterior o al índice
+            if (document.referrer) {
+                window.location.href = document.referrer;
+            } else {
+                window.location.href = 'index.html';
+            }
+        }
+
+        // Atajo: Escape para cerrar
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') closeGame();
+        });
+    </script>
+</body>
+</html>
