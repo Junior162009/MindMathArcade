@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>🎃 Halloween Parade</title>
     <style>
         /* ========== RESET Y BASE ========== */
@@ -12,21 +12,34 @@
             box-sizing: border-box;
         }
 
-        body {
-            min-height: 100vh;
-            background: radial-gradient(ellipse at center, #1a0a2e 0%, #0d0518 100%);
-            display: flex;
-            justify-content: center;
-            align-items: center;
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: #0d0518;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            padding: 20px;
-            position: relative;
-            overflow-x: hidden;
+            touch-action: manipulation;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
         }
 
-        /* ========== FONDO DE PARTÍCULAS (CSS puro) ========== */
-        .stars {
-            position: fixed;
+        /* ========== CONTENEDOR PRINCIPAL (ocupa toda la pantalla) ========== */
+        .game-container {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: clamp(8px, 2vh, 20px);
+            background: radial-gradient(ellipse at center, #1a0a2e 0%, #0d0518 100%);
+            position: relative;
+        }
+
+        /* ========== FONDO DECORATIVO (emojis flotantes) ========== */
+        .bg-emojis {
+            position: absolute;
             top: 0;
             left: 0;
             width: 100%;
@@ -34,91 +47,47 @@
             pointer-events: none;
             z-index: 0;
             overflow: hidden;
+            font-size: clamp(30px, 6vw, 70px);
+            opacity: 0.06;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+            align-items: center;
+            word-break: break-all;
+            line-height: 1.5;
         }
 
-        .star {
-            position: absolute;
-            width: 3px;
-            height: 3px;
-            background: #fff;
-            border-radius: 50%;
-            animation: twinkle var(--duration) ease-in-out infinite alternate;
-            opacity: 0;
+        .bg-emojis span {
+            display: inline-block;
+            animation: floatEmoji 10s ease-in-out infinite alternate;
         }
 
-        @keyframes twinkle {
-            0% { opacity: 0; transform: scale(0.5); }
-            100% { opacity: 1; transform: scale(1.2); }
+        @keyframes floatEmoji {
+            0% { transform: translateY(0) rotate(-3deg); }
+            100% { transform: translateY(-20px) rotate(3deg); }
         }
 
-        /* ========== CONTENEDOR PRINCIPAL ========== */
-        .game-wrapper {
+        /* ========== WRAPPER DEL IFRAME (autoescalable) ========== */
+        .iframe-wrapper {
             position: relative;
             z-index: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 20px;
-            width: 100%;
+            width: min(95vw, 95vh * 0.666); /* respeta proporción 2:3 */
             max-width: 500px;
-        }
-
-        /* ========== TÍTULO CON NEÓN ========== */
-        .title {
-            font-size: clamp(1.6rem, 5vw, 2.8rem);
-            font-weight: 900;
-            color: #ff8c00;
-            text-shadow:
-                0 0 10px rgba(255, 140, 0, 0.8),
-                0 0 20px rgba(255, 140, 0, 0.6),
-                0 0 40px rgba(255, 140, 0, 0.4),
-                0 0 80px rgba(255, 140, 0, 0.2);
-            letter-spacing: 2px;
-            text-align: center;
-            padding: 0 10px;
-            animation: flicker 3s ease-in-out infinite alternate;
-        }
-
-        @keyframes flicker {
-            0% { text-shadow: 0 0 10px rgba(255, 140, 0, 0.8), 0 0 20px rgba(255, 140, 0, 0.6); }
-            100% { text-shadow: 0 0 15px rgba(255, 140, 0, 1), 0 0 30px rgba(255, 140, 0, 0.8), 0 0 60px rgba(255, 140, 0, 0.5); }
-        }
-
-        .title .emoji {
-            display: inline-block;
-            animation: bounce 2s ease-in-out infinite;
-        }
-
-        @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-8px); }
-        }
-
-        /* ========== CONTENEDOR DEL IFRAME ========== */
-        .iframe-container {
-            position: relative;
-            width: 100%;
-            padding-top: 150%; /* Proporción 420:630 ≈ 1:1.5 */
-            background: linear-gradient(145deg, #2d1b3d, #1a0a2e);
-            border-radius: 24px;
-            box-shadow:
-                0 0 30px rgba(255, 140, 0, 0.3),
-                0 0 60px rgba(255, 140, 0, 0.15),
-                inset 0 0 30px rgba(255, 140, 0, 0.05);
+            aspect-ratio: 2 / 3; /* relación de aspecto fija (420/630) */
+            background: #0a0410;
+            border-radius: clamp(12px, 3vw, 28px);
             border: 2px solid rgba(255, 140, 0, 0.3);
-            transition: box-shadow 0.4s ease, border-color 0.4s ease;
+            box-shadow: 0 0 40px rgba(255, 140, 0, 0.15), inset 0 0 60px rgba(255, 140, 0, 0.05);
             overflow: hidden;
+            transition: border-color 0.4s ease, box-shadow 0.4s ease;
         }
 
-        .iframe-container:hover {
-            box-shadow:
-                0 0 40px rgba(255, 140, 0, 0.5),
-                0 0 80px rgba(255, 140, 0, 0.25),
-                inset 0 0 30px rgba(255, 140, 0, 0.1);
-            border-color: rgba(255, 140, 0, 0.6);
+        .iframe-wrapper:hover {
+            border-color: rgba(255, 140, 0, 0.7);
+            box-shadow: 0 0 60px rgba(255, 140, 0, 0.3);
         }
 
-        .iframe-container iframe {
+        .iframe-wrapper iframe {
             position: absolute;
             top: 0;
             left: 0;
@@ -126,30 +95,49 @@
             height: 100%;
             border: none;
             background: #000;
-            border-radius: 22px;
         }
 
-        /* ========== BOTÓN VOLVER ========== */
+        /* ========== TÍTULO (minimalista, encima del iframe) ========== */
+        .title {
+            position: relative;
+            z-index: 2;
+            font-size: clamp(1rem, 3.5vw, 2.2rem);
+            font-weight: 900;
+            color: #ff8c00;
+            text-shadow: 0 0 20px rgba(255, 140, 0, 0.4), 0 0 60px rgba(255, 140, 0, 0.2);
+            text-align: center;
+            letter-spacing: 2px;
+            margin-bottom: clamp(6px, 1.5vh, 15px);
+            padding: 0 10px;
+            white-space: nowrap;
+        }
+
+        /* ========== BOTÓN VOLVER (abajo, fijo) ========== */
         .btn-back {
+            position: relative;
+            z-index: 2;
             display: inline-flex;
             align-items: center;
-            gap: 10px;
-            padding: 12px 28px;
-            background: rgba(255, 140, 0, 0.15);
+            gap: clamp(6px, 1vw, 12px);
+            padding: clamp(8px, 1.5vh, 14px) clamp(16px, 3vw, 32px);
+            background: rgba(255, 140, 0, 0.1);
             color: #ff8c00;
-            font-size: clamp(0.8rem, 1.5vw, 1rem);
+            font-size: clamp(0.6rem, 1.8vw, 1rem);
             font-weight: 600;
             text-decoration: none;
-            border: 2px solid rgba(255, 140, 0, 0.4);
+            border: 2px solid rgba(255, 140, 0, 0.25);
             border-radius: 50px;
             backdrop-filter: blur(10px);
             transition: all 0.3s ease;
             letter-spacing: 1px;
             text-transform: uppercase;
+            font-family: inherit;
+            margin-top: clamp(8px, 2vh, 20px);
+            touch-action: manipulation;
         }
 
         .btn-back:hover {
-            background: rgba(255, 140, 0, 0.25);
+            background: rgba(255, 140, 0, 0.2);
             border-color: #ff8c00;
             box-shadow: 0 0 30px rgba(255, 140, 0, 0.3);
             transform: scale(1.05);
@@ -160,72 +148,79 @@
         }
 
         .btn-back svg {
-            width: 20px;
-            height: 20px;
+            width: clamp(16px, 2vw, 24px);
+            height: clamp(16px, 2vw, 24px);
             fill: currentColor;
+            flex-shrink: 0;
         }
 
-        /* ========== FOOTER ========== */
-        .footer {
-            color: rgba(255, 255, 255, 0.2);
-            font-size: 0.7rem;
-            text-align: center;
-            letter-spacing: 1px;
-            margin-top: 10px;
-        }
-
-        .footer span {
-            color: rgba(255, 140, 0, 0.3);
-        }
-
-        /* ========== RESPONSIVE ========== */
-        @media (max-width: 480px) {
-            .iframe-container {
-                border-radius: 16px;
-                padding-top: 155%;
+        /* ========== RESPONSIVE: ajuste por orientación ========== */
+        @media (orientation: landscape) and (max-height: 500px) {
+            .iframe-wrapper {
+                width: min(70vh, 80vw);
+                aspect-ratio: 2 / 3;
+                max-width: 400px;
+            }
+            .title {
+                font-size: clamp(0.8rem, 2.5vw, 1.4rem);
+                margin-bottom: 4px;
             }
             .btn-back {
-                padding: 10px 20px;
-                font-size: 0.75rem;
+                padding: 6px 16px;
+                font-size: 0.6rem;
+                margin-top: 4px;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .title {
+                white-space: normal;
+                font-size: clamp(0.8rem, 4vw, 1.2rem);
+            }
+            .iframe-wrapper {
+                width: 95vw;
+                max-width: 360px;
             }
         }
 
         @media (min-width: 768px) {
-            .game-wrapper {
-                max-width: 560px;
-            }
-            .iframe-container {
-                padding-top: 145%;
-                border-radius: 28px;
+            .iframe-wrapper {
+                max-width: 520px;
             }
         }
 
         @media (min-width: 1024px) {
-            .game-wrapper {
-                max-width: 620px;
+            .iframe-wrapper {
+                max-width: 580px;
             }
-            .iframe-container {
-                padding-top: 140%;
-                border-radius: 32px;
+        }
+
+        /* ========== BLOQUEO DE ZOOM (adicional) ========== */
+        @supports (-webkit-touch-callout: none) {
+            body {
+                -webkit-text-size-adjust: none;
             }
         }
     </style>
 </head>
 <body>
 
-    <!-- ===== ESTRELLAS DE FONDO (generadas con JS) ===== -->
-    <div class="stars" id="stars"></div>
+    <!-- Fondo decorativo con emojis -->
+    <div class="bg-emojis">
+        <span>🎃</span><span>🦇</span><span>🎃</span><span>🕸️</span><span>🎃</span>
+        <span>🦇</span><span>🎃</span><span>🕷️</span><span>🎃</span><span>🦇</span>
+        <span>🎃</span><span>🕸️</span><span>🎃</span><span>🦇</span><span>🎃</span>
+        <span>🦇</span><span>🎃</span><span>🕸️</span><span>🎃</span><span>🦇</span>
+    </div>
 
-    <!-- ===== CONTENIDO PRINCIPAL ===== -->
-    <div class="game-wrapper">
+    <!-- Contenido principal -->
+    <div class="game-container">
 
         <!-- Título -->
-        <h1 class="title">
-            <span class="emoji">🎃</span> Halloween Parade <span class="emoji">🦇</span>
-        </h1>
+        <div class="title">🎃 Halloween Parade</div>
 
-        <!-- Contenedor del iframe -->
-        <div class="iframe-container">
+        <!-- Iframe autoescalable -->
+        <div class="iframe-wrapper">
             <iframe
                 src="https://y8.com/embed/halloween_parade"
                 scrolling="no"
@@ -238,51 +233,33 @@
         <!-- Botón volver -->
         <a href="../index.html" class="btn-back">
             <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
-            Volver al inicio
+            Volver
         </a>
-
-        <!-- Footer -->
-        <div class="footer">
-            <span>🎮</span> Tecnomath · Juego de Halloween <span>🎮</span>
-        </div>
 
     </div>
 
     <script>
         // ============================================================
-        // GENERAR ESTRELLAS DE FONDO
+        // BLOQUEAR ZOOM CON GESTOS (touch)
         // ============================================================
-        (function createStars() {
-            const container = document.getElementById('stars');
-            const count = 120;
-            const fragment = document.createDocumentFragment();
+        document.addEventListener('gesturestart', function(e) {
+            e.preventDefault();
+        });
 
-            for (let i = 0; i < count; i++) {
-                const star = document.createElement('div');
-                star.className = 'star';
-                const size = Math.random() * 4 + 1;
-                const x = Math.random() * 100;
-                const y = Math.random() * 100;
-                const duration = Math.random() * 3 + 2;
-                const delay = Math.random() * 5;
+        document.addEventListener('gesturechange', function(e) {
+            e.preventDefault();
+        });
 
-                star.style.width = size + 'px';
-                star.style.height = size + 'px';
-                star.style.left = x + '%';
-                star.style.top = y + '%';
-                star.style.setProperty('--duration', duration + 's');
-                star.style.animationDelay = delay + 's';
-                star.style.opacity = Math.random() * 0.5 + 0.2;
+        document.addEventListener('gestureend', function(e) {
+            e.preventDefault();
+        });
 
-                // Colores cálidos para Halloween
-                const colors = ['#fff', '#ff8c00', '#ff6b00', '#ffaa33', '#ffcc88'];
-                star.style.background = colors[Math.floor(Math.random() * colors.length)];
+        // También bloquear zoom con doble toque
+        document.addEventListener('dblclick', function(e) {
+            e.preventDefault();
+        }, { passive: false });
 
-                fragment.appendChild(star);
-            }
-
-            container.appendChild(fragment);
-        })();
+        console.log('🎃 Halloween Parade cargado - Zoom bloqueado y autoescalado');
     </script>
 
 </body>
