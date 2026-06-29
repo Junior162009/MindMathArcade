@@ -939,7 +939,7 @@
         });
 
         // ============================================================
-        // FILTROS Y RENDERIZADO (con soporte para eventos + badge)
+        // FILTROS Y RENDERIZADO (con soporte para eventos + badge + orden)
         // ============================================================
         let currentActiveFilter = 'todos';
 
@@ -1013,6 +1013,20 @@
             // Eliminar juegos rotos
             filtered = filtered.filter(p => !p.broken);
 
+            // ============================================================
+            // 🆕 ORDENAR: PRIMERO LOS EXCLUSIVOS DEL EVENTO ACTIVO
+            // ============================================================
+            if (activeEvent) {
+                filtered.sort((a, b) => {
+                    const aExclusive = a.evento === activeEvent;
+                    const bExclusive = b.evento === activeEvent;
+                    if (aExclusive && !bExclusive) return -1;
+                    if (!aExclusive && bExclusive) return 1;
+                    return 0;
+                });
+            }
+
+            // Renderizar cada juego
             filtered.forEach(proj => {
                 const card = document.createElement('a');
                 card.className = 'project-card';
@@ -1725,6 +1739,7 @@
         console.log('🕹️ Los juegos con propiedad "evento" solo aparecen cuando ese evento está activo.');
         console.log('✨ Los temas son permanentes hasta que se desactiven con feriaoff o stop.');
         console.log('🏷️ Los juegos exclusivos tienen un badge con emoji identificativo.');
+        console.log('📌 Los juegos exclusivos aparecen primero en la lista.');
     </script>
 </body>
 </html>
