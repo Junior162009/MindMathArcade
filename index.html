@@ -22,6 +22,9 @@
     <!-- Ruffle para Flash -->
     <script src="https://unpkg.com/@ruffle-rs/ruffle"></script>
 
+    <!-- QRCode.js para generar códigos QR -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
         /* ==============================
@@ -317,12 +320,82 @@
             font-family: 'Orbitron', monospace;
         }
 
+        /* ========== FOOTER CON QR ========== */
         footer {
-            text-align: center; padding: 15px; color: #444;
-            font-size: clamp(3px, 1vw, 5px);
+            text-align: center;
+            padding: 20px 15px 15px;
             border-top: 1px solid var(--theme-border);
             margin-top: 20px;
             transition: border-color 0.6s;
+        }
+
+        .qr-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 0 20px;
+        }
+
+        .qr-label {
+            color: var(--neon-cyan);
+            font-size: clamp(8px, 1.5vw, 12px);
+            letter-spacing: 2px;
+            text-shadow: 0 0 10px var(--neon-cyan);
+        }
+
+        .qr-container {
+            background: white;
+            padding: 12px;
+            border-radius: 16px;
+            box-shadow: 0 0 30px rgba(0,255,255,0.2);
+            border: 2px solid var(--neon-cyan);
+            display: inline-block;
+            position: relative;
+            transition: box-shadow 0.3s;
+        }
+
+        .qr-container:hover {
+            box-shadow: 0 0 50px rgba(0,255,255,0.4);
+        }
+
+        #qrcode canvas {
+            display: block;
+            border-radius: 8px;
+        }
+
+        .qr-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 4px;
+        }
+
+        .qr-btn-download {
+            background: var(--neon-cyan);
+            color: black;
+            border: none;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 6px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .qr-btn-download:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px var(--neon-cyan);
+        }
+
+        .qr-subtext {
+            color: #888;
+            font-size: clamp(5px, 1vw, 8px);
+        }
+
+        .copyright {
+            color: #444;
+            font-size: clamp(3px, 1vw, 5px);
+            padding-top: 5px;
         }
 
         /* Overlay del reproductor Flash */
@@ -475,7 +548,6 @@
         <a href="pages/admin/admin-promos.html" target="_blank">📢 GESTIONAR PROMOS</a>
         <a href="pages/admin/gestor-movil.html" target="_blank" class="btn-gold">➕ AGREGAR JUEGO</a>
         <button onclick="showCodePrompt()" style="background: var(--neon-yellow); color: black; box-shadow: 0 4px 0 #b8860b;">🔢 CÓDIGOS</button>
-        <!-- 🟢 BOTÓN DE VERIFICAR ROTOS -->
         <button onclick="verificarYMostrarRotos()" style="background: var(--neon-cyan); color: black; box-shadow: 0 4px 0 #008080;">🔍 VERIFICAR ROTOS</button>
         <button onclick="exitAdminMode()" style="background:#c0392b;">🚪 SALIR ADMIN</button>
     </div>
@@ -523,7 +595,22 @@
         <button id="leaderboard-close" onclick="closeLeaderboard()">CERRAR</button>
     </div>
 
-    <footer>© 2026 Tecnomath · Powered by GitHub Pages</footer>
+    <!-- ============================================================ -->
+    <!-- FOOTER CON CÓDIGO QR                                        -->
+    <!-- ============================================================ -->
+    <footer>
+        <div class="qr-section">
+            <span class="qr-label">📱 ESCANEA EL CÓDIGO QR</span>
+            <div class="qr-container">
+                <div id="qrcode"></div>
+            </div>
+            <div class="qr-actions">
+                <button id="downloadQrBtn" class="qr-btn-download">⬇ DESCARGAR QR</button>
+            </div>
+            <span class="qr-subtext">Accede a Tecnomath desde tu móvil</span>
+        </div>
+        <div class="copyright">© 2026 Tecnomath · Powered by GitHub Pages</div>
+    </footer>
 
     <script src="js/shared.js"></script>
     <script>
@@ -770,7 +857,7 @@
         // ============================================================
         const juegosIncrustados = [
             // ==============================
-            // JUEGOS SIEMPRE VISIBLES (evento: null) - Con rutas actualizadas a pages/
+            // JUEGOS SIEMPRE VISIBLES (evento: null)
             // ==============================
             { name: "MindMath Arcade", desc: "Juego de matemáticas retro con 60+ niveles", url: "pages/game.html", imageUrl: "img/mindmath.png", icon: "🧮", category: "mates", deviceCompatibility: "both", evento: null },
             { name: "BanderQuiz", desc: "Adivina las banderas del mundo", url: "https://junior162009.github.io/BanderQuiz/", imageUrl: "img/banderquiz.png", icon: "🏳️🌎", category: "edu", deviceCompatibility: "both", evento: null },
@@ -957,8 +1044,8 @@
                 filtered = filtered.filter(p => p.category === filterCategory);
             }
 
-            // 🔴 AHORA NO FILTRAMOS LOS ROTOS, LOS MOSTRAMOS CON BORDE ROJO
-            // filtered = filtered.filter(p => !p.broken);  // <-- COMENTADO
+            // NO filtramos los rotos, los mostramos con marca visual
+            // filtered = filtered.filter(p => !p.broken);
 
             if (activeEvent) {
                 filtered.sort((a, b) => {
@@ -1003,7 +1090,7 @@
                 nameDiv.className = 'project-name';
                 nameDiv.textContent = proj.name;
 
-                // 🟢 MARCAR VISUALMENTE LOS JUEGOS ROTOS
+                // Marcar visualmente los juegos rotos
                 if (proj.broken) {
                     card.style.border = '3px solid red';
                     card.style.opacity = '0.7';
@@ -1153,6 +1240,98 @@
                 console.table(rotos);
             }
         }
+
+        // ============================================================
+        // 📱 GENERAR CÓDIGO QR CON LOGO DE TECNOMATH
+        // ============================================================
+        function generarQRConLogo() {
+            const container = document.getElementById('qrcode');
+            if (!container) return;
+
+            // URL actual de la página
+            const url = window.location.href;
+
+            // Generar QR
+            const qr = new QRCode(container, {
+                text: url,
+                width: 160,
+                height: 160,
+                colorDark: "#00FFFF",     // Color neón cian
+                colorLight: "#ffffff",    // Fondo blanco
+                correctLevel: QRCode.CorrectLevel.H // Alta corrección de errores
+            });
+
+            // Obtener el canvas
+            const canvas = container.querySelector('canvas');
+            if (canvas) {
+                // Esperar a que el QR se dibuje
+                setTimeout(() => {
+                    const ctx = canvas.getContext('2d');
+                    const size = canvas.width;
+
+                    // Crear el logo en un canvas auxiliar
+                    const logoSize = size * 0.25;
+                    const logoCanvas = document.createElement('canvas');
+                    logoCanvas.width = logoSize;
+                    logoCanvas.height = logoSize;
+                    const logoCtx = logoCanvas.getContext('2d');
+
+                    // Fondo blanco redondeado para el logo
+                    const radius = logoSize * 0.15;
+                    logoCtx.beginPath();
+                    logoCtx.arc(logoSize/2, logoSize/2, logoSize/2 - radius, 0, Math.PI * 2);
+                    logoCtx.fillStyle = 'white';
+                    logoCtx.fill();
+                    logoCtx.shadowColor = 'rgba(0,0,0,0.2)';
+                    logoCtx.shadowBlur = 10;
+
+                    // Dibujar el emoji de Tecnomath (🎮)
+                    logoCtx.textAlign = 'center';
+                    logoCtx.textBaseline = 'middle';
+                    logoCtx.font = `${logoSize * 0.6}px Arial`;
+                    logoCtx.fillStyle = '#00FFFF';
+                    logoCtx.shadowColor = '#00FFFF';
+                    logoCtx.shadowBlur = 15;
+                    logoCtx.fillText('🎮', logoSize/2, logoSize/2 + 2);
+
+                    // Dibujar el logo encima del QR
+                    const x = (size - logoSize) / 2;
+                    const y = (size - logoSize) / 2;
+                    ctx.drawImage(logoCanvas, x, y, logoSize, logoSize);
+
+                    // Borde alrededor del logo
+                    ctx.beginPath();
+                    ctx.arc(size/2, size/2, logoSize/2 + 2, 0, Math.PI * 2);
+                    ctx.strokeStyle = 'rgba(0,255,255,0.3)';
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+                }, 100);
+            }
+        }
+
+        function descargarQR() {
+            const canvas = document.querySelector('#qrcode canvas');
+            if (!canvas) {
+                alert('El QR aún no está listo. Espera un momento.');
+                return;
+            }
+            const link = document.createElement('a');
+            link.download = 'Tecnomath-QR.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+
+        // Generar el QR al cargar la página
+        document.addEventListener('DOMContentLoaded', function() {
+            // Esperar un momento para que el DOM esté listo
+            setTimeout(generarQRConLogo, 500);
+
+            // Botón de descarga
+            const downloadBtn = document.getElementById('downloadQrBtn');
+            if (downloadBtn) {
+                downloadBtn.addEventListener('click', descargarQR);
+            }
+        });
 
         // ============================================================
         // MODO FERIA, TEMAS PERMANENTES, FAVICON DINÁMICO
@@ -1806,6 +1985,7 @@
         console.log('📌 Los juegos exclusivos aparecen primero en la lista.');
         console.log('📁 Estructura: /pages/ para juegos, /js/ para scripts, /css/ para estilos.');
         console.log('🕵️ Usa el botón "VERIFICAR ROTOS" en el panel admin para escanear 404.');
+        console.log('📱 Código QR con logo de Tecnomath generado en el footer.');
     </script>
 </body>
 </html>
