@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>🎃 Halloween Parade</title>
     <style>
-        /* ========== RESET Y BASE ========== */
+        /* ========== RESET ========== */
         * {
             margin: 0;
             padding: 0;
@@ -24,7 +24,6 @@
             user-select: none;
         }
 
-        /* ========== CONTENEDOR PRINCIPAL (ocupa toda la pantalla) ========== */
         .game-container {
             width: 100vw;
             height: 100vh;
@@ -37,7 +36,6 @@
             position: relative;
         }
 
-        /* ========== FONDO DECORATIVO (emojis flotantes) ========== */
         .bg-emojis {
             position: absolute;
             top: 0;
@@ -67,13 +65,12 @@
             100% { transform: translateY(-20px) rotate(3deg); }
         }
 
-        /* ========== WRAPPER DEL IFRAME (autoescalable) ========== */
         .iframe-wrapper {
             position: relative;
             z-index: 1;
-            width: min(95vw, 95vh * 0.666); /* respeta proporción 2:3 */
+            width: min(95vw, 95vh * 0.666);
             max-width: 500px;
-            aspect-ratio: 2 / 3; /* relación de aspecto fija (420/630) */
+            aspect-ratio: 2 / 3;
             background: #0a0410;
             border-radius: clamp(12px, 3vw, 28px);
             border: 2px solid rgba(255, 140, 0, 0.3);
@@ -97,7 +94,6 @@
             background: #000;
         }
 
-        /* ========== TÍTULO (minimalista, encima del iframe) ========== */
         .title {
             position: relative;
             z-index: 2;
@@ -112,7 +108,6 @@
             white-space: nowrap;
         }
 
-        /* ========== BOTÓN VOLVER (abajo, fijo) ========== */
         .btn-back {
             position: relative;
             z-index: 2;
@@ -154,7 +149,6 @@
             flex-shrink: 0;
         }
 
-        /* ========== RESPONSIVE: ajuste por orientación ========== */
         @media (orientation: landscape) and (max-height: 500px) {
             .iframe-wrapper {
                 width: min(70vh, 80vw);
@@ -164,6 +158,7 @@
             .title {
                 font-size: clamp(0.8rem, 2.5vw, 1.4rem);
                 margin-bottom: 4px;
+                white-space: nowrap;
             }
             .btn-back {
                 padding: 6px 16px;
@@ -195,17 +190,25 @@
             }
         }
 
-        /* ========== BLOQUEO DE ZOOM (adicional) ========== */
         @supports (-webkit-touch-callout: none) {
             body {
                 -webkit-text-size-adjust: none;
             }
         }
+
+        /* Bloqueo de zoom */
+        .no-zoom {
+            touch-action: manipulation;
+        }
+
+        /* Ocultar scrollbar */
+        ::-webkit-scrollbar {
+            display: none;
+        }
     </style>
 </head>
 <body>
 
-    <!-- Fondo decorativo con emojis -->
     <div class="bg-emojis">
         <span>🎃</span><span>🦇</span><span>🎃</span><span>🕸️</span><span>🎃</span>
         <span>🦇</span><span>🎃</span><span>🕷️</span><span>🎃</span><span>🦇</span>
@@ -213,15 +216,12 @@
         <span>🦇</span><span>🎃</span><span>🕸️</span><span>🎃</span><span>🦇</span>
     </div>
 
-    <!-- Contenido principal -->
     <div class="game-container">
 
-        <!-- Título -->
         <div class="title">🎃 Halloween Parade</div>
 
-        <!-- Iframe autoescalable -->
         <div class="iframe-wrapper">
-           <iframe
+            <iframe
                 src="https://www.y8.com/embed/halloween_parade"
                 scrolling="no"
                 allowfullscreen
@@ -230,7 +230,6 @@
             </iframe>
         </div>
 
-        <!-- Botón volver -->
         <a href="../index.html" class="btn-back">
             <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
             Volver
@@ -239,27 +238,11 @@
     </div>
 
     <script>
-        // ============================================================
-        // BLOQUEAR ZOOM CON GESTOS (touch)
-        // ============================================================
-        document.addEventListener('gesturestart', function(e) {
-            e.preventDefault();
-        });
-
-        document.addEventListener('gesturechange', function(e) {
-            e.preventDefault();
-        });
-
-        document.addEventListener('gestureend', function(e) {
-            e.preventDefault();
-        });
-
-        // También bloquear zoom con doble toque
-        document.addEventListener('dblclick', function(e) {
-            e.preventDefault();
-        }, { passive: false });
-
-        console.log('🎃 Halloween Parade cargado - Zoom bloqueado y autoescalado');
+        document.addEventListener('gesturestart', function(e) { e.preventDefault(); });
+        document.addEventListener('gesturechange', function(e) { e.preventDefault(); });
+        document.addEventListener('gestureend', function(e) { e.preventDefault(); });
+        document.addEventListener('dblclick', function(e) { e.preventDefault(); }, { passive: false });
+        console.log('🎃 Halloween Parade cargado - Diseño mejorado');
     </script>
 
 </body>
