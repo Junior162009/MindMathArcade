@@ -104,14 +104,14 @@
         .btn-main:hover { transform: scale(1.02); box-shadow: 0 0 15px rgba(255,0,255,0.4); }
         .btn-secondary { background: transparent; border: 1px solid #444; color: #888; padding: 8px; font-family: 'Press Start 2P', cursive; font-size: 5px; cursor: pointer; width: 100%; max-width: 340px; transition: all .2s; border-radius: 6px; text-align: center; }
         .btn-secondary:hover { border-color: #888; color: white; }
-        #shop-view { display: none; flex: 1; overflow-y: auto; padding: 12px; flex-direction: column; gap: 10px; }
+        #shop-view { display: none; flex: 1; overflow-y: auto; padding: 12px; flex-direction: column; gap: 10px; position: relative; }
         #shop-view.active { display: flex; }
         .shop-title { font-size: 10px; color: var(--neon-pink); text-align: center; text-shadow: 0 0 10px var(--neon-pink); }
         .shop-item { border: 1px solid #222; background: var(--card-bg); padding: 12px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: all .2s; font-size: 6px; border-radius: 6px; }
         .shop-item:hover { border-color: var(--gold); background: rgba(255,215,0,0.05); }
         .shop-item-name { color: white; }
         .shop-item-price { color: var(--gold); font-size: 7px; }
-        #scores-view { display: none; flex: 1; overflow-y: auto; padding: 12px; flex-direction: column; gap: 8px; }
+        #scores-view { display: none; flex: 1; overflow-y: auto; padding: 12px; flex-direction: column; gap: 8px; position: relative; }
         #scores-view.active { display: flex; }
         .score-popup { position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%) scale(0); background: #0d0d1a; border: 2px solid var(--gold); padding: 20px 25px; text-align: center; z-index: 200; transition: transform .3s cubic-bezier(0.175,0.885,0.32,1.275); box-shadow: 0 0 40px rgba(255,215,0,0.3); border-radius: 10px; pointer-events: none; }
         .score-popup.show { transform: translate(-50%,-50%) scale(1); }
@@ -136,8 +136,16 @@
         .ods-card.completed { border-color: #FFD700; background: #0a0a15; }
         .ods-card .ods-icon { font-size: 22px; }
         .dash-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)); gap: 6px; padding: 8px; }
+        .close-btn {
+            position: absolute; top: 8px; right: 12px; font-size: 18px; color: #888;
+            cursor: pointer; transition: color .2s; z-index: 10;
+            font-family: 'Press Start 2P', cursive;
+        }
+        .close-btn:hover { color: var(--neon-pink); }
+        #ods-view { display: none; flex: 1; overflow-y: auto; padding: 12px; flex-direction: column; gap: 8px; position: relative; }
+        #ods-view.active { display: flex; }
         @media (max-width:350px) {
-            .header-title { font-size: 6px; } .cat-tab { font-size: 3px; padding: 4px 6px; } .game-slot { min-height: 55px; padding: 6px 3px; } .game-slot .slot-emoji { font-size: 14px; } .game-slot .slot-name { font-size: 3px; } .key { padding: 10px 4px; font-size: 8px; } .numpad { gap: 4px; max-width: 200px; } .math-problem { font-size: 16px; padding: 8px; } .footer-btn { font-size: 4px; padding: 6px 2px; }
+            .header-title { font-size: 6px; } .cat-tab { font-size: 3px; padding: 4px 6px; } .game-slot { min-height: 55px; padding: 6px 3px; } .game-slot .slot-emoji { font-size: 14px; } .game-slot .slot-name { font-size: 3px; } .key { padding: 10px 4px; font-size: 8px; } .numpad { gap: 4px; max-width: 200px; } .math-problem { font-size: 16px; padding: 8px; } .footer-btn { font-size: 4px; padding: 6px 2px; } .close-btn { font-size: 14px; top: 4px; right: 8px; }
         }
     </style>
 </head>
@@ -162,12 +170,13 @@
             <div class="hud-stat"><span class="hud-label">ODS</span><span id="ods-progress" class="hud-val" style="color:#FFD700">0/17</span></div>
         </div>
 
-        <!-- Vistas -->
+        <!-- MENÚ -->
         <div id="menu-view" class="view">
             <div class="cat-tabs" id="cat-tabs"></div>
             <div id="game-grid" style="flex:1;overflow-y:auto;padding:8px;display:grid;grid-template-columns:repeat(auto-fill,minmax(78px,1fr));gap:8px;align-content:start;"></div>
         </div>
 
+        <!-- JUEGO -->
         <div id="game-view" class="view hidden">
             <div id="game-content" style="flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;align-items:center;gap:10px;"></div>
             <div style="padding:8px;border-top:1px solid #1a1a2e;flex-shrink:0;">
@@ -175,7 +184,9 @@
             </div>
         </div>
 
+        <!-- TIENDA con X -->
         <div id="shop-view" class="view hidden">
+            <span class="close-btn" onclick="switchTab('menu')">✕</span>
             <div class="shop-title" style="margin-bottom:8px;">🛒 TIENDA ARCADE</div>
             <div class="shop-item" onclick="buyItem('life',50)"><span class="shop-item-name">❤️ +1 VIDA</span><span class="shop-item-price">50 💰</span></div>
             <div class="shop-item" onclick="buyItem('shield',80)"><span class="shop-item-name">🛡️ ESCUDO x1</span><span class="shop-item-price">80 💰</span></div>
@@ -187,12 +198,16 @@
             </div>
         </div>
 
+        <!-- LOGROS con X -->
         <div id="scores-view" class="view hidden">
+            <span class="close-btn" onclick="switchTab('menu')">✕</span>
             <div style="font-size:9px;color:var(--neon-cyan);text-align:center;margin-bottom:8px;">🏆 LOGROS</div>
             <div id="scores-content" style="overflow-y:auto;padding:8px;"></div>
         </div>
 
+        <!-- ODS con X -->
         <div id="ods-view" class="view hidden">
+            <span class="close-btn" onclick="switchTab('menu')">✕</span>
             <div style="font-size:8px;color:#FFD700;text-align:center;margin-bottom:8px;">🌍 OBJETIVOS ODS</div>
             <div id="ods-dash-content" style="overflow-y:auto;padding:8px;flex:1;"></div>
         </div>
