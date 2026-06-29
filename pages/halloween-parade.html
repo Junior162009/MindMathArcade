@@ -2,14 +2,288 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Halloween Parade</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>🎃 Halloween Parade</title>
     <style>
-        body { margin: 0; padding: 0; background: #000; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; }
-        iframe { width: 100%; height: 100%; max-width: 420px; max-height: 630px; border: none; }
+        /* ========== RESET Y BASE ========== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            background: radial-gradient(ellipse at center, #1a0a2e 0%, #0d0518 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* ========== FONDO DE PARTÍCULAS (CSS puro) ========== */
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .star {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background: #fff;
+            border-radius: 50%;
+            animation: twinkle var(--duration) ease-in-out infinite alternate;
+            opacity: 0;
+        }
+
+        @keyframes twinkle {
+            0% { opacity: 0; transform: scale(0.5); }
+            100% { opacity: 1; transform: scale(1.2); }
+        }
+
+        /* ========== CONTENEDOR PRINCIPAL ========== */
+        .game-wrapper {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            width: 100%;
+            max-width: 500px;
+        }
+
+        /* ========== TÍTULO CON NEÓN ========== */
+        .title {
+            font-size: clamp(1.6rem, 5vw, 2.8rem);
+            font-weight: 900;
+            color: #ff8c00;
+            text-shadow:
+                0 0 10px rgba(255, 140, 0, 0.8),
+                0 0 20px rgba(255, 140, 0, 0.6),
+                0 0 40px rgba(255, 140, 0, 0.4),
+                0 0 80px rgba(255, 140, 0, 0.2);
+            letter-spacing: 2px;
+            text-align: center;
+            padding: 0 10px;
+            animation: flicker 3s ease-in-out infinite alternate;
+        }
+
+        @keyframes flicker {
+            0% { text-shadow: 0 0 10px rgba(255, 140, 0, 0.8), 0 0 20px rgba(255, 140, 0, 0.6); }
+            100% { text-shadow: 0 0 15px rgba(255, 140, 0, 1), 0 0 30px rgba(255, 140, 0, 0.8), 0 0 60px rgba(255, 140, 0, 0.5); }
+        }
+
+        .title .emoji {
+            display: inline-block;
+            animation: bounce 2s ease-in-out infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+
+        /* ========== CONTENEDOR DEL IFRAME ========== */
+        .iframe-container {
+            position: relative;
+            width: 100%;
+            padding-top: 150%; /* Proporción 420:630 ≈ 1:1.5 */
+            background: linear-gradient(145deg, #2d1b3d, #1a0a2e);
+            border-radius: 24px;
+            box-shadow:
+                0 0 30px rgba(255, 140, 0, 0.3),
+                0 0 60px rgba(255, 140, 0, 0.15),
+                inset 0 0 30px rgba(255, 140, 0, 0.05);
+            border: 2px solid rgba(255, 140, 0, 0.3);
+            transition: box-shadow 0.4s ease, border-color 0.4s ease;
+            overflow: hidden;
+        }
+
+        .iframe-container:hover {
+            box-shadow:
+                0 0 40px rgba(255, 140, 0, 0.5),
+                0 0 80px rgba(255, 140, 0, 0.25),
+                inset 0 0 30px rgba(255, 140, 0, 0.1);
+            border-color: rgba(255, 140, 0, 0.6);
+        }
+
+        .iframe-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+            background: #000;
+            border-radius: 22px;
+        }
+
+        /* ========== BOTÓN VOLVER ========== */
+        .btn-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 28px;
+            background: rgba(255, 140, 0, 0.15);
+            color: #ff8c00;
+            font-size: clamp(0.8rem, 1.5vw, 1rem);
+            font-weight: 600;
+            text-decoration: none;
+            border: 2px solid rgba(255, 140, 0, 0.4);
+            border-radius: 50px;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .btn-back:hover {
+            background: rgba(255, 140, 0, 0.25);
+            border-color: #ff8c00;
+            box-shadow: 0 0 30px rgba(255, 140, 0, 0.3);
+            transform: scale(1.05);
+        }
+
+        .btn-back:active {
+            transform: scale(0.95);
+        }
+
+        .btn-back svg {
+            width: 20px;
+            height: 20px;
+            fill: currentColor;
+        }
+
+        /* ========== FOOTER ========== */
+        .footer {
+            color: rgba(255, 255, 255, 0.2);
+            font-size: 0.7rem;
+            text-align: center;
+            letter-spacing: 1px;
+            margin-top: 10px;
+        }
+
+        .footer span {
+            color: rgba(255, 140, 0, 0.3);
+        }
+
+        /* ========== RESPONSIVE ========== */
+        @media (max-width: 480px) {
+            .iframe-container {
+                border-radius: 16px;
+                padding-top: 155%;
+            }
+            .btn-back {
+                padding: 10px 20px;
+                font-size: 0.75rem;
+            }
+        }
+
+        @media (min-width: 768px) {
+            .game-wrapper {
+                max-width: 560px;
+            }
+            .iframe-container {
+                padding-top: 145%;
+                border-radius: 28px;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .game-wrapper {
+                max-width: 620px;
+            }
+            .iframe-container {
+                padding-top: 140%;
+                border-radius: 32px;
+            }
+        }
     </style>
 </head>
 <body>
-    <iframe src="https://y8.com/embed/halloween_parade" scrolling="no" style="width: 100%; height: 100%; max-width: 420px; max-height: 630px; border: 0; margin: 0; padding: 0;"></iframe>
+
+    <!-- ===== ESTRELLAS DE FONDO (generadas con JS) ===== -->
+    <div class="stars" id="stars"></div>
+
+    <!-- ===== CONTENIDO PRINCIPAL ===== -->
+    <div class="game-wrapper">
+
+        <!-- Título -->
+        <h1 class="title">
+            <span class="emoji">🎃</span> Halloween Parade <span class="emoji">🦇</span>
+        </h1>
+
+        <!-- Contenedor del iframe -->
+        <div class="iframe-container">
+            <iframe
+                src="https://y8.com/embed/halloween_parade"
+                scrolling="no"
+                allowfullscreen
+                loading="lazy"
+                title="Halloween Parade Game">
+            </iframe>
+        </div>
+
+        <!-- Botón volver -->
+        <a href="../index.html" class="btn-back">
+            <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+            Volver al inicio
+        </a>
+
+        <!-- Footer -->
+        <div class="footer">
+            <span>🎮</span> Tecnomath · Juego de Halloween <span>🎮</span>
+        </div>
+
+    </div>
+
+    <script>
+        // ============================================================
+        // GENERAR ESTRELLAS DE FONDO
+        // ============================================================
+        (function createStars() {
+            const container = document.getElementById('stars');
+            const count = 120;
+            const fragment = document.createDocumentFragment();
+
+            for (let i = 0; i < count; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                const size = Math.random() * 4 + 1;
+                const x = Math.random() * 100;
+                const y = Math.random() * 100;
+                const duration = Math.random() * 3 + 2;
+                const delay = Math.random() * 5;
+
+                star.style.width = size + 'px';
+                star.style.height = size + 'px';
+                star.style.left = x + '%';
+                star.style.top = y + '%';
+                star.style.setProperty('--duration', duration + 's');
+                star.style.animationDelay = delay + 's';
+                star.style.opacity = Math.random() * 0.5 + 0.2;
+
+                // Colores cálidos para Halloween
+                const colors = ['#fff', '#ff8c00', '#ff6b00', '#ffaa33', '#ffcc88'];
+                star.style.background = colors[Math.floor(Math.random() * colors.length)];
+
+                fragment.appendChild(star);
+            }
+
+            container.appendChild(fragment);
+        })();
+    </script>
+
 </body>
 </html>
