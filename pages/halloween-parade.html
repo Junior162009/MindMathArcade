@@ -27,7 +27,7 @@
             user-select: none;
         }
 
-        /* ========== CONTENEDOR PRINCIPAL (centrado perfecto) ========== */
+        /* ========== CONTENEDOR PRINCIPAL ========== */
         .game-container {
             width: 100vw;
             height: 100vh;
@@ -35,7 +35,7 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: clamp(8px, 2vh, 20px);
+            padding: clamp(8px, 2vh, 25px);
             background: radial-gradient(ellipse at center, #1a0a2e 0%, #0d0518 100%);
             position: relative;
         }
@@ -74,7 +74,7 @@
         .title {
             position: relative;
             z-index: 2;
-            font-size: clamp(1.2rem, 4vw, 2.5rem);
+            font-size: clamp(1.2rem, 4vw, 2.8rem);
             font-weight: 900;
             color: #ff8c00;
             text-shadow: 0 0 20px rgba(255, 140, 0, 0.4), 0 0 60px rgba(255, 140, 0, 0.2);
@@ -85,21 +85,22 @@
             white-space: nowrap;
         }
 
-        @media (max-width: 400px) {
+        @media (max-width: 500px) {
             .title {
                 white-space: normal;
-                font-size: clamp(0.9rem, 4.5vw, 1.3rem);
+                font-size: clamp(0.9rem, 5vw, 1.4rem);
             }
         }
 
-        /* ========== WRAPPER DEL IFRAME (con padding-top para mantener proporción) ========== */
+        /* ========== WRAPPER DEL IFRAME (se adapta a todos los tamaños) ========== */
         .iframe-wrapper {
             position: relative;
             z-index: 1;
-            width: min(92vw, 520px);
-            max-width: 520px;
+            /* En móvil: ocupa casi todo el ancho; en escritorio: hasta 700px */
+            width: min(92vw, 700px);
+            max-width: 700px;
             /* Proporción 2:3 (420/630 ≈ 0.666) */
-            padding-top: 150%; /* 100% * (3/2) = 150% */
+            padding-top: 150%;
             background: #0a0410;
             border-radius: clamp(12px, 3vw, 28px);
             border: 2px solid rgba(255, 140, 0, 0.3);
@@ -121,7 +122,7 @@
             height: 100%;
             border: none;
             background: #000;
-            /* Asegura que el iframe no se desborde */
+            /* Evita que el iframe se desborde */
             object-fit: contain;
         }
 
@@ -171,8 +172,8 @@
         @media (orientation: landscape) and (max-height: 500px) {
             .iframe-wrapper {
                 width: min(60vh, 70vw);
-                max-width: 400px;
-                padding-top: 150%; /* Se mantiene la proporción */
+                max-width: 500px;
+                padding-top: 150%;
             }
             .title {
                 font-size: clamp(0.8rem, 2.5vw, 1.2rem);
@@ -189,6 +190,13 @@
         @supports (-webkit-touch-callout: none) {
             body {
                 -webkit-text-size-adjust: none;
+            }
+        }
+
+        /* ========== MEJORA PARA PANTALLAS MUY GRANDES (escritorio) ========== */
+        @media (min-width: 1200px) {
+            .iframe-wrapper {
+                max-width: 800px;
             }
         }
     </style>
