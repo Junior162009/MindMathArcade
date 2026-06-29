@@ -12,7 +12,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Tecnomath">
 
-    <!-- Favicon dinámico (se actualiza con JavaScript) -->
+    <!-- Favicon dinámico -->
     <link rel="icon" id="dynamicFavicon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎮</text></svg>">
 
     <!-- Google AdSense -->
@@ -461,13 +461,11 @@
             <div class="user-area">
                 <span id="userDisplay">Invitado</span>
                 <a href="auth.html" class="auth-link" id="authLink">🔑 ACCEDER</a>
-                <!-- Botón de acceso rápido a administrador -->
                 <button id="adminAccessBtn" class="auth-link" style="border-color: var(--gold); color: var(--gold); background: transparent; cursor: pointer; font-family: 'Press Start 2P', cursive; font-size: clamp(4px, 1.5vw, 6px); padding: 4px 8px; border-radius: 4px;">👑 ADMIN</button>
             </div>
         </div>
     </header>
 
-    <!-- Cinta de noticias (Modo Feria) -->
     <div class="news-ticker" id="newsTicker">
         <span>🔥 ¡Tecnomath es la plataforma #1 en juegos educativos! 🚀 Más de 60 juegos ODS · Gana monedas · Desbloquea logros · ¡Únete ya! 🔥</span>
     </div>
@@ -480,13 +478,11 @@
         <button onclick="exitAdminMode()" style="background:#c0392b;">🚪 SALIR ADMIN</button>
     </div>
 
-    <!-- Reproductor Flash oculto -->
     <div id="flash-overlay">
         <div id="flash-player"></div>
         <button id="flash-close" onclick="closeFlash()">❌ CERRAR</button>
     </div>
 
-    <!-- Burbujas de promociones -->
     <div class="promo-bubble-container" id="promoBubbleContainer">
         <div class="promo-bubble inactive" id="promoBubble1"></div>
         <div class="promo-bubble inactive" id="promoBubble2"></div>
@@ -505,7 +501,6 @@
         <div class="sponsors-grid" id="sponsorsArea"></div>
     </div>
 
-    <!-- Anuncio Google AdSense (cambiar data-ad-slot por el tuyo) -->
     <div class="ad-container">
         <ins class="adsbygoogle"
              style="display:block"
@@ -520,7 +515,6 @@
 
     <div class="container" id="projectsContainer"></div>
 
-    <!-- Leaderboard -->
     <div id="leaderboard-panel">
         <h2>🏆 TOP 10 JUGADORES</h2>
         <ul id="leaderboard-list"></ul>
@@ -532,7 +526,7 @@
     <script src="shared.js"></script>
     <script>
         // ============================================================
-        // REGISTRO DEL SERVICE WORKER (PWA)
+        // SERVICE WORKER, DETECCIÓN DE DISPOSITIVO, PATROCINADORES...
         // ============================================================
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
@@ -540,9 +534,6 @@
             });
         }
 
-        // ============================================================
-        // DETECCIÓN DE DISPOSITIVO
-        // ============================================================
         let currentDeviceCategory = 'desktop';
 
         function detectDevice() {
@@ -596,9 +587,7 @@
             setTimeout(detectDevice, 300);
         });
 
-        // ============================================================
-        // PATROCINADORES
-        // ============================================================
+        // Patrocinadores
         const allSponsorsPortal = [
             { name: "HappyBander",     phone: "+573001112233", image: "👨‍💼", imageUrl: "img/happybander.jpg" },
             { name: "Gomix",           phone: "+573002223344", image: "👩‍🔬", imageUrl: "img/gomix.png" },
@@ -641,9 +630,7 @@
         }
         renderSponsors();
 
-        // ============================================================
-        // SISTEMA DE ANUNCIOS (BURBUJAS)
-        // ============================================================
+        // Promociones (burbujas)
         let promosActivas = [];
         let burbujaActual = 0;
         let intervaloBurbujas = null;
@@ -750,9 +737,7 @@
 
         cargarPromociones();
 
-        // ============================================================
-        // SOPORTE PARA JUEGOS FLASH (Ruffle)
-        // ============================================================
+        // SOPORTE PARA FLASH (Ruffle)
         const flashOverlay = document.getElementById('flash-overlay');
         const flashPlayer = document.getElementById('flash-player');
 
@@ -779,46 +764,113 @@
         });
 
         // ============================================================
-        // CARGA DE JUEGOS DESDE JSON EXTERNO
+        // LISTA DE JUEGOS (INCRUSTADA, SIN JSON)
         // ============================================================
-        let projects = [];
+        const projects = [
+            // ==============================
+            // JUEGOS SIEMPRE VISIBLES (evento: null)
+            // ==============================
+            { name: "MindMath Arcade", desc: "Juego de matemáticas retro con 60+ niveles", url: "game.html", imageUrl: "img/mindmath.png", icon: "🧮", category: "mates", deviceCompatibility: "both", evento: null },
+            { name: "BanderQuiz", desc: "Adivina las banderas del mundo", url: "https://junior162009.github.io/BanderQuiz/", imageUrl: "img/banderquiz.png", icon: "🏳️🌎", category: "edu", deviceCompatibility: "both", evento: null },
+            { name: "EmojiMath Pro", desc: "Suma, resta y cuenta con emojis. Para niños", url: "emoji-math.html", imageUrl: "", icon: "🧸", category: "mates", deviceCompatibility: "mobile", evento: null },
+            { name: "Eco Recolector", desc: "Atrapa agua y reciclables. ODS 6 y 12", url: "eco-collector.html", imageUrl: "img/ecorecolector.png", icon: "🌍", category: "eco", deviceCompatibility: "both", evento: null },
+            { name: "Eco-Barrio 2030", desc: "Simulador de ciudad sostenible. ODS 11,12,13,7", url: "eco-barrio.html", imageUrl: "", icon: "🏙️", category: "eco", deviceCompatibility: "desktop", evento: null },
+            { name: "Coral Guardian", desc: "Protege el arrecife de basura y especies invasoras", url: "coral-guardian.html", imageUrl: "", icon: "🪸", category: "eco", deviceCompatibility: "both", evento: null },
+            { name: "Orbit Cleaner", desc: "Limpia el espacio y protege la capa de ozono. ODS 13", url: "orbit-cleaner.html", imageUrl: "", icon: "🛰️", category: "eco", deviceCompatibility: "both", evento: null },
+            { name: "Marine Tech Cleaner", desc: "USV y ROV para limpiar el océano. ODS 14", url: "marine-cleaner.html", imageUrl: "", icon: "🌊", category: "eco", deviceCompatibility: "both", evento: null },
+            { name: "Animalandia", desc: "Alimenta a los animales. Para niños pequeños", url: "animalandia.html", imageUrl: "", icon: "🐮", category: "kids", deviceCompatibility: "mobile", evento: null },
+            { name: "ODS-2048", desc: "Fusiona los 17 ODS. Juego de puzzle adictivo", url: "ods-2048.html", imageUrl: "", icon: "🌐", category: "puzzle", deviceCompatibility: "both", evento: null },
+            { name: "2048", desc: "Fusiona los números hasta 2048", url: "https://gabrielecirulli.github.io/2048/", imageUrl: "", icon: "🔢", category: "puzzle", deviceCompatibility: "both", evento: null },
+            { name: "Hextris", desc: "Juego de puzzle hexagonal rápido", url: "https://hextris.github.io/hextris/", imageUrl: "", icon: "⬡", category: "puzzle", deviceCompatibility: "both", evento: null },
+            { name: "Pacman", desc: "El clásico comecocos", url: "https://pacman.platzh1rsch.ch/", imageUrl: "", icon: "🟡", category: "retro", deviceCompatibility: "desktop", evento: null },
+            { name: "Clumsy Bird", desc: "Vuela esquivando tuberías (Flappy Bird)", url: "https://ellisonleao.github.io/clumsy-bird/", imageUrl: "", icon: "🐤", category: "retro", deviceCompatibility: "both", evento: null },
+            { name: "BrowserQuest", desc: "Aventura multijugador en el navegador", url: "https://browserquest.mozilla.org/", imageUrl: "", icon: "⚔️", category: "rpg", deviceCompatibility: "desktop", evento: null },
+            { name: "HexGL", desc: "Carrera futurista estilo Wipeout", url: "https://hexgl.bkcore.com/play/", imageUrl: "", icon: "🏎️", category: "runners", deviceCompatibility: "desktop", evento: null },
+            { name: "Astray", desc: "Laberinto 3D con bola", url: "https://wwwtyro.github.io/Astray/", imageUrl: "", icon: "🔮", category: "puzzle", deviceCompatibility: "desktop", evento: null },
+            { name: "Tetris Canvas", desc: "El famoso puzzle de bloques", url: "https://dionyziz.com/canvas-tetris/", imageUrl: "", icon: "🧱", category: "puzzle", deviceCompatibility: "desktop", evento: null },
+            { name: "Asteroids HTML5", desc: "Destruye asteroides en el espacio", url: "https://dougmcinnes.com/html-5-asteroids/", imageUrl: "", icon: "🌑", category: "retro", deviceCompatibility: "desktop", evento: null },
+            { name: "Tower Game", desc: "Construye una torre de bloques", url: "https://iamkun.github.io/tower_game/", imageUrl: "", icon: "🏗️", category: "puzzle", deviceCompatibility: "both", evento: null },
+            { name: "2048 (OpenArcade)", desc: "Versión alternativa del clásico", url: "https://openarcade.github.io/game/2048/", imageUrl: "", icon: "🔢", category: "puzzle", deviceCompatibility: "both", evento: null },
+            { name: "Snake (OpenArcade)", desc: "La serpiente come manzanas", url: "https://openarcade.github.io/game/snake/", imageUrl: "", icon: "🐍", category: "retro", deviceCompatibility: "both", evento: null },
+            { name: "Hextris (OpenArcade)", desc: "Puzzle hexagonal rápido", url: "https://openarcade.github.io/game/hextris/", imageUrl: "", icon: "⬡", category: "puzzle", deviceCompatibility: "both", evento: null },
+            { name: "Asteroids (OpenArcade)", desc: "Destruye asteroides", url: "https://openarcade.github.io/game/asteroids/", imageUrl: "", icon: "🌑", category: "retro", deviceCompatibility: "both", evento: null },
+            { name: "Tanx (OpenArcade)", desc: "Batalla de tanques", url: "https://openarcade.github.io/game/tanx/", imageUrl: "", icon: "🔫", category: "shooter", deviceCompatibility: "desktop", evento: null },
+            { name: "Soul Surfers (PlayCanvas)", desc: "Surf infinito en el espacio", url: "https://playcanv.as/p/JtL2iqIH/", imageUrl: "", icon: "🏄", category: "runners", deviceCompatibility: "desktop", evento: null },
+            { name: "Monkey God (PlayCanvas)", desc: "Aventura de plataformas", url: "https://playcanv.as/p/SA7hVBLt/", imageUrl: "", icon: "🐒", category: "runners", deviceCompatibility: "desktop", evento: null },
+            { name: "Blast Arena (PlayCanvas)", desc: "Dispara a los enemigos", url: "https://playcanv.as/p/8bDxzG5M/", imageUrl: "", icon: "💥", category: "shooter", deviceCompatibility: "desktop", evento: null },
+            { name: "Moto X3M (PlayCanvas)", desc: "Carrera de motos extrema", url: "https://playcanv.as/p/44MRmJRU/", imageUrl: "", icon: "🏍️", category: "runners", deviceCompatibility: "desktop", evento: null },
+            { name: "Matemáticas (Cokitos)", desc: "Juegos educativos de mates", url: "https://www.cokitos.com/tag/matematicas/", imageUrl: "", icon: "🧮", category: "mates", deviceCompatibility: "both", evento: null },
+            { name: "Lógica (Cokitos)", desc: "Juegos de lógica y razonamiento", url: "https://www.cokitos.com/tag/logica/", imageUrl: "", icon: "🧩", category: "puzzle", deviceCompatibility: "both", evento: null },
+            { name: "Memoria (Cokitos)", desc: "Juegos para entrenar la memoria", url: "https://www.cokitos.com/tag/memoria/", imageUrl: "", icon: "🧠", category: "memoria", deviceCompatibility: "both", evento: null },
+            { name: "Geografía (Cokitos)", desc: "Aprende geografía jugando", url: "https://www.cokitos.com/tag/geografia/", imageUrl: "", icon: "🌍", category: "edu", deviceCompatibility: "both", evento: null },
+            { name: "Ciencias (Cokitos)", desc: "Juegos de ciencias naturales", url: "https://www.cokitos.com/tag/ciencias/", imageUrl: "", icon: "🔬", category: "edu", deviceCompatibility: "both", evento: null },
+            { name: "Educaplay (Recursos)", desc: "Plataforma de actividades educativas", url: "https://es.educaplay.com/es/recursoseducativos/", imageUrl: "", icon: "📚", category: "edu", deviceCompatibility: "both", evento: null },
+            { name: "Educaplay (Mates)", desc: "Actividades de matemáticas", url: "https://es.educaplay.com/es/actividades/matematicas/", imageUrl: "", icon: "🧮", category: "mates", deviceCompatibility: "both", evento: null },
+            { name: "Educaplay (Lengua)", desc: "Actividades de lengua", url: "https://es.educaplay.com/es/actividades/lengua/", imageUrl: "", icon: "📖", category: "edu", deviceCompatibility: "both", evento: null },
+            { name: "Educaplay (Geo)", desc: "Actividades de geografía", url: "https://es.educaplay.com/es/actividades/geografia/", imageUrl: "", icon: "🌍", category: "edu", deviceCompatibility: "both", evento: null },
+            { name: "Educaplay (Ciencias)", desc: "Actividades de ciencias", url: "https://es.educaplay.com/es/actividades/ciencias/", imageUrl: "", icon: "🔬", category: "edu", deviceCompatibility: "both", evento: null },
+            { name: "Cookie Clicker", desc: "Haz clic para hacer galletas", url: "https://orteil.dashnet.org/cookieclicker/", imageUrl: "", icon: "🍪", category: "idle", deviceCompatibility: "both", evento: null },
+            { name: "Agar.io", desc: "Come células y hazte más grande", url: "https://agar.io/", imageUrl: "", icon: "🔴", category: "multiplayer", deviceCompatibility: "both", evento: null },
+            { name: "Slither.io", desc: "Serpiente multijugador masivo", url: "https://slither.io/", imageUrl: "", icon: "🐍", category: "multiplayer", deviceCompatibility: "both", evento: null },
+            { name: "Krunker.io", desc: "FPS multijugador en el navegador", url: "https://krunker.io/", imageUrl: "", icon: "🔫", category: "shooter", deviceCompatibility: "desktop", evento: null },
+            { name: "Ev.io", desc: "FPS futurista multijugador", url: "https://ev.io/", imageUrl: "", icon: "🤖", category: "shooter", deviceCompatibility: "desktop", evento: null },
+            { name: "Minecraft Classic", desc: "Construye y explora", url: "https://classic.minecraft.net/", imageUrl: "", icon: "⛏️", category: "sandbox", deviceCompatibility: "desktop", evento: null },
+            { name: "Tetr.io", desc: "Tetris competitivo online", url: "https://tetr.io/", imageUrl: "", icon: "🧱", category: "puzzle", deviceCompatibility: "desktop", evento: null },
+            { name: "Chess.com (CPU)", desc: "Ajedrez contra el ordenador", url: "https://chess.com/play/computer", imageUrl: "", icon: "♟️", category: "board", deviceCompatibility: "both", evento: null },
+            { name: "Lichess", desc: "Plataforma de ajedrez libre", url: "https://lichess.org/", imageUrl: "", icon: "♟️", category: "board", deviceCompatibility: "both", evento: null },
+            { name: "Sudoku.com", desc: "Resuelve puzles de sudoku", url: "https://sudoku.com/", imageUrl: "", icon: "🧮", category: "puzzle", deviceCompatibility: "both", evento: null },
+            { name: "Run 3", desc: "Corre por el espacio infinito", url: "https://www.coolmathgames.com/0-run-3", imageUrl: "", icon: "🏃", category: "runners", deviceCompatibility: "both", evento: null },
+            { name: "Fireboy & Watergirl", desc: "Aventura cooperativa de 2 jugadores", url: "https://www.coolmathgames.com/0-fireboy-and-watergirl-forest-temple", imageUrl: "", icon: "🔥💧", category: "puzzle", deviceCompatibility: "desktop", evento: null },
+            { name: "Bloxorz", desc: "Mueve el bloque al agujero", url: "https://www.coolmathgames.com/0-bloxorz", imageUrl: "", icon: "🧱", category: "puzzle", deviceCompatibility: "desktop", evento: null },
+            { name: "Papa's Freezeria", desc: "Gestiona una heladería", url: "https://www.coolmathgames.com/0-papas-freezeria", imageUrl: "", icon: "🍦", category: "simulation", deviceCompatibility: "desktop", evento: null },
+            { name: "Duck Life", desc: "Entrena a tu pato para carreras", url: "https://www.coolmathgames.com/0-duck-life", imageUrl: "", icon: "🦆", category: "simulation", deviceCompatibility: "both", evento: null },
+            { name: "Wordle (ES)", desc: "Adivina la palabra diaria", url: "https://wordlewebsite.com/", imageUrl: "", icon: "🟩", category: "puzzle", deviceCompatibility: "both", evento: null },
+            { name: "Squabble", desc: "Batalla multijugador de palabras", url: "https://squabble.me/", imageUrl: "", icon: "🔤", category: "puzzle", deviceCompatibility: "both", evento: null },
+            { name: "Quick, Draw!", desc: "Dibuja y la IA adivina", url: "https://quickdraw.withgoogle.com/", imageUrl: "", icon: "✍️", category: "puzzle", deviceCompatibility: "both", evento: null },
+            { name: "Semantle", desc: "Adivina la palabra por significado", url: "https://semantle.com/", imageUrl: "", icon: "🧠", category: "puzzle", deviceCompatibility: "both", evento: null },
+            { name: "Worldle", desc: "Adivina el país por su forma", url: "https://worldle.teuteuf.fr/", imageUrl: "", icon: "🗺️", category: "edu", deviceCompatibility: "both", evento: null },
+            { name: "Banana Kong Dash", desc: "Corre por la selva. 3 carriles, meta final y power-ups", url: "banana-dash.html", imageUrl: "", icon: "🍌", category: "runners", deviceCompatibility: "both", evento: null },
 
-        async function cargarJuegos() {
-            try {
-                const response = await fetch('juegos.json');
-                if (!response.ok) throw new Error('No se pudo cargar juegos.json');
-                const data = await response.json();
-                projects = data;
-                console.log('✅ Juegos cargados correctamente desde JSON:', projects.length);
-                // Renderizar los juegos después de cargar
-                renderProjects(currentActiveFilter);
-                // También refrescar filtros
-                actualizarFiltros();
-            } catch (error) {
-                console.error('❌ Error cargando juegos:', error);
-                projects = [];
-                renderProjects(currentActiveFilter);
-            }
-        }
+            // 🎃 JUEGOS EXCLUSIVOS DE HALLOWEEN
+            { name: "Caza de Calabazas", desc: "Dispara a los fantasmas y recoge calabazas", url: "halloween-game.html", imageUrl: "", icon: "🎃", category: "halloween", deviceCompatibility: "both", evento: "halloween" },
+            { name: "Noche de Brujas", desc: "Escapa del cementerio encantado", url: "brujas-game.html", imageUrl: "", icon: "🧙", category: "halloween", deviceCompatibility: "both", evento: "halloween" },
+            { name: "Casa del Terror", desc: "Recorre la casa embrujada sin morir", url: "casa-terror.html", imageUrl: "", icon: "🏚️", category: "halloween", deviceCompatibility: "both", evento: "halloween" },
+
+            // 🎄 JUEGOS EXCLUSIVOS DE NAVIDAD
+            { name: "Trineo Navideño", desc: "Recoge regalos mientras esquivas obstáculos", url: "navidad-game.html", imageUrl: "", icon: "🎄", category: "navidad", deviceCompatibility: "both", evento: "navidad" },
+            { name: "Elfos Trabajadores", desc: "Ayuda a los elfos a empaquetar juguetes", url: "elfos-game.html", imageUrl: "", icon: "🧝", category: "navidad", deviceCompatibility: "both", evento: "navidad" },
+            { name: "Carrera de Renos", desc: "Guía a los renos en la carrera navideña", url: "renos-game.html", imageUrl: "", icon: "🦌", category: "navidad", deviceCompatibility: "both", evento: "navidad" },
+
+            // 🥳 JUEGOS EXCLUSIVOS DE CUMPLEAÑOS
+            { name: "Fiesta Globos", desc: "Revienta globos y recoge regalos", url: "cumple-game.html", imageUrl: "", icon: "🎈", category: "cumpleanos", deviceCompatibility: "both", evento: "cumpleanos" },
+            { name: "Pastel de Cumpleaños", desc: "Decora el pastel antes de que se acabe el tiempo", url: "pastel-game.html", imageUrl: "", icon: "🎂", category: "cumpleanos", deviceCompatibility: "both", evento: "cumpleanos" },
+            { name: "Búsqueda del Tesoro", desc: "Encuentra los regalos escondidos", url: "tesoro-game.html", imageUrl: "", icon: "🔍", category: "cumpleanos", deviceCompatibility: "both", evento: "cumpleanos" },
+
+            // 🎡 JUEGOS DE FERIA
+            { name: "Feria de Atracciones", desc: "Disfruta de juegos de feria clásicos", url: "feria-game.html", imageUrl: "", icon: "🎡", category: "feria", deviceCompatibility: "both", evento: "feria" },
+            { name: "Carrera de Globos", desc: "Compite con otros jugadores en una carrera de globos", url: "globos-race.html", imageUrl: "", icon: "🏆", category: "feria", deviceCompatibility: "both", evento: "feria" },
+            { name: "Tiro al Plato", desc: "Demuestra tu puntería en la feria", url: "tiro-plato.html", imageUrl: "", icon: "🍽️", category: "feria", deviceCompatibility: "both", evento: "feria" },
+
+            // 🔥 JUEGOS EXCLUSIVOS DE MEGA FERIA
+            { name: "Mega Tiro al Blanco", desc: "Prueba tu puntería en el modo mega feria", url: "tiro-game.html", imageUrl: "", icon: "🎯", category: "feria", deviceCompatibility: "both", evento: "feriaplus" },
+            { name: "Carrera Extrema", desc: "Velocidad pura en la mega feria", url: "carrera-extrema.html", imageUrl: "", icon: "🚀", category: "feria", deviceCompatibility: "both", evento: "feriaplus" }
+        ];
 
         // ============================================================
-        // FILTROS Y RENDERIZADO (con soporte para eventos + badge + orden)
+        // FILTROS Y RENDERIZADO
         // ============================================================
         let currentActiveFilter = 'todos';
-
-        // Variable que almacena el evento activo (ej: 'halloween', 'navidad', null)
         let activeEvent = null;
 
-        // Función para obtener los proyectos filtrados por evento activo
         function getFilteredProjects() {
             if (!activeEvent) return projects;
-            // Si hay evento activo, solo mostrar juegos que no tengan evento o que coincidan
             return projects.filter(p => p.evento === null || p.evento === activeEvent);
         }
 
+        const categories = ['todos', ...new Set(projects.map(p => p.category))];
+        const filtersContainer = document.getElementById('filtersContainer');
+
         function actualizarFiltros() {
-            const categories = ['todos', ...new Set(projects.map(p => p.category))];
-            const filtersContainer = document.getElementById('filtersContainer');
             filtersContainer.innerHTML = '';
             categories.forEach(cat => {
                 const btn = document.createElement('button');
@@ -848,6 +900,7 @@
             });
             filtersContainer.appendChild(recommendBtn);
         }
+        actualizarFiltros();
 
         function setActiveFilter(filter) {
             currentActiveFilter = filter;
@@ -864,22 +917,16 @@
             const container = document.getElementById('projectsContainer');
             container.innerHTML = '';
 
-            // Obtener proyectos filtrados por evento activo
             let filtered = getFilteredProjects();
 
-            // Aplicar filtro de categoría si corresponde
             if (filterCategory === 'recommended') {
                 filtered = filtered.filter(p => (p.deviceCompatibility === currentDeviceCategory || p.deviceCompatibility === 'both'));
             } else if (filterCategory && filterCategory !== 'todos') {
                 filtered = filtered.filter(p => p.category === filterCategory);
             }
 
-            // Eliminar juegos rotos (si ya están marcados)
             filtered = filtered.filter(p => !p.broken);
 
-            // ============================================================
-            // 🆕 ORDENAR: PRIMERO LOS EXCLUSIVOS DEL EVENTO ACTIVO
-            // ============================================================
             if (activeEvent) {
                 filtered.sort((a, b) => {
                     const aExclusive = a.evento === activeEvent;
@@ -890,7 +937,6 @@
                 });
             }
 
-            // Renderizar cada juego
             filtered.forEach(proj => {
                 const card = document.createElement('a');
                 card.className = 'project-card';
@@ -924,7 +970,6 @@
                 nameDiv.className = 'project-name';
                 nameDiv.textContent = proj.name;
 
-                // --- BADGE DE EVENTO (SOLO PARA EXCLUSIVOS) ---
                 if (proj.evento && proj.evento !== null) {
                     const eventoEmojis = {
                         'halloween': '🎃',
@@ -951,6 +996,7 @@
                 container.appendChild(card);
             });
         }
+        renderProjects();
 
         // ============================================================
         // FILTRO DE JUEGOS ROTOS (404)
@@ -1013,9 +1059,8 @@
         });
 
         // ============================================================
-        // 🎈 MODO FERIA MEJORADO + LLUVIA DE EMOJIS + TEMAS PERMANENTES
+        // MODO FERIA, TEMAS PERMANENTES, FAVICON DINÁMICO
         // ============================================================
-
         let fairMode = false;
         let leaderboardInterval = null;
         let fairContainer = null;
@@ -1029,13 +1074,9 @@
             emojis: null
         };
 
-        // ─── FUNCIONES PARA CSS EXTERNO ──────────────────────────
         function loadThemeCSS(themeName) {
-            // Eliminar cualquier hoja de estilo temática anterior
             document.querySelectorAll('link[data-theme]').forEach(el => el.remove());
-
             if (!themeName) return;
-
             const link = document.createElement('link');
             link.rel = 'stylesheet';
             link.href = `css/${themeName}.css`;
@@ -1043,7 +1084,6 @@
             document.head.appendChild(link);
         }
 
-        // ─── CONTENEDOR Y CSS DINÁMICO PARA EFECTOS ────────────
         function createFairContainer() {
             if (fairContainer) return;
             fairContainer = document.createElement('div');
@@ -1098,7 +1138,6 @@
             document.head.appendChild(style);
         }
 
-        // ─── CONFETI (colores) ──────────────────────────────────
         function createConfettiPiece(colors = null) {
             const el = document.createElement('div');
             const defaultColors = ['#FF3366', '#FFD700', '#00FF88', '#FF6600', '#00CCFF', '#FF00FF', '#39FF14'];
@@ -1151,7 +1190,6 @@
             }
         }
 
-        // ─── GLOBOS ───────────────────────────────────────────────
         function createBalloon() {
             const el = document.createElement('div');
             const colors = ['#FF3366', '#FFD700', '#00FF88', '#FF6600', '#00CCFF', '#FF00FF', '#39FF14', '#FFA500', '#FF69B4'];
@@ -1209,7 +1247,6 @@
             }
         }
 
-        // ─── DESTELLOS ────────────────────────────────────────────
         function createSparkle() {
             const el = document.createElement('div');
             const size = Math.random() * 6 + 3;
@@ -1249,7 +1286,6 @@
             }
         }
 
-        // ─── FUEGOS ARTIFICIALES ──────────────────────────────────
         function createFirework() {
             const el = document.createElement('div');
             const x = Math.random() * 80 + 10;
@@ -1295,13 +1331,12 @@
             }
         }
 
-        // ─── LLUVIA DE EMOJIS ────────────────────────────────────
         function createEmoji(emojis) {
             const el = document.createElement('div');
             const emoji = emojis[Math.floor(Math.random() * emojis.length)];
-            const size = Math.random() * 30 + 20; // 20-50px
+            const size = Math.random() * 30 + 20;
             const left = Math.random() * 100;
-            const duration = Math.random() * 5 + 4; // 4-9s
+            const duration = Math.random() * 5 + 4;
             const delay = Math.random() * 3;
 
             el.textContent = emoji;
@@ -1324,7 +1359,7 @@
             const interval = 800 / speedMultiplier;
             fairVisualIntervals.emojis = setInterval(() => {
                 if (!fairContainer) return;
-                const count = Math.floor(Math.random() * 4) + 2; // 2-5 emojis por tanda
+                const count = Math.floor(Math.random() * 4) + 2;
                 for (let i = 0; i < count; i++) {
                     const emojiEl = createEmoji(emojis);
                     fairContainer.appendChild(emojiEl);
@@ -1344,7 +1379,6 @@
             }
         }
 
-        // ─── DESTACAR PROMOCIONES ─────────────────────────────────
         function highlightPromotions() {
             document.querySelectorAll('.promo-bubble').forEach(b => b.classList.add('fair-promo-highlight'));
             document.querySelectorAll('.promo-dot').forEach(d => {
@@ -1361,7 +1395,6 @@
             });
         }
 
-        // ─── NOTIFICACIÓN ─────────────────────────────────────────
         function showFairNotification(text) {
             const notif = document.createElement('div');
             notif.style.cssText = `
@@ -1381,7 +1414,6 @@
             setTimeout(() => { if (notif.parentNode) notif.remove(); }, 3000);
         }
 
-        // ─── ACTIVAR / DESACTIVAR EFECTOS VISUALES ──────────────
         function activateVisualEffects(confettiColors = null, emojis = null, speed = 1) {
             if (visualEffectsActive && !confettiColors && !emojis) return;
             visualEffectsActive = true;
@@ -1412,7 +1444,6 @@
             }
         }
 
-        // ─── FAVICON DINÁMICO ──────────────────────────────────────
         function updateFavicon(emoji) {
             const favicon = document.getElementById('dynamicFavicon');
             if (favicon) {
@@ -1430,7 +1461,6 @@
             'default': '🎮'
         };
 
-        // ─── FUNCIONES PRINCIPALES (TEMAS PERMANENTES) ──────────
         function activateFairMode() {
             if (fairMode) return;
             fairMode = true;
@@ -1469,12 +1499,8 @@
             renderProjects(currentActiveFilter);
         }
 
-        // ─── TEMAS PERMANENTES (sin temporizador) ──────────────
         function activatePermanentTheme(title, notification, confettiColors, emojis, themeName) {
-            // Si hay un modo feria activo, lo desactivamos
             if (fairMode) deactivateFairMode();
-
-            // Eliminar cualquier tema anterior
             activeEvent = themeName;
             loadThemeCSS(themeName);
             updateFavicon(faviconEmojis[themeName] || '🎮');
@@ -1482,7 +1508,6 @@
             document.getElementById('mainTitle').textContent = title;
             showFairNotification(notification);
 
-            // Reiniciar efectos visuales con los nuevos emojis y colores
             if (visualEffectsActive) deactivateVisualEffects();
             activateVisualEffects(confettiColors, emojis, 1);
 
@@ -1508,7 +1533,6 @@
             renderProjects(currentActiveFilter);
         }
 
-        // ─── CÓDIGOS DE EVENTOS ──────────────────────────────────
         function showCodePrompt() {
             const code = prompt('🔐 CÓDIGO DE EVENTO:');
             if (!code) return;
@@ -1568,7 +1592,6 @@
             }
         }
 
-        // ─── LEADERBOARD ──────────────────────────────────────────
         function getLeaderboardData() {
             const jugadores = [
                 { name: 'Junior162009', score: 9999, game: 'MindMath Arcade' },
@@ -1636,9 +1659,6 @@
             }
         })();
 
-        // ============================================================
-        // 🟢 BOTÓN DE ACCESO RÁPIDO A ADMIN
-        // ============================================================
         document.addEventListener('DOMContentLoaded', function() {
             const adminBtn = document.getElementById('adminAccessBtn');
             if (adminBtn) {
@@ -1661,7 +1681,6 @@
             }
         });
 
-        // ACCESO OCULTO: DOBLE CLIC EN ESQUINA INFERIOR DERECHA (sigue funcionando)
         const ADMINS_PORTAL = { "1983": "Junior", "2024": "Nicole", "7777": "Mateo", "8888": "Jaider", "ods2026": "ODS Master" };
         const secretZone = document.createElement('div');
         secretZone.style.cssText = 'position:fixed; bottom:0; right:0; width:70px; height:70px; z-index:499;';
@@ -1678,17 +1697,10 @@
         });
         document.body.appendChild(secretZone);
 
-        // ============================================================
-        // INICIAR CARGA DE JUEGOS
-        // ============================================================
-        cargarJuegos();
-
-        console.log('🎈 Modo Feria mejorado con lluvia de emojis y temas permanentes cargado.');
+        console.log('🎮 Sistema de juegos cargado correctamente.');
         console.log('📌 Códigos disponibles: feria2026, feriaoff, halloween, navidad, cumpleanos, feriaplus, stop');
         console.log('👑 Acceso admin: clic en botón "👑 ADMIN" o doble clic en esquina inferior derecha.');
         console.log('🎨 Los estilos de cada evento se cargan desde /css/{evento}.css');
-        console.log('🕹️ Los juegos se cargan desde juegos.json');
-        console.log('✨ Los temas son permanentes hasta que se desactiven con feriaoff o stop.');
         console.log('🏷️ Los juegos exclusivos tienen un badge con emoji identificativo.');
         console.log('📌 Los juegos exclusivos aparecen primero en la lista.');
     </script>
