@@ -1885,7 +1885,7 @@
         }
 
         // ============================================================
-        // FUNCIONES GENÉRICAS: LOCAL Y GLOBAL
+        // FUNCIONES GENÉRICAS: LOCAL Y GLOBAL (UNIFICADAS)
         // ============================================================
 
         // Configuración de todos los eventos
@@ -1982,21 +1982,28 @@
             }
         }
 
-        // Sincronizar evento GLOBALMENTE (para todos los usuarios)
+        // Sincronizar evento GLOBALMENTE (UNIFICADO)
         function sincronizarGlobal() {
             const user = Tecnomath.getCurrentUser();
             if (!user || !Tecnomath.isAdmin()) {
                 alert('⚠️ Solo el administrador puede publicar globalmente.');
                 return;
             }
-            const code = prompt('🔐 Introduce el código de evento para PUBLICAR a TODOS los usuarios:\n\nOpciones: halloween, navidad, cumpleanos, feria2026, feriaplus, mundial, stop');
+
+            // Si hay un evento local activo, sincronizarlo directamente (sin pedir código)
+            if (activeEvent && activeEvent !== null) {
+                syncEventToFirebase(activeEvent);
+                alert('✅ Evento "' + activeEvent + '" sincronizado a TODOS los usuarios.');
+                return;
+            }
+
+            // Fallback: si no hay evento local activo, pedir un código
+            const code = prompt('🔐 No hay evento local activo. Introduce el código para PUBLICAR a TODOS:\n\nOpciones: halloween, navidad, cumpleanos, feria2026, feriaplus, mundial, stop');
             if (code === null) return;
             const lowerCode = code.toLowerCase();
 
             if (lowerCode === 'stop') {
-                // Sincronizar stop a Firebase
                 syncEventToFirebase('stop');
-                // Desactivar localmente también
                 if (fairMode) {
                     fairMode = false;
                     activeEvent = null;
@@ -2013,24 +2020,22 @@
                     renderProjects(currentActiveFilter);
                 }
                 alert('⏹️ Evento finalizado para TODOS los usuarios.');
-                console.log('🌍 Evento stop sincronizado globalmente');
                 return;
             }
 
             const eventConfig = getEventConfig(lowerCode);
             if (eventConfig) {
-                // Activar y sincronizar
                 activatePermanentTheme(
                     eventConfig.title,
                     eventConfig.notification,
                     eventConfig.confettiColors,
                     eventConfig.emojis,
                     lowerCode,
-                    true // <-- Sincronizar a Firebase
+                    true
                 );
                 alert('✅ Evento "' + lowerCode + '" PUBLICADO a todos los usuarios.');
             } else {
-                alert('❌ CÓDIGO INVÁLIDO. Intenta con: halloween, navidad, cumpleanos, feria2026, feriaplus, mundial o stop.');
+                alert('❌ CÓDIGO INVÁLIDO.');
             }
         }
 
@@ -2230,7 +2235,8 @@
         console.log('🎮 Sistema de juegos cargado correctamente.');
         console.log('📌 Códigos disponibles: feria2026, feriaoff, halloween, navidad, cumpleanos, feriaplus, mundial, stop');
         console.log('🔥 Firebase sincronización activa.');
-        console.log('🛠️ Botones genéricos: ACTIVAR LOCAL y PUBLICAR GLOBAL (todos los eventos).');
+        console.log('🛠️ Botones genéricos: ACTIVAR LOCAL (prueba) y PUBLICAR GLOBAL (sincroniza).');
+        console.log('📡 PUBLICAR GLOBAL sincroniza el evento local activo; si no hay, pide un código.');
         console.log('📱 Código QR con logo de Tecnomath generado en el footer.');
         console.log('🏗️ Juegos de Tower Building incluidos.');
         console.log('🎈 Lluvia de emojis corregida: funciona en todos los eventos.');
