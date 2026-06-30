@@ -858,7 +858,7 @@
         });
 
         // ============================================================
-        // LISTA DE JUEGOS (INCRUSTADA) - AÑADE AQUÍ TODOS TUS JUEGOS
+        // 🟢 LISTA DE JUEGOS RECOMENDADOS (CON TOWER BUILDING Y NUEVOS)
         // ============================================================
         const juegosRecomendados = [
             // Internos (tuyos)
@@ -870,21 +870,18 @@
             { name: "Pacman", desc: "El clásico comecocos", url: "https://pacman.platzh1rsch.ch/", imageUrl: "", icon: "🟡", category: "retro", deviceCompatibility: "desktop", evento: null },
             { name: "Cookie Clicker", desc: "Haz clic para hacer galletas", url: "https://orteil.dashnet.org/cookieclicker/", imageUrl: "", icon: "🍪", category: "idle", deviceCompatibility: "both", evento: null },
             { name: "Run 3", desc: "Corre por el espacio", url: "https://www.coolmathgames.com/0-run-3", imageUrl: "", icon: "🏃", category: "runners", deviceCompatibility: "both", evento: null },
-            // Juego de Tower Building
-            { name: "Tower Building", desc: "Apila bloques para construir la torre más alta", url: "https://gameforge.com/en-US/littlegames/tower-building/", imageUrl: "", icon: "🏗️", category: "puzzle", deviceCompatibility: "both", evento: null },
             
-            // Juego de Tappy Tower
+            // 🏗️ JUEGOS DE CONSTRUCCIÓN DE TORRES
+            { name: "Tower Building", desc: "Apila bloques para construir la torre más alta", url: "https://gameforge.com/en-US/littlegames/tower-building/", imageUrl: "", icon: "🏗️", category: "puzzle", deviceCompatibility: "both", evento: null },
             { name: "Tappy Tower", desc: "Toca para crear bloques y construir la torre más alta", url: "https://www.silvergames.com/en/tappy-tower", imageUrl: "", icon: "🏢", category: "puzzle", deviceCompatibility: "both", evento: null },
             
-            // Juego de Stickman Archer
+            // 🎯 OTROS JUEGOS MULTIPLATAFORMA
             { name: "Stickman Archer", desc: "Juego de arquería con física minimalista", url: "https://gamh5.com/category/bubble-shooter/", imageUrl: "", icon: "🏹", category: "shooter", deviceCompatibility: "both", evento: null },
-            
-            // Juego de 2048 Merge
             { name: "2048 Merge", desc: "Fusiona números hasta llegar a 2048", url: "https://gamh5.com/category/merge/", imageUrl: "", icon: "🔢", category: "puzzle", deviceCompatibility: "both", evento: null },
-            
-            // Juego de Endless Car Race
             { name: "Endless Car Race", desc: "Carrera sin fin para poner a prueba tus reflejos", url: "https://gamh5.com/category/racing/", imageUrl: "", icon: "🏎️", category: "runners", deviceCompatibility: "both", evento: null },
-        
+            { name: "Hexagon Fall", desc: "Caída a través de hexágonos", url: "https://gplpal.com/hexagon-fall-html5-skill-game/", imageUrl: "", icon: "⬡", category: "skill", deviceCompatibility: "both", evento: null },
+            { name: "Rocket Pult", desc: "Lanza cohetes con física", url: "https://gamesfree.io/rocket-pult.html", imageUrl: "", icon: "🚀", category: "physics", deviceCompatibility: "both", evento: null },
+            
             // Exclusivos por evento (internos)
             { name: "Halloween Parade", desc: "Desfile de Halloween", url: "pages/halloween-parade.html", imageUrl: "", icon: "🎃", category: "halloween", deviceCompatibility: "both", evento: "halloween" },
             { name: "Trineo Navideño", desc: "Recoge regalos", url: "pages/navidad-game.html", imageUrl: "", icon: "🎄", category: "navidad", deviceCompatibility: "both", evento: "navidad" },
@@ -903,8 +900,8 @@
                 projects = data;
                 console.log('✅ Juegos cargados desde JSON:', projects.length);
             } catch (error) {
-                console.warn('⚠️ No se pudo cargar juegos.json, usando lista incrustada.');
-                projects = juegosIncrustados;
+                console.warn('⚠️ No se pudo cargar juegos.json, usando lista recomendada.');
+                projects = juegosRecomendados; // <-- CORREGIDO: ahora usa juegosRecomendados
             }
             renderProjects(currentActiveFilter);
             actualizarFiltros();
@@ -2035,6 +2032,7 @@
         console.log('📌 Códigos disponibles: feria2026, feriaoff, halloween, navidad, cumpleanos, feriaplus, stop');
         console.log('🔥 Firebase sincronización activa. Los cambios de tema se reflejarán en todos los dispositivos.');
         console.log('📱 Código QR con logo de Tecnomath generado en el footer.');
+        console.log('🏗️ Juegos de Tower Building incluidos.');
     </script>
 </body>
 </html>
