@@ -44,7 +44,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
         /* ==============================
-           ESTILOS BASE
+           ESTILOS BASE (se sobrescriben con los temas)
            ============================== */
         :root {
             --neon-cyan: #00FFFF; --neon-pink: #FF00FF; --neon-green: #39FF14;
@@ -550,6 +550,9 @@
         <a href="pages/admin/gestor-movil.html" target="_blank" class="btn-gold">➕ AGREGAR JUEGO</a>
         <button onclick="showCodePrompt()" style="background: var(--neon-yellow); color: black; box-shadow: 0 4px 0 #b8860b;">🔢 CÓDIGOS</button>
         <button onclick="verificarYMostrarRotos()" style="background: var(--neon-cyan); color: black; box-shadow: 0 4px 0 #008080;">🔍 VERIFICAR ROTOS</button>
+        <!-- 🆕 BOTONES PARA MUNDIAL (LOCAL Y SINCRONIZAR) -->
+        <button onclick="activarMundialLocal()" style="background: #FFD700; color: black; box-shadow: 0 4px 0 #b8860b;">🌍 ACTIVAR MUNDIAL (LOCAL)</button>
+        <button onclick="sincronizarMundial()" style="background: #FF4500; color: white; box-shadow: 0 4px 0 #8B0000;">📤 SINCRONIZAR MUNDIAL</button>
         <button onclick="exitAdminMode()" style="background:#c0392b;">🚪 SALIR ADMIN</button>
     </div>
 
@@ -858,10 +861,10 @@
         });
 
         // ============================================================
-        // 🟢 LISTA DE JUEGOS RECOMENDADOS
+        // 🟢 LISTA DE JUEGOS (CON JUEGOS EXCLUSIVOS DEL MUNDIAL)
         // ============================================================
         const juegosRecomendados = [
-            // Internos (tuyos)
+            // JUEGOS NORMALES (siempre visibles)
             { name: "MindMath Arcade", desc: "Matemáticas retro", url: "pages/game.html", imageUrl: "img/mindmath.png", icon: "🧮", category: "mates", deviceCompatibility: "both", evento: null },
             { name: "BanderQuiz", desc: "Adivina banderas", url: "https://junior162009.github.io/BanderQuiz/", imageUrl: "img/banderquiz.png", icon: "🏳️🌎", category: "edu", deviceCompatibility: "both", evento: null },
             { name: "Eco Recolector", desc: "Atrapa agua y reciclables", url: "pages/eco-collector.html", imageUrl: "img/ecorecolector.png", icon: "🌍", category: "eco", deviceCompatibility: "both", evento: null },
@@ -870,36 +873,36 @@
             { name: "Pacman", desc: "El clásico comecocos", url: "https://pacman.platzh1rsch.ch/", imageUrl: "", icon: "🟡", category: "retro", deviceCompatibility: "desktop", evento: null },
             { name: "Cookie Clicker", desc: "Haz clic para hacer galletas", url: "https://orteil.dashnet.org/cookieclicker/", imageUrl: "", icon: "🍪", category: "idle", deviceCompatibility: "both", evento: null },
             { name: "Run 3", desc: "Corre por el espacio", url: "https://www.coolmathgames.com/0-run-3", imageUrl: "", icon: "🏃", category: "runners", deviceCompatibility: "both", evento: null },
-            // 🏗️ JUEGOS DE CONSTRUCCIÓN DE TORRES
             { name: "Tower Building", desc: "Apila bloques para construir la torre más alta", url: "https://gameforge.com/en-US/littlegames/tower-building/", imageUrl: "", icon: "🏗️", category: "puzzle", deviceCompatibility: "both", evento: null },
-            { name: "Tappy Tower", desc: "Toca para crear bloques y construir la torre más alta", url: "https://www.silvergames.com/en/tappy-tower", imageUrl: "", icon: "🏢", category: "puzzle", deviceCompatibility: "both", evento: null },
-            // 🎯 OTROS JUEGOS MULTIPLATAFORMA
-            { name: "Stickman Archer", desc: "Juego de arquería con física minimalista", url: "https://gamh5.com/category/bubble-shooter/", imageUrl: "", icon: "🏹", category: "shooter", deviceCompatibility: "both", evento: null },
-            { name: "2048 Merge", desc: "Fusiona números hasta llegar a 2048", url: "https://gamh5.com/category/merge/", imageUrl: "", icon: "🔢", category: "puzzle", deviceCompatibility: "both", evento: null },
-            { name: "Endless Car Race", desc: "Carrera sin fin para poner a prueba tus reflejos", url: "https://gamh5.com/category/racing/", imageUrl: "", icon: "🏎️", category: "runners", deviceCompatibility: "both", evento: null },
+            { name: "Tappy Tower", desc: "Toca para crear bloques", url: "https://www.silvergames.com/en/tappy-tower", imageUrl: "", icon: "🏢", category: "puzzle", deviceCompatibility: "both", evento: null },
+            { name: "Stickman Archer", desc: "Arquería minimalista", url: "https://gamh5.com/category/bubble-shooter/", imageUrl: "", icon: "🏹", category: "shooter", deviceCompatibility: "both", evento: null },
+            { name: "2048 Merge", desc: "Fusiona números hasta 2048", url: "https://gamh5.com/category/merge/", imageUrl: "", icon: "🔢", category: "puzzle", deviceCompatibility: "both", evento: null },
+            { name: "Endless Car Race", desc: "Carrera sin fin", url: "https://gamh5.com/category/racing/", imageUrl: "", icon: "🏎️", category: "runners", deviceCompatibility: "both", evento: null },
             { name: "Hexagon Fall", desc: "Caída a través de hexágonos", url: "https://gplpal.com/hexagon-fall-html5-skill-game/", imageUrl: "", icon: "⬡", category: "skill", deviceCompatibility: "both", evento: null },
             { name: "Rocket Pult", desc: "Lanza cohetes con física", url: "https://gamesfree.io/rocket-pult.html", imageUrl: "", icon: "🚀", category: "physics", deviceCompatibility: "both", evento: null },
-            { name: "Hextris", desc: "Versión hexagonal de Tetris", url: "https://hextris.io/", imageUrl: "", icon: "🔷", category: "puzzle", deviceCompatibility: "both", evento: null },
-            { name: "Tetris", desc: "Clásico juego de bloques", url: "https://tetris.com/play-tetris", imageUrl: "", icon: "🧩", category: "puzzle", deviceCompatibility: "both", evento: null },
-            { name: "Flappy Bird", desc: "Esquiva obstáculos volando", url: "https://flappybird.io/", imageUrl: "", icon: "🐦", category: "runners", deviceCompatibility: "both", evento: null },
-            { name: "Snake", desc: "La clásica serpiente", url: "https://playsnake.org/", imageUrl: "", icon: "🐍", category: "retro", deviceCompatibility: "both", evento: null },
-            { name: "Minesweeper", desc: "Buscaminas clásico", url: "https://minesweeperonline.com/", imageUrl: "", icon: "💣", category: "puzzle", deviceCompatibility: "both", evento: null },
-            { name: "Space Invaders", desc: "Defiende la Tierra", url: "https://freeinvaders.org/", imageUrl: "", icon: "👾", category: "retro", deviceCompatibility: "both", evento: null },
-            { name: "Chess", desc: "Ajedrez online", url: "https://lichess.org/", imageUrl: "", icon: "♟️", category: "strategy", deviceCompatibility: "both", evento: null },
-            { name: "Sudoku", desc: "Entrena tu lógica", url: "https://sudoku.com/", imageUrl: "", icon: "🔢", category: "puzzle", deviceCompatibility: "both", evento: null },
-            { name: "Solitario", desc: "Juego de cartas clásico", url: "https://worldofsolitaire.com/", imageUrl: "", icon: "🃏", category: "cards", deviceCompatibility: "both", evento: null },
-            { name: "2048 Cupcakes", desc: "Versión dulce de 2048", url: "https://0x0800.github.io/2048-CUPCAKES/", imageUrl: "", icon: "🧁", category: "puzzle", deviceCompatibility: "both", evento: null },
-            // ⚽ JUEGOS EXCLUSIVOS DEL MUNDIAL (evento: "mundial")
-            { name: "Penalty Shootout", desc: "Lanza penales y defiende el arco", url: "https://www.gameflare.com/game/penalty-shootout/", imageUrl: "", icon: "⚽", category: "mundial", deviceCompatibility: "both", evento: "mundial" },
-            { name: "World Cup Quiz", desc: "Preguntas sobre la historia del Mundial", url: "https://www.sporcle.com/games/g/worldcup", imageUrl: "", icon: "🧠", category: "mundial", deviceCompatibility: "both", evento: "mundial" },
-            { name: "FIFA World Cup 2022", desc: "Juego de fútbol rápido y divertido", url: "https://www.coolmathgames.com/0-world-cup-2022", imageUrl: "", icon: "🏆", category: "mundial", deviceCompatibility: "both", evento: "mundial" },
-            { name: "World Cup Headers", desc: "Cabecea la pelota para marcar goles", url: "https://www.silvergames.com/en/world-cup-headers", imageUrl: "", icon: "🥅", category: "mundial", deviceCompatibility: "both", evento: "mundial" },
-            // Exclusivos por evento (internos)
+
+            // 🎃 EXCLUSIVOS DE HALLOWEEN
             { name: "Halloween Parade", desc: "Desfile de Halloween", url: "pages/halloween-parade.html", imageUrl: "", icon: "🎃", category: "halloween", deviceCompatibility: "both", evento: "halloween" },
+            { name: "Caza de Calabazas", desc: "Dispara a los fantasmas", url: "pages/halloween-game.html", imageUrl: "", icon: "🎃", category: "halloween", deviceCompatibility: "both", evento: "halloween" },
+
+            // 🎄 EXCLUSIVOS DE NAVIDAD
             { name: "Trineo Navideño", desc: "Recoge regalos", url: "pages/navidad-game.html", imageUrl: "", icon: "🎄", category: "navidad", deviceCompatibility: "both", evento: "navidad" },
+            { name: "Elfos Trabajadores", desc: "Ayuda a los elfos", url: "pages/elfos-game.html", imageUrl: "", icon: "🧝", category: "navidad", deviceCompatibility: "both", evento: "navidad" },
+
+            // 🥳 EXCLUSIVOS DE CUMPLEAÑOS
             { name: "Fiesta Globos", desc: "Revienta globos", url: "pages/cumple-game.html", imageUrl: "", icon: "🎈", category: "cumpleanos", deviceCompatibility: "both", evento: "cumpleanos" },
+            { name: "Pastel de Cumpleaños", desc: "Decora el pastel", url: "pages/pastel-game.html", imageUrl: "", icon: "🎂", category: "cumpleanos", deviceCompatibility: "both", evento: "cumpleanos" },
+
+            // 🎡 EXCLUSIVOS DE FERIA
             { name: "Feria de Atracciones", desc: "Juegos de feria", url: "pages/feria-game.html", imageUrl: "", icon: "🎡", category: "feria", deviceCompatibility: "both", evento: "feria" },
-            { name: "Mega Tiro al Blanco", desc: "Puntería", url: "pages/tiro-game.html", imageUrl: "", icon: "🎯", category: "feria", deviceCompatibility: "both", evento: "feriaplus" }
+            { name: "Carrera de Globos", desc: "Carrera de globos", url: "pages/globos-race.html", imageUrl: "", icon: "🏆", category: "feria", deviceCompatibility: "both", evento: "feria" },
+
+            // 🔥 EXCLUSIVOS DE MEGA FERIA
+            { name: "Mega Tiro al Blanco", desc: "Puntería", url: "pages/tiro-game.html", imageUrl: "", icon: "🎯", category: "feria", deviceCompatibility: "both", evento: "feriaplus" },
+
+            // ⚽ EXCLUSIVOS DEL MUNDIAL
+            { name: "Penalty Shootout", desc: "Lanza penales como un campeón", url: "https://www.silvergames.com/en/penalty-shootout", imageUrl: "", icon: "⚽", category: "mundial", deviceCompatibility: "both", evento: "mundial" },
+            { name: "World Cup Quiz", desc: "Preguntas sobre la historia del Mundial", url: "https://www.sporcle.com/games/g/worldcup", imageUrl: "", icon: "🏆", category: "mundial", deviceCompatibility: "both", evento: "mundial" }
         ];
 
         let projects = [];
@@ -927,10 +930,8 @@
 
         function getFilteredProjects() {
             if (!activeEvent) {
-                // Si no hay evento activo, SOLO mostrar juegos normales (evento === null)
                 return projects.filter(p => p.evento === null);
             }
-            // Si hay evento activo, mostrar juegos normales + los exclusivos del evento
             return projects.filter(p => p.evento === null || p.evento === activeEvent);
         }
 
@@ -950,7 +951,8 @@
                                   cat === 'halloween' ? '🎃 HALLOWEEN' :
                                   cat === 'navidad' ? '🎄 NAVIDAD' :
                                   cat === 'cumpleanos' ? '🥳 CUMPLEAÑOS' :
-                                  cat === 'feria' ? '🎡 FERIA' : cat.toUpperCase();
+                                  cat === 'feria' ? '🎡 FERIA' :
+                                  cat === 'mundial' ? '⚽ MUNDIAL' : cat.toUpperCase();
                 btn.addEventListener('click', () => {
                     setActiveFilter(cat);
                     renderProjects(cat);
@@ -1044,7 +1046,8 @@
                         'navidad': '🎄',
                         'cumpleanos': '🎂',
                         'feria': '🎡',
-                        'feriaplus': '🔥'
+                        'feriaplus': '🔥',
+                        'mundial': '⚽'
                     };
                     const emoji = eventoEmojis[proj.evento] || '🎮';
                     const badge = document.createElement('span');
@@ -1315,7 +1318,7 @@
         })();
 
         // ============================================================
-        // FIREBASE SYNC
+        // FIREBASE SYNC (CON SINCRONIZACIÓN MANUAL)
         // ============================================================
         let syncInitialized = false;
 
@@ -1343,15 +1346,6 @@
                 if (eventName === activeEvent) return;
 
                 switch (eventName) {
-                    case 'mundial':
-                        activatePermanentTheme(
-                            '⚽ TECNOMATH MUNDIAL ⚽',
-                            '🏆 ¡MODO MUNDIAL ACTIVADO! ⚽',
-                            ['#FFD700', '#009900', '#FFFFFF', '#000000', '#FF0000'], // Colores: dorado, verde, blanco, negro, rojo
-                            ['⚽', '🏆', '🌍', '🇦🇷', '🇧🇷', '🇫🇷', '🇪🇸', '🇩🇪', '🇮🇹', '🇬🇧', '🇺🇾', '🏟️', '🥅', '📺'],
-                            'mundial'
-                        );
-                        break;
                     case 'feria':
                         if (!fairMode) activateFairMode();
                         break;
@@ -1383,6 +1377,15 @@
                             ['#FF1493', '#FFD700', '#00BFFF', '#FF4500', '#32CD32'],
                             ['🎂', '🎈', '🎉', '🥳', '🎁', '🎊', '🎵', '🕺'],
                             'cumpleanos'
+                        );
+                        break;
+                    case 'mundial':
+                        if (activeEvent !== 'mundial') activatePermanentTheme(
+                            '🏆 TECNOMATH MUNDIAL 🏆',
+                            '⚽ ¡MODO MUNDIAL ACTIVADO! 🌍',
+                            ['#FFD700', '#009A3E', '#FFFFFF', '#008000', '#FF4500'],
+                            ['⚽', '🏆', '🌍', '🇦🇷', '🇧🇷', '🇫🇷', '🇪🇸', '🇩🇪', '🥅'],
+                            'mundial'
                         );
                         break;
                     case 'stop':
@@ -1795,13 +1798,11 @@
             unhighlightPromotions();
             if (fairContainer) {
                 fairContainer.innerHTML = '';
-                // No ocultamos el contenedor para que los nuevos efectos se dibujen encima
-                // fairContainer.style.display = 'none'; // ELIMINADO
             }
         }
 
         // ============================================================
-        // FUNCIONES PRINCIPALES DE EVENTOS
+        // FUNCIONES PRINCIPALES DE EVENTOS (CON PARÁMETRO sync)
         // ============================================================
         function activateFairMode() {
             if (fairMode) return;
@@ -1843,7 +1844,7 @@
             syncEventToFirebase('stop');
         }
 
-        function activatePermanentTheme(title, notification, confettiColors, emojis, themeName) {
+        function activatePermanentTheme(title, notification, confettiColors, emojis, themeName, sync = true) {
             if (fairMode) deactivateFairMode();
             activeEvent = themeName;
             loadThemeCSS(themeName);
@@ -1856,7 +1857,11 @@
             activateVisualEffects(confettiColors, emojis, 1);
 
             renderProjects(currentActiveFilter);
-            syncEventToFirebase(themeName);
+            if (sync) {
+                syncEventToFirebase(themeName);
+            } else {
+                console.log('🔇 Evento activado LOCALMENTE (sin sincronizar a Firebase)');
+            }
         }
 
         function activateMegaFair() {
@@ -1880,7 +1885,40 @@
         }
 
         // ============================================================
-        // CÓDIGOS DE EVENTOS
+        // FUNCIONES PARA MUNDIAL (LOCAL Y SINCRONIZAR)
+        // ============================================================
+        function activarMundialLocal() {
+            const user = Tecnomath.getCurrentUser();
+            if (!user || !Tecnomath.isAdmin()) {
+                alert('⚠️ Solo el administrador puede activar el modo local.');
+                return;
+            }
+            activatePermanentTheme(
+                '🏆 TECNOMATH MUNDIAL 🏆',
+                '⚽ ¡MODO MUNDIAL ACTIVADO LOCALMENTE! 🌍 (solo para ti)',
+                ['#FFD700', '#009A3E', '#FFFFFF', '#008000', '#FF4500'],
+                ['⚽', '🏆', '🌍', '🇦🇷', '🇧🇷', '🇫🇷', '🇪🇸', '🇩🇪', '🥅'],
+                'mundial',
+                false // <-- SIN sincronizar a Firebase
+            );
+        }
+
+        function sincronizarMundial() {
+            const user = Tecnomath.getCurrentUser();
+            if (!user || !Tecnomath.isAdmin()) {
+                alert('⚠️ Solo el administrador puede sincronizar.');
+                return;
+            }
+            if (!activeEvent || activeEvent !== 'mundial') {
+                alert('⚠️ Primero activa el evento Mundial (local o con código) antes de sincronizar.');
+                return;
+            }
+            syncEventToFirebase('mundial');
+            alert('✅ Tema Mundial sincronizado a todos los usuarios.');
+        }
+
+        // ============================================================
+        // CÓDIGOS DE EVENTOS (NUEVO CÓDIGO "mundial")
         // ============================================================
         function showCodePrompt() {
             const code = prompt('🔐 CÓDIGO DE EVENTO:');
@@ -1888,15 +1926,6 @@
             const lowerCode = code.toLowerCase();
 
             switch (lowerCode) {
-                case 'mundial':
-                    activatePermanentTheme(
-                        '⚽ TECNOMATH MUNDIAL ⚽',
-                        '🏆 ¡MODO MUNDIAL ACTIVADO! ⚽',
-                        ['#FFD700', '#009900', '#FFFFFF', '#000000', '#FF0000'],
-                        ['⚽', '🏆', '🌍', '🇦🇷', '🇧🇷', '🇫🇷', '🇪🇸', '🇩🇪', '🇮🇹', '🇬🇧', '🇺🇾', '🏟️', '🥅', '📺'],
-                        'mundial'
-                    );
-                    break;
                 case 'feria2026':
                     activateFairMode();
                     break;
@@ -1932,6 +1961,15 @@
                     break;
                 case 'feriaplus':
                     activateMegaFair();
+                    break;
+                case 'mundial':
+                    activatePermanentTheme(
+                        '🏆 TECNOMATH MUNDIAL 🏆',
+                        '⚽ ¡MODO MUNDIAL ACTIVADO! 🌍',
+                        ['#FFD700', '#009A3E', '#FFFFFF', '#008000', '#FF4500'],
+                        ['⚽', '🏆', '🌍', '🇦🇷', '🇧🇷', '🇫🇷', '🇪🇸', '🇩🇪', '🥅'],
+                        'mundial'
+                    );
                     break;
                 case 'stop':
                     if (fairMode) deactivateFairMode();
@@ -2073,11 +2111,12 @@
         });
 
         console.log('🎮 Sistema de juegos cargado correctamente.');
-        console.log('📌 Códigos disponibles: feria2026, feriaoff, halloween, navidad, cumpleanos, feriaplus, stop');
-        console.log('🔥 Firebase sincronización activa. Los cambios de tema se reflejarán en todos los dispositivos.');
+        console.log('📌 Códigos disponibles: feria2026, feriaoff, halloween, navidad, cumpleanos, feriaplus, mundial, stop');
+        console.log('🔥 Firebase sincronización activa.');
+        console.log('🌍 Evento Mundial: código "mundial" o botones en panel admin (local / sincronizar).');
         console.log('📱 Código QR con logo de Tecnomath generado en el footer.');
         console.log('🏗️ Juegos de Tower Building incluidos.');
-        console.log('🎈 Lluvia de emojis corregida: ahora funciona en todos los eventos.');
+        console.log('🎈 Lluvia de emojis corregida: funciona en todos los eventos.');
         console.log('👀 Juegos de eventos ocultos hasta que se active su evento correspondiente.');
     </script>
 </body>
