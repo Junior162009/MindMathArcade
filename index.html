@@ -889,6 +889,11 @@
             { name: "Sudoku", desc: "Entrena tu lógica", url: "https://sudoku.com/", imageUrl: "", icon: "🔢", category: "puzzle", deviceCompatibility: "both", evento: null },
             { name: "Solitario", desc: "Juego de cartas clásico", url: "https://worldofsolitaire.com/", imageUrl: "", icon: "🃏", category: "cards", deviceCompatibility: "both", evento: null },
             { name: "2048 Cupcakes", desc: "Versión dulce de 2048", url: "https://0x0800.github.io/2048-CUPCAKES/", imageUrl: "", icon: "🧁", category: "puzzle", deviceCompatibility: "both", evento: null },
+            // ⚽ JUEGOS EXCLUSIVOS DEL MUNDIAL (evento: "mundial")
+            { name: "Penalty Shootout", desc: "Lanza penales y defiende el arco", url: "https://www.gameflare.com/game/penalty-shootout/", imageUrl: "", icon: "⚽", category: "mundial", deviceCompatibility: "both", evento: "mundial" },
+            { name: "World Cup Quiz", desc: "Preguntas sobre la historia del Mundial", url: "https://www.sporcle.com/games/g/worldcup", imageUrl: "", icon: "🧠", category: "mundial", deviceCompatibility: "both", evento: "mundial" },
+            { name: "FIFA World Cup 2022", desc: "Juego de fútbol rápido y divertido", url: "https://www.coolmathgames.com/0-world-cup-2022", imageUrl: "", icon: "🏆", category: "mundial", deviceCompatibility: "both", evento: "mundial" },
+            { name: "World Cup Headers", desc: "Cabecea la pelota para marcar goles", url: "https://www.silvergames.com/en/world-cup-headers", imageUrl: "", icon: "🥅", category: "mundial", deviceCompatibility: "both", evento: "mundial" },
             // Exclusivos por evento (internos)
             { name: "Halloween Parade", desc: "Desfile de Halloween", url: "pages/halloween-parade.html", imageUrl: "", icon: "🎃", category: "halloween", deviceCompatibility: "both", evento: "halloween" },
             { name: "Trineo Navideño", desc: "Recoge regalos", url: "pages/navidad-game.html", imageUrl: "", icon: "🎄", category: "navidad", deviceCompatibility: "both", evento: "navidad" },
@@ -1883,6 +1888,15 @@
             const lowerCode = code.toLowerCase();
 
             switch (lowerCode) {
+                case 'mundial':
+                    activatePermanentTheme(
+                        '⚽ TECNOMATH MUNDIAL ⚽',
+                        '🏆 ¡MODO MUNDIAL ACTIVADO! ⚽',
+                        ['#FFD700', '#009900', '#FFFFFF', '#000000', '#FF0000'],
+                        ['⚽', '🏆', '🌍', '🇦🇷', '🇧🇷', '🇫🇷', '🇪🇸', '🇩🇪', '🇮🇹', '🇬🇧', '🇺🇾', '🏟️', '🥅', '📺'],
+                        'mundial'
+                    );
+                    break;
                 case 'feria2026':
                     activateFairMode();
                     break;
