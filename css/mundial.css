@@ -1,0 +1,31 @@
+:root {
+    --theme-bg: #0a1a0a;
+    --theme-card: #1a2d1a;
+    --theme-border: #FFD700;
+    --theme-text: #FFFFFF;
+}
+body {
+    background: #0a1a0a !important;
+    color: #FFFFFF !important;
+    position: relative;
+}
+body::after {
+    content: "⚽🏆🌍🇦🇷🇧🇷🇫🇷🇪🇸🇩🇪🇮🇹🇬🇧🇺🇾🏟️🥅📺⚽🏆🌍🇦🇷🇧🇷🇫🇷🇪🇸🇩🇪🇮🇹🇬🇧🇺🇾🏟️🥅📺";
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    font-size: 80px; opacity: 0.06; pointer-events: none; z-index: 0;
+    display: flex; flex-wrap: wrap; justify-content: space-around; align-items: center;
+    word-break: break-all; line-height: 1.2; overflow: hidden;
+}
+header { border-bottom-color: #FFD700 !important; background: rgba(255, 215, 0, 0.1) !important; }
+h1 { color: #FFD700 !important; text-shadow: 0 0 20px #FFD700, 0 0 40px #009900 !important; }
+h1::before { content: "⚽ "; }
+h1::after { content: " 🏆"; }
+.project-card { background: #1a2d1a !important; border-color: #FFD700 !important; }
+.project-card:hover { border-color: #FFFFFF !important; box-shadow: 0 0 20px #FFD700 !important; }
+.hero { background: rgba(255, 215, 0, 0.1) !important; border-bottom-color: #FFD700 !important; }
+.filter-btn { border-color: #FFD700 !important; color: #FFD700 !important; }
+.filter-btn.active, .filter-btn:hover { background: rgba(255, 215, 0, 0.2) !important; }
+.sponsor-card { background: #1a2d1a !important; border-color: #FFD700 !important; }
+footer { border-top-color: #FFD700 !important; }
+#admin-panel { border-color: #FFD700 !important; }
