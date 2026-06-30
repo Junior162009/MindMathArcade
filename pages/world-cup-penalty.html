@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>⚽ World Cup Penalty</title>
+    <style>
+        /* ========== RESET ========== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: #0a0a1a;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            touch-action: manipulation;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        /* ========== CONTENEDOR PRINCIPAL ========== */
+        .game-container {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: clamp(8px, 2vh, 20px);
+            background: radial-gradient(ellipse at center, #1a2a0a 0%, #0a1a0a 100%);
+            position: relative;
+        }
+
+        /* ========== FONDO DECORATIVO ========== */
+        .bg-emojis {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+            font-size: clamp(30px, 6vw, 70px);
+            opacity: 0.06;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+            align-items: center;
+            word-break: break-all;
+            line-height: 1.5;
+        }
+
+        .bg-emojis span {
+            display: inline-block;
+            animation: floatEmoji 10s ease-in-out infinite alternate;
+        }
+
+        @keyframes floatEmoji {
+            0% { transform: translateY(0) rotate(-3deg); }
+            100% { transform: translateY(-20px) rotate(3deg); }
+        }
+
+        /* ========== TÍTULO ========== */
+        .title {
+            position: relative;
+            z-index: 2;
+            font-size: clamp(1.2rem, 4vw, 2.5rem);
+            font-weight: 900;
+            color: #FFD700;
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.4), 0 0 60px rgba(255, 215, 0, 0.2);
+            text-align: center;
+            letter-spacing: 3px;
+            margin-bottom: clamp(8px, 2vh, 20px);
+            padding: 0 10px;
+            white-space: nowrap;
+        }
+
+        @media (max-width: 400px) {
+            .title {
+                white-space: normal;
+                font-size: clamp(0.9rem, 4.5vw, 1.3rem);
+            }
+        }
+
+        /* ========== WRAPPER DEL IFRAME ========== */
+        .iframe-wrapper {
+            position: relative;
+            z-index: 1;
+            width: min(92vw, 92vh * 0.666);
+            max-width: 520px;
+            aspect-ratio: 2 / 3;
+            background: #0a0410;
+            border-radius: clamp(12px, 3vw, 28px);
+            border: 2px solid rgba(255, 215, 0, 0.3);
+            box-shadow: 0 0 40px rgba(255, 215, 0, 0.15), inset 0 0 60px rgba(255, 215, 0, 0.05);
+            overflow: hidden;
+            transition: border-color 0.4s ease, box-shadow 0.4s ease;
+        }
+
+        .iframe-wrapper:hover {
+            border-color: rgba(255, 215, 0, 0.7);
+            box-shadow: 0 0 60px rgba(255, 215, 0, 0.3);
+        }
+
+        .iframe-wrapper iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+            background: #000;
+        }
+
+        /* ========== BOTÓN VOLVER ========== */
+        .btn-back {
+            position: relative;
+            z-index: 2;
+            display: inline-flex;
+            align-items: center;
+            gap: clamp(6px, 1vw, 12px);
+            padding: clamp(8px, 1.5vh, 14px) clamp(16px, 3vw, 32px);
+            background: rgba(255, 215, 0, 0.1);
+            color: #FFD700;
+            font-size: clamp(0.6rem, 1.8vw, 1rem);
+            font-weight: 600;
+            text-decoration: none;
+            border: 2px solid rgba(255, 215, 0, 0.25);
+            border-radius: 50px;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            font-family: inherit;
+            margin-top: clamp(8px, 2vh, 20px);
+            touch-action: manipulation;
+        }
+
+        .btn-back:hover {
+            background: rgba(255, 215, 0, 0.2);
+            border-color: #FFD700;
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.3);
+            transform: scale(1.05);
+        }
+
+        .btn-back:active {
+            transform: scale(0.95);
+        }
+
+        .btn-back svg {
+            width: clamp(16px, 2vw, 24px);
+            height: clamp(16px, 2vw, 24px);
+            fill: currentColor;
+            flex-shrink: 0;
+        }
+
+        /* ========== ORIENTACIÓN HORIZONTAL ========== */
+        @media (orientation: landscape) and (max-height: 500px) {
+            .iframe-wrapper {
+                width: min(60vh, 70vw);
+                max-width: 400px;
+            }
+            .title {
+                font-size: clamp(0.8rem, 2.5vw, 1.2rem);
+                margin-bottom: 4px;
+            }
+            .btn-back {
+                padding: 6px 16px;
+                font-size: 0.6rem;
+                margin-top: 4px;
+            }
+        }
+
+        /* ========== BLOQUEO DE ZOOM ========== */
+        @supports (-webkit-touch-callout: none) {
+            body {
+                -webkit-text-size-adjust: none;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Fondo decorativo -->
+    <div class="bg-emojis">
+        <span>⚽</span><span>🏆</span><span>🌍</span><span>⚽</span><span>🏆</span>
+        <span>🌍</span><span>⚽</span><span>🏆</span><span>🌍</span><span>⚽</span>
+        <span>🏆</span><span>🌍</span><span>⚽</span><span>🏆</span><span>🌍</span>
+        <span>⚽</span><span>🏆</span><span>🌍</span><span>⚽</span><span>🏆</span>
+    </div>
+
+    <!-- Contenido principal -->
+    <div class="game-container">
+
+        <!-- Título -->
+        <div class="title">⚽ World Cup Penalty</div>
+
+        <!-- Iframe -->
+        <div class="iframe-wrapper">
+            <iframe
+                src="https://www.minijuegos.com/embed/world-cup-penalty"
+                scrolling="no"
+                allowfullscreen
+                loading="lazy"
+                title="World Cup Penalty Game"
+                allow="autoplay; encrypted-media; fullscreen">
+            </iframe>
+        </div>
+
+        <!-- Botón volver -->
+        <a href="../index.html" class="btn-back">
+            <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+            Volver
+        </a>
+
+    </div>
+
+    <script>
+        // Bloquear zoom con gestos
+        document.addEventListener('gesturestart', function(e) { e.preventDefault(); });
+        document.addEventListener('gesturechange', function(e) { e.preventDefault(); });
+        document.addEventListener('gestureend', function(e) { e.preventDefault(); });
+        document.addEventListener('dblclick', function(e) { e.preventDefault(); }, { passive: false });
+        console.log('⚽ World Cup Penalty cargado');
+    </script>
+
+</body>
+</html>
