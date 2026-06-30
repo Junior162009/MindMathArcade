@@ -1,7 +1,4 @@
 {
-  // ============================================================
-  // IDENTIFICACIÓN DE LA APP
-  // ============================================================
   "name": "Tecnomath - Portal de Juegos Educativos ODS",
   "short_name": "Tecnomath",
   "description": "Portal de minijuegos educativos sobre los ODS. Matemáticas, ciencias, ecología y mucho más.",
@@ -10,29 +7,13 @@
   "scope": "/",
   "lang": "es-ES",
   "dir": "ltr",
-
-  // ============================================================
-  // 🟢 PANTALLA COMPLETA (¡IMPORTANTE!)
-  // ============================================================
   "display": "fullscreen",
   "display_override": ["fullscreen", "standalone"],
   "orientation": "any",
-
-  // ============================================================
-  // COLORES DE LA APP
-  // ============================================================
   "background_color": "#060610",
   "theme_color": "#060610",
-
-  // ============================================================
-  // CATEGORÍAS Y CLASIFICACIÓN
-  // ============================================================
   "categories": ["education", "games", "kids"],
   "iarc_rating_id": "",
-
-  // ============================================================
-  // CAPTURAS DE PANTALLA (para Google Play y tiendas)
-  // ============================================================
   "screenshots": [
     {
       "src": "img/screenshot-1.png",
@@ -42,10 +23,6 @@
       "label": "Pantalla principal del portal Tecnomath"
     }
   ],
-
-  // ============================================================
-  // ICONOS (todos los tamaños necesarios)
-  // ============================================================
   "icons": [
     { "src": "img/icon-48.png", "sizes": "48x48", "type": "image/png" },
     { "src": "img/icon-72.png", "sizes": "72x72", "type": "image/png" },
@@ -56,10 +33,6 @@
     { "src": "img/icon-384.png", "sizes": "384x384", "type": "image/png", "purpose": "any maskable" },
     { "src": "img/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
   ],
-
-  // ============================================================
-  // ACCESOS DIRECTOS (shortcuts) a juegos principales
-  // ============================================================
   "shortcuts": [
     {
       "name": "MindMath Arcade",
@@ -83,10 +56,6 @@
       "icons": [{ "src": "img/animalandia.png", "sizes": "96x96", "type": "image/png" }]
     }
   ],
-
-  // ============================================================
-  // PROTOCOLOS Y COMPARTIR (mejora la integración)
-  // ============================================================
   "share_target": {
     "action": "/index.html",
     "method": "GET",
@@ -97,10 +66,6 @@
       "url": "url"
     }
   },
-
-  // ============================================================
-  // CONFIGURACIÓN DE LANZAMIENTO (mejora la experiencia)
-  // ============================================================
   "launch_handler": {
     "client_mode": "auto"
   }
