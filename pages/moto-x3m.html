@@ -119,10 +119,18 @@
             background: #000;
         }
 
-        /* ========== BOTÓN VOLVER ========== */
-        .btn-back {
-            position: relative;
+        /* ========== CONTROLES (botones) ========== */
+        .controls {
+            display: flex;
+            gap: clamp(10px, 2vw, 20px);
+            margin-top: clamp(8px, 2vh, 20px);
+            flex-wrap: wrap;
+            justify-content: center;
             z-index: 2;
+            position: relative;
+        }
+
+        .btn-back, .fullscreen-btn {
             display: inline-flex;
             align-items: center;
             gap: clamp(6px, 1vw, 12px);
@@ -139,18 +147,18 @@
             letter-spacing: 1px;
             text-transform: uppercase;
             font-family: inherit;
-            margin-top: clamp(8px, 2vh, 20px);
             touch-action: manipulation;
+            cursor: pointer;
         }
 
-        .btn-back:hover {
+        .btn-back:hover, .fullscreen-btn:hover {
             background: rgba(255, 215, 0, 0.2);
             border-color: #FFD700;
             box-shadow: 0 0 30px rgba(255, 215, 0, 0.3);
             transform: scale(1.05);
         }
 
-        .btn-back:active {
+        .btn-back:active, .fullscreen-btn:active {
             transform: scale(0.95);
         }
 
@@ -171,7 +179,7 @@
                 font-size: clamp(0.8rem, 2.5vw, 1.2rem);
                 margin-bottom: 4px;
             }
-            .btn-back {
+            .btn-back, .fullscreen-btn {
                 padding: 6px 16px;
                 font-size: 0.6rem;
                 margin-top: 4px;
@@ -202,10 +210,10 @@
         <!-- Título -->
         <div class="title">🏍️ Moto X3M</div>
 
-        <!-- Iframe -->
+        <!-- Iframe (se carga la página del juego, no el embed) -->
         <div class="iframe-wrapper">
             <iframe
-                src="https://www.minijuegos.com/embed/moto-x3m"
+                src="https://www.minijuegos.com/juego/moto-x3m"
                 scrolling="no"
                 allowfullscreen
                 loading="lazy"
@@ -214,20 +222,54 @@
             </iframe>
         </div>
 
-        <!-- Botón volver -->
-        <a href="../index.html" class="btn-back">
-            <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
-            Volver
-        </a>
+        <!-- Controles -->
+        <div class="controls">
+            <button id="fullscreenBtn" class="fullscreen-btn">⛶ Pantalla completa</button>
+            <a href="../index.html" class="btn-back">
+                <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+                Volver
+            </a>
+        </div>
 
     </div>
 
     <script>
-        // Bloquear zoom con gestos
+        // ============================================================
+        // BLOQUEAR ZOOM CON GESTOS
+        // ============================================================
         document.addEventListener('gesturestart', function(e) { e.preventDefault(); });
         document.addEventListener('gesturechange', function(e) { e.preventDefault(); });
         document.addEventListener('gestureend', function(e) { e.preventDefault(); });
         document.addEventListener('dblclick', function(e) { e.preventDefault(); }, { passive: false });
+
+        // ============================================================
+        // BOTÓN DE PANTALLA COMPLETA (funciona en Android y PC)
+        // ============================================================
+        const fullscreenBtn = document.getElementById('fullscreenBtn');
+
+        fullscreenBtn.addEventListener('click', function() {
+            if (!document.fullscreenElement) {
+                // Entrar en pantalla completa
+                document.documentElement.requestFullscreen().catch(err => {
+                    alert('No se puede entrar en pantalla completa: ' + err.message);
+                });
+            } else {
+                // Salir de pantalla completa
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            }
+        });
+
+        // Cambiar el texto del botón cuando cambie el estado de pantalla completa
+        document.addEventListener('fullscreenchange', function() {
+            if (document.fullscreenElement) {
+                fullscreenBtn.textContent = '⛶ Salir pantalla completa';
+            } else {
+                fullscreenBtn.textContent = '⛶ Pantalla completa';
+            }
+        });
+
         console.log('🏍️ Moto X3M cargado');
     </script>
 
