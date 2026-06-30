@@ -858,7 +858,7 @@
         });
 
         // ============================================================
-        // 🟢 LISTA DE JUEGOS RECOMENDADOS (CON TOWER BUILDING Y NUEVOS)
+        // 🟢 LISTA DE JUEGOS RECOMENDADOS
         // ============================================================
         const juegosRecomendados = [
             // Internos (tuyos)
@@ -870,30 +870,15 @@
             { name: "Pacman", desc: "El clásico comecocos", url: "https://pacman.platzh1rsch.ch/", imageUrl: "", icon: "🟡", category: "retro", deviceCompatibility: "desktop", evento: null },
             { name: "Cookie Clicker", desc: "Haz clic para hacer galletas", url: "https://orteil.dashnet.org/cookieclicker/", imageUrl: "", icon: "🍪", category: "idle", deviceCompatibility: "both", evento: null },
             { name: "Run 3", desc: "Corre por el espacio", url: "https://www.coolmathgames.com/0-run-3", imageUrl: "", icon: "🏃", category: "runners", deviceCompatibility: "both", evento: null },
-            
             // 🏗️ JUEGOS DE CONSTRUCCIÓN DE TORRES
             { name: "Tower Building", desc: "Apila bloques para construir la torre más alta", url: "https://gameforge.com/en-US/littlegames/tower-building/", imageUrl: "", icon: "🏗️", category: "puzzle", deviceCompatibility: "both", evento: null },
             { name: "Tappy Tower", desc: "Toca para crear bloques y construir la torre más alta", url: "https://www.silvergames.com/en/tappy-tower", imageUrl: "", icon: "🏢", category: "puzzle", deviceCompatibility: "both", evento: null },
-            
             // 🎯 OTROS JUEGOS MULTIPLATAFORMA
             { name: "Stickman Archer", desc: "Juego de arquería con física minimalista", url: "https://gamh5.com/category/bubble-shooter/", imageUrl: "", icon: "🏹", category: "shooter", deviceCompatibility: "both", evento: null },
             { name: "2048 Merge", desc: "Fusiona números hasta llegar a 2048", url: "https://gamh5.com/category/merge/", imageUrl: "", icon: "🔢", category: "puzzle", deviceCompatibility: "both", evento: null },
             { name: "Endless Car Race", desc: "Carrera sin fin para poner a prueba tus reflejos", url: "https://gamh5.com/category/racing/", imageUrl: "", icon: "🏎️", category: "runners", deviceCompatibility: "both", evento: null },
             { name: "Hexagon Fall", desc: "Caída a través de hexágonos", url: "https://gplpal.com/hexagon-fall-html5-skill-game/", imageUrl: "", icon: "⬡", category: "skill", deviceCompatibility: "both", evento: null },
             { name: "Rocket Pult", desc: "Lanza cohetes con física", url: "https://gamesfree.io/rocket-pult.html", imageUrl: "", icon: "🚀", category: "physics", deviceCompatibility: "both", evento: null },
-
-            // 🎮 JUEGOS HTML5 MULTIPLATAFORMA
-            { name: "Hextris", desc: "Versión hexagonal de Tetris", url: "https://hextris.io/", imageUrl: "", icon: "🔷", category: "puzzle", deviceCompatibility: "both", evento: null },
-            { name: "Tetris", desc: "Clásico juego de bloques", url: "https://tetris.com/play-tetris", imageUrl: "", icon: "🧩", category: "puzzle", deviceCompatibility: "both", evento: null },
-            { name: "Flappy Bird", desc: "Esquiva obstáculos volando", url: "https://flappybird.io/", imageUrl: "", icon: "🐦", category: "runners", deviceCompatibility: "both", evento: null },
-            { name: "Snake", desc: "La clásica serpiente", url: "https://playsnake.org/", imageUrl: "", icon: "🐍", category: "retro", deviceCompatibility: "both", evento: null },
-            { name: "Minesweeper", desc: "Buscaminas clásico", url: "https://minesweeperonline.com/", imageUrl: "", icon: "💣", category: "puzzle", deviceCompatibility: "both", evento: null },
-            { name: "Space Invaders", desc: "Defiende la Tierra", url: "https://freeinvaders.org/", imageUrl: "", icon: "👾", category: "retro", deviceCompatibility: "both", evento: null },
-            { name: "Chess", desc: "Ajedrez online", url: "https://lichess.org/", imageUrl: "", icon: "♟️", category: "strategy", deviceCompatibility: "both", evento: null },
-            { name: "Sudoku", desc: "Entrena tu lógica", url: "https://sudoku.com/", imageUrl: "", icon: "🔢", category: "puzzle", deviceCompatibility: "both", evento: null },
-            { name: "Solitario", desc: "Juego de cartas clásico", url: "https://worldofsolitaire.com/", imageUrl: "", icon: "🃏", category: "cards", deviceCompatibility: "both", evento: null },
-            { name: "2048 Cupcakes", desc: "Versión dulce de 2048", url: "https://0x0800.github.io/2048-CUPCAKES/", imageUrl: "", icon: "🧁", category: "puzzle", deviceCompatibility: "both", evento: null },
-            
             // Exclusivos por evento (internos)
             { name: "Halloween Parade", desc: "Desfile de Halloween", url: "pages/halloween-parade.html", imageUrl: "", icon: "🎃", category: "halloween", deviceCompatibility: "both", evento: "halloween" },
             { name: "Trineo Navideño", desc: "Recoge regalos", url: "pages/navidad-game.html", imageUrl: "", icon: "🎄", category: "navidad", deviceCompatibility: "both", evento: "navidad" },
@@ -913,20 +898,24 @@
                 console.log('✅ Juegos cargados desde JSON:', projects.length);
             } catch (error) {
                 console.warn('⚠️ No se pudo cargar juegos.json, usando lista recomendada.');
-                projects = juegosRecomendados; // <-- CORREGIDO: ahora usa juegosRecomendados
+                projects = juegosRecomendados;
             }
             renderProjects(currentActiveFilter);
             actualizarFiltros();
         }
 
         // ============================================================
-        // FILTROS Y RENDERIZADO
+        // FILTROS Y RENDERIZADO (CORREGIDO)
         // ============================================================
         let currentActiveFilter = 'todos';
         let activeEvent = null;
 
         function getFilteredProjects() {
-            if (!activeEvent) return projects;
+            if (!activeEvent) {
+                // Si no hay evento activo, SOLO mostrar juegos normales (evento === null)
+                return projects.filter(p => p.evento === null);
+            }
+            // Si hay evento activo, mostrar juegos normales + los exclusivos del evento
             return projects.filter(p => p.evento === null || p.evento === activeEvent);
         }
 
@@ -1167,7 +1156,7 @@
         }
 
         // ============================================================
-        // 🟢 FAVICON DINÁMICO (DEFINIDO ANTES DE USARLO)
+        // 🟢 FAVICON DINÁMICO
         // ============================================================
         function updateFavicon(emoji) {
             const favicon = document.getElementById('dynamicFavicon');
@@ -1391,7 +1380,7 @@
         }
 
         // ============================================================
-        // EFECTOS VISUALES (CONFETI, GLOBOS, ETC.)
+        // EFECTOS VISUALES (CON CORRECCIÓN DE CONTENEDOR)
         // ============================================================
         let fairMode = false;
         let leaderboardInterval = null;
@@ -1417,7 +1406,10 @@
         }
 
         function createFairContainer() {
-            if (fairContainer) return;
+            if (fairContainer) {
+                fairContainer.style.display = 'block';
+                return;
+            }
             fairContainer = document.createElement('div');
             fairContainer.id = 'fair-effects-container';
             fairContainer.style.cssText = `
@@ -1427,6 +1419,7 @@
                 pointer-events: none;
                 z-index: 9998;
                 overflow: hidden;
+                display: block;
             `;
             document.body.appendChild(fairContainer);
         }
@@ -1747,10 +1740,14 @@
             setTimeout(() => { if (notif.parentNode) notif.remove(); }, 3000);
         }
 
+        // ============================================================
+        // ACTIVAR/DESACTIVAR EFECTOS (CORREGIDO)
+        // ============================================================
         function activateVisualEffects(confettiColors = null, emojis = null, speed = 1) {
             if (visualEffectsActive && !confettiColors && !emojis) return;
             visualEffectsActive = true;
             createFairContainer();
+            if (fairContainer) fairContainer.style.display = 'block';
             injectFairCSS();
             startConfetti(confettiColors, speed);
             startBalloons(speed);
@@ -1773,12 +1770,13 @@
             unhighlightPromotions();
             if (fairContainer) {
                 fairContainer.innerHTML = '';
-                fairContainer.style.display = 'none';
+                // No ocultamos el contenedor para que los nuevos efectos se dibujen encima
+                // fairContainer.style.display = 'none'; // ELIMINADO
             }
         }
 
         // ============================================================
-        // FUNCIONES PRINCIPALES DE EVENTOS (CON SINCRONIZACIÓN)
+        // FUNCIONES PRINCIPALES DE EVENTOS
         // ============================================================
         function activateFairMode() {
             if (fairMode) return;
@@ -2045,6 +2043,8 @@
         console.log('🔥 Firebase sincronización activa. Los cambios de tema se reflejarán en todos los dispositivos.');
         console.log('📱 Código QR con logo de Tecnomath generado en el footer.');
         console.log('🏗️ Juegos de Tower Building incluidos.');
+        console.log('🎈 Lluvia de emojis corregida: ahora funciona en todos los eventos.');
+        console.log('👀 Juegos de eventos ocultos hasta que se active su evento correspondiente.');
     </script>
 </body>
 </html>
