@@ -210,7 +210,7 @@
         <!-- Título -->
         <div class="title">🏍️ Moto X3M</div>
 
-        <!-- Iframe (se carga la página del juego, no el embed) -->
+        <!-- Iframe (URL de la página del juego, NO embed, para evitar 404 en móviles) -->
         <div class="iframe-wrapper">
             <iframe
                 src="https://www.minijuegos.com/juego/moto-x3m"
@@ -243,14 +243,15 @@
         document.addEventListener('dblclick', function(e) { e.preventDefault(); }, { passive: false });
 
         // ============================================================
-        // BOTÓN DE PANTALLA COMPLETA (funciona en Android y PC)
+        // BOTÓN DE PANTALLA COMPLETA (SOLO PARA EL IFRAME)
         // ============================================================
         const fullscreenBtn = document.getElementById('fullscreenBtn');
+        const iframe = document.querySelector('.iframe-wrapper iframe'); // Seleccionamos el iframe
 
         fullscreenBtn.addEventListener('click', function() {
             if (!document.fullscreenElement) {
-                // Entrar en pantalla completa
-                document.documentElement.requestFullscreen().catch(err => {
+                // Entrar en pantalla completa solo para el iframe
+                iframe.requestFullscreen().catch(err => {
                     alert('No se puede entrar en pantalla completa: ' + err.message);
                 });
             } else {
@@ -263,7 +264,7 @@
 
         // Cambiar el texto del botón cuando cambie el estado de pantalla completa
         document.addEventListener('fullscreenchange', function() {
-            if (document.fullscreenElement) {
+            if (document.fullscreenElement === iframe) {
                 fullscreenBtn.textContent = '⛶ Salir pantalla completa';
             } else {
                 fullscreenBtn.textContent = '⛶ Pantalla completa';
@@ -272,6 +273,5 @@
 
         console.log('🏍️ Moto X3M cargado');
     </script>
-
 </body>
 </html>
