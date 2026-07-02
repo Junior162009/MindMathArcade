@@ -4,798 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>StudyHub</title>
-    <style>
-        /* ==============================================================
-           ESTILOS BASE (compartidos)
-           ============================================================== */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', system-ui, sans-serif;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        body {
-            background: #0f172a;
-            color: #f1f5f9;
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            transition: background 0.3s, color 0.3s;
-            padding: 0;
-            margin: 0;
-        }
-
-        /* Overlay de selección */
-        #device-selector {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.75);
-            backdrop-filter: blur(8px);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 9999;
-            padding: 20px;
-            transition: opacity 0.5s;
-        }
-        #device-selector.hidden {
-            opacity: 0;
-            pointer-events: none;
-        }
-        #device-selector h2 {
-            font-size: 28px;
-            margin-bottom: 24px;
-            color: #f1f5f9;
-            text-align: center;
-        }
-        #device-selector .btn-group {
-            display: flex;
-            gap: 30px;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-        #device-selector .btn-group button {
-            background: #1e293b;
-            border: 2px solid #334155;
-            color: #f1f5f9;
-            padding: 20px 40px;
-            border-radius: 60px;
-            font-size: 24px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: 0.2s;
-            min-width: 160px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 8px;
-        }
-        #device-selector .btn-group button:hover {
-            border-color: #3b82f6;
-            background: #2d3748;
-            transform: scale(1.02);
-        }
-        #device-selector .btn-group button .icon {
-            font-size: 48px;
-        }
-        #device-selector .btn-group button .label {
-            font-size: 18px;
-        }
-        #device-selector .btn-group button .sub {
-            font-size: 14px;
-            color: #94a3b8;
-        }
-
-        /* ==============================================================
-           VARIABLES CSS (se sobrescriben según modo)
-           ============================================================== */
-        :root {
-            --bg-primary: #0f172a;
-            --bg-secondary: #1a2332;
-            --bg-card: #1e293b;
-            --bg-input: #0f172a;
-            --text-primary: #f1f5f9;
-            --text-secondary: #b0c4de;
-            --border-color: #334155;
-            --accent: #3b82f6;
-            --accent-hover: #2563eb;
-            --shadow: 0 12px 24px rgba(0,0,0,0.5);
-            --radius: 24px;
-            --transition: 0.25s ease;
-            --nav-bg: #1a2332;
-            --header-bg: #1a2332;
-            --font-base: 18px;
-            --touch-target: 56px;
-            --card-padding: 24px 22px;
-            --gap: 22px;
-            --app-radius: 32px;
-            --app-max-width: 520px;
-            --app-height: 820px;
-            --nav-padding: 8px 4px 18px 4px;
-            --nav-wrap: nowrap;
-            --nav-justify: space-around;
-        }
-
-        /* --- Modo Móvil (activo por defecto) --- */
-        body.mobile {
-            --font-base: 18px;
-            --touch-target: 56px;
-            --card-padding: 24px 22px;
-            --gap: 22px;
-            --app-max-width: 520px;
-            --app-height: 820px;
-            --app-radius: 32px;
-            --nav-padding: 8px 4px 18px 4px;
-            --nav-wrap: nowrap;
-            --nav-justify: space-around;
-            --radius: 24px;
-        }
-        body.mobile #app {
-            border-radius: var(--app-radius);
-            max-width: var(--app-max-width);
-            height: var(--app-height);
-            border: 1px solid var(--border-color);
-        }
-
-        /* --- Modo PC (pantalla completa estilo YouTube) --- */
-        body.desktop {
-            --font-base: 20px;
-            --touch-target: 64px;
-            --card-padding: 32px 36px;
-            --gap: 28px;
-            --app-max-width: 100%;
-            --app-height: 100vh;
-            --app-radius: 0;
-            --nav-padding: 12px 24px 18px 24px;
-            --nav-wrap: wrap;
-            --nav-justify: center;
-            --radius: 24px;
-            --shadow: none;
-            --border-color: #2d3748;
-        }
-        body.desktop #app {
-            border-radius: 0;
-            max-width: 100%;
-            height: 100vh;
-            border: none;
-            box-shadow: none;
-        }
-        body.desktop .bottom-nav {
-            gap: 8px;
-            flex-wrap: var(--nav-wrap);
-            justify-content: var(--nav-justify);
-        }
-        body.desktop .nav-btn {
-            padding: 12px 24px;
-            min-height: 64px;
-            font-size: 15px;
-        }
-        body.desktop .nav-btn .nav-icon {
-            font-size: 30px;
-        }
-        body.desktop .pages-container {
-            padding: 28px 40px;
-        }
-        body.desktop .card {
-            padding: 32px 36px;
-        }
-        body.desktop .input-group input,
-        body.desktop .input-group select {
-            padding: 18px 22px;
-            font-size: 20px;
-            min-height: 64px;
-        }
-        body.desktop .btn {
-            font-size: 20px;
-            padding: 16px 28px;
-            min-height: 64px;
-        }
-        body.desktop .btn-sm {
-            font-size: 18px;
-            padding: 14px 20px;
-            min-height: 52px;
-        }
-        body.desktop .calendar-grid .day-cell {
-            min-height: 68px;
-            font-size: 20px;
-        }
-        body.desktop .pomodoro-timer {
-            font-size: 80px;
-        }
-        body.desktop .player-avatar {
-            width: 120px;
-            height: 120px;
-            font-size: 84px;
-        }
-        body.desktop .avatar-selector .avatar-option {
-            width: 80px;
-            height: 80px;
-            font-size: 44px;
-        }
-        body.desktop .quote-box {
-            font-size: 20px;
-            padding: 26px 30px;
-        }
-        body.desktop .list-item .info .title {
-            font-size: 20px;
-        }
-        body.desktop .list-item .info .sub {
-            font-size: 17px;
-        }
-
-        /* Tema claro */
-        [data-theme="light"] {
-            --bg-primary: #f0f4f8;
-            --bg-secondary: #ffffff;
-            --bg-card: #ffffff;
-            --bg-input: #e9eef3;
-            --text-primary: #0b1a2a;
-            --text-secondary: #2d4b6e;
-            --border-color: #cbd5e1;
-            --shadow: 0 12px 24px rgba(0,0,0,0.08);
-            --nav-bg: #ffffff;
-            --header-bg: #ffffff;
-        }
-        body.desktop [data-theme="light"] {
-            --shadow: none;
-        }
-
-        /* Colores de acento */
-        [data-accent="green"] { --accent: #22c55e; --accent-hover: #16a34a; }
-        [data-accent="purple"] { --accent: #8b5cf6; --accent-hover: #7c3aed; }
-        [data-accent="orange"] { --accent: #f59e0b; --accent-hover: #d97706; }
-
-        /* ==============================================================
-           CONTENEDOR PRINCIPAL
-           ============================================================== */
-        #app {
-            width: 100%;
-            background: var(--bg-secondary);
-            box-shadow: var(--shadow);
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            position: relative;
-            border: 1px solid var(--border-color);
-            transition: background var(--transition), border-color var(--transition),
-                        max-width 0.3s, height 0.3s, border-radius 0.3s;
-        }
-
-        /* ==============================================================
-           HEADER
-           ============================================================== */
-        .header {
-            background: var(--header-bg);
-            padding: 16px 24px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 2px solid var(--border-color);
-            flex-shrink: 0;
-            transition: background var(--transition), border-color var(--transition);
-            min-height: 72px;
-        }
-        .header .brand {
-            font-weight: 800;
-            font-size: 26px;
-            color: var(--accent);
-            letter-spacing: -0.5px;
-        }
-        .header .brand span { color: var(--text-primary); }
-        .header-actions {
-            display: flex;
-            gap: 18px;
-            align-items: center;
-        }
-        .header-actions button {
-            background: transparent;
-            border: none;
-            color: var(--text-secondary);
-            font-size: 30px;
-            cursor: pointer;
-            transition: color var(--transition);
-            padding: 8px;
-            min-height: var(--touch-target);
-            min-width: var(--touch-target);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 40px;
-        }
-        .header-actions button:active { background: var(--bg-input); }
-
-        /* ==============================================================
-           PÁGINAS
-           ============================================================== */
-        .pages-container {
-            flex: 1;
-            overflow-y: auto;
-            padding: 20px;
-            scroll-behavior: smooth;
-            -webkit-overflow-scrolling: touch;
-        }
-        .page {
-            display: none;
-            animation: fadeUp 0.3s ease;
-        }
-        .page.active { display: block; }
-        @keyframes fadeUp {
-            from { opacity: 0; transform: translateY(16px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* ==============================================================
-           NAVEGACIÓN INFERIOR
-           ============================================================== */
-        .bottom-nav {
-            background: var(--nav-bg);
-            display: flex;
-            justify-content: var(--nav-justify);
-            padding: var(--nav-padding);
-            border-top: 2px solid var(--border-color);
-            flex-shrink: 0;
-            transition: background var(--transition), border-color var(--transition);
-            flex-wrap: var(--nav-wrap);
-            gap: 4px;
-            overflow-x: auto;
-        }
-        .bottom-nav::-webkit-scrollbar { display: none; }
-
-        .nav-btn {
-            background: transparent;
-            border: none;
-            color: var(--text-secondary);
-            font-size: 13px;
-            font-weight: 700;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 4px;
-            cursor: pointer;
-            padding: 8px 14px;
-            border-radius: 20px;
-            transition: 0.2s;
-            min-height: var(--touch-target);
-            min-width: 56px;
-            justify-content: center;
-            touch-action: manipulation;
-            white-space: nowrap;
-        }
-        .nav-btn .nav-icon { font-size: 28px; line-height: 1.2; }
-        .nav-btn.active {
-            color: var(--accent);
-            background: var(--bg-input);
-            padding: 8px 18px;
-        }
-        .nav-btn:active { transform: scale(0.92); }
-
-        /* ==============================================================
-           COMPONENTES (compartidos)
-           ============================================================== */
-        .card {
-            background: var(--bg-card);
-            border-radius: var(--radius);
-            padding: var(--card-padding);
-            margin-bottom: var(--gap);
-            border: 1px solid var(--border-color);
-            box-shadow: var(--shadow);
-            transition: background var(--transition), border-color var(--transition);
-        }
-        .card-title {
-            font-size: 22px;
-            font-weight: 700;
-            margin-bottom: 18px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .btn {
-            background: var(--accent);
-            color: white;
-            border: none;
-            padding: 14px 24px;
-            border-radius: 50px;
-            font-weight: 700;
-            font-size: 18px;
-            cursor: pointer;
-            transition: background 0.15s, transform 0.1s;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            min-height: var(--touch-target);
-            min-width: var(--touch-target);
-            touch-action: manipulation;
-            line-height: 1.2;
-        }
-        .btn:active { transform: scale(0.94); }
-        .btn:hover { background: var(--accent-hover); }
-        .btn-outline {
-            background: transparent;
-            border: 2px solid var(--border-color);
-            color: var(--text-primary);
-        }
-        .btn-outline:hover { background: var(--bg-input); border-color: var(--accent); }
-        .btn-danger { background: #ef4444; }
-        .btn-danger:hover { background: #dc2626; }
-        .btn-success { background: #22c55e; }
-        .btn-success:hover { background: #16a34a; }
-        .btn-sm { padding: 12px 18px; font-size: 16px; min-height: 48px; }
-        .btn:disabled { opacity: 0.4; pointer-events: none; }
-
-        .input-group {
-            display: flex;
-            gap: 14px;
-            flex-wrap: wrap;
-            margin-bottom: 16px;
-        }
-        .input-group input, .input-group select {
-            flex: 1;
-            min-width: 140px;
-            padding: 16px 18px;
-            border-radius: 50px;
-            border: 1px solid var(--border-color);
-            background: var(--bg-input);
-            color: var(--text-primary);
-            font-size: 18px;
-            transition: border-color var(--transition);
-            min-height: var(--touch-target);
-        }
-        .input-group input:focus, .input-group select:focus {
-            outline: none;
-            border-color: var(--accent);
-        }
-
-        .badge {
-            background: var(--accent);
-            color: white;
-            border-radius: 40px;
-            padding: 6px 18px;
-            font-size: 16px;
-            font-weight: 600;
-            display: inline-block;
-        }
-        .badge-success { background: #22c55e; }
-        .badge-danger { background: #ef4444; }
-        .badge-warning { background: #f59e0b; color: #0f172a; }
-
-        .list-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 14px 0;
-            border-bottom: 1px solid var(--border-color);
-            gap: 12px;
-        }
-        .list-item:last-child { border-bottom: none; }
-        .list-item .info { flex: 1; }
-        .list-item .info .title { font-weight: 700; font-size: 18px; }
-        .list-item .info .sub { font-size: 16px; color: var(--text-secondary); }
-        .list-item .actions {
-            display: flex;
-            gap: 12px;
-            flex-shrink: 0;
-        }
-        .list-item .actions .btn { min-height: 44px; min-width: 44px; padding: 8px 14px; font-size: 16px; }
-
-        .empty-state {
-            text-align: center;
-            padding: 30px 0;
-            color: var(--text-secondary);
-            font-size: 17px;
-        }
-
-        .progress-bar {
-            background: var(--bg-input);
-            border-radius: 40px;
-            height: 16px;
-            overflow: hidden;
-            margin: 10px 0;
-        }
-        .progress-bar .fill {
-            height: 100%;
-            background: var(--accent);
-            border-radius: 40px;
-            transition: width 0.3s ease;
-        }
-
-        .grid-2 {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 16px;
-        }
-
-        /* ==============================================================
-           CALENDARIO
-           ============================================================== */
-        .calendar-grid {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 8px;
-            text-align: center;
-            font-size: 17px;
-            margin-top: 10px;
-        }
-        .calendar-grid .day-name {
-            font-weight: 700;
-            color: var(--text-secondary);
-            padding: 10px 0;
-            font-size: 16px;
-        }
-        .calendar-grid .day-cell {
-            background: var(--bg-input);
-            border-radius: 16px;
-            padding: 14px 0;
-            cursor: pointer;
-            transition: 0.1s;
-            border: 1px solid transparent;
-            position: relative;
-            min-height: 54px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            font-size: 18px;
-            font-weight: 600;
-        }
-        .calendar-grid .day-cell.has-event {
-            border-color: var(--accent);
-            font-weight: 700;
-        }
-        .calendar-grid .day-cell.today {
-            background: var(--accent);
-            color: white;
-        }
-        .calendar-grid .day-cell .event-dot {
-            display: block;
-            width: 10px;
-            height: 10px;
-            background: var(--accent);
-            border-radius: 50%;
-            margin-top: 4px;
-        }
-        .calendar-nav {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 16px;
-        }
-        .calendar-nav .month-year {
-            font-weight: 700;
-            font-size: 22px;
-        }
-
-        /* ==============================================================
-           POMODORO
-           ============================================================== */
-        .pomodoro-timer {
-            font-size: 68px;
-            font-weight: 800;
-            text-align: center;
-            font-variant-numeric: tabular-nums;
-            letter-spacing: 4px;
-            margin: 16px 0;
-        }
-        .pomodoro-phase {
-            text-align: center;
-            font-size: 20px;
-            color: var(--text-secondary);
-            margin-bottom: 10px;
-        }
-
-        /* ==============================================================
-           LOGROS
-           ============================================================== */
-        .achievement-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 16px;
-        }
-        .achievement-item {
-            background: var(--bg-input);
-            border-radius: var(--radius);
-            padding: 18px 8px;
-            text-align: center;
-            border: 1px solid var(--border-color);
-            transition: 0.15s;
-        }
-        .achievement-item.unlocked {
-            border-color: var(--accent);
-            background: var(--bg-card);
-        }
-        .achievement-item .icon { font-size: 40px; }
-        .achievement-item .name { font-size: 15px; font-weight: 700; margin-top: 6px; }
-        .achievement-item .desc { font-size: 13px; color: var(--text-secondary); }
-
-        /* ==============================================================
-           FRASE MOTIVACIONAL
-           ============================================================== */
-        .quote-box {
-            background: var(--bg-input);
-            border-radius: var(--radius);
-            padding: 22px 24px;
-            border-left: 6px solid var(--accent);
-            font-style: italic;
-            color: var(--text-secondary);
-            margin-bottom: var(--gap);
-            font-size: 18px;
-        }
-        .quote-box .author {
-            display: block;
-            text-align: right;
-            font-style: normal;
-            font-weight: 700;
-            color: var(--text-primary);
-            margin-top: 8px;
-            font-size: 17px;
-        }
-
-        /* ==============================================================
-           PERSONALIZACIÓN JUGADOR
-           ============================================================== */
-        .player-profile {
-            display: flex;
-            align-items: center;
-            gap: 24px;
-            flex-wrap: wrap;
-        }
-        .player-avatar {
-            font-size: 72px;
-            background: var(--bg-input);
-            border-radius: 50%;
-            width: 100px;
-            height: 100px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border: 3px solid var(--border-color);
-            transition: border-color var(--transition);
-        }
-        .avatar-selector {
-            display: flex;
-            gap: 14px;
-            flex-wrap: wrap;
-            margin-top: 10px;
-        }
-        .avatar-selector .avatar-option {
-            font-size: 38px;
-            background: var(--bg-input);
-            border: 3px solid var(--border-color);
-            border-radius: 50%;
-            width: 68px;
-            height: 68px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: 0.15s;
-        }
-        .avatar-selector .avatar-option.active {
-            border-color: var(--accent);
-            background: var(--bg-card);
-        }
-        .avatar-selector .avatar-option:active { transform: scale(0.9); }
-
-        /* ==============================================================
-           SWITCH TOGGLE
-           ============================================================== */
-        .switch {
-            position: relative;
-            display: inline-block;
-            width: 60px;
-            height: 32px;
-        }
-        .switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-        .slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: var(--border-color);
-            transition: .2s;
-            border-radius: 34px;
-        }
-        .slider:before {
-            position: absolute;
-            content: "";
-            height: 24px;
-            width: 24px;
-            left: 4px;
-            bottom: 4px;
-            background-color: white;
-            transition: .2s;
-            border-radius: 50%;
-        }
-        input:checked + .slider {
-            background-color: var(--accent);
-        }
-        input:checked + .slider:before {
-            transform: translateX(28px);
-        }
-
-        /* ==============================================================
-           SCROLL
-           ============================================================== */
-        .pages-container::-webkit-scrollbar { width: 6px; }
-        .pages-container::-webkit-scrollbar-track { background: transparent; }
-        .pages-container::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 10px; }
-
-        /* ==============================================================
-           RESPONSIVE (solo para móvil cuando no está en modo PC)
-           ============================================================== */
-        @media (max-width: 520px) {
-            body.mobile #app {
-                height: 100vh;
-                border-radius: 0;
-                max-width: 100%;
-                border: none;
-            }
-            body.mobile .bottom-nav {
-                gap: 2px;
-                padding: 4px 0 12px 0;
-            }
-            body.mobile .nav-btn {
-                font-size: 11px;
-                padding: 6px 8px;
-                min-height: 48px;
-                min-width: 44px;
-            }
-            body.mobile .nav-btn .nav-icon {
-                font-size: 22px;
-            }
-        }
-        @media (max-width: 420px) {
-            .grid-2 { grid-template-columns: 1fr; }
-            .achievement-grid { grid-template-columns: repeat(2, 1fr); }
-            .header .brand { font-size: 22px; }
-            .pomodoro-timer { font-size: 52px; }
-        }
-
-        /* ==============================================================
-           BOTÓN PARA CAMBIAR DE MODO (en Configuración)
-           ============================================================== */
-        .mode-toggle-btn {
-            background: var(--bg-input);
-            border: 2px solid var(--border-color);
-            color: var(--text-primary);
-            padding: 14px 20px;
-            border-radius: 40px;
-            font-size: 18px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: 0.2s;
-            width: 100%;
-            text-align: center;
-        }
-        .mode-toggle-btn:hover {
-            border-color: var(--accent);
-            background: var(--bg-card);
-        }
-        .mode-toggle-btn .icon {
-            font-size: 24px;
-            margin-right: 8px;
-        }
-    </style>
+    
+    <!-- CSS externos -->
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="mobile.css" id="mobileCSS">
+    <link rel="stylesheet" href="desktop.css" id="desktopCSS">
 </head>
 <body>
 
-    <!-- ============================================================
-    SELECTOR DE DISPOSITIVO (overlay)
-    ============================================================ -->
+    <!-- SELECTOR DE DISPOSITIVO (overlay) -->
     <div id="device-selector">
         <h2>📱💻 ¿Cómo quieres usar StudyHub?</h2>
         <div class="btn-group">
@@ -813,9 +30,7 @@
         <p style="margin-top: 30px; color: #94a3b8; font-size: 14px;">Esta elección se guardará para la próxima vez.</p>
     </div>
 
-    <!-- ============================================================
-    APLICACIÓN PRINCIPAL
-    ============================================================ -->
+    <!-- APLICACIÓN PRINCIPAL -->
     <div id="app">
         <!-- HEADER -->
         <div class="header">
@@ -837,10 +52,19 @@
 
                 <div class="card">
                     <div class="card-title">📊 Resumen del día</div>
-                    <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; text-align:center;">
-                        <div><div style="font-size:34px;">📝</div><div><strong id="home-tasks-pending" style="font-size:20px;">0</strong><br><span style="font-size:15px;">tareas pend.</span></div></div>
-                        <div><div style="font-size:34px;">📅</div><div><strong id="home-exams-today" style="font-size:20px;">0</strong><br><span style="font-size:15px;">exámenes hoy</span></div></div>
-                        <div><div style="font-size:34px;">🎯</div><div><strong id="home-goals-progress" style="font-size:20px;">0%</strong><br><span style="font-size:15px;">metas</span></div></div>
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <div class="stat-icon">📝</div>
+                            <div><strong id="home-tasks-pending">0</strong><br><span class="stat-label">tareas pend.</span></div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-icon">📅</div>
+                            <div><strong id="home-exams-today">0</strong><br><span class="stat-label">exámenes hoy</span></div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-icon">🎯</div>
+                            <div><strong id="home-goals-progress">0%</strong><br><span class="stat-label">metas</span></div>
+                        </div>
                     </div>
                 </div>
 
@@ -861,7 +85,7 @@
                     <div class="card-title">📅 Horario</div>
                     <div id="schedule-container"></div>
                     <div class="input-group" style="margin-top:18px;">
-                        <select id="schedule-day-select" style="flex:1; min-width:120px; font-size:17px;">
+                        <select id="schedule-day-select">
                             <option value="Lunes">Lunes</option>
                             <option value="Martes">Martes</option>
                             <option value="Miércoles">Miércoles</option>
@@ -869,7 +93,6 @@
                             <option value="Viernes">Viernes</option>
                             <option value="Sábado">Sábado</option>
                         </select>
-                        <input type="text" id="schedule-subject" placeholder="Materia">
                         <input type="text" id="schedule-teacher" placeholder="Profesor">
                         <input type="text" id="schedule-room" placeholder="Salón">
                         <button class="btn btn-sm" id="schedule-add-btn">+ Añadir</button>
@@ -912,9 +135,9 @@
                         <button class="btn btn-sm" id="grade-add-btn">+ Agregar</button>
                     </div>
                     <div id="grade-list"></div>
-                    <div style="margin-top:18px; display:flex; gap:24px; flex-wrap:wrap; font-size:18px;">
-                        <span><strong>Promedio:</strong> <span id="grade-average" style="font-size:20px;">-</span></span>
-                        <span><strong>Nota necesaria (70):</strong> <span id="grade-needed" style="font-size:20px;">-</span></span>
+                    <div class="grades-summary">
+                        <span><strong>Promedio:</strong> <span id="grade-average">-</span></span>
+                        <span><strong>Nota necesaria (70):</strong> <span id="grade-needed">-</span></span>
                     </div>
                 </div>
             </div>
@@ -925,13 +148,13 @@
                     <div class="card-title">🍅 Pomodoro</div>
                     <div class="pomodoro-phase" id="pomodoro-phase">Estudio</div>
                     <div class="pomodoro-timer" id="pomodoro-timer">25:00</div>
-                    <div style="display:flex; gap:16px; justify-content:center; flex-wrap:wrap;">
+                    <div class="pomodoro-buttons">
                         <button class="btn" id="pomodoro-start">▶ Iniciar</button>
                         <button class="btn btn-outline" id="pomodoro-pause">⏸️ Pausa</button>
                         <button class="btn btn-danger" id="pomodoro-reset">⟳ Reiniciar</button>
                     </div>
-                    <div style="margin-top:16px; text-align:center; color:var(--text-secondary); font-size:18px;">
-                        Ciclos completados: <strong id="pomodoro-cycles" style="font-size:22px;">0</strong>
+                    <div class="pomodoro-cycles">
+                        Ciclos completados: <strong id="pomodoro-cycles">0</strong>
                     </div>
                 </div>
             </div>
@@ -966,8 +189,8 @@
                         <button class="btn btn-outline btn-sm" id="cal-next">›</button>
                     </div>
                     <div class="calendar-grid" id="calendar-grid"></div>
-                    <div style="margin-top:14px; font-size:16px; color:var(--text-secondary);">
-                        <span style="display:inline-block; width:16px; height:16px; background:var(--accent); border-radius:50%; margin-right:8px;"></span> Evento
+                    <div class="calendar-legend">
+                        <span class="legend-dot"></span> Evento
                     </div>
                 </div>
             </div>
@@ -978,13 +201,13 @@
                     <div class="card-title">⚙️ Configuración</div>
 
                     <!-- Personalización del jugador -->
-                    <div style="margin-bottom:24px;">
-                        <div style="font-weight:700; font-size:20px; margin-bottom:12px;">👤 Mi perfil</div>
+                    <div class="settings-section">
+                        <div class="settings-label">👤 Mi perfil</div>
                         <div class="player-profile">
                             <div class="player-avatar" id="player-avatar-display">🧑‍🎓</div>
-                            <div style="flex:1;">
-                                <div class="input-group" style="margin-bottom:6px;">
-                                    <input type="text" id="player-name-input" placeholder="Tu nombre" style="flex:2; font-size:18px;">
+                            <div class="player-info">
+                                <div class="input-group">
+                                    <input type="text" id="player-name-input" placeholder="Tu nombre">
                                     <button class="btn btn-sm" id="player-name-btn">Guardar</button>
                                 </div>
                                 <div class="avatar-selector" id="avatar-selector">
@@ -999,30 +222,27 @@
                         </div>
                     </div>
 
-                    <div style="display:flex; flex-direction:column; gap:18px;">
-                        <div style="display:flex; justify-content:space-between; align-items:center;">
-                            <span style="font-size:18px; font-weight:600;">Tema oscuro</span>
+                    <div class="settings-controls">
+                        <div class="setting-item">
+                            <span>Tema oscuro</span>
                             <label class="switch">
                                 <input type="checkbox" id="darkModeToggle" checked>
                                 <span class="slider"></span>
                             </label>
                         </div>
-                        <div style="display:flex; justify-content:space-between; align-items:center;">
-                            <span style="font-size:18px; font-weight:600;">Color principal</span>
-                            <select id="accent-select" style="background:var(--bg-input); color:var(--text-primary); border:1px solid var(--border-color); border-radius:40px; padding:10px 18px; font-size:17px; min-height:52px;">
+                        <div class="setting-item">
+                            <span>Color principal</span>
+                            <select id="accent-select">
                                 <option value="blue">Azul</option>
                                 <option value="green">Verde</option>
                                 <option value="purple">Púrpura</option>
                                 <option value="orange">Naranja</option>
                             </select>
                         </div>
-
-                        <!-- Botón para cambiar de modo (PC <-> Móvil) -->
                         <button class="mode-toggle-btn" id="modeToggleBtn">
                             <span class="icon">🔄</span> Cambiar a <span id="modeToggleLabel">PC</span>
                         </button>
-
-                        <button class="btn btn-danger" id="reset-data-btn" style="width:100%; font-size:18px; padding:16px;">🔄 Restablecer todos los datos</button>
+                        <button class="btn btn-danger" id="reset-data-btn">🔄 Restablecer todos los datos</button>
                     </div>
                 </div>
             </div>
@@ -1043,69 +263,48 @@
         </div>
     </div>
 
+    <!-- JavaScript (igual que antes, pero sin estilos incrustados) -->
     <script>
         // ================================================================
-        //  STUDYHUB · SELECCIONADOR + MODO PC/MÓVIL
+        //  STUDYHUB · LÓGICA COMPLETA (sin CSS)
         // ================================================================
 
         // ---------- GESTIÓN DE MODO ----------
         const selector = document.getElementById('device-selector');
         const body = document.body;
 
-        // Cargar modo guardado o detectar automáticamente
         let savedMode = localStorage.getItem('studyhubDeviceMode');
         if (!savedMode) {
-            // Detección automática (ancho de pantalla o userAgent)
             const isMobile = window.innerWidth < 768 || /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
             savedMode = isMobile ? 'mobile' : 'desktop';
             localStorage.setItem('studyhubDeviceMode', savedMode);
         }
 
-        // Aplicar modo
         function applyMode(mode) {
             body.classList.remove('mobile', 'desktop');
             body.classList.add(mode);
-            // Ajustar meta viewport
             const meta = document.querySelector('meta[name=viewport]');
             if (mode === 'mobile') {
                 meta.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover');
             } else {
                 meta.setAttribute('content', 'width=device-width, initial-scale=1.0, user-scalable=yes');
             }
-            // Actualizar etiqueta del botón de cambio
             const label = document.getElementById('modeToggleLabel');
-            if (label) {
-                label.innerText = mode === 'mobile' ? 'PC' : 'Móvil';
-            }
-            // Ocultar selector si estaba visible
+            if (label) label.innerText = mode === 'mobile' ? 'PC' : 'Móvil';
             selector.classList.add('hidden');
-            // Guardar preferencia
             localStorage.setItem('studyhubDeviceMode', mode);
-            // Forzar re-dibujo (opcional)
-            // ...
         }
 
-        // Eventos del selector
-        document.getElementById('choose-mobile').addEventListener('click', function() {
-            applyMode('mobile');
-        });
-        document.getElementById('choose-desktop').addEventListener('click', function() {
-            applyMode('desktop');
-        });
-
-        // Botón en Configuración para cambiar de modo
+        document.getElementById('choose-mobile').addEventListener('click', () => applyMode('mobile'));
+        document.getElementById('choose-desktop').addEventListener('click', () => applyMode('desktop'));
         document.getElementById('modeToggleBtn').addEventListener('click', function() {
             const current = body.classList.contains('mobile') ? 'mobile' : 'desktop';
-            const newMode = current === 'mobile' ? 'desktop' : 'mobile';
-            applyMode(newMode);
+            applyMode(current === 'mobile' ? 'desktop' : 'mobile');
         });
 
-        // Si ya hay modo guardado, ocultar selector y aplicar
-        if (savedMode) {
-            applyMode(savedMode);
-        }
+        if (savedMode) applyMode(savedMode);
 
-        // ---------- DATOS Y LÓGICA (igual que antes) ----------
+        // ---------- DATOS Y LÓGICA (idéntica a la anterior) ----------
         const defaultData = {
             player: { name: 'Estudiante', avatar: '🧑‍🎓' },
             schedule: {
@@ -1199,7 +398,7 @@
                     pomodoroMaster: '🍅 10 ciclos Pomodoro'
                 };
                 container.innerHTML = unlocked.slice(-3).map(k =>
-                    `<span style="display:inline-block; background:var(--bg-input); border-radius:40px; padding:8px 16px; margin:4px; font-size:16px;">${names[k] || k}</span>`
+                    `<span class="achievement-badge">${names[k] || k}</span>`
                 ).join(' ');
             }
 
@@ -1221,9 +420,9 @@
                 container2.innerHTML = '<div class="empty-state">No hay eventos próximos.</div>';
             } else {
                 container2.innerHTML = upcoming.slice(0, 5).map(e =>
-                    `<div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid var(--border-color); font-size:17px;">
+                    `<div class="event-item">
                         <span>${e.type} ${e.title}</span>
-                        <span style="color:var(--text-secondary);">${formatDate(e.date)}</span>
+                        <span class="event-date">${formatDate(e.date)}</span>
                     </div>`
                 ).join('');
             }
@@ -1250,12 +449,12 @@
             let html = '';
             days.forEach(day => {
                 const entries = data.schedule[day] || [];
-                html += `<div style="margin-bottom:18px;">
-                    <div style="font-weight:700; font-size:20px; margin-bottom:8px;">${day}</div>
-                    ${entries.length === 0 ? '<div class="empty-state" style="padding:10px 0;">Sin clases</div>' :
-                        entries.map((e, i) => `<div style="display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid var(--border-color); font-size:17px;">
-                            <span><strong>${e.subject}</strong> · ${e.teacher} · ${e.room}</span>
-                            <button class="btn btn-danger btn-sm" onclick="removeSchedule('${day}', ${i})" style="min-height:40px; min-width:40px;">✕</button>
+                html += `<div class="schedule-day">
+                    <div class="schedule-day-name">${day}</div>
+                    ${entries.length === 0 ? '<div class="empty-state">Sin clases</div>' :
+                        entries.map((e, i) => `<div class="schedule-entry">
+                            <span>${e.teacher ? 'Prof. ' + e.teacher : ''} ${e.room ? '· Salón ' + e.room : ''}</span>
+                            <button class="btn btn-danger btn-sm" onclick="removeSchedule('${day}', ${i})">✕</button>
                         </div>`).join('')}
                 </div>`;
             });
@@ -1269,13 +468,11 @@
 
         document.getElementById('schedule-add-btn').addEventListener('click', function() {
             const day = document.getElementById('schedule-day-select').value;
-            const subject = document.getElementById('schedule-subject').value.trim();
             const teacher = document.getElementById('schedule-teacher').value.trim();
             const room = document.getElementById('schedule-room').value.trim();
-            if (!subject) return alert('Ingresa la materia.');
+            if (!teacher && !room) return alert('Ingresa al menos el profesor o el salón.');
             if (!data.schedule[day]) data.schedule[day] = [];
-            data.schedule[day].push({ subject, teacher, room });
-            document.getElementById('schedule-subject').value = '';
+            data.schedule[day].push({ teacher, room });
             document.getElementById('schedule-teacher').value = '';
             document.getElementById('schedule-room').value = '';
             saveData();
@@ -1378,7 +575,7 @@
             } else {
                 list.innerHTML = data.grades.map((g, i) =>
                     `<div class="list-item">
-                        <span style="font-size:20px; font-weight:700;">${g}%</span>
+                        <span class="grade-value">${g}%</span>
                         <button class="btn btn-danger btn-sm" onclick="deleteGrade(${i})">✕</button>
                     </div>`
                 ).join('');
@@ -1482,15 +679,15 @@
             }
             list.innerHTML = data.goals.map((g, i) => {
                 const pct = Math.min(100, (g.progress / g.total) * 100);
-                return `<div class="list-item" style="flex-direction:column; align-items:stretch; gap:8px;">
-                    <div style="display:flex; justify-content:space-between; font-size:18px;">
-                        <div class="title">${g.title}</div>
-                        <div>${Math.round(pct)}%</div>
+                return `<div class="goal-item">
+                    <div class="goal-header">
+                        <span class="goal-title">${g.title}</span>
+                        <span>${Math.round(pct)}%</span>
                     </div>
                     <div class="progress-bar"><div class="fill" style="width:${pct}%;"></div></div>
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:6px;">
-                        <span style="font-size:16px; color:var(--text-secondary);">${g.progress} / ${g.total}</span>
-                        <div style="display:flex; gap:10px;">
+                    <div class="goal-footer">
+                        <span>${g.progress} / ${g.total}</span>
+                        <div class="goal-actions">
                             <button class="btn btn-sm btn-success" onclick="goalProgress(${i}, 1)">+1</button>
                             <button class="btn btn-sm btn-success" onclick="goalProgress(${i}, 5)">+5</button>
                             <button class="btn btn-sm btn-danger" onclick="deleteGoal(${i})">🗑️</button>
