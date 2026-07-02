@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>StudyHub</title>
+    
+    <!-- CSS externos -->
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="mobile.css" id="mobileCSS">
+    <link rel="stylesheet" href="desktop.css" id="desktopCSS">
+</head>
+<body>
+
+    <!-- SELECTOR DE DISPOSITIVO (overlay) -->
+    <div id="device-selector">
+        <h2>📱💻 ¿Cómo quieres usar StudyHub?</h2>
+        <div class="btn-group">
+            <button id="choose-mobile">
+                <span class="icon">📱</span>
+                <span class="label">Móvil / Tablet</span>
+                <span class="sub">Pantalla táctil, botones grandes</span>
+            </button>
+            <button id="choose-desktop">
+                <span class="icon">💻</span>
+                <span class="label">PC / Escritorio</span>
+                <span class="sub">Pantalla completa estilo YouTube</span>
+            </button>
+        </div>
+        <p style="margin-top: 30px; color: #94a3b8; font-size: 14px;">Esta elección se guardará para la próxima vez.</p>
+    </div>
+
+    <!-- APLICACIÓN PRINCIPAL -->
+    <div id="app">
+        <!-- HEADER -->
+        <div class="header">
+            <div class="brand">Study<span>Hub</span></div>
+            <div class="header-actions">
+                <button id="themeToggle" title="Cambiar tema">🌙</button>
+                <button id="accentToggle" title="Cambiar color">🎨</button>
+            </div>
+        </div>
+
+        <!-- PÁGINAS -->
+        <div class="pages-container" id="pagesContainer">
+            <!-- ========== INICIO ========== -->
+            <div class="page active" id="page-home">
+                <div class="quote-box" id="dailyQuote">
+                    "El éxito es la suma de pequeños esfuerzos repetidos día tras día."
+                    <span class="author">— Robert Collier</span>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">📊 Resumen del día</div>
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <div class="stat-icon">📝</div>
+                            <div><strong id="home-tasks-pending">0</strong><br><span class="stat-label">tareas pend.</span></div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-icon">📅</div>
+                            <div><strong id="home-exams-today">0</strong><br><span class="stat-label">exámenes hoy</span></div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-icon">🎯</div>
+                            <div><strong id="home-goals-progress">0%</strong><br><span class="stat-label">metas</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">🏆 Logros recientes</div>
+                    <div id="home-achievements" class="empty-state">Aún no tienes logros. ¡Sigue estudiando!</div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">⏳ Próximos eventos</div>
+                    <div id="home-upcoming-events" class="empty-state">No hay eventos próximos.</div>
+                </div>
+            </div>
+
+            <!-- ========== HORARIO ========== -->
+            <div class="page" id="page-schedule">
+                <div class="card">
+                    <div class="card-title">📅 Horario</div>
+                    <div id="schedule-container"></div>
+                    <div class="input-group" style="margin-top:18px;">
+                        <select id="schedule-day-select">
+                            <option value="Lunes">Lunes</option>
+                            <option value="Martes">Martes</option>
+                            <option value="Miércoles">Miércoles</option>
+                            <option value="Jueves">Jueves</option>
+                            <option value="Viernes">Viernes</option>
+                            <option value="Sábado">Sábado</option>
+                        </select>
+                        <input type="text" id="schedule-teacher" placeholder="Profesor">
+                        <input type="text" id="schedule-room" placeholder="Salón">
+                        <button class="btn btn-sm" id="schedule-add-btn">+ Añadir</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========== TAREAS ========== -->
+            <div class="page" id="page-tasks">
+                <div class="card">
+                    <div class="card-title">📝 Tareas</div>
+                    <div class="input-group">
+                        <input type="text" id="task-title" placeholder="Título">
+                        <input type="date" id="task-due">
+                        <button class="btn btn-sm" id="task-add-btn">+ Añadir</button>
+                    </div>
+                    <div id="task-list"></div>
+                </div>
+            </div>
+
+            <!-- ========== EXÁMENES ========== -->
+            <div class="page" id="page-exams">
+                <div class="card">
+                    <div class="card-title">📚 Exámenes</div>
+                    <div class="input-group">
+                        <input type="text" id="exam-title" placeholder="Materia">
+                        <input type="date" id="exam-date">
+                        <button class="btn btn-sm" id="exam-add-btn">+ Añadir</button>
+                    </div>
+                    <div id="exam-list"></div>
+                </div>
+            </div>
+
+            <!-- ========== CALCULADORA DE NOTAS ========== -->
+            <div class="page" id="page-grades">
+                <div class="card">
+                    <div class="card-title">🧮 Calculadora de Notas</div>
+                    <div class="input-group">
+                        <input type="number" id="grade-input" placeholder="Nota (0-100)" min="0" max="100" step="0.1">
+                        <button class="btn btn-sm" id="grade-add-btn">+ Agregar</button>
+                    </div>
+                    <div id="grade-list"></div>
+                    <div class="grades-summary">
+                        <span><strong>Promedio:</strong> <span id="grade-average">-</span></span>
+                        <span><strong>Nota necesaria (70):</strong> <span id="grade-needed">-</span></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========== POMODORO ========== -->
+            <div class="page" id="page-pomodoro">
+                <div class="card">
+                    <div class="card-title">🍅 Pomodoro</div>
+                    <div class="pomodoro-phase" id="pomodoro-phase">Estudio</div>
+                    <div class="pomodoro-timer" id="pomodoro-timer">25:00</div>
+                    <div class="pomodoro-buttons">
+                        <button class="btn" id="pomodoro-start">▶ Iniciar</button>
+                        <button class="btn btn-outline" id="pomodoro-pause">⏸️ Pausa</button>
+                        <button class="btn btn-danger" id="pomodoro-reset">⟳ Reiniciar</button>
+                    </div>
+                    <div class="pomodoro-cycles">
+                        Ciclos completados: <strong id="pomodoro-cycles">0</strong>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========== METAS ========== -->
+            <div class="page" id="page-goals">
+                <div class="card">
+                    <div class="card-title">🎯 Metas</div>
+                    <div class="input-group">
+                        <input type="text" id="goal-title" placeholder="Nombre de la meta">
+                        <input type="number" id="goal-total" placeholder="Total (ej: 100)" min="1">
+                        <button class="btn btn-sm" id="goal-add-btn">+ Crear</button>
+                    </div>
+                    <div id="goal-list"></div>
+                </div>
+            </div>
+
+            <!-- ========== LOGROS ========== -->
+            <div class="page" id="page-achievements">
+                <div class="card">
+                    <div class="card-title">🏅 Logros</div>
+                    <div class="achievement-grid" id="achievement-grid"></div>
+                </div>
+            </div>
+
+            <!-- ========== CALENDARIO ========== -->
+            <div class="page" id="page-calendar">
+                <div class="card">
+                    <div class="calendar-nav">
+                        <button class="btn btn-outline btn-sm" id="cal-prev">‹</button>
+                        <span class="month-year" id="cal-month-year">Enero 2025</span>
+                        <button class="btn btn-outline btn-sm" id="cal-next">›</button>
+                    </div>
+                    <div class="calendar-grid" id="calendar-grid"></div>
+                    <div class="calendar-legend">
+                        <span class="legend-dot"></span> Evento
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========== CONFIGURACIÓN ========== -->
+            <div class="page" id="page-settings">
+                <div class="card">
+                    <div class="card-title">⚙️ Configuración</div>
+
+                    <!-- Personalización del jugador -->
+                    <div class="settings-section">
+                        <div class="settings-label">👤 Mi perfil</div>
+                        <div class="player-profile">
+                            <div class="player-avatar" id="player-avatar-display">🧑‍🎓</div>
+                            <div class="player-info">
+                                <div class="input-group">
+                                    <input type="text" id="player-name-input" placeholder="Tu nombre">
+                                    <button class="btn btn-sm" id="player-name-btn">Guardar</button>
+                                </div>
+                                <div class="avatar-selector" id="avatar-selector">
+                                    <span class="avatar-option" data-avatar="🧑‍🎓">🧑‍🎓</span>
+                                    <span class="avatar-option" data-avatar="👨‍🎓">👨‍🎓</span>
+                                    <span class="avatar-option" data-avatar="👩‍🎓">👩‍🎓</span>
+                                    <span class="avatar-option" data-avatar="🐱">🐱</span>
+                                    <span class="avatar-option" data-avatar="🦊">🦊</span>
+                                    <span class="avatar-option" data-avatar="⭐">⭐</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="settings-controls">
+                        <div class="setting-item">
+                            <span>Tema oscuro</span>
+                            <label class="switch">
+                                <input type="checkbox" id="darkModeToggle" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="setting-item">
+                            <span>Color principal</span>
+                            <select id="accent-select">
+                                <option value="blue">Azul</option>
+                                <option value="green">Verde</option>
+                                <option value="purple">Púrpura</option>
+                                <option value="orange">Naranja</option>
+                            </select>
+                        </div>
+                        <button class="mode-toggle-btn" id="modeToggleBtn">
+                            <span class="icon">🔄</span> Cambiar a <span id="modeToggleLabel">PC</span>
+                        </button>
+                        <button class="btn btn-danger" id="reset-data-btn">🔄 Restablecer todos los datos</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- NAVEGACIÓN INFERIOR -->
+        <div class="bottom-nav" id="bottomNav">
+            <button class="nav-btn active" data-page="home"><span class="nav-icon">🏠</span> Inicio</button>
+            <button class="nav-btn" data-page="schedule"><span class="nav-icon">📅</span> Horario</button>
+            <button class="nav-btn" data-page="tasks"><span class="nav-icon">📝</span> Tareas</button>
+            <button class="nav-btn" data-page="exams"><span class="nav-icon">📚</span> Exámenes</button>
+            <button class="nav-btn" data-page="grades"><span class="nav-icon">🧮</span> Notas</button>
+            <button class="nav-btn" data-page="pomodoro"><span class="nav-icon">🍅</span> Pomodoro</button>
+            <button class="nav-btn" data-page="goals"><span class="nav-icon">🎯</span> Metas</button>
+            <button class="nav-btn" data-page="achievements"><span class="nav-icon">🏅</span> Logros</button>
+            <button class="nav-btn" data-page="calendar"><span class="nav-icon">📆</span> Calendario</button>
+            <button class="nav-btn" data-page="settings"><span class="nav-icon">⚙️</span> Config</button>
+        </div>
+    </div>
+
+    <!-- JavaScript (igual que antes, pero sin estilos incrustados) -->
+    <script>
+        // ================================================================
+        //  STUDYHUB · LÓGICA COMPLETA (sin CSS)
+        // ================================================================
+
+        // ---------- GESTIÓN DE MODO ----------
+        const selector = document.getElementById('device-selector');
+        const body = document.body;
+
+        let savedMode = localStorage.getItem('studyhubDeviceMode');
+        if (!savedMode) {
+            const isMobile = window.innerWidth < 768 || /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
+            savedMode = isMobile ? 'mobile' : 'desktop';
+            localStorage.setItem('studyhubDeviceMode', savedMode);
+        }
+
+        function applyMode(mode) {
+            body.classList.remove('mobile', 'desktop');
+            body.classList.add(mode);
+            const meta = document.querySelector('meta[name=viewport]');
+            if (mode === 'mobile') {
+                meta.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover');
+            } else {
+                meta.setAttribute('content', 'width=device-width, initial-scale=1.0, user-scalable=yes');
+            }
+            const label = document.getElementById('modeToggleLabel');
+            if (label) label.innerText = mode === 'mobile' ? 'PC' : 'Móvil';
+            selector.classList.add('hidden');
+            localStorage.setItem('studyhubDeviceMode', mode);
+        }
+
+        document.getElementById('choose-mobile').addEventListener('click', () => applyMode('mobile'));
+        document.getElementById('choose-desktop').addEventListener('click', () => applyMode('desktop'));
+        document.getElementById('modeToggleBtn').addEventListener('click', function() {
+            const current = body.classList.contains('mobile') ? 'mobile' : 'desktop';
+            applyMode(current === 'mobile' ? 'desktop' : 'mobile');
+        });
+
+        if (savedMode) applyMode(savedMode);
+
+        // ---------- DATOS Y LÓGICA (idéntica a la anterior) ----------
+        const defaultData = {
+            player: { name: 'Estudiante', avatar: '🧑‍🎓' },
+            schedule: {
+                Lunes: [], Martes: [], Miércoles: [], Jueves: [], Viernes: [], Sábado: []
+            },
+            tasks: [],
+            exams: [],
+            grades: [],
+            goals: [],
+            pomodoroCycles: 0,
+            achievements: {
+                firstTask: false, firstExam: false, studyStreak: 0,
+                lastStudyDate: null, fiveTasks: false, tenGoals: false, pomodoroMaster: false
+            },
+            settings: { darkMode: true, accent: 'blue' }
+        };
+
+        let data = loadData();
+
+        function loadData() {
+            const raw = localStorage.getItem('studyhubData');
+            if (raw) {
+                try {
+                    const parsed = JSON.parse(raw);
+                    for (let key in defaultData) {
+                        if (!(key in parsed)) parsed[key] = defaultData[key];
+                    }
+                    if (!parsed.player) parsed.player = { name: 'Estudiante', avatar: '🧑‍🎓' };
+                    if (!parsed.schedule) parsed.schedule = defaultData.schedule;
+                    if (!parsed.achievements) parsed.achievements = defaultData.achievements;
+                    if (!parsed.settings) parsed.settings = defaultData.settings;
+                    return parsed;
+                } catch (e) {
+                    return JSON.parse(JSON.stringify(defaultData));
+                }
+            }
+            return JSON.parse(JSON.stringify(defaultData));
+        }
+
+        function saveData() {
+            localStorage.setItem('studyhubData', JSON.stringify(data));
+            updateAllUI();
+        }
+
+        function todayStr() { return new Date().toISOString().split('T')[0]; }
+        function formatDate(dateStr) {
+            if (!dateStr) return '';
+            const d = new Date(dateStr + 'T00:00:00');
+            return d.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
+        }
+
+        function updateAllUI() {
+            document.getElementById('player-name-input').value = data.player.name || 'Estudiante';
+            document.getElementById('player-avatar-display').textContent = data.player.avatar || '🧑‍🎓';
+            document.querySelectorAll('.avatar-option').forEach(el => {
+                el.classList.toggle('active', el.dataset.avatar === data.player.avatar);
+            });
+            updateHome();
+            updateSchedule();
+            updateTasks();
+            updateExams();
+            updateGrades();
+            updateGoals();
+            updateAchievements();
+            updateCalendar();
+            updatePomodoroUI();
+            applyTheme();
+        }
+
+        // ---------- HOME ----------
+        function updateHome() {
+            const pending = data.tasks.filter(t => !t.completed).length;
+            document.getElementById('home-tasks-pending').innerText = pending;
+            const today = todayStr();
+            const examsToday = data.exams.filter(e => e.date === today).length;
+            document.getElementById('home-exams-today').innerText = examsToday;
+            const goalsProgress = data.goals.length > 0 ?
+                Math.round(data.goals.reduce((acc, g) => acc + (g.progress / g.total * 100), 0) / data.goals.length) : 0;
+            document.getElementById('home-goals-progress').innerText = goalsProgress + '%';
+
+            const unlocked = Object.entries(data.achievements).filter(([k, v]) => v === true).map(([k]) => k);
+            const container = document.getElementById('home-achievements');
+            if (unlocked.length === 0) {
+                container.innerHTML = '<div class="empty-state">Aún no tienes logros. ¡Sigue estudiando!</div>';
+            } else {
+                const names = {
+                    firstTask: '📝 Primera tarea',
+                    firstExam: '📚 Primer examen',
+                    fiveTasks: '✅ 5 tareas completadas',
+                    tenGoals: '🎯 10 metas creadas',
+                    pomodoroMaster: '🍅 10 ciclos Pomodoro'
+                };
+                container.innerHTML = unlocked.slice(-3).map(k =>
+                    `<span class="achievement-badge">${names[k] || k}</span>`
+                ).join(' ');
+            }
+
+            const upcoming = [];
+            const todayDate = new Date();
+            data.tasks.forEach(t => {
+                if (!t.completed && t.due) {
+                    const diff = (new Date(t.due + 'T00:00:00') - todayDate) / (1000 * 60 * 60 * 24);
+                    if (diff >= 0 && diff <= 7) upcoming.push({ type: '📝', title: t.title, date: t.due });
+                }
+            });
+            data.exams.forEach(e => {
+                const diff = (new Date(e.date + 'T00:00:00') - todayDate) / (1000 * 60 * 60 * 24);
+                if (diff >= 0 && diff <= 7) upcoming.push({ type: '📚', title: e.title, date: e.date });
+            });
+            upcoming.sort((a, b) => new Date(a.date) - new Date(b.date));
+            const container2 = document.getElementById('home-upcoming-events');
+            if (upcoming.length === 0) {
+                container2.innerHTML = '<div class="empty-state">No hay eventos próximos.</div>';
+            } else {
+                container2.innerHTML = upcoming.slice(0, 5).map(e =>
+                    `<div class="event-item">
+                        <span>${e.type} ${e.title}</span>
+                        <span class="event-date">${formatDate(e.date)}</span>
+                    </div>`
+                ).join('');
+            }
+
+            const quotes = [
+                { text: "El éxito es la suma de pequeños esfuerzos repetidos día tras día.", author: "Robert Collier" },
+                { text: "El estudio no se mide por el tiempo que pasas, sino por lo que aprendes.", author: "Anónimo" },
+                { text: "La educación es el arma más poderosa para cambiar el mundo.", author: "Nelson Mandela" },
+                { text: "No te detengas cuando estés cansado, detente cuando hayas terminado.", author: "Anónimo" },
+                { text: "El conocimiento es poder, pero solo si se aplica.", author: "Anónimo" },
+                { text: "La disciplina es el puente entre metas y logros.", author: "Jim Rohn" },
+                { text: "El mejor momento para empezar fue ayer. El siguiente mejor momento es ahora.", author: "Anónimo" },
+                { text: "El único lugar donde el éxito viene antes que el trabajo es en el diccionario.", author: "Vidal Sassoon" }
+            ];
+            const dayOfYear = Math.floor((new Date() - new Date(new Date().getFullYear(), 0, 0)) / (1000 * 60 * 60 * 24));
+            const quote = quotes[dayOfYear % quotes.length];
+            document.getElementById('dailyQuote').innerHTML = `"${quote.text}" <span class="author">— ${quote.author}</span>`;
+        }
+
+        // ---------- HORARIO ----------
+        function updateSchedule() {
+            const container = document.getElementById('schedule-container');
+            const days = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+            let html = '';
+            days.forEach(day => {
+                const entries = data.schedule[day] || [];
+                html += `<div class="schedule-day">
+                    <div class="schedule-day-name">${day}</div>
+                    ${entries.length === 0 ? '<div class="empty-state">Sin clases</div>' :
+                        entries.map((e, i) => `<div class="schedule-entry">
+                            <span>${e.teacher ? 'Prof. ' + e.teacher : ''} ${e.room ? '· Salón ' + e.room : ''}</span>
+                            <button class="btn btn-danger btn-sm" onclick="removeSchedule('${day}', ${i})">✕</button>
+                        </div>`).join('')}
+                </div>`;
+            });
+            container.innerHTML = html;
+        }
+
+        window.removeSchedule = function(day, index) {
+            data.schedule[day].splice(index, 1);
+            saveData();
+        };
+
+        document.getElementById('schedule-add-btn').addEventListener('click', function() {
+            const day = document.getElementById('schedule-day-select').value;
+            const teacher = document.getElementById('schedule-teacher').value.trim();
+            const room = document.getElementById('schedule-room').value.trim();
+            if (!teacher && !room) return alert('Ingresa al menos el profesor o el salón.');
+            if (!data.schedule[day]) data.schedule[day] = [];
+            data.schedule[day].push({ teacher, room });
+            document.getElementById('schedule-teacher').value = '';
+            document.getElementById('schedule-room').value = '';
+            saveData();
+        });
+
+        // ---------- TAREAS ----------
+        function updateTasks() {
+            const list = document.getElementById('task-list');
+            if (data.tasks.length === 0) {
+                list.innerHTML = '<div class="empty-state">No hay tareas.</div>';
+                return;
+            }
+            list.innerHTML = data.tasks.map((t, i) =>
+                `<div class="list-item">
+                    <div class="info">
+                        <div class="title" style="${t.completed ? 'text-decoration:line-through; color:var(--text-secondary);' : ''}">${t.title}</div>
+                        <div class="sub">📅 ${t.due ? formatDate(t.due) : 'Sin fecha'} ${t.completed ? '✅ Completada' : ''}</div>
+                    </div>
+                    <div class="actions">
+                        <button class="btn btn-success btn-sm" onclick="toggleTask(${i})">${t.completed ? '↩️' : '✅'}</button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteTask(${i})">🗑️</button>
+                    </div>
+                </div>`
+            ).join('');
+            checkAchievements();
+        }
+
+        window.toggleTask = function(index) {
+            data.tasks[index].completed = !data.tasks[index].completed;
+            saveData();
+            checkAchievements();
+        };
+        window.deleteTask = function(index) {
+            data.tasks.splice(index, 1);
+            saveData();
+        };
+
+        document.getElementById('task-add-btn').addEventListener('click', function() {
+            const title = document.getElementById('task-title').value.trim();
+            const due = document.getElementById('task-due').value;
+            if (!title) return alert('Escribe un título.');
+            data.tasks.push({ title, due, completed: false });
+            document.getElementById('task-title').value = '';
+            document.getElementById('task-due').value = '';
+            saveData();
+            checkAchievements();
+        });
+
+        // ---------- EXÁMENES ----------
+        function updateExams() {
+            const list = document.getElementById('exam-list');
+            if (data.exams.length === 0) {
+                list.innerHTML = '<div class="empty-state">No hay exámenes.</div>';
+                return;
+            }
+            list.innerHTML = data.exams.map((e, i) =>
+                `<div class="list-item">
+                    <div class="info">
+                        <div class="title">${e.title}</div>
+                        <div class="sub">📅 ${formatDate(e.date)}</div>
+                    </div>
+                    <div class="actions">
+                        <button class="btn btn-danger btn-sm" onclick="deleteExam(${i})">🗑️</button>
+                    </div>
+                </div>`
+            ).join('');
+            const today = new Date();
+            const tomorrow = new Date(today);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            const tomorrowStr = tomorrow.toISOString().split('T')[0];
+            data.exams.forEach(e => {
+                if (e.date === tomorrowStr) {
+                    showNotification('📚 Recordatorio', `Mañana tienes examen de ${e.title}`);
+                }
+            });
+            checkAchievements();
+        }
+
+        window.deleteExam = function(index) {
+            data.exams.splice(index, 1);
+            saveData();
+        };
+
+        document.getElementById('exam-add-btn').addEventListener('click', function() {
+            const title = document.getElementById('exam-title').value.trim();
+            const date = document.getElementById('exam-date').value;
+            if (!title || !date) return alert('Completa todos los campos.');
+            data.exams.push({ title, date });
+            document.getElementById('exam-title').value = '';
+            document.getElementById('exam-date').value = '';
+            saveData();
+            checkAchievements();
+        });
+
+        // ---------- NOTAS ----------
+        function updateGrades() {
+            const list = document.getElementById('grade-list');
+            if (data.grades.length === 0) {
+                list.innerHTML = '<div class="empty-state">No hay notas ingresadas.</div>';
+            } else {
+                list.innerHTML = data.grades.map((g, i) =>
+                    `<div class="list-item">
+                        <span class="grade-value">${g}%</span>
+                        <button class="btn btn-danger btn-sm" onclick="deleteGrade(${i})">✕</button>
+                    </div>`
+                ).join('');
+            }
+            const avg = data.grades.length > 0 ? data.grades.reduce((a, b) => a + b, 0) / data.grades.length : null;
+            document.getElementById('grade-average').innerText = avg !== null ? avg.toFixed(1) + '%' : '-';
+            if (data.grades.length > 0 && avg < 70) {
+                const needed = 70 * (data.grades.length + 1) - data.grades.reduce((a, b) => a + b, 0);
+                document.getElementById('grade-needed').innerText = Math.max(0, needed).toFixed(1) + '%';
+            } else {
+                document.getElementById('grade-needed').innerText = avg >= 70 ? '✅ Aprobado' : '--';
+            }
+        }
+
+        window.deleteGrade = function(index) {
+            data.grades.splice(index, 1);
+            saveData();
+        };
+
+        document.getElementById('grade-add-btn').addEventListener('click', function() {
+            const val = parseFloat(document.getElementById('grade-input').value);
+            if (isNaN(val) || val < 0 || val > 100) return alert('Ingresa una nota entre 0 y 100.');
+            data.grades.push(val);
+            document.getElementById('grade-input').value = '';
+            saveData();
+        });
+
+        // ---------- POMODORO ----------
+        let pomodoroInterval = null;
+        let pomodoroTime = 25 * 60;
+        let pomodoroRunning = false;
+        let pomodoroPhase = 'study';
+
+        function updatePomodoroUI() {
+            const mins = Math.floor(pomodoroTime / 60);
+            const secs = pomodoroTime % 60;
+            document.getElementById('pomodoro-timer').innerText =
+                `${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}`;
+            document.getElementById('pomodoro-phase').innerText =
+                pomodoroPhase === 'study' ? '📖 Estudio' : '☕ Descanso';
+            document.getElementById('pomodoro-cycles').innerText = data.pomodoroCycles;
+        }
+
+        function pomodoroTick() {
+            if (pomodoroTime <= 0) {
+                if (pomodoroPhase === 'study') {
+                    data.pomodoroCycles += 1;
+                    if (data.pomodoroCycles >= 10) {
+                        data.achievements.pomodoroMaster = true;
+                        saveData();
+                    }
+                    pomodoroPhase = 'break';
+                    pomodoroTime = 5 * 60;
+                    showNotification('🍅 Pomodoro', '¡Descanso! 5 minutos.');
+                } else {
+                    pomodoroPhase = 'study';
+                    pomodoroTime = 25 * 60;
+                    showNotification('🍅 Pomodoro', '¡Vuelve a estudiar! 25 minutos.');
+                }
+                saveData();
+                updatePomodoroUI();
+                return;
+            }
+            pomodoroTime--;
+            updatePomodoroUI();
+        }
+
+        document.getElementById('pomodoro-start').addEventListener('click', function() {
+            if (pomodoroRunning) return;
+            pomodoroRunning = true;
+            pomodoroInterval = setInterval(pomodoroTick, 1000);
+            this.disabled = true;
+            document.getElementById('pomodoro-pause').disabled = false;
+        });
+
+        document.getElementById('pomodoro-pause').addEventListener('click', function() {
+            if (!pomodoroRunning) return;
+            clearInterval(pomodoroInterval);
+            pomodoroRunning = false;
+            document.getElementById('pomodoro-start').disabled = false;
+            this.disabled = true;
+        });
+
+        document.getElementById('pomodoro-reset').addEventListener('click', function() {
+            clearInterval(pomodoroInterval);
+            pomodoroRunning = false;
+            pomodoroPhase = 'study';
+            pomodoroTime = 25 * 60;
+            document.getElementById('pomodoro-start').disabled = false;
+            document.getElementById('pomodoro-pause').disabled = true;
+            updatePomodoroUI();
+            saveData();
+        });
+
+        // ---------- METAS ----------
+        function updateGoals() {
+            const list = document.getElementById('goal-list');
+            if (data.goals.length === 0) {
+                list.innerHTML = '<div class="empty-state">No hay metas.</div>';
+                return;
+            }
+            list.innerHTML = data.goals.map((g, i) => {
+                const pct = Math.min(100, (g.progress / g.total) * 100);
+                return `<div class="goal-item">
+                    <div class="goal-header">
+                        <span class="goal-title">${g.title}</span>
+                        <span>${Math.round(pct)}%</span>
+                    </div>
+                    <div class="progress-bar"><div class="fill" style="width:${pct}%;"></div></div>
+                    <div class="goal-footer">
+                        <span>${g.progress} / ${g.total}</span>
+                        <div class="goal-actions">
+                            <button class="btn btn-sm btn-success" onclick="goalProgress(${i}, 1)">+1</button>
+                            <button class="btn btn-sm btn-success" onclick="goalProgress(${i}, 5)">+5</button>
+                            <button class="btn btn-sm btn-danger" onclick="deleteGoal(${i})">🗑️</button>
+                        </div>
+                    </div>
+                </div>`;
+            }).join('');
+            checkAchievements();
+        }
+
+        window.goalProgress = function(index, amount) {
+            const g = data.goals[index];
+            g.progress = Math.min(g.total, g.progress + amount);
+            if (g.progress >= g.total) {
+                showNotification('🎯 Meta completada', `¡Lograste tu meta: ${g.title}!`);
+            }
+            saveData();
+            checkAchievements();
+        };
+        window.deleteGoal = function(index) {
+            data.goals.splice(index, 1);
+            saveData();
+        };
+
+        document.getElementById('goal-add-btn').addEventListener('click', function() {
+            const title = document.getElementById('goal-title').value.trim();
+            const total = parseInt(document.getElementById('goal-total').value);
+            if (!title || isNaN(total) || total < 1) return alert('Completa los campos correctamente.');
+            data.goals.push({ title, total, progress: 0 });
+            document.getElementById('goal-title').value = '';
+            document.getElementById('goal-total').value = '';
+            saveData();
+            checkAchievements();
+        });
+
+        // ---------- LOGROS ----------
+        function checkAchievements() {
+            let changed = false;
+            if (!data.achievements.firstTask && data.tasks.some(t => t.completed)) {
+                data.achievements.firstTask = true; changed = true;
+                showNotification('🏅 Logro desbloqueado', '¡Completaste tu primera tarea!');
+            }
+            if (!data.achievements.firstExam && data.exams.length > 0) {
+                data.achievements.firstExam = true; changed = true;
+                showNotification('🏅 Logro desbloqueado', '¡Agregaste tu primer examen!');
+            }
+            if (!data.achievements.fiveTasks && data.tasks.filter(t => t.completed).length >= 5) {
+                data.achievements.fiveTasks = true; changed = true;
+                showNotification('🏅 Logro desbloqueado', '¡Completaste 5 tareas!');
+            }
+            if (!data.achievements.tenGoals && data.goals.length >= 10) {
+                data.achievements.tenGoals = true; changed = true;
+                showNotification('🏅 Logro desbloqueado', '¡Creaste 10 metas!');
+            }
+            if (!data.achievements.pomodoroMaster && data.pomodoroCycles >= 10) {
+                data.achievements.pomodoroMaster = true; changed = true;
+                showNotification('🏅 Logro desbloqueado', '¡Completaste 10 ciclos Pomodoro!');
+            }
+            if (changed) saveData();
+            updateAchievements();
+            updateHome();
+        }
+
+        function updateAchievements() {
+            const grid = document.getElementById('achievement-grid');
+            const achievements = [
+                { id: 'firstTask', icon: '📝', name: 'Primera tarea', desc: 'Completa tu primera tarea' },
+                { id: 'firstExam', icon: '📚', name: 'Primer examen', desc: 'Agrega un examen' },
+                { id: 'fiveTasks', icon: '✅', name: '5 tareas', desc: 'Completa 5 tareas' },
+                { id: 'tenGoals', icon: '🎯', name: '10 metas', desc: 'Crea 10 metas' },
+                { id: 'pomodoroMaster', icon: '🍅', name: 'Pomodoro máster', desc: '10 ciclos completados' }
+            ];
+            grid.innerHTML = achievements.map(a =>
+                `<div class="achievement-item ${data.achievements[a.id] ? 'unlocked' : ''}">
+                    <div class="icon">${a.icon}</div>
+                    <div class="name">${a.name}</div>
+                    <div class="desc">${data.achievements[a.id] ? '✅ Desbloqueado' : a.desc}</div>
+                </div>`
+            ).join('');
+        }
+
+        // ---------- CALENDARIO ----------
+        let calDate = new Date();
+        function updateCalendar() {
+            const year = calDate.getFullYear();
+            const month = calDate.getMonth();
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            const today = new Date();
+            const todayStr = today.toISOString().split('T')[0];
+
+            document.getElementById('cal-month-year').innerText =
+                new Date(year, month).toLocaleDateString('es-ES', { month: 'long', year: 'numeric' });
+
+            let html = '';
+            const dayNames = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+            dayNames.forEach(d => html += `<div class="day-name">${d}</div>`);
+
+            for (let i = 0; i < firstDay; i++) {
+                html += `<div></div>`;
+            }
+
+            for (let d = 1; d <= daysInMonth; d++) {
+                const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+                const hasEvent = data.tasks.some(t => t.due === dateStr) || data.exams.some(e => e.date === dateStr);
+                const isToday = dateStr === todayStr;
+                html += `<div class="day-cell ${hasEvent ? 'has-event' : ''} ${isToday ? 'today' : ''}">
+                            ${d}
+                            ${hasEvent ? '<span class="event-dot"></span>' : ''}
+                        </div>`;
+            }
+            document.getElementById('calendar-grid').innerHTML = html;
+        }
+
+        document.getElementById('cal-prev').addEventListener('click', function() {
+            calDate.setMonth(calDate.getMonth() - 1);
+            updateCalendar();
+        });
+        document.getElementById('cal-next').addEventListener('click', function() {
+            calDate.setMonth(calDate.getMonth() + 1);
+            updateCalendar();
+        });
+
+        // ---------- NOTIFICACIONES ----------
+        function showNotification(title, body) {
+            if ('Notification' in window && Notification.permission === 'granted') {
+                new Notification(title, { body, icon: '📚' });
+            } else if ('Notification' in window && Notification.permission !== 'denied') {
+                Notification.requestPermission();
+            }
+        }
+
+        // ---------- PERSONALIZACIÓN ----------
+        document.getElementById('player-name-btn').addEventListener('click', function() {
+            const name = document.getElementById('player-name-input').value.trim();
+            if (name) { data.player.name = name; saveData(); }
+        });
+        document.querySelectorAll('.avatar-option').forEach(el => {
+            el.addEventListener('click', function() {
+                data.player.avatar = this.dataset.avatar;
+                saveData();
+            });
+        });
+
+        // ---------- TEMAS Y COLOR ----------
+        function applyTheme() {
+            const dark = data.settings.darkMode;
+            document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+            document.getElementById('darkModeToggle').checked = dark;
+            document.getElementById('themeToggle').innerText = dark ? '🌙' : '☀️';
+            const accent = data.settings.accent || 'blue';
+            document.documentElement.setAttribute('data-accent', accent);
+            document.getElementById('accent-select').value = accent;
+        }
+
+        document.getElementById('themeToggle').addEventListener('click', function() {
+            data.settings.darkMode = !data.settings.darkMode;
+            saveData();
+        });
+        document.getElementById('darkModeToggle').addEventListener('change', function() {
+            data.settings.darkMode = this.checked;
+            saveData();
+        });
+        document.getElementById('accent-select').addEventListener('change', function() {
+            data.settings.accent = this.value;
+            saveData();
+        });
+        document.getElementById('accentToggle').addEventListener('click', function() {
+            const colors = ['blue', 'green', 'purple', 'orange'];
+            const current = data.settings.accent || 'blue';
+            const idx = colors.indexOf(current);
+            const next = colors[(idx + 1) % colors.length];
+            data.settings.accent = next;
+            document.getElementById('accent-select').value = next;
+            saveData();
+        });
+
+        // ---------- REINICIAR ----------
+        document.getElementById('reset-data-btn').addEventListener('click', function() {
+            if (confirm('¿Seguro que quieres borrar todos los datos?')) {
+                localStorage.removeItem('studyhubData');
+                data = JSON.parse(JSON.stringify(defaultData));
+                saveData();
+                alert('Datos restablecidos.');
+                location.reload();
+            }
+        });
+
+        // ---------- NAVEGACIÓN ----------
+        document.querySelectorAll('.nav-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const pageId = this.dataset.page;
+                document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+                document.getElementById('page-' + pageId).classList.add('active');
+                document.getElementById('pagesContainer').scrollTop = 0;
+                if (pageId === 'calendar') updateCalendar();
+                if (pageId === 'achievements') updateAchievements();
+                if (pageId === 'home') updateHome();
+            });
+        });
+
+        // ---------- INICIALIZACIÓN ----------
+        if ('Notification' in window && Notification.permission === 'default') {
+            Notification.requestPermission();
+        }
+
+        pomodoroTime = 25 * 60;
+        pomodoroPhase = 'study';
+        updatePomodoroUI();
+        document.getElementById('pomodoro-pause').disabled = true;
+
+        saveData();
+        console.log('📚 StudyHub cargado. Modo:', body.classList.contains('mobile') ? 'Móvil' : 'PC');
+    </script>
+</body>
+</html>
