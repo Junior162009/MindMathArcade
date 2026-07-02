@@ -1,5 +1,5 @@
 /* ============================================================
-   ESTILOS PARA MÓVIL / TABLET
+   ESTILOS PARA MÓVIL / TABLET (CORREGIDO)
    ============================================================ */
 
 body.mobile {
@@ -7,51 +7,113 @@ body.mobile {
     --touch-target: 56px;
     --card-padding: 24px 22px;
     --gap: 22px;
-    --app-max-width: 520px;
-    --app-height: 820px;
-    --app-radius: 32px;
-    --nav-padding: 8px 4px 18px 4px;
+    --app-max-width: 100%;        /* ← Cambiado a 100% */
+    --app-height: 100vh;          /* ← Altura completa */
+    --app-radius: 0;              /* ← Sin bordes redondeados (ocupa toda la pantalla) */
+    --nav-padding: 8px 8px 12px 8px;
     --nav-wrap: nowrap;
     --nav-justify: space-around;
     --radius: 24px;
-    --shadow: 0 12px 24px rgba(0,0,0,0.5);
+    --shadow: none;               /* ← Sin sombra para mejor integración */
 }
 
 body.mobile #app {
     border-radius: var(--app-radius);
     max-width: var(--app-max-width);
     height: var(--app-height);
-    border: 1px solid var(--border-color);
+    border: none;                 /* ← Sin borde para pantalla completa */
     box-shadow: var(--shadow);
+    overflow: hidden;             /* ← Mantiene todo dentro */
 }
 
-/* Ajuste para pantallas muy pequeñas */
-@media (max-width: 520px) {
-    body.mobile #app {
-        height: 100vh;
-        border-radius: 0;
-        max-width: 100%;
-        border: none;
-    }
-    body.mobile .bottom-nav {
-        gap: 2px;
-        padding: 4px 0 12px 0;
-    }
+/* ---------- BARRA DE NAVEGACIÓN INFERIOR (asegurada) ---------- */
+body.mobile .bottom-nav {
+    background: var(--nav-bg);
+    display: flex;
+    flex-wrap: nowrap;           /* ← No envuelve, hace scroll horizontal */
+    overflow-x: auto;            /* ← Permite scroll si hay muchos botones */
+    overflow-y: hidden;
+    justify-content: var(--nav-justify);
+    padding: var(--nav-padding);
+    border-top: 2px solid var(--border-color);
+    flex-shrink: 0;
+    min-height: 64px;            /* ← Altura mínima asegurada */
+    gap: 4px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;       /* ← Oculta scrollbar en Firefox */
+}
+body.mobile .bottom-nav::-webkit-scrollbar {
+    display: none;               /* ← Oculta scrollbar en Chrome/Safari */
+}
+
+body.mobile .nav-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 12px;
+    font-weight: 700;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    cursor: pointer;
+    padding: 6px 10px;
+    border-radius: 16px;
+    transition: 0.2s;
+    min-height: 56px;            /* ← Tamaño táctil adecuado */
+    min-width: 48px;
+    justify-content: center;
+    touch-action: manipulation;
+    white-space: nowrap;
+    flex-shrink: 0;              /* ← Evita que se encojan */
+}
+body.mobile .nav-btn .nav-icon {
+    font-size: 24px;
+    line-height: 1.2;
+}
+body.mobile .nav-btn.active {
+    color: var(--accent);
+    background: var(--bg-input);
+    padding: 6px 14px;
+}
+body.mobile .nav-btn:active {
+    transform: scale(0.92);
+}
+
+/* Ajuste para pantallas muy pequeñas (menos de 420px) */
+@media (max-width: 420px) {
     body.mobile .nav-btn {
-        font-size: 11px;
-        padding: 6px 8px;
+        font-size: 10px;
+        padding: 4px 6px;
         min-height: 48px;
-        min-width: 44px;
+        min-width: 40px;
     }
     body.mobile .nav-btn .nav-icon {
-        font-size: 22px;
+        font-size: 20px;
+    }
+    body.mobile .bottom-nav {
+        padding: 4px 4px 10px 4px;
+        gap: 2px;
     }
 }
 
-@media (max-width: 420px) {
-    body.mobile .grid-2 { grid-template-columns: 1fr; }
-    body.mobile .achievement-grid { grid-template-columns: repeat(2, 1fr); }
-    body.mobile .header .brand { font-size: 22px; }
-    body.mobile .pomodoro-timer { font-size: 52px; }
-    body.mobile .stats-grid { grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+/* Asegurar que el contenedor de páginas no tape la barra */
+body.mobile .pages-container {
+    padding-bottom: 10px;        /* ← Espacio extra al final */
+    flex: 1 1 auto;
+    overflow-y: auto;
+}
+
+/* Si el header es muy alto, reducirlo en móvil */
+body.mobile .header {
+    min-height: 60px;
+    padding: 12px 16px;
+}
+body.mobile .header .brand {
+    font-size: 22px;
+}
+body.mobile .header-actions button {
+    font-size: 24px;
+    min-height: 44px;
+    min-width: 44px;
 }
