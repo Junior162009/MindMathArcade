@@ -1,0 +1,57 @@
+/* ============================================================
+   ESTILOS PARA MÓVIL / TABLET
+   ============================================================ */
+
+body.mobile {
+    --font-base: 18px;
+    --touch-target: 56px;
+    --card-padding: 24px 22px;
+    --gap: 22px;
+    --app-max-width: 520px;
+    --app-height: 820px;
+    --app-radius: 32px;
+    --nav-padding: 8px 4px 18px 4px;
+    --nav-wrap: nowrap;
+    --nav-justify: space-around;
+    --radius: 24px;
+    --shadow: 0 12px 24px rgba(0,0,0,0.5);
+}
+
+body.mobile #app {
+    border-radius: var(--app-radius);
+    max-width: var(--app-max-width);
+    height: var(--app-height);
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow);
+}
+
+/* Ajuste para pantallas muy pequeñas */
+@media (max-width: 520px) {
+    body.mobile #app {
+        height: 100vh;
+        border-radius: 0;
+        max-width: 100%;
+        border: none;
+    }
+    body.mobile .bottom-nav {
+        gap: 2px;
+        padding: 4px 0 12px 0;
+    }
+    body.mobile .nav-btn {
+        font-size: 11px;
+        padding: 6px 8px;
+        min-height: 48px;
+        min-width: 44px;
+    }
+    body.mobile .nav-btn .nav-icon {
+        font-size: 22px;
+    }
+}
+
+@media (max-width: 420px) {
+    body.mobile .grid-2 { grid-template-columns: 1fr; }
+    body.mobile .achievement-grid { grid-template-columns: repeat(2, 1fr); }
+    body.mobile .header .brand { font-size: 22px; }
+    body.mobile .pomodoro-timer { font-size: 52px; }
+    body.mobile .stats-grid { grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+}
