@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>StudyHub</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>StudyHub · Materias y Eventos</title>
     <style>
-        /* ========== VARIABLES CSS ========== */
+        /* ========== VARIABLES ========== */
         :root {
             --bg-primary: #0f172a;
             --bg-secondary: #1e293b;
@@ -22,8 +22,6 @@
             --nav-bg: #1e293b;
             --header-bg: #1e293b;
         }
-
-        /* Tema claro */
         [data-theme="light"] {
             --bg-primary: #f1f5f9;
             --bg-secondary: #ffffff;
@@ -36,13 +34,11 @@
             --nav-bg: #ffffff;
             --header-bg: #ffffff;
         }
-
-        /* Colores de acento */
         [data-accent="green"] { --accent: #22c55e; --accent-hover: #16a34a; }
         [data-accent="purple"] { --accent: #8b5cf6; --accent-hover: #7c3aed; }
         [data-accent="orange"] { --accent: #f59e0b; --accent-hover: #d97706; }
 
-        /* ========== RESET Y GLOBALES ========== */
+        /* ========== RESET ========== */
         * {
             margin: 0;
             padding: 0;
@@ -68,7 +64,6 @@
             display: flex;
             flex-direction: column;
             overflow: hidden;
-            position: relative;
             border: 1px solid var(--border-color);
             transition: background var(--transition), border-color var(--transition);
         }
@@ -82,13 +77,12 @@
             align-items: center;
             border-bottom: 1px solid var(--border-color);
             flex-shrink: 0;
-            transition: background var(--transition), border-color var(--transition);
+            transition: background var(--transition);
         }
         .header .brand {
             font-weight: 800;
             font-size: 20px;
             color: var(--accent);
-            letter-spacing: -0.5px;
         }
         .header .brand span { color: var(--text-primary); }
         .header-actions {
@@ -123,7 +117,7 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* ========== NAVEGACIÓN INFERIOR ========== */
+        /* ========== NAV ========== */
         .bottom-nav {
             background: var(--nav-bg);
             display: flex;
@@ -131,7 +125,8 @@
             padding: 6px 0 12px 0;
             border-top: 1px solid var(--border-color);
             flex-shrink: 0;
-            transition: background var(--transition), border-color var(--transition);
+            transition: background var(--transition);
+            flex-wrap: wrap;
         }
         .nav-btn {
             background: transparent;
@@ -144,19 +139,19 @@
             align-items: center;
             gap: 2px;
             cursor: pointer;
-            padding: 4px 12px;
+            padding: 4px 10px;
             border-radius: 12px;
             transition: 0.2s;
         }
-        .nav-btn .nav-icon { font-size: 22px; line-height: 1.2; }
+        .nav-btn .nav-icon { font-size: 20px; line-height: 1.2; }
         .nav-btn.active {
             color: var(--accent);
             background: var(--bg-input);
-            padding: 4px 16px;
+            padding: 4px 14px;
         }
         .nav-btn:active { transform: scale(0.92); }
 
-        /* ========== COMPONENTES REUTILIZABLES ========== */
+        /* ========== COMPONENTES ========== */
         .card {
             background: var(--bg-card);
             border-radius: var(--radius);
@@ -225,18 +220,6 @@
             border-color: var(--accent);
         }
 
-        .badge {
-            background: var(--accent);
-            color: white;
-            border-radius: 40px;
-            padding: 2px 12px;
-            font-size: 12px;
-            font-weight: 600;
-        }
-        .badge-success { background: #22c55e; }
-        .badge-danger { background: #ef4444; }
-        .badge-warning { background: #f59e0b; color: #0f172a; }
-
         .list-item {
             display: flex;
             justify-content: space-between;
@@ -257,146 +240,51 @@
             font-size: 14px;
         }
 
-        .progress-bar {
-            background: var(--bg-input);
-            border-radius: 40px;
-            height: 8px;
-            overflow: hidden;
-            margin: 6px 0;
-        }
-        .progress-bar .fill {
-            height: 100%;
-            background: var(--accent);
-            border-radius: 40px;
-            transition: width 0.3s ease;
-        }
-
-        .grid-2 {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-        }
-
-        /* ========== CALENDARIO ========== */
-        .calendar-grid {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 4px;
-            text-align: center;
-            font-size: 13px;
-            margin-top: 6px;
-        }
-        .calendar-grid .day-name {
-            font-weight: 600;
-            color: var(--text-secondary);
-            padding: 4px 0;
-        }
-        .calendar-grid .day-cell {
-            background: var(--bg-input);
-            border-radius: 8px;
-            padding: 6px 0;
-            cursor: pointer;
-            transition: 0.1s;
-            border: 1px solid transparent;
-            position: relative;
-        }
-        .calendar-grid .day-cell.has-event {
-            border-color: var(--accent);
-            font-weight: 600;
-        }
-        .calendar-grid .day-cell.today {
+        .badge {
             background: var(--accent);
             color: white;
-        }
-        .calendar-grid .day-cell .event-dot {
-            display: block;
-            width: 6px;
-            height: 6px;
-            background: var(--accent);
-            border-radius: 50%;
-            margin: 2px auto 0;
-        }
-        .calendar-nav {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 8px;
-        }
-        .calendar-nav .month-year {
-            font-weight: 700;
-            font-size: 16px;
-        }
-
-        /* ========== POMODORO ========== */
-        .pomodoro-timer {
-            font-size: 48px;
-            font-weight: 800;
-            text-align: center;
-            font-variant-numeric: tabular-nums;
-            letter-spacing: 2px;
-            margin: 8px 0;
-        }
-        .pomodoro-phase {
-            text-align: center;
-            font-size: 14px;
-            color: var(--text-secondary);
-            margin-bottom: 6px;
-        }
-
-        /* ========== LOGROS ========== */
-        .achievement-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-        }
-        .achievement-item {
-            background: var(--bg-input);
-            border-radius: var(--radius);
-            padding: 12px 6px;
-            text-align: center;
-            border: 1px solid var(--border-color);
-            transition: 0.15s;
-        }
-        .achievement-item.unlocked {
-            border-color: var(--accent);
-            background: var(--bg-card);
-        }
-        .achievement-item .icon { font-size: 28px; }
-        .achievement-item .name { font-size: 11px; font-weight: 600; margin-top: 2px; }
-        .achievement-item .desc { font-size: 10px; color: var(--text-secondary); }
-
-        /* ========== MOTIVACIÓN ========== */
-        .quote-box {
-            background: var(--bg-input);
-            border-radius: var(--radius);
-            padding: 14px 18px;
-            border-left: 4px solid var(--accent);
-            font-style: italic;
-            color: var(--text-secondary);
-            margin-bottom: 14px;
-        }
-        .quote-box .author {
-            display: block;
-            text-align: right;
-            font-style: normal;
+            border-radius: 40px;
+            padding: 2px 12px;
+            font-size: 12px;
             font-weight: 600;
-            color: var(--text-primary);
-            margin-top: 4px;
         }
+        .badge-success { background: #22c55e; }
+        .badge-danger { background: #ef4444; }
 
-        /* ========== SCROLL ========== */
-        .pages-container::-webkit-scrollbar { width: 4px; }
-        .pages-container::-webkit-scrollbar-track { background: transparent; }
-        .pages-container::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 10px; }
+        /* ========== MATERIAS ========== */
+        .subject-tag {
+            display: inline-block;
+            background: var(--bg-input);
+            padding: 4px 12px;
+            border-radius: 40px;
+            margin: 2px 4px 2px 0;
+            font-size: 13px;
+            border: 1px solid var(--border-color);
+        }
+        .subject-tag .remove-subject {
+            cursor: pointer;
+            margin-left: 6px;
+            color: var(--text-secondary);
+            font-weight: bold;
+        }
+        .subject-tag .remove-subject:hover { color: #ef4444; }
+
+        /* ========== EVENTOS ========== */
+        .event-item {
+            border-left: 4px solid var(--accent);
+            padding-left: 12px;
+            margin-bottom: 10px;
+        }
+        .event-item .event-title { font-weight: 700; }
+        .event-item .event-detail { font-size: 13px; color: var(--text-secondary); }
 
         /* ========== RESPONSIVE ========== */
         @media (max-width: 500px) {
             #app { height: 100vh; border-radius: 0; max-width: 100%; }
         }
-        @media (max-width: 400px) {
-            .grid-2 { grid-template-columns: 1fr; }
-            .achievement-grid { grid-template-columns: repeat(2, 1fr); }
-        }
+        .pages-container::-webkit-scrollbar { width: 4px; }
+        .pages-container::-webkit-scrollbar-track { background: transparent; }
+        .pages-container::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 10px; }
     </style>
 </head>
 <body>
@@ -405,167 +293,88 @@
         <div class="header">
             <div class="brand">Study<span>Hub</span></div>
             <div class="header-actions">
-                <button id="themeToggle" title="Cambiar tema">🌙</button>
-                <button id="accentToggle" title="Cambiar color">🎨</button>
+                <button id="themeToggle" title="Tema">🌙</button>
+                <button id="accentToggle" title="Color">🎨</button>
             </div>
         </div>
 
         <!-- PÁGINAS -->
         <div class="pages-container" id="pagesContainer">
-            <!-- ==================== INICIO ==================== -->
+            <!-- INICIO -->
             <div class="page active" id="page-home">
-                <div class="quote-box" id="dailyQuote">
-                    "El éxito es la suma de pequeños esfuerzos repetidos día tras día."
-                    <span class="author">— Robert Collier</span>
-                </div>
-
                 <div class="card">
-                    <div class="card-title">📊 Resumen del día</div>
+                    <div class="card-title">📊 Resumen</div>
                     <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; text-align:center;">
-                        <div><div style="font-size:24px;">📝</div><div><strong id="home-tasks-pending">0</strong> tareas pend.</div></div>
-                        <div><div style="font-size:24px;">📅</div><div><strong id="home-exams-today">0</strong> exámenes hoy</div></div>
-                        <div><div style="font-size:24px;">🎯</div><div><strong id="home-goals-progress">0%</strong> metas</div></div>
+                        <div><div style="font-size:24px;">📚</div><div><strong id="home-subjects">0</strong> materias</div></div>
+                        <div><div style="font-size:24px;">📅</div><div><strong id="home-events">0</strong> eventos</div></div>
+                        <div><div style="font-size:24px;">📝</div><div><strong id="home-tasks">0</strong> tareas</div></div>
                     </div>
                 </div>
-
-                <div class="card">
-                    <div class="card-title">🏆 Logros recientes</div>
-                    <div id="home-achievements" class="empty-state">Aún no tienes logros. ¡Sigue estudiando!</div>
-                </div>
-
                 <div class="card">
                     <div class="card-title">⏳ Próximos eventos</div>
                     <div id="home-upcoming-events" class="empty-state">No hay eventos próximos.</div>
                 </div>
+                <div class="card">
+                    <div class="card-title">📚 Mis materias</div>
+                    <div id="home-subject-list" class="empty-state">No hay materias.</div>
+                </div>
             </div>
 
-            <!-- ==================== HORARIO ==================== -->
-            <div class="page" id="page-schedule">
+            <!-- MATERIAS -->
+            <div class="page" id="page-subjects">
                 <div class="card">
-                    <div class="card-title">📅 Horario</div>
-                    <div id="schedule-container"></div>
-                    <div class="input-group" style="margin-top:12px;">
-                        <select id="schedule-day-select">
-                            <option value="Lunes">Lunes</option>
-                            <option value="Martes">Martes</option>
-                            <option value="Miércoles">Miércoles</option>
-                            <option value="Jueves">Jueves</option>
-                            <option value="Viernes">Viernes</option>
-                            <option value="Sábado">Sábado</option>
-                        </select>
-                        <input type="text" id="schedule-subject" placeholder="Materia">
-                        <input type="text" id="schedule-teacher" placeholder="Profesor">
-                        <input type="text" id="schedule-room" placeholder="Salón">
-                        <button class="btn btn-sm" id="schedule-add-btn">+ Añadir</button>
+                    <div class="card-title">📚 Materias</div>
+                    <div class="input-group">
+                        <input type="text" id="subject-input" placeholder="Nueva materia" />
+                        <button class="btn btn-sm" id="subject-add-btn">+ Agregar</button>
+                    </div>
+                    <div id="subject-list"></div>
+                    <div style="margin-top:10px; font-size:13px; color:var(--text-secondary);">
+                        <span>Materias predefinidas: </span>
+                        <span id="predefined-subjects"></span>
                     </div>
                 </div>
             </div>
 
-            <!-- ==================== TAREAS ==================== -->
+            <!-- EVENTOS -->
+            <div class="page" id="page-events">
+                <div class="card">
+                    <div class="card-title">📅 Eventos</div>
+                    <div class="input-group">
+                        <input type="text" id="event-title" placeholder="Título (ej: Exposición)" />
+                        <select id="event-subject">
+                            <option value="">Selecciona materia</option>
+                        </select>
+                        <input type="date" id="event-date" />
+                        <input type="time" id="event-time" />
+                        <button class="btn btn-sm" id="event-add-btn">+ Agregar</button>
+                    </div>
+                    <div id="event-list"></div>
+                </div>
+            </div>
+
+            <!-- TAREAS (resumen) -->
             <div class="page" id="page-tasks">
                 <div class="card">
                     <div class="card-title">📝 Tareas</div>
                     <div class="input-group">
-                        <input type="text" id="task-title" placeholder="Título">
-                        <input type="date" id="task-due">
+                        <input type="text" id="task-title" placeholder="Título" />
+                        <input type="date" id="task-due" />
                         <button class="btn btn-sm" id="task-add-btn">+ Añadir</button>
                     </div>
                     <div id="task-list"></div>
                 </div>
             </div>
 
-            <!-- ==================== EXÁMENES ==================== -->
-            <div class="page" id="page-exams">
-                <div class="card">
-                    <div class="card-title">📚 Exámenes</div>
-                    <div class="input-group">
-                        <input type="text" id="exam-title" placeholder="Materia">
-                        <input type="date" id="exam-date">
-                        <button class="btn btn-sm" id="exam-add-btn">+ Añadir</button>
-                    </div>
-                    <div id="exam-list"></div>
-                </div>
-            </div>
-
-            <!-- ==================== CALCULADORA DE NOTAS ==================== -->
-            <div class="page" id="page-grades">
-                <div class="card">
-                    <div class="card-title">🧮 Calculadora de Notas</div>
-                    <div class="input-group">
-                        <input type="number" id="grade-input" placeholder="Nota (0-100)" min="0" max="100">
-                        <button class="btn btn-sm" id="grade-add-btn">+ Agregar</button>
-                    </div>
-                    <div id="grade-list"></div>
-                    <div style="margin-top:10px; display:flex; gap:16px; flex-wrap:wrap;">
-                        <span><strong>Promedio:</strong> <span id="grade-average">-</span></span>
-                        <span><strong>Nota necesaria para aprobar (70):</strong> <span id="grade-needed">-</span></span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ==================== POMODORO ==================== -->
-            <div class="page" id="page-pomodoro">
-                <div class="card">
-                    <div class="card-title">🍅 Pomodoro</div>
-                    <div class="pomodoro-phase" id="pomodoro-phase">Estudio</div>
-                    <div class="pomodoro-timer" id="pomodoro-timer">25:00</div>
-                    <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
-                        <button class="btn" id="pomodoro-start">▶ Iniciar</button>
-                        <button class="btn btn-outline" id="pomodoro-pause">⏸️ Pausa</button>
-                        <button class="btn btn-danger" id="pomodoro-reset">⟳ Reiniciar</button>
-                    </div>
-                    <div style="margin-top:8px; text-align:center; color:var(--text-secondary); font-size:13px;">
-                        Ciclos completados: <strong id="pomodoro-cycles">0</strong>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ==================== METAS ==================== -->
-            <div class="page" id="page-goals">
-                <div class="card">
-                    <div class="card-title">🎯 Metas</div>
-                    <div class="input-group">
-                        <input type="text" id="goal-title" placeholder="Nombre de la meta">
-                        <input type="number" id="goal-total" placeholder="Total (ej: 100)" min="1">
-                        <button class="btn btn-sm" id="goal-add-btn">+ Crear</button>
-                    </div>
-                    <div id="goal-list"></div>
-                </div>
-            </div>
-
-            <!-- ==================== LOGROS ==================== -->
-            <div class="page" id="page-achievements">
-                <div class="card">
-                    <div class="card-title">🏅 Logros</div>
-                    <div class="achievement-grid" id="achievement-grid"></div>
-                </div>
-            </div>
-
-            <!-- ==================== CALENDARIO ==================== -->
-            <div class="page" id="page-calendar">
-                <div class="card">
-                    <div class="calendar-nav">
-                        <button class="btn btn-outline btn-sm" id="cal-prev">‹</button>
-                        <span class="month-year" id="cal-month-year">Enero 2025</span>
-                        <button class="btn btn-outline btn-sm" id="cal-next">›</button>
-                    </div>
-                    <div class="calendar-grid" id="calendar-grid"></div>
-                    <div style="margin-top:10px; font-size:13px; color:var(--text-secondary);">
-                        <span style="display:inline-block; width:12px; height:12px; background:var(--accent); border-radius:50%; margin-right:4px;"></span> Evento
-                    </div>
-                </div>
-            </div>
-
-            <!-- ==================== CONFIGURACIÓN ==================== -->
+            <!-- CONFIGURACIÓN -->
             <div class="page" id="page-settings">
                 <div class="card">
                     <div class="card-title">⚙️ Configuración</div>
                     <div style="display:flex; flex-direction:column; gap:12px;">
                         <div style="display:flex; justify-content:space-between; align-items:center;">
                             <span>Tema oscuro</span>
-                            <label class="switch">
-                                <input type="checkbox" id="darkModeToggle" checked>
-                                <span class="slider"></span>
+                            <label>
+                                <input type="checkbox" id="darkModeToggle" checked />
                             </label>
                         </div>
                         <div style="display:flex; justify-content:space-between; align-items:center;">
@@ -586,47 +395,30 @@
         <!-- NAVEGACIÓN INFERIOR -->
         <div class="bottom-nav">
             <button class="nav-btn active" data-page="home"><span class="nav-icon">🏠</span> Inicio</button>
-            <button class="nav-btn" data-page="schedule"><span class="nav-icon">📅</span> Horario</button>
+            <button class="nav-btn" data-page="subjects"><span class="nav-icon">📚</span> Materias</button>
+            <button class="nav-btn" data-page="events"><span class="nav-icon">📅</span> Eventos</button>
             <button class="nav-btn" data-page="tasks"><span class="nav-icon">📝</span> Tareas</button>
-            <button class="nav-btn" data-page="exams"><span class="nav-icon">📚</span> Exámenes</button>
-            <button class="nav-btn" data-page="grades"><span class="nav-icon">🧮</span> Notas</button>
-            <button class="nav-btn" data-page="pomodoro"><span class="nav-icon">🍅</span> Pomodoro</button>
-            <button class="nav-btn" data-page="goals"><span class="nav-icon">🎯</span> Metas</button>
-            <button class="nav-btn" data-page="achievements"><span class="nav-icon">🏅</span> Logros</button>
-            <button class="nav-btn" data-page="calendar"><span class="nav-icon">📆</span> Calendario</button>
             <button class="nav-btn" data-page="settings"><span class="nav-icon">⚙️</span> Config</button>
         </div>
     </div>
 
     <script>
         // ================================================================
-        //  STUDYHUB - LÓGICA COMPLETA
+        //  STUDYHUB - MATERIAS Y EVENTOS CON NOTIFICACIONES
         // ================================================================
+
+        // ---------- MATERIAS PREDEFINIDAS ----------
+        const PREDEFINED_SUBJECTS = [
+            'Matemáticas', 'Lengua', 'Ciencias', 'Historia', 'Inglés',
+            'Arte', 'Música', 'Educación Física', 'Tecnología',
+            'Química', 'Física', 'Biología', 'Geografía', 'Filosofía'
+        ];
 
         // ---------- ESTADO PREDETERMINADO ----------
         const defaultData = {
-            schedule: {
-                Lunes: [],
-                Martes: [],
-                Miércoles: [],
-                Jueves: [],
-                Viernes: [],
-                Sábado: []
-            },
+            subjects: [...PREDEFINED_SUBJECTS],
+            events: [],
             tasks: [],
-            exams: [],
-            grades: [],
-            goals: [],
-            pomodoroCycles: 0,
-            achievements: {
-                firstTask: false,
-                firstExam: false,
-                studyStreak: 0,
-                lastStudyDate: null,
-                fiveTasks: false,
-                tenGoals: false,
-                pomodoroMaster: false
-            },
             settings: {
                 darkMode: true,
                 accent: 'blue'
@@ -636,18 +428,17 @@
         let data = loadData();
 
         function loadData() {
-            const raw = localStorage.getItem('studyhubData');
+            const raw = localStorage.getItem('studyhubData_v2');
             if (raw) {
                 try {
                     const parsed = JSON.parse(raw);
-                    // Merge con defaults
-                    for (let key in defaultData) {
-                        if (!(key in parsed)) parsed[key] = defaultData[key];
+                    // Asegurar que subjects exista y contenga las predefinidas si no tiene
+                    if (!parsed.subjects || parsed.subjects.length === 0) {
+                        parsed.subjects = [...PREDEFINED_SUBJECTS];
                     }
-                    // Asegurar sub-objetos
-                    if (!parsed.schedule) parsed.schedule = defaultData.schedule;
-                    if (!parsed.achievements) parsed.achievements = defaultData.achievements;
-                    if (!parsed.settings) parsed.settings = defaultData.settings;
+                    if (!parsed.events) parsed.events = [];
+                    if (!parsed.tasks) parsed.tasks = [];
+                    if (!parsed.settings) parsed.settings = { darkMode: true, accent: 'blue' };
                     return parsed;
                 } catch (e) {
                     return JSON.parse(JSON.stringify(defaultData));
@@ -657,7 +448,7 @@
         }
 
         function saveData() {
-            localStorage.setItem('studyhubData', JSON.stringify(data));
+            localStorage.setItem('studyhubData_v2', JSON.stringify(data));
             updateAllUI();
         }
 
@@ -672,137 +463,175 @@
             return d.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
         }
 
-        function getWeekDay(dateStr) {
-            const days = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
-            return days[new Date(dateStr + 'T00:00:00').getDay()];
+        function formatDateTime(dateStr, timeStr) {
+            if (!dateStr || !timeStr) return formatDate(dateStr);
+            const d = new Date(dateStr + 'T' + timeStr);
+            return d.toLocaleString('es-ES', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+        }
+
+        // ---------- NOTIFICACIONES ----------
+        function showNotification(title, body) {
+            if ('Notification' in window && Notification.permission === 'granted') {
+                new Notification(title, { body, icon: '📚' });
+            } else if ('Notification' in window && Notification.permission !== 'denied') {
+                Notification.requestPermission();
+            }
+            // También mostramos alerta si no hay notificaciones
+            if (!('Notification' in window) || Notification.permission !== 'granted') {
+                alert(`🔔 ${title}\n${body}`);
+            }
         }
 
         // ---------- ACTUALIZACIÓN UI ----------
         function updateAllUI() {
             updateHome();
-            updateSchedule();
+            updateSubjects();
+            updateEvents();
             updateTasks();
-            updateExams();
-            updateGrades();
-            updateGoals();
-            updateAchievements();
-            updateCalendar();
-            updatePomodoroUI();
             applyTheme();
+            updateSubjectSelect();
         }
 
         // ---------- INICIO ----------
         function updateHome() {
-            const pending = data.tasks.filter(t => !t.completed).length;
-            document.getElementById('home-tasks-pending').innerText = pending;
+            document.getElementById('home-subjects').innerText = data.subjects.length;
+            document.getElementById('home-events').innerText = data.events.length;
+            document.getElementById('home-tasks').innerText = data.tasks.filter(t => !t.completed).length;
 
-            const today = todayStr();
-            const examsToday = data.exams.filter(e => e.date === today).length;
-            document.getElementById('home-exams-today').innerText = examsToday;
+            // Próximos eventos (próximos 7 días)
+            const today = new Date();
+            const upcoming = data.events.filter(e => {
+                const evDate = new Date(e.date + 'T' + (e.time || '00:00'));
+                const diff = (evDate - today) / (1000 * 60 * 60 * 24);
+                return diff >= 0 && diff <= 7;
+            }).sort((a, b) => new Date(a.date + 'T' + (a.time || '00:00')) - new Date(b.date + 'T' + (b.time || '00:00')));
 
-            const goalsProgress = data.goals.length > 0 ?
-                Math.round(data.goals.reduce((acc, g) => acc + (g.progress / g.total * 100), 0) / data.goals.length) : 0;
-            document.getElementById('home-goals-progress').innerText = goalsProgress + '%';
-
-            // Logros recientes (últimos 3 desbloqueados)
-            const unlocked = Object.entries(data.achievements).filter(([k, v]) => v === true).map(([k]) => k);
-            const container = document.getElementById('home-achievements');
-            if (unlocked.length === 0) {
-                container.innerHTML = '<div class="empty-state">Aún no tienes logros. ¡Sigue estudiando!</div>';
-            } else {
-                const names = {
-                    firstTask: '📝 Primera tarea',
-                    firstExam: '📚 Primer examen',
-                    fiveTasks: '✅ 5 tareas completadas',
-                    tenGoals: '🎯 10 metas creadas',
-                    pomodoroMaster: '🍅 10 ciclos Pomodoro'
-                };
-                container.innerHTML = unlocked.slice(-3).map(k =>
-                    `<span style="display:inline-block; background:var(--bg-input); border-radius:40px; padding:4px 12px; margin:2px;">${names[k] || k}</span>`
-                ).join(' ');
-            }
-
-            // Próximos eventos (tareas y exámenes próximos 7 días)
-            const upcoming = [];
-            const todayDate = new Date();
-            data.tasks.forEach(t => {
-                if (!t.completed && t.due) {
-                    const diff = (new Date(t.due + 'T00:00:00') - todayDate) / (1000 * 60 * 60 * 24);
-                    if (diff >= 0 && diff <= 7) upcoming.push({ type: '📝', title: t.title, date: t.due });
-                }
-            });
-            data.exams.forEach(e => {
-                const diff = (new Date(e.date + 'T00:00:00') - todayDate) / (1000 * 60 * 60 * 24);
-                if (diff >= 0 && diff <= 7) upcoming.push({ type: '📚', title: e.title, date: e.date });
-            });
-            upcoming.sort((a, b) => new Date(a.date) - new Date(b.date));
-            const container2 = document.getElementById('home-upcoming-events');
+            const container = document.getElementById('home-upcoming-events');
             if (upcoming.length === 0) {
-                container2.innerHTML = '<div class="empty-state">No hay eventos próximos.</div>';
+                container.innerHTML = '<div class="empty-state">No hay eventos próximos.</div>';
             } else {
-                container2.innerHTML = upcoming.slice(0, 5).map(e =>
-                    `<div style="display:flex; justify-content:space-between; padding:4px 0; border-bottom:1px solid var(--border-color);">
-                        <span>${e.type} ${e.title}</span>
-                        <span style="color:var(--text-secondary);">${formatDate(e.date)}</span>
+                container.innerHTML = upcoming.slice(0, 5).map(e =>
+                    `<div class="event-item">
+                        <div class="event-title">${e.title}</div>
+                        <div class="event-detail">${e.subject ? '📚 ' + e.subject : ''} · ${formatDateTime(e.date, e.time)}</div>
                     </div>`
                 ).join('');
             }
 
-            // Frase motivacional (cambia diario)
-            const quotes = [
-                { text: "El éxito es la suma de pequeños esfuerzos repetidos día tras día.", author: "Robert Collier" },
-                { text: "El estudio no se mide por el tiempo que pasas, sino por lo que aprendes.", author: "Anónimo" },
-                { text: "La educación es el arma más poderosa para cambiar el mundo.", author: "Nelson Mandela" },
-                { text: "No te detengas cuando estés cansado, detente cuando hayas terminado.", author: "Anónimo" },
-                { text: "El conocimiento es poder, pero solo si se aplica.", author: "Anónimo" },
-                { text: "El único lugar donde el éxito viene antes que el trabajo es en el diccionario.", author: "Vidal Sassoon" },
-                { text: "La disciplina es el puente entre metas y logros.", author: "Jim Rohn" },
-                { text: "El mejor momento para empezar fue ayer. El siguiente mejor momento es ahora.", author: "Anónimo" },
-            ];
-            const dayOfYear = Math.floor((new Date() - new Date(new Date().getFullYear(), 0, 0)) / (1000 * 60 * 60 * 24));
-            const quote = quotes[dayOfYear % quotes.length];
-            document.getElementById('dailyQuote').innerHTML = `"${quote.text}" <span class="author">— ${quote.author}</span>`;
+            // Lista de materias en home
+            const subContainer = document.getElementById('home-subject-list');
+            if (data.subjects.length === 0) {
+                subContainer.innerHTML = '<div class="empty-state">No hay materias.</div>';
+            } else {
+                subContainer.innerHTML = data.subjects.slice(0, 10).map(s =>
+                    `<span class="subject-tag">${s}</span>`
+                ).join(' ') + (data.subjects.length > 10 ? ' ...' : '');
+            }
         }
 
-        // ---------- HORARIO ----------
-        function updateSchedule() {
-            const container = document.getElementById('schedule-container');
-            const days = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
-            let html = '';
-            days.forEach(day => {
-                const entries = data.schedule[day] || [];
-                html += `<div style="margin-bottom:10px;">
-                    <div style="font-weight:700; margin-bottom:4px;">${day}</div>
-                    ${entries.length === 0 ? '<div class="empty-state">Sin clases</div>' :
-                        entries.map((e, i) => `<div style="display:flex; justify-content:space-between; padding:4px 0; border-bottom:1px solid var(--border-color);">
-                            <span><strong>${e.subject}</strong> · ${e.teacher} · ${e.room}</span>
-                            <button class="btn btn-danger btn-sm" onclick="removeSchedule('${day}', ${i})">✕</button>
-                        </div>`).join('')}
-                </div>`;
-            });
-            container.innerHTML = html;
+        // ---------- MATERIAS ----------
+        function updateSubjects() {
+            const list = document.getElementById('subject-list');
+            if (data.subjects.length === 0) {
+                list.innerHTML = '<div class="empty-state">No hay materias. Agrega una.</div>';
+                return;
+            }
+            list.innerHTML = data.subjects.map((s, i) =>
+                `<div class="list-item">
+                    <span>${s}</span>
+                    <button class="btn btn-danger btn-sm" onclick="removeSubject(${i})">✕</button>
+                </div>`
+            ).join('');
+
+            // Mostrar predefinidas
+            const predefinedDiv = document.getElementById('predefined-subjects');
+            predefinedDiv.innerHTML = PREDEFINED_SUBJECTS.map(s =>
+                `<span class="subject-tag" style="background:var(--bg-card);">${s}</span>`
+            ).join(' ');
         }
 
-        window.removeSchedule = function(day, index) {
-            data.schedule[day].splice(index, 1);
+        window.removeSubject = function(index) {
+            const subject = data.subjects[index];
+            if (PREDEFINED_SUBJECTS.includes(subject)) {
+                if (!confirm(`¿Eliminar la materia predefinida "${subject}"?`)) return;
+            }
+            data.subjects.splice(index, 1);
             saveData();
         };
 
-        document.getElementById('schedule-add-btn').addEventListener('click', function() {
-            const day = document.getElementById('schedule-day-select').value;
-            const subject = document.getElementById('schedule-subject').value.trim();
-            const teacher = document.getElementById('schedule-teacher').value.trim();
-            const room = document.getElementById('schedule-room').value.trim();
-            if (!subject) return alert('Ingresa la materia.');
-            if (!data.schedule[day]) data.schedule[day] = [];
-            data.schedule[day].push({ subject, teacher, room });
-            document.getElementById('schedule-subject').value = '';
-            document.getElementById('schedule-teacher').value = '';
-            document.getElementById('schedule-room').value = '';
+        document.getElementById('subject-add-btn').addEventListener('click', function() {
+            const input = document.getElementById('subject-input');
+            const val = input.value.trim();
+            if (!val) return alert('Escribe el nombre de la materia.');
+            if (data.subjects.includes(val)) return alert('Ya existe esa materia.');
+            data.subjects.push(val);
+            input.value = '';
             saveData();
         });
 
-        // ---------- TAREAS ----------
+        // ---------- EVENTOS ----------
+        function updateEvents() {
+            const list = document.getElementById('event-list');
+            if (data.events.length === 0) {
+                list.innerHTML = '<div class="empty-state">No hay eventos registrados.</div>';
+                return;
+            }
+            // Ordenar por fecha
+            const sorted = [...data.events].sort((a, b) => new Date(a.date + 'T' + (a.time || '00:00')) - new Date(b.date + 'T' + (b.time || '00:00')));
+            list.innerHTML = sorted.map((e, i) => {
+                const idx = data.events.indexOf(e);
+                return `<div class="list-item">
+                    <div class="info">
+                        <div class="title">${e.title}</div>
+                        <div class="sub">${e.subject ? '📚 ' + e.subject : ''} · ${formatDateTime(e.date, e.time)}</div>
+                    </div>
+                    <div class="actions">
+                        <button class="btn btn-danger btn-sm" onclick="removeEvent(${idx})">✕</button>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        window.removeEvent = function(index) {
+            data.events.splice(index, 1);
+            saveData();
+        };
+
+        document.getElementById('event-add-btn').addEventListener('click', function() {
+            const title = document.getElementById('event-title').value.trim();
+            const subject = document.getElementById('event-subject').value;
+            const date = document.getElementById('event-date').value;
+            const time = document.getElementById('event-time').value;
+            if (!title || !date || !time) return alert('Completa todos los campos (título, fecha y hora).');
+            if (!subject) return alert('Selecciona una materia.');
+
+            data.events.push({ title, subject, date, time });
+            document.getElementById('event-title').value = '';
+            document.getElementById('event-date').value = '';
+            document.getElementById('event-time').value = '';
+            saveData();
+
+            // Notificación inmediata si el evento es hoy
+            if (date === todayStr()) {
+                showNotification(`📅 Evento hoy: ${title}`, `Materia: ${subject} a las ${time}`);
+            }
+            // Recordatorio: si el evento es mañana, notificar ahora (simulado)
+            const tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            if (date === tomorrow.toISOString().split('T')[0]) {
+                showNotification(`📅 Recordatorio: ${title} mañana`, `Materia: ${subject} a las ${time}`);
+            }
+        });
+
+        function updateSubjectSelect() {
+            const select = document.getElementById('event-subject');
+            const current = select.value;
+            select.innerHTML = '<option value="">Selecciona materia</option>' +
+                data.subjects.map(s => `<option value="${s}">${s}</option>`).join('');
+            if (current && data.subjects.includes(current)) select.value = current;
+        }
+
+        // ---------- TAREAS (básico) ----------
         function updateTasks() {
             const list = document.getElementById('task-list');
             if (data.tasks.length === 0) {
@@ -813,21 +642,19 @@
                 `<div class="list-item">
                     <div class="info">
                         <div class="title" style="${t.completed ? 'text-decoration:line-through; color:var(--text-secondary);' : ''}">${t.title}</div>
-                        <div class="sub">📅 ${t.due ? formatDate(t.due) : 'Sin fecha'} ${t.completed ? '✅ Completada' : ''}</div>
+                        <div class="sub">📅 ${t.due ? formatDate(t.due) : 'Sin fecha'}</div>
                     </div>
                     <div class="actions">
                         <button class="btn btn-success btn-sm" onclick="toggleTask(${i})">${t.completed ? '↩️' : '✅'}</button>
-                        <button class="btn btn-danger btn-sm" onclick="deleteTask(${i})">🗑️</button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteTask(${i})">✕</button>
                     </div>
                 </div>`
             ).join('');
-            checkAchievements();
         }
 
         window.toggleTask = function(index) {
             data.tasks[index].completed = !data.tasks[index].completed;
             saveData();
-            checkAchievements();
         };
 
         window.deleteTask = function(index) {
@@ -843,322 +670,9 @@
             document.getElementById('task-title').value = '';
             document.getElementById('task-due').value = '';
             saveData();
-            checkAchievements();
         });
 
-        // ---------- EXÁMENES ----------
-        function updateExams() {
-            const list = document.getElementById('exam-list');
-            if (data.exams.length === 0) {
-                list.innerHTML = '<div class="empty-state">No hay exámenes.</div>';
-                return;
-            }
-            list.innerHTML = data.exams.map((e, i) =>
-                `<div class="list-item">
-                    <div class="info">
-                        <div class="title">${e.title}</div>
-                        <div class="sub">📅 ${formatDate(e.date)}</div>
-                    </div>
-                    <div class="actions">
-                        <button class="btn btn-danger btn-sm" onclick="deleteExam(${i})">🗑️</button>
-                    </div>
-                </div>`
-            ).join('');
-            // Recordatorios: notificar si hay examen mañana
-            const today = new Date();
-            const tomorrow = new Date(today);
-            tomorrow.setDate(tomorrow.getDate() + 1);
-            const tomorrowStr = tomorrow.toISOString().split('T')[0];
-            data.exams.forEach(e => {
-                if (e.date === tomorrowStr) {
-                    showNotification('📚 Recordatorio de examen', `Mañana tienes examen de ${e.title}`);
-                }
-            });
-            checkAchievements();
-        }
-
-        window.deleteExam = function(index) {
-            data.exams.splice(index, 1);
-            saveData();
-        };
-
-        document.getElementById('exam-add-btn').addEventListener('click', function() {
-            const title = document.getElementById('exam-title').value.trim();
-            const date = document.getElementById('exam-date').value;
-            if (!title || !date) return alert('Completa todos los campos.');
-            data.exams.push({ title, date });
-            document.getElementById('exam-title').value = '';
-            document.getElementById('exam-date').value = '';
-            saveData();
-            checkAchievements();
-        });
-
-        // ---------- CALCULADORA DE NOTAS ----------
-        function updateGrades() {
-            const list = document.getElementById('grade-list');
-            if (data.grades.length === 0) {
-                list.innerHTML = '<div class="empty-state">No hay notas ingresadas.</div>';
-            } else {
-                list.innerHTML = data.grades.map((g, i) =>
-                    `<div class="list-item">
-                        <span>${g}%</span>
-                        <button class="btn btn-danger btn-sm" onclick="deleteGrade(${i})">✕</button>
-                    </div>`
-                ).join('');
-            }
-
-            const avg = data.grades.length > 0 ? data.grades.reduce((a, b) => a + b, 0) / data.grades.length : null;
-            document.getElementById('grade-average').innerText = avg !== null ? avg.toFixed(1) + '%' : '-';
-
-            // Nota necesaria para llegar a 70 (asumiendo que la próxima nota vale lo mismo que el promedio actual)
-            if (data.grades.length > 0 && avg < 70) {
-                const needed = 70 * (data.grades.length + 1) - data.grades.reduce((a, b) => a + b, 0);
-                document.getElementById('grade-needed').innerText = Math.max(0, needed).toFixed(1) + '%';
-            } else {
-                document.getElementById('grade-needed').innerText = avg >= 70 ? '✅ Aprobado' : '--';
-            }
-        }
-
-        window.deleteGrade = function(index) {
-            data.grades.splice(index, 1);
-            saveData();
-        };
-
-        document.getElementById('grade-add-btn').addEventListener('click', function() {
-            const val = parseFloat(document.getElementById('grade-input').value);
-            if (isNaN(val) || val < 0 || val > 100) return alert('Ingresa una nota entre 0 y 100.');
-            data.grades.push(val);
-            document.getElementById('grade-input').value = '';
-            saveData();
-        });
-
-        // ---------- POMODORO ----------
-        let pomodoroInterval = null;
-        let pomodoroTime = 25 * 60;
-        let pomodoroRunning = false;
-        let pomodoroPhase = 'study'; // 'study' o 'break'
-        let pomodoroCycles = 0;
-
-        function updatePomodoroUI() {
-            const mins = Math.floor(pomodoroTime / 60);
-            const secs = pomodoroTime % 60;
-            document.getElementById('pomodoro-timer').innerText =
-                `${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}`;
-            document.getElementById('pomodoro-phase').innerText =
-                pomodoroPhase === 'study' ? '📖 Estudio' : '☕ Descanso';
-            document.getElementById('pomodoro-cycles').innerText = data.pomodoroCycles;
-        }
-
-        function pomodoroTick() {
-            if (pomodoroTime <= 0) {
-                // Cambiar fase
-                if (pomodoroPhase === 'study') {
-                    data.pomodoroCycles += 1;
-                    if (data.pomodoroCycles >= 10) {
-                        data.achievements.pomodoroMaster = true;
-                        saveData();
-                    }
-                    pomodoroPhase = 'break';
-                    pomodoroTime = 5 * 60;
-                    showNotification('🍅 Pomodoro', '¡Descanso! 5 minutos.');
-                } else {
-                    pomodoroPhase = 'study';
-                    pomodoroTime = 25 * 60;
-                    showNotification('🍅 Pomodoro', '¡Vuelve a estudiar! 25 minutos.');
-                }
-                saveData();
-                updatePomodoroUI();
-                return;
-            }
-            pomodoroTime--;
-            updatePomodoroUI();
-        }
-
-        document.getElementById('pomodoro-start').addEventListener('click', function() {
-            if (pomodoroRunning) return;
-            pomodoroRunning = true;
-            pomodoroInterval = setInterval(pomodoroTick, 1000);
-            this.disabled = true;
-            document.getElementById('pomodoro-pause').disabled = false;
-        });
-
-        document.getElementById('pomodoro-pause').addEventListener('click', function() {
-            if (!pomodoroRunning) return;
-            clearInterval(pomodoroInterval);
-            pomodoroRunning = false;
-            document.getElementById('pomodoro-start').disabled = false;
-            this.disabled = true;
-        });
-
-        document.getElementById('pomodoro-reset').addEventListener('click', function() {
-            clearInterval(pomodoroInterval);
-            pomodoroRunning = false;
-            pomodoroPhase = 'study';
-            pomodoroTime = 25 * 60;
-            document.getElementById('pomodoro-start').disabled = false;
-            document.getElementById('pomodoro-pause').disabled = true;
-            updatePomodoroUI();
-            saveData();
-        });
-
-        // ---------- METAS ----------
-        function updateGoals() {
-            const list = document.getElementById('goal-list');
-            if (data.goals.length === 0) {
-                list.innerHTML = '<div class="empty-state">No hay metas.</div>';
-                return;
-            }
-            list.innerHTML = data.goals.map((g, i) => {
-                const pct = Math.min(100, (g.progress / g.total) * 100);
-                return `<div class="list-item" style="flex-direction:column; align-items:stretch;">
-                    <div style="display:flex; justify-content:space-between;">
-                        <div class="title">${g.title}</div>
-                        <div>${Math.round(pct)}%</div>
-                    </div>
-                    <div class="progress-bar"><div class="fill" style="width:${pct}%;"></div></div>
-                    <div style="display:flex; justify-content:space-between; margin-top:4px;">
-                        <span style="font-size:13px; color:var(--text-secondary);">${g.progress} / ${g.total}</span>
-                        <div style="display:flex; gap:6px;">
-                            <button class="btn btn-sm btn-success" onclick="goalProgress(${i}, 1)">+1</button>
-                            <button class="btn btn-sm btn-success" onclick="goalProgress(${i}, 5)">+5</button>
-                            <button class="btn btn-sm btn-danger" onclick="deleteGoal(${i})">🗑️</button>
-                        </div>
-                    </div>
-                </div>`;
-            }).join('');
-            checkAchievements();
-        }
-
-        window.goalProgress = function(index, amount) {
-            const g = data.goals[index];
-            g.progress = Math.min(g.total, g.progress + amount);
-            if (g.progress >= g.total) {
-                showNotification('🎯 Meta completada', `¡Lograste tu meta: ${g.title}!`);
-            }
-            saveData();
-            checkAchievements();
-        };
-
-        window.deleteGoal = function(index) {
-            data.goals.splice(index, 1);
-            saveData();
-        };
-
-        document.getElementById('goal-add-btn').addEventListener('click', function() {
-            const title = document.getElementById('goal-title').value.trim();
-            const total = parseInt(document.getElementById('goal-total').value);
-            if (!title || isNaN(total) || total < 1) return alert('Completa los campos correctamente.');
-            data.goals.push({ title, total, progress: 0 });
-            document.getElementById('goal-title').value = '';
-            document.getElementById('goal-total').value = '';
-            saveData();
-            checkAchievements();
-        });
-
-        // ---------- LOGROS ----------
-        function checkAchievements() {
-            let changed = false;
-            if (!data.achievements.firstTask && data.tasks.some(t => t.completed)) {
-                data.achievements.firstTask = true;
-                changed = true;
-                showNotification('🏅 Logro desbloqueado', '¡Completaste tu primera tarea!');
-            }
-            if (!data.achievements.firstExam && data.exams.length > 0) {
-                data.achievements.firstExam = true;
-                changed = true;
-                showNotification('🏅 Logro desbloqueado', '¡Agregaste tu primer examen!');
-            }
-            if (!data.achievements.fiveTasks && data.tasks.filter(t => t.completed).length >= 5) {
-                data.achievements.fiveTasks = true;
-                changed = true;
-                showNotification('🏅 Logro desbloqueado', '¡Completaste 5 tareas!');
-            }
-            if (!data.achievements.tenGoals && data.goals.length >= 10) {
-                data.achievements.tenGoals = true;
-                changed = true;
-                showNotification('🏅 Logro desbloqueado', '¡Creaste 10 metas!');
-            }
-            if (!data.achievements.pomodoroMaster && data.pomodoroCycles >= 10) {
-                data.achievements.pomodoroMaster = true;
-                changed = true;
-                showNotification('🏅 Logro desbloqueado', '¡Completaste 10 ciclos Pomodoro!');
-            }
-            if (changed) saveData();
-            updateAchievements();
-            updateHome();
-        }
-
-        function updateAchievements() {
-            const grid = document.getElementById('achievement-grid');
-            const achievements = [
-                { id: 'firstTask', icon: '📝', name: 'Primera tarea', desc: 'Completa tu primera tarea' },
-                { id: 'firstExam', icon: '📚', name: 'Primer examen', desc: 'Agrega un examen' },
-                { id: 'fiveTasks', icon: '✅', name: '5 tareas', desc: 'Completa 5 tareas' },
-                { id: 'tenGoals', icon: '🎯', name: '10 metas', desc: 'Crea 10 metas' },
-                { id: 'pomodoroMaster', icon: '🍅', name: 'Pomodoro máster', desc: '10 ciclos completados' }
-            ];
-            grid.innerHTML = achievements.map(a =>
-                `<div class="achievement-item ${data.achievements[a.id] ? 'unlocked' : ''}">
-                    <div class="icon">${a.icon}</div>
-                    <div class="name">${a.name}</div>
-                    <div class="desc">${data.achievements[a.id] ? '✅ Desbloqueado' : a.desc}</div>
-                </div>`
-            ).join('');
-        }
-
-        // ---------- CALENDARIO ----------
-        let calDate = new Date();
-        function updateCalendar() {
-            const year = calDate.getFullYear();
-            const month = calDate.getMonth();
-            const firstDay = new Date(year, month, 1).getDay();
-            const daysInMonth = new Date(year, month + 1, 0).getDate();
-            const today = new Date();
-            const todayStr = today.toISOString().split('T')[0];
-
-            document.getElementById('cal-month-year').innerText =
-                new Date(year, month).toLocaleDateString('es-ES', { month: 'long', year: 'numeric' });
-
-            let html = '';
-            const dayNames = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
-            dayNames.forEach(d => html += `<div class="day-name">${d}</div>`);
-
-            for (let i = 0; i < firstDay; i++) {
-                html += `<div></div>`;
-            }
-
-            for (let d = 1; d <= daysInMonth; d++) {
-                const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-                const hasEvent = data.tasks.some(t => t.due === dateStr) || data.exams.some(e => e.date === dateStr);
-                const isToday = dateStr === todayStr;
-                html += `<div class="day-cell ${hasEvent ? 'has-event' : ''} ${isToday ? 'today' : ''}">
-                            ${d}
-                            ${hasEvent ? '<span class="event-dot"></span>' : ''}
-                        </div>`;
-            }
-
-            document.getElementById('calendar-grid').innerHTML = html;
-        }
-
-        document.getElementById('cal-prev').addEventListener('click', function() {
-            calDate.setMonth(calDate.getMonth() - 1);
-            updateCalendar();
-        });
-        document.getElementById('cal-next').addEventListener('click', function() {
-            calDate.setMonth(calDate.getMonth() + 1);
-            updateCalendar();
-        });
-
-        // ---------- NOTIFICACIONES ----------
-        function showNotification(title, body) {
-            if ('Notification' in window && Notification.permission === 'granted') {
-                new Notification(title, { body, icon: '📚' });
-            } else if ('Notification' in window && Notification.permission !== 'denied') {
-                Notification.requestPermission();
-            }
-        }
-
-        // ---------- TEMAS Y PERSONALIZACIÓN ----------
+        // ---------- TEMAS ----------
         function applyTheme() {
             const dark = data.settings.darkMode;
             document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
@@ -1195,10 +709,10 @@
             saveData();
         });
 
-        // ---------- REINICIAR DATOS ----------
+        // ---------- REINICIAR ----------
         document.getElementById('reset-data-btn').addEventListener('click', function() {
             if (confirm('¿Seguro que quieres borrar todos los datos?')) {
-                localStorage.removeItem('studyhubData');
+                localStorage.removeItem('studyhubData_v2');
                 data = JSON.parse(JSON.stringify(defaultData));
                 saveData();
                 alert('Datos restablecidos.');
@@ -1215,28 +729,31 @@
                 document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
                 document.getElementById('page-' + pageId).classList.add('active');
                 document.getElementById('pagesContainer').scrollTop = 0;
-                // Actualizar contenido específico al cambiar
-                if (pageId === 'calendar') updateCalendar();
-                if (pageId === 'achievements') updateAchievements();
-                if (pageId === 'home') updateHome();
+                updateAllUI();
             });
         });
 
-        // ---------- INICIALIZAR ----------
-        // Pedir permiso para notificaciones
+        // ---------- INICIALIZACIÓN ----------
+        // Pedir permiso de notificaciones
         if ('Notification' in window && Notification.permission === 'default') {
             Notification.requestPermission();
         }
 
-        // Iniciar Pomodoro con datos guardados
-        pomodoroCycles = data.pomodoroCycles || 0;
-        pomodoroTime = 25 * 60; // Siempre comenzamos en estudio
-        pomodoroPhase = 'study';
-        updatePomodoroUI();
-        document.getElementById('pomodoro-pause').disabled = true;
+        // Verificar eventos del día al cargar
+        function checkTodayEvents() {
+            const today = todayStr();
+            data.events.forEach(e => {
+                if (e.date === today) {
+                    showNotification(`📅 Evento hoy: ${e.title}`, `Materia: ${e.subject} a las ${e.time}`);
+                }
+            });
+        }
 
         saveData();
-        console.log('📚 StudyHub cargado correctamente.');
+        checkTodayEvents();
+
+        console.log('📚 StudyHub v2 con materias y eventos cargado.');
     </script>
 </body>
 </html>
+
