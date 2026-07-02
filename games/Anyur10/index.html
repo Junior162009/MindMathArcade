@@ -30,10 +30,39 @@
         <p style="margin-top: 30px; color: #94a3b8; font-size: 14px;">Esta elección se guardará para la próxima vez.</p>
     </div>
 
+    <!-- OVERLAY (fondo oscuro al abrir el drawer) -->
+    <div id="drawer-overlay" class="drawer-overlay"></div>
+
+    <!-- MENÚ LATERAL (DRAWER) -->
+    <div id="drawer" class="drawer">
+        <div class="drawer-header">
+            <span class="drawer-title">📚 StudyHub</span>
+            <button id="drawer-close" class="drawer-close">✕</button>
+        </div>
+        <nav class="drawer-nav">
+            <a href="#" data-page="home" class="drawer-item active">🏠 Inicio</a>
+            <a href="#" data-page="schedule" class="drawer-item">📅 Horario</a>
+            <a href="#" data-page="tasks" class="drawer-item">📝 Tareas</a>
+            <a href="#" data-page="exams" class="drawer-item">📚 Exámenes</a>
+            <a href="#" data-page="grades" class="drawer-item">🧮 Notas</a>
+            <a href="#" data-page="pomodoro" class="drawer-item">🍅 Pomodoro</a>
+            <a href="#" data-page="goals" class="drawer-item">🎯 Metas</a>
+            <a href="#" data-page="achievements" class="drawer-item">🏅 Logros</a>
+            <a href="#" data-page="calendar" class="drawer-item">📆 Calendario</a>
+            <a href="#" data-page="settings" class="drawer-item">⚙️ Config</a>
+        </nav>
+    </div>
+
     <!-- APLICACIÓN PRINCIPAL -->
     <div id="app">
         <!-- HEADER -->
         <div class="header">
+            <!-- Botón hamburguesa (solo móvil) -->
+            <button id="menuToggle" class="menu-btn" aria-label="Menú">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
             <div class="brand">Study<span>Hub</span></div>
             <div class="header-actions">
                 <button id="themeToggle" title="Cambiar tema">🌙</button>
@@ -248,7 +277,7 @@
             </div>
         </div>
 
-        <!-- NAVEGACIÓN INFERIOR -->
+        <!-- NAVEGACIÓN INFERIOR (se oculta en móvil) -->
         <div class="bottom-nav" id="bottomNav">
             <button class="nav-btn active" data-page="home"><span class="nav-icon">🏠</span> Inicio</button>
             <button class="nav-btn" data-page="schedule"><span class="nav-icon">📅</span> Horario</button>
@@ -263,13 +292,11 @@
         </div>
     </div>
 
-    <!-- JavaScript (igual que antes, pero sin estilos incrustados) -->
+    <!-- ============================================================
+    JAVASCRIPT
+    ============================================================ -->
     <script>
-        // ================================================================
-        //  STUDYHUB · LÓGICA COMPLETA (sin CSS)
-        // ================================================================
-
-        // ---------- GESTIÓN DE MODO ----------
+        // ---------- GESTIÓN DE MODO (PC / MÓVIL) ----------
         const selector = document.getElementById('device-selector');
         const body = document.body;
 
@@ -303,6 +330,58 @@
         });
 
         if (savedMode) applyMode(savedMode);
+
+        // ---------- DRAWER (menú lateral) ----------
+        const menuToggle = document.getElementById('menuToggle');
+        const drawer = document.getElementById('drawer');
+        const overlay = document.getElementById('drawer-overlay');
+        const drawerClose = document.getElementById('drawer-close');
+        const drawerItems = document.querySelectorAll('.drawer-item');
+
+        function openDrawer() {
+            drawer.classList.add('open');
+            overlay.classList.add('open');
+        }
+
+        function closeDrawer() {
+            drawer.classList.remove('open');
+            overlay.classList.remove('open');
+        }
+
+        if (menuToggle) {
+            menuToggle.addEventListener('click', openDrawer);
+        }
+        if (drawerClose) {
+            drawerClose.addEventListener('click', closeDrawer);
+        }
+        if (overlay) {
+            overlay.addEventListener('click', closeDrawer);
+        }
+
+        // Navegación desde el drawer
+        drawerItems.forEach(item => {
+            item.addEventListener('click', function(e) {
+                e.preventDefault();
+                const pageId = this.dataset.page;
+                if (pageId) {
+                    // Cambiar página
+                    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+                    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+                    document.getElementById('page-' + pageId).classList.add('active');
+                    // Marcar el item del drawer como activo
+                    drawerItems.forEach(i => i.classList.remove('active'));
+                    this.classList.add('active');
+                    // Cerrar drawer
+                    closeDrawer();
+                    // Scroll arriba
+                    document.getElementById('pagesContainer').scrollTop = 0;
+                    // Actualizar contenido si es necesario
+                    if (pageId === 'calendar') updateCalendar();
+                    if (pageId === 'achievements') updateAchievements();
+                    if (pageId === 'home') updateHome();
+                }
+            });
+        });
 
         // ---------- DATOS Y LÓGICA (idéntica a la anterior) ----------
         const defaultData = {
@@ -876,7 +955,7 @@
             }
         });
 
-        // ---------- NAVEGACIÓN ----------
+        // ---------- NAVEGACIÓN (barra inferior) ----------
         document.querySelectorAll('.nav-btn').forEach(btn => {
             btn.addEventListener('click', function() {
                 const pageId = this.dataset.page;
@@ -888,6 +967,10 @@
                 if (pageId === 'calendar') updateCalendar();
                 if (pageId === 'achievements') updateAchievements();
                 if (pageId === 'home') updateHome();
+                // Actualizar también el drawer
+                drawerItems.forEach(item => {
+                    item.classList.toggle('active', item.dataset.page === pageId);
+                });
             });
         });
 
