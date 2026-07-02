@@ -1,18 +1,11 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-    <title>StudyHub · Materias, Eventos y Recordatorios</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>StudyHub · Con personalización</title>
     <style>
-        /* ========== RESET Y VARIABLES ========== */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-        }
-
+        /* ========== VARIABLES CSS ========== */
         :root {
             --bg-primary: #0f172a;
             --bg-secondary: #1e293b;
@@ -28,7 +21,6 @@
             --transition: 0.2s ease;
             --nav-bg: #1e293b;
             --header-bg: #1e293b;
-            --safe-bottom: env(safe-area-inset-bottom, 0px);
         }
 
         [data-theme="light"] {
@@ -48,45 +40,46 @@
         [data-accent="purple"] { --accent: #8b5cf6; --accent-hover: #7c3aed; }
         [data-accent="orange"] { --accent: #f59e0b; --accent-hover: #d97706; }
 
-        html, body {
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
+        /* ========== RESET ========== */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; }
+        body {
             background: var(--bg-primary);
             color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
             transition: background var(--transition), color var(--transition);
-            touch-action: manipulation;
         }
-
-        /* ========== APP CONTAINER ========== */
         #app {
             width: 100%;
-            height: 100vh;
-            height: 100dvh; /* Para móviles modernos */
-            max-width: 100%;
+            max-width: 480px;
+            height: 780px;
             background: var(--bg-secondary);
+            border-radius: 32px;
+            box-shadow: var(--shadow);
             display: flex;
             flex-direction: column;
             overflow: hidden;
-            transition: background var(--transition), border-color var(--transition);
             position: relative;
+            border: 1px solid var(--border-color);
+            transition: background var(--transition), border-color var(--transition);
         }
 
         /* ========== HEADER ========== */
         .header {
             background: var(--header-bg);
-            padding: 12px 16px;
+            padding: 10px 16px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             border-bottom: 1px solid var(--border-color);
             flex-shrink: 0;
             transition: background var(--transition), border-color var(--transition);
-            min-height: 56px;
         }
         .header .brand {
             font-weight: 800;
-            font-size: clamp(18px, 4vw, 24px);
+            font-size: 18px;
             color: var(--accent);
             letter-spacing: -0.5px;
         }
@@ -100,55 +93,97 @@
             background: transparent;
             border: none;
             color: var(--text-secondary);
-            font-size: clamp(18px, 3.5vw, 24px);
+            font-size: 20px;
             cursor: pointer;
             transition: color var(--transition);
-            padding: 4px;
         }
         .header-actions button:hover { color: var(--accent); }
+
+        /* Mini avatar en header */
+        .header-avatar {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+        }
+        .header-avatar .mini-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #fcd34d;
+            position: relative;
+            overflow: hidden;
+            border: 2px solid var(--border-color);
+        }
+        .header-avatar .mini-avatar .hair-mini {
+            position: absolute;
+            top: -4px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 110%;
+            height: 14px;
+            background: #78350f;
+            border-radius: 50% 50% 0 0;
+        }
+        .header-avatar .mini-avatar .hair-mini.blonde { background: #fde047; }
+        .header-avatar .mini-avatar .hair-mini.red { background: #b91c1c; }
+        .header-avatar .mini-avatar .hair-mini.none { display: none; }
+        .header-avatar .mini-avatar .shirt-mini {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 55%;
+            background: #3b82f6;
+            border-radius: 0 0 50% 50%;
+        }
+        .header-avatar .mini-avatar .shirt-mini.red { background: #ef4444; }
+        .header-avatar .mini-avatar .shirt-mini.green { background: #22c55e; }
+        .header-avatar .mini-avatar .shirt-mini.purple { background: #8b5cf6; }
+        .header-avatar .mini-avatar .eyes-mini {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 16px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .header-avatar .mini-avatar .eyes-mini span {
+            display: block;
+            width: 4px;
+            height: 6px;
+            background: #0f172a;
+            border-radius: 50%;
+        }
 
         /* ========== PÁGINAS ========== */
         .pages-container {
             flex: 1;
             overflow-y: auto;
-            overflow-x: hidden;
-            padding: 12px 14px calc(12px + var(--safe-bottom));
+            padding: 14px 16px 10px 16px;
             scroll-behavior: smooth;
-            -webkit-overflow-scrolling: touch;
         }
-        .pages-container::-webkit-scrollbar { width: 3px; }
-        .pages-container::-webkit-scrollbar-track { background: transparent; }
-        .pages-container::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 10px; }
-
-        .page {
-            display: none;
-            animation: fadeUp 0.25s ease;
-        }
+        .page { display: none; animation: fadeUp 0.3s ease; }
         .page.active { display: block; }
-        @keyframes fadeUp {
-            from { opacity: 0; transform: translateY(8px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+        @keyframes fadeUp { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
 
-        /* ========== NAVEGACIÓN INFERIOR ========== */
+        /* ========== NAVEGACIÓN ========== */
         .bottom-nav {
             background: var(--nav-bg);
             display: flex;
             justify-content: space-around;
-            padding: 4px 0 calc(6px + var(--safe-bottom));
+            padding: 4px 0 10px 0;
             border-top: 1px solid var(--border-color);
             flex-shrink: 0;
-            transition: background var(--transition), border-color var(--transition);
-            flex-wrap: nowrap;
             overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
+            transition: background var(--transition), border-color var(--transition);
         }
-        .bottom-nav::-webkit-scrollbar { display: none; }
         .nav-btn {
             background: transparent;
             border: none;
             color: var(--text-secondary);
-            font-size: clamp(9px, 2vw, 11px);
+            font-size: 10px;
             font-weight: 600;
             display: flex;
             flex-direction: column;
@@ -159,10 +194,8 @@
             border-radius: 12px;
             transition: 0.2s;
             white-space: nowrap;
-            flex: 0 0 auto;
-            touch-action: manipulation;
         }
-        .nav-btn .nav-icon { font-size: clamp(18px, 4vw, 24px); line-height: 1.2; }
+        .nav-btn .nav-icon { font-size: 20px; line-height: 1.2; }
         .nav-btn.active {
             color: var(--accent);
             background: var(--bg-input);
@@ -181,9 +214,9 @@
             transition: background var(--transition), border-color var(--transition);
         }
         .card-title {
-            font-size: clamp(15px, 3vw, 18px);
+            font-size: 15px;
             font-weight: 700;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             display: flex;
             align-items: center;
             gap: 8px;
@@ -195,72 +228,44 @@
             padding: 6px 14px;
             border-radius: 40px;
             font-weight: 600;
-            font-size: clamp(12px, 2.5vw, 14px);
+            font-size: 12px;
             cursor: pointer;
             transition: background 0.15s, transform 0.1s;
             display: inline-flex;
             align-items: center;
             gap: 4px;
-            touch-action: manipulation;
-            min-height: 36px;
         }
         .btn:active { transform: scale(0.95); }
         .btn:hover { background: var(--accent-hover); }
-        .btn-outline {
-            background: transparent;
-            border: 2px solid var(--border-color);
-            color: var(--text-primary);
-        }
+        .btn-outline { background: transparent; border: 2px solid var(--border-color); color: var(--text-primary); }
         .btn-outline:hover { background: var(--bg-input); border-color: var(--accent); }
         .btn-danger { background: #ef4444; }
         .btn-danger:hover { background: #dc2626; }
         .btn-success { background: #22c55e; }
         .btn-success:hover { background: #16a34a; }
-        .btn-sm { padding: 3px 10px; font-size: clamp(11px, 2vw, 12px); min-height: 28px; }
+        .btn-sm { padding: 4px 10px; font-size: 11px; }
         .btn:disabled { opacity: 0.5; pointer-events: none; }
 
         .input-group {
             display: flex;
             gap: 6px;
             flex-wrap: wrap;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
         }
         .input-group input, .input-group select {
             flex: 1;
             min-width: 80px;
-            padding: 6px 12px;
+            padding: 6px 10px;
             border-radius: 40px;
             border: 1px solid var(--border-color);
             background: var(--bg-input);
             color: var(--text-primary);
-            font-size: clamp(13px, 2.5vw, 15px);
+            font-size: 12px;
             transition: border-color var(--transition);
-            min-height: 36px;
         }
         .input-group input:focus, .input-group select:focus {
             outline: none;
             border-color: var(--accent);
-        }
-
-        .list-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 6px 0;
-            border-bottom: 1px solid var(--border-color);
-            gap: 6px;
-        }
-        .list-item:last-child { border-bottom: none; }
-        .list-item .info { flex: 1; min-width: 0; }
-        .list-item .info .title { font-weight: 600; font-size: clamp(14px, 2.8vw, 16px); }
-        .list-item .info .sub { font-size: clamp(12px, 2.2vw, 14px); color: var(--text-secondary); }
-        .list-item .actions { display: flex; gap: 4px; flex-shrink: 0; }
-
-        .empty-state {
-            text-align: center;
-            padding: 16px 0;
-            color: var(--text-secondary);
-            font-size: clamp(13px, 2.5vw, 15px);
         }
 
         .badge {
@@ -268,103 +273,229 @@
             color: white;
             border-radius: 40px;
             padding: 2px 10px;
-            font-size: clamp(11px, 2vw, 13px);
+            font-size: 11px;
             font-weight: 600;
         }
         .badge-success { background: #22c55e; }
         .badge-danger { background: #ef4444; }
+        .badge-warning { background: #f59e0b; color: #0f172a; }
 
-        .subject-tag {
-            display: inline-block;
-            background: var(--bg-input);
-            padding: 2px 10px;
-            border-radius: 40px;
-            margin: 2px 4px 2px 0;
-            font-size: clamp(12px, 2.2vw, 14px);
-            border: 1px solid var(--border-color);
+        .list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 0;
+            border-bottom: 1px solid var(--border-color);
         }
-        .subject-tag .remove-subject {
-            cursor: pointer;
-            margin-left: 4px;
+        .list-item:last-child { border-bottom: none; }
+        .list-item .info { flex: 1; }
+        .list-item .info .title { font-weight: 600; font-size: 13px; }
+        .list-item .info .sub { font-size: 12px; color: var(--text-secondary); }
+        .list-item .actions { display: flex; gap: 4px; }
+
+        .empty-state {
+            text-align: center;
+            padding: 16px 0;
             color: var(--text-secondary);
-            font-weight: bold;
+            font-size: 13px;
         }
-        .subject-tag .remove-subject:hover { color: #ef4444; }
 
-        .event-item {
-            border-left: 4px solid var(--accent);
-            padding-left: 10px;
-            margin-bottom: 8px;
-        }
-        .event-item .event-title { font-weight: 700; font-size: clamp(14px, 2.8vw, 16px); }
-        .event-item .event-detail { font-size: clamp(12px, 2.2vw, 14px); color: var(--text-secondary); }
-
-        /* ========== RECORDATORIOS (alarma) ========== */
-        .alarm-box {
+        .progress-bar {
             background: var(--bg-input);
-            border-radius: var(--radius);
-            padding: 12px;
-            margin-top: 8px;
-            border: 1px dashed var(--accent);
+            border-radius: 40px;
+            height: 6px;
+            overflow: hidden;
+            margin: 4px 0;
         }
-        .alarm-box .alarm-time {
-            font-size: clamp(20px, 5vw, 32px);
+        .progress-bar .fill {
+            height: 100%;
+            background: var(--accent);
+            border-radius: 40px;
+            transition: width 0.3s ease;
+        }
+
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+        /* ========== CALENDARIO ========== */
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 3px;
+            text-align: center;
+            font-size: 12px;
+            margin-top: 4px;
+        }
+        .calendar-grid .day-name { font-weight: 600; color: var(--text-secondary); padding: 4px 0; }
+        .calendar-grid .day-cell {
+            background: var(--bg-input);
+            border-radius: 6px;
+            padding: 4px 0;
+            cursor: pointer;
+            transition: 0.1s;
+            border: 1px solid transparent;
+            position: relative;
+            font-size: 12px;
+        }
+        .calendar-grid .day-cell.has-event { border-color: var(--accent); font-weight: 600; }
+        .calendar-grid .day-cell.today { background: var(--accent); color: white; }
+        .calendar-grid .day-cell .event-dot {
+            display: block;
+            width: 5px;
+            height: 5px;
+            background: var(--accent);
+            border-radius: 50%;
+            margin: 1px auto 0;
+        }
+        .calendar-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+        .calendar-nav .month-year { font-weight: 700; font-size: 15px; }
+
+        /* ========== POMODORO ========== */
+        .pomodoro-timer {
+            font-size: 40px;
             font-weight: 800;
             text-align: center;
             font-variant-numeric: tabular-nums;
+            letter-spacing: 2px;
+            margin: 4px 0;
         }
-        .alarm-box .alarm-controls {
-            display: flex;
-            gap: 8px;
-            justify-content: center;
-            margin-top: 6px;
-            flex-wrap: wrap;
-        }
+        .pomodoro-phase { text-align: center; font-size: 13px; color: var(--text-secondary); margin-bottom: 4px; }
 
-        /* ========== RESPONSIVE ========== */
-        @media (max-width: 480px) {
-            .header { padding: 8px 12px; min-height: 48px; }
-            .pages-container { padding: 10px 10px calc(10px + var(--safe-bottom)); }
-            .card { padding: 10px 12px; margin-bottom: 10px; }
-            .bottom-nav { padding: 2px 0 calc(4px + var(--safe-bottom)); }
-            .nav-btn { padding: 2px 6px; }
-            .nav-btn.active { padding: 2px 10px; }
-            .input-group { gap: 4px; }
-            .input-group input, .input-group select { min-height: 32px; padding: 4px 10px; }
-            .btn { min-height: 32px; padding: 4px 12px; }
-        }
-
-        @media (min-width: 768px) {
-            #app {
-                max-width: 520px;
-                margin: 0 auto;
-                border-radius: 32px;
-                height: 90vh;
-                height: 90dvh;
-                box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
-                border: 1px solid var(--border-color);
-            }
-            body {
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                padding: 20px;
-            }
-        }
-
-        @media (min-width: 1024px) {
-            #app { max-width: 600px; height: 85vh; height: 85dvh; }
-        }
-
-        /* ========== UTILIDADES ========== */
-        .grid-3 {
+        /* ========== LOGROS ========== */
+        .achievement-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 8px;
-            text-align: center;
         }
-        .grid-3 div { font-size: clamp(12px, 2.2vw, 14px); }
-        .grid-3 div strong { font-size: clamp(18px, 4vw, 24px); display: block; }
+        .achievement-item {
+            background: var(--bg-input);
+            border-radius: var(--radius);
+            padding: 10px 4px;
+            text-align: center;
+            border: 1px solid var(--border-color);
+            transition: 0.15s;
+        }
+        .achievement-item.unlocked { border-color: var(--accent); background: var(--bg-card); }
+        .achievement-item .icon { font-size: 24px; }
+        .achievement-item .name { font-size: 10px; font-weight: 600; margin-top: 2px; }
+        .achievement-item .desc { font-size: 9px; color: var(--text-secondary); }
+
+        /* ========== AVATAR PERSONALIZACIÓN ========== */
+        .avatar-customizer {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .avatar-preview-big {
+            position: relative;
+            width: 100px;
+            height: 120px;
+            background: #fcd34d;
+            border-radius: 50px 50px 20px 20px;
+            margin-bottom: 8px;
+            border: 2px solid var(--border-color);
+        }
+        .avatar-preview-big .hair-big {
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 110%;
+            height: 30px;
+            background: #78350f;
+            border-radius: 50% 50% 0 0;
+        }
+        .avatar-preview-big .hair-big.blonde { background: #fde047; }
+        .avatar-preview-big .hair-big.red { background: #b91c1c; }
+        .avatar-preview-big .hair-big.none { display: none; }
+        .avatar-preview-big .shirt-big {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 60%;
+            background: #3b82f6;
+            border-radius: 0 0 20px 20px;
+        }
+        .avatar-preview-big .shirt-big.red { background: #ef4444; }
+        .avatar-preview-big .shirt-big.green { background: #22c55e; }
+        .avatar-preview-big .shirt-big.purple { background: #8b5cf6; }
+        .avatar-preview-big .eyes-big {
+            position: absolute;
+            top: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .avatar-preview-big .eyes-big span {
+            display: block;
+            width: 8px;
+            height: 10px;
+            background: #0f172a;
+            border-radius: 50%;
+        }
+
+        .avatar-options {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .avatar-options button {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: 2px solid var(--border-color);
+            cursor: pointer;
+            transition: 0.15s;
+            font-size: 16px;
+        }
+        .avatar-options button.active { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent); }
+        .avatar-options button:active { transform: scale(0.9); }
+
+        /* ========== QUOTE ========== */
+        .quote-box {
+            background: var(--bg-input);
+            border-radius: var(--radius);
+            padding: 12px 16px;
+            border-left: 4px solid var(--accent);
+            font-style: italic;
+            color: var(--text-secondary);
+            margin-bottom: 12px;
+            font-size: 13px;
+        }
+        .quote-box .author {
+            display: block;
+            text-align: right;
+            font-style: normal;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-top: 2px;
+            font-size: 12px;
+        }
+
+        /* ========== SCROLL ========== */
+        .pages-container::-webkit-scrollbar { width: 4px; }
+        .pages-container::-webkit-scrollbar-track { background: transparent; }
+        .pages-container::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 10px; }
+
+        /* ========== RESPONSIVE ========== */
+        @media (max-width: 500px) {
+            #app { height: 100vh; border-radius: 0; max-width: 100%; }
+            .bottom-nav { gap: 2px; }
+            .nav-btn { font-size: 9px; padding: 4px 6px; }
+            .nav-btn .nav-icon { font-size: 18px; }
+        }
+        @media (max-width: 400px) {
+            .grid-2 { grid-template-columns: 1fr; }
+            .achievement-grid { grid-template-columns: repeat(2, 1fr); }
+        }
     </style>
 </head>
 <body>
@@ -373,6 +504,14 @@
         <div class="header">
             <div class="brand">Study<span>Hub</span></div>
             <div class="header-actions">
+                <div class="header-avatar" id="header-avatar" title="Tu perfil">
+                    <div class="mini-avatar" id="mini-avatar">
+                        <div class="hair-mini" id="mini-hair"></div>
+                        <div class="eyes-mini"><span></span><span></span></div>
+                        <div class="shirt-mini" id="mini-shirt"></div>
+                    </div>
+                    <span id="header-name" style="font-size:13px; font-weight:600; color:var(--text-primary);">Jugador</span>
+                </div>
                 <button id="themeToggle" title="Tema">🌙</button>
                 <button id="accentToggle" title="Color">🎨</button>
             </div>
@@ -380,104 +519,227 @@
 
         <!-- PÁGINAS -->
         <div class="pages-container" id="pagesContainer">
-            <!-- INICIO -->
+            <!-- ==================== INICIO ==================== -->
             <div class="page active" id="page-home">
+                <div class="quote-box" id="dailyQuote">
+                    "El éxito es la suma de pequeños esfuerzos repetidos día tras día."
+                    <span class="author">— Robert Collier</span>
+                </div>
+
                 <div class="card">
-                    <div class="card-title">📊 Resumen</div>
-                    <div class="grid-3">
-                        <div><strong id="home-subjects">0</strong> Materias</div>
-                        <div><strong id="home-events">0</strong> Eventos</div>
-                        <div><strong id="home-tasks">0</strong> Tareas pend.</div>
+                    <div class="card-title">📊 Resumen del día</div>
+                    <div style="display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:6px; text-align:center;">
+                        <div><div style="font-size:20px;">📝</div><div><strong id="home-tasks-pending">0</strong> tareas</div></div>
+                        <div><div style="font-size:20px;">📚</div><div><strong id="home-exams-today">0</strong> exámenes</div></div>
+                        <div><div style="font-size:20px;">🎯</div><div><strong id="home-goals-progress">0%</strong> metas</div></div>
+                        <div><div style="font-size:20px;">🏆</div><div><strong id="home-achievements-count">0</strong> logros</div></div>
                     </div>
                 </div>
+
+                <div class="card">
+                    <div class="card-title">🏅 Logros recientes</div>
+                    <div id="home-achievements" class="empty-state">Aún no tienes logros. ¡Sigue estudiando!</div>
+                </div>
+
                 <div class="card">
                     <div class="card-title">⏳ Próximos eventos</div>
                     <div id="home-upcoming-events" class="empty-state">No hay eventos próximos.</div>
                 </div>
+            </div>
+
+            <!-- ==================== HORARIO ==================== -->
+            <div class="page" id="page-schedule">
                 <div class="card">
-                    <div class="card-title">📚 Mis materias</div>
-                    <div id="home-subject-list" class="empty-state">No hay materias.</div>
-                </div>
-                <!-- Recordatorio rápido en home -->
-                <div class="card" style="border-color: var(--accent);">
-                    <div class="card-title">⏰ Recordatorio rápido</div>
-                    <div class="alarm-box">
-                        <div class="alarm-time" id="home-alarm-display">--:--</div>
-                        <div class="alarm-controls">
-                            <input type="time" id="home-alarm-input" style="background:var(--bg-input); color:var(--text-primary); border:1px solid var(--border-color); border-radius:40px; padding:4px 12px; font-size:clamp(14px,2.8vw,18px);" />
-                            <button class="btn btn-sm" id="home-alarm-set">⏰ Activar</button>
-                            <button class="btn btn-danger btn-sm" id="home-alarm-clear">✕</button>
-                        </div>
-                        <div id="home-alarm-status" style="font-size:clamp(12px,2.2vw,14px); color:var(--text-secondary); text-align:center; margin-top:4px;">Sin alarma activa</div>
+                    <div class="card-title">📅 Horario</div>
+                    <div id="schedule-container"></div>
+                    <div class="input-group" style="margin-top:10px;">
+                        <select id="schedule-day-select">
+                            <option value="Lunes">Lunes</option>
+                            <option value="Martes">Martes</option>
+                            <option value="Miércoles">Miércoles</option>
+                            <option value="Jueves">Jueves</option>
+                            <option value="Viernes">Viernes</option>
+                            <option value="Sábado">Sábado</option>
+                        </select>
+                        <input type="text" id="schedule-subject" placeholder="Materia" style="min-width:60px;">
+                        <input type="text" id="schedule-teacher" placeholder="Profesor" style="min-width:60px;">
+                        <input type="text" id="schedule-room" placeholder="Salón" style="min-width:50px;">
+                        <button class="btn btn-sm" id="schedule-add-btn">+</button>
                     </div>
                 </div>
             </div>
 
-            <!-- MATERIAS -->
-            <div class="page" id="page-subjects">
-                <div class="card">
-                    <div class="card-title">📚 Materias</div>
-                    <div class="input-group">
-                        <input type="text" id="subject-input" placeholder="Nueva materia" />
-                        <button class="btn btn-sm" id="subject-add-btn">+ Agregar</button>
-                    </div>
-                    <div id="subject-list"></div>
-                    <div style="margin-top:10px; font-size:clamp(12px,2.2vw,14px); color:var(--text-secondary);">
-                        <span>Predefinidas: </span>
-                        <span id="predefined-subjects"></span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- EVENTOS -->
-            <div class="page" id="page-events">
-                <div class="card">
-                    <div class="card-title">📅 Eventos</div>
-                    <div class="input-group">
-                        <input type="text" id="event-title" placeholder="Título" />
-                        <select id="event-subject"><option value="">Materia</option></select>
-                        <input type="date" id="event-date" />
-                        <input type="time" id="event-time" />
-                        <button class="btn btn-sm" id="event-add-btn">+ Agregar</button>
-                    </div>
-                    <div id="event-list"></div>
-                </div>
-            </div>
-
-            <!-- TAREAS -->
+            <!-- ==================== TAREAS ==================== -->
             <div class="page" id="page-tasks">
                 <div class="card">
                     <div class="card-title">📝 Tareas</div>
                     <div class="input-group">
-                        <input type="text" id="task-title" placeholder="Título" />
-                        <input type="date" id="task-due" />
-                        <button class="btn btn-sm" id="task-add-btn">+ Añadir</button>
+                        <input type="text" id="task-title" placeholder="Título" style="min-width:80px;">
+                        <input type="date" id="task-due" style="min-width:80px;">
+                        <button class="btn btn-sm" id="task-add-btn">+</button>
                     </div>
                     <div id="task-list"></div>
                 </div>
             </div>
 
-            <!-- CONFIGURACIÓN -->
-            <div class="page" id="page-settings">
+            <!-- ==================== EXÁMENES ==================== -->
+            <div class="page" id="page-exams">
+                <div class="card">
+                    <div class="card-title">📚 Exámenes</div>
+                    <div class="input-group">
+                        <input type="text" id="exam-title" placeholder="Materia" style="min-width:80px;">
+                        <input type="date" id="exam-date" style="min-width:80px;">
+                        <button class="btn btn-sm" id="exam-add-btn">+</button>
+                    </div>
+                    <div id="exam-list"></div>
+                </div>
+            </div>
+
+            <!-- ==================== CALCULADORA DE NOTAS ==================== -->
+            <div class="page" id="page-grades">
+                <div class="card">
+                    <div class="card-title">🧮 Calculadora de Notas</div>
+                    <div class="input-group">
+                        <input type="number" id="grade-input" placeholder="Nota (0-100)" min="0" max="100" style="min-width:80px;">
+                        <button class="btn btn-sm" id="grade-add-btn">+</button>
+                    </div>
+                    <div id="grade-list"></div>
+                    <div style="margin-top:8px; display:flex; gap:12px; flex-wrap:wrap; font-size:13px;">
+                        <span><strong>Promedio:</strong> <span id="grade-average">-</span></span>
+                        <span><strong>Nota para aprobar (70):</strong> <span id="grade-needed">-</span></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==================== POMODORO ==================== -->
+            <div class="page" id="page-pomodoro">
+                <div class="card">
+                    <div class="card-title">🍅 Pomodoro</div>
+                    <div class="pomodoro-phase" id="pomodoro-phase">Estudio</div>
+                    <div class="pomodoro-timer" id="pomodoro-timer">25:00</div>
+                    <div style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap;">
+                        <button class="btn" id="pomodoro-start">▶ Iniciar</button>
+                        <button class="btn btn-outline" id="pomodoro-pause">⏸️</button>
+                        <button class="btn btn-danger" id="pomodoro-reset">⟳</button>
+                    </div>
+                    <div style="margin-top:6px; text-align:center; color:var(--text-secondary); font-size:12px;">
+                        Ciclos: <strong id="pomodoro-cycles">0</strong>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==================== METAS ==================== -->
+            <div class="page" id="page-goals">
+                <div class="card">
+                    <div class="card-title">🎯 Metas</div>
+                    <div class="input-group">
+                        <input type="text" id="goal-title" placeholder="Meta" style="min-width:80px;">
+                        <input type="number" id="goal-total" placeholder="Total" min="1" style="min-width:60px;">
+                        <button class="btn btn-sm" id="goal-add-btn">+</button>
+                    </div>
+                    <div id="goal-list"></div>
+                </div>
+            </div>
+
+            <!-- ==================== LOGROS ==================== -->
+            <div class="page" id="page-achievements">
+                <div class="card">
+                    <div class="card-title">🏅 Logros</div>
+                    <div class="achievement-grid" id="achievement-grid"></div>
+                </div>
+            </div>
+
+            <!-- ==================== CALENDARIO ==================== -->
+            <div class="page" id="page-calendar">
+                <div class="card">
+                    <div class="calendar-nav">
+                        <button class="btn btn-outline btn-sm" id="cal-prev">‹</button>
+                        <span class="month-year" id="cal-month-year">Enero 2025</span>
+                        <button class="btn btn-outline btn-sm" id="cal-next">›</button>
+                    </div>
+                    <div class="calendar-grid" id="calendar-grid"></div>
+                    <div style="margin-top:6px; font-size:11px; color:var(--text-secondary);">
+                        <span style="display:inline-block; width:10px; height:10px; background:var(--accent); border-radius:50%; margin-right:4px;"></span> Evento
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==================== PERFIL Y PERSONALIZACIÓN ==================== -->
+            <div class="page" id="page-profile">
+                <div class="card">
+                    <div class="card-title">👤 Mi Perfil</div>
+                    <div style="display:flex; align-items:center; gap:12px;">
+                        <div class="avatar-preview-big" id="avatar-preview">
+                            <div class="hair-big" id="avatar-hair"></div>
+                            <div class="eyes-big"><span></span><span></span></div>
+                            <div class="shirt-big" id="avatar-shirt"></div>
+                        </div>
+                        <div style="flex:1;">
+                            <div style="font-size:18px; font-weight:700;" id="profile-name-display">Jugador</div>
+                            <div style="font-size:13px; color:var(--text-secondary);">Nivel: <strong id="profile-level">1</strong></div>
+                            <div style="margin-top:4px;">
+                                <input type="text" id="profile-name-input" placeholder="Nuevo nombre" style="background:var(--bg-input); border:1px solid var(--border-color); border-radius:40px; padding:4px 10px; color:var(--text-primary); width:100%; font-size:12px;">
+                            </div>
+                            <button class="btn btn-sm" id="profile-rename-btn" style="margin-top:4px;">Cambiar nombre</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">🎨 Personalizar avatar</div>
+                    <div class="avatar-customizer">
+                        <div style="display:flex; gap:12px; flex-wrap:wrap; justify-content:center; width:100%;">
+                            <div>
+                                <div style="font-size:12px; font-weight:600; margin-bottom:4px;">Piel</div>
+                                <div class="avatar-options" id="skin-options">
+                                    <button data-skin="#fcd34d" style="background:#fcd34d;" class="active"></button>
+                                    <button data-skin="#fca5a5" style="background:#fca5a5;"></button>
+                                    <button data-skin="#d97706" style="background:#d97706;"></button>
+                                    <button data-skin="#92400e" style="background:#92400e;"></button>
+                                </div>
+                            </div>
+                            <div>
+                                <div style="font-size:12px; font-weight:600; margin-bottom:4px;">Pelo</div>
+                                <div class="avatar-options" id="hair-options">
+                                    <button data-hair="dark" style="background:#78350f;">🟫</button>
+                                    <button data-hair="blonde" style="background:#fde047;">🟨</button>
+                                    <button data-hair="red" style="background:#b91c1c;">🟥</button>
+                                    <button data-hair="none" style="background:transparent; border-color:var(--border-color);">🚫</button>
+                                </div>
+                            </div>
+                            <div>
+                                <div style="font-size:12px; font-weight:600; margin-bottom:4px;">Camiseta</div>
+                                <div class="avatar-options" id="shirt-options">
+                                    <button data-shirt="blue" style="background:#3b82f6;" class="active"></button>
+                                    <button data-shirt="red" style="background:#ef4444;"></button>
+                                    <button data-shirt="green" style="background:#22c55e;"></button>
+                                    <button data-shirt="purple" style="background:#8b5cf6;"></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="card">
                     <div class="card-title">⚙️ Configuración</div>
-                    <div style="display:flex; flex-direction:column; gap:12px;">
+                    <div style="display:flex; flex-direction:column; gap:8px;">
                         <div style="display:flex; justify-content:space-between; align-items:center;">
                             <span>Tema oscuro</span>
-                            <label>
-                                <input type="checkbox" id="darkModeToggle" checked style="transform:scale(1.3);" />
+                            <label class="switch">
+                                <input type="checkbox" id="darkModeToggle" checked>
+                                <span class="slider"></span>
                             </label>
                         </div>
                         <div style="display:flex; justify-content:space-between; align-items:center;">
                             <span>Color principal</span>
-                            <select id="accent-select" style="background:var(--bg-input); color:var(--text-primary); border:1px solid var(--border-color); border-radius:40px; padding:4px 12px; font-size:clamp(13px,2.5vw,15px);">
+                            <select id="accent-select" style="background:var(--bg-input); color:var(--text-primary); border:1px solid var(--border-color); border-radius:40px; padding:4px 10px; font-size:12px;">
                                 <option value="blue">Azul</option>
                                 <option value="green">Verde</option>
                                 <option value="purple">Púrpura</option>
                                 <option value="orange">Naranja</option>
                             </select>
                         </div>
-                        <button class="btn btn-danger" id="reset-data-btn" style="width:100%;">🔄 Restablecer todos los datos</button>
+                        <button class="btn btn-danger" id="reset-data-btn" style="width:100%; margin-top:4px;">🔄 Restablecer todos los datos</button>
                     </div>
                 </div>
             </div>
@@ -486,31 +748,46 @@
         <!-- NAVEGACIÓN INFERIOR -->
         <div class="bottom-nav">
             <button class="nav-btn active" data-page="home"><span class="nav-icon">🏠</span> Inicio</button>
-            <button class="nav-btn" data-page="subjects"><span class="nav-icon">📚</span> Materias</button>
-            <button class="nav-btn" data-page="events"><span class="nav-icon">📅</span> Eventos</button>
+            <button class="nav-btn" data-page="schedule"><span class="nav-icon">📅</span> Horario</button>
             <button class="nav-btn" data-page="tasks"><span class="nav-icon">📝</span> Tareas</button>
-            <button class="nav-btn" data-page="settings"><span class="nav-icon">⚙️</span> Config</button>
+            <button class="nav-btn" data-page="exams"><span class="nav-icon">📚</span> Exámenes</button>
+            <button class="nav-btn" data-page="grades"><span class="nav-icon">🧮</span> Notas</button>
+            <button class="nav-btn" data-page="pomodoro"><span class="nav-icon">🍅</span> Pomodoro</button>
+            <button class="nav-btn" data-page="goals"><span class="nav-icon">🎯</span> Metas</button>
+            <button class="nav-btn" data-page="achievements"><span class="nav-icon">🏅</span> Logros</button>
+            <button class="nav-btn" data-page="calendar"><span class="nav-icon">📆</span> Calendario</button>
+            <button class="nav-btn" data-page="profile"><span class="nav-icon">👤</span> Perfil</button>
         </div>
     </div>
 
     <script>
         // ================================================================
-        //  STUDYHUB - VERSIÓN DEFINITIVA CON RECORDATORIOS (ALARMA)
+        //  STUDYHUB - CON PERSONALIZACIÓN DE JUGADOR
         // ================================================================
-
-        // ---------- MATERIAS PREDEFINIDAS ----------
-        const PREDEFINED_SUBJECTS = [
-            'Matemáticas', 'Lengua', 'Ciencias', 'Historia', 'Inglés',
-            'Arte', 'Música', 'Educación Física', 'Tecnología',
-            'Química', 'Física', 'Biología', 'Geografía', 'Filosofía'
-        ];
 
         // ---------- ESTADO PREDETERMINADO ----------
         const defaultData = {
-            subjects: [...PREDEFINED_SUBJECTS],
-            events: [],
+            player: {
+                name: 'Jugador',
+                skin: '#fcd34d',
+                hair: 'dark',
+                shirt: 'blue'
+            },
+            schedule: {
+                Lunes: [], Martes: [], Miércoles: [], Jueves: [], Viernes: [], Sábado: []
+            },
             tasks: [],
-            alarm: null, // { hour, minute, active }
+            exams: [],
+            grades: [],
+            goals: [],
+            pomodoroCycles: 0,
+            achievements: {
+                firstTask: false,
+                firstExam: false,
+                fiveTasks: false,
+                tenGoals: false,
+                pomodoroMaster: false
+            },
             settings: {
                 darkMode: true,
                 accent: 'blue'
@@ -520,17 +797,17 @@
         let data = loadData();
 
         function loadData() {
-            const raw = localStorage.getItem('studyhubData_v3');
+            const raw = localStorage.getItem('studyhubData');
             if (raw) {
                 try {
                     const parsed = JSON.parse(raw);
-                    if (!parsed.subjects || parsed.subjects.length === 0) {
-                        parsed.subjects = [...PREDEFINED_SUBJECTS];
+                    for (let key in defaultData) {
+                        if (!(key in parsed)) parsed[key] = defaultData[key];
                     }
-                    if (!parsed.events) parsed.events = [];
-                    if (!parsed.tasks) parsed.tasks = [];
-                    if (!parsed.alarm) parsed.alarm = null;
-                    if (!parsed.settings) parsed.settings = { darkMode: true, accent: 'blue' };
+                    if (!parsed.player) parsed.player = defaultData.player;
+                    if (!parsed.schedule) parsed.schedule = defaultData.schedule;
+                    if (!parsed.achievements) parsed.achievements = defaultData.achievements;
+                    if (!parsed.settings) parsed.settings = defaultData.settings;
                     return parsed;
                 } catch (e) {
                     return JSON.parse(JSON.stringify(defaultData));
@@ -540,7 +817,7 @@
         }
 
         function saveData() {
-            localStorage.setItem('studyhubData_v3', JSON.stringify(data));
+            localStorage.setItem('studyhubData', JSON.stringify(data));
             updateAllUI();
         }
 
@@ -555,240 +832,154 @@
             return d.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
         }
 
-        function formatDateTime(dateStr, timeStr) {
-            if (!dateStr || !timeStr) return formatDate(dateStr);
-            const d = new Date(dateStr + 'T' + timeStr);
-            return d.toLocaleString('es-ES', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
-        }
-
-        // ---------- NOTIFICACIONES ----------
-        function showNotification(title, body) {
-            if ('Notification' in window && Notification.permission === 'granted') {
-                new Notification(title, { body, icon: '📚' });
-            } else if ('Notification' in window && Notification.permission !== 'denied') {
-                Notification.requestPermission();
-            }
-            // También mostramos alerta si no hay notificaciones
-            if (!('Notification' in window) || Notification.permission !== 'granted') {
-                alert(`🔔 ${title}\n${body}`);
-            }
-        }
-
-        // ---------- ALARMA (recordatorio programado) ----------
-        let alarmInterval = null;
-
-        function checkAlarm() {
-            if (!data.alarm || !data.alarm.active) return;
-            const now = new Date();
-            const currentHour = now.getHours();
-            const currentMinute = now.getMinutes();
-            if (currentHour === data.alarm.hour && currentMinute === data.alarm.minute) {
-                // Disparar alarma
-                showNotification('⏰ ¡Recordatorio!', `Es hora de tu evento: ${data.alarm.eventTitle || 'Estudio'}`);
-                // Opcional: desactivar después de sonar para que no se repita
-                data.alarm.active = false;
-                saveData();
-                updateAlarmUI();
-            }
-        }
-
-        function startAlarmChecker() {
-            if (alarmInterval) clearInterval(alarmInterval);
-            alarmInterval = setInterval(checkAlarm, 10000); // revisar cada 10 segundos
-        }
-
-        function updateAlarmUI() {
-            const display = document.getElementById('home-alarm-display');
-            const status = document.getElementById('home-alarm-status');
-            const input = document.getElementById('home-alarm-input');
-            if (data.alarm && data.alarm.active) {
-                const h = String(data.alarm.hour).padStart(2, '0');
-                const m = String(data.alarm.minute).padStart(2, '0');
-                display.innerText = `${h}:${m}`;
-                status.innerText = `⏰ Alarma activa para las ${h}:${m} ${data.alarm.eventTitle ? '· ' + data.alarm.eventTitle : ''}`;
-                input.value = `${h}:${m}`;
-            } else {
-                display.innerText = '--:--';
-                status.innerText = 'Sin alarma activa';
-                input.value = '';
-            }
-        }
-
-        document.getElementById('home-alarm-set').addEventListener('click', function() {
-            const val = document.getElementById('home-alarm-input').value;
-            if (!val) return alert('Selecciona una hora.');
-            const [hour, minute] = val.split(':').map(Number);
-            if (isNaN(hour) || isNaN(minute)) return alert('Hora inválida.');
-            // Preguntar título del evento
-            const eventTitle = prompt('¿Qué evento recuerda esta alarma? (opcional)', 'Estudio');
-            data.alarm = {
-                hour,
-                minute,
-                active: true,
-                eventTitle: eventTitle || 'Estudio'
-            };
-            saveData();
-            updateAlarmUI();
-            showNotification('⏰ Alarma activada', `Recordatorio programado para las ${String(hour).padStart(2,'0')}:${String(minute).padStart(2,'0')}`);
-        });
-
-        document.getElementById('home-alarm-clear').addEventListener('click', function() {
-            if (data.alarm) {
-                data.alarm.active = false;
-                data.alarm = null;
-                saveData();
-                updateAlarmUI();
-                showNotification('⏰ Alarma desactivada', 'Recordatorio cancelado.');
-            }
-        });
-
-        // ---------- ACTUALIZACIÓN UI ----------
+        // ---------- ACTUALIZACIÓN UI COMPLETA ----------
         function updateAllUI() {
+            updateHeader();
             updateHome();
-            updateSubjects();
-            updateEvents();
+            updateSchedule();
             updateTasks();
+            updateExams();
+            updateGrades();
+            updateGoals();
+            updateAchievements();
+            updateCalendar();
+            updatePomodoroUI();
+            updateProfile();
             applyTheme();
-            updateSubjectSelect();
-            updateAlarmUI();
+        }
+
+        // ---------- HEADER CON AVATAR ----------
+        function updateHeader() {
+            const p = data.player;
+            document.getElementById('header-name').innerText = p.name;
+
+            // Mini avatar
+            const miniHair = document.getElementById('mini-hair');
+            miniHair.className = 'hair-mini';
+            if (p.hair && p.hair !== 'none') miniHair.classList.add(p.hair);
+            else miniHair.classList.add('none');
+
+            const miniShirt = document.getElementById('mini-shirt');
+            miniShirt.className = 'shirt-mini';
+            if (p.shirt && p.shirt !== 'blue') miniShirt.classList.add(p.shirt);
+
+            // Color de piel del mini avatar (se aplica al contenedor)
+            const miniAvatar = document.getElementById('mini-avatar');
+            miniAvatar.style.background = p.skin || '#fcd34d';
         }
 
         // ---------- INICIO ----------
         function updateHome() {
-            document.getElementById('home-subjects').innerText = data.subjects.length;
-            document.getElementById('home-events').innerText = data.events.length;
-            document.getElementById('home-tasks').innerText = data.tasks.filter(t => !t.completed).length;
+            const pending = data.tasks.filter(t => !t.completed).length;
+            document.getElementById('home-tasks-pending').innerText = pending;
 
-            // Próximos eventos (próximos 7 días)
-            const today = new Date();
-            const upcoming = data.events.filter(e => {
-                const evDate = new Date(e.date + 'T' + (e.time || '00:00'));
-                const diff = (evDate - today) / (1000 * 60 * 60 * 24);
-                return diff >= 0 && diff <= 7;
-            }).sort((a, b) => new Date(a.date + 'T' + (a.time || '00:00')) - new Date(b.date + 'T' + (b.time || '00:00')));
+            const today = todayStr();
+            const examsToday = data.exams.filter(e => e.date === today).length;
+            document.getElementById('home-exams-today').innerText = examsToday;
 
-            const container = document.getElementById('home-upcoming-events');
-            if (upcoming.length === 0) {
-                container.innerHTML = '<div class="empty-state">No hay eventos próximos.</div>';
+            const goalsProgress = data.goals.length > 0 ?
+                Math.round(data.goals.reduce((acc, g) => acc + (g.progress / g.total * 100), 0) / data.goals.length) : 0;
+            document.getElementById('home-goals-progress').innerText = goalsProgress + '%';
+
+            const unlocked = Object.values(data.achievements).filter(v => v === true).length;
+            document.getElementById('home-achievements-count').innerText = unlocked;
+
+            // Logros recientes
+            const unlockedList = Object.entries(data.achievements).filter(([k, v]) => v === true).map(([k]) => k);
+            const container = document.getElementById('home-achievements');
+            if (unlockedList.length === 0) {
+                container.innerHTML = '<div class="empty-state">Aún no tienes logros. ¡Sigue estudiando!</div>';
             } else {
-                container.innerHTML = upcoming.slice(0, 5).map(e =>
-                    `<div class="event-item">
-                        <div class="event-title">${e.title}</div>
-                        <div class="event-detail">${e.subject ? '📚 ' + e.subject : ''} · ${formatDateTime(e.date, e.time)}</div>
+                const names = {
+                    firstTask: '📝 Primera tarea',
+                    firstExam: '📚 Primer examen',
+                    fiveTasks: '✅ 5 tareas completadas',
+                    tenGoals: '🎯 10 metas creadas',
+                    pomodoroMaster: '🍅 10 ciclos Pomodoro'
+                };
+                container.innerHTML = unlockedList.slice(-3).map(k =>
+                    `<span style="display:inline-block; background:var(--bg-input); border-radius:40px; padding:2px 10px; margin:2px; font-size:12px;">${names[k] || k}</span>`
+                ).join(' ');
+            }
+
+            // Próximos eventos
+            const upcoming = [];
+            const todayDate = new Date();
+            data.tasks.forEach(t => {
+                if (!t.completed && t.due) {
+                    const diff = (new Date(t.due + 'T00:00:00') - todayDate) / (1000 * 60 * 60 * 24);
+                    if (diff >= 0 && diff <= 7) upcoming.push({ type: '📝', title: t.title, date: t.due });
+                }
+            });
+            data.exams.forEach(e => {
+                const diff = (new Date(e.date + 'T00:00:00') - todayDate) / (1000 * 60 * 60 * 24);
+                if (diff >= 0 && diff <= 7) upcoming.push({ type: '📚', title: e.title, date: e.date });
+            });
+            upcoming.sort((a, b) => new Date(a.date) - new Date(b.date));
+            const container2 = document.getElementById('home-upcoming-events');
+            if (upcoming.length === 0) {
+                container2.innerHTML = '<div class="empty-state">No hay eventos próximos.</div>';
+            } else {
+                container2.innerHTML = upcoming.slice(0, 5).map(e =>
+                    `<div style="display:flex; justify-content:space-between; padding:4px 0; border-bottom:1px solid var(--border-color); font-size:13px;">
+                        <span>${e.type} ${e.title}</span>
+                        <span style="color:var(--text-secondary);">${formatDate(e.date)}</span>
                     </div>`
                 ).join('');
             }
 
-            // Lista de materias en home
-            const subContainer = document.getElementById('home-subject-list');
-            if (data.subjects.length === 0) {
-                subContainer.innerHTML = '<div class="empty-state">No hay materias.</div>';
-            } else {
-                subContainer.innerHTML = data.subjects.slice(0, 10).map(s =>
-                    `<span class="subject-tag">${s}</span>`
-                ).join(' ') + (data.subjects.length > 10 ? ' ...' : '');
-            }
+            // Frase motivacional
+            const quotes = [
+                { text: "El éxito es la suma de pequeños esfuerzos repetidos día tras día.", author: "Robert Collier" },
+                { text: "El estudio no se mide por el tiempo que pasas, sino por lo que aprendes.", author: "Anónimo" },
+                { text: "La educación es el arma más poderosa para cambiar el mundo.", author: "Nelson Mandela" },
+                { text: "No te detengas cuando estés cansado, detente cuando hayas terminado.", author: "Anónimo" },
+                { text: "El conocimiento es poder, pero solo si se aplica.", author: "Anónimo" },
+                { text: "La disciplina es el puente entre metas y logros.", author: "Jim Rohn" },
+                { text: "El mejor momento para empezar fue ayer. El siguiente mejor momento es ahora.", author: "Anónimo" },
+            ];
+            const dayOfYear = Math.floor((new Date() - new Date(new Date().getFullYear(), 0, 0)) / (1000 * 60 * 60 * 24));
+            const quote = quotes[dayOfYear % quotes.length];
+            document.getElementById('dailyQuote').innerHTML = `"${quote.text}" <span class="author">— ${quote.author}</span>`;
         }
 
-        // ---------- MATERIAS ----------
-        function updateSubjects() {
-            const list = document.getElementById('subject-list');
-            if (data.subjects.length === 0) {
-                list.innerHTML = '<div class="empty-state">No hay materias. Agrega una.</div>';
-                return;
-            }
-            list.innerHTML = data.subjects.map((s, i) =>
-                `<div class="list-item">
-                    <span>${s}</span>
-                    <button class="btn btn-danger btn-sm" onclick="removeSubject(${i})">✕</button>
-                </div>`
-            ).join('');
-
-            const predefinedDiv = document.getElementById('predefined-subjects');
-            predefinedDiv.innerHTML = PREDEFINED_SUBJECTS.map(s =>
-                `<span class="subject-tag" style="background:var(--bg-card);">${s}</span>`
-            ).join(' ');
-        }
-
-        window.removeSubject = function(index) {
-            const subject = data.subjects[index];
-            if (PREDEFINED_SUBJECTS.includes(subject)) {
-                if (!confirm(`¿Eliminar la materia predefinida "${subject}"?`)) return;
-            }
-            data.subjects.splice(index, 1);
-            saveData();
-        };
-
-        document.getElementById('subject-add-btn').addEventListener('click', function() {
-            const input = document.getElementById('subject-input');
-            const val = input.value.trim();
-            if (!val) return alert('Escribe el nombre de la materia.');
-            if (data.subjects.includes(val)) return alert('Ya existe esa materia.');
-            data.subjects.push(val);
-            input.value = '';
-            saveData();
-        });
-
-        // ---------- EVENTOS ----------
-        function updateEvents() {
-            const list = document.getElementById('event-list');
-            if (data.events.length === 0) {
-                list.innerHTML = '<div class="empty-state">No hay eventos registrados.</div>';
-                return;
-            }
-            const sorted = [...data.events].sort((a, b) => new Date(a.date + 'T' + (a.time || '00:00')) - new Date(b.date + 'T' + (b.time || '00:00')));
-            list.innerHTML = sorted.map((e, i) => {
-                const idx = data.events.indexOf(e);
-                return `<div class="list-item">
-                    <div class="info">
-                        <div class="title">${e.title}</div>
-                        <div class="sub">${e.subject ? '📚 ' + e.subject : ''} · ${formatDateTime(e.date, e.time)}</div>
-                    </div>
-                    <div class="actions">
-                        <button class="btn btn-danger btn-sm" onclick="removeEvent(${idx})">✕</button>
-                    </div>
+        // ---------- HORARIO ----------
+        function updateSchedule() {
+            const container = document.getElementById('schedule-container');
+            const days = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+            let html = '';
+            days.forEach(day => {
+                const entries = data.schedule[day] || [];
+                html += `<div style="margin-bottom:8px;">
+                    <div style="font-weight:700; margin-bottom:2px; font-size:13px;">${day}</div>
+                    ${entries.length === 0 ? '<div class="empty-state" style="padding:4px 0; font-size:12px;">Sin clases</div>' :
+                        entries.map((e, i) => `<div style="display:flex; justify-content:space-between; padding:4px 0; border-bottom:1px solid var(--border-color); font-size:13px;">
+                            <span><strong>${e.subject}</strong> · ${e.teacher} · ${e.room}</span>
+                            <button class="btn btn-danger btn-sm" onclick="removeSchedule('${day}', ${i})">✕</button>
+                        </div>`).join('')}
                 </div>`;
-            }).join('');
+            });
+            container.innerHTML = html;
         }
 
-        window.removeEvent = function(index) {
-            data.events.splice(index, 1);
+        window.removeSchedule = function(day, index) {
+            data.schedule[day].splice(index, 1);
             saveData();
         };
 
-        document.getElementById('event-add-btn').addEventListener('click', function() {
-            const title = document.getElementById('event-title').value.trim();
-            const subject = document.getElementById('event-subject').value;
-            const date = document.getElementById('event-date').value;
-            const time = document.getElementById('event-time').value;
-            if (!title || !date || !time) return alert('Completa todos los campos (título, fecha y hora).');
-            if (!subject) return alert('Selecciona una materia.');
-
-            data.events.push({ title, subject, date, time });
-            document.getElementById('event-title').value = '';
-            document.getElementById('event-date').value = '';
-            document.getElementById('event-time').value = '';
+        document.getElementById('schedule-add-btn').addEventListener('click', function() {
+            const day = document.getElementById('schedule-day-select').value;
+            const subject = document.getElementById('schedule-subject').value.trim();
+            const teacher = document.getElementById('schedule-teacher').value.trim();
+            const room = document.getElementById('schedule-room').value.trim();
+            if (!subject) return alert('Ingresa la materia.');
+            if (!data.schedule[day]) data.schedule[day] = [];
+            data.schedule[day].push({ subject, teacher, room });
+            document.getElementById('schedule-subject').value = '';
+            document.getElementById('schedule-teacher').value = '';
+            document.getElementById('schedule-room').value = '';
             saveData();
-
-            // Notificación inmediata si es hoy
-            if (date === todayStr()) {
-                showNotification(`📅 Evento hoy: ${title}`, `Materia: ${subject} a las ${time}`);
-            }
-            // Recordatorio si es mañana
-            const tomorrow = new Date();
-            tomorrow.setDate(tomorrow.getDate() + 1);
-            if (date === tomorrow.toISOString().split('T')[0]) {
-                showNotification(`📅 Recordatorio: ${title} mañana`, `Materia: ${subject} a las ${time}`);
-            }
         });
-
-        function updateSubjectSelect() {
-            const select = document.getElementById('event-subject');
-            const current = select.value;
-            select.innerHTML = '<option value="">Materia</option>' +
-                data.subjects.map(s => `<option value="${s}">${s}</option>`).join('');
-            if (current && data.subjects.includes(current)) select.value = current;
-        }
 
         // ---------- TAREAS ----------
         function updateTasks() {
@@ -801,19 +992,21 @@
                 `<div class="list-item">
                     <div class="info">
                         <div class="title" style="${t.completed ? 'text-decoration:line-through; color:var(--text-secondary);' : ''}">${t.title}</div>
-                        <div class="sub">📅 ${t.due ? formatDate(t.due) : 'Sin fecha'}</div>
+                        <div class="sub">📅 ${t.due ? formatDate(t.due) : 'Sin fecha'} ${t.completed ? '✅ Completada' : ''}</div>
                     </div>
                     <div class="actions">
                         <button class="btn btn-success btn-sm" onclick="toggleTask(${i})">${t.completed ? '↩️' : '✅'}</button>
-                        <button class="btn btn-danger btn-sm" onclick="deleteTask(${i})">✕</button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteTask(${i})">🗑️</button>
                     </div>
                 </div>`
             ).join('');
+            checkAchievements();
         }
 
         window.toggleTask = function(index) {
             data.tasks[index].completed = !data.tasks[index].completed;
             saveData();
+            checkAchievements();
         };
 
         window.deleteTask = function(index) {
@@ -829,9 +1022,387 @@
             document.getElementById('task-title').value = '';
             document.getElementById('task-due').value = '';
             saveData();
+            checkAchievements();
         });
 
-        // ---------- TEMAS ----------
+        // ---------- EXÁMENES ----------
+        function updateExams() {
+            const list = document.getElementById('exam-list');
+            if (data.exams.length === 0) {
+                list.innerHTML = '<div class="empty-state">No hay exámenes registrados.</div>';
+                return;
+            }
+            list.innerHTML = data.exams.map((e, i) =>
+                `<div class="list-item">
+                    <div class="info">
+                        <div class="title">${e.title}</div>
+                        <div class="sub">📅 ${formatDate(e.date)}</div>
+                    </div>
+                    <div class="actions">
+                        <button class="btn btn-danger btn-sm" onclick="deleteExam(${i})">🗑️</button>
+                    </div>
+                </div>`
+            ).join('');
+
+            // Recordatorio de examen mañana
+            const today = new Date();
+            const tomorrow = new Date(today);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            const tomorrowStr = tomorrow.toISOString().split('T')[0];
+            data.exams.forEach(e => {
+                if (e.date === tomorrowStr) {
+                    showNotification('📚 Recordatorio de examen', `Mañana tienes examen de ${e.title}`);
+                }
+            });
+            checkAchievements();
+        }
+
+        window.deleteExam = function(index) {
+            data.exams.splice(index, 1);
+            saveData();
+        };
+
+        document.getElementById('exam-add-btn').addEventListener('click', function() {
+            const title = document.getElementById('exam-title').value.trim();
+            const date = document.getElementById('exam-date').value;
+            if (!title || !date) return alert('Completa todos los campos.');
+            data.exams.push({ title, date });
+            document.getElementById('exam-title').value = '';
+            document.getElementById('exam-date').value = '';
+            saveData();
+            checkAchievements();
+        });
+
+        // ---------- CALCULADORA DE NOTAS ----------
+        function updateGrades() {
+            const list = document.getElementById('grade-list');
+            if (data.grades.length === 0) {
+                list.innerHTML = '<div class="empty-state">No hay notas ingresadas.</div>';
+            } else {
+                list.innerHTML = data.grades.map((g, i) =>
+                    `<div class="list-item">
+                        <span>${g}%</span>
+                        <button class="btn btn-danger btn-sm" onclick="deleteGrade(${i})">✕</button>
+                    </div>`
+                ).join('');
+            }
+
+            const avg = data.grades.length > 0 ? data.grades.reduce((a, b) => a + b, 0) / data.grades.length : null;
+            document.getElementById('grade-average').innerText = avg !== null ? avg.toFixed(1) + '%' : '-';
+
+            if (data.grades.length > 0 && avg < 70) {
+                const needed = 70 * (data.grades.length + 1) - data.grades.reduce((a, b) => a + b, 0);
+                document.getElementById('grade-needed').innerText = Math.max(0, needed).toFixed(1) + '%';
+            } else {
+                document.getElementById('grade-needed').innerText = avg >= 70 ? '✅ Aprobado' : '--';
+            }
+        }
+
+        window.deleteGrade = function(index) {
+            data.grades.splice(index, 1);
+            saveData();
+        };
+
+        document.getElementById('grade-add-btn').addEventListener('click', function() {
+            const val = parseFloat(document.getElementById('grade-input').value);
+            if (isNaN(val) || val < 0 || val > 100) return alert('Ingresa una nota entre 0 y 100.');
+            data.grades.push(val);
+            document.getElementById('grade-input').value = '';
+            saveData();
+        });
+
+        // ---------- POMODORO ----------
+        let pomodoroInterval = null;
+        let pomodoroTime = 25 * 60;
+        let pomodoroRunning = false;
+        let pomodoroPhase = 'study';
+
+        function updatePomodoroUI() {
+            const mins = Math.floor(pomodoroTime / 60);
+            const secs = pomodoroTime % 60;
+            document.getElementById('pomodoro-timer').innerText =
+                `${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}`;
+            document.getElementById('pomodoro-phase').innerText =
+                pomodoroPhase === 'study' ? '📖 Estudio' : '☕ Descanso';
+            document.getElementById('pomodoro-cycles').innerText = data.pomodoroCycles || 0;
+        }
+
+        function pomodoroTick() {
+            if (pomodoroTime <= 0) {
+                if (pomodoroPhase === 'study') {
+                    data.pomodoroCycles = (data.pomodoroCycles || 0) + 1;
+                    if (data.pomodoroCycles >= 10) {
+                        data.achievements.pomodoroMaster = true;
+                        saveData();
+                    }
+                    pomodoroPhase = 'break';
+                    pomodoroTime = 5 * 60;
+                    showNotification('🍅 Pomodoro', '¡Descanso! 5 minutos.');
+                } else {
+                    pomodoroPhase = 'study';
+                    pomodoroTime = 25 * 60;
+                    showNotification('🍅 Pomodoro', '¡Vuelve a estudiar! 25 minutos.');
+                }
+                saveData();
+                updatePomodoroUI();
+                return;
+            }
+            pomodoroTime--;
+            updatePomodoroUI();
+        }
+
+        document.getElementById('pomodoro-start').addEventListener('click', function() {
+            if (pomodoroRunning) return;
+            pomodoroRunning = true;
+            pomodoroInterval = setInterval(pomodoroTick, 1000);
+            this.disabled = true;
+            document.getElementById('pomodoro-pause').disabled = false;
+        });
+
+        document.getElementById('pomodoro-pause').addEventListener('click', function() {
+            if (!pomodoroRunning) return;
+            clearInterval(pomodoroInterval);
+            pomodoroRunning = false;
+            document.getElementById('pomodoro-start').disabled = false;
+            this.disabled = true;
+        });
+
+        document.getElementById('pomodoro-reset').addEventListener('click', function() {
+            clearInterval(pomodoroInterval);
+            pomodoroRunning = false;
+            pomodoroPhase = 'study';
+            pomodoroTime = 25 * 60;
+            document.getElementById('pomodoro-start').disabled = false;
+            document.getElementById('pomodoro-pause').disabled = true;
+            updatePomodoroUI();
+            saveData();
+        });
+
+        // ---------- METAS ----------
+        function updateGoals() {
+            const list = document.getElementById('goal-list');
+            if (data.goals.length === 0) {
+                list.innerHTML = '<div class="empty-state">No hay metas.</div>';
+                return;
+            }
+            list.innerHTML = data.goals.map((g, i) => {
+                const pct = Math.min(100, (g.progress / g.total) * 100);
+                return `<div class="list-item" style="flex-direction:column; align-items:stretch;">
+                    <div style="display:flex; justify-content:space-between;">
+                        <div class="title">${g.title}</div>
+                        <div>${Math.round(pct)}%</div>
+                    </div>
+                    <div class="progress-bar"><div class="fill" style="width:${pct}%;"></div></div>
+                    <div style="display:flex; justify-content:space-between; margin-top:2px;">
+                        <span style="font-size:12px; color:var(--text-secondary);">${g.progress} / ${g.total}</span>
+                        <div style="display:flex; gap:4px;">
+                            <button class="btn btn-sm btn-success" onclick="goalProgress(${i}, 1)">+1</button>
+                            <button class="btn btn-sm btn-success" onclick="goalProgress(${i}, 5)">+5</button>
+                            <button class="btn btn-sm btn-danger" onclick="deleteGoal(${i})">🗑️</button>
+                        </div>
+                    </div>
+                </div>`;
+            }).join('');
+            checkAchievements();
+        }
+
+        window.goalProgress = function(index, amount) {
+            const g = data.goals[index];
+            g.progress = Math.min(g.total, g.progress + amount);
+            if (g.progress >= g.total) {
+                showNotification('🎯 Meta completada', `¡Lograste tu meta: ${g.title}!`);
+            }
+            saveData();
+            checkAchievements();
+        };
+
+        window.deleteGoal = function(index) {
+            data.goals.splice(index, 1);
+            saveData();
+        };
+
+        document.getElementById('goal-add-btn').addEventListener('click', function() {
+            const title = document.getElementById('goal-title').value.trim();
+            const total = parseInt(document.getElementById('goal-total').value);
+            if (!title || isNaN(total) || total < 1) return alert('Completa los campos correctamente.');
+            data.goals.push({ title, total, progress: 0 });
+            document.getElementById('goal-title').value = '';
+            document.getElementById('goal-total').value = '';
+            saveData();
+            checkAchievements();
+        });
+
+        // ---------- LOGROS ----------
+        function checkAchievements() {
+            let changed = false;
+            if (!data.achievements.firstTask && data.tasks.some(t => t.completed)) {
+                data.achievements.firstTask = true;
+                changed = true;
+                showNotification('🏅 Logro desbloqueado', '¡Completaste tu primera tarea!');
+            }
+            if (!data.achievements.firstExam && data.exams.length > 0) {
+                data.achievements.firstExam = true;
+                changed = true;
+                showNotification('🏅 Logro desbloqueado', '¡Agregaste tu primer examen!');
+            }
+            if (!data.achievements.fiveTasks && data.tasks.filter(t => t.completed).length >= 5) {
+                data.achievements.fiveTasks = true;
+                changed = true;
+                showNotification('🏅 Logro desbloqueado', '¡Completaste 5 tareas!');
+            }
+            if (!data.achievements.tenGoals && data.goals.length >= 10) {
+                data.achievements.tenGoals = true;
+                changed = true;
+                showNotification('🏅 Logro desbloqueado', '¡Creaste 10 metas!');
+            }
+            if (!data.achievements.pomodoroMaster && (data.pomodoroCycles || 0) >= 10) {
+                data.achievements.pomodoroMaster = true;
+                changed = true;
+                showNotification('🏅 Logro desbloqueado', '¡Completaste 10 ciclos Pomodoro!');
+            }
+            if (changed) saveData();
+            updateAchievements();
+            updateHome();
+        }
+
+        function updateAchievements() {
+            const grid = document.getElementById('achievement-grid');
+            const achievements = [
+                { id: 'firstTask', icon: '📝', name: 'Primera tarea', desc: 'Completa tu primera tarea' },
+                { id: 'firstExam', icon: '📚', name: 'Primer examen', desc: 'Agrega un examen' },
+                { id: 'fiveTasks', icon: '✅', name: '5 tareas', desc: 'Completa 5 tareas' },
+                { id: 'tenGoals', icon: '🎯', name: '10 metas', desc: 'Crea 10 metas' },
+                { id: 'pomodoroMaster', icon: '🍅', name: 'Pomodoro máster', desc: '10 ciclos completados' }
+            ];
+            grid.innerHTML = achievements.map(a =>
+                `<div class="achievement-item ${data.achievements[a.id] ? 'unlocked' : ''}">
+                    <div class="icon">${a.icon}</div>
+                    <div class="name">${a.name}</div>
+                    <div class="desc">${data.achievements[a.id] ? '✅ Desbloqueado' : a.desc}</div>
+                </div>`
+            ).join('');
+        }
+
+        // ---------- CALENDARIO ----------
+        let calDate = new Date();
+
+        function updateCalendar() {
+            const year = calDate.getFullYear();
+            const month = calDate.getMonth();
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            const today = new Date();
+            const todayStr = today.toISOString().split('T')[0];
+
+            document.getElementById('cal-month-year').innerText =
+                new Date(year, month).toLocaleDateString('es-ES', { month: 'long', year: 'numeric' });
+
+            let html = '';
+            const dayNames = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+            dayNames.forEach(d => html += `<div class="day-name">${d}</div>`);
+
+            for (let i = 0; i < firstDay; i++) {
+                html += `<div></div>`;
+            }
+
+            for (let d = 1; d <= daysInMonth; d++) {
+                const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+                const hasEvent = data.tasks.some(t => t.due === dateStr) || data.exams.some(e => e.date === dateStr);
+                const isToday = dateStr === todayStr;
+                html += `<div class="day-cell ${hasEvent ? 'has-event' : ''} ${isToday ? 'today' : ''}">
+                            ${d}
+                            ${hasEvent ? '<span class="event-dot"></span>' : ''}
+                        </div>`;
+            }
+
+            document.getElementById('calendar-grid').innerHTML = html;
+        }
+
+        document.getElementById('cal-prev').addEventListener('click', function() {
+            calDate.setMonth(calDate.getMonth() - 1);
+            updateCalendar();
+        });
+        document.getElementById('cal-next').addEventListener('click', function() {
+            calDate.setMonth(calDate.getMonth() + 1);
+            updateCalendar();
+        });
+
+        // ---------- PERFIL Y PERSONALIZACIÓN ----------
+        function updateProfile() {
+            const p = data.player;
+            document.getElementById('profile-name-display').innerText = p.name;
+
+            // Avatar grande
+            const bigHair = document.getElementById('avatar-hair');
+            bigHair.className = 'hair-big';
+            if (p.hair && p.hair !== 'none') bigHair.classList.add(p.hair);
+            else bigHair.classList.add('none');
+
+            const bigShirt = document.getElementById('avatar-shirt');
+            bigShirt.className = 'shirt-big';
+            if (p.shirt && p.shirt !== 'blue') bigShirt.classList.add(p.shirt);
+
+            const bigAvatar = document.getElementById('avatar-preview');
+            bigAvatar.style.background = p.skin || '#fcd34d';
+
+            // Marcar opciones activas
+            document.querySelectorAll('#skin-options button').forEach(b => {
+                b.classList.toggle('active', b.dataset.skin === p.skin);
+            });
+            document.querySelectorAll('#hair-options button').forEach(b => {
+                b.classList.toggle('active', b.dataset.hair === p.hair);
+            });
+            document.querySelectorAll('#shirt-options button').forEach(b => {
+                b.classList.toggle('active', b.dataset.shirt === p.shirt);
+            });
+
+            // Nivel (simulado)
+            const totalTasks = data.tasks.length;
+            const level = Math.floor(totalTasks / 3) + 1;
+            document.getElementById('profile-level').innerText = level;
+        }
+
+        // Eventos de personalización
+        document.querySelectorAll('#skin-options button').forEach(btn => {
+            btn.addEventListener('click', function() {
+                data.player.skin = this.dataset.skin;
+                saveData();
+            });
+        });
+
+        document.querySelectorAll('#hair-options button').forEach(btn => {
+            btn.addEventListener('click', function() {
+                data.player.hair = this.dataset.hair;
+                saveData();
+            });
+        });
+
+        document.querySelectorAll('#shirt-options button').forEach(btn => {
+            btn.addEventListener('click', function() {
+                data.player.shirt = this.dataset.shirt;
+                saveData();
+            });
+        });
+
+        document.getElementById('profile-rename-btn').addEventListener('click', function() {
+            const input = document.getElementById('profile-name-input');
+            if (input.value.trim().length > 0) {
+                data.player.name = input.value.trim();
+                saveData();
+                input.value = '';
+            }
+        });
+
+        // ---------- NOTIFICACIONES ----------
+        function showNotification(title, body) {
+            if ('Notification' in window && Notification.permission === 'granted') {
+                new Notification(title, { body, icon: '📚' });
+            } else if ('Notification' in window && Notification.permission !== 'denied') {
+                Notification.requestPermission();
+            }
+        }
+
+        // ---------- TEMAS Y PERSONALIZACIÓN ----------
         function applyTheme() {
             const dark = data.settings.darkMode;
             document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
@@ -868,10 +1439,10 @@
             saveData();
         });
 
-        // ---------- REINICIAR ----------
+        // ---------- REINICIAR DATOS ----------
         document.getElementById('reset-data-btn').addEventListener('click', function() {
             if (confirm('¿Seguro que quieres borrar todos los datos?')) {
-                localStorage.removeItem('studyhubData_v3');
+                localStorage.removeItem('studyhubData');
                 data = JSON.parse(JSON.stringify(defaultData));
                 saveData();
                 alert('Datos restablecidos.');
@@ -888,34 +1459,25 @@
                 document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
                 document.getElementById('page-' + pageId).classList.add('active');
                 document.getElementById('pagesContainer').scrollTop = 0;
-                updateAllUI();
+                if (pageId === 'calendar') updateCalendar();
+                if (pageId === 'achievements') updateAchievements();
+                if (pageId === 'home') updateHome();
+                if (pageId === 'profile') updateProfile();
             });
         });
 
-        // ---------- INICIALIZACIÓN ----------
-        // Notificaciones
+        // ---------- INICIALIZAR ----------
         if ('Notification' in window && Notification.permission === 'default') {
             Notification.requestPermission();
         }
 
-        // Verificar eventos del día
-        function checkTodayEvents() {
-            const today = todayStr();
-            data.events.forEach(e => {
-                if (e.date === today) {
-                    showNotification(`📅 Evento hoy: ${e.title}`, `Materia: ${e.subject} a las ${e.time}`);
-                }
-            });
-        }
+        pomodoroTime = 25 * 60;
+        pomodoroPhase = 'study';
+        updatePomodoroUI();
+        document.getElementById('pomodoro-pause').disabled = true;
 
-        // Iniciar checker de alarma
-        startAlarmChecker();
-
-        // Guardar y actualizar
         saveData();
-        checkTodayEvents();
-
-        console.log('📚 StudyHub v3 con recordatorios de alarma cargado.');
+        console.log('📚 StudyHub con personalización cargado.');
     </script>
 </body>
 </html>
