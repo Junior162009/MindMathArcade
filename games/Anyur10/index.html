@@ -92,7 +92,7 @@
                         </div>
                         <div class="stat-item">
                             <div class="stat-icon">🎯</div>
-                            <div><strong id="home-goals-progress">0%</strong><br><span class="stat-label">metas</span></div> <!-- 🔥 CORREGIDO -->
+                            <div><strong id="home-goals-progress">0%</strong><br><span class="stat-label">metas</span></div>
                         </div>
                     </div>
                 </div>
@@ -268,8 +268,9 @@
                                 <option value="orange">Naranja</option>
                             </select>
                         </div>
-                        <button class="mode-toggle-btn" id="modeToggleBtn">
-                            <span class="icon">🔄</span> Cambiar a <span id="modeToggleLabel">PC</span>
+                        <!-- NUEVO BOTÓN PARA CAMBIAR DE MODO -->
+                        <button class="mode-toggle-btn" id="resetModeBtn">
+                            <span class="icon">🔄</span> Cambiar modo (PC/Móvil)
                         </button>
                         <button class="btn btn-danger" id="reset-data-btn">🔄 Restablecer todos los datos</button>
                     </div>
@@ -277,7 +278,7 @@
             </div>
         </div>
 
-        <!-- NAVEGACIÓN INFERIOR (se oculta en móvil) -->
+        <!-- NAVEGACIÓN INFERIOR (SOLO PC) -->
         <div class="bottom-nav" id="bottomNav">
             <button class="nav-btn active" data-page="home"><span class="nav-icon">🏠</span> Inicio</button>
             <button class="nav-btn" data-page="schedule"><span class="nav-icon">📅</span> Horario</button>
@@ -300,13 +301,12 @@
         const selector = document.getElementById('device-selector');
         const body = document.body;
 
-        let savedMode = localStorage.getItem('studyhubDeviceMode');
-        if (!savedMode) {
-            const isMobile = window.innerWidth < 768 || /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
-            savedMode = isMobile ? 'mobile' : 'desktop';
-            localStorage.setItem('studyhubDeviceMode', savedMode);
+        // Función para mostrar el selector
+        function showSelector() {
+            selector.classList.remove('hidden');
         }
 
+        // Función para ocultar el selector y aplicar modo
         function applyMode(mode) {
             body.classList.remove('mobile', 'desktop');
             body.classList.add(mode);
@@ -322,14 +322,25 @@
             localStorage.setItem('studyhubDeviceMode', mode);
         }
 
+        // Eventos de los botones del selector
         document.getElementById('choose-mobile').addEventListener('click', () => applyMode('mobile'));
         document.getElementById('choose-desktop').addEventListener('click', () => applyMode('desktop'));
-        document.getElementById('modeToggleBtn').addEventListener('click', function() {
-            const current = body.classList.contains('mobile') ? 'mobile' : 'desktop';
-            applyMode(current === 'mobile' ? 'desktop' : 'mobile');
+
+        // Botón en Configuración para resetear el modo y mostrar selector
+        document.getElementById('resetModeBtn').addEventListener('click', function() {
+            localStorage.removeItem('studyhubDeviceMode');
+            // Recargar la página para que el selector aparezca
+            location.reload();
         });
 
-        if (savedMode) applyMode(savedMode);
+        // Al cargar, si no hay modo guardado, mostrar selector; si hay, aplicar directamente
+        let savedMode = localStorage.getItem('studyhubDeviceMode');
+        if (savedMode) {
+            applyMode(savedMode);
+        } else {
+            // No hay modo guardado, mostrar selector
+            showSelector();
+        }
 
         // ---------- DRAWER (menú lateral) ----------
         const menuToggle = document.getElementById('menuToggle');
@@ -383,7 +394,7 @@
             });
         });
 
-        // ---------- DATOS Y LÓGICA (idéntica a la anterior) ----------
+        // ---------- DATOS Y LÓGICA (igual que antes) ----------
         const defaultData = {
             player: { name: 'Estudiante', avatar: '🧑‍🎓' },
             schedule: {

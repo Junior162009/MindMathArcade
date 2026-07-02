@@ -29,7 +29,7 @@ body.mobile #app {
 }
 
 /* ============================================================
-   MENÚ LATERAL (DRAWER)
+   MENÚ LATERAL (DRAWER) - SOLO MÓVIL
    ============================================================ */
 
 /* Botón hamburguesa */
@@ -171,7 +171,7 @@ body.mobile .header-actions button {
 }
 
 /* ============================================================
-   CONTENEDOR DE PÁGINAS (evita que tape la barra)
+   CONTENEDOR DE PÁGINAS
    ============================================================ */
 body.mobile .pages-container {
     flex: 1 1 auto;
