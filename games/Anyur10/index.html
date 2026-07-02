@@ -3,37 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>StudyHub · Android</title>
+    <title>StudyHub · Grande</title>
     <style>
         /* ========== VARIABLES ========== */
         :root {
             --bg-primary: #0f172a;
-            --bg-secondary: #1e293b;
+            --bg-secondary: #1a2332;
             --bg-card: #1e293b;
             --bg-input: #0f172a;
             --text-primary: #f1f5f9;
-            --text-secondary: #94a3b8;
+            --text-secondary: #b0c4de;
             --border-color: #334155;
             --accent: #3b82f6;
             --accent-hover: #2563eb;
-            --shadow: 0 8px 16px rgba(0,0,0,0.4);
-            --radius: 20px;
+            --shadow: 0 12px 24px rgba(0,0,0,0.5);
+            --radius: 24px;
             --transition: 0.25s ease;
-            --nav-bg: #1e293b;
-            --header-bg: #1e293b;
-            --font-base: 16px;
-            --touch-target: 48px;
+            --nav-bg: #1a2332;
+            --header-bg: #1a2332;
+            --font-base: 18px;
+            --touch-target: 56px;
         }
 
         [data-theme="light"] {
-            --bg-primary: #f1f5f9;
+            --bg-primary: #f0f4f8;
             --bg-secondary: #ffffff;
             --bg-card: #ffffff;
-            --bg-input: #f1f5f9;
-            --text-primary: #0f172a;
-            --text-secondary: #475569;
+            --bg-input: #e9eef3;
+            --text-primary: #0b1a2a;
+            --text-secondary: #2d4b6e;
             --border-color: #cbd5e1;
-            --shadow: 0 8px 16px rgba(0,0,0,0.08);
+            --shadow: 0 12px 24px rgba(0,0,0,0.08);
             --nav-bg: #ffffff;
             --header-bg: #ffffff;
         }
@@ -59,16 +59,17 @@
             justify-content: center;
             align-items: center;
             transition: background var(--transition), color var(--transition);
-            padding: 8px;
+            padding: 12px;
             touch-action: manipulation;
+            font-size: var(--font-base);
         }
 
         #app {
             width: 100%;
-            max-width: 480px;
-            height: 780px;
+            max-width: 520px;
+            height: 820px;
             background: var(--bg-secondary);
-            border-radius: 32px;
+            border-radius: 36px;
             box-shadow: var(--shadow);
             display: flex;
             flex-direction: column;
@@ -78,51 +79,52 @@
             transition: background var(--transition), border-color var(--transition);
         }
 
-        /* ========== HEADER (más grande) ========== */
+        /* ========== HEADER ========== */
         .header {
             background: var(--header-bg);
-            padding: 16px 20px;
+            padding: 20px 24px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 1px solid var(--border-color);
+            border-bottom: 2px solid var(--border-color);
             flex-shrink: 0;
             transition: background var(--transition), border-color var(--transition);
-            min-height: 64px;
+            min-height: 72px;
         }
         .header .brand {
             font-weight: 800;
-            font-size: 22px;
+            font-size: 26px;
             color: var(--accent);
             letter-spacing: -0.5px;
         }
         .header .brand span { color: var(--text-primary); }
         .header-actions {
             display: flex;
-            gap: 14px;
+            gap: 18px;
             align-items: center;
         }
         .header-actions button {
             background: transparent;
             border: none;
             color: var(--text-secondary);
-            font-size: 26px;
+            font-size: 30px;
             cursor: pointer;
             transition: color var(--transition);
-            padding: 6px;
+            padding: 8px;
             min-height: var(--touch-target);
             min-width: var(--touch-target);
             display: flex;
             align-items: center;
             justify-content: center;
+            border-radius: 40px;
         }
-        .header-actions button:active { opacity: 0.6; }
+        .header-actions button:active { background: var(--bg-input); }
 
         /* ========== PÁGINAS ========== */
         .pages-container {
             flex: 1;
             overflow-y: auto;
-            padding: 16px 16px 10px 16px;
+            padding: 20px 20px 14px 20px;
             scroll-behavior: smooth;
             -webkit-overflow-scrolling: touch;
         }
@@ -132,22 +134,22 @@
         }
         .page.active { display: block; }
         @keyframes fadeUp {
-            from { opacity: 0; transform: translateY(12px); }
+            from { opacity: 0; transform: translateY(16px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* ========== NAVEGACIÓN INFERIOR (táctil) ========== */
+        /* ========== NAVEGACIÓN INFERIOR ========== */
         .bottom-nav {
             background: var(--nav-bg);
             display: flex;
             justify-content: space-around;
-            padding: 6px 0 16px 0;
-            border-top: 1px solid var(--border-color);
+            padding: 8px 4px 18px 4px;
+            border-top: 2px solid var(--border-color);
             flex-shrink: 0;
             transition: background var(--transition), border-color var(--transition);
             flex-wrap: nowrap;
             overflow-x: auto;
-            gap: 2px;
+            gap: 4px;
         }
         .bottom-nav::-webkit-scrollbar { display: none; }
 
@@ -155,66 +157,67 @@
             background: transparent;
             border: none;
             color: var(--text-secondary);
-            font-size: 12px;
-            font-weight: 600;
+            font-size: 13px;
+            font-weight: 700;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 2px;
+            gap: 4px;
             cursor: pointer;
-            padding: 6px 12px;
-            border-radius: 16px;
+            padding: 8px 14px;
+            border-radius: 20px;
             transition: 0.2s;
-            min-height: 56px;
-            min-width: 48px;
+            min-height: 64px;
+            min-width: 56px;
             justify-content: center;
             touch-action: manipulation;
             white-space: nowrap;
         }
-        .nav-btn .nav-icon { font-size: 24px; line-height: 1.2; }
+        .nav-btn .nav-icon { font-size: 28px; line-height: 1.2; }
         .nav-btn.active {
             color: var(--accent);
             background: var(--bg-input);
-            padding: 6px 16px;
+            padding: 8px 18px;
         }
         .nav-btn:active { transform: scale(0.92); }
 
-        /* ========== COMPONENTES TÁCTILES ========== */
+        /* ========== COMPONENTES GRANDES ========== */
         .card {
             background: var(--bg-card);
             border-radius: var(--radius);
-            padding: 20px 18px;
-            margin-bottom: 18px;
+            padding: 24px 22px;
+            margin-bottom: 22px;
             border: 1px solid var(--border-color);
             box-shadow: var(--shadow);
             transition: background var(--transition), border-color var(--transition);
         }
         .card-title {
-            font-size: 18px;
+            font-size: 22px;
             font-weight: 700;
-            margin-bottom: 14px;
+            margin-bottom: 18px;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
         }
 
         .btn {
             background: var(--accent);
             color: white;
             border: none;
-            padding: 12px 20px;
-            border-radius: 40px;
+            padding: 14px 24px;
+            border-radius: 50px;
             font-weight: 700;
-            font-size: 16px;
+            font-size: 18px;
             cursor: pointer;
             transition: background 0.15s, transform 0.1s;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
+            gap: 10px;
             min-height: var(--touch-target);
             min-width: var(--touch-target);
             touch-action: manipulation;
+            line-height: 1.2;
         }
         .btn:active { transform: scale(0.94); }
         .btn:hover { background: var(--accent-hover); }
@@ -228,24 +231,24 @@
         .btn-danger:hover { background: #dc2626; }
         .btn-success { background: #22c55e; }
         .btn-success:hover { background: #16a34a; }
-        .btn-sm { padding: 10px 16px; font-size: 14px; min-height: 40px; }
+        .btn-sm { padding: 12px 18px; font-size: 16px; min-height: 48px; }
         .btn:disabled { opacity: 0.4; pointer-events: none; }
 
         .input-group {
             display: flex;
-            gap: 12px;
+            gap: 14px;
             flex-wrap: wrap;
-            margin-bottom: 12px;
+            margin-bottom: 16px;
         }
         .input-group input, .input-group select {
             flex: 1;
-            min-width: 120px;
-            padding: 14px 16px;
-            border-radius: 40px;
+            min-width: 140px;
+            padding: 16px 18px;
+            border-radius: 50px;
             border: 1px solid var(--border-color);
             background: var(--bg-input);
             color: var(--text-primary);
-            font-size: 16px; /* evita zoom en Android */
+            font-size: 18px;
             transition: border-color var(--transition);
             min-height: var(--touch-target);
         }
@@ -258,8 +261,8 @@
             background: var(--accent);
             color: white;
             border-radius: 40px;
-            padding: 4px 14px;
-            font-size: 14px;
+            padding: 6px 18px;
+            font-size: 16px;
             font-weight: 600;
             display: inline-block;
         }
@@ -271,34 +274,34 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 12px 0;
+            padding: 14px 0;
             border-bottom: 1px solid var(--border-color);
-            gap: 8px;
+            gap: 12px;
         }
         .list-item:last-child { border-bottom: none; }
         .list-item .info { flex: 1; }
-        .list-item .info .title { font-weight: 600; font-size: 16px; }
-        .list-item .info .sub { font-size: 14px; color: var(--text-secondary); }
+        .list-item .info .title { font-weight: 700; font-size: 18px; }
+        .list-item .info .sub { font-size: 16px; color: var(--text-secondary); }
         .list-item .actions {
             display: flex;
-            gap: 10px;
+            gap: 12px;
             flex-shrink: 0;
         }
-        .list-item .actions .btn { min-height: 40px; min-width: 40px; padding: 6px 12px; font-size: 14px; }
+        .list-item .actions .btn { min-height: 44px; min-width: 44px; padding: 8px 14px; font-size: 16px; }
 
         .empty-state {
             text-align: center;
-            padding: 24px 0;
+            padding: 30px 0;
             color: var(--text-secondary);
-            font-size: 15px;
+            font-size: 17px;
         }
 
         .progress-bar {
             background: var(--bg-input);
             border-radius: 40px;
-            height: 12px;
+            height: 16px;
             overflow: hidden;
-            margin: 8px 0;
+            margin: 10px 0;
         }
         .progress-bar .fill {
             height: 100%;
@@ -310,36 +313,39 @@
         .grid-2 {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 12px;
+            gap: 16px;
         }
 
         /* ========== CALENDARIO ========== */
         .calendar-grid {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
-            gap: 6px;
+            gap: 8px;
             text-align: center;
-            font-size: 15px;
-            margin-top: 8px;
+            font-size: 17px;
+            margin-top: 10px;
         }
         .calendar-grid .day-name {
-            font-weight: 600;
+            font-weight: 700;
             color: var(--text-secondary);
-            padding: 8px 0;
+            padding: 10px 0;
+            font-size: 16px;
         }
         .calendar-grid .day-cell {
             background: var(--bg-input);
-            border-radius: 12px;
-            padding: 10px 0;
+            border-radius: 16px;
+            padding: 14px 0;
             cursor: pointer;
             transition: 0.1s;
             border: 1px solid transparent;
             position: relative;
-            min-height: 44px;
+            min-height: 54px;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
+            font-size: 18px;
+            font-weight: 600;
         }
         .calendar-grid .day-cell.has-event {
             border-color: var(--accent);
@@ -351,49 +357,49 @@
         }
         .calendar-grid .day-cell .event-dot {
             display: block;
-            width: 8px;
-            height: 8px;
+            width: 10px;
+            height: 10px;
             background: var(--accent);
             border-radius: 50%;
-            margin-top: 2px;
+            margin-top: 4px;
         }
         .calendar-nav {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 12px;
+            margin-bottom: 16px;
         }
         .calendar-nav .month-year {
             font-weight: 700;
-            font-size: 18px;
+            font-size: 22px;
         }
 
         /* ========== POMODORO ========== */
         .pomodoro-timer {
-            font-size: 56px;
+            font-size: 68px;
             font-weight: 800;
             text-align: center;
             font-variant-numeric: tabular-nums;
-            letter-spacing: 3px;
-            margin: 12px 0;
+            letter-spacing: 4px;
+            margin: 16px 0;
         }
         .pomodoro-phase {
             text-align: center;
-            font-size: 16px;
+            font-size: 20px;
             color: var(--text-secondary);
-            margin-bottom: 8px;
+            margin-bottom: 10px;
         }
 
         /* ========== LOGROS ========== */
         .achievement-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 12px;
+            gap: 16px;
         }
         .achievement-item {
             background: var(--bg-input);
             border-radius: var(--radius);
-            padding: 14px 8px;
+            padding: 18px 8px;
             text-align: center;
             border: 1px solid var(--border-color);
             transition: 0.15s;
@@ -402,62 +408,63 @@
             border-color: var(--accent);
             background: var(--bg-card);
         }
-        .achievement-item .icon { font-size: 32px; }
-        .achievement-item .name { font-size: 13px; font-weight: 600; margin-top: 4px; }
-        .achievement-item .desc { font-size: 11px; color: var(--text-secondary); }
+        .achievement-item .icon { font-size: 40px; }
+        .achievement-item .name { font-size: 15px; font-weight: 700; margin-top: 6px; }
+        .achievement-item .desc { font-size: 13px; color: var(--text-secondary); }
 
         /* ========== MOTIVACIÓN ========== */
         .quote-box {
             background: var(--bg-input);
             border-radius: var(--radius);
-            padding: 18px 20px;
-            border-left: 5px solid var(--accent);
+            padding: 22px 24px;
+            border-left: 6px solid var(--accent);
             font-style: italic;
             color: var(--text-secondary);
-            margin-bottom: 18px;
-            font-size: 15px;
+            margin-bottom: 22px;
+            font-size: 18px;
         }
         .quote-box .author {
             display: block;
             text-align: right;
             font-style: normal;
-            font-weight: 600;
+            font-weight: 700;
             color: var(--text-primary);
-            margin-top: 6px;
+            margin-top: 8px;
+            font-size: 17px;
         }
 
         /* ========== PERSONALIZACIÓN JUGADOR ========== */
         .player-profile {
             display: flex;
             align-items: center;
-            gap: 20px;
+            gap: 24px;
             flex-wrap: wrap;
         }
         .player-avatar {
-            font-size: 56px;
+            font-size: 72px;
             background: var(--bg-input);
             border-radius: 50%;
-            width: 80px;
-            height: 80px;
+            width: 100px;
+            height: 100px;
             display: flex;
             align-items: center;
             justify-content: center;
-            border: 2px solid var(--border-color);
+            border: 3px solid var(--border-color);
             transition: border-color var(--transition);
         }
         .avatar-selector {
             display: flex;
-            gap: 12px;
+            gap: 14px;
             flex-wrap: wrap;
-            margin-top: 8px;
+            margin-top: 10px;
         }
         .avatar-selector .avatar-option {
-            font-size: 32px;
+            font-size: 38px;
             background: var(--bg-input);
-            border: 2px solid var(--border-color);
+            border: 3px solid var(--border-color);
             border-radius: 50%;
-            width: 56px;
-            height: 56px;
+            width: 68px;
+            height: 68px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -470,30 +477,12 @@
         }
         .avatar-selector .avatar-option:active { transform: scale(0.9); }
 
-        /* ========== SCROLL ========== */
-        .pages-container::-webkit-scrollbar { width: 4px; }
-        .pages-container::-webkit-scrollbar-track { background: transparent; }
-        .pages-container::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 10px; }
-
-        /* ========== RESPONSIVE ========== */
-        @media (max-width: 500px) {
-            #app { height: 100vh; border-radius: 0; max-width: 100%; }
-            .bottom-nav { padding: 4px 0 12px 0; }
-            .nav-btn { font-size: 11px; padding: 4px 8px; min-height: 48px; }
-            .nav-btn .nav-icon { font-size: 20px; }
-        }
-        @media (max-width: 400px) {
-            .grid-2 { grid-template-columns: 1fr; }
-            .achievement-grid { grid-template-columns: repeat(2, 1fr); }
-            .header .brand { font-size: 18px; }
-        }
-
-        /* ========== SWITCH TOGGLE (para tema) ========== */
+        /* ========== SWITCH TOGGLE ========== */
         .switch {
             position: relative;
             display: inline-block;
-            width: 52px;
-            height: 28px;
+            width: 60px;
+            height: 32px;
         }
         .switch input {
             opacity: 0;
@@ -514,8 +503,8 @@
         .slider:before {
             position: absolute;
             content: "";
-            height: 20px;
-            width: 20px;
+            height: 24px;
+            width: 24px;
             left: 4px;
             bottom: 4px;
             background-color: white;
@@ -526,7 +515,25 @@
             background-color: var(--accent);
         }
         input:checked + .slider:before {
-            transform: translateX(24px);
+            transform: translateX(28px);
+        }
+
+        /* ========== SCROLL ========== */
+        .pages-container::-webkit-scrollbar { width: 6px; }
+        .pages-container::-webkit-scrollbar-track { background: transparent; }
+        .pages-container::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 10px; }
+
+        /* ========== RESPONSIVE ========== */
+        @media (max-width: 520px) {
+            #app { height: 100vh; border-radius: 0; max-width: 100%; }
+        }
+        @media (max-width: 420px) {
+            .grid-2 { grid-template-columns: 1fr; }
+            .achievement-grid { grid-template-columns: repeat(2, 1fr); }
+            .header .brand { font-size: 22px; }
+            .nav-btn { font-size: 12px; padding: 6px 10px; min-height: 56px; }
+            .nav-btn .nav-icon { font-size: 24px; }
+            .pomodoro-timer { font-size: 52px; }
         }
     </style>
 </head>
@@ -543,7 +550,7 @@
 
         <!-- PÁGINAS -->
         <div class="pages-container" id="pagesContainer">
-            <!-- ==================== INICIO ==================== -->
+            <!-- ========== INICIO ========== -->
             <div class="page active" id="page-home">
                 <div class="quote-box" id="dailyQuote">
                     "El éxito es la suma de pequeños esfuerzos repetidos día tras día."
@@ -552,10 +559,10 @@
 
                 <div class="card">
                     <div class="card-title">📊 Resumen del día</div>
-                    <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; text-align:center;">
-                        <div><div style="font-size:28px;">📝</div><div><strong id="home-tasks-pending">0</strong> tareas pend.</div></div>
-                        <div><div style="font-size:28px;">📅</div><div><strong id="home-exams-today">0</strong> exámenes hoy</div></div>
-                        <div><div style="font-size:28px;">🎯</div><div><strong id="home-goals-progress">0%</strong> metas</div></div>
+                    <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; text-align:center;">
+                        <div><div style="font-size:34px;">📝</div><div><strong id="home-tasks-pending" style="font-size:20px;">0</strong><br><span style="font-size:15px;">tareas pend.</span></div></div>
+                        <div><div style="font-size:34px;">📅</div><div><strong id="home-exams-today" style="font-size:20px;">0</strong><br><span style="font-size:15px;">exámenes hoy</span></div></div>
+                        <div><div style="font-size:34px;">🎯</div><div><strong id="home-goals-progress" style="font-size:20px;">0%</strong><br><span style="font-size:15px;">metas</span></div></div>
                     </div>
                 </div>
 
@@ -570,13 +577,13 @@
                 </div>
             </div>
 
-            <!-- ==================== HORARIO ==================== -->
+            <!-- ========== HORARIO ========== -->
             <div class="page" id="page-schedule">
                 <div class="card">
                     <div class="card-title">📅 Horario</div>
                     <div id="schedule-container"></div>
-                    <div class="input-group" style="margin-top:16px;">
-                        <select id="schedule-day-select" style="flex:1; min-width:100px;">
+                    <div class="input-group" style="margin-top:18px;">
+                        <select id="schedule-day-select" style="flex:1; min-width:120px; font-size:17px;">
                             <option value="Lunes">Lunes</option>
                             <option value="Martes">Martes</option>
                             <option value="Miércoles">Miércoles</option>
@@ -592,7 +599,7 @@
                 </div>
             </div>
 
-            <!-- ==================== TAREAS ==================== -->
+            <!-- ========== TAREAS ========== -->
             <div class="page" id="page-tasks">
                 <div class="card">
                     <div class="card-title">📝 Tareas</div>
@@ -605,7 +612,7 @@
                 </div>
             </div>
 
-            <!-- ==================== EXÁMENES ==================== -->
+            <!-- ========== EXÁMENES ========== -->
             <div class="page" id="page-exams">
                 <div class="card">
                     <div class="card-title">📚 Exámenes</div>
@@ -618,7 +625,7 @@
                 </div>
             </div>
 
-            <!-- ==================== CALCULADORA DE NOTAS ==================== -->
+            <!-- ========== CALCULADORA DE NOTAS ========== -->
             <div class="page" id="page-grades">
                 <div class="card">
                     <div class="card-title">🧮 Calculadora de Notas</div>
@@ -627,31 +634,31 @@
                         <button class="btn btn-sm" id="grade-add-btn">+ Agregar</button>
                     </div>
                     <div id="grade-list"></div>
-                    <div style="margin-top:14px; display:flex; gap:20px; flex-wrap:wrap; font-size:15px;">
-                        <span><strong>Promedio:</strong> <span id="grade-average">-</span></span>
-                        <span><strong>Nota necesaria (70):</strong> <span id="grade-needed">-</span></span>
+                    <div style="margin-top:18px; display:flex; gap:24px; flex-wrap:wrap; font-size:18px;">
+                        <span><strong>Promedio:</strong> <span id="grade-average" style="font-size:20px;">-</span></span>
+                        <span><strong>Nota necesaria (70):</strong> <span id="grade-needed" style="font-size:20px;">-</span></span>
                     </div>
                 </div>
             </div>
 
-            <!-- ==================== POMODORO ==================== -->
+            <!-- ========== POMODORO ========== -->
             <div class="page" id="page-pomodoro">
                 <div class="card">
                     <div class="card-title">🍅 Pomodoro</div>
                     <div class="pomodoro-phase" id="pomodoro-phase">Estudio</div>
                     <div class="pomodoro-timer" id="pomodoro-timer">25:00</div>
-                    <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
+                    <div style="display:flex; gap:16px; justify-content:center; flex-wrap:wrap;">
                         <button class="btn" id="pomodoro-start">▶ Iniciar</button>
                         <button class="btn btn-outline" id="pomodoro-pause">⏸️ Pausa</button>
                         <button class="btn btn-danger" id="pomodoro-reset">⟳ Reiniciar</button>
                     </div>
-                    <div style="margin-top:12px; text-align:center; color:var(--text-secondary); font-size:15px;">
-                        Ciclos completados: <strong id="pomodoro-cycles">0</strong>
+                    <div style="margin-top:16px; text-align:center; color:var(--text-secondary); font-size:18px;">
+                        Ciclos completados: <strong id="pomodoro-cycles" style="font-size:22px;">0</strong>
                     </div>
                 </div>
             </div>
 
-            <!-- ==================== METAS ==================== -->
+            <!-- ========== METAS ========== -->
             <div class="page" id="page-goals">
                 <div class="card">
                     <div class="card-title">🎯 Metas</div>
@@ -664,7 +671,7 @@
                 </div>
             </div>
 
-            <!-- ==================== LOGROS ==================== -->
+            <!-- ========== LOGROS ========== -->
             <div class="page" id="page-achievements">
                 <div class="card">
                     <div class="card-title">🏅 Logros</div>
@@ -672,7 +679,7 @@
                 </div>
             </div>
 
-            <!-- ==================== CALENDARIO ==================== -->
+            <!-- ========== CALENDARIO ========== -->
             <div class="page" id="page-calendar">
                 <div class="card">
                     <div class="calendar-nav">
@@ -681,25 +688,25 @@
                         <button class="btn btn-outline btn-sm" id="cal-next">›</button>
                     </div>
                     <div class="calendar-grid" id="calendar-grid"></div>
-                    <div style="margin-top:12px; font-size:14px; color:var(--text-secondary);">
-                        <span style="display:inline-block; width:14px; height:14px; background:var(--accent); border-radius:50%; margin-right:6px;"></span> Evento
+                    <div style="margin-top:14px; font-size:16px; color:var(--text-secondary);">
+                        <span style="display:inline-block; width:16px; height:16px; background:var(--accent); border-radius:50%; margin-right:8px;"></span> Evento
                     </div>
                 </div>
             </div>
 
-            <!-- ==================== CONFIGURACIÓN ==================== -->
+            <!-- ========== CONFIGURACIÓN ========== -->
             <div class="page" id="page-settings">
                 <div class="card">
                     <div class="card-title">⚙️ Configuración</div>
 
                     <!-- Personalización del jugador -->
-                    <div style="margin-bottom:20px;">
-                        <div style="font-weight:600; margin-bottom:8px;">👤 Mi perfil</div>
+                    <div style="margin-bottom:24px;">
+                        <div style="font-weight:700; font-size:20px; margin-bottom:12px;">👤 Mi perfil</div>
                         <div class="player-profile">
                             <div class="player-avatar" id="player-avatar-display">🧑‍🎓</div>
                             <div style="flex:1;">
-                                <div class="input-group" style="margin-bottom:4px;">
-                                    <input type="text" id="player-name-input" placeholder="Tu nombre" style="flex:2;">
+                                <div class="input-group" style="margin-bottom:6px;">
+                                    <input type="text" id="player-name-input" placeholder="Tu nombre" style="flex:2; font-size:18px;">
                                     <button class="btn btn-sm" id="player-name-btn">Guardar</button>
                                 </div>
                                 <div class="avatar-selector" id="avatar-selector">
@@ -714,30 +721,30 @@
                         </div>
                     </div>
 
-                    <div style="display:flex; flex-direction:column; gap:16px;">
+                    <div style="display:flex; flex-direction:column; gap:18px;">
                         <div style="display:flex; justify-content:space-between; align-items:center;">
-                            <span style="font-size:16px;">Tema oscuro</span>
+                            <span style="font-size:18px; font-weight:600;">Tema oscuro</span>
                             <label class="switch">
                                 <input type="checkbox" id="darkModeToggle" checked>
                                 <span class="slider"></span>
                             </label>
                         </div>
                         <div style="display:flex; justify-content:space-between; align-items:center;">
-                            <span style="font-size:16px;">Color principal</span>
-                            <select id="accent-select" style="background:var(--bg-input); color:var(--text-primary); border:1px solid var(--border-color); border-radius:40px; padding:8px 16px; font-size:16px; min-height:44px;">
+                            <span style="font-size:18px; font-weight:600;">Color principal</span>
+                            <select id="accent-select" style="background:var(--bg-input); color:var(--text-primary); border:1px solid var(--border-color); border-radius:40px; padding:10px 18px; font-size:17px; min-height:52px;">
                                 <option value="blue">Azul</option>
                                 <option value="green">Verde</option>
                                 <option value="purple">Púrpura</option>
                                 <option value="orange">Naranja</option>
                             </select>
                         </div>
-                        <button class="btn btn-danger" id="reset-data-btn" style="width:100%;">🔄 Restablecer todos los datos</button>
+                        <button class="btn btn-danger" id="reset-data-btn" style="width:100%; font-size:18px; padding:16px;">🔄 Restablecer todos los datos</button>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- NAVEGACIÓN INFERIOR (scroll horizontal si es necesario) -->
+        <!-- NAVEGACIÓN INFERIOR -->
         <div class="bottom-nav" id="bottomNav">
             <button class="nav-btn active" data-page="home"><span class="nav-icon">🏠</span> Inicio</button>
             <button class="nav-btn" data-page="schedule"><span class="nav-icon">📅</span> Horario</button>
@@ -754,19 +761,13 @@
 
     <script>
         // ================================================================
-        //  STUDYHUB · VERSIÓN ANDROID (TÁCTIL)
+        //  STUDYHUB · VERSIÓN GRANDE (TÁCTIL)
         // ================================================================
 
-        // ---------- ESTADO PREDETERMINADO ----------
         const defaultData = {
             player: { name: 'Estudiante', avatar: '🧑‍🎓' },
             schedule: {
-                Lunes: [],
-                Martes: [],
-                Miércoles: [],
-                Jueves: [],
-                Viernes: [],
-                Sábado: []
+                Lunes: [], Martes: [], Miércoles: [], Jueves: [], Viernes: [], Sábado: []
             },
             tasks: [],
             exams: [],
@@ -774,18 +775,10 @@
             goals: [],
             pomodoroCycles: 0,
             achievements: {
-                firstTask: false,
-                firstExam: false,
-                studyStreak: 0,
-                lastStudyDate: null,
-                fiveTasks: false,
-                tenGoals: false,
-                pomodoroMaster: false
+                firstTask: false, firstExam: false, studyStreak: 0,
+                lastStudyDate: null, fiveTasks: false, tenGoals: false, pomodoroMaster: false
             },
-            settings: {
-                darkMode: true,
-                accent: 'blue'
-            }
+            settings: { darkMode: true, accent: 'blue' }
         };
 
         let data = loadData();
@@ -815,27 +808,19 @@
             updateAllUI();
         }
 
-        // ---------- UTILIDADES ----------
-        function todayStr() {
-            return new Date().toISOString().split('T')[0];
-        }
-
+        function todayStr() { return new Date().toISOString().split('T')[0]; }
         function formatDate(dateStr) {
             if (!dateStr) return '';
             const d = new Date(dateStr + 'T00:00:00');
             return d.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
         }
 
-        // ---------- ACTUALIZACIÓN UI ----------
         function updateAllUI() {
-            // Actualizar nombre y avatar
             document.getElementById('player-name-input').value = data.player.name || 'Estudiante';
             document.getElementById('player-avatar-display').textContent = data.player.avatar || '🧑‍🎓';
-            // Marcar avatar activo
             document.querySelectorAll('.avatar-option').forEach(el => {
                 el.classList.toggle('active', el.dataset.avatar === data.player.avatar);
             });
-
             updateHome();
             updateSchedule();
             updateTasks();
@@ -848,15 +833,13 @@
             applyTheme();
         }
 
-        // ---------- INICIO ----------
+        // ---------- HOME ----------
         function updateHome() {
             const pending = data.tasks.filter(t => !t.completed).length;
             document.getElementById('home-tasks-pending').innerText = pending;
-
             const today = todayStr();
             const examsToday = data.exams.filter(e => e.date === today).length;
             document.getElementById('home-exams-today').innerText = examsToday;
-
             const goalsProgress = data.goals.length > 0 ?
                 Math.round(data.goals.reduce((acc, g) => acc + (g.progress / g.total * 100), 0) / data.goals.length) : 0;
             document.getElementById('home-goals-progress').innerText = goalsProgress + '%';
@@ -874,11 +857,10 @@
                     pomodoroMaster: '🍅 10 ciclos Pomodoro'
                 };
                 container.innerHTML = unlocked.slice(-3).map(k =>
-                    `<span style="display:inline-block; background:var(--bg-input); border-radius:40px; padding:6px 14px; margin:3px; font-size:14px;">${names[k] || k}</span>`
+                    `<span style="display:inline-block; background:var(--bg-input); border-radius:40px; padding:8px 16px; margin:4px; font-size:16px;">${names[k] || k}</span>`
                 ).join(' ');
             }
 
-            // Próximos eventos
             const upcoming = [];
             const todayDate = new Date();
             data.tasks.forEach(t => {
@@ -897,14 +879,13 @@
                 container2.innerHTML = '<div class="empty-state">No hay eventos próximos.</div>';
             } else {
                 container2.innerHTML = upcoming.slice(0, 5).map(e =>
-                    `<div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid var(--border-color); font-size:15px;">
+                    `<div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid var(--border-color); font-size:17px;">
                         <span>${e.type} ${e.title}</span>
                         <span style="color:var(--text-secondary);">${formatDate(e.date)}</span>
                     </div>`
                 ).join('');
             }
 
-            // Frase motivacional (diaria)
             const quotes = [
                 { text: "El éxito es la suma de pequeños esfuerzos repetidos día tras día.", author: "Robert Collier" },
                 { text: "El estudio no se mide por el tiempo que pasas, sino por lo que aprendes.", author: "Anónimo" },
@@ -927,12 +908,12 @@
             let html = '';
             days.forEach(day => {
                 const entries = data.schedule[day] || [];
-                html += `<div style="margin-bottom:14px;">
-                    <div style="font-weight:700; font-size:16px; margin-bottom:6px;">${day}</div>
-                    ${entries.length === 0 ? '<div class="empty-state" style="padding:8px 0;">Sin clases</div>' :
-                        entries.map((e, i) => `<div style="display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid var(--border-color);">
-                            <span style="font-size:15px;"><strong>${e.subject}</strong> · ${e.teacher} · ${e.room}</span>
-                            <button class="btn btn-danger btn-sm" onclick="removeSchedule('${day}', ${i})" style="min-height:36px; min-width:36px;">✕</button>
+                html += `<div style="margin-bottom:18px;">
+                    <div style="font-weight:700; font-size:20px; margin-bottom:8px;">${day}</div>
+                    ${entries.length === 0 ? '<div class="empty-state" style="padding:10px 0;">Sin clases</div>' :
+                        entries.map((e, i) => `<div style="display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid var(--border-color); font-size:17px;">
+                            <span><strong>${e.subject}</strong> · ${e.teacher} · ${e.room}</span>
+                            <button class="btn btn-danger btn-sm" onclick="removeSchedule('${day}', ${i})" style="min-height:40px; min-width:40px;">✕</button>
                         </div>`).join('')}
                 </div>`;
             });
@@ -985,7 +966,6 @@
             saveData();
             checkAchievements();
         };
-
         window.deleteTask = function(index) {
             data.tasks.splice(index, 1);
             saveData();
@@ -1020,7 +1000,6 @@
                     </div>
                 </div>`
             ).join('');
-            // Recordatorio si hay examen mañana
             const today = new Date();
             const tomorrow = new Date(today);
             tomorrow.setDate(tomorrow.getDate() + 1);
@@ -1049,7 +1028,7 @@
             checkAchievements();
         });
 
-        // ---------- CALCULADORA DE NOTAS ----------
+        // ---------- NOTAS ----------
         function updateGrades() {
             const list = document.getElementById('grade-list');
             if (data.grades.length === 0) {
@@ -1057,15 +1036,13 @@
             } else {
                 list.innerHTML = data.grades.map((g, i) =>
                     `<div class="list-item">
-                        <span style="font-size:16px; font-weight:600;">${g}%</span>
+                        <span style="font-size:20px; font-weight:700;">${g}%</span>
                         <button class="btn btn-danger btn-sm" onclick="deleteGrade(${i})">✕</button>
                     </div>`
                 ).join('');
             }
-
             const avg = data.grades.length > 0 ? data.grades.reduce((a, b) => a + b, 0) / data.grades.length : null;
             document.getElementById('grade-average').innerText = avg !== null ? avg.toFixed(1) + '%' : '-';
-
             if (data.grades.length > 0 && avg < 70) {
                 const needed = 70 * (data.grades.length + 1) - data.grades.reduce((a, b) => a + b, 0);
                 document.getElementById('grade-needed').innerText = Math.max(0, needed).toFixed(1) + '%';
@@ -1163,15 +1140,15 @@
             }
             list.innerHTML = data.goals.map((g, i) => {
                 const pct = Math.min(100, (g.progress / g.total) * 100);
-                return `<div class="list-item" style="flex-direction:column; align-items:stretch; gap:6px;">
-                    <div style="display:flex; justify-content:space-between; font-size:15px;">
+                return `<div class="list-item" style="flex-direction:column; align-items:stretch; gap:8px;">
+                    <div style="display:flex; justify-content:space-between; font-size:18px;">
                         <div class="title">${g.title}</div>
                         <div>${Math.round(pct)}%</div>
                     </div>
                     <div class="progress-bar"><div class="fill" style="width:${pct}%;"></div></div>
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
-                        <span style="font-size:14px; color:var(--text-secondary);">${g.progress} / ${g.total}</span>
-                        <div style="display:flex; gap:8px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:6px;">
+                        <span style="font-size:16px; color:var(--text-secondary);">${g.progress} / ${g.total}</span>
+                        <div style="display:flex; gap:10px;">
                             <button class="btn btn-sm btn-success" onclick="goalProgress(${i}, 1)">+1</button>
                             <button class="btn btn-sm btn-success" onclick="goalProgress(${i}, 5)">+5</button>
                             <button class="btn btn-sm btn-danger" onclick="deleteGoal(${i})">🗑️</button>
@@ -1191,7 +1168,6 @@
             saveData();
             checkAchievements();
         };
-
         window.deleteGoal = function(index) {
             data.goals.splice(index, 1);
             saveData();
@@ -1212,28 +1188,23 @@
         function checkAchievements() {
             let changed = false;
             if (!data.achievements.firstTask && data.tasks.some(t => t.completed)) {
-                data.achievements.firstTask = true;
-                changed = true;
+                data.achievements.firstTask = true; changed = true;
                 showNotification('🏅 Logro desbloqueado', '¡Completaste tu primera tarea!');
             }
             if (!data.achievements.firstExam && data.exams.length > 0) {
-                data.achievements.firstExam = true;
-                changed = true;
+                data.achievements.firstExam = true; changed = true;
                 showNotification('🏅 Logro desbloqueado', '¡Agregaste tu primer examen!');
             }
             if (!data.achievements.fiveTasks && data.tasks.filter(t => t.completed).length >= 5) {
-                data.achievements.fiveTasks = true;
-                changed = true;
+                data.achievements.fiveTasks = true; changed = true;
                 showNotification('🏅 Logro desbloqueado', '¡Completaste 5 tareas!');
             }
             if (!data.achievements.tenGoals && data.goals.length >= 10) {
-                data.achievements.tenGoals = true;
-                changed = true;
+                data.achievements.tenGoals = true; changed = true;
                 showNotification('🏅 Logro desbloqueado', '¡Creaste 10 metas!');
             }
             if (!data.achievements.pomodoroMaster && data.pomodoroCycles >= 10) {
-                data.achievements.pomodoroMaster = true;
-                changed = true;
+                data.achievements.pomodoroMaster = true; changed = true;
                 showNotification('🏅 Logro desbloqueado', '¡Completaste 10 ciclos Pomodoro!');
             }
             if (changed) saveData();
@@ -1289,7 +1260,6 @@
                             ${hasEvent ? '<span class="event-dot"></span>' : ''}
                         </div>`;
             }
-
             document.getElementById('calendar-grid').innerHTML = html;
         }
 
@@ -1311,15 +1281,11 @@
             }
         }
 
-        // ---------- PERSONALIZACIÓN JUGADOR ----------
+        // ---------- PERSONALIZACIÓN ----------
         document.getElementById('player-name-btn').addEventListener('click', function() {
             const name = document.getElementById('player-name-input').value.trim();
-            if (name) {
-                data.player.name = name;
-                saveData();
-            }
+            if (name) { data.player.name = name; saveData(); }
         });
-
         document.querySelectorAll('.avatar-option').forEach(el => {
             el.addEventListener('click', function() {
                 data.player.avatar = this.dataset.avatar;
@@ -1333,7 +1299,6 @@
             document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
             document.getElementById('darkModeToggle').checked = dark;
             document.getElementById('themeToggle').innerText = dark ? '🌙' : '☀️';
-
             const accent = data.settings.accent || 'blue';
             document.documentElement.setAttribute('data-accent', accent);
             document.getElementById('accent-select').value = accent;
@@ -1343,17 +1308,14 @@
             data.settings.darkMode = !data.settings.darkMode;
             saveData();
         });
-
         document.getElementById('darkModeToggle').addEventListener('change', function() {
             data.settings.darkMode = this.checked;
             saveData();
         });
-
         document.getElementById('accent-select').addEventListener('change', function() {
             data.settings.accent = this.value;
             saveData();
         });
-
         document.getElementById('accentToggle').addEventListener('click', function() {
             const colors = ['blue', 'green', 'purple', 'orange'];
             const current = data.settings.accent || 'blue';
@@ -1395,15 +1357,13 @@
             Notification.requestPermission();
         }
 
-        // Iniciar Pomodoro
         pomodoroTime = 25 * 60;
         pomodoroPhase = 'study';
         updatePomodoroUI();
         document.getElementById('pomodoro-pause').disabled = true;
 
-        // Cargar datos y mostrar
         saveData();
-        console.log('📚 StudyHub · Versión Android táctil cargada.');
+        console.log('📚 StudyHub · Versión XXL cargada.');
     </script>
 </body>
 </html>
