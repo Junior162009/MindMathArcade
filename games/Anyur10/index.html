@@ -2,10 +2,10 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>StudyHub · Con personalización</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>StudyHub · Android</title>
     <style>
-        /* ========== VARIABLES CSS ========== */
+        /* ========== VARIABLES ========== */
         :root {
             --bg-primary: #0f172a;
             --bg-secondary: #1e293b;
@@ -16,11 +16,13 @@
             --border-color: #334155;
             --accent: #3b82f6;
             --accent-hover: #2563eb;
-            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
-            --radius: 16px;
-            --transition: 0.2s ease;
+            --shadow: 0 8px 16px rgba(0,0,0,0.4);
+            --radius: 20px;
+            --transition: 0.25s ease;
             --nav-bg: #1e293b;
             --header-bg: #1e293b;
+            --font-base: 16px;
+            --touch-target: 48px;
         }
 
         [data-theme="light"] {
@@ -31,7 +33,7 @@
             --text-primary: #0f172a;
             --text-secondary: #475569;
             --border-color: #cbd5e1;
-            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow: 0 8px 16px rgba(0,0,0,0.08);
             --nav-bg: #ffffff;
             --header-bg: #ffffff;
         }
@@ -40,8 +42,15 @@
         [data-accent="purple"] { --accent: #8b5cf6; --accent-hover: #7c3aed; }
         [data-accent="orange"] { --accent: #f59e0b; --accent-hover: #d97706; }
 
-        /* ========== RESET ========== */
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; }
+        /* ========== RESET Y GLOBALES ========== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
         body {
             background: var(--bg-primary);
             color: var(--text-primary);
@@ -50,7 +59,10 @@
             justify-content: center;
             align-items: center;
             transition: background var(--transition), color var(--transition);
+            padding: 8px;
+            touch-action: manipulation;
         }
+
         #app {
             width: 100%;
             max-width: 480px;
@@ -66,202 +78,176 @@
             transition: background var(--transition), border-color var(--transition);
         }
 
-        /* ========== HEADER ========== */
+        /* ========== HEADER (más grande) ========== */
         .header {
             background: var(--header-bg);
-            padding: 10px 16px;
+            padding: 16px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             border-bottom: 1px solid var(--border-color);
             flex-shrink: 0;
             transition: background var(--transition), border-color var(--transition);
+            min-height: 64px;
         }
         .header .brand {
             font-weight: 800;
-            font-size: 18px;
+            font-size: 22px;
             color: var(--accent);
             letter-spacing: -0.5px;
         }
         .header .brand span { color: var(--text-primary); }
         .header-actions {
             display: flex;
-            gap: 12px;
+            gap: 14px;
             align-items: center;
         }
         .header-actions button {
             background: transparent;
             border: none;
             color: var(--text-secondary);
-            font-size: 20px;
+            font-size: 26px;
             cursor: pointer;
             transition: color var(--transition);
-        }
-        .header-actions button:hover { color: var(--accent); }
-
-        /* Mini avatar en header */
-        .header-avatar {
+            padding: 6px;
+            min-height: var(--touch-target);
+            min-width: var(--touch-target);
             display: flex;
             align-items: center;
-            gap: 6px;
-            cursor: pointer;
+            justify-content: center;
         }
-        .header-avatar .mini-avatar {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            background: #fcd34d;
-            position: relative;
-            overflow: hidden;
-            border: 2px solid var(--border-color);
-        }
-        .header-avatar .mini-avatar .hair-mini {
-            position: absolute;
-            top: -4px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 110%;
-            height: 14px;
-            background: #78350f;
-            border-radius: 50% 50% 0 0;
-        }
-        .header-avatar .mini-avatar .hair-mini.blonde { background: #fde047; }
-        .header-avatar .mini-avatar .hair-mini.red { background: #b91c1c; }
-        .header-avatar .mini-avatar .hair-mini.none { display: none; }
-        .header-avatar .mini-avatar .shirt-mini {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 55%;
-            background: #3b82f6;
-            border-radius: 0 0 50% 50%;
-        }
-        .header-avatar .mini-avatar .shirt-mini.red { background: #ef4444; }
-        .header-avatar .mini-avatar .shirt-mini.green { background: #22c55e; }
-        .header-avatar .mini-avatar .shirt-mini.purple { background: #8b5cf6; }
-        .header-avatar .mini-avatar .eyes-mini {
-            position: absolute;
-            top: 10px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 16px;
-            display: flex;
-            justify-content: space-between;
-        }
-        .header-avatar .mini-avatar .eyes-mini span {
-            display: block;
-            width: 4px;
-            height: 6px;
-            background: #0f172a;
-            border-radius: 50%;
-        }
+        .header-actions button:active { opacity: 0.6; }
 
         /* ========== PÁGINAS ========== */
         .pages-container {
             flex: 1;
             overflow-y: auto;
-            padding: 14px 16px 10px 16px;
+            padding: 16px 16px 10px 16px;
             scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
         }
-        .page { display: none; animation: fadeUp 0.3s ease; }
+        .page {
+            display: none;
+            animation: fadeUp 0.3s ease;
+        }
         .page.active { display: block; }
-        @keyframes fadeUp { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
 
-        /* ========== NAVEGACIÓN ========== */
+        /* ========== NAVEGACIÓN INFERIOR (táctil) ========== */
         .bottom-nav {
             background: var(--nav-bg);
             display: flex;
             justify-content: space-around;
-            padding: 4px 0 10px 0;
+            padding: 6px 0 16px 0;
             border-top: 1px solid var(--border-color);
             flex-shrink: 0;
-            overflow-x: auto;
             transition: background var(--transition), border-color var(--transition);
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            gap: 2px;
         }
+        .bottom-nav::-webkit-scrollbar { display: none; }
+
         .nav-btn {
             background: transparent;
             border: none;
             color: var(--text-secondary);
-            font-size: 10px;
+            font-size: 12px;
             font-weight: 600;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 1px;
+            gap: 2px;
             cursor: pointer;
-            padding: 4px 8px;
-            border-radius: 12px;
+            padding: 6px 12px;
+            border-radius: 16px;
             transition: 0.2s;
+            min-height: 56px;
+            min-width: 48px;
+            justify-content: center;
+            touch-action: manipulation;
             white-space: nowrap;
         }
-        .nav-btn .nav-icon { font-size: 20px; line-height: 1.2; }
+        .nav-btn .nav-icon { font-size: 24px; line-height: 1.2; }
         .nav-btn.active {
             color: var(--accent);
             background: var(--bg-input);
-            padding: 4px 12px;
+            padding: 6px 16px;
         }
         .nav-btn:active { transform: scale(0.92); }
 
-        /* ========== COMPONENTES ========== */
+        /* ========== COMPONENTES TÁCTILES ========== */
         .card {
             background: var(--bg-card);
             border-radius: var(--radius);
-            padding: 14px 16px;
-            margin-bottom: 12px;
+            padding: 20px 18px;
+            margin-bottom: 18px;
             border: 1px solid var(--border-color);
             box-shadow: var(--shadow);
             transition: background var(--transition), border-color var(--transition);
         }
         .card-title {
-            font-size: 15px;
+            font-size: 18px;
             font-weight: 700;
-            margin-bottom: 8px;
+            margin-bottom: 14px;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
         }
+
         .btn {
             background: var(--accent);
             color: white;
             border: none;
-            padding: 6px 14px;
+            padding: 12px 20px;
             border-radius: 40px;
-            font-weight: 600;
-            font-size: 12px;
+            font-weight: 700;
+            font-size: 16px;
             cursor: pointer;
             transition: background 0.15s, transform 0.1s;
             display: inline-flex;
             align-items: center;
-            gap: 4px;
+            justify-content: center;
+            gap: 8px;
+            min-height: var(--touch-target);
+            min-width: var(--touch-target);
+            touch-action: manipulation;
         }
-        .btn:active { transform: scale(0.95); }
+        .btn:active { transform: scale(0.94); }
         .btn:hover { background: var(--accent-hover); }
-        .btn-outline { background: transparent; border: 2px solid var(--border-color); color: var(--text-primary); }
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--border-color);
+            color: var(--text-primary);
+        }
         .btn-outline:hover { background: var(--bg-input); border-color: var(--accent); }
         .btn-danger { background: #ef4444; }
         .btn-danger:hover { background: #dc2626; }
         .btn-success { background: #22c55e; }
         .btn-success:hover { background: #16a34a; }
-        .btn-sm { padding: 4px 10px; font-size: 11px; }
-        .btn:disabled { opacity: 0.5; pointer-events: none; }
+        .btn-sm { padding: 10px 16px; font-size: 14px; min-height: 40px; }
+        .btn:disabled { opacity: 0.4; pointer-events: none; }
 
         .input-group {
             display: flex;
-            gap: 6px;
+            gap: 12px;
             flex-wrap: wrap;
-            margin-bottom: 6px;
+            margin-bottom: 12px;
         }
         .input-group input, .input-group select {
             flex: 1;
-            min-width: 80px;
-            padding: 6px 10px;
+            min-width: 120px;
+            padding: 14px 16px;
             border-radius: 40px;
             border: 1px solid var(--border-color);
             background: var(--bg-input);
             color: var(--text-primary);
-            font-size: 12px;
+            font-size: 16px; /* evita zoom en Android */
             transition: border-color var(--transition);
+            min-height: var(--touch-target);
         }
         .input-group input:focus, .input-group select:focus {
             outline: none;
@@ -272,9 +258,10 @@
             background: var(--accent);
             color: white;
             border-radius: 40px;
-            padding: 2px 10px;
-            font-size: 11px;
+            padding: 4px 14px;
+            font-size: 14px;
             font-weight: 600;
+            display: inline-block;
         }
         .badge-success { background: #22c55e; }
         .badge-danger { background: #ef4444; }
@@ -284,28 +271,34 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 6px 0;
+            padding: 12px 0;
             border-bottom: 1px solid var(--border-color);
+            gap: 8px;
         }
         .list-item:last-child { border-bottom: none; }
         .list-item .info { flex: 1; }
-        .list-item .info .title { font-weight: 600; font-size: 13px; }
-        .list-item .info .sub { font-size: 12px; color: var(--text-secondary); }
-        .list-item .actions { display: flex; gap: 4px; }
+        .list-item .info .title { font-weight: 600; font-size: 16px; }
+        .list-item .info .sub { font-size: 14px; color: var(--text-secondary); }
+        .list-item .actions {
+            display: flex;
+            gap: 10px;
+            flex-shrink: 0;
+        }
+        .list-item .actions .btn { min-height: 40px; min-width: 40px; padding: 6px 12px; font-size: 14px; }
 
         .empty-state {
             text-align: center;
-            padding: 16px 0;
+            padding: 24px 0;
             color: var(--text-secondary);
-            font-size: 13px;
+            font-size: 15px;
         }
 
         .progress-bar {
             background: var(--bg-input);
             border-radius: 40px;
-            height: 6px;
+            height: 12px;
             overflow: hidden;
-            margin: 4px 0;
+            margin: 8px 0;
         }
         .progress-bar .fill {
             height: 100%;
@@ -314,161 +307,115 @@
             transition: width 0.3s ease;
         }
 
-        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
 
         /* ========== CALENDARIO ========== */
         .calendar-grid {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
-            gap: 3px;
+            gap: 6px;
             text-align: center;
-            font-size: 12px;
-            margin-top: 4px;
+            font-size: 15px;
+            margin-top: 8px;
         }
-        .calendar-grid .day-name { font-weight: 600; color: var(--text-secondary); padding: 4px 0; }
+        .calendar-grid .day-name {
+            font-weight: 600;
+            color: var(--text-secondary);
+            padding: 8px 0;
+        }
         .calendar-grid .day-cell {
             background: var(--bg-input);
-            border-radius: 6px;
-            padding: 4px 0;
+            border-radius: 12px;
+            padding: 10px 0;
             cursor: pointer;
             transition: 0.1s;
             border: 1px solid transparent;
             position: relative;
-            font-size: 12px;
+            min-height: 44px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
         }
-        .calendar-grid .day-cell.has-event { border-color: var(--accent); font-weight: 600; }
-        .calendar-grid .day-cell.today { background: var(--accent); color: white; }
+        .calendar-grid .day-cell.has-event {
+            border-color: var(--accent);
+            font-weight: 700;
+        }
+        .calendar-grid .day-cell.today {
+            background: var(--accent);
+            color: white;
+        }
         .calendar-grid .day-cell .event-dot {
             display: block;
-            width: 5px;
-            height: 5px;
+            width: 8px;
+            height: 8px;
             background: var(--accent);
             border-radius: 50%;
-            margin: 1px auto 0;
+            margin-top: 2px;
         }
         .calendar-nav {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 6px;
+            margin-bottom: 12px;
         }
-        .calendar-nav .month-year { font-weight: 700; font-size: 15px; }
+        .calendar-nav .month-year {
+            font-weight: 700;
+            font-size: 18px;
+        }
 
         /* ========== POMODORO ========== */
         .pomodoro-timer {
-            font-size: 40px;
+            font-size: 56px;
             font-weight: 800;
             text-align: center;
             font-variant-numeric: tabular-nums;
-            letter-spacing: 2px;
-            margin: 4px 0;
+            letter-spacing: 3px;
+            margin: 12px 0;
         }
-        .pomodoro-phase { text-align: center; font-size: 13px; color: var(--text-secondary); margin-bottom: 4px; }
+        .pomodoro-phase {
+            text-align: center;
+            font-size: 16px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
 
         /* ========== LOGROS ========== */
         .achievement-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 8px;
+            gap: 12px;
         }
         .achievement-item {
             background: var(--bg-input);
             border-radius: var(--radius);
-            padding: 10px 4px;
+            padding: 14px 8px;
             text-align: center;
             border: 1px solid var(--border-color);
             transition: 0.15s;
         }
-        .achievement-item.unlocked { border-color: var(--accent); background: var(--bg-card); }
-        .achievement-item .icon { font-size: 24px; }
-        .achievement-item .name { font-size: 10px; font-weight: 600; margin-top: 2px; }
-        .achievement-item .desc { font-size: 9px; color: var(--text-secondary); }
+        .achievement-item.unlocked {
+            border-color: var(--accent);
+            background: var(--bg-card);
+        }
+        .achievement-item .icon { font-size: 32px; }
+        .achievement-item .name { font-size: 13px; font-weight: 600; margin-top: 4px; }
+        .achievement-item .desc { font-size: 11px; color: var(--text-secondary); }
 
-        /* ========== AVATAR PERSONALIZACIÓN ========== */
-        .avatar-customizer {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        .avatar-preview-big {
-            position: relative;
-            width: 100px;
-            height: 120px;
-            background: #fcd34d;
-            border-radius: 50px 50px 20px 20px;
-            margin-bottom: 8px;
-            border: 2px solid var(--border-color);
-        }
-        .avatar-preview-big .hair-big {
-            position: absolute;
-            top: -10px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 110%;
-            height: 30px;
-            background: #78350f;
-            border-radius: 50% 50% 0 0;
-        }
-        .avatar-preview-big .hair-big.blonde { background: #fde047; }
-        .avatar-preview-big .hair-big.red { background: #b91c1c; }
-        .avatar-preview-big .hair-big.none { display: none; }
-        .avatar-preview-big .shirt-big {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 60%;
-            background: #3b82f6;
-            border-radius: 0 0 20px 20px;
-        }
-        .avatar-preview-big .shirt-big.red { background: #ef4444; }
-        .avatar-preview-big .shirt-big.green { background: #22c55e; }
-        .avatar-preview-big .shirt-big.purple { background: #8b5cf6; }
-        .avatar-preview-big .eyes-big {
-            position: absolute;
-            top: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 40px;
-            display: flex;
-            justify-content: space-between;
-        }
-        .avatar-preview-big .eyes-big span {
-            display: block;
-            width: 8px;
-            height: 10px;
-            background: #0f172a;
-            border-radius: 50%;
-        }
-
-        .avatar-options {
-            display: flex;
-            gap: 6px;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-        .avatar-options button {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            border: 2px solid var(--border-color);
-            cursor: pointer;
-            transition: 0.15s;
-            font-size: 16px;
-        }
-        .avatar-options button.active { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent); }
-        .avatar-options button:active { transform: scale(0.9); }
-
-        /* ========== QUOTE ========== */
+        /* ========== MOTIVACIÓN ========== */
         .quote-box {
             background: var(--bg-input);
             border-radius: var(--radius);
-            padding: 12px 16px;
-            border-left: 4px solid var(--accent);
+            padding: 18px 20px;
+            border-left: 5px solid var(--accent);
             font-style: italic;
             color: var(--text-secondary);
-            margin-bottom: 12px;
-            font-size: 13px;
+            margin-bottom: 18px;
+            font-size: 15px;
         }
         .quote-box .author {
             display: block;
@@ -476,9 +423,52 @@
             font-style: normal;
             font-weight: 600;
             color: var(--text-primary);
-            margin-top: 2px;
-            font-size: 12px;
+            margin-top: 6px;
         }
+
+        /* ========== PERSONALIZACIÓN JUGADOR ========== */
+        .player-profile {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .player-avatar {
+            font-size: 56px;
+            background: var(--bg-input);
+            border-radius: 50%;
+            width: 80px;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid var(--border-color);
+            transition: border-color var(--transition);
+        }
+        .avatar-selector {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 8px;
+        }
+        .avatar-selector .avatar-option {
+            font-size: 32px;
+            background: var(--bg-input);
+            border: 2px solid var(--border-color);
+            border-radius: 50%;
+            width: 56px;
+            height: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: 0.15s;
+        }
+        .avatar-selector .avatar-option.active {
+            border-color: var(--accent);
+            background: var(--bg-card);
+        }
+        .avatar-selector .avatar-option:active { transform: scale(0.9); }
 
         /* ========== SCROLL ========== */
         .pages-container::-webkit-scrollbar { width: 4px; }
@@ -488,13 +478,55 @@
         /* ========== RESPONSIVE ========== */
         @media (max-width: 500px) {
             #app { height: 100vh; border-radius: 0; max-width: 100%; }
-            .bottom-nav { gap: 2px; }
-            .nav-btn { font-size: 9px; padding: 4px 6px; }
-            .nav-btn .nav-icon { font-size: 18px; }
+            .bottom-nav { padding: 4px 0 12px 0; }
+            .nav-btn { font-size: 11px; padding: 4px 8px; min-height: 48px; }
+            .nav-btn .nav-icon { font-size: 20px; }
         }
         @media (max-width: 400px) {
             .grid-2 { grid-template-columns: 1fr; }
             .achievement-grid { grid-template-columns: repeat(2, 1fr); }
+            .header .brand { font-size: 18px; }
+        }
+
+        /* ========== SWITCH TOGGLE (para tema) ========== */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 52px;
+            height: 28px;
+        }
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--border-color);
+            transition: .2s;
+            border-radius: 34px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .2s;
+            border-radius: 50%;
+        }
+        input:checked + .slider {
+            background-color: var(--accent);
+        }
+        input:checked + .slider:before {
+            transform: translateX(24px);
         }
     </style>
 </head>
@@ -504,16 +536,8 @@
         <div class="header">
             <div class="brand">Study<span>Hub</span></div>
             <div class="header-actions">
-                <div class="header-avatar" id="header-avatar" title="Tu perfil">
-                    <div class="mini-avatar" id="mini-avatar">
-                        <div class="hair-mini" id="mini-hair"></div>
-                        <div class="eyes-mini"><span></span><span></span></div>
-                        <div class="shirt-mini" id="mini-shirt"></div>
-                    </div>
-                    <span id="header-name" style="font-size:13px; font-weight:600; color:var(--text-primary);">Jugador</span>
-                </div>
-                <button id="themeToggle" title="Tema">🌙</button>
-                <button id="accentToggle" title="Color">🎨</button>
+                <button id="themeToggle" title="Cambiar tema">🌙</button>
+                <button id="accentToggle" title="Cambiar color">🎨</button>
             </div>
         </div>
 
@@ -528,16 +552,15 @@
 
                 <div class="card">
                     <div class="card-title">📊 Resumen del día</div>
-                    <div style="display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:6px; text-align:center;">
-                        <div><div style="font-size:20px;">📝</div><div><strong id="home-tasks-pending">0</strong> tareas</div></div>
-                        <div><div style="font-size:20px;">📚</div><div><strong id="home-exams-today">0</strong> exámenes</div></div>
-                        <div><div style="font-size:20px;">🎯</div><div><strong id="home-goals-progress">0%</strong> metas</div></div>
-                        <div><div style="font-size:20px;">🏆</div><div><strong id="home-achievements-count">0</strong> logros</div></div>
+                    <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; text-align:center;">
+                        <div><div style="font-size:28px;">📝</div><div><strong id="home-tasks-pending">0</strong> tareas pend.</div></div>
+                        <div><div style="font-size:28px;">📅</div><div><strong id="home-exams-today">0</strong> exámenes hoy</div></div>
+                        <div><div style="font-size:28px;">🎯</div><div><strong id="home-goals-progress">0%</strong> metas</div></div>
                     </div>
                 </div>
 
                 <div class="card">
-                    <div class="card-title">🏅 Logros recientes</div>
+                    <div class="card-title">🏆 Logros recientes</div>
                     <div id="home-achievements" class="empty-state">Aún no tienes logros. ¡Sigue estudiando!</div>
                 </div>
 
@@ -552,8 +575,8 @@
                 <div class="card">
                     <div class="card-title">📅 Horario</div>
                     <div id="schedule-container"></div>
-                    <div class="input-group" style="margin-top:10px;">
-                        <select id="schedule-day-select">
+                    <div class="input-group" style="margin-top:16px;">
+                        <select id="schedule-day-select" style="flex:1; min-width:100px;">
                             <option value="Lunes">Lunes</option>
                             <option value="Martes">Martes</option>
                             <option value="Miércoles">Miércoles</option>
@@ -561,10 +584,10 @@
                             <option value="Viernes">Viernes</option>
                             <option value="Sábado">Sábado</option>
                         </select>
-                        <input type="text" id="schedule-subject" placeholder="Materia" style="min-width:60px;">
-                        <input type="text" id="schedule-teacher" placeholder="Profesor" style="min-width:60px;">
-                        <input type="text" id="schedule-room" placeholder="Salón" style="min-width:50px;">
-                        <button class="btn btn-sm" id="schedule-add-btn">+</button>
+                        <input type="text" id="schedule-subject" placeholder="Materia">
+                        <input type="text" id="schedule-teacher" placeholder="Profesor">
+                        <input type="text" id="schedule-room" placeholder="Salón">
+                        <button class="btn btn-sm" id="schedule-add-btn">+ Añadir</button>
                     </div>
                 </div>
             </div>
@@ -574,9 +597,9 @@
                 <div class="card">
                     <div class="card-title">📝 Tareas</div>
                     <div class="input-group">
-                        <input type="text" id="task-title" placeholder="Título" style="min-width:80px;">
-                        <input type="date" id="task-due" style="min-width:80px;">
-                        <button class="btn btn-sm" id="task-add-btn">+</button>
+                        <input type="text" id="task-title" placeholder="Título">
+                        <input type="date" id="task-due">
+                        <button class="btn btn-sm" id="task-add-btn">+ Añadir</button>
                     </div>
                     <div id="task-list"></div>
                 </div>
@@ -587,9 +610,9 @@
                 <div class="card">
                     <div class="card-title">📚 Exámenes</div>
                     <div class="input-group">
-                        <input type="text" id="exam-title" placeholder="Materia" style="min-width:80px;">
-                        <input type="date" id="exam-date" style="min-width:80px;">
-                        <button class="btn btn-sm" id="exam-add-btn">+</button>
+                        <input type="text" id="exam-title" placeholder="Materia">
+                        <input type="date" id="exam-date">
+                        <button class="btn btn-sm" id="exam-add-btn">+ Añadir</button>
                     </div>
                     <div id="exam-list"></div>
                 </div>
@@ -600,13 +623,13 @@
                 <div class="card">
                     <div class="card-title">🧮 Calculadora de Notas</div>
                     <div class="input-group">
-                        <input type="number" id="grade-input" placeholder="Nota (0-100)" min="0" max="100" style="min-width:80px;">
-                        <button class="btn btn-sm" id="grade-add-btn">+</button>
+                        <input type="number" id="grade-input" placeholder="Nota (0-100)" min="0" max="100" step="0.1">
+                        <button class="btn btn-sm" id="grade-add-btn">+ Agregar</button>
                     </div>
                     <div id="grade-list"></div>
-                    <div style="margin-top:8px; display:flex; gap:12px; flex-wrap:wrap; font-size:13px;">
+                    <div style="margin-top:14px; display:flex; gap:20px; flex-wrap:wrap; font-size:15px;">
                         <span><strong>Promedio:</strong> <span id="grade-average">-</span></span>
-                        <span><strong>Nota para aprobar (70):</strong> <span id="grade-needed">-</span></span>
+                        <span><strong>Nota necesaria (70):</strong> <span id="grade-needed">-</span></span>
                     </div>
                 </div>
             </div>
@@ -617,13 +640,13 @@
                     <div class="card-title">🍅 Pomodoro</div>
                     <div class="pomodoro-phase" id="pomodoro-phase">Estudio</div>
                     <div class="pomodoro-timer" id="pomodoro-timer">25:00</div>
-                    <div style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap;">
+                    <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
                         <button class="btn" id="pomodoro-start">▶ Iniciar</button>
-                        <button class="btn btn-outline" id="pomodoro-pause">⏸️</button>
-                        <button class="btn btn-danger" id="pomodoro-reset">⟳</button>
+                        <button class="btn btn-outline" id="pomodoro-pause">⏸️ Pausa</button>
+                        <button class="btn btn-danger" id="pomodoro-reset">⟳ Reiniciar</button>
                     </div>
-                    <div style="margin-top:6px; text-align:center; color:var(--text-secondary); font-size:12px;">
-                        Ciclos: <strong id="pomodoro-cycles">0</strong>
+                    <div style="margin-top:12px; text-align:center; color:var(--text-secondary); font-size:15px;">
+                        Ciclos completados: <strong id="pomodoro-cycles">0</strong>
                     </div>
                 </div>
             </div>
@@ -633,9 +656,9 @@
                 <div class="card">
                     <div class="card-title">🎯 Metas</div>
                     <div class="input-group">
-                        <input type="text" id="goal-title" placeholder="Meta" style="min-width:80px;">
-                        <input type="number" id="goal-total" placeholder="Total" min="1" style="min-width:60px;">
-                        <button class="btn btn-sm" id="goal-add-btn">+</button>
+                        <input type="text" id="goal-title" placeholder="Nombre de la meta">
+                        <input type="number" id="goal-total" placeholder="Total (ej: 100)" min="1">
+                        <button class="btn btn-sm" id="goal-add-btn">+ Crear</button>
                     </div>
                     <div id="goal-list"></div>
                 </div>
@@ -658,95 +681,64 @@
                         <button class="btn btn-outline btn-sm" id="cal-next">›</button>
                     </div>
                     <div class="calendar-grid" id="calendar-grid"></div>
-                    <div style="margin-top:6px; font-size:11px; color:var(--text-secondary);">
-                        <span style="display:inline-block; width:10px; height:10px; background:var(--accent); border-radius:50%; margin-right:4px;"></span> Evento
+                    <div style="margin-top:12px; font-size:14px; color:var(--text-secondary);">
+                        <span style="display:inline-block; width:14px; height:14px; background:var(--accent); border-radius:50%; margin-right:6px;"></span> Evento
                     </div>
                 </div>
             </div>
 
-            <!-- ==================== PERFIL Y PERSONALIZACIÓN ==================== -->
-            <div class="page" id="page-profile">
-                <div class="card">
-                    <div class="card-title">👤 Mi Perfil</div>
-                    <div style="display:flex; align-items:center; gap:12px;">
-                        <div class="avatar-preview-big" id="avatar-preview">
-                            <div class="hair-big" id="avatar-hair"></div>
-                            <div class="eyes-big"><span></span><span></span></div>
-                            <div class="shirt-big" id="avatar-shirt"></div>
-                        </div>
-                        <div style="flex:1;">
-                            <div style="font-size:18px; font-weight:700;" id="profile-name-display">Jugador</div>
-                            <div style="font-size:13px; color:var(--text-secondary);">Nivel: <strong id="profile-level">1</strong></div>
-                            <div style="margin-top:4px;">
-                                <input type="text" id="profile-name-input" placeholder="Nuevo nombre" style="background:var(--bg-input); border:1px solid var(--border-color); border-radius:40px; padding:4px 10px; color:var(--text-primary); width:100%; font-size:12px;">
-                            </div>
-                            <button class="btn btn-sm" id="profile-rename-btn" style="margin-top:4px;">Cambiar nombre</button>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="card">
-                    <div class="card-title">🎨 Personalizar avatar</div>
-                    <div class="avatar-customizer">
-                        <div style="display:flex; gap:12px; flex-wrap:wrap; justify-content:center; width:100%;">
-                            <div>
-                                <div style="font-size:12px; font-weight:600; margin-bottom:4px;">Piel</div>
-                                <div class="avatar-options" id="skin-options">
-                                    <button data-skin="#fcd34d" style="background:#fcd34d;" class="active"></button>
-                                    <button data-skin="#fca5a5" style="background:#fca5a5;"></button>
-                                    <button data-skin="#d97706" style="background:#d97706;"></button>
-                                    <button data-skin="#92400e" style="background:#92400e;"></button>
-                                </div>
-                            </div>
-                            <div>
-                                <div style="font-size:12px; font-weight:600; margin-bottom:4px;">Pelo</div>
-                                <div class="avatar-options" id="hair-options">
-                                    <button data-hair="dark" style="background:#78350f;">🟫</button>
-                                    <button data-hair="blonde" style="background:#fde047;">🟨</button>
-                                    <button data-hair="red" style="background:#b91c1c;">🟥</button>
-                                    <button data-hair="none" style="background:transparent; border-color:var(--border-color);">🚫</button>
-                                </div>
-                            </div>
-                            <div>
-                                <div style="font-size:12px; font-weight:600; margin-bottom:4px;">Camiseta</div>
-                                <div class="avatar-options" id="shirt-options">
-                                    <button data-shirt="blue" style="background:#3b82f6;" class="active"></button>
-                                    <button data-shirt="red" style="background:#ef4444;"></button>
-                                    <button data-shirt="green" style="background:#22c55e;"></button>
-                                    <button data-shirt="purple" style="background:#8b5cf6;"></button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
+            <!-- ==================== CONFIGURACIÓN ==================== -->
+            <div class="page" id="page-settings">
                 <div class="card">
                     <div class="card-title">⚙️ Configuración</div>
-                    <div style="display:flex; flex-direction:column; gap:8px;">
+
+                    <!-- Personalización del jugador -->
+                    <div style="margin-bottom:20px;">
+                        <div style="font-weight:600; margin-bottom:8px;">👤 Mi perfil</div>
+                        <div class="player-profile">
+                            <div class="player-avatar" id="player-avatar-display">🧑‍🎓</div>
+                            <div style="flex:1;">
+                                <div class="input-group" style="margin-bottom:4px;">
+                                    <input type="text" id="player-name-input" placeholder="Tu nombre" style="flex:2;">
+                                    <button class="btn btn-sm" id="player-name-btn">Guardar</button>
+                                </div>
+                                <div class="avatar-selector" id="avatar-selector">
+                                    <span class="avatar-option" data-avatar="🧑‍🎓">🧑‍🎓</span>
+                                    <span class="avatar-option" data-avatar="👨‍🎓">👨‍🎓</span>
+                                    <span class="avatar-option" data-avatar="👩‍🎓">👩‍🎓</span>
+                                    <span class="avatar-option" data-avatar="🐱">🐱</span>
+                                    <span class="avatar-option" data-avatar="🦊">🦊</span>
+                                    <span class="avatar-option" data-avatar="⭐">⭐</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="display:flex; flex-direction:column; gap:16px;">
                         <div style="display:flex; justify-content:space-between; align-items:center;">
-                            <span>Tema oscuro</span>
+                            <span style="font-size:16px;">Tema oscuro</span>
                             <label class="switch">
                                 <input type="checkbox" id="darkModeToggle" checked>
                                 <span class="slider"></span>
                             </label>
                         </div>
                         <div style="display:flex; justify-content:space-between; align-items:center;">
-                            <span>Color principal</span>
-                            <select id="accent-select" style="background:var(--bg-input); color:var(--text-primary); border:1px solid var(--border-color); border-radius:40px; padding:4px 10px; font-size:12px;">
+                            <span style="font-size:16px;">Color principal</span>
+                            <select id="accent-select" style="background:var(--bg-input); color:var(--text-primary); border:1px solid var(--border-color); border-radius:40px; padding:8px 16px; font-size:16px; min-height:44px;">
                                 <option value="blue">Azul</option>
                                 <option value="green">Verde</option>
                                 <option value="purple">Púrpura</option>
                                 <option value="orange">Naranja</option>
                             </select>
                         </div>
-                        <button class="btn btn-danger" id="reset-data-btn" style="width:100%; margin-top:4px;">🔄 Restablecer todos los datos</button>
+                        <button class="btn btn-danger" id="reset-data-btn" style="width:100%;">🔄 Restablecer todos los datos</button>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- NAVEGACIÓN INFERIOR -->
-        <div class="bottom-nav">
+        <!-- NAVEGACIÓN INFERIOR (scroll horizontal si es necesario) -->
+        <div class="bottom-nav" id="bottomNav">
             <button class="nav-btn active" data-page="home"><span class="nav-icon">🏠</span> Inicio</button>
             <button class="nav-btn" data-page="schedule"><span class="nav-icon">📅</span> Horario</button>
             <button class="nav-btn" data-page="tasks"><span class="nav-icon">📝</span> Tareas</button>
@@ -756,25 +748,25 @@
             <button class="nav-btn" data-page="goals"><span class="nav-icon">🎯</span> Metas</button>
             <button class="nav-btn" data-page="achievements"><span class="nav-icon">🏅</span> Logros</button>
             <button class="nav-btn" data-page="calendar"><span class="nav-icon">📆</span> Calendario</button>
-            <button class="nav-btn" data-page="profile"><span class="nav-icon">👤</span> Perfil</button>
+            <button class="nav-btn" data-page="settings"><span class="nav-icon">⚙️</span> Config</button>
         </div>
     </div>
 
     <script>
         // ================================================================
-        //  STUDYHUB - CON PERSONALIZACIÓN DE JUGADOR
+        //  STUDYHUB · VERSIÓN ANDROID (TÁCTIL)
         // ================================================================
 
         // ---------- ESTADO PREDETERMINADO ----------
         const defaultData = {
-            player: {
-                name: 'Jugador',
-                skin: '#fcd34d',
-                hair: 'dark',
-                shirt: 'blue'
-            },
+            player: { name: 'Estudiante', avatar: '🧑‍🎓' },
             schedule: {
-                Lunes: [], Martes: [], Miércoles: [], Jueves: [], Viernes: [], Sábado: []
+                Lunes: [],
+                Martes: [],
+                Miércoles: [],
+                Jueves: [],
+                Viernes: [],
+                Sábado: []
             },
             tasks: [],
             exams: [],
@@ -784,6 +776,8 @@
             achievements: {
                 firstTask: false,
                 firstExam: false,
+                studyStreak: 0,
+                lastStudyDate: null,
                 fiveTasks: false,
                 tenGoals: false,
                 pomodoroMaster: false
@@ -804,7 +798,7 @@
                     for (let key in defaultData) {
                         if (!(key in parsed)) parsed[key] = defaultData[key];
                     }
-                    if (!parsed.player) parsed.player = defaultData.player;
+                    if (!parsed.player) parsed.player = { name: 'Estudiante', avatar: '🧑‍🎓' };
                     if (!parsed.schedule) parsed.schedule = defaultData.schedule;
                     if (!parsed.achievements) parsed.achievements = defaultData.achievements;
                     if (!parsed.settings) parsed.settings = defaultData.settings;
@@ -832,9 +826,16 @@
             return d.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
         }
 
-        // ---------- ACTUALIZACIÓN UI COMPLETA ----------
+        // ---------- ACTUALIZACIÓN UI ----------
         function updateAllUI() {
-            updateHeader();
+            // Actualizar nombre y avatar
+            document.getElementById('player-name-input').value = data.player.name || 'Estudiante';
+            document.getElementById('player-avatar-display').textContent = data.player.avatar || '🧑‍🎓';
+            // Marcar avatar activo
+            document.querySelectorAll('.avatar-option').forEach(el => {
+                el.classList.toggle('active', el.dataset.avatar === data.player.avatar);
+            });
+
             updateHome();
             updateSchedule();
             updateTasks();
@@ -844,28 +845,7 @@
             updateAchievements();
             updateCalendar();
             updatePomodoroUI();
-            updateProfile();
             applyTheme();
-        }
-
-        // ---------- HEADER CON AVATAR ----------
-        function updateHeader() {
-            const p = data.player;
-            document.getElementById('header-name').innerText = p.name;
-
-            // Mini avatar
-            const miniHair = document.getElementById('mini-hair');
-            miniHair.className = 'hair-mini';
-            if (p.hair && p.hair !== 'none') miniHair.classList.add(p.hair);
-            else miniHair.classList.add('none');
-
-            const miniShirt = document.getElementById('mini-shirt');
-            miniShirt.className = 'shirt-mini';
-            if (p.shirt && p.shirt !== 'blue') miniShirt.classList.add(p.shirt);
-
-            // Color de piel del mini avatar (se aplica al contenedor)
-            const miniAvatar = document.getElementById('mini-avatar');
-            miniAvatar.style.background = p.skin || '#fcd34d';
         }
 
         // ---------- INICIO ----------
@@ -881,13 +861,9 @@
                 Math.round(data.goals.reduce((acc, g) => acc + (g.progress / g.total * 100), 0) / data.goals.length) : 0;
             document.getElementById('home-goals-progress').innerText = goalsProgress + '%';
 
-            const unlocked = Object.values(data.achievements).filter(v => v === true).length;
-            document.getElementById('home-achievements-count').innerText = unlocked;
-
-            // Logros recientes
-            const unlockedList = Object.entries(data.achievements).filter(([k, v]) => v === true).map(([k]) => k);
+            const unlocked = Object.entries(data.achievements).filter(([k, v]) => v === true).map(([k]) => k);
             const container = document.getElementById('home-achievements');
-            if (unlockedList.length === 0) {
+            if (unlocked.length === 0) {
                 container.innerHTML = '<div class="empty-state">Aún no tienes logros. ¡Sigue estudiando!</div>';
             } else {
                 const names = {
@@ -897,8 +873,8 @@
                     tenGoals: '🎯 10 metas creadas',
                     pomodoroMaster: '🍅 10 ciclos Pomodoro'
                 };
-                container.innerHTML = unlockedList.slice(-3).map(k =>
-                    `<span style="display:inline-block; background:var(--bg-input); border-radius:40px; padding:2px 10px; margin:2px; font-size:12px;">${names[k] || k}</span>`
+                container.innerHTML = unlocked.slice(-3).map(k =>
+                    `<span style="display:inline-block; background:var(--bg-input); border-radius:40px; padding:6px 14px; margin:3px; font-size:14px;">${names[k] || k}</span>`
                 ).join(' ');
             }
 
@@ -921,14 +897,14 @@
                 container2.innerHTML = '<div class="empty-state">No hay eventos próximos.</div>';
             } else {
                 container2.innerHTML = upcoming.slice(0, 5).map(e =>
-                    `<div style="display:flex; justify-content:space-between; padding:4px 0; border-bottom:1px solid var(--border-color); font-size:13px;">
+                    `<div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid var(--border-color); font-size:15px;">
                         <span>${e.type} ${e.title}</span>
                         <span style="color:var(--text-secondary);">${formatDate(e.date)}</span>
                     </div>`
                 ).join('');
             }
 
-            // Frase motivacional
+            // Frase motivacional (diaria)
             const quotes = [
                 { text: "El éxito es la suma de pequeños esfuerzos repetidos día tras día.", author: "Robert Collier" },
                 { text: "El estudio no se mide por el tiempo que pasas, sino por lo que aprendes.", author: "Anónimo" },
@@ -937,6 +913,7 @@
                 { text: "El conocimiento es poder, pero solo si se aplica.", author: "Anónimo" },
                 { text: "La disciplina es el puente entre metas y logros.", author: "Jim Rohn" },
                 { text: "El mejor momento para empezar fue ayer. El siguiente mejor momento es ahora.", author: "Anónimo" },
+                { text: "El único lugar donde el éxito viene antes que el trabajo es en el diccionario.", author: "Vidal Sassoon" }
             ];
             const dayOfYear = Math.floor((new Date() - new Date(new Date().getFullYear(), 0, 0)) / (1000 * 60 * 60 * 24));
             const quote = quotes[dayOfYear % quotes.length];
@@ -950,12 +927,12 @@
             let html = '';
             days.forEach(day => {
                 const entries = data.schedule[day] || [];
-                html += `<div style="margin-bottom:8px;">
-                    <div style="font-weight:700; margin-bottom:2px; font-size:13px;">${day}</div>
-                    ${entries.length === 0 ? '<div class="empty-state" style="padding:4px 0; font-size:12px;">Sin clases</div>' :
-                        entries.map((e, i) => `<div style="display:flex; justify-content:space-between; padding:4px 0; border-bottom:1px solid var(--border-color); font-size:13px;">
-                            <span><strong>${e.subject}</strong> · ${e.teacher} · ${e.room}</span>
-                            <button class="btn btn-danger btn-sm" onclick="removeSchedule('${day}', ${i})">✕</button>
+                html += `<div style="margin-bottom:14px;">
+                    <div style="font-weight:700; font-size:16px; margin-bottom:6px;">${day}</div>
+                    ${entries.length === 0 ? '<div class="empty-state" style="padding:8px 0;">Sin clases</div>' :
+                        entries.map((e, i) => `<div style="display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid var(--border-color);">
+                            <span style="font-size:15px;"><strong>${e.subject}</strong> · ${e.teacher} · ${e.room}</span>
+                            <button class="btn btn-danger btn-sm" onclick="removeSchedule('${day}', ${i})" style="min-height:36px; min-width:36px;">✕</button>
                         </div>`).join('')}
                 </div>`;
             });
@@ -1029,7 +1006,7 @@
         function updateExams() {
             const list = document.getElementById('exam-list');
             if (data.exams.length === 0) {
-                list.innerHTML = '<div class="empty-state">No hay exámenes registrados.</div>';
+                list.innerHTML = '<div class="empty-state">No hay exámenes.</div>';
                 return;
             }
             list.innerHTML = data.exams.map((e, i) =>
@@ -1043,15 +1020,14 @@
                     </div>
                 </div>`
             ).join('');
-
-            // Recordatorio de examen mañana
+            // Recordatorio si hay examen mañana
             const today = new Date();
             const tomorrow = new Date(today);
             tomorrow.setDate(tomorrow.getDate() + 1);
             const tomorrowStr = tomorrow.toISOString().split('T')[0];
             data.exams.forEach(e => {
                 if (e.date === tomorrowStr) {
-                    showNotification('📚 Recordatorio de examen', `Mañana tienes examen de ${e.title}`);
+                    showNotification('📚 Recordatorio', `Mañana tienes examen de ${e.title}`);
                 }
             });
             checkAchievements();
@@ -1081,7 +1057,7 @@
             } else {
                 list.innerHTML = data.grades.map((g, i) =>
                     `<div class="list-item">
-                        <span>${g}%</span>
+                        <span style="font-size:16px; font-weight:600;">${g}%</span>
                         <button class="btn btn-danger btn-sm" onclick="deleteGrade(${i})">✕</button>
                     </div>`
                 ).join('');
@@ -1124,13 +1100,13 @@
                 `${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}`;
             document.getElementById('pomodoro-phase').innerText =
                 pomodoroPhase === 'study' ? '📖 Estudio' : '☕ Descanso';
-            document.getElementById('pomodoro-cycles').innerText = data.pomodoroCycles || 0;
+            document.getElementById('pomodoro-cycles').innerText = data.pomodoroCycles;
         }
 
         function pomodoroTick() {
             if (pomodoroTime <= 0) {
                 if (pomodoroPhase === 'study') {
-                    data.pomodoroCycles = (data.pomodoroCycles || 0) + 1;
+                    data.pomodoroCycles += 1;
                     if (data.pomodoroCycles >= 10) {
                         data.achievements.pomodoroMaster = true;
                         saveData();
@@ -1187,15 +1163,15 @@
             }
             list.innerHTML = data.goals.map((g, i) => {
                 const pct = Math.min(100, (g.progress / g.total) * 100);
-                return `<div class="list-item" style="flex-direction:column; align-items:stretch;">
-                    <div style="display:flex; justify-content:space-between;">
+                return `<div class="list-item" style="flex-direction:column; align-items:stretch; gap:6px;">
+                    <div style="display:flex; justify-content:space-between; font-size:15px;">
                         <div class="title">${g.title}</div>
                         <div>${Math.round(pct)}%</div>
                     </div>
                     <div class="progress-bar"><div class="fill" style="width:${pct}%;"></div></div>
-                    <div style="display:flex; justify-content:space-between; margin-top:2px;">
-                        <span style="font-size:12px; color:var(--text-secondary);">${g.progress} / ${g.total}</span>
-                        <div style="display:flex; gap:4px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
+                        <span style="font-size:14px; color:var(--text-secondary);">${g.progress} / ${g.total}</span>
+                        <div style="display:flex; gap:8px;">
                             <button class="btn btn-sm btn-success" onclick="goalProgress(${i}, 1)">+1</button>
                             <button class="btn btn-sm btn-success" onclick="goalProgress(${i}, 5)">+5</button>
                             <button class="btn btn-sm btn-danger" onclick="deleteGoal(${i})">🗑️</button>
@@ -1255,7 +1231,7 @@
                 changed = true;
                 showNotification('🏅 Logro desbloqueado', '¡Creaste 10 metas!');
             }
-            if (!data.achievements.pomodoroMaster && (data.pomodoroCycles || 0) >= 10) {
+            if (!data.achievements.pomodoroMaster && data.pomodoroCycles >= 10) {
                 data.achievements.pomodoroMaster = true;
                 changed = true;
                 showNotification('🏅 Logro desbloqueado', '¡Completaste 10 ciclos Pomodoro!');
@@ -1285,7 +1261,6 @@
 
         // ---------- CALENDARIO ----------
         let calDate = new Date();
-
         function updateCalendar() {
             const year = calDate.getFullYear();
             const month = calDate.getMonth();
@@ -1327,72 +1302,6 @@
             updateCalendar();
         });
 
-        // ---------- PERFIL Y PERSONALIZACIÓN ----------
-        function updateProfile() {
-            const p = data.player;
-            document.getElementById('profile-name-display').innerText = p.name;
-
-            // Avatar grande
-            const bigHair = document.getElementById('avatar-hair');
-            bigHair.className = 'hair-big';
-            if (p.hair && p.hair !== 'none') bigHair.classList.add(p.hair);
-            else bigHair.classList.add('none');
-
-            const bigShirt = document.getElementById('avatar-shirt');
-            bigShirt.className = 'shirt-big';
-            if (p.shirt && p.shirt !== 'blue') bigShirt.classList.add(p.shirt);
-
-            const bigAvatar = document.getElementById('avatar-preview');
-            bigAvatar.style.background = p.skin || '#fcd34d';
-
-            // Marcar opciones activas
-            document.querySelectorAll('#skin-options button').forEach(b => {
-                b.classList.toggle('active', b.dataset.skin === p.skin);
-            });
-            document.querySelectorAll('#hair-options button').forEach(b => {
-                b.classList.toggle('active', b.dataset.hair === p.hair);
-            });
-            document.querySelectorAll('#shirt-options button').forEach(b => {
-                b.classList.toggle('active', b.dataset.shirt === p.shirt);
-            });
-
-            // Nivel (simulado)
-            const totalTasks = data.tasks.length;
-            const level = Math.floor(totalTasks / 3) + 1;
-            document.getElementById('profile-level').innerText = level;
-        }
-
-        // Eventos de personalización
-        document.querySelectorAll('#skin-options button').forEach(btn => {
-            btn.addEventListener('click', function() {
-                data.player.skin = this.dataset.skin;
-                saveData();
-            });
-        });
-
-        document.querySelectorAll('#hair-options button').forEach(btn => {
-            btn.addEventListener('click', function() {
-                data.player.hair = this.dataset.hair;
-                saveData();
-            });
-        });
-
-        document.querySelectorAll('#shirt-options button').forEach(btn => {
-            btn.addEventListener('click', function() {
-                data.player.shirt = this.dataset.shirt;
-                saveData();
-            });
-        });
-
-        document.getElementById('profile-rename-btn').addEventListener('click', function() {
-            const input = document.getElementById('profile-name-input');
-            if (input.value.trim().length > 0) {
-                data.player.name = input.value.trim();
-                saveData();
-                input.value = '';
-            }
-        });
-
         // ---------- NOTIFICACIONES ----------
         function showNotification(title, body) {
             if ('Notification' in window && Notification.permission === 'granted') {
@@ -1402,7 +1311,23 @@
             }
         }
 
-        // ---------- TEMAS Y PERSONALIZACIÓN ----------
+        // ---------- PERSONALIZACIÓN JUGADOR ----------
+        document.getElementById('player-name-btn').addEventListener('click', function() {
+            const name = document.getElementById('player-name-input').value.trim();
+            if (name) {
+                data.player.name = name;
+                saveData();
+            }
+        });
+
+        document.querySelectorAll('.avatar-option').forEach(el => {
+            el.addEventListener('click', function() {
+                data.player.avatar = this.dataset.avatar;
+                saveData();
+            });
+        });
+
+        // ---------- TEMAS Y COLOR ----------
         function applyTheme() {
             const dark = data.settings.darkMode;
             document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
@@ -1439,7 +1364,7 @@
             saveData();
         });
 
-        // ---------- REINICIAR DATOS ----------
+        // ---------- REINICIAR ----------
         document.getElementById('reset-data-btn').addEventListener('click', function() {
             if (confirm('¿Seguro que quieres borrar todos los datos?')) {
                 localStorage.removeItem('studyhubData');
@@ -1462,22 +1387,23 @@
                 if (pageId === 'calendar') updateCalendar();
                 if (pageId === 'achievements') updateAchievements();
                 if (pageId === 'home') updateHome();
-                if (pageId === 'profile') updateProfile();
             });
         });
 
-        // ---------- INICIALIZAR ----------
+        // ---------- INICIALIZACIÓN ----------
         if ('Notification' in window && Notification.permission === 'default') {
             Notification.requestPermission();
         }
 
+        // Iniciar Pomodoro
         pomodoroTime = 25 * 60;
         pomodoroPhase = 'study';
         updatePomodoroUI();
         document.getElementById('pomodoro-pause').disabled = true;
 
+        // Cargar datos y mostrar
         saveData();
-        console.log('📚 StudyHub con personalización cargado.');
+        console.log('📚 StudyHub · Versión Android táctil cargada.');
     </script>
 </body>
 </html>
