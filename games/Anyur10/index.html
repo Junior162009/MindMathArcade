@@ -24,7 +24,8 @@
             justify-content: center;
             align-items: center;
             transition: background 0.3s, color 0.3s;
-            padding: 12px;
+            padding: 0;
+            margin: 0;
         }
 
         /* Overlay de selección */
@@ -34,7 +35,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.7);
+            background: rgba(0,0,0,0.75);
             backdrop-filter: blur(8px);
             display: flex;
             flex-direction: column;
@@ -114,9 +115,12 @@
             --touch-target: 56px;
             --card-padding: 24px 22px;
             --gap: 22px;
-            --max-width: 520px;
+            --app-radius: 32px;
+            --app-max-width: 520px;
             --app-height: 820px;
             --nav-padding: 8px 4px 18px 4px;
+            --nav-wrap: nowrap;
+            --nav-justify: space-around;
         }
 
         /* --- Modo Móvil (activo por defecto) --- */
@@ -125,25 +129,108 @@
             --touch-target: 56px;
             --card-padding: 24px 22px;
             --gap: 22px;
-            --max-width: 520px;
+            --app-max-width: 520px;
             --app-height: 820px;
+            --app-radius: 32px;
             --nav-padding: 8px 4px 18px 4px;
+            --nav-wrap: nowrap;
+            --nav-justify: space-around;
             --radius: 24px;
         }
+        body.mobile #app {
+            border-radius: var(--app-radius);
+            max-width: var(--app-max-width);
+            height: var(--app-height);
+            border: 1px solid var(--border-color);
+        }
 
-        /* --- Modo PC (se activa con clase .desktop) --- */
+        /* --- Modo PC (pantalla completa estilo YouTube) --- */
         body.desktop {
             --font-base: 20px;
             --touch-target: 64px;
-            --card-padding: 32px 30px;
+            --card-padding: 32px 36px;
             --gap: 28px;
-            --max-width: 900px;
-            --app-height: 90vh;
-            --nav-padding: 12px 16px 22px 16px;
-            --radius: 32px;
+            --app-max-width: 100%;
+            --app-height: 100vh;
+            --app-radius: 0;
+            --nav-padding: 12px 24px 18px 24px;
+            --nav-wrap: wrap;
+            --nav-justify: center;
+            --radius: 24px;
+            --shadow: none;
+            --border-color: #2d3748;
+        }
+        body.desktop #app {
+            border-radius: 0;
+            max-width: 100%;
+            height: 100vh;
+            border: none;
+            box-shadow: none;
+        }
+        body.desktop .bottom-nav {
+            gap: 8px;
+            flex-wrap: var(--nav-wrap);
+            justify-content: var(--nav-justify);
+        }
+        body.desktop .nav-btn {
+            padding: 12px 24px;
+            min-height: 64px;
+            font-size: 15px;
+        }
+        body.desktop .nav-btn .nav-icon {
+            font-size: 30px;
+        }
+        body.desktop .pages-container {
+            padding: 28px 40px;
+        }
+        body.desktop .card {
+            padding: 32px 36px;
+        }
+        body.desktop .input-group input,
+        body.desktop .input-group select {
+            padding: 18px 22px;
+            font-size: 20px;
+            min-height: 64px;
+        }
+        body.desktop .btn {
+            font-size: 20px;
+            padding: 16px 28px;
+            min-height: 64px;
+        }
+        body.desktop .btn-sm {
+            font-size: 18px;
+            padding: 14px 20px;
+            min-height: 52px;
+        }
+        body.desktop .calendar-grid .day-cell {
+            min-height: 68px;
+            font-size: 20px;
+        }
+        body.desktop .pomodoro-timer {
+            font-size: 80px;
+        }
+        body.desktop .player-avatar {
+            width: 120px;
+            height: 120px;
+            font-size: 84px;
+        }
+        body.desktop .avatar-selector .avatar-option {
+            width: 80px;
+            height: 80px;
+            font-size: 44px;
+        }
+        body.desktop .quote-box {
+            font-size: 20px;
+            padding: 26px 30px;
+        }
+        body.desktop .list-item .info .title {
+            font-size: 20px;
+        }
+        body.desktop .list-item .info .sub {
+            font-size: 17px;
         }
 
-        /* Tema claro (se aplica con data-theme="light") */
+        /* Tema claro */
         [data-theme="light"] {
             --bg-primary: #f0f4f8;
             --bg-secondary: #ffffff;
@@ -156,6 +243,9 @@
             --nav-bg: #ffffff;
             --header-bg: #ffffff;
         }
+        body.desktop [data-theme="light"] {
+            --shadow: none;
+        }
 
         /* Colores de acento */
         [data-accent="green"] { --accent: #22c55e; --accent-hover: #16a34a; }
@@ -167,10 +257,7 @@
            ============================================================== */
         #app {
             width: 100%;
-            max-width: var(--max-width);
-            height: var(--app-height);
             background: var(--bg-secondary);
-            border-radius: var(--radius);
             box-shadow: var(--shadow);
             display: flex;
             flex-direction: column;
@@ -178,7 +265,7 @@
             position: relative;
             border: 1px solid var(--border-color);
             transition: background var(--transition), border-color var(--transition),
-                        max-width 0.3s, height 0.3s;
+                        max-width 0.3s, height 0.3s, border-radius 0.3s;
         }
 
         /* ==============================================================
@@ -250,14 +337,14 @@
         .bottom-nav {
             background: var(--nav-bg);
             display: flex;
-            justify-content: space-around;
+            justify-content: var(--nav-justify);
             padding: var(--nav-padding);
             border-top: 2px solid var(--border-color);
             flex-shrink: 0;
             transition: background var(--transition), border-color var(--transition);
-            flex-wrap: nowrap;
-            overflow-x: auto;
+            flex-wrap: var(--nav-wrap);
             gap: 4px;
+            overflow-x: auto;
         }
         .bottom-nav::-webkit-scrollbar { display: none; }
 
@@ -648,67 +735,59 @@
         .pages-container::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 10px; }
 
         /* ==============================================================
-           RESPONSIVE
+           RESPONSIVE (solo para móvil cuando no está en modo PC)
            ============================================================== */
         @media (max-width: 520px) {
-            #app { height: 100vh; border-radius: 0; max-width: 100%; }
+            body.mobile #app {
+                height: 100vh;
+                border-radius: 0;
+                max-width: 100%;
+                border: none;
+            }
+            body.mobile .bottom-nav {
+                gap: 2px;
+                padding: 4px 0 12px 0;
+            }
+            body.mobile .nav-btn {
+                font-size: 11px;
+                padding: 6px 8px;
+                min-height: 48px;
+                min-width: 44px;
+            }
+            body.mobile .nav-btn .nav-icon {
+                font-size: 22px;
+            }
         }
         @media (max-width: 420px) {
             .grid-2 { grid-template-columns: 1fr; }
             .achievement-grid { grid-template-columns: repeat(2, 1fr); }
             .header .brand { font-size: 22px; }
-            .nav-btn { font-size: 12px; padding: 6px 10px; min-height: 56px; }
-            .nav-btn .nav-icon { font-size: 24px; }
             .pomodoro-timer { font-size: 52px; }
         }
 
-        /* En PC, la navegación puede ser horizontal sin scroll */
-        body.desktop .bottom-nav {
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 6px;
-        }
-        body.desktop .nav-btn {
-            padding: 10px 20px;
-        }
-        body.desktop .pages-container {
-            padding: 28px 32px;
-        }
-        body.desktop .card {
-            padding: 32px 30px;
-        }
-        body.desktop .input-group input,
-        body.desktop .input-group select {
-            padding: 18px 22px;
-            font-size: 20px;
-            min-height: 64px;
-        }
-        body.desktop .btn {
-            font-size: 20px;
-            padding: 16px 28px;
-            min-height: 64px;
-        }
-        body.desktop .btn-sm {
-            font-size: 18px;
+        /* ==============================================================
+           BOTÓN PARA CAMBIAR DE MODO (en Configuración)
+           ============================================================== */
+        .mode-toggle-btn {
+            background: var(--bg-input);
+            border: 2px solid var(--border-color);
+            color: var(--text-primary);
             padding: 14px 20px;
-            min-height: 52px;
+            border-radius: 40px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            width: 100%;
+            text-align: center;
         }
-        body.desktop .calendar-grid .day-cell {
-            min-height: 64px;
-            font-size: 20px;
+        .mode-toggle-btn:hover {
+            border-color: var(--accent);
+            background: var(--bg-card);
         }
-        body.desktop .pomodoro-timer {
-            font-size: 80px;
-        }
-        body.desktop .player-avatar {
-            width: 120px;
-            height: 120px;
-            font-size: 84px;
-        }
-        body.desktop .avatar-selector .avatar-option {
-            width: 80px;
-            height: 80px;
-            font-size: 44px;
+        .mode-toggle-btn .icon {
+            font-size: 24px;
+            margin-right: 8px;
         }
     </style>
 </head>
@@ -728,7 +807,7 @@
             <button id="choose-desktop">
                 <span class="icon">💻</span>
                 <span class="label">PC / Escritorio</span>
-                <span class="sub">Pantalla grande, más espacio</span>
+                <span class="sub">Pantalla completa estilo YouTube</span>
             </button>
         </div>
         <p style="margin-top: 30px; color: #94a3b8; font-size: 14px;">Esta elección se guardará para la próxima vez.</p>
@@ -937,6 +1016,12 @@
                                 <option value="orange">Naranja</option>
                             </select>
                         </div>
+
+                        <!-- Botón para cambiar de modo (PC <-> Móvil) -->
+                        <button class="mode-toggle-btn" id="modeToggleBtn">
+                            <span class="icon">🔄</span> Cambiar a <span id="modeToggleLabel">PC</span>
+                        </button>
+
                         <button class="btn btn-danger" id="reset-data-btn" style="width:100%; font-size:18px; padding:16px;">🔄 Restablecer todos los datos</button>
                     </div>
                 </div>
@@ -960,47 +1045,67 @@
 
     <script>
         // ================================================================
-        //  STUDYHUB · SELECCIONADOR DE DISPOSITIVO + LÓGICA COMPLETA
+        //  STUDYHUB · SELECCIONADOR + MODO PC/MÓVIL
         // ================================================================
 
-        // ---------- SELECCIONADOR ----------
+        // ---------- GESTIÓN DE MODO ----------
         const selector = document.getElementById('device-selector');
         const body = document.body;
 
-        // Comprobar si ya hay preferencia guardada
-        const savedMode = localStorage.getItem('studyhubDeviceMode');
-        if (savedMode === 'mobile' || savedMode === 'desktop') {
-            applyMode(savedMode);
-            selector.classList.add('hidden');
+        // Cargar modo guardado o detectar automáticamente
+        let savedMode = localStorage.getItem('studyhubDeviceMode');
+        if (!savedMode) {
+            // Detección automática (ancho de pantalla o userAgent)
+            const isMobile = window.innerWidth < 768 || /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
+            savedMode = isMobile ? 'mobile' : 'desktop';
+            localStorage.setItem('studyhubDeviceMode', savedMode);
         }
 
-        // Botones
-        document.getElementById('choose-mobile').addEventListener('click', function() {
-            applyMode('mobile');
-            selector.classList.add('hidden');
-            localStorage.setItem('studyhubDeviceMode', 'mobile');
-        });
-        document.getElementById('choose-desktop').addEventListener('click', function() {
-            applyMode('desktop');
-            selector.classList.add('hidden');
-            localStorage.setItem('studyhubDeviceMode', 'desktop');
-        });
-
+        // Aplicar modo
         function applyMode(mode) {
             body.classList.remove('mobile', 'desktop');
             body.classList.add(mode);
-            // Ajustar el viewport meta para mejor experiencia en cada modo
+            // Ajustar meta viewport
             const meta = document.querySelector('meta[name=viewport]');
             if (mode === 'mobile') {
                 meta.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover');
             } else {
                 meta.setAttribute('content', 'width=device-width, initial-scale=1.0, user-scalable=yes');
             }
-            // Recalcular tamaños de algunos elementos dinámicos (opcional)
+            // Actualizar etiqueta del botón de cambio
+            const label = document.getElementById('modeToggleLabel');
+            if (label) {
+                label.innerText = mode === 'mobile' ? 'PC' : 'Móvil';
+            }
+            // Ocultar selector si estaba visible
+            selector.classList.add('hidden');
+            // Guardar preferencia
+            localStorage.setItem('studyhubDeviceMode', mode);
+            // Forzar re-dibujo (opcional)
             // ...
         }
 
-        // ---------- DATOS Y LÓGICA (igual que antes, pero con variables CSS) ----------
+        // Eventos del selector
+        document.getElementById('choose-mobile').addEventListener('click', function() {
+            applyMode('mobile');
+        });
+        document.getElementById('choose-desktop').addEventListener('click', function() {
+            applyMode('desktop');
+        });
+
+        // Botón en Configuración para cambiar de modo
+        document.getElementById('modeToggleBtn').addEventListener('click', function() {
+            const current = body.classList.contains('mobile') ? 'mobile' : 'desktop';
+            const newMode = current === 'mobile' ? 'desktop' : 'mobile';
+            applyMode(newMode);
+        });
+
+        // Si ya hay modo guardado, ocultar selector y aplicar
+        if (savedMode) {
+            applyMode(savedMode);
+        }
+
+        // ---------- DATOS Y LÓGICA (igual que antes) ----------
         const defaultData = {
             player: { name: 'Estudiante', avatar: '🧑‍🎓' },
             schedule: {
@@ -1599,11 +1704,8 @@
         updatePomodoroUI();
         document.getElementById('pomodoro-pause').disabled = true;
 
-        // Si ya hay modo guardado, aplicamos y ocultamos selector (ya hecho al inicio)
-        // Pero si no hay modo, el selector se muestra.
-        // Al cargar datos, actualizamos UI
         saveData();
-        console.log('📚 StudyHub · Modo ' + (savedMode || 'seleccionar') + ' cargado.');
+        console.log('📚 StudyHub cargado. Modo:', body.classList.contains('mobile') ? 'Móvil' : 'PC');
     </script>
 </body>
 </html>
