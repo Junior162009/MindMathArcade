@@ -1,0 +1,107 @@
+/* ============================================================
+   ESTILOS PARA PC / ESCRITORIO (pantalla completa estilo YouTube)
+   ============================================================ */
+
+body.desktop {
+    --font-base: 20px;
+    --touch-target: 64px;
+    --card-padding: 32px 36px;
+    --gap: 28px;
+    --app-max-width: 100%;
+    --app-height: 100vh;
+    --app-radius: 0;
+    --nav-padding: 12px 24px 18px 24px;
+    --nav-wrap: wrap;
+    --nav-justify: center;
+    --radius: 24px;
+    --shadow: none;
+    --border-color: #2d3748;
+}
+
+body.desktop #app {
+    border-radius: 0;
+    max-width: 100%;
+    height: 100vh;
+    border: none;
+    box-shadow: none;
+}
+
+body.desktop .bottom-nav {
+    gap: 8px;
+    flex-wrap: var(--nav-wrap);
+    justify-content: var(--nav-justify);
+}
+body.desktop .nav-btn {
+    padding: 12px 24px;
+    min-height: 64px;
+    font-size: 15px;
+}
+body.desktop .nav-btn .nav-icon {
+    font-size: 30px;
+}
+body.desktop .pages-container {
+    padding: 28px 40px;
+}
+body.desktop .card {
+    padding: 32px 36px;
+}
+body.desktop .input-group input,
+body.desktop .input-group select {
+    padding: 18px 22px;
+    font-size: 20px;
+    min-height: 64px;
+}
+body.desktop .btn {
+    font-size: 20px;
+    padding: 16px 28px;
+    min-height: 64px;
+}
+body.desktop .btn-sm {
+    font-size: 18px;
+    padding: 14px 20px;
+    min-height: 52px;
+}
+body.desktop .calendar-grid .day-cell {
+    min-height: 68px;
+    font-size: 20px;
+}
+body.desktop .pomodoro-timer {
+    font-size: 80px;
+}
+body.desktop .player-avatar {
+    width: 120px;
+    height: 120px;
+    font-size: 84px;
+}
+body.desktop .avatar-selector .avatar-option {
+    width: 80px;
+    height: 80px;
+    font-size: 44px;
+}
+body.desktop .quote-box {
+    font-size: 20px;
+    padding: 26px 30px;
+}
+body.desktop .list-item .info .title {
+    font-size: 20px;
+}
+body.desktop .list-item .info .sub {
+    font-size: 17px;
+}
+body.desktop .stats-grid {
+    gap: 20px;
+}
+body.desktop .stat-item .stat-icon {
+    font-size: 40px;
+}
+body.desktop .stat-item strong {
+    font-size: 24px;
+}
+body.desktop .stat-item .stat-label {
+    font-size: 17px;
+}
+
+/* Tema claro en PC (sin sombra) */
+body.desktop [data-theme="light"] {
+    --shadow: none;
+}
