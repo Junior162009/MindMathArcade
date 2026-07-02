@@ -2,10 +2,17 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>StudyHub · Materias y Eventos</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <title>StudyHub · Materias, Eventos y Recordatorios</title>
     <style>
-        /* ========== VARIABLES ========== */
+        /* ========== RESET Y VARIABLES ========== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+
         :root {
             --bg-primary: #0f172a;
             --bg-secondary: #1e293b;
@@ -21,7 +28,9 @@
             --transition: 0.2s ease;
             --nav-bg: #1e293b;
             --header-bg: #1e293b;
+            --safe-bottom: env(safe-area-inset-bottom, 0px);
         }
+
         [data-theme="light"] {
             --bg-primary: #f1f5f9;
             --bg-secondary: #ffffff;
@@ -34,55 +43,52 @@
             --nav-bg: #ffffff;
             --header-bg: #ffffff;
         }
+
         [data-accent="green"] { --accent: #22c55e; --accent-hover: #16a34a; }
         [data-accent="purple"] { --accent: #8b5cf6; --accent-hover: #7c3aed; }
         [data-accent="orange"] { --accent: #f59e0b; --accent-hover: #d97706; }
 
-        /* ========== RESET ========== */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', system-ui, sans-serif;
-        }
-        body {
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
             background: var(--bg-primary);
             color: var(--text-primary);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
             transition: background var(--transition), color var(--transition);
+            touch-action: manipulation;
         }
+
+        /* ========== APP CONTAINER ========== */
         #app {
             width: 100%;
-            max-width: 480px;
-            height: 780px;
+            height: 100vh;
+            height: 100dvh; /* Para móviles modernos */
+            max-width: 100%;
             background: var(--bg-secondary);
-            border-radius: 32px;
-            box-shadow: var(--shadow);
             display: flex;
             flex-direction: column;
             overflow: hidden;
-            border: 1px solid var(--border-color);
             transition: background var(--transition), border-color var(--transition);
+            position: relative;
         }
 
         /* ========== HEADER ========== */
         .header {
             background: var(--header-bg);
-            padding: 14px 20px;
+            padding: 12px 16px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             border-bottom: 1px solid var(--border-color);
             flex-shrink: 0;
-            transition: background var(--transition);
+            transition: background var(--transition), border-color var(--transition);
+            min-height: 56px;
         }
         .header .brand {
             font-weight: 800;
-            font-size: 20px;
+            font-size: clamp(18px, 4vw, 24px);
             color: var(--accent);
+            letter-spacing: -0.5px;
         }
         .header .brand span { color: var(--text-primary); }
         .header-actions {
@@ -94,9 +100,10 @@
             background: transparent;
             border: none;
             color: var(--text-secondary);
-            font-size: 20px;
+            font-size: clamp(18px, 3.5vw, 24px);
             cursor: pointer;
             transition: color var(--transition);
+            padding: 4px;
         }
         .header-actions button:hover { color: var(--accent); }
 
@@ -104,50 +111,62 @@
         .pages-container {
             flex: 1;
             overflow-y: auto;
-            padding: 16px 18px 10px 18px;
+            overflow-x: hidden;
+            padding: 12px 14px calc(12px + var(--safe-bottom));
             scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
         }
+        .pages-container::-webkit-scrollbar { width: 3px; }
+        .pages-container::-webkit-scrollbar-track { background: transparent; }
+        .pages-container::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 10px; }
+
         .page {
             display: none;
-            animation: fadeUp 0.3s ease;
+            animation: fadeUp 0.25s ease;
         }
         .page.active { display: block; }
         @keyframes fadeUp {
-            from { opacity: 0; transform: translateY(12px); }
+            from { opacity: 0; transform: translateY(8px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* ========== NAV ========== */
+        /* ========== NAVEGACIÓN INFERIOR ========== */
         .bottom-nav {
             background: var(--nav-bg);
             display: flex;
             justify-content: space-around;
-            padding: 6px 0 12px 0;
+            padding: 4px 0 calc(6px + var(--safe-bottom));
             border-top: 1px solid var(--border-color);
             flex-shrink: 0;
-            transition: background var(--transition);
-            flex-wrap: wrap;
+            transition: background var(--transition), border-color var(--transition);
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
         }
+        .bottom-nav::-webkit-scrollbar { display: none; }
         .nav-btn {
             background: transparent;
             border: none;
             color: var(--text-secondary);
-            font-size: 11px;
+            font-size: clamp(9px, 2vw, 11px);
             font-weight: 600;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 2px;
+            gap: 1px;
             cursor: pointer;
-            padding: 4px 10px;
+            padding: 4px 8px;
             border-radius: 12px;
             transition: 0.2s;
+            white-space: nowrap;
+            flex: 0 0 auto;
+            touch-action: manipulation;
         }
-        .nav-btn .nav-icon { font-size: 20px; line-height: 1.2; }
+        .nav-btn .nav-icon { font-size: clamp(18px, 4vw, 24px); line-height: 1.2; }
         .nav-btn.active {
             color: var(--accent);
             background: var(--bg-input);
-            padding: 4px 14px;
+            padding: 4px 12px;
         }
         .nav-btn:active { transform: scale(0.92); }
 
@@ -155,14 +174,14 @@
         .card {
             background: var(--bg-card);
             border-radius: var(--radius);
-            padding: 16px 18px;
-            margin-bottom: 14px;
+            padding: 14px 16px;
+            margin-bottom: 12px;
             border: 1px solid var(--border-color);
             box-shadow: var(--shadow);
             transition: background var(--transition), border-color var(--transition);
         }
         .card-title {
-            font-size: 16px;
+            font-size: clamp(15px, 3vw, 18px);
             font-weight: 700;
             margin-bottom: 10px;
             display: flex;
@@ -173,15 +192,17 @@
             background: var(--accent);
             color: white;
             border: none;
-            padding: 8px 16px;
+            padding: 6px 14px;
             border-radius: 40px;
             font-weight: 600;
-            font-size: 13px;
+            font-size: clamp(12px, 2.5vw, 14px);
             cursor: pointer;
             transition: background 0.15s, transform 0.1s;
             display: inline-flex;
             align-items: center;
-            gap: 6px;
+            gap: 4px;
+            touch-action: manipulation;
+            min-height: 36px;
         }
         .btn:active { transform: scale(0.95); }
         .btn:hover { background: var(--accent-hover); }
@@ -195,25 +216,26 @@
         .btn-danger:hover { background: #dc2626; }
         .btn-success { background: #22c55e; }
         .btn-success:hover { background: #16a34a; }
-        .btn-sm { padding: 4px 12px; font-size: 12px; }
+        .btn-sm { padding: 3px 10px; font-size: clamp(11px, 2vw, 12px); min-height: 28px; }
         .btn:disabled { opacity: 0.5; pointer-events: none; }
 
         .input-group {
             display: flex;
-            gap: 8px;
+            gap: 6px;
             flex-wrap: wrap;
             margin-bottom: 8px;
         }
         .input-group input, .input-group select {
             flex: 1;
-            min-width: 100px;
-            padding: 8px 12px;
+            min-width: 80px;
+            padding: 6px 12px;
             border-radius: 40px;
             border: 1px solid var(--border-color);
             background: var(--bg-input);
             color: var(--text-primary);
-            font-size: 13px;
+            font-size: clamp(13px, 2.5vw, 15px);
             transition: border-color var(--transition);
+            min-height: 36px;
         }
         .input-group input:focus, .input-group select:focus {
             outline: none;
@@ -224,67 +246,125 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 8px 0;
+            padding: 6px 0;
             border-bottom: 1px solid var(--border-color);
+            gap: 6px;
         }
         .list-item:last-child { border-bottom: none; }
-        .list-item .info { flex: 1; }
-        .list-item .info .title { font-weight: 600; }
-        .list-item .info .sub { font-size: 13px; color: var(--text-secondary); }
-        .list-item .actions { display: flex; gap: 6px; }
+        .list-item .info { flex: 1; min-width: 0; }
+        .list-item .info .title { font-weight: 600; font-size: clamp(14px, 2.8vw, 16px); }
+        .list-item .info .sub { font-size: clamp(12px, 2.2vw, 14px); color: var(--text-secondary); }
+        .list-item .actions { display: flex; gap: 4px; flex-shrink: 0; }
 
         .empty-state {
             text-align: center;
-            padding: 20px 0;
+            padding: 16px 0;
             color: var(--text-secondary);
-            font-size: 14px;
+            font-size: clamp(13px, 2.5vw, 15px);
         }
 
         .badge {
             background: var(--accent);
             color: white;
             border-radius: 40px;
-            padding: 2px 12px;
-            font-size: 12px;
+            padding: 2px 10px;
+            font-size: clamp(11px, 2vw, 13px);
             font-weight: 600;
         }
         .badge-success { background: #22c55e; }
         .badge-danger { background: #ef4444; }
 
-        /* ========== MATERIAS ========== */
         .subject-tag {
             display: inline-block;
             background: var(--bg-input);
-            padding: 4px 12px;
+            padding: 2px 10px;
             border-radius: 40px;
             margin: 2px 4px 2px 0;
-            font-size: 13px;
+            font-size: clamp(12px, 2.2vw, 14px);
             border: 1px solid var(--border-color);
         }
         .subject-tag .remove-subject {
             cursor: pointer;
-            margin-left: 6px;
+            margin-left: 4px;
             color: var(--text-secondary);
             font-weight: bold;
         }
         .subject-tag .remove-subject:hover { color: #ef4444; }
 
-        /* ========== EVENTOS ========== */
         .event-item {
             border-left: 4px solid var(--accent);
-            padding-left: 12px;
-            margin-bottom: 10px;
+            padding-left: 10px;
+            margin-bottom: 8px;
         }
-        .event-item .event-title { font-weight: 700; }
-        .event-item .event-detail { font-size: 13px; color: var(--text-secondary); }
+        .event-item .event-title { font-weight: 700; font-size: clamp(14px, 2.8vw, 16px); }
+        .event-item .event-detail { font-size: clamp(12px, 2.2vw, 14px); color: var(--text-secondary); }
+
+        /* ========== RECORDATORIOS (alarma) ========== */
+        .alarm-box {
+            background: var(--bg-input);
+            border-radius: var(--radius);
+            padding: 12px;
+            margin-top: 8px;
+            border: 1px dashed var(--accent);
+        }
+        .alarm-box .alarm-time {
+            font-size: clamp(20px, 5vw, 32px);
+            font-weight: 800;
+            text-align: center;
+            font-variant-numeric: tabular-nums;
+        }
+        .alarm-box .alarm-controls {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            margin-top: 6px;
+            flex-wrap: wrap;
+        }
 
         /* ========== RESPONSIVE ========== */
-        @media (max-width: 500px) {
-            #app { height: 100vh; border-radius: 0; max-width: 100%; }
+        @media (max-width: 480px) {
+            .header { padding: 8px 12px; min-height: 48px; }
+            .pages-container { padding: 10px 10px calc(10px + var(--safe-bottom)); }
+            .card { padding: 10px 12px; margin-bottom: 10px; }
+            .bottom-nav { padding: 2px 0 calc(4px + var(--safe-bottom)); }
+            .nav-btn { padding: 2px 6px; }
+            .nav-btn.active { padding: 2px 10px; }
+            .input-group { gap: 4px; }
+            .input-group input, .input-group select { min-height: 32px; padding: 4px 10px; }
+            .btn { min-height: 32px; padding: 4px 12px; }
         }
-        .pages-container::-webkit-scrollbar { width: 4px; }
-        .pages-container::-webkit-scrollbar-track { background: transparent; }
-        .pages-container::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 10px; }
+
+        @media (min-width: 768px) {
+            #app {
+                max-width: 520px;
+                margin: 0 auto;
+                border-radius: 32px;
+                height: 90vh;
+                height: 90dvh;
+                box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+                border: 1px solid var(--border-color);
+            }
+            body {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                padding: 20px;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            #app { max-width: 600px; height: 85vh; height: 85dvh; }
+        }
+
+        /* ========== UTILIDADES ========== */
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            text-align: center;
+        }
+        .grid-3 div { font-size: clamp(12px, 2.2vw, 14px); }
+        .grid-3 div strong { font-size: clamp(18px, 4vw, 24px); display: block; }
     </style>
 </head>
 <body>
@@ -304,10 +384,10 @@
             <div class="page active" id="page-home">
                 <div class="card">
                     <div class="card-title">📊 Resumen</div>
-                    <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; text-align:center;">
-                        <div><div style="font-size:24px;">📚</div><div><strong id="home-subjects">0</strong> materias</div></div>
-                        <div><div style="font-size:24px;">📅</div><div><strong id="home-events">0</strong> eventos</div></div>
-                        <div><div style="font-size:24px;">📝</div><div><strong id="home-tasks">0</strong> tareas</div></div>
+                    <div class="grid-3">
+                        <div><strong id="home-subjects">0</strong> Materias</div>
+                        <div><strong id="home-events">0</strong> Eventos</div>
+                        <div><strong id="home-tasks">0</strong> Tareas pend.</div>
                     </div>
                 </div>
                 <div class="card">
@@ -317,6 +397,19 @@
                 <div class="card">
                     <div class="card-title">📚 Mis materias</div>
                     <div id="home-subject-list" class="empty-state">No hay materias.</div>
+                </div>
+                <!-- Recordatorio rápido en home -->
+                <div class="card" style="border-color: var(--accent);">
+                    <div class="card-title">⏰ Recordatorio rápido</div>
+                    <div class="alarm-box">
+                        <div class="alarm-time" id="home-alarm-display">--:--</div>
+                        <div class="alarm-controls">
+                            <input type="time" id="home-alarm-input" style="background:var(--bg-input); color:var(--text-primary); border:1px solid var(--border-color); border-radius:40px; padding:4px 12px; font-size:clamp(14px,2.8vw,18px);" />
+                            <button class="btn btn-sm" id="home-alarm-set">⏰ Activar</button>
+                            <button class="btn btn-danger btn-sm" id="home-alarm-clear">✕</button>
+                        </div>
+                        <div id="home-alarm-status" style="font-size:clamp(12px,2.2vw,14px); color:var(--text-secondary); text-align:center; margin-top:4px;">Sin alarma activa</div>
+                    </div>
                 </div>
             </div>
 
@@ -329,8 +422,8 @@
                         <button class="btn btn-sm" id="subject-add-btn">+ Agregar</button>
                     </div>
                     <div id="subject-list"></div>
-                    <div style="margin-top:10px; font-size:13px; color:var(--text-secondary);">
-                        <span>Materias predefinidas: </span>
+                    <div style="margin-top:10px; font-size:clamp(12px,2.2vw,14px); color:var(--text-secondary);">
+                        <span>Predefinidas: </span>
                         <span id="predefined-subjects"></span>
                     </div>
                 </div>
@@ -341,10 +434,8 @@
                 <div class="card">
                     <div class="card-title">📅 Eventos</div>
                     <div class="input-group">
-                        <input type="text" id="event-title" placeholder="Título (ej: Exposición)" />
-                        <select id="event-subject">
-                            <option value="">Selecciona materia</option>
-                        </select>
+                        <input type="text" id="event-title" placeholder="Título" />
+                        <select id="event-subject"><option value="">Materia</option></select>
                         <input type="date" id="event-date" />
                         <input type="time" id="event-time" />
                         <button class="btn btn-sm" id="event-add-btn">+ Agregar</button>
@@ -353,7 +444,7 @@
                 </div>
             </div>
 
-            <!-- TAREAS (resumen) -->
+            <!-- TAREAS -->
             <div class="page" id="page-tasks">
                 <div class="card">
                     <div class="card-title">📝 Tareas</div>
@@ -374,19 +465,19 @@
                         <div style="display:flex; justify-content:space-between; align-items:center;">
                             <span>Tema oscuro</span>
                             <label>
-                                <input type="checkbox" id="darkModeToggle" checked />
+                                <input type="checkbox" id="darkModeToggle" checked style="transform:scale(1.3);" />
                             </label>
                         </div>
                         <div style="display:flex; justify-content:space-between; align-items:center;">
                             <span>Color principal</span>
-                            <select id="accent-select" style="background:var(--bg-input); color:var(--text-primary); border:1px solid var(--border-color); border-radius:40px; padding:4px 12px;">
+                            <select id="accent-select" style="background:var(--bg-input); color:var(--text-primary); border:1px solid var(--border-color); border-radius:40px; padding:4px 12px; font-size:clamp(13px,2.5vw,15px);">
                                 <option value="blue">Azul</option>
                                 <option value="green">Verde</option>
                                 <option value="purple">Púrpura</option>
                                 <option value="orange">Naranja</option>
                             </select>
                         </div>
-                        <button class="btn btn-danger" id="reset-data-btn">🔄 Restablecer todos los datos</button>
+                        <button class="btn btn-danger" id="reset-data-btn" style="width:100%;">🔄 Restablecer todos los datos</button>
                     </div>
                 </div>
             </div>
@@ -404,7 +495,7 @@
 
     <script>
         // ================================================================
-        //  STUDYHUB - MATERIAS Y EVENTOS CON NOTIFICACIONES
+        //  STUDYHUB - VERSIÓN DEFINITIVA CON RECORDATORIOS (ALARMA)
         // ================================================================
 
         // ---------- MATERIAS PREDEFINIDAS ----------
@@ -419,6 +510,7 @@
             subjects: [...PREDEFINED_SUBJECTS],
             events: [],
             tasks: [],
+            alarm: null, // { hour, minute, active }
             settings: {
                 darkMode: true,
                 accent: 'blue'
@@ -428,16 +520,16 @@
         let data = loadData();
 
         function loadData() {
-            const raw = localStorage.getItem('studyhubData_v2');
+            const raw = localStorage.getItem('studyhubData_v3');
             if (raw) {
                 try {
                     const parsed = JSON.parse(raw);
-                    // Asegurar que subjects exista y contenga las predefinidas si no tiene
                     if (!parsed.subjects || parsed.subjects.length === 0) {
                         parsed.subjects = [...PREDEFINED_SUBJECTS];
                     }
                     if (!parsed.events) parsed.events = [];
                     if (!parsed.tasks) parsed.tasks = [];
+                    if (!parsed.alarm) parsed.alarm = null;
                     if (!parsed.settings) parsed.settings = { darkMode: true, accent: 'blue' };
                     return parsed;
                 } catch (e) {
@@ -448,7 +540,7 @@
         }
 
         function saveData() {
-            localStorage.setItem('studyhubData_v2', JSON.stringify(data));
+            localStorage.setItem('studyhubData_v3', JSON.stringify(data));
             updateAllUI();
         }
 
@@ -482,6 +574,74 @@
             }
         }
 
+        // ---------- ALARMA (recordatorio programado) ----------
+        let alarmInterval = null;
+
+        function checkAlarm() {
+            if (!data.alarm || !data.alarm.active) return;
+            const now = new Date();
+            const currentHour = now.getHours();
+            const currentMinute = now.getMinutes();
+            if (currentHour === data.alarm.hour && currentMinute === data.alarm.minute) {
+                // Disparar alarma
+                showNotification('⏰ ¡Recordatorio!', `Es hora de tu evento: ${data.alarm.eventTitle || 'Estudio'}`);
+                // Opcional: desactivar después de sonar para que no se repita
+                data.alarm.active = false;
+                saveData();
+                updateAlarmUI();
+            }
+        }
+
+        function startAlarmChecker() {
+            if (alarmInterval) clearInterval(alarmInterval);
+            alarmInterval = setInterval(checkAlarm, 10000); // revisar cada 10 segundos
+        }
+
+        function updateAlarmUI() {
+            const display = document.getElementById('home-alarm-display');
+            const status = document.getElementById('home-alarm-status');
+            const input = document.getElementById('home-alarm-input');
+            if (data.alarm && data.alarm.active) {
+                const h = String(data.alarm.hour).padStart(2, '0');
+                const m = String(data.alarm.minute).padStart(2, '0');
+                display.innerText = `${h}:${m}`;
+                status.innerText = `⏰ Alarma activa para las ${h}:${m} ${data.alarm.eventTitle ? '· ' + data.alarm.eventTitle : ''}`;
+                input.value = `${h}:${m}`;
+            } else {
+                display.innerText = '--:--';
+                status.innerText = 'Sin alarma activa';
+                input.value = '';
+            }
+        }
+
+        document.getElementById('home-alarm-set').addEventListener('click', function() {
+            const val = document.getElementById('home-alarm-input').value;
+            if (!val) return alert('Selecciona una hora.');
+            const [hour, minute] = val.split(':').map(Number);
+            if (isNaN(hour) || isNaN(minute)) return alert('Hora inválida.');
+            // Preguntar título del evento
+            const eventTitle = prompt('¿Qué evento recuerda esta alarma? (opcional)', 'Estudio');
+            data.alarm = {
+                hour,
+                minute,
+                active: true,
+                eventTitle: eventTitle || 'Estudio'
+            };
+            saveData();
+            updateAlarmUI();
+            showNotification('⏰ Alarma activada', `Recordatorio programado para las ${String(hour).padStart(2,'0')}:${String(minute).padStart(2,'0')}`);
+        });
+
+        document.getElementById('home-alarm-clear').addEventListener('click', function() {
+            if (data.alarm) {
+                data.alarm.active = false;
+                data.alarm = null;
+                saveData();
+                updateAlarmUI();
+                showNotification('⏰ Alarma desactivada', 'Recordatorio cancelado.');
+            }
+        });
+
         // ---------- ACTUALIZACIÓN UI ----------
         function updateAllUI() {
             updateHome();
@@ -490,6 +650,7 @@
             updateTasks();
             applyTheme();
             updateSubjectSelect();
+            updateAlarmUI();
         }
 
         // ---------- INICIO ----------
@@ -543,7 +704,6 @@
                 </div>`
             ).join('');
 
-            // Mostrar predefinidas
             const predefinedDiv = document.getElementById('predefined-subjects');
             predefinedDiv.innerHTML = PREDEFINED_SUBJECTS.map(s =>
                 `<span class="subject-tag" style="background:var(--bg-card);">${s}</span>`
@@ -576,7 +736,6 @@
                 list.innerHTML = '<div class="empty-state">No hay eventos registrados.</div>';
                 return;
             }
-            // Ordenar por fecha
             const sorted = [...data.events].sort((a, b) => new Date(a.date + 'T' + (a.time || '00:00')) - new Date(b.date + 'T' + (b.time || '00:00')));
             list.innerHTML = sorted.map((e, i) => {
                 const idx = data.events.indexOf(e);
@@ -611,11 +770,11 @@
             document.getElementById('event-time').value = '';
             saveData();
 
-            // Notificación inmediata si el evento es hoy
+            // Notificación inmediata si es hoy
             if (date === todayStr()) {
                 showNotification(`📅 Evento hoy: ${title}`, `Materia: ${subject} a las ${time}`);
             }
-            // Recordatorio: si el evento es mañana, notificar ahora (simulado)
+            // Recordatorio si es mañana
             const tomorrow = new Date();
             tomorrow.setDate(tomorrow.getDate() + 1);
             if (date === tomorrow.toISOString().split('T')[0]) {
@@ -626,12 +785,12 @@
         function updateSubjectSelect() {
             const select = document.getElementById('event-subject');
             const current = select.value;
-            select.innerHTML = '<option value="">Selecciona materia</option>' +
+            select.innerHTML = '<option value="">Materia</option>' +
                 data.subjects.map(s => `<option value="${s}">${s}</option>`).join('');
             if (current && data.subjects.includes(current)) select.value = current;
         }
 
-        // ---------- TAREAS (básico) ----------
+        // ---------- TAREAS ----------
         function updateTasks() {
             const list = document.getElementById('task-list');
             if (data.tasks.length === 0) {
@@ -712,7 +871,7 @@
         // ---------- REINICIAR ----------
         document.getElementById('reset-data-btn').addEventListener('click', function() {
             if (confirm('¿Seguro que quieres borrar todos los datos?')) {
-                localStorage.removeItem('studyhubData_v2');
+                localStorage.removeItem('studyhubData_v3');
                 data = JSON.parse(JSON.stringify(defaultData));
                 saveData();
                 alert('Datos restablecidos.');
@@ -734,12 +893,12 @@
         });
 
         // ---------- INICIALIZACIÓN ----------
-        // Pedir permiso de notificaciones
+        // Notificaciones
         if ('Notification' in window && Notification.permission === 'default') {
             Notification.requestPermission();
         }
 
-        // Verificar eventos del día al cargar
+        // Verificar eventos del día
         function checkTodayEvents() {
             const today = todayStr();
             data.events.forEach(e => {
@@ -749,11 +908,14 @@
             });
         }
 
+        // Iniciar checker de alarma
+        startAlarmChecker();
+
+        // Guardar y actualizar
         saveData();
         checkTodayEvents();
 
-        console.log('📚 StudyHub v2 con materias y eventos cargado.');
-  </script>  
+        console.log('📚 StudyHub v3 con recordatorios de alarma cargado.');
+    </script>
 </body>
 </html>
-
