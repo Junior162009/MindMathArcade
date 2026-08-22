@@ -1,243 +1,541 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>TecnoQuiz 3.0 — Nexu</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Nexo Orbital · TecnoQuiz</title>
   <style>
     /* ===== ESTILOS GLOBALES ===== */
+    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=DM+Mono&display=swap');
+    :root {
+      --c: #5fe9ff;
+      --v: #a084ff;
+      --l: #baff79;
+      --r: #ff709b;
+      --t: #edf4ff;
+      --m: #a2afd0;
+      --line: #a8c9ff31;
+      --bg: #070b1a;
+      --card: #1b2c61e8;
+      --shadow: #0009;
+    }
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
     }
     body {
-      font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
-      background: #0b0e1a;
+      margin: 0;
       min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      color: #f0f4ff;
-      padding: 1rem;
+      background: var(--bg);
+      color: var(--t);
+      font-family: 'Outfit', sans-serif;
       transition: background 0.4s, color 0.4s;
     }
     body.light {
-      background: #eef2ff;
+      --bg: #eef2ff;
+      --t: #1a1f2f;
+      --m: #4a5a7a;
+      --card: #ffffffd9;
+      --shadow: #00000020;
+      --line: #00000018;
+    }
+    body:before {
+      content: "";
+      position: fixed;
+      z-index: -1;
+      width: 55vw;
+      height: 55vw;
+      left: -25vw;
+      top: -25vw;
+      border-radius: 50%;
+      background: #4933a0;
+      filter: blur(100px);
+      opacity: .43;
+      transition: opacity 0.4s;
+    }
+    body.light:before {
+      opacity: 0.08;
+    }
+    .app {
+      max-width: 1000px;
+      margin: auto;
+      padding: 20px 14px 45px;
+    }
+    /* HEADER */
+    .top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .brand {
+      font-weight: 800;
+      letter-spacing: .13em;
+    }
+    .brand b {
+      color: var(--c);
+    }
+    .pill {
+      font: 13px 'DM Mono';
+      background: #111c40;
+      border: 1px solid var(--line);
+      border-radius: 30px;
+      padding: 8px 10px;
+      color: var(--m);
+      cursor: default;
+    }
+    body.light .pill {
+      background: #ffffff80;
+    }
+    .pill-btn {
+      background: #111c40;
+      border: 1px solid var(--line);
+      border-radius: 30px;
+      padding: 8px 10px;
+      color: var(--t);
+      cursor: pointer;
+      font: 13px 'DM Mono';
+      transition: 0.2s;
+    }
+    body.light .pill-btn {
+      background: #ffffff80;
       color: #1a1f2f;
     }
-    .container {
-      max-width: 1100px;
-      width: 100%;
-      background: rgba(22, 28, 46, 0.85);
-      backdrop-filter: blur(12px);
-      border-radius: 3rem;
-      padding: 2rem 1.5rem;
-      box-shadow: 0 25px 50px -8px rgba(0, 0, 0, 0.8), inset 0 0 0 1px rgba(255, 255, 255, 0.06);
-      transition: all 0.4s;
-      position: relative;
-    }
-    body.light .container {
-      background: rgba(255, 255, 255, 0.7);
-      box-shadow: 0 25px 50px -8px rgba(0, 0, 0, 0.15);
+    .pill-btn:hover {
+      filter: brightness(1.2);
     }
     .screen {
-      display: block;
-      animation: fadeIn 0.4s ease;
-    }
-    .screen.hidden {
       display: none;
+      animation: up .35s;
     }
-    @keyframes fadeIn {
-      0% { opacity: 0; transform: translateY(18px); }
-      100% { opacity: 1; transform: translateY(0); }
+    .screen.on {
+      display: block;
     }
-    @keyframes pulse {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.05); }
-      100% { transform: scale(1); }
+    @keyframes up {
+      from {
+        opacity: 0;
+        transform: translateY(12px);
+      }
+      to {
+        opacity: 1;
+      }
     }
-    @keyframes float {
-      0%,100% { transform: translateY(0); }
-      50% { transform: translateY(-6px); }
+    .panel {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 28px;
+      padding: clamp(22px, 5vw, 48px);
+      box-shadow: 0 25px 70px var(--shadow);
+      overflow: hidden;
+      position: relative;
+      backdrop-filter: blur(4px);
+      transition: background 0.4s, box-shadow 0.4s;
     }
-    @keyframes glow {
-      0% { box-shadow: 0 0 5px rgba(241,196,15,0.2); }
-      50% { box-shadow: 0 0 25px rgba(241,196,15,0.6); }
-      100% { box-shadow: 0 0 5px rgba(241,196,15,0.2); }
+    .hero {
+      min-height: 500px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
     }
-    @keyframes confetti {
-      0% { opacity:1; transform: translateY(0) rotate(0deg); }
-      100% { opacity:0; transform: translateY(-80px) rotate(720deg); }
+    .eyebrow {
+      font: 12px 'DM Mono';
+      letter-spacing: .16em;
+      color: var(--c);
+      text-transform: uppercase;
     }
-
     h1 {
-      font-size: 3rem;
-      font-weight: 800;
-      background: linear-gradient(135deg, #f9d976, #f39c12);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      letter-spacing: -0.02em;
-      text-align: center;
+      font-size: clamp(3rem, 8vw, 6rem);
+      line-height: .86;
+      letter-spacing: -.08em;
+      margin: 17px 0;
+    }
+    h1 span {
+      color: var(--c);
     }
     h2 {
-      font-size: 2rem;
-      font-weight: 600;
-      color: #eef2ff;
-      text-align: center;
-      margin-bottom: 1.5rem;
+      font-size: clamp(2rem, 5vw, 3.1rem);
+      letter-spacing: -.06em;
+      margin: 8px 0;
     }
-    body.light h2 { color: #1a1f2f; }
-    .lead {
-      text-align: center;
-      color: #aab4d6;
-      font-size: 1.1rem;
-      margin: 0.5rem 0 1.5rem;
+    p {
+      color: var(--m);
+      line-height: 1.6;
+      max-width: 610px;
     }
-    body.light .lead { color: #4a5a7a; }
-
-    .controls {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 1rem;
-      margin: 1.5rem 0 0.5rem;
+    .ship {
+      position: absolute;
+      right: 6%;
+      bottom: 9%;
+      font-size: clamp(6rem, 15vw, 12rem);
+      filter: drop-shadow(0 0 24px #5fe9ff88);
+      animation: f 3s ease-in-out infinite;
+    }
+    @keyframes f {
+      50% {
+        transform: translateY(-18px);
+      }
     }
     button {
-      background: rgba(255, 255, 255, 0.07);
-      border: none;
-      padding: 0.8rem 1.8rem;
-      border-radius: 60px;
-      font-weight: 600;
-      font-size: 1rem;
-      color: #eef2ff;
+      border: 0;
+      border-radius: 13px;
+      padding: 12px 17px;
+      background: #1e3261;
+      color: var(--t);
+      font: 700 15px 'Outfit', sans-serif;
       cursor: pointer;
-      transition: all 0.2s;
-      backdrop-filter: blur(4px);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      user-select: none;
-    }
-    body.light button {
-      color: #1a1f2f;
-      background: rgba(0, 0, 0, 0.05);
-      border-color: rgba(0, 0, 0, 0.08);
+      transition: .18s;
     }
     button:hover:not(:disabled) {
-      transform: scale(1.04);
-      background: rgba(255, 255, 255, 0.15);
-      border-color: rgba(255, 255, 255, 0.25);
+      transform: translateY(-2px);
+      filter: brightness(1.15);
     }
-    body.light button:hover:not(:disabled) {
-      background: rgba(0, 0, 0, 0.08);
-    }
-    button:active:not(:disabled) { transform: scale(0.96); }
     button:disabled {
-      opacity: 0.5;
+      opacity: .45;
       cursor: not-allowed;
       transform: none;
     }
-    button.primary {
-      background: #f1c40f;
-      color: #1a1f2f;
-      border-color: #f1c40f;
-      box-shadow: 0 0 20px rgba(241, 196, 15, 0.25);
+    .primary {
+      background: linear-gradient(100deg, var(--c), #9ca9ff);
+      color: #07132d;
     }
-    button.primary:hover:not(:disabled) {
-      background: #f39c12;
-      border-color: #f39c12;
-      box-shadow: 0 0 30px rgba(241, 196, 15, 0.4);
+    .secondary {
+      border: 1px solid var(--line);
+      background: #101b3c;
     }
-    button.secondary {
-      background: rgba(52, 73, 94, 0.6);
-      border-color: #2c3e50;
+    body.light .secondary {
+      background: #ffffff80;
     }
-    button.back {
-      background: transparent;
-      border: 1px solid #4a5a7a;
-      color: #aab4d6;
-      padding: 0.5rem 1.2rem;
-      font-size: 0.9rem;
-    }
-    body.light button.back {
-      border-color: #b0b8d0;
-      color: #4a5a7a;
-    }
-    button.back:hover:not(:disabled) {
-      background: rgba(255, 255, 255, 0.05);
+    .actions,
+    .tabs {
+      display: flex;
+      gap: 9px;
+      flex-wrap: wrap;
+      margin-top: 21px;
     }
     .grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-      gap: 1rem;
-      margin: 1rem 0;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 11px;
+      margin: 20px 0;
     }
     .card {
-      background: rgba(255, 255, 255, 0.04);
-      border-radius: 1.5rem;
-      padding: 1.2rem 0.8rem;
-      text-align: center;
-      backdrop-filter: blur(4px);
-      border: 1px solid rgba(255, 255, 255, 0.06);
-      transition: all 0.2s;
+      text-align: left;
+      min-height: 110px;
+      border: 1px solid var(--line);
+      background: #101a3ad9;
+      padding: 14px;
+      border-radius: 13px;
       cursor: pointer;
+      transition: 0.2s;
     }
     body.light .card {
-      background: rgba(0, 0, 0, 0.02);
-      border-color: rgba(0, 0, 0, 0.06);
+      background: #ffffff80;
     }
-    .card:hover {
-      background: rgba(255, 255, 255, 0.1);
-      transform: translateY(-4px);
-      border-color: rgba(241, 196, 15, 0.3);
+    .card.sel,
+    .tabs button.sel {
+      outline: 2px solid var(--c);
+      background: #17436c;
     }
-    .card.active {
-      border-color: #f1c40f;
-      background: rgba(241, 196, 15, 0.1);
+    body.light .card.sel,
+    body.light .tabs button.sel {
+      background: #d0e4ff;
     }
-
-    /* ===== PERSONAJE NEXU ===== */
-    .nexu-avatar {
-      font-size: 5rem;
-      text-align: center;
-      filter: drop-shadow(0 0 20px rgba(241, 196, 15, 0.2));
-      margin: 0.5rem 0;
-      transition: transform 0.3s;
-      display: flex;
-      justify-content: center;
+    .ico {
+      font-size: 28px;
+      display: block;
+      margin-bottom: 7px;
+    }
+    .card small,
+    .item small {
+      display: block;
+      color: var(--m);
+      font-weight: 400;
+      margin-top: 3px;
+    }
+    /* RULETA */
+    .roulette {
+      display: grid;
+      grid-template-columns: 300px 1fr;
+      gap: 32px;
       align-items: center;
-      gap: 0.2rem;
+      margin: 25px 0;
+    }
+    @media (max-width: 650px) {
+      .roulette {
+        grid-template-columns: 1fr;
+      }
+    }
+    .wheelbox {
+      width: 300px;
+      max-width: 80vw;
+      aspect-ratio: 1;
+      position: relative;
+      margin: auto;
+    }
+    .wheelbox canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      border-radius: 50%;
+      background: #0b1532;
+      box-shadow: 0 0 0 8px #c4f4ff, 0 0 0 13px #7765bd, 0 18px 42px #000a;
+    }
+    .wheelbox .pin {
+      position: absolute;
+      top: -30px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: #fff;
+      font-size: 40px;
+      filter: drop-shadow(0 5px 5px #000);
+      z-index: 2;
+    }
+    .wheel-center {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 55%;
+      padding: 11px 6px;
+      background: #101b3ce8;
+      border: 2px solid var(--c);
+      border-radius: 18px;
+      text-align: center;
+      pointer-events: none;
+      box-shadow: 0 6px 18px #0008;
+    }
+    .wheel-center strong {
+      display: block;
+      font: 800 1.15rem 'DM Mono';
+      color: var(--c);
+    }
+    .wheel-center small {
+      color: var(--m);
+      font-size: .68rem;
+    }
+    .result {
+      font: 700 25px 'DM Mono';
+      color: var(--l);
+      margin: 11px 0;
+    }
+    /* JUEGO */
+    .topgame {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 13px;
+      align-items: center;
+    }
+    @media (max-width: 650px) {
+      .topgame {
+        grid-template-columns: 1fr;
+      }
+    }
+    .row {
+      display: flex;
+      justify-content: space-between;
+      font: 12px 'DM Mono';
+      color: var(--m);
+      gap: 10px;
       flex-wrap: wrap;
     }
-    .nexu-avatar span {
-      display: inline-block;
+    .bar {
+      height: 10px;
+      background: #080f29;
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      overflow: hidden;
+      margin-top: 7px;
     }
-    .nexu-message {
-      background: rgba(241, 196, 15, 0.12);
-      padding: 0.6rem 1.2rem;
-      border-radius: 40px;
-      font-size: 1rem;
-      border-left: 4px solid #f1c40f;
-      flex: 1;
-      min-width: 180px;
+    .fill {
+      height: 100%;
+      width: 100%;
+      background: linear-gradient(90deg, var(--c), var(--v));
+      transition: width .1s;
+    }
+    .score {
+      font: 700 22px 'DM Mono';
+      color: var(--l);
+    }
+    .arena {
+      min-height: 430px;
+      display: grid;
+      place-items: center;
+      position: relative;
+    }
+    .orbit {
+      position: absolute;
+      width: min(430px, 84vw);
+      aspect-ratio: 1;
+      border: 1px solid #65eaff3b;
+      border-radius: 50%;
+      animation: spin 17s linear infinite;
+    }
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+    .question {
+      z-index: 1;
+      width: min(610px, 100%);
+      padding: 29px;
+      background: linear-gradient(145deg, #1c2d65, #0d1738);
+      border: 1px solid #6ae8ff66;
+      border-radius: 24px;
+      text-align: center;
+      box-shadow: 0 18px 55px #0008;
+      transition: background 0.4s;
+    }
+    body.light .question {
+      background: linear-gradient(145deg, #dce8ff, #b0c4e8);
+      border-color: #3a7bd5;
+    }
+    .tag {
+      font: 12px 'DM Mono';
+      color: var(--c);
+      letter-spacing: .14em;
+    }
+    .problem {
+      font-size: clamp(2.5rem, 8vw, 5rem);
+      font-weight: 800;
+      letter-spacing: -.08em;
+      margin: 16px;
+    }
+    .answers {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 9px;
+    }
+    @media (max-width: 500px) {
+      .answers {
+        grid-template-columns: 1fr;
+      }
+    }
+    .answer {
+      background: #0c1737;
+      border: 1px solid #657aab;
+      color: var(--t);
+      padding: 12px;
+      border-radius: 12px;
+      font: 600 16px 'Outfit';
+      cursor: pointer;
+      transition: 0.15s;
+    }
+    body.light .answer {
+      background: #ffffff80;
+      border-color: #5a7bb0;
+    }
+    .answer.ok {
+      background: #285b4d;
+      border-color: var(--l);
+    }
+    .answer.bad {
+      background: #672e4d;
+      border-color: var(--r);
+    }
+    .feed {
+      height: 25px;
+      color: var(--l);
+      font-weight: 600;
+      margin-top: 13px;
+    }
+    /* ESTADÍSTICAS */
+    .stats,
+    .items,
+    .badges {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(145px, 1fr));
+      gap: 11px;
+      margin: 22px 0;
+    }
+    .stat,
+    .item,
+    .badge {
+      border: 1px solid var(--line);
+      border-radius: 15px;
+      background: #0c1735;
+      padding: 16px;
+      text-align: center;
+    }
+    body.light .stat,
+    body.light .item,
+    body.light .badge {
+      background: #ffffff80;
+    }
+    .stat strong {
+      display: block;
+      font: 700 25px 'DM Mono';
+      color: var(--c);
+    }
+    .stat span {
+      color: var(--m);
+      font-size: 14px;
+    }
+    .item .ico {
+      font-size: 32px;
+    }
+    .item button {
+      font-size: 12px;
+      padding: 8px;
+      margin-top: 8px;
+    }
+    .badge {
+      color: var(--m);
+    }
+    .badge.on {
+      color: var(--t);
+      border-color: var(--c);
+    }
+    /* TOAST */
+    .toast {
+      position: fixed;
+      z-index: 5;
+      left: 50%;
+      bottom: 25px;
+      transform: translate(-50%, 120px);
+      background: #e4fbff;
+      color: #071127;
+      padding: 11px 17px;
+      border-radius: 30px;
+      font-weight: 700;
+      transition: .3s;
+    }
+    .toast.on {
+      transform: translate(-50%, 0);
+    }
+    /* PERFIL */
+    .profile-avatar {
+      text-align: center;
+      font-size: 65px;
     }
     #profile-canvas {
-      border-radius: 20px;
-      background: rgba(0, 0, 0, 0.3);
-      box-shadow: 0 0 30px rgba(241, 196, 15, 0.1);
-      width: 180px;
-      height: 240px;
+      width: 160px;
+      height: 213px;
       display: block;
       margin: 0 auto;
-      border: 2px solid rgba(241, 196, 15, 0.15);
-      transition: all 0.3s;
+      border-radius: 16px;
+      background: rgba(0,0,0,0.3);
+      border: 2px solid var(--line);
     }
-    body.light #profile-canvas {
-      background: rgba(0, 0, 0, 0.08);
+    .xp-bar {
+      width: 100%;
+      max-width: 300px;
+      height: 12px;
+      background: #080f29;
+      border-radius: 20px;
+      overflow: hidden;
+      margin: 8px auto;
     }
+    .xp-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--c), var(--v));
+      border-radius: 20px;
+      transition: width 0.5s;
+    }
+    /* ACCESORIOS MINI */
     .accesorios-mini {
       display: flex;
       gap: 0.3rem;
@@ -245,1079 +543,450 @@
       margin-top: 0.5rem;
       font-size: 2rem;
     }
-
-    /* ===== RULETA ===== */
-    .roulette-wrapper {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 1rem;
+    /* RESPONSIVE */
+    @media (max-width: 650px) {
+      .ship {
+        opacity: .25;
+      }
+      .arena {
+        min-height: 450px;
+      }
+      .grid {
+        grid-template-columns: 1fr 1fr;
+      }
     }
-    .roulette-controls {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 0.8rem;
-      margin-bottom: 0.5rem;
+    @media (max-width: 450px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
     }
-    .roulette-controls label {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      background: rgba(255, 255, 255, 0.05);
-      padding: 0.3rem 1rem;
-      border-radius: 30px;
-    }
-    .roulette-controls input[type="number"] {
-      width: 60px;
-      padding: 0.3rem;
-      border-radius: 20px;
-      border: 1px solid #2c3e50;
-      background: #1a1f2f;
-      color: #fff;
-      text-align: center;
-    }
-    body.light .roulette-controls input[type="number"] {
-      background: #fff;
-      color: #1a1f2f;
-      border-color: #b0b8d0;
-    }
-    .input-container {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 0.5rem;
-      margin: 0.5rem 0;
-      max-width: 100%;
-    }
-    .input-container input {
-      width: 120px;
-      padding: 0.4rem;
-      border-radius: 20px;
-      border: 1px solid #2c3e50;
-      background: #1a1f2f;
-      color: #fff;
-      text-align: center;
-      font-size: 0.9rem;
-    }
-    body.light .input-container input {
-      background: #fff;
-      color: #1a1f2f;
-      border-color: #b0b8d0;
-    }
-    .canvas-wrapper {
-      position: relative;
-      width: 300px;
-      height: 300px;
-      margin: 0 auto;
-    }
-    .canvas-wrapper canvas {
-      border-radius: 50%;
-      border: 4px solid #2c3e50;
-      background: #fff;
-      box-shadow: 0 0 0 8px #1a1f2f, 0 20px 40px rgba(0, 0, 0, 0.7);
-      width: 100%;
-      height: 100%;
-    }
-    body.light .canvas-wrapper canvas {
-      border-color: #b0b8d0;
-      box-shadow: 0 0 0 8px #eef2ff, 0 20px 40px rgba(0, 0, 0, 0.2);
-    }
-    .pointer {
-      position: absolute;
-      top: -12px;
-      left: 50%;
-      transform: translateX(-50%);
-      font-size: 2.5rem;
-      color: #f1c40f;
-      filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.6));
-      z-index: 10;
-      text-shadow: 0 0 15px #f1c40f;
-    }
-    .result-box {
-      background: rgba(0, 0, 0, 0.3);
-      padding: 0.8rem 1.5rem;
-      border-radius: 40px;
-      font-size: 1.4rem;
-      font-weight: 700;
-      min-height: 4rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #f1c40f;
-      border: 1px solid rgba(241, 196, 15, 0.2);
-      width: 100%;
-      max-width: 300px;
-      margin: 0 auto;
-      transition: all 0.3s;
-    }
-    .result-box.show {
-      background: rgba(46, 204, 113, 0.2);
-      border-color: #2ecc71;
-      color: #2ecc71;
-    }
-
-    /* ===== PREGUNTAS ===== */
-    .top-row {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: 0.8rem;
-      margin-bottom: 1rem;
-    }
-    .progress-wrap {
-      flex: 1;
-      min-width: 120px;
-    }
-    progress {
-      width: 100%;
-      height: 10px;
-      border-radius: 20px;
-      background: #2c3e50;
-      overflow: hidden;
-    }
-    progress::-webkit-progress-bar { background: #2c3e50; }
-    progress::-webkit-progress-value { background: #f1c40f; border-radius: 20px; transition: width 0.3s; }
-    progress::-moz-progress-bar { background: #f1c40f; border-radius: 20px; }
-    .question-box {
-      background: rgba(0, 0, 0, 0.2);
-      padding: 1.5rem;
-      border-radius: 1.5rem;
-      font-size: 1.3rem;
-      line-height: 1.5;
-      margin: 0.5rem 0 1.2rem;
-      border: 1px solid rgba(255, 255, 255, 0.05);
-    }
-    body.light .question-box {
-      background: rgba(0, 0, 0, 0.04);
-      border-color: rgba(0, 0, 0, 0.06);
-    }
-    .options-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 0.8rem;
-      margin: 0.8rem 0;
-    }
-    .options-grid button {
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 1rem;
-      padding: 0.9rem;
-      text-align: left;
-      font-weight: 500;
-      transition: all 0.15s;
-    }
-    .options-grid button:hover:not(:disabled) { background: rgba(255, 255, 255, 0.12); }
-    .options-grid button.correct { background: #2ecc71; border-color: #2ecc71; color: #fff; }
-    .options-grid button.wrong { background: #e74c3c; border-color: #e74c3c; color: #fff; }
-    .options-grid button:disabled { opacity: 0.7; cursor: not-allowed; transform: none; }
-    .feedback {
-      margin: 0.8rem 0;
-      font-size: 1rem;
-      padding: 0.6rem 1rem;
-      border-radius: 30px;
-      background: rgba(0, 0, 0, 0.2);
-      min-height: 2.8rem;
-    }
-
-    /* ===== PERFIL ===== */
-    .profile-row {
-      display: flex;
-      align-items: center;
-      gap: 2rem;
-      flex-wrap: wrap;
-      justify-content: center;
-      margin: 1rem 0;
-    }
-    .profile-stats {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 1.5rem;
-      justify-content: center;
-    }
-    .profile-stats div {
-      background: rgba(0, 0, 0, 0.2);
-      padding: 0.5rem 1.2rem;
-      border-radius: 40px;
-    }
-    body.light .profile-stats div {
-      background: rgba(0, 0, 0, 0.04);
-    }
-    .xp-bar {
-      width: 100%;
-      max-width: 300px;
-      height: 12px;
-      background: #2c3e50;
-      border-radius: 20px;
-      overflow: hidden;
-      margin: 0.5rem auto;
-    }
-    .xp-bar-fill {
-      height: 100%;
-      background: linear-gradient(90deg, #f1c40f, #f39c12);
-      border-radius: 20px;
-      transition: width 0.5s;
-    }
-
-    /* ===== TIENDA ===== */
-    .shop-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-      gap: 1rem;
-      margin: 1rem 0;
-    }
-    .shop-item {
-      background: rgba(255, 255, 255, 0.04);
-      padding: 0.8rem;
-      border-radius: 1.2rem;
-      text-align: center;
-      border: 1px solid rgba(255, 255, 255, 0.06);
-      transition: all 0.2s;
-    }
-    body.light .shop-item {
-      background: rgba(0, 0, 0, 0.02);
-      border-color: rgba(0, 0, 0, 0.06);
-    }
-    .shop-item .price { color: #f1c40f; font-weight: 700; }
-    .shop-item .owned { color: #2ecc71; font-weight: 700; }
-    .shop-item button { margin-top: 0.5rem; padding: 0.4rem 1rem; font-size: 0.85rem; }
-    .shop-tabs {
-      display: flex;
-      gap: 0.5rem;
-      justify-content: center;
-      margin-bottom: 1rem;
-      flex-wrap: wrap;
-    }
-    .shop-tabs button {
-      padding: 0.4rem 1.2rem;
-      font-size: 0.9rem;
-      border-radius: 40px;
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid transparent;
-    }
-    .shop-tabs button.active {
-      background: rgba(241, 196, 15, 0.2);
-      border-color: #f1c40f;
-      color: #f1c40f;
-    }
-
-    /* ===== RESULTADOS ===== */
-    .result-stats {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-      gap: 1rem;
-      margin: 1.5rem 0;
-    }
-    .result-stat {
-      background: rgba(255, 255, 255, 0.04);
-      padding: 1rem;
-      border-radius: 1.2rem;
-      text-align: center;
-      border: 1px solid rgba(255, 255, 255, 0.06);
-    }
-    body.light .result-stat {
-      background: rgba(0, 0, 0, 0.02);
-    }
-    .result-stat .value { font-size: 2rem; font-weight: 700; color: #f1c40f; }
-    .result-stat .label { font-size: 0.9rem; opacity: 0.7; }
-
-    /* ===== REPASO ===== */
-    .review-item {
-      background: rgba(255, 255, 255, 0.04);
-      padding: 1rem;
-      border-radius: 1.2rem;
-      margin-bottom: 1rem;
-      border-left: 4px solid #e74c3c;
-    }
-    body.light .review-item { background: rgba(0, 0, 0, 0.02); }
-    .review-item.correct { border-left-color: #2ecc71; }
-
-    /* ===== LOGROS ===== */
-    .achievement-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 1rem;
-      margin: 1rem 0;
-    }
-    .achievement {
-      background: rgba(255, 255, 255, 0.04);
-      padding: 1rem;
-      border-radius: 1.2rem;
-      text-align: center;
-      border: 1px solid rgba(255, 255, 255, 0.06);
-      opacity: 0.5;
-      transition: all 0.3s;
-    }
-    body.light .achievement { background: rgba(0, 0, 0, 0.02); }
-    .achievement.unlocked { opacity: 1; border-color: #f1c40f; }
-    .achievement .emoji { font-size: 2.5rem; }
-
-    /* ===== TEMA ===== */
-    .theme-selector {
-      display: flex;
-      gap: 0.8rem;
-      justify-content: center;
-      margin: 1rem 0;
-    }
-    .theme-btn {
-      padding: 0.5rem 1.2rem;
-      border-radius: 40px;
-      border: 2px solid transparent;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s;
-    }
-    .theme-btn.active {
-      border-color: #f1c40f;
-      background: rgba(241, 196, 15, 0.15);
-    }
-
-    /* ===== RESPONSIVE ===== */
-    @media (max-width: 600px) {
-      .container { padding: 1rem; }
-      .options-grid { grid-template-columns: 1fr; }
-      .canvas-wrapper { width: 240px; height: 240px; }
-      h1 { font-size: 2rem; }
-      .nexu-avatar { font-size: 3.5rem; }
-      .input-container input { width: 100px; }
-      #profile-canvas { width: 140px; height: 190px; }
-      .result-stats { grid-template-columns: 1fr 1fr; }
-    }
-
-    /* ===== SONIDO TOGGLE ===== */
-    .sound-toggle {
-      position: fixed;
-      top: 1rem;
-      right: 1rem;
-      z-index: 999;
-      background: rgba(0,0,0,0.5);
-      border: none;
-      color: #fff;
-      font-size: 1.5rem;
-      padding: 0.5rem 0.8rem;
-      border-radius: 50%;
-      cursor: pointer;
-      backdrop-filter: blur(4px);
-    }
-    body.light .sound-toggle { background: rgba(255,255,255,0.5); color: #1a1f2f; }
   </style>
 </head>
 <body>
-  <button id="soundToggle" class="sound-toggle" title="Activar/Desactivar sonido">🔊</button>
-  <div id="app" class="container">
-
-    <!-- ===== MENÚ ===== -->
-    <section id="menu" class="screen">
-      <div class="nexu-avatar" style="font-size:6rem;">🤖</div>
-      <h1>TecnoQuiz 3.0</h1>
-      <p class="lead">Aprende con Nexu — ruleta personalizada, tienda y personalización</p>
-      <div class="controls">
-        <button id="start-btn" class="primary">▶ Jugar</button>
-        <button id="profile-btn" class="secondary">👤 Perfil</button>
-        <button id="shop-btn" class="secondary">🛒 Tienda</button>
-        <button id="stats-btn" class="secondary">📊 Estadísticas</button>
-        <button id="achievements-btn" class="secondary">🏆 Logros</button>
+  <div class="app">
+    <header class="top">
+      <div class="brand">NEXO<b>•</b>ÓRBITA</div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <span class="pill" id="coins">✦ 0</span>
+        <button class="pill-btn" id="soundToggle">🔊</button>
+        <button class="pill-btn" id="themeToggle">🌙</button>
       </div>
-      <div class="theme-selector">
-        <button class="theme-btn" data-theme="dark">🌙 Oscuro</button>
-        <button class="theme-btn" data-theme="light">☀️ Claro</button>
-      </div>
-    </section>
+    </header>
 
-    <!-- ===== SELECCIÓN DE MATERIA ===== -->
-    <section id="subject-selection" class="screen hidden">
-      <h2>Elige materia</h2>
-      <div class="grid" id="subject-grid"></div>
-      <button class="back" data-target="menu">← Volver</button>
-    </section>
-
-    <!-- ===== NÚMERO DE PREGUNTAS ===== -->
-    <section id="question-count-selection" class="screen hidden">
-      <h2>¿Cuántas preguntas?</h2>
-      <div class="grid">
-        <button class="count-btn card" data-count="5">5</button>
-        <button class="count-btn card" data-count="10">10</button>
-        <button class="count-btn card" data-count="15">15</button>
-        <button class="count-btn card" data-count="20">20</button>
-      </div>
-      <button class="back" data-target="subject-selection">← Volver</button>
-    </section>
-
-    <!-- ===== MODO DE DIFICULTAD ===== -->
-    <section id="difficulty-mode-selection" class="screen hidden">
-      <h2>Elige el modo</h2>
-      <div class="grid">
-        <button id="manual-diff-btn" class="card">🎯 Elegir manual</button>
-        <button id="random-diff-btn" class="card">🎡 Ruleta personalizada</button>
-      </div>
-      <button class="back" data-target="question-count-selection">← Volver</button>
-    </section>
-
-    <!-- ===== RULETA ===== -->
-    <section id="roulette" class="screen hidden">
-      <h2>🎡 Ruleta personalizada</h2>
-      <div class="roulette-wrapper">
-        <div class="roulette-controls">
-          <label>Casillas: <input type="number" id="numCasillas" min="2" max="20" value="8"></label>
-          <button id="generar-btn" class="secondary">Generar</button>
-          <button id="limpiar-btn" class="secondary">Limpiar</button>
-          <button id="crear-btn" class="primary">Crear ruleta</button>
+    <!-- HOME -->
+    <section id="home" class="screen on">
+      <div class="panel hero">
+        <div class="eyebrow">Academia espacial · aprende jugando</div>
+        <h1>Tu mente.<br><span>Tu misión.</span></h1>
+        <p>Resuelve retos, gira la ruleta, personaliza tu piloto y desbloquea logros.</p>
+        <div class="actions">
+          <button class="primary" id="play">Iniciar misión →</button>
+          <button class="secondary" data-go="profile">👨‍🚀 Perfil</button>
+          <button class="secondary" data-go="shop">✦ Tienda</button>
+          <button class="secondary" data-go="stats">▥ Estadísticas</button>
+          <button class="secondary" data-go="ach">🏆 Logros</button>
         </div>
-        <div id="entradas" class="input-container"></div>
-        <div class="canvas-wrapper">
-          <canvas id="ruletaCanvas" width="300" height="300"></canvas>
-          <div class="pointer">▼</div>
-        </div>
-        <button id="girar-btn" class="primary">🎲 Girar</button>
-        <div id="resultado" class="result-box">Gira para obtener dificultad</div>
-        <button class="back" data-target="difficulty-mode-selection">← Volver</button>
+        <div class="ship">🚀</div>
       </div>
     </section>
 
-    <!-- ===== PREGUNTAS ===== -->
-    <section id="questions" class="screen hidden">
-      <div class="top-row">
-        <div id="nexu-question" class="nexu-message">🤖 ¡Vamos, tú puedes!</div>
-        <div class="progress-wrap">
-          <progress id="progress" max="100" value="0"></progress>
-          <small id="progress-label">0 / 0</small>
+    <!-- SETUP -->
+    <section id="setup" class="screen">
+      <div class="panel">
+        <div class="eyebrow">Preparación de misión</div>
+        <h2>Elige una materia</h2>
+        <p>Cada materia tiene preguntas propias y retos distintos.</p>
+        <div class="grid" id="subjects">
+          <button class="card sel" data-sub="mat"><span class="ico">➗</span>Matemáticas<small>Operaciones y lógica</small></button>
+          <button class="card" data-sub="science"><span class="ico">⚗️</span>Ciencias<small>Planeta, materia y vida</small></button>
+          <button class="card" data-sub="tech"><span class="ico">⌘</span>Tecnología<small>Inventos y programación</small></button>
+          <button class="card" data-sub="mix"><span class="ico">✦</span>Mixto<small>Todo el universo</small></button>
+        </div>
+        <h2>¿Cuántos retos?</h2>
+        <div class="tabs" id="counts">
+          <button class="sel" data-count="5">5 retos</button>
+          <button data-count="10">10 retos</button>
+          <button data-count="15">15 retos</button>
+          <button data-count="20">20 retos</button>
+        </div>
+        <h2>Dificultad</h2>
+        <div class="grid" id="diffs">
+          <button class="card sel" data-diff="easy"><span class="ico">◌</span>Fácil<small>Ritmo tranquilo</small></button>
+          <button class="card" data-diff="medium"><span class="ico">◈</span>Medio<small>Más velocidad</small></button>
+          <button class="card" data-diff="hard"><span class="ico">◆</span>Difícil<small>Exigente</small></button>
+          <button class="card" data-diff="impossible"><span class="ico">★</span>Imposible<small>Elite</small></button>
+          <button class="card" data-diff="roulette"><span class="ico">🎡</span>Ruleta<small>La suerte decide</small></button>
+        </div>
+        <div class="actions">
+          <button class="primary" id="start">Lanzar nave</button>
+          <button class="secondary" data-go="home">← Volver</button>
         </div>
       </div>
-      <div id="question-display" class="question-box"></div>
-      <div id="options" class="options-grid"></div>
-      <div id="feedback" class="feedback" aria-live="polite"></div>
-      <div class="controls">
-        <button id="quit-btn" class="secondary">🚪 Salir</button>
-      </div>
     </section>
 
-    <!-- ===== PERFIL ===== -->
-    <section id="profile" class="screen hidden">
-      <h2>👤 Mi perfil</h2>
-      <div class="profile-row">
-        <div>
-          <canvas id="profile-canvas" width="180" height="240"></canvas>
-          <div class="accesorios-mini">
-            <span id="profile-hat-display">🧢</span>
-            <span id="profile-glasses-display">👓</span>
-            <span id="profile-shirt-display">👕</span>
-            <span id="profile-backpack-display">🎒</span>
-            <span id="profile-wand-display">🪄</span>
+    <!-- ROULETTE -->
+    <section id="roulette" class="screen">
+      <div class="panel">
+        <div class="eyebrow">Modo ruleta</div>
+        <h2>El destino marca el nivel</h2>
+        <div class="roulette">
+          <div class="wheelbox">
+            <div class="pin">▼</div>
+            <canvas id="wheelCanvas" width="600" height="600"></canvas>
+            <div class="wheel-center"><strong id="wheelLabel">GIRA</strong><small id="wheelSub">elige tu nivel</small></div>
+          </div>
+          <div>
+            <div class="eyebrow">Dificultad seleccionada</div>
+            <div class="result" id="roll">Gira la ruleta</div>
+            <p>La ruleta determina la dificultad, el tiempo disponible y los puntos por acierto.</p>
+            <button class="primary" id="spin">Girar ruleta</button>
+            <button class="secondary" id="begin" disabled>Comenzar →</button>
           </div>
         </div>
-        <div style="min-width:200px;">
-          <p><strong>Nombre:</strong> <span id="profile-name">Jugador</span></p>
-          <p>Puntos: <strong id="total-points">0</strong></p>
-          <p>Nivel: <strong id="profile-level">1</strong></p>
-          <p>XP: <strong id="profile-xp">0</strong> / <span id="profile-xp-next">100</span></p>
-          <div class="xp-bar"><div class="xp-bar-fill" id="xp-bar-fill" style="width:0%;"></div></div>
-          <p>Racha actual: <strong id="streak-display">0</strong> 🔥</p>
-          <p>Mejor racha: <strong id="best-streak-display">0</strong> 🏆</p>
+      </div>
+    </section>
+
+    <!-- GAME -->
+    <section id="game" class="screen">
+      <div class="panel">
+        <div class="topgame">
+          <div>
+            <div class="row">
+              <span>SECTOR <b id="sector">1</b> · RETO <b id="round">1/5</b></span>
+              <span id="subname">MATEMÁTICAS</span>
+            </div>
+            <div class="bar"><div id="energy" class="fill"></div></div>
+          </div>
+          <div class="score"><span id="score">0</span> XP</div>
         </div>
-      </div>
-      <div style="margin: 1rem 0; text-align:center;">
-        <label>Cambiar nombre: <input type="text" id="name-input" placeholder="Tu nombre" style="background:#1a1f2f;color:#fff;border:1px solid #2c3e50;border-radius:30px;padding:0.4rem 1rem;" /></label>
-        <button id="save-name-btn" class="primary" style="padding:0.4rem 1.2rem;">Guardar</button>
-      </div>
-      <button class="back" data-target="menu">← Volver al menú</button>
-    </section>
-
-    <!-- ===== TIENDA ===== -->
-    <section id="shop" class="screen hidden">
-      <h2>🛒 Tienda de Nexu</h2>
-      <p style="text-align:center;margin-bottom:1rem;">Tus puntos: <strong id="shop-points">0</strong></p>
-      <div class="shop-tabs" id="shop-tabs">
-        <button class="active" data-category="all">Todo</button>
-        <button data-category="hat">🧢 Sombreros</button>
-        <button data-category="glasses">👓 Gafas</button>
-        <button data-category="shirt">👕 Camisetas</button>
-        <button data-category="backpack">🎒 Mochilas</button>
-        <button data-category="wand">🪄 Varitas</button>
-      </div>
-      <div class="shop-grid" id="shop-grid"></div>
-      <button class="back" data-target="menu">← Volver</button>
-    </section>
-
-    <!-- ===== ESTADÍSTICAS ===== -->
-    <section id="stats" class="screen hidden">
-      <h2>📊 Estadísticas</h2>
-      <div class="result-stats" id="stats-grid"></div>
-      <button class="back" data-target="menu">← Volver</button>
-    </section>
-
-    <!-- ===== LOGROS ===== -->
-    <section id="achievements" class="screen hidden">
-      <h2>🏆 Logros</h2>
-      <div class="achievement-grid" id="achievement-grid"></div>
-      <button class="back" data-target="menu">← Volver</button>
-    </section>
-
-    <!-- ===== RESULTADOS ===== -->
-    <section id="results" class="screen hidden">
-      <h2>🎉 ¡Partida terminada!</h2>
-      <div id="result-content"></div>
-      <div class="controls">
-        <button id="result-menu-btn" class="secondary">🏠 Menú</button>
-        <button id="result-retry-btn" class="primary">🔄 Jugar otra vez</button>
-        <button id="result-review-btn" class="secondary">📖 Ver errores</button>
+        <div class="arena">
+          <div class="orbit"></div>
+          <div class="question">
+            <div class="row">
+              <span id="combo">COMBO ×1</span>
+              <span id="shields">◈ ◈ ◈</span>
+            </div>
+            <div class="tag" id="tag">CALIBRANDO</div>
+            <div class="problem" id="problem">?</div>
+            <div id="answers" class="answers"></div>
+            <div id="feed" class="feed"></div>
+          </div>
+        </div>
+        <button id="quit" class="secondary">Terminar misión</button>
       </div>
     </section>
 
-    <!-- ===== REPASO DE ERRORES ===== -->
-    <section id="review" class="screen hidden">
-      <h2>📖 Repaso de errores</h2>
-      <div id="review-list"></div>
-      <button class="back" data-target="results">← Volver a resultados</button>
+    <!-- RESULTS -->
+    <section id="results" class="screen">
+      <div class="panel">
+        <div class="eyebrow">Informe de misión</div>
+        <h2 id="title">Piloto estelar</h2>
+        <p id="desc"></p>
+        <div class="stats" id="resultStats"></div>
+        <div class="actions">
+          <button class="primary" id="again">Nueva misión</button>
+          <button class="secondary" id="reviewBtn">Revisar errores</button>
+          <button class="secondary" data-go="home">Menú</button>
+        </div>
+        <div id="reviewlist"></div>
+      </div>
+    </section>
+
+    <!-- PROFILE -->
+    <section id="profile" class="screen">
+      <div class="panel">
+        <div class="eyebrow">Tu identidad orbital</div>
+        <div style="display:flex;flex-wrap:wrap;gap:20px;justify-content:center;align-items:center;">
+          <div>
+            <canvas id="profile-canvas" width="180" height="240"></canvas>
+            <div class="accesorios-mini">
+              <span id="p-hat">🧢</span>
+              <span id="p-glasses">👓</span>
+              <span id="p-shirt">👕</span>
+              <span id="p-backpack">🎒</span>
+              <span id="p-wand">🪄</span>
+            </div>
+          </div>
+          <div style="min-width:200px;">
+            <p><strong>Nombre:</strong> <span id="p-name">Jugador</span></p>
+            <p>Puntos: <strong id="p-points">0</strong></p>
+            <p>Nivel: <strong id="p-level">1</strong></p>
+            <p>XP: <strong id="p-xp">0</strong> / <span id="p-xp-next">100</span></p>
+            <div class="xp-bar"><div class="xp-bar-fill" id="xp-fill" style="width:0%"></div></div>
+            <p>Racha actual: <strong id="p-streak">0</strong> 🔥</p>
+            <p>Mejor racha: <strong id="p-best">0</strong> 🏆</p>
+          </div>
+        </div>
+        <div style="margin:1rem 0;text-align:center;">
+          <label>Cambiar nombre: <input type="text" id="nameInput" placeholder="Tu nombre" style="background:#111c40;color:#fff;border:1px solid var(--line);border-radius:30px;padding:0.4rem 1rem;"></label>
+          <button id="saveName" class="primary" style="padding:0.4rem 1.2rem;">Guardar</button>
+        </div>
+        <button class="secondary" data-go="home">← Menú</button>
+      </div>
+    </section>
+
+    <!-- SHOP -->
+    <section id="shop" class="screen">
+      <div class="panel">
+        <div class="eyebrow">Tienda orbital</div>
+        <h2>Personaliza a tu piloto</h2>
+        <p>Usa los cristales conseguidos en tus misiones.</p>
+        <div class="tabs" id="shopTabs">
+          <button class="sel" data-cat="all">Todo</button>
+          <button data-cat="hat">🧢 Sombreros</button>
+          <button data-cat="glasses">👓 Gafas</button>
+          <button data-cat="shirt">👕 Camisetas</button>
+          <button data-cat="backpack">🎒 Mochilas</button>
+          <button data-cat="wand">🪄 Varitas</button>
+        </div>
+        <div id="shopItems" class="items"></div>
+        <button class="secondary" data-go="home">← Menú</button>
+      </div>
+    </section>
+
+    <!-- STATS -->
+    <section id="stats" class="screen">
+      <div class="panel">
+        <div class="eyebrow">Datos de vuelo</div>
+        <h2>Estadísticas</h2>
+        <div id="statGrid" class="stats"></div>
+        <button class="secondary" data-go="home">← Menú</button>
+      </div>
+    </section>
+
+    <!-- ACHIEVEMENTS -->
+    <section id="ach" class="screen">
+      <div class="panel">
+        <div class="eyebrow">Bitácora de la Academia</div>
+        <h2>Logros</h2>
+        <div id="badgeGrid" class="badges"></div>
+        <button class="secondary" data-go="home">← Menú</button>
+      </div>
     </section>
   </div>
 
+  <div id="toast" class="toast"></div>
+
   <script>
-    // ============================================================
-    //  BANCO DE PREGUNTAS (ampliado)
-    // ============================================================
-    const QUESTIONS = {
-      math: {
+    // ================================================================
+    //  BANCO DE PREGUNTAS (ampliado con explicaciones)
+    // ================================================================
+    const QUESTION_BANK = {
+      mat: {
         easy: [
-          { q: "¿Cuánto es 2 + 2?", opts: ["3", "4", "5", "6"], ans: 1, explanation: "2 + 2 = 4." },
-          { q: "¿Raíz cuadrada de 9?", opts: ["2", "3", "4", "6"], ans: 1, explanation: "√9 = 3." },
-          { q: "¿10 - 3?", opts: ["5", "6", "7", "8"], ans: 2, explanation: "10 - 3 = 7." },
-          { q: "¿Cuánto es 5 × 5?", opts: ["20", "25", "30", "35"], ans: 1, explanation: "5 × 5 = 25." },
-          { q: "¿Cuál es el doble de 12?", opts: ["20", "22", "24", "26"], ans: 2, explanation: "12 × 2 = 24." }
+          { q: "¿Cuánto es 2 + 2?", opts: ["3", "4", "5", "6"], ans: 1, exp: "2 + 2 = 4." },
+          { q: "¿Raíz cuadrada de 9?", opts: ["2", "3", "4", "6"], ans: 1, exp: "√9 = 3." },
+          { q: "¿10 - 3?", opts: ["5", "6", "7", "8"], ans: 2, exp: "10 - 3 = 7." },
+          { q: "¿5 × 5?", opts: ["20", "25", "30", "35"], ans: 1, exp: "5 × 5 = 25." },
+          { q: "¿Doble de 12?", opts: ["20", "22", "24", "26"], ans: 2, exp: "12 × 2 = 24." }
         ],
         medium: [
-          { q: "¿7 × 8?", opts: ["48", "56", "64", "72"], ans: 1, explanation: "7 × 8 = 56." },
-          { q: "¿144 ÷ 12?", opts: ["10", "11", "12", "13"], ans: 2, explanation: "144 ÷ 12 = 12." },
-          { q: "Área de un rectángulo 5×3", opts: ["8", "12", "15", "18"], ans: 2, explanation: "Área = 5×3 = 15." },
-          { q: "¿Cuánto es 3⁴?", opts: ["27", "64", "81", "243"], ans: 2, explanation: "3⁴ = 81." },
-          { q: "¿Cuál es el MCD de 12 y 18?", opts: ["2", "3", "6", "9"], ans: 2, explanation: "MCD(12,18) = 6." }
+          { q: "¿7 × 8?", opts: ["48", "56", "64", "72"], ans: 1, exp: "7 × 8 = 56." },
+          { q: "¿144 ÷ 12?", opts: ["10", "11", "12", "13"], ans: 2, exp: "144 ÷ 12 = 12." },
+          { q: "Área 5×3", opts: ["8", "12", "15", "18"], ans: 2, exp: "5×3 = 15." },
+          { q: "¿3⁴?", opts: ["27", "64", "81", "243"], ans: 2, exp: "3⁴ = 81." },
+          { q: "MCD(12,18)", opts: ["2", "3", "6", "9"], ans: 2, exp: "MCD = 6." }
         ],
         hard: [
-          { q: "Derivada de x²", opts: ["x", "2x", "x²", "2"], ans: 1, explanation: "d/dx x² = 2x." },
-          { q: "Resuelve 3x + 5 = 20", opts: ["3", "5", "7", "9"], ans: 2, explanation: "3x = 15 => x = 5." },
-          { q: "2^10", opts: ["512", "1024", "2048", "256"], ans: 1, explanation: "2^10 = 1024." },
-          { q: "Integral de 2x dx", opts: ["x²", "2x²", "x²+C", "2x+C"], ans: 2, explanation: "∫2x dx = x² + C." },
-          { q: "Logaritmo natural de e³", opts: ["1", "2", "3", "e"], ans: 2, explanation: "ln(e³) = 3." }
+          { q: "Derivada de x²", opts: ["x", "2x", "x²", "2"], ans: 1, exp: "d/dx x² = 2x." },
+          { q: "3x + 5 = 20", opts: ["3", "5", "7", "9"], ans: 2, exp: "x = 5." },
+          { q: "2¹⁰", opts: ["512", "1024", "2048", "256"], ans: 1, exp: "2¹⁰ = 1024." },
+          { q: "∫2x dx", opts: ["x²", "2x²", "x²+C", "2x+C"], ans: 2, exp: "∫2x dx = x² + C." },
+          { q: "ln(e³)", opts: ["1", "2", "3", "e"], ans: 2, exp: "ln(e³) = 3." }
         ],
         impossible: [
-          { q: "Integral de e^x", opts: ["e^x", "e^x + C", "x e^x", "ln(x)"], ans: 1, explanation: "∫e^x dx = e^x + C." },
-          { q: "0/0 es:", opts: ["0", "1", "Indefinido", "Inf"], ans: 2, explanation: "0/0 es una indeterminación." },
-          { q: "¿Cuál es la derivada de ln(x)?", opts: ["1/x", "x", "e^x", "ln(x)"], ans: 0, explanation: "d/dx ln(x) = 1/x." },
-          { q: "Teorema fundamental del cálculo", opts: ["Relaciona derivada e integral", "Calcula áreas", "Es una ley física", "Ninguna"], ans: 0, explanation: "El teorema fundamental relaciona la derivada y la integral definida." },
-          { q: "¿Cuál es la solución de y'' + y = 0?", opts: ["Acos(x)+Bsin(x)", "Ae^x+Be^-x", "Ax+B", "x²"], ans: 0, explanation: "Ecuación diferencial armónica." }
-        ]
-      },
-      cs: {
-        easy: [
-          { q: "¿Qué significa HTML?", opts: ["HyperText Markup Language", "High Tech Machine Language", "Hyper Transfer Markup", "Home Tool Language"], ans: 0, explanation: "HTML = HyperText Markup Language." },
-          { q: "¿Cuántos bits tiene un byte?", opts: ["4", "8", "16", "32"], ans: 1, explanation: "Un byte = 8 bits." },
-          { q: "¿Qué es un algoritmo?", opts: ["Un lenguaje", "Una receta de pasos", "Un programa", "Un dato"], ans: 1, explanation: "Un algoritmo es una secuencia de pasos para resolver un problema." },
-          { q: "¿Qué es un compilador?", opts: ["Traduce código a máquina", "Ejecuta código", "Depura código", "Optimiza código"], ans: 0, explanation: "Un compilador traduce código fuente a código máquina." },
-          { q: "¿Qué es un bucle?", opts: ["Una estructura repetitiva", "Un tipo de dato", "Un programa", "Un error"], ans: 0, explanation: "Un bucle repite un bloque de código." }
-        ],
-        medium: [
-          { q: "¿Qué es una IP?", opts: ["Internet Protocol", "Internal Process", "Integrated Program", "Intelligent Packet"], ans: 0, explanation: "IP = Internet Protocol." },
-          { q: "¿Qué es una función recursiva?", opts: ["Se llama a sí misma", "Itera", "Divide y vencerás", "Es inline"], ans: 0, explanation: "Una función recursiva se llama a sí misma." },
-          { q: "¿Qué es un puntero en C?", opts: ["Variable que almacena dirección", "Un valor", "Un tipo", "Un operador"], ans: 0, explanation: "Un puntero almacena una dirección de memoria." },
-          { q: "¿Qué es un árbol binario?", opts: ["Estructura de datos", "Un algoritmo", "Un tipo de dato", "Un programa"], ans: 0, explanation: "Un árbol binario es una estructura de datos jerárquica." },
-          { q: "¿Qué significa O(n) en complejidad?", opts: ["Lineal", "Constante", "Cuadrática", "Logarítmica"], ans: 0, explanation: "O(n) es complejidad lineal." }
-        ],
-        hard: [
-          { q: "¿Qué es una función lambda?", opts: ["Función anónima", "Recursiva", "Orden superior", "Inline"], ans: 0, explanation: "Lambda es una función anónima." },
-          { q: "¿Qué es un puntero a función?", opts: ["Puntero que apunta a código", "Valor", "Tipo", "Variable"], ans: 0, explanation: "Un puntero a función almacena la dirección de una función." },
-          { q: "¿Qué es el paso por referencia?", opts: ["Se pasa la dirección", "Se pasa el valor", "Se pasa una copia", "Ninguna"], ans: 0, explanation: "En paso por referencia se pasa la dirección de la variable." },
-          { q: "¿Qué es la herencia en POO?", opts: ["Mecanismo de reutilización", "Polimorfismo", "Encapsulamiento", "Abstracción"], ans: 0, explanation: "La herencia permite crear clases derivadas." },
-          { q: "¿Qué es un semáforo en sistemas operativos?", opts: ["Mecanismo de sincronización", "Un tipo de dato", "Un proceso", "Un archivo"], ans: 0, explanation: "Un semáforo es un mecanismo de sincronización entre procesos." }
-        ],
-        impossible: [
-          { q: "¿Qué es el problema P vs NP?", opts: ["Problema abierto en computación", "Clase de complejidad", "Algoritmo", "Ninguna"], ans: 0, explanation: "P vs NP es un problema abierto en ciencias de la computación." },
-          { q: "¿Qué es un autómata finito?", opts: ["Modelo matemático", "Lenguaje regular", "Máquina de estados", "Todas las anteriores"], ans: 3, explanation: "Un autómata finito es un modelo matemático que reconoce lenguajes regulares." },
-          { q: "¿Qué es una máquina de Turing?", opts: ["Modelo computacional", "Lenguaje", "Algoritmo", "Hardware"], ans: 0, explanation: "La máquina de Turing es un modelo computacional teórico." },
-          { q: "¿Qué significa que un problema sea NP-completo?", opts: ["Es difícil", "Es fácil", "No tiene solución", "Es polinomial"], ans: 0, explanation: "Un problema NP-completo es uno de los más difíciles en NP." },
-          { q: "¿Qué es la criptografía asimétrica?", opts: ["Usa dos claves", "Usa una clave", "Usa hash", "Usa cifrado simétrico"], ans: 0, explanation: "La criptografía asimétrica usa un par de claves pública/privada." }
+          { q: "∫e^x dx", opts: ["e^x", "e^x + C", "x e^x", "ln(x)"], ans: 1, exp: "∫e^x dx = e^x + C." },
+          { q: "0/0 es:", opts: ["0", "1", "Indefinido", "Inf"], ans: 2, exp: "Indeterminación." },
+          { q: "d/dx ln(x)", opts: ["1/x", "x", "e^x", "ln(x)"], ans: 0, exp: "d/dx ln(x) = 1/x." },
+          { q: "Teorema fundamental", opts: ["Relaciona derivada e integral", "Calcula áreas", "Ley física", "Ninguna"],
+            ans: 0, exp: "Relaciona derivada e integral." },
+          { q: "y'' + y = 0", opts: ["Acos(x)+Bsin(x)", "Ae^x+Be^-x", "Ax+B", "x²"], ans: 0,
+          exp: "Solución armónica." }
         ]
       },
       science: {
         easy: [
-          { q: "Planeta más cercano al Sol", opts: ["Venus", "Mercurio", "Tierra", "Marte"], ans: 1, explanation: "Mercurio es el planeta más cercano al Sol." },
-          { q: "Órgano que bombea sangre", opts: ["Pulmón", "Corazón", "Hígado", "Cerebro"], ans: 1, explanation: "El corazón bombea sangre." },
-          { q: "Huesos en el cuerpo humano adulto", opts: ["206", "200", "210", "180"], ans: 0, explanation: "El esqueleto humano adulto tiene 206 huesos." },
-          { q: "¿Qué es la fotosíntesis?", opts: ["Proceso de plantas", "Respiración", "Digestión", "Circulación"], ans: 0, explanation: "La fotosíntesis es el proceso por el cual las plantas producen alimento." },
-          { q: "Unidad de fuerza", opts: ["Newton", "Joule", "Watt", "Pascal"], ans: 0, explanation: "El Newton es la unidad de fuerza." }
+          { q: "Planeta más cercano al Sol", opts: ["Venus", "Mercurio", "Tierra", "Marte"], ans: 1,
+          exp: "Mercurio." },
+          { q: "Órgano que bombea sangre", opts: ["Pulmón", "Corazón", "Hígado", "Cerebro"], ans: 1,
+          exp: "El corazón." },
+          { q: "Huesos humano adulto", opts: ["206", "200", "210", "180"], ans: 0, exp: "206 huesos." },
+          { q: "Fotosíntesis", opts: ["Proceso plantas", "Respiración", "Digestión", "Circulación"], ans: 0,
+            exp: "Proceso de plantas." },
+          { q: "Unidad de fuerza", opts: ["Newton", "Joule", "Watt", "Pascal"], ans: 0, exp: "Newton." }
         ],
         medium: [
-          { q: "Ecosistema", opts: ["Seres vivos + entorno", "Animales", "Plantas", "Rocas"], ans: 0, explanation: "Un ecosistema incluye seres vivos y su entorno físico." },
-          { q: "Teoría de la relatividad", opts: ["Einstein", "Newton", "Hawking", "Bohr"], ans: 0, explanation: "La teoría de la relatividad fue formulada por Einstein." },
-          { q: "Energía oscura", opts: ["Forma desconocida de energía", "Solar", "Nuclear", "Cinética"], ans: 0, explanation: "La energía oscura es una forma hipotética de energía que acelera la expansión del universo." },
-          { q: "¿Qué es un ecosistema?", opts: ["Comunidad biológica y su medio", "Solo animales", "Solo plantas", "Solo el clima"], ans: 0, explanation: "Un ecosistema incluye todos los organismos y el medio físico." },
-          { q: "¿Qué es la mitosis?", opts: ["División celular", "Fusión de células", "Muerte celular", "Diferenciación"], ans: 0, explanation: "La mitosis es el proceso de división celular." }
+          { q: "Ecosistema", opts: ["Seres vivos + entorno", "Animales", "Plantas", "Rocas"], ans: 0,
+            exp: "Seres vivos y entorno." },
+          { q: "Relatividad", opts: ["Einstein", "Newton", "Hawking", "Bohr"], ans: 0, exp: "Einstein." },
+          { q: "Energía oscura", opts: ["Forma desconocida", "Solar", "Nuclear", "Cinética"], ans: 0,
+            exp: "Forma desconocida." },
+          { q: "Mitosis", opts: ["División celular", "Fusión", "Muerte", "Diferenciación"], ans: 0,
+            exp: "División celular." },
+          { q: "Reacción exotérmica", opts: ["Libera energía", "Absorbe energía", "No cambia", "Cambia de fase"], ans: 0,
+            exp: "Libera energía." }
         ],
         hard: [
-          { q: "Mecánica cuántica", opts: ["Física de partículas", "Clásica", "Fluidos", "Termodinámica"], ans: 0, explanation: "La mecánica cuántica describe el comportamiento de partículas subatómicas." },
-          { q: "Bosón de Higgs", opts: ["Partícula elemental", "Fuerza", "Energía", "Onda"], ans: 0, explanation: "El bosón de Higgs es una partícula elemental." },
-          { q: "¿Qué es la entropía?", opts: ["Medida de desorden", "Energía", "Temperatura", "Presión"], ans: 0, explanation: "La entropía mide el grado de desorden en un sistema." },
-          { q: "¿Qué es una reacción exotérmica?", opts: ["Libera energía", "Absorbe energía", "No cambia", "Cambia de fase"], ans: 0, explanation: "Una reacción exotérmica libera energía al entorno." },
-          { q: "¿Qué es la evolución?", opts: ["Cambio en especies a lo largo del tiempo", "Creación", "Adaptación", "Selección natural"], ans: 0, explanation: "La evolución es el cambio en las especies a través del tiempo." }
+          { q: "Mecánica cuántica", opts: ["Física partículas", "Clásica", "Fluidos", "Termo"], ans: 0,
+            exp: "Física de partículas." },
+          { q: "Bosón de Higgs", opts: ["Partícula elemental", "Fuerza", "Energía", "Onda"], ans: 0,
+            exp: "Partícula elemental." },
+          { q: "Entropía", opts: ["Medida de desorden", "Energía", "Temperatura", "Presión"], ans: 0,
+            exp: "Medida de desorden." },
+          { q: "Evolución", opts: ["Cambio en especies", "Creación", "Adaptación", "Selección natural"], ans: 0,
+            exp: "Cambio en especies." },
+          { q: "Radiación de Hawking", opts: ["Agujeros negros", "Solar", "Cósmica", "Fondo"], ans: 0,
+            exp: "Agujeros negros." }
         ],
         impossible: [
-          { q: "¿Qué es la radiación de Hawking?", opts: ["Radiación emitida por agujeros negros", "Radiación solar", "Rayos cósmicos", "Radiación de fondo"], ans: 0, explanation: "La radiación de Hawking es emitida por agujeros negros." },
-          { q: "¿Qué es la teoría de cuerdas?", opts: ["Modelo de partículas como cuerdas", "Teoría de fuerzas", "Gravedad cuántica", "Todas las anteriores"], ans: 3, explanation: "La teoría de cuerdas propone que las partículas son cuerdas vibrantes." },
-          { q: "¿Qué es la energía oscura?", opts: ["Forma de energía que acelera el universo", "Energía solar", "Nuclear", "Cinética"], ans: 0, explanation: "La energía oscura es una forma hipotética de energía." },
-          { q: "¿Qué es el principio de incertidumbre?", opts: ["No se pueden conocer posición y momento exactos", "Todo es incierto", "La luz es onda", "Ninguna"], ans: 0, explanation: "El principio de incertidumbre de Heisenberg establece limitaciones en la medición." },
-          { q: "¿Qué es un agujero negro?", opts: ["Región con gravedad extrema", "Estrella muerta", "Agujero en el espacio", "Ninguna"], ans: 0, explanation: "Un agujero negro es una región del espacio con gravedad tan intensa que nada puede escapar." }
+          { q: "Teoría de cuerdas", opts: ["Partículas como cuerdas", "Fuerzas", "Gravedad cuántica", "Todas"], ans: 3,
+            exp: "Partículas como cuerdas." },
+          { q: "Energía oscura", opts: ["Acelera el universo", "Solar", "Nuclear", "Cinética"], ans: 0,
+            exp: "Acelera el universo." },
+          { q: "Principio de incertidumbre", opts: ["No se puede conocer todo", "Todo incierto", "Luz es onda", "Ninguna"],
+            ans: 0, exp: "No se puede conocer todo." },
+          { q: "Agujero negro", opts: ["Gravedad extrema", "Estrella muerta", "Agujero espacial", "Ninguna"], ans: 0,
+            exp: "Gravedad extrema." },
+          { q: "Materia oscura", opts: ["Masa invisible", "Antimateria", "Energía", "Ninguna"], ans: 0,
+            exp: "Masa invisible." }
         ]
       },
-      history: {
+      tech: {
         easy: [
-          { q: "Llegada de Colón a América", opts: ["1492", "1500", "1485", "1510"], ans: 0, explanation: "Cristóbal Colón llegó a América en 1492." },
-          { q: "Pintor de la Mona Lisa", opts: ["Miguel Ángel", "Da Vinci", "Rafael", "Donatello"], ans: 1, explanation: "La Mona Lisa fue pintada por Leonardo da Vinci." },
-          { q: "Primera civilización", opts: ["Egipto", "Mesopotamia", "Grecia", "Roma"], ans: 1, explanation: "Mesopotamia es considerada una de las primeras civilizaciones." },
-          { q: "Revolución Francesa", opts: ["Movimiento social y político", "Guerra", "Industrial", "Colonización"], ans: 0, explanation: "La Revolución Francesa fue un movimiento social y político." },
-          { q: "Alejandro Magno", opts: ["Rey de Macedonia", "Emperador romano", "Faraón", "Filósofo"], ans: 0, explanation: "Alejandro Magno fue rey de Macedonia." }
+          { q: "¿Qué significa HTML?", opts: ["HyperText Markup Language", "High Tech ML", "Hyper Transfer", "Home Tool"],
+            ans: 0, exp: "HyperText Markup Language." },
+          { q: "¿Cuántos bits tiene un byte?", opts: ["4", "8", "16", "32"], ans: 1, exp: "8 bits." },
+          { q: "¿Qué es un algoritmo?", opts: ["Receta de pasos", "Lenguaje", "Programa", "Dato"], ans: 0,
+            exp: "Receta de pasos." },
+          { q: "¿Qué es un compilador?", opts: ["Traduce a máquina", "Ejecuta", "Depura", "Optimiza"], ans: 0,
+            exp: "Traduce a máquina." },
+          { q: "¿Qué es un bucle?", opts: ["Estructura repetitiva", "Tipo de dato", "Programa", "Error"], ans: 0,
+            exp: "Estructura repetitiva." }
         ],
         medium: [
-          { q: "Edad Media", opts: ["Periodo histórico", "Edad de Hielo", "Edad Dorada", "Edad Moderna"], ans: 0, explanation: "La Edad Media es un periodo histórico entre el siglo V y XV." },
-          { q: "Guerra Fría", opts: ["EE.UU. vs URSS", "Mundial", "Civil", "Colonial"], ans: 0, explanation: "La Guerra Fría fue el enfrentamiento entre EE.UU. y la URSS." },
-          { q: "Imperio Romano", opts: ["Antiguo", "Medieval", "Moderno", "Asiático"], ans: 0, explanation: "El Imperio Romano fue una civilización antigua." },
-          { q: "Revolución Rusa", opts: ["Movimiento obrero", "Bolchevique", "Industrial", "Civil"], ans: 1, explanation: "La Revolución Rusa fue liderada por los bolcheviques." },
-          { q: "Feudalismo", opts: ["Sistema social", "Económico", "Político", "Todos los anteriores"], ans: 3, explanation: "El feudalismo abarcaba aspectos sociales, económicos y políticos." }
+          { q: "¿Qué es una IP?", opts: ["Internet Protocol", "Internal Process", "Integrated Program", "Intelligent Packet"],
+            ans: 0, exp: "Internet Protocol." },
+          { q: "Función recursiva", opts: ["Se llama a sí misma", "Itera", "Divide y vencerás", "Inline"], ans: 0,
+            exp: "Se llama a sí misma." },
+          { q: "Puntero en C", opts: ["Variable dirección", "Valor", "Tipo", "Operador"], ans: 0,
+            exp: "Variable dirección." },
+          { q: "Árbol binario", opts: ["Estructura de datos", "Algoritmo", "Tipo de dato", "Programa"], ans: 0,
+            exp: "Estructura de datos." },
+          { q: "O(n) complejidad", opts: ["Lineal", "Constante", "Cuadrática", "Logarítmica"], ans: 0,
+            exp: "Lineal." }
         ],
         hard: [
-          { q: "Segunda Guerra Mundial", opts: ["1939-1945", "1914-1918", "1941-1945", "1930-1940"], ans: 0, explanation: "La Segunda Guerra Mundial fue de 1939 a 1945." },
-          { q: "Independencia de Estados Unidos", opts: ["1776", "1789", "1810", "1821"], ans: 0, explanation: "La independencia de Estados Unidos fue declarada en 1776." },
-          { q: "Revolución Industrial", opts: ["Inglaterra", "Francia", "Alemania", "EE.UU."], ans: 0, explanation: "La Revolución Industrial comenzó en Inglaterra." },
-          { q: "Caída del Muro de Berlín", opts: ["1989", "1990", "1991", "1985"], ans: 0, explanation: "El Muro de Berlín cayó en 1989." },
-          { q: "Primer viaje a la Luna", opts: ["1969", "1968", "1970", "1967"], ans: 0, explanation: "El Apolo 11 llegó a la Luna en 1969." }
+          { q: "Función lambda", opts: ["Anónima", "Recursiva", "Orden superior", "Inline"], ans: 0,
+            exp: "Función anónima." },
+          { q: "Puntero a función", opts: ["Apunta a código", "Valor", "Tipo", "Variable"], ans: 0,
+            exp: "Apunta a código." },
+          { q: "Paso por referencia", opts: ["Se pasa la dirección", "Se pasa el valor", "Copia", "Ninguna"], ans: 0,
+            exp: "Se pasa la dirección." },
+          { q: "Herencia en POO", opts: ["Reutilización", "Polimorfismo", "Encapsulamiento", "Abstracción"], ans: 0,
+            exp: "Reutilización." },
+          { q: "Semáforo SO", opts: ["Sincronización", "Dato", "Proceso", "Archivo"], ans: 0,
+            exp: "Mecanismo de sincronización." }
         ],
         impossible: [
-          { q: "¿Qué fue el Imperio Bizantino?", opts: ["Continuación del Imperio Romano", "Imperio Germánico", "Imperio Islámico", "Ninguna"], ans: 0, explanation: "El Imperio Bizantino fue la continuación del Imperio Romano en Oriente." },
-          { q: "¿Quién fue Genghis Khan?", opts: ["Líder mongol", "Emperador chino", "Sultán otomano", "Rey inglés"], ans: 0, explanation: "Genghis Khan fue el fundador del Imperio Mongol." },
-          { q: "¿Qué fue el Renacimiento?", opts: ["Movimiento cultural", "Guerra", "Epidemia", "Revolución"], ans: 0, explanation: "El Renacimiento fue un movimiento cultural en Europa." },
-          { q: "¿Qué fue la Inquisición?", opts: ["Tribunal eclesiástico", "Movimiento religioso", "Guerra santa", "Reforma"], ans: 0, explanation: "La Inquisición fue un tribunal de la Iglesia Católica." },
-          { q: "¿Qué fue la Peste Negra?", opts: ["Epidemia de peste", "Guerra", "Hambruna", "Revolución"], ans: 0, explanation: "La Peste Negra fue una epidemia de peste bubónica." }
-        ]
-      },
-      art: {
-        easy: [
-          { q: "Pintor de 'La noche estrellada'", opts: ["Van Gogh", "Picasso", "Dalí", "Monet"], ans: 0, explanation: "La noche estrellada fue pintada por Van Gogh." },
-          { q: "Arte renacentista", opts: ["Movimiento artístico", "Escultura", "Pintura", "Arquitectura"], ans: 0, explanation: "El Renacimiento fue un movimiento artístico y cultural." },
-          { q: "Mural", opts: ["Pintura en pared", "Escultura", "Fotografía", "Grabado"], ans: 0, explanation: "Un mural es una pintura realizada en una pared." },
-          { q: "¿Qué es la escultura?", opts: ["Arte de modelar", "Pintura", "Dibujo", "Grabado"], ans: 0, explanation: "La escultura es el arte de crear formas tridimensionales." },
-          { q: "Frida Kahlo", opts: ["Pintora mexicana", "Escritora", "Cantante", "Actriz"], ans: 0, explanation: "Frida Kahlo fue una pintora mexicana." }
-        ],
-        medium: [
-          { q: "Cubismo", opts: ["Movimiento artístico", "Música", "Literatura", "Cine"], ans: 0, explanation: "El cubismo fue un movimiento artístico liderado por Picasso." },
-          { q: "Arte abstracto", opts: ["Sin figuración", "Realista", "Clásico", "Moderno"], ans: 0, explanation: "El arte abstracto no representa figuras reconocibles." },
-          { q: "Andy Warhol", opts: ["Artista pop", "Escultor", "Músico", "Cineasta"], ans: 0, explanation: "Andy Warhol fue un artista del pop art." },
-          { q: "Impresionismo", opts: ["Movimiento artístico", "Literario", "Musical", "Arquitectónico"], ans: 0, explanation: "El impresionismo fue un movimiento artístico centrado en la luz y el color." },
-          { q: "Mona Lisa", opts: ["Óleo sobre tabla", "Acuarela", "Fresco", "Temple"], ans: 0, explanation: "La Mona Lisa es un óleo sobre tabla." }
-        ],
-        hard: [
-          { q: "Surrealismo", opts: ["Movimiento artístico", "Literario", "Político", "Todos los anteriores"], ans: 3, explanation: "El surrealismo abarca arte, literatura y política." },
-          { q: "Dadaísmo", opts: ["Antiarte", "Clásico", "Barroco", "Renacentista"], ans: 0, explanation: "El dadaísmo fue un movimiento antiarte." },
-          { q: "¿Qué es el arte barroco?", opts: ["Estilo artístico", "Movimiento literario", "Musical", "Arquitectónico"], ans: 0, explanation: "El barroco fue un estilo artístico de los siglos XVII y XVIII." },
-          { q: "¿Quién pintó 'Guernica'?", opts: ["Picasso", "Dalí", "Miró", "Kandinsky"], ans: 0, explanation: "Guernica fue pintada por Pablo Picasso." },
-          { q: "¿Qué es el arte conceptual?", opts: ["Prioriza la idea", "Prioriza la técnica", "Prioriza el color", "Prioriza la forma"], ans: 0, explanation: "El arte conceptual da más importancia a la idea que al objeto." }
-        ],
-        impossible: [
-          { q: "¿Qué fue el movimiento Fluxus?", opts: ["Movimiento artístico vanguardista", "Movimiento literario", "Escuela filosófica", "Ninguna"], ans: 0, explanation: "Fluxus fue un movimiento de arte vanguardista." },
-          { q: "¿Qué es la estética relacional?", opts: ["Teoría del arte contemporáneo", "Técnica pictórica", "Escultura", "Arquitectura"], ans: 0, explanation: "La estética relacional es una teoría del arte contemporáneo." },
-          { q: "¿Quién fue Marcel Duchamp?", opts: ["Artista conceptual", "Pintor impresionista", "Escultor clásico", "Arquitecto"], ans: 0, explanation: "Marcel Duchamp fue un artista conceptual, precursor del dadaísmo." },
-          { q: "¿Qué es el arte povera?", opts: ["Arte con materiales pobres", "Arte rico", "Arte clásico", "Arte abstracto"], ans: 0, explanation: "El arte povera utiliza materiales sencillos y no convencionales." },
-          { q: "¿Qué es el performance art?", opts: ["Arte en vivo", "Pintura", "Escultura", "Fotografía"], ans: 0, explanation: "El performance art es una expresión artística en vivo." }
+          { q: "P vs NP", opts: ["Problema abierto", "Clase", "Algoritmo", "Ninguna"], ans: 0,
+            exp: "Problema abierto." },
+          { q: "Autómata finito", opts: ["Modelo matemático", "Lenguaje regular", "Máquina de estados", "Todas"], ans: 3,
+            exp: "Modelo matemático." },
+          { q: "Máquina de Turing", opts: ["Modelo computacional", "Lenguaje", "Algoritmo", "Hardware"], ans: 0,
+            exp: "Modelo computacional." },
+          { q: "NP-completo", opts: ["Difícil", "Fácil", "Sin solución", "Polinomial"], ans: 0,
+            exp: "Uno de los más difíciles." },
+          { q: "Criptografía asimétrica", opts: ["Usa dos claves", "Usa una clave", "Hash", "Simétrico"], ans: 0,
+            exp: "Usa dos claves." }
         ]
       }
     };
 
-    // ============================================================
+    // ================================================================
     //  ESTADO GLOBAL
-    // ============================================================
+    // ================================================================
     const state = {
-      subject: 'math',
-      count: 5,
-      difficulty: 'easy',
-      questions: [],
-      currentIndex: 0,
-      score: 0,
-      streak: 0,
-      bestStreak: 0,
       name: 'Jugador',
-      points: 0,
+      coins: 0,
       xp: 0,
       level: 1,
-      gamesPlayed: 0,
-      totalQuestions: 0,
-      correctAnswers: 0,
-      wrongAnswers: 0,
+      games: 0,
+      correct: 0,
+      wrong: 0,
+      bestStreak: 0,
+      streak: 0,
+      // Inventario de accesorios (categoría -> array de emojis)
       wardrobe: { hat: ['🧢'], glasses: ['👓'], shirt: ['👕'], backpack: ['🎒'], wand: ['🪄'] },
       equipped: { hat: '🧢', glasses: '👓', shirt: '👕', backpack: '🎒', wand: '🪄' },
       theme: 'dark',
-      soundOn: true,
+      sound: true,
       achievements: [],
-      wrongQuestions: [], // para repaso
-      // variables temporales para partida
-      startTime: 0,
-      questionTimes: [],
+      // temporales
+      currentGame: null, // { questions, index, score, streak, wrongs, startTime, diff, subject, count }
     };
 
-    // ============================================================
+    // ================================================================
     //  LOCALSTORAGE
-    // ============================================================
+    // ================================================================
     function loadState() {
       try {
-        const saved = localStorage.getItem('tecnoquiz_state');
-        if (saved) {
-          const parsed = JSON.parse(saved);
+        const raw = localStorage.getItem('nexo_state');
+        if (raw) {
+          const parsed = JSON.parse(raw);
           Object.assign(state, parsed);
-          for (const cat of ['hat','glasses','shirt','backpack','wand']) {
+          for (const cat of ['hat', 'glasses', 'shirt', 'backpack', 'wand']) {
             if (!state.wardrobe[cat]) state.wardrobe[cat] = [];
             if (!state.equipped[cat]) state.equipped[cat] = state.wardrobe[cat][0] || '❓';
           }
           if (!state.achievements) state.achievements = [];
-          if (!state.wrongQuestions) state.wrongQuestions = [];
-          // Asegurar stats
-          if (state.gamesPlayed === undefined) state.gamesPlayed = 0;
-          if (state.totalQuestions === undefined) state.totalQuestions = 0;
-          if (state.correctAnswers === undefined) state.correctAnswers = 0;
-          if (state.wrongAnswers === undefined) state.wrongAnswers = 0;
-          if (state.bestStreak === undefined) state.bestStreak = 0;
         }
-      } catch(e) {}
+      } catch (e) {}
     }
+
     function saveState() {
       try {
-        localStorage.setItem('tecnoquiz_state', JSON.stringify(state));
-      } catch(e) {}
+        localStorage.setItem('nexo_state', JSON.stringify(state));
+      } catch (e) {}
     }
 
-    // ============================================================
-    //  DOM REFS
-    // ============================================================
-    const $ = id => document.getElementById(id);
-    const screens = {
-      menu: $('menu'),
-      subject: $('subject-selection'),
-      count: $('question-count-selection'),
-      diffMode: $('difficulty-mode-selection'),
-      roulette: $('roulette'),
-      questions: $('questions'),
-      profile: $('profile'),
-      shop: $('shop'),
-      stats: $('stats'),
-      achievements: $('achievements'),
-      results: $('results'),
-      review: $('review'),
-    };
-
-    // ============================================================
-    //  NAVEGACIÓN
-    // ============================================================
-    function showScreen(name) {
-      Object.entries(screens).forEach(([key, el]) => {
-        if (el) el.classList.toggle('hidden', key !== name);
-      });
-      if (name === 'profile') renderProfile();
-      if (name === 'shop') renderShop('all');
-      if (name === 'stats') renderStats();
-      if (name === 'achievements') renderAchievements();
-      if (name === 'menu') updateMenuUI();
-    }
-
-    document.querySelectorAll('.back').forEach(btn => {
-      btn.addEventListener('click', () => showScreen(btn.dataset.target));
-    });
-
-    // ============================================================
-    //  SONIDOS (Web Audio API)
-    // ============================================================
-    let audioCtx = null;
-    function initAudio() {
-      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    }
-    function playTone(freq, duration, type='sine', vol=0.3) {
-      if (!state.soundOn) return;
-      try {
-        initAudio();
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.type = type;
-        osc.frequency.value = freq;
-        gain.gain.setValueAtTime(vol, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        osc.start();
-        osc.stop(audioCtx.currentTime + duration);
-      } catch(e) {}
-    }
-    function soundClick() { playTone(800, 0.1, 'sine', 0.15); }
-    function soundCorrect() { playTone(523, 0.15); setTimeout(()=>playTone(659, 0.15), 150); setTimeout(()=>playTone(784, 0.2), 300); }
-    function soundWrong() { playTone(300, 0.4, 'sawtooth', 0.2); }
-    function soundSpin() { playTone(440, 0.1, 'sine', 0.1); }
-    function soundLevelUp() { playTone(523, 0.1); setTimeout(()=>playTone(659, 0.1), 100); setTimeout(()=>playTone(784, 0.15), 200); setTimeout(()=>playTone(1047, 0.2), 350); }
-    function soundWin() { playTone(523, 0.1); setTimeout(()=>playTone(659, 0.1), 120); setTimeout(()=>playTone(784, 0.1), 240); setTimeout(()=>playTone(1047, 0.2), 360); }
-    function soundBuy() { playTone(600, 0.1); setTimeout(()=>playTone(800, 0.1), 120); }
-
-    // Toggle sonido
-    const soundBtn = $('soundToggle');
-    soundBtn.addEventListener('click', () => {
-      state.soundOn = !state.soundOn;
-      soundBtn.textContent = state.soundOn ? '🔊' : '🔇';
-      saveState();
-    });
-
-    // ============================================================
-    //  TEMA
-    // ============================================================
-    function applyTheme(theme) {
-      document.body.classList.toggle('light', theme === 'light');
-      document.querySelectorAll('.theme-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.theme === theme);
-      });
-    }
-    document.querySelectorAll('.theme-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        state.theme = btn.dataset.theme;
-        applyTheme(state.theme);
-        saveState();
-      });
-    });
-
-    // ============================================================
-    //  DIBUJAR PERSONAJE NEXU (robot con cuerpo y accesorios)
-    // ============================================================
-    function dibujarPersonaje(canvas, equipped, animating = false) {
-      const ctx = canvas.getContext('2d');
-      const w = canvas.width, h = canvas.height;
-      ctx.clearRect(0, 0, w, h);
-
-      const grad = ctx.createRadialGradient(90, 120, 20, 90, 120, 100);
-      grad.addColorStop(0, 'rgba(241,196,15,0.08)');
-      grad.addColorStop(1, 'rgba(0,0,0,0.4)');
-      ctx.fillStyle = grad;
-      ctx.fillRect(0, 0, w, h);
-
-      const cx = 90, cy = 120;
-
-      // Animación de rebote
-      const bounce = animating ? Math.sin(Date.now() / 300) * 2 : 0;
-      const cyOff = cy + bounce;
-
-      ctx.shadowColor = 'rgba(0,0,0,0.5)';
-      ctx.shadowBlur = 12;
-      // Cabeza
-      ctx.beginPath();
-      ctx.arc(cx, 65 + bounce, 34, 0, Math.PI * 2);
-      ctx.fillStyle = '#8ecae6';
-      ctx.fill();
-      ctx.strokeStyle = '#023e8a';
-      ctx.lineWidth = 2;
-      ctx.stroke();
-      // Detalles
-      ctx.strokeStyle = 'rgba(2,62,138,0.3)';
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.moveTo(cx - 20, 55 + bounce);
-      ctx.lineTo(cx + 20, 55 + bounce);
-      ctx.stroke();
-      ctx.beginPath();
-      ctx.moveTo(cx - 15, 50 + bounce);
-      ctx.lineTo(cx + 15, 50 + bounce);
-      ctx.stroke();
-      // Ojos
-      ctx.shadowBlur = 6;
-      ctx.shadowColor = 'rgba(0,150,255,0.6)';
-      ctx.fillStyle = '#00b4d8';
-      ctx.beginPath();
-      ctx.arc(cx - 13, 60 + bounce, 8, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.beginPath();
-      ctx.arc(cx + 13, 60 + bounce, 8, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.shadowBlur = 0;
-      ctx.fillStyle = '#caf0f8';
-      ctx.beginPath();
-      ctx.arc(cx - 11, 62 + bounce, 3, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.beginPath();
-      ctx.arc(cx + 15, 62 + bounce, 3, 0, Math.PI * 2);
-      ctx.fill();
-      // Sonrisa
-      ctx.shadowBlur = 4;
-      ctx.shadowColor = 'rgba(0,150,255,0.4)';
-      ctx.strokeStyle = '#00b4d8';
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.arc(cx, 74 + bounce, 12, 0.1 * Math.PI, 0.9 * Math.PI);
-      ctx.stroke();
-      // Antenas
-      ctx.shadowBlur = 8;
-      ctx.shadowColor = 'rgba(241,196,15,0.3)';
-      ctx.strokeStyle = '#f1c40f';
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.moveTo(cx - 10, 34 + bounce);
-      ctx.lineTo(cx - 18, 20 + bounce);
-      ctx.stroke();
-      ctx.beginPath();
-      ctx.arc(cx - 18, 18 + bounce, 4, 0, Math.PI * 2);
-      ctx.fillStyle = '#f1c40f';
-      ctx.fill();
-      ctx.beginPath();
-      ctx.moveTo(cx + 10, 34 + bounce);
-      ctx.lineTo(cx + 18, 20 + bounce);
-      ctx.stroke();
-      ctx.beginPath();
-      ctx.arc(cx + 18, 18 + bounce, 4, 0, Math.PI * 2);
-      ctx.fill();
-
-      // Cuerpo
-      ctx.shadowBlur = 10;
-      ctx.shadowColor = 'rgba(0,0,0,0.4)';
-      ctx.fillStyle = '#0077b6';
-      ctx.strokeStyle = '#023e8a';
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.moveTo(cx - 26, 95 + bounce);
-      ctx.lineTo(cx + 26, 95 + bounce);
-      ctx.lineTo(cx + 34, 155 + bounce);
-      ctx.lineTo(cx - 34, 155 + bounce);
-      ctx.closePath();
-      ctx.fill();
-      ctx.stroke();
-      ctx.strokeStyle = 'rgba(2,62,138,0.3)';
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.moveTo(cx - 12, 105 + bounce);
-      ctx.lineTo(cx + 12, 105 + bounce);
-      ctx.stroke();
-      ctx.beginPath();
-      ctx.moveTo(cx - 10, 125 + bounce);
-      ctx.lineTo(cx + 10, 125 + bounce);
-      ctx.stroke();
-      // Brazos
-      ctx.shadowBlur = 6;
-      ctx.strokeStyle = '#0077b6';
-      ctx.lineWidth = 7;
-      ctx.lineCap = 'round';
-      ctx.beginPath();
-      ctx.moveTo(cx - 28, 100 + bounce);
-      ctx.lineTo(cx - 48, 128 + bounce);
-      ctx.lineTo(cx - 38, 140 + bounce);
-      ctx.stroke();
-      ctx.beginPath();
-      ctx.moveTo(cx + 28, 100 + bounce);
-      ctx.lineTo(cx + 48, 128 + bounce);
-      ctx.lineTo(cx + 38, 140 + bounce);
-      ctx.stroke();
-      ctx.fillStyle = '#8ecae6';
-      ctx.shadowBlur = 4;
-      ctx.beginPath();
-      ctx.arc(cx - 42, 138 + bounce, 6, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.beginPath();
-      ctx.arc(cx + 42, 138 + bounce, 6, 0, Math.PI * 2);
-      ctx.fill();
-      // Piernas
-      ctx.shadowBlur = 8;
-      ctx.strokeStyle = '#023e8a';
-      ctx.lineWidth = 7;
-      ctx.beginPath();
-      ctx.moveTo(cx - 18, 155 + bounce);
-      ctx.lineTo(cx - 22, 195 + bounce);
-      ctx.lineTo(cx - 10, 195 + bounce);
-      ctx.stroke();
-      ctx.beginPath();
-      ctx.moveTo(cx + 18, 155 + bounce);
-      ctx.lineTo(cx + 22, 195 + bounce);
-      ctx.lineTo(cx + 10, 195 + bounce);
-      ctx.stroke();
-      ctx.fillStyle = '#023e8a';
-      ctx.shadowBlur = 6;
-      ctx.beginPath();
-      ctx.ellipse(cx - 16, 198 + bounce, 10, 4, 0, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.beginPath();
-      ctx.ellipse(cx + 16, 198 + bounce, 10, 4, 0, 0, Math.PI * 2);
-      ctx.fill();
-
-      // Accesorios
-      ctx.shadowBlur = 0;
-      const fontSize = 34;
-      ctx.font = `${fontSize}px "Segoe UI Emoji", "Apple Color Emoji", sans-serif`;
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      if (equipped.hat) ctx.fillText(equipped.hat, cx, 38 + bounce);
-      if (equipped.glasses) ctx.fillText(equipped.glasses, cx, 58 + bounce);
-      if (equipped.shirt) ctx.fillText(equipped.shirt, cx, 128 + bounce);
-      if (equipped.backpack) ctx.fillText(equipped.backpack, cx - 42, 118 + bounce);
-      if (equipped.wand) ctx.fillText(equipped.wand, cx + 48, 118 + bounce);
-
-      ctx.strokeStyle = 'rgba(241,196,15,0.05)';
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.moveTo(10, 10);
-      ctx.lineTo(170, 10);
-      ctx.stroke();
-    }
-
-    // ============================================================
-    //  FUNCIONES AUXILIARES
-    // ============================================================
-    function shuffleArray(arr) {
-      for (let i = arr.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [arr[i], arr[j]] = [arr[j], arr[i]];
-      }
-      return arr;
-    }
-
-    function eliminarDuplicados(arr) {
-      const seen = new Set();
-      return arr.filter(item => {
-        const key = item.q;
-        if (seen.has(key)) return false;
-        seen.add(key);
-        return true;
-      });
-    }
-
-    // Niveles (XP para subir)
-    function xpForLevel(level) {
-      return Math.floor(100 * Math.pow(1.2, level - 1));
+    // ================================================================
+    //  XP Y NIVELES
+    // ================================================================
+    function xpForLevel(lvl) {
+      return Math.floor(100 * Math.pow(1.25, lvl - 1));
     }
 
     function addXP(amount) {
       state.xp += amount;
-      let levelUp = false;
+      let leveled = false;
       while (state.xp >= xpForLevel(state.level)) {
         state.xp -= xpForLevel(state.level);
         state.level++;
-        levelUp = true;
+        leveled = true;
         soundLevelUp();
-        // Notificar nivel
-        setTimeout(() => alert(`🎉 ¡Subiste al nivel ${state.level}!`), 300);
-        // Desbloquear logro por nivel?
-      }
-      if (levelUp) {
-        // Check logros de nivel
+        toast('🎉 ¡Subiste al nivel ' + state.level + '!');
         checkAchievements();
       }
+      if (leveled) {
+        // animación
+      }
+      saveState();
     }
 
-    // ============================================================
+    // ================================================================
     //  LOGROS
-    // ============================================================
+    // ================================================================
     const ACHIEVEMENTS = [
       { id: 'first_game', name: 'Primer paso', desc: 'Completa tu primera partida', emoji: '🚀' },
       { id: 'streak_5', name: 'Racha 5', desc: '5 respuestas correctas seguidas', emoji: '🔥' },
       { id: 'streak_10', name: 'Cerebrito', desc: '10 respuestas correctas seguidas', emoji: '🧠' },
       { id: 'streak_20', name: 'Imparable', desc: '20 respuestas correctas seguidas', emoji: '💪' },
-      { id: 'points_100', name: 'Coleccionista', desc: 'Acumula 100 puntos', emoji: '💰' },
-      { id: 'points_500', name: 'Millonario', desc: 'Acumula 500 puntos', emoji: '💎' },
-      { id: 'hard_win', name: 'Maestro', desc: 'Completa una partida en difícil', emoji: '🏅' },
-      { id: 'impossible_win', name: 'Insano', desc: 'Completa una partida en imposible', emoji: '🤯' },
-      { id: 'level_5', name: 'Experto', desc: 'Alcanza el nivel 5', emoji: '🌟' },
-      { id: 'level_10', name: 'Leyenda', desc: 'Alcanza el nivel 10', emoji: '👑' },
+      { id: 'coins_100', name: 'Coleccionista', desc: '100 cristales', emoji: '💰' },
+      { id: 'coins_500', name: 'Millonario', desc: '500 cristales', emoji: '💎' },
+      { id: 'hard_win', name: 'Maestro', desc: 'Completa difícil con ≥70%', emoji: '🏅' },
+      { id: 'impossible_win', name: 'Insano', desc: 'Completa imposible con ≥60%', emoji: '🤯' },
+      { id: 'level_5', name: 'Experto', desc: 'Nivel 5', emoji: '🌟' },
+      { id: 'level_10', name: 'Leyenda', desc: 'Nivel 10', emoji: '👑' },
     ];
 
     function unlockAchievement(id) {
@@ -1325,726 +994,833 @@
         state.achievements.push(id);
         saveState();
         soundLevelUp();
-        setTimeout(() => {
-          const ach = ACHIEVEMENTS.find(a => a.id === id);
-          if (ach) alert(`🏆 ¡Logro desbloqueado! ${ach.emoji} ${ach.name}`);
-        }, 400);
+        const ach = ACHIEVEMENTS.find(a => a.id === id);
+        if (ach) toast('🏆 ¡Logro desbloqueado! ' + ach.emoji + ' ' + ach.name);
       }
     }
 
     function checkAchievements() {
-      // Primer partida
-      if (state.gamesPlayed >= 1) unlockAchievement('first_game');
-      // Rachas
+      if (state.games >= 1) unlockAchievement('first_game');
       if (state.bestStreak >= 5) unlockAchievement('streak_5');
       if (state.bestStreak >= 10) unlockAchievement('streak_10');
       if (state.bestStreak >= 20) unlockAchievement('streak_20');
-      // Puntos
-      if (state.points >= 100) unlockAchievement('points_100');
-      if (state.points >= 500) unlockAchievement('points_500');
-      // Niveles
+      if (state.coins >= 100) unlockAchievement('coins_100');
+      if (state.coins >= 500) unlockAchievement('coins_500');
       if (state.level >= 5) unlockAchievement('level_5');
       if (state.level >= 10) unlockAchievement('level_10');
-      // Dificultades se chequean al finalizar partida
     }
 
-    function renderAchievements() {
-      const grid = $('achievement-grid');
-      grid.innerHTML = '';
-      ACHIEVEMENTS.forEach(ach => {
-        const div = document.createElement('div');
-        div.className = 'achievement' + (state.achievements.includes(ach.id) ? ' unlocked' : '');
-        div.innerHTML = `
-          <div class="emoji">${ach.emoji}</div>
-          <div><strong>${ach.name}</strong></div>
-          <div style="font-size:0.85rem;opacity:0.7;">${ach.desc}</div>
-        `;
-        grid.appendChild(div);
-      });
+    // ================================================================
+    //  SONIDOS (Web Audio)
+    // ================================================================
+    let audioCtx = null;
+
+    function initAudio() {
+      if (!audioCtx) audioCtx = new(window.AudioContext || window.webkitAudioContext)();
     }
 
-    // ============================================================
-    //  MENÚ
-    // ============================================================
-    function updateMenuUI() {
-      // Nada especial
+    function playTone(freq, dur, type = 'sine', vol = 0.2) {
+      if (!state.sound) return;
+      try {
+        initAudio();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.value = freq;
+        gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + dur);
+      } catch (e) {}
     }
 
-    $('start-btn').addEventListener('click', () => {
-      renderSubjects();
-      showScreen('subject');
-    });
-    $('profile-btn').addEventListener('click', () => showScreen('profile'));
-    $('shop-btn').addEventListener('click', () => { renderShop('all'); showScreen('shop'); });
-    $('stats-btn').addEventListener('click', () => showScreen('stats'));
-    $('achievements-btn').addEventListener('click', () => showScreen('achievements'));
+    function soundClick() { playTone(800, 0.08); }
 
-    // ============================================================
-    //  MATERIAS
-    // ============================================================
-    function renderSubjects() {
-      const grid = $('subject-grid');
-      grid.innerHTML = '';
-      const subjects = [
-        { id: 'math', label: '📐 Matemáticas' },
-        { id: 'cs', label: '💻 Informática' },
-        { id: 'science', label: '🔬 Ciencias' },
-        { id: 'history', label: '📜 Historia' },
-        { id: 'art', label: '🎨 Arte' },
-      ];
-      subjects.forEach(s => {
-        const btn = document.createElement('button');
-        btn.className = 'subject-btn card';
-        btn.textContent = s.label;
-        btn.dataset.subject = s.id;
-        btn.addEventListener('click', () => {
-          state.subject = s.id;
-          showScreen('count');
-          soundClick();
-        });
-        grid.appendChild(btn);
-      });
+    function soundCorrect() { playTone(523, 0.12);
+      setTimeout(() => playTone(659, 0.12), 120);
+      setTimeout(() => playTone(784, 0.15), 240); }
+
+    function soundWrong() { playTone(300, 0.3, 'sawtooth', 0.15); }
+
+    function soundSpin() { playTone(440, 0.1); }
+
+    function soundLevelUp() { playTone(523, 0.1);
+      setTimeout(() => playTone(659, 0.1), 100);
+      setTimeout(() => playTone(784, 0.12), 200);
+      setTimeout(() => playTone(1047, 0.2), 320); }
+
+    function soundWin() { playTone(523, 0.1);
+      setTimeout(() => playTone(659, 0.1), 120);
+      setTimeout(() => playTone(784, 0.1), 240);
+      setTimeout(() => playTone(1047, 0.2), 360); }
+
+    function soundBuy() { playTone(600, 0.08);
+      setTimeout(() => playTone(800, 0.08), 100); }
+
+    // ================================================================
+    //  TOAST
+    // ================================================================
+    function toast(msg) {
+      const el = document.getElementById('toast');
+      el.textContent = msg;
+      el.classList.add('on');
+      clearTimeout(el._hide);
+      el._hide = setTimeout(() => el.classList.remove('on'), 1800);
     }
 
-    // ============================================================
-    //  CANTIDAD
-    // ============================================================
-    document.querySelectorAll('.count-btn').forEach(btn => {
+    // ================================================================
+    //  TEMA
+    // ================================================================
+    function applyTheme(theme) {
+      document.body.classList.toggle('light', theme === 'light');
+      document.getElementById('themeToggle').textContent = theme === 'light' ? '☀️' : '🌙';
+    }
+
+    // ================================================================
+    //  NAVEGACIÓN
+    // ================================================================
+    const screens = {
+      home: document.getElementById('home'),
+      setup: document.getElementById('setup'),
+      roulette: document.getElementById('roulette'),
+      game: document.getElementById('game'),
+      results: document.getElementById('results'),
+      profile: document.getElementById('profile'),
+      shop: document.getElementById('shop'),
+      stats: document.getElementById('stats'),
+      ach: document.getElementById('ach'),
+    };
+
+    function go(screenId) {
+      Object.values(screens).forEach(el => el.classList.remove('on'));
+      screens[screenId].classList.add('on');
+      if (screenId === 'profile') renderProfile();
+      if (screenId === 'shop') renderShop('all');
+      if (screenId === 'stats') renderStats();
+      if (screenId === 'ach') renderAchievements();
+      window.scrollTo(0, 0);
+    }
+
+    document.querySelectorAll('[data-go]').forEach(btn => {
       btn.addEventListener('click', () => {
-        state.count = parseInt(btn.dataset.count);
-        showScreen('diffMode');
         soundClick();
+        go(btn.dataset.go);
       });
     });
 
-    // ============================================================
-    //  MODO DIFICULTAD
-    // ============================================================
-    $('manual-diff-btn').addEventListener('click', () => {
+    // ================================================================
+    //  HOME
+    // ================================================================
+    document.getElementById('play').addEventListener('click', () => {
       soundClick();
-      const diff = prompt('Elige dificultad: easy, medium, hard, impossible', 'easy');
-      if (diff && ['easy','medium','hard','impossible'].includes(diff)) {
-        state.difficulty = diff;
-        startGame();
+      go('setup');
+    });
+
+    // ================================================================
+    //  SETUP
+    // ================================================================
+    let setup = { sub: 'mat', count: 5, diff: 'easy' };
+
+    function setupGroup(containerId, key) {
+      const container = document.getElementById(containerId);
+      container.querySelectorAll('button').forEach(btn => {
+        btn.addEventListener('click', () => {
+          soundClick();
+          container.querySelectorAll('button').forEach(b => b.classList.remove('sel'));
+          btn.classList.add('sel');
+          setup[key] = btn.dataset[key] || btn.dataset.count || btn.dataset.diff;
+          if (key === 'count') setup.count = parseInt(btn.dataset.count);
+        });
+      });
+    }
+    setupGroup('subjects', 'sub');
+    setupGroup('counts', 'count');
+    setupGroup('diffs', 'diff');
+
+    document.getElementById('start').addEventListener('click', () => {
+      soundClick();
+      if (setup.diff === 'roulette') {
+        go('roulette');
+        initRoulette();
       } else {
-        alert('Dificultad no válida, se usará easy');
-        state.difficulty = 'easy';
-        startGame();
+        startGame(setup.sub, setup.count, setup.diff);
       }
     });
-    $('random-diff-btn').addEventListener('click', () => {
-      soundClick();
-      state.difficulty = 'random';
-      showScreen('roulette');
-      initRoulette();
-    });
 
-    // ============================================================
-    //  RULETA
-    // ============================================================
-    let datosRuleta = [];
-    let anguloActual = 0;
-    let girando = false;
-    const ctx = $('ruletaCanvas').getContext('2d');
-    const DEFAULT_SLOTS = ['😊 Fácil', '🌟 Fácil+', '🤔 Medio', '⚡ Medio+', '😅 Difícil', '🔥 Difícil+', '😈 Imposible', '💀 Penal'];
+    // ================================================================
+    //  RULETA (canvas)
+    // ================================================================
+    const canvas = document.getElementById('wheelCanvas');
+    const ctx = canvas.getContext('2d');
+    const LEVELS = [
+      ['FÁCIL', '#61e7ff', 'easy'],
+      ['MEDIO', '#a084ff', 'medium'],
+      ['DIFÍCIL', '#baff79', 'hard'],
+      ['ÉLITE', '#ff709b', 'impossible']
+    ];
+    const SLICE = (Math.PI * 2) / LEVELS.length;
+    let rotation = 0;
+    let spinning = false;
 
-    function generarEntradas() {
-      const num = parseInt($('numCasillas').value) || 8;
-      const contenedor = $('entradas');
-      contenedor.innerHTML = '';
-      for (let i = 0; i < num; i++) {
-        const input = document.createElement('input');
-        input.type = 'text';
-        input.id = `casilla${i}`;
-        input.placeholder = `Casilla ${i + 1}`;
-        if (i < DEFAULT_SLOTS.length) input.value = DEFAULT_SLOTS[i];
-        contenedor.appendChild(input);
-      }
-    }
-
-    function crearRuleta() {
-      soundClick();
-      const num = parseInt($('numCasillas').value) || 8;
-      datosRuleta = [];
-      for (let i = 0; i < num; i++) {
-        const val = $(`casilla${i}`) ? $(`casilla${i}`).value : `Casilla ${i+1}`;
-        datosRuleta.push(val || `Casilla ${i+1}`);
-      }
-      dibujarRuleta();
-      $('resultado').textContent = '¡Ruleta lista! Gira para obtener dificultad';
-      $('resultado').classList.remove('show');
-    }
-
-    function dibujarRuleta() {
-      const num = datosRuleta.length;
-      if (num === 0) return;
-      const radio = 150;
-      let anguloInicio = 0;
-      ctx.clearRect(0, 0, 300, 300);
-      for (let i = 0; i < num; i++) {
-        const angulo = (2 * Math.PI) / num;
+    function drawWheel(angle) {
+      const w = canvas.width,
+        h = canvas.height;
+      ctx.clearRect(0, 0, w, h);
+      const cx = w / 2,
+        cy = h / 2,
+        r = Math.min(w, h) * 0.45;
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.rotate(angle);
+      LEVELS.forEach(([label, color], i) => {
+        const start = i * SLICE - Math.PI / 2;
         ctx.beginPath();
-        ctx.moveTo(150, 150);
-        ctx.arc(150, 150, radio, anguloInicio, anguloInicio + angulo);
-        ctx.fillStyle = `hsl(${(i * 360) / num}, 80%, 55%)`;
-        ctx.fill();
-        ctx.strokeStyle = '#fff';
-        ctx.lineWidth = 2;
-        ctx.stroke();
+        ctx.moveTo(0, 0);
+        ctx.arc(0, 0, r, start, start + SLICE);
         ctx.closePath();
-        ctx.fillStyle = 'white';
+        ctx.fillStyle = color;
+        ctx.fill();
+        ctx.strokeStyle = '#071127';
+        ctx.lineWidth = 3;
+        ctx.stroke();
+        ctx.save();
+        ctx.rotate(start + SLICE / 2);
+        ctx.fillStyle = '#071127';
+        ctx.font = '800 24px Outfit, sans-serif';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.font = 'bold 13px Arial';
-        const midAngle = anguloInicio + angulo / 2;
-        const textX = 150 + Math.cos(midAngle) * (radio / 1.6);
-        const textY = 150 + Math.sin(midAngle) * (radio / 1.6);
-        ctx.fillText(datosRuleta[i], textX, textY);
-        anguloInicio += angulo;
-      }
-    }
-
-    function girarRuleta() {
-      if (girando) return;
-      if (datosRuleta.length === 0) { alert('Primero crea la ruleta con "Crear ruleta"'); return; }
-      girando = true;
-      soundSpin();
-      const girarBtn = $('girar-btn');
-      girarBtn.disabled = true;
-      const resultadoDiv = $('resultado');
-      resultadoDiv.textContent = 'Girando...';
-      resultadoDiv.classList.remove('show');
-
-      const vueltas = 4 + Math.random() * 4;
-      const duracion = 5000;
-      const inicio = performance.now();
-
-      function animar(tiempo) {
-        const progreso = (tiempo - inicio) / duracion;
-        if (progreso >= 1) {
-          const anguloFinal = anguloActual % 360;
-          const num = datosRuleta.length;
-          const anguloPorSegmento = 360 / num;
-          const anguloPuntero = (360 - (anguloFinal % 360)) % 360;
-          const indice = Math.floor(anguloPuntero / anguloPorSegmento) % num;
-          const resultado = datosRuleta[indice];
-
-          resultadoDiv.textContent = `🎯 ${resultado}`;
-          resultadoDiv.classList.add('show');
-          girando = false;
-          girarBtn.disabled = false;
-          soundClick();
-
-          const diff = mapearDificultad(resultado);
-          state.difficulty = diff;
-          saveState();
-          setTimeout(() => startGame(), 800);
-          return;
-        }
-        const incremento = 20 * (1 + progreso * 0.5);
-        anguloActual += incremento;
-        ctx.clearRect(0, 0, 300, 300);
-        ctx.save();
-        ctx.translate(150, 150);
-        ctx.rotate(anguloActual * Math.PI / 180);
-        ctx.translate(-150, -150);
-        dibujarRuleta();
+        ctx.fillText(label, r * 0.6, 0);
         ctx.restore();
-        requestAnimationFrame(animar);
-      }
-      requestAnimationFrame(animar);
+      });
+      // Centro
+      ctx.beginPath();
+      ctx.arc(0, 0, r * 0.18, 0, Math.PI * 2);
+      ctx.fillStyle = '#101b3c';
+      ctx.fill();
+      ctx.strokeStyle = '#e4fbff';
+      ctx.lineWidth = 4;
+      ctx.stroke();
+      ctx.restore();
     }
 
-    function mapearDificultad(texto) {
-      const lower = texto.toLowerCase();
-      if (lower.includes('fácil') || lower.includes('facil') || lower.includes('easy')) return 'easy';
-      if (lower.includes('medio') || lower.includes('medium')) return 'medium';
-      if (lower.includes('difícil') || lower.includes('dificil') || lower.includes('hard')) return 'hard';
-      if (lower.includes('imposible') || lower.includes('impossible')) return 'impossible';
-      return 'easy';
-    }
-
-    function limpiarRuleta() {
-      $('numCasillas').value = '8';
-      $('entradas').innerHTML = '';
-      datosRuleta = [];
-      anguloActual = 0;
-      ctx.clearRect(0, 0, 300, 300);
-      $('resultado').textContent = 'Gira para obtener dificultad';
-      $('resultado').classList.remove('show');
+    function getSelected(angle) {
+      let raw = (-Math.PI / 2 - angle) % (Math.PI * 2);
+      if (raw < 0) raw += Math.PI * 2;
+      return Math.floor(raw / SLICE) % LEVELS.length;
     }
 
     function initRoulette() {
-      $('numCasillas').value = '8';
-      generarEntradas();
-      crearRuleta();
+      drawWheel(rotation);
+      document.getElementById('roll').textContent = 'Gira la ruleta';
+      document.getElementById('begin').disabled = true;
+      document.getElementById('wheelLabel').textContent = 'GIRA';
+      document.getElementById('wheelSub').textContent = 'elige tu nivel';
     }
 
-    $('generar-btn').addEventListener('click', generarEntradas);
-    $('crear-btn').addEventListener('click', crearRuleta);
-    $('girar-btn').addEventListener('click', girarRuleta);
-    $('limpiar-btn').addEventListener('click', limpiarRuleta);
+    document.getElementById('spin').addEventListener('click', () => {
+      if (spinning) return;
+      spinning = true;
+      soundSpin();
+      const btn = document.getElementById('spin');
+      btn.disabled = true;
+      const beginBtn = document.getElementById('begin');
+      beginBtn.disabled = true;
+      const startRot = rotation;
+      const targetRot = startRot + (5 + Math.random() * 4) * Math.PI * 2 + Math.random() * Math.PI * 2;
+      const duration = 3400;
+      const started = performance.now();
 
-    // ============================================================
-    //  INICIO DEL JUEGO
-    // ============================================================
-    function startGame() {
-      const subjectData = QUESTIONS[state.subject];
-      if (!subjectData) return;
+      function frame(now) {
+        const progress = Math.min((now - started) / duration, 1);
+        const eased = 1 - Math.pow(1 - progress, 3);
+        const current = startRot + (targetRot - startRot) * eased;
+        drawWheel(current);
+        if (progress < 1) { requestAnimationFrame(frame); return; }
+        rotation = targetRot;
+        const idx = getSelected(rotation);
+        const level = LEVELS[idx];
+        document.getElementById('roll').textContent = level[0];
+        document.getElementById('wheelLabel').textContent = level[0];
+        document.getElementById('wheelSub').textContent = 'nivel seleccionado';
+        setup.diff = level[2];
+        beginBtn.disabled = false;
+        btn.disabled = false;
+        spinning = false;
+        soundClick();
+      }
+      requestAnimationFrame(frame);
+    });
 
+    document.getElementById('begin').addEventListener('click', () => {
+      soundClick();
+      startGame(setup.sub, setup.count, setup.diff);
+    });
+
+    // ================================================================
+    //  JUEGO
+    // ================================================================
+    let game = null;
+    let timer = null;
+    let timeLeft = 0;
+
+    function startGame(subject, count, difficulty) {
+      // Construir pool
       let pool = [];
-      if (state.difficulty === 'random') {
-        for (const diff of ['easy','medium','hard','impossible']) {
-          if (subjectData[diff]) {
-            pool.push(...subjectData[diff].map(q => ({ ...q, difficulty: diff })));
-          }
+      const bank = QUESTION_BANK[subject] || QUESTION_BANK.mat;
+      if (difficulty === 'roulette' || difficulty === 'random') {
+        for (const d of ['easy', 'medium', 'hard', 'impossible']) {
+          if (bank[d]) pool.push(...bank[d].map(q => ({ ...q, diff: d })));
         }
       } else {
-        if (subjectData[state.difficulty]) {
-          pool = subjectData[state.difficulty].map(q => ({ ...q, difficulty: state.difficulty }));
-        } else {
-          pool = subjectData.easy.map(q => ({ ...q, difficulty: 'easy' }));
-        }
+        if (bank[difficulty]) pool = bank[difficulty].map(q => ({ ...q, diff: difficulty }));
+        else pool = bank.easy.map(q => ({ ...q, diff: 'easy' }));
       }
-
-      pool = eliminarDuplicados(pool);
-      pool = shuffleArray(pool);
-
+      // Eliminar duplicados (por texto)
+      const seen = new Set();
+      pool = pool.filter(q => {
+        const key = q.q;
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
+      // Mezclar
+      pool = pool.sort(() => Math.random() - 0.5);
       // Mezclar opciones dentro de cada pregunta
       pool = pool.map(q => {
         const opts = q.opts.slice();
         const correct = q.ans;
         const correctText = opts[correct];
-        const shuffled = shuffleArray([...opts]);
+        const shuffled = opts.sort(() => Math.random() - 0.5);
         const newCorrect = shuffled.indexOf(correctText);
         return { ...q, opts: shuffled, ans: newCorrect };
       });
-
+      // Seleccionar count preguntas (si no hay suficientes, se repiten)
       let selected = [];
-      const count = state.count;
       if (pool.length >= count) {
         selected = pool.slice(0, count);
       } else {
-        // Repetir aleatoriamente hasta completar count
-        const fullPool = pool.slice();
+        const base = pool.slice();
         while (selected.length < count) {
-          const idx = Math.floor(Math.random() * fullPool.length);
-          selected.push({ ...fullPool[idx] });
+          const idx = Math.floor(Math.random() * base.length);
+          selected.push({ ...base[idx] });
         }
-        selected = shuffleArray(selected);
+        selected = selected.sort(() => Math.random() - 0.5);
       }
 
-      state.questions = selected;
-      state.currentIndex = 0;
-      state.score = 0;
+      game = {
+        questions: selected,
+        index: 0,
+        score: 0,
+        streak: 0,
+        wrongs: [],
+        startTime: Date.now(),
+        diff: difficulty,
+        subject: subject,
+        count: count,
+        total: selected.length,
+      };
       state.streak = 0;
-      state.wrongQuestions = [];
-      state.startTime = Date.now();
-      state.questionTimes = [];
-      showScreen('questions');
+      saveState();
+      go('game');
       renderQuestion();
     }
 
-    // ============================================================
-    //  RENDER PREGUNTA
-    // ============================================================
     function renderQuestion() {
-      const qs = state.questions;
-      const idx = state.currentIndex;
-      if (idx >= qs.length) { endGame(); return; }
-      const q = qs[idx];
-      $('question-display').textContent = q.q;
-      const optsContainer = $('options');
-      optsContainer.innerHTML = '';
-      q.opts.forEach((opt, i) => {
-        const btn = document.createElement('button');
-        btn.textContent = `${String.fromCharCode(65 + i)}. ${opt}`;
-        btn.dataset.index = i;
-        btn.addEventListener('click', () => handleAnswer(i));
-        optsContainer.appendChild(btn);
-      });
-      const total = qs.length;
-      $('progress').value = ((idx) / total) * 100;
-      $('progress-label').textContent = `${idx+1} / ${total}`;
-      const nexu = $('nexu-question');
-      const msgs = ['🤖 ¡Vamos!', '🤖 Piensa bien', '🤖 Confía', '🤖 ¡Fácil!', '🤖 Concéntrate'];
-      nexu.textContent = msgs[Math.floor(Math.random() * msgs.length)];
-      $('feedback').textContent = '';
-      document.querySelectorAll('#options button').forEach(b => b.disabled = false);
-      // tiempo
-      state.questionTimes[idx] = { start: Date.now() };
-    }
-
-    // ============================================================
-    //  MANEJAR RESPUESTA
-    // ============================================================
-    function handleAnswer(selected) {
-      const qs = state.questions;
-      const idx = state.currentIndex;
-      const q = qs[idx];
-      const correct = q.ans;
-      const buttons = document.querySelectorAll('#options button');
-      buttons.forEach((btn, i) => {
-        btn.disabled = true;
-        if (i === correct) btn.classList.add('correct');
-        if (i === selected && selected !== correct) btn.classList.add('wrong');
-      });
-
-      const feedback = $('feedback');
-      const nexu = $('nexu-question');
-      const isCorrect = (selected === correct);
-      const elapsed = (Date.now() - state.questionTimes[idx].start) / 1000;
-
-      if (isCorrect) {
-        state.score++;
-        state.streak++;
-        if (state.streak > state.bestStreak) state.bestStreak = state.streak;
-        // Puntos
-        let basePoints = 1;
-        if (q.difficulty === 'medium') basePoints = 2;
-        else if (q.difficulty === 'hard') basePoints = 3;
-        else if (q.difficulty === 'impossible') basePoints = 5;
-        // Bonificación por racha
-        let streakBonus = 0;
-        if (state.streak >= 3) streakBonus = 1;
-        if (state.streak >= 6) streakBonus = 2;
-        if (state.streak >= 10) streakBonus = 3;
-        // Bonificación por tiempo (rápido)
-        let timeBonus = 0;
-        if (elapsed < 3) timeBonus = 1;
-        else if (elapsed < 6) timeBonus = 0.5;
-        const totalPoints = Math.round(basePoints + streakBonus + timeBonus);
-        state.points += totalPoints;
-        addXP(totalPoints * 2);
-        state.correctAnswers++;
-        soundCorrect();
-        feedback.innerHTML = `✅ ¡Correcto! +${totalPoints} pts (Racha: ${state.streak})`;
-        const happy = ['🤖 ¡Excelente!', '🤖 ¡Genial!', '🤖 ¡Eres un crack!', '🤖 ¡Sigue así!'];
-        nexu.textContent = happy[Math.floor(Math.random() * happy.length)];
-        // Efecto
-        document.querySelector('.question-box').style.animation = 'pulse 0.3s ease';
-        setTimeout(() => document.querySelector('.question-box').style.animation = '', 300);
-      } else {
-        state.streak = 0;
-        state.wrongAnswers++;
-        state.wrongQuestions.push({
-          question: q.q,
-          correct: q.opts[correct],
-          chosen: q.opts[selected],
-          explanation: q.explanation || 'Sin explicación.'
-        });
-        soundWrong();
-        feedback.innerHTML = `❌ Incorrecto. Era: ${q.opts[correct]}`;
-        const sad = ['🤖 No pasa nada, ¡sigue!', '🤖 Ánimo, la próxima será', '🤖 Revisa bien'];
-        nexu.textContent = sad[Math.floor(Math.random() * sad.length)];
-      }
-      state.totalQuestions++;
-      saveState();
-
-      setTimeout(() => {
-        state.currentIndex++;
-        renderQuestion();
-      }, 1500);
-    }
-
-    // ============================================================
-    //  FIN DEL JUEGO
-    // ============================================================
-    function endGame() {
-      const qs = state.questions;
-      const total = qs.length;
-      const correct = state.score;
-      const percent = Math.round((correct / total) * 100);
-      state.gamesPlayed++;
-      // Logros por dificultad
-      if (state.difficulty === 'hard' && percent >= 70) unlockAchievement('hard_win');
-      if (state.difficulty === 'impossible' && percent >= 60) unlockAchievement('impossible_win');
-      // Otros logros
-      checkAchievements();
-      saveState();
-      soundWin();
-
-      const resultDiv = $('result-content');
-      let msg = '';
-      if (percent === 100) msg = '🏆 ¡Perfecto! Eres un genio.';
-      else if (percent >= 70) msg = '🌟 ¡Muy bien! Sigue así.';
-      else if (percent >= 50) msg = '👍 Buen intento.';
-      else msg = '📚 Necesitas repasar. ¡Ánimo!';
-
-      resultDiv.innerHTML = `
-        <div class="result-stats">
-          <div class="result-stat"><div class="value">${correct}</div><div class="label">✅ Aciertos</div></div>
-          <div class="result-stat"><div class="value">${total - correct}</div><div class="label">❌ Fallos</div></div>
-          <div class="result-stat"><div class="value">${percent}%</div><div class="label">Porcentaje</div></div>
-          <div class="result-stat"><div class="value">${state.bestStreak}</div><div class="label">Mejor racha</div></div>
-          <div class="result-stat"><div class="value">${state.difficulty.toUpperCase()}</div><div class="label">Dificultad</div></div>
-          <div class="result-stat"><div class="value">${state.subject.toUpperCase()}</div><div class="label">Materia</div></div>
-        </div>
-        <p style="text-align:center;font-size:1.2rem;">${msg}</p>
-        <p style="text-align:center;">Puntos obtenidos: <strong>${state.points}</strong></p>
-        <div id="review-summary" style="text-align:center;margin-top:1rem;"></div>
-      `;
-
-      // Mostrar resumen de errores si los hay
-      if (state.wrongQuestions.length > 0) {
-        $('review-summary').innerHTML = `<p>Tienes ${state.wrongQuestions.length} errores para repasar.</p>`;
-      } else {
-        $('review-summary').innerHTML = `<p>🎉 ¡Sin errores! Perfecto.</p>`;
-      }
-
-      showScreen('results');
-
-      // Eventos de resultados
-      $('result-menu-btn').onclick = () => showScreen('menu');
-      $('result-retry-btn').onclick = () => {
-        soundClick();
-        // Reiniciar con misma configuración
-        startGame();
-      };
-      $('result-review-btn').onclick = () => {
-        soundClick();
-        renderReview();
-        showScreen('review');
-      };
-    }
-
-    // ============================================================
-    //  REPASO DE ERRORES
-    // ============================================================
-    function renderReview() {
-      const list = $('review-list');
-      list.innerHTML = '';
-      if (state.wrongQuestions.length === 0) {
-        list.innerHTML = '<p style="text-align:center;">No hay errores para repasar. ¡Bien hecho!</p>';
+      if (!game || game.index >= game.questions.length) {
+        endGame();
         return;
       }
-      state.wrongQuestions.forEach((item, i) => {
-        const div = document.createElement('div');
-        div.className = 'review-item';
-        div.innerHTML = `
-          <div><strong>Pregunta ${i+1}:</strong> ${item.question}</div>
-          <div style="color:#e74c3c;">❌ Tu respuesta: ${item.chosen}</div>
-          <div style="color:#2ecc71;">✅ Correcta: ${item.correct}</div>
-          <div style="opacity:0.7;font-size:0.9rem;">📝 ${item.explanation}</div>
-        `;
-        list.appendChild(div);
+      const q = game.questions[game.index];
+      document.getElementById('sector').textContent = Math.floor(game.index / 5) + 1;
+      document.getElementById('round').textContent = (game.index + 1) + '/' + game.total;
+      document.getElementById('subname').textContent = { mat: 'MATEMÁTICAS', science: 'CIENCIAS', tech: 'TECNOLOGÍA',
+        mix: 'MIXTO' } [game.subject] || 'MATEMÁTICAS';
+      document.getElementById('score').textContent = game.score;
+      document.getElementById('combo').textContent = 'COMBO ×' + (game.streak + 1);
+      document.getElementById('shields').textContent = '◈ '.repeat(Math.max(0, 3 - game.wrongs.length));
+      document.getElementById('tag').textContent = game.diff.toUpperCase();
+      document.getElementById('problem').textContent = q.q;
+      document.getElementById('feed').textContent = '';
+      const box = document.getElementById('answers');
+      box.innerHTML = '';
+      q.opts.forEach((opt, i) => {
+        const btn = document.createElement('button');
+        btn.className = 'answer';
+        btn.textContent = opt;
+        btn.dataset.idx = i;
+        btn.addEventListener('click', () => handleAnswer(i));
+        box.appendChild(btn);
       });
+      // Temporizador según dificultad
+      const times = { easy: 12000, medium: 9000, hard: 6500, impossible: 4500 };
+      timeLeft = times[game.diff] || 10000;
+      const bar = document.getElementById('energy');
+      clearInterval(timer);
+      timer = setInterval(() => {
+        timeLeft -= 60;
+        bar.style.width = Math.max(0, (timeLeft / (times[game.diff] || 10000)) * 100) + '%';
+        if (timeLeft <= 0) {
+          clearInterval(timer);
+          handleAnswer(-1); // tiempo agotado
+        }
+      }, 60);
     }
 
-    // ============================================================
+    function handleAnswer(selected) {
+      clearInterval(timer);
+      const q = game.questions[game.index];
+      const correct = q.ans;
+      const btns = document.querySelectorAll('.answer');
+      btns.forEach((b, i) => {
+        b.disabled = true;
+        if (i === correct) b.classList.add('ok');
+        if (i === selected && selected !== correct) b.classList.add('bad');
+      });
+      const feed = document.getElementById('feed');
+      const isCorrect = (selected === correct);
+      if (isCorrect) {
+        game.streak++;
+        state.streak = game.streak;
+        if (state.streak > state.bestStreak) state.bestStreak = state.streak;
+        let base = 1;
+        if (game.diff === 'medium') base = 2;
+        else if (game.diff === 'hard') base = 3;
+        else if (game.diff === 'impossible') base = 5;
+        let bonus = 0;
+        if (game.streak >= 3) bonus += 1;
+        if (game.streak >= 6) bonus += 1;
+        if (game.streak >= 10) bonus += 2;
+        const totalPts = base + bonus;
+        game.score += totalPts;
+        state.correct++;
+        feed.textContent = '✅ ¡Correcto! +' + totalPts + ' XP (Racha: ' + game.streak + ')';
+        soundCorrect();
+        // XP
+        addXP(totalPts * 2);
+        // Monedas
+        state.coins += Math.max(1, Math.floor(totalPts / 3));
+        saveState();
+      } else {
+        game.streak = 0;
+        state.streak = 0;
+        game.wrongs.push({ question: q.q, correct: q.opts[correct], chosen: selected >= 0 ? q.opts[selected] : 'Tiempo',
+          explanation: q.exp || '' });
+        state.wrong++;
+        feed.textContent = '❌ Incorrecto. Era: ' + q.opts[correct];
+        soundWrong();
+      }
+      game.index++;
+      saveState();
+      setTimeout(() => renderQuestion(), 1200);
+    }
+
+    function endGame() {
+      clearInterval(timer);
+      state.games++;
+      checkAchievements();
+      if (game.diff === 'hard' && (game.score / (game.total * 5)) >= 0.7) unlockAchievement('hard_win');
+      if (game.diff === 'impossible' && (game.score / (game.total * 7)) >= 0.6) unlockAchievement('impossible_win');
+      saveState();
+      soundWin();
+      // Mostrar resultados
+      const total = game.total;
+      const correctCount = game.questions.length - game.wrongs.length;
+      const pct = Math.round((correctCount / total) * 100);
+      let title = 'Piloto estelar';
+      let desc = 'Sigue entrenando.';
+      if (pct >= 85) { title = '🏆 Piloto de élite';
+        desc = 'Misión impecable.'; } else if (pct >= 60) { title = '🌟 Navegante orbital';
+        desc = 'Buen desempeño.'; } else { title = '📚 Cadete espacial';
+        desc = 'Repasa y vuelve a intentarlo.'; }
+      document.getElementById('title').textContent = title;
+      document.getElementById('desc').textContent = desc;
+      const statsDiv = document.getElementById('resultStats');
+      statsDiv.innerHTML = `
+        <div class="stat"><strong>${game.score}</strong><span>XP obtenida</span></div>
+        <div class="stat"><strong>${pct}%</strong><span>precisión</span></div>
+        <div class="stat"><strong>×${game.streak}</strong><span>mejor racha</span></div>
+        <div class="stat"><strong>✦ ${Math.max(0, Math.floor(game.score / 5))}</strong><span>cristales</span></div>
+        <div class="stat"><strong>${correctCount}/${total}</strong><span>aciertos</span></div>
+      `;
+      document.getElementById('reviewlist').innerHTML = '';
+      go('results');
+    }
+
+    document.getElementById('quit').addEventListener('click', () => {
+      if (confirm('¿Terminar misión? Se perderá el progreso.')) {
+        soundClick();
+        endGame();
+      }
+    });
+
+    document.getElementById('again').addEventListener('click', () => {
+      soundClick();
+      go('setup');
+    });
+
+    document.getElementById('reviewBtn').addEventListener('click', () => {
+      soundClick();
+      const list = document.getElementById('reviewlist');
+      if (game && game.wrongs.length > 0) {
+        list.innerHTML = '<h3>Repaso de errores</h3>' +
+          game.wrongs.map(w =>
+            '<div class="item" style="text-align:left;margin-bottom:8px;"><b>' + w.question + '</b><br>❌ Tu respuesta: ' +
+            w.chosen + '<br>✅ Correcta: ' + w.correct + '<br><small>' + w.explanation + '</small></div>'
+          ).join('');
+      } else {
+        list.innerHTML = '<p>¡Sin errores! Perfecto.</p>';
+      }
+    });
+
+    // ================================================================
     //  PERFIL
-    // ============================================================
+    // ================================================================
     function renderProfile() {
-      $('profile-name').textContent = state.name;
-      $('total-points').textContent = state.points;
-      $('streak-display').textContent = state.streak;
-      $('best-streak-display').textContent = state.bestStreak;
-      $('profile-level').textContent = state.level;
-      const xpNeeded = xpForLevel(state.level);
-      $('profile-xp').textContent = state.xp;
-      $('profile-xp-next').textContent = xpNeeded;
-      const pct = Math.min(100, (state.xp / xpNeeded) * 100);
-      $('xp-bar-fill').style.width = pct + '%';
-
-      $('profile-hat-display').textContent = state.equipped.hat || '🧢';
-      $('profile-glasses-display').textContent = state.equipped.glasses || '👓';
-      $('profile-shirt-display').textContent = state.equipped.shirt || '👕';
-      $('profile-backpack-display').textContent = state.equipped.backpack || '🎒';
-      $('profile-wand-display').textContent = state.equipped.wand || '🪄';
-
-      const canvas = $('profile-canvas');
-      dibujarPersonaje(canvas, state.equipped, true);
+      document.getElementById('p-name').textContent = state.name;
+      document.getElementById('p-points').textContent = state.coins;
+      document.getElementById('p-level').textContent = state.level;
+      const xpNeed = xpForLevel(state.level);
+      document.getElementById('p-xp').textContent = state.xp;
+      document.getElementById('p-xp-next').textContent = xpNeed;
+      document.getElementById('xp-fill').style.width = Math.min(100, (state.xp / xpNeed) * 100) + '%';
+      document.getElementById('p-streak').textContent = state.streak;
+      document.getElementById('p-best').textContent = state.bestStreak;
+      document.getElementById('p-hat').textContent = state.equipped.hat || '🧢';
+      document.getElementById('p-glasses').textContent = state.equipped.glasses || '👓';
+      document.getElementById('p-shirt').textContent = state.equipped.shirt || '👕';
+      document.getElementById('p-backpack').textContent = state.equipped.backpack || '🎒';
+      document.getElementById('p-wand').textContent = state.equipped.wand || '🪄';
+      document.getElementById('nameInput').value = state.name;
+      // Dibujar personaje
+      drawCharacter('profile-canvas', state.equipped);
     }
 
-    $('save-name-btn').addEventListener('click', () => {
-      const name = $('name-input').value.trim() || 'Jugador';
+    document.getElementById('saveName').addEventListener('click', () => {
+      const name = document.getElementById('nameInput').value.trim() || 'Jugador';
       state.name = name;
       saveState();
       renderProfile();
       soundClick();
+      toast('Nombre guardado');
     });
 
-    // Animación en perfil
-    setInterval(() => {
-      if (!screens.profile.classList.contains('hidden')) {
-        const canvas = $('profile-canvas');
-        dibujarPersonaje(canvas, state.equipped, true);
-      }
-    }, 300);
+    // ================================================================
+    //  DIBUJAR PERSONAJE (canvas)
+    // ================================================================
+    function drawCharacter(canvasId, equipped) {
+      const canvas = document.getElementById(canvasId);
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const w = canvas.width,
+        h = canvas.height;
+      ctx.clearRect(0, 0, w, h);
+      const cx = w / 2,
+        cy = h / 2 + 10;
+      // Fondo
+      const grad = ctx.createRadialGradient(cx, cy - 10, 20, cx, cy, 90);
+      grad.addColorStop(0, 'rgba(241,196,15,0.08)');
+      grad.addColorStop(1, 'rgba(0,0,0,0.4)');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, w, h);
 
-    // ============================================================
+      // Cuerpo robot
+      ctx.shadowColor = 'rgba(0,0,0,0.5)';
+      ctx.shadowBlur = 12;
+      // Cabeza
+      ctx.beginPath();
+      ctx.arc(cx, cy - 60, 34, 0, Math.PI * 2);
+      ctx.fillStyle = '#8ecae6';
+      ctx.fill();
+      ctx.strokeStyle = '#023e8a';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      // Ojos
+      ctx.shadowBlur = 6;
+      ctx.shadowColor = 'rgba(0,150,255,0.6)';
+      ctx.fillStyle = '#00b4d8';
+      ctx.beginPath();
+      ctx.arc(cx - 12, cy - 64, 7, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(cx + 12, cy - 64, 7, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.shadowBlur = 0;
+      ctx.fillStyle = '#caf0f8';
+      ctx.beginPath();
+      ctx.arc(cx - 10, cy - 62, 3, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(cx + 14, cy - 62, 3, 0, Math.PI * 2);
+      ctx.fill();
+      // Sonrisa
+      ctx.shadowBlur = 4;
+      ctx.shadowColor = 'rgba(0,150,255,0.4)';
+      ctx.strokeStyle = '#00b4d8';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(cx, cy - 48, 10, 0.1 * Math.PI, 0.9 * Math.PI);
+      ctx.stroke();
+      // Antenas
+      ctx.shadowBlur = 8;
+      ctx.shadowColor = 'rgba(241,196,15,0.3)';
+      ctx.strokeStyle = '#f1c40f';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(cx - 8, cy - 90);
+      ctx.lineTo(cx - 16, cy - 104);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(cx - 16, cy - 106, 4, 0, Math.PI * 2);
+      ctx.fillStyle = '#f1c40f';
+      ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(cx + 8, cy - 90);
+      ctx.lineTo(cx + 16, cy - 104);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(cx + 16, cy - 106, 4, 0, Math.PI * 2);
+      ctx.fill();
+      // Torso
+      ctx.shadowBlur = 10;
+      ctx.shadowColor = 'rgba(0,0,0,0.4)';
+      ctx.fillStyle = '#0077b6';
+      ctx.strokeStyle = '#023e8a';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(cx - 24, cy - 30);
+      ctx.lineTo(cx + 24, cy - 30);
+      ctx.lineTo(cx + 32, cy + 30);
+      ctx.lineTo(cx - 32, cy + 30);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      // Brazos
+      ctx.shadowBlur = 6;
+      ctx.strokeStyle = '#0077b6';
+      ctx.lineWidth = 6;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(cx - 26, cy - 26);
+      ctx.lineTo(cx - 44, cy + 4);
+      ctx.lineTo(cx - 34, cy + 16);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(cx + 26, cy - 26);
+      ctx.lineTo(cx + 44, cy + 4);
+      ctx.lineTo(cx + 34, cy + 16);
+      ctx.stroke();
+      // Manos
+      ctx.fillStyle = '#8ecae6';
+      ctx.shadowBlur = 4;
+      ctx.beginPath();
+      ctx.arc(cx - 38, cy + 14, 5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(cx + 38, cy + 14, 5, 0, Math.PI * 2);
+      ctx.fill();
+      // Piernas
+      ctx.shadowBlur = 8;
+      ctx.strokeStyle = '#023e8a';
+      ctx.lineWidth = 6;
+      ctx.beginPath();
+      ctx.moveTo(cx - 16, cy + 30);
+      ctx.lineTo(cx - 20, cy + 68);
+      ctx.lineTo(cx - 8, cy + 68);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(cx + 16, cy + 30);
+      ctx.lineTo(cx + 20, cy + 68);
+      ctx.lineTo(cx + 8, cy + 68);
+      ctx.stroke();
+      ctx.fillStyle = '#023e8a';
+      ctx.shadowBlur = 6;
+      ctx.beginPath();
+      ctx.ellipse(cx - 14, cy + 70, 8, 4, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.ellipse(cx + 14, cy + 70, 8, 4, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Accesorios
+      ctx.shadowBlur = 0;
+      const fs = 30;
+      ctx.font = fs + 'px "Segoe UI Emoji", "Apple Color Emoji", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      if (equipped.hat) ctx.fillText(equipped.hat, cx, cy - 88);
+      if (equipped.glasses) ctx.fillText(equipped.glasses, cx, cy - 64);
+      if (equipped.shirt) ctx.fillText(equipped.shirt, cx, cy + 2);
+      if (equipped.backpack) ctx.fillText(equipped.backpack, cx - 38, cy - 6);
+      if (equipped.wand) ctx.fillText(equipped.wand, cx + 38, cy - 6);
+    }
+
+    // ================================================================
+    //  TIENDA
+    // ================================================================
+    const SHOP_DATA = {
+      hat: [
+        { id: 'hat_cowboy', emoji: '🤠', price: 15, label: 'Cowboy' },
+        { id: 'hat_crown', emoji: '👑', price: 30, label: 'Corona' },
+        { id: 'hat_top', emoji: '🎩', price: 20, label: 'Chistera' },
+        { id: 'hat_beanie', emoji: '🧶', price: 10, label: 'Gorro' },
+        { id: 'hat_sombrero', emoji: '🇲🇽', price: 25, label: 'Sombrero' }
+      ],
+      glasses: [
+        { id: 'glasses_sun', emoji: '🕶️', price: 20, label: 'Sol' },
+        { id: 'glasses_nerd', emoji: '🤓', price: 15, label: 'Nerd' },
+        { id: 'glasses_monocle', emoji: '🧐', price: 25, label: 'Monóculo' },
+        { id: 'glasses_heart', emoji: '😍', price: 30, label: 'Corazón' }
+      ],
+      shirt: [
+        { id: 'shirt_tshirt', emoji: '👕', price: 10, label: 'Básica' },
+        { id: 'shirt_vest', emoji: '🧥', price: 25, label: 'Chaleco' },
+        { id: 'shirt_suit', emoji: '🤵', price: 40, label: 'Traje' },
+        { id: 'shirt_hoodie', emoji: '🧥', price: 35, label: 'Sudadera' }
+      ],
+      backpack: [
+        { id: 'backpack_default', emoji: '🎒', price: 10, label: 'Normal' },
+        { id: 'backpack_rocket', emoji: '🚀', price: 35, label: 'Cohete' },
+        { id: 'backpack_wings', emoji: '🦅', price: 30, label: 'Alas' },
+        { id: 'backpack_jet', emoji: '✈️', price: 45, label: 'Jet' }
+      ],
+      wand: [
+        { id: 'wand_default', emoji: '🪄', price: 10, label: 'Básica' },
+        { id: 'wand_star', emoji: '⭐', price: 25, label: 'Estelar' },
+        { id: 'wand_lightning', emoji: '⚡', price: 30, label: 'Relámpago' },
+        { id: 'wand_moon', emoji: '🌙', price: 35, label: 'Lunar' }
+      ]
+    };
+
+    function renderShop(category) {
+      const container = document.getElementById('shopItems');
+      container.innerHTML = '';
+      document.getElementById('coins').textContent = '✦ ' + state.coins;
+
+      let items = [];
+      for (const cat in SHOP_DATA) {
+        if (category !== 'all' && cat !== category) continue;
+        SHOP_DATA[cat].forEach(item => items.push({ ...item, category: cat }));
+      }
+      if (items.length === 0) {
+        container.innerHTML = '<p style="grid-column:1/-1;text-align:center;">No hay artículos en esta categoría.</p>';
+        return;
+      }
+      items.forEach(item => {
+        const owned = state.wardrobe[item.category].includes(item.emoji);
+        const equipped = state.equipped[item.category] === item.emoji;
+        const div = document.createElement('div');
+        div.className = 'item';
+        div.innerHTML = `
+          <div class="ico">${item.emoji}</div>
+          <b>${item.label}</b>
+          <small>${owned ? (equipped ? '✅ Equipado' : '✅ Comprado') : '✦ ' + item.price}</small>
+          <button data-cat="${item.category}" data-emoji="${item.emoji}" data-price="${item.price}" ${equipped ? 'disabled' : ''}>
+            ${equipped ? 'Equipado' : (owned ? 'Equipar' : 'Comprar')}
+          </button>
+        `;
+        container.appendChild(div);
+        const btn = div.querySelector('button');
+        btn.addEventListener('click', () => {
+          soundClick();
+          const emoji = item.emoji;
+          const cat = item.category;
+          const price = item.price;
+          if (!owned) {
+            if (state.coins < price) { toast('No tienes suficientes cristales'); return; }
+            state.coins -= price;
+            state.wardrobe[cat].push(emoji);
+            state.equipped[cat] = emoji;
+            soundBuy();
+            saveState();
+            renderShop(category);
+            renderProfile();
+            toast('¡Comprado!');
+          } else {
+            state.equipped[cat] = emoji;
+            soundClick();
+            saveState();
+            renderShop(category);
+            renderProfile();
+          }
+        });
+      });
+      // Actualizar pestañas
+      document.querySelectorAll('#shopTabs button').forEach(b => {
+        b.classList.toggle('sel', b.dataset.cat === category);
+      });
+    }
+
+    document.querySelectorAll('#shopTabs button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        soundClick();
+        renderShop(btn.dataset.cat);
+      });
+    });
+
+    // ================================================================
     //  ESTADÍSTICAS
-    // ============================================================
+    // ================================================================
     function renderStats() {
-      const grid = $('stats-grid');
-      const total = state.correctAnswers + state.wrongAnswers;
-      const pct = total > 0 ? Math.round((state.correctAnswers / total) * 100) : 0;
+      const grid = document.getElementById('statGrid');
+      const total = state.correct + state.wrong;
+      const pct = total > 0 ? Math.round((state.correct / total) * 100) : 0;
       grid.innerHTML = `
-        <div class="result-stat"><div class="value">${state.gamesPlayed}</div><div class="label">Partidas</div></div>
-        <div class="result-stat"><div class="value">${total}</div><div class="label">Preguntas</div></div>
-        <div class="result-stat"><div class="value">${state.correctAnswers}</div><div class="label">Aciertos</div></div>
-        <div class="result-stat"><div class="value">${state.wrongAnswers}</div><div class="label">Fallos</div></div>
-        <div class="result-stat"><div class="value">${pct}%</div><div class="label">% Aciertos</div></div>
-        <div class="result-stat"><div class="value">${state.bestStreak}</div><div class="label">Mejor racha</div></div>
-        <div class="result-stat"><div class="value">${state.points}</div><div class="label">Puntos</div></div>
-        <div class="result-stat"><div class="value">${state.level}</div><div class="label">Nivel</div></div>
-        <div class="result-stat"><div class="value">${state.xp}</div><div class="label">XP</div></div>
+        <div class="stat"><strong>${state.games}</strong><span>Partidas</span></div>
+        <div class="stat"><strong>${total}</strong><span>Preguntas</span></div>
+        <div class="stat"><strong>${state.correct}</strong><span>Aciertos</span></div>
+        <div class="stat"><strong>${state.wrong}</strong><span>Fallos</span></div>
+        <div class="stat"><strong>${pct}%</strong><span>% Aciertos</span></div>
+        <div class="stat"><strong>${state.bestStreak}</strong><span>Mejor racha</span></div>
+        <div class="stat"><strong>${state.coins}</strong><span>Cristales</span></div>
+        <div class="stat"><strong>${state.level}</strong><span>Nivel</span></div>
+        <div class="stat"><strong>${state.xp}</strong><span>XP</span></div>
       `;
     }
 
-    // ============================================================
-    //  TIENDA
-    // ============================================================
-    const SHOP_CATEGORIES = {
-      hat: {
-        label: '🧢 Sombreros',
-        items: [
-          { id: 'hat_cowboy', emoji: '🤠', price: 15, category: 'hat', label: 'Cowboy' },
-          { id: 'hat_crown', emoji: '👑', price: 30, category: 'hat', label: 'Corona' },
-          { id: 'hat_top', emoji: '🎩', price: 20, category: 'hat', label: 'Chistera' },
-          { id: 'hat_beanie', emoji: '🧶', price: 10, category: 'hat', label: 'Gorro' },
-          { id: 'hat_sombrero', emoji: '🇲🇽', price: 25, category: 'hat', label: 'Sombrero' },
-        ]
-      },
-      glasses: {
-        label: '👓 Gafas',
-        items: [
-          { id: 'glasses_sun', emoji: '🕶️', price: 20, category: 'glasses', label: 'Sol' },
-          { id: 'glasses_nerd', emoji: '🤓', price: 15, category: 'glasses', label: 'Nerd' },
-          { id: 'glasses_monocle', emoji: '🧐', price: 25, category: 'glasses', label: 'Monóculo' },
-          { id: 'glasses_heart', emoji: '😍', price: 30, category: 'glasses', label: 'Corazón' },
-        ]
-      },
-      shirt: {
-        label: '👕 Camisetas',
-        items: [
-          { id: 'shirt_tshirt', emoji: '👕', price: 10, category: 'shirt', label: 'Básica' },
-          { id: 'shirt_vest', emoji: '🧥', price: 25, category: 'shirt', label: 'Chaleco' },
-          { id: 'shirt_suit', emoji: '🤵', price: 40, category: 'shirt', label: 'Traje' },
-          { id: 'shirt_hoodie', emoji: '🧥', price: 35, category: 'shirt', label: 'Sudadera' },
-        ]
-      },
-      backpack: {
-        label: '🎒 Mochilas',
-        items: [
-          { id: 'backpack_default', emoji: '🎒', price: 10, category: 'backpack', label: 'Normal' },
-          { id: 'backpack_rocket', emoji: '🚀', price: 35, category: 'backpack', label: 'Cohete' },
-          { id: 'backpack_wings', emoji: '🦅', price: 30, category: 'backpack', label: 'Alas' },
-          { id: 'backpack_jet', emoji: '✈️', price: 45, category: 'backpack', label: 'Jet' },
-        ]
-      },
-      wand: {
-        label: '🪄 Varitas',
-        items: [
-          { id: 'wand_default', emoji: '🪄', price: 10, category: 'wand', label: 'Básica' },
-          { id: 'wand_star', emoji: '⭐', price: 25, category: 'wand', label: 'Estelar' },
-          { id: 'wand_lightning', emoji: '⚡', price: 30, category: 'wand', label: 'Relámpago' },
-          { id: 'wand_moon', emoji: '🌙', price: 35, category: 'wand', label: 'Lunar' },
-        ]
-      }
-    };
-
-    function renderShop(category = 'all') {
-      const grid = $('shop-grid');
+    // ================================================================
+    //  LOGROS
+    // ================================================================
+    function renderAchievements() {
+      const grid = document.getElementById('badgeGrid');
       grid.innerHTML = '';
-      $('shop-points').textContent = state.points;
-
-      let items = [];
-      for (const cat in SHOP_CATEGORIES) {
-        if (category !== 'all' && cat !== category) continue;
-        SHOP_CATEGORIES[cat].items.forEach(item => items.push(item));
-      }
-
-      if (items.length === 0) {
-        grid.innerHTML = '<p style="text-align:center;grid-column:1/-1;">No hay artículos en esta categoría.</p>';
-        return;
-      }
-
-      items.forEach(item => {
+      ACHIEVEMENTS.forEach(a => {
+        const unlocked = state.achievements.includes(a.id);
         const div = document.createElement('div');
-        div.className = 'shop-item';
-        const owned = state.wardrobe[item.category].includes(item.emoji);
-        const equipped = state.equipped[item.category] === item.emoji;
-
+        div.className = 'badge' + (unlocked ? ' on' : '');
         div.innerHTML = `
-          <div style="font-size:2.5rem;">${item.emoji}</div>
-          <div>${item.label}</div>
-          <div class="${owned ? 'owned' : 'price'}">${owned ? (equipped ? '✅ Equipado' : '✅ Comprado') : item.price + ' pts'}</div>
-          <button data-id="${item.id}" data-category="${item.category}" data-emoji="${item.emoji}">
-            ${owned ? (equipped ? 'Equipado' : 'Equipar') : `Comprar (${item.price} pts)`}
-          </button>
+          <div style="font-size:2.5rem;">${a.emoji}</div>
+          <b>${a.name}</b>
+          <small>${unlocked ? '✅ Desbloqueado' : a.desc}</small>
         `;
-        const btn = div.querySelector('button');
-
-        if (!owned) {
-          btn.addEventListener('click', () => {
-            if (state.points >= item.price) {
-              state.points -= item.price;
-              state.wardrobe[item.category].push(item.emoji);
-              state.equipped[item.category] = item.emoji;
-              soundBuy();
-              saveState();
-              renderShop(category);
-              if (!screens.profile.classList.contains('hidden')) renderProfile();
-            } else {
-              alert('No tienes suficientes puntos.');
-            }
-          });
-        } else {
-          if (equipped) {
-            btn.disabled = true;
-            btn.textContent = '✅ Equipado';
-          } else {
-            btn.addEventListener('click', () => {
-              state.equipped[item.category] = item.emoji;
-              soundClick();
-              saveState();
-              renderShop(category);
-              if (!screens.profile.classList.contains('hidden')) renderProfile();
-            });
-          }
-        }
         grid.appendChild(div);
       });
-
-      document.querySelectorAll('.shop-tabs button').forEach(tab => {
-        tab.classList.toggle('active', tab.dataset.category === category);
-      });
     }
 
-    document.querySelectorAll('.shop-tabs button').forEach(tab => {
-      tab.addEventListener('click', () => {
-        renderShop(tab.dataset.category);
-        soundClick();
-      });
-    });
-
-    // ============================================================
+    // ================================================================
     //  INICIALIZACIÓN
-    // ============================================================
+    // ================================================================
     loadState();
-    for (const cat of ['hat','glasses','shirt','backpack','wand']) {
-      if (!state.wardrobe[cat] || state.wardrobe[cat].length === 0) {
-        const defaultItem = SHOP_CATEGORIES[cat].items[0];
-        if (defaultItem) {
-          state.wardrobe[cat] = [defaultItem.emoji];
-          state.equipped[cat] = defaultItem.emoji;
-        }
-      }
-    }
     applyTheme(state.theme);
-    soundBtn.textContent = state.soundOn ? '🔊' : '🔇';
-    showScreen('menu');
-    saveState();
-
-    $('quit-btn').addEventListener('click', () => {
-      if (confirm('¿Seguro que quieres salir? Se perderá el progreso de esta partida.')) {
-        soundClick();
-        showScreen('menu');
-      }
+    document.getElementById('soundToggle').textContent = state.sound ? '🔊' : '🔇';
+    document.getElementById('soundToggle').addEventListener('click', () => {
+      state.sound = !state.sound;
+      document.getElementById('soundToggle').textContent = state.sound ? '🔊' : '🔇';
+      saveState();
+      soundClick();
     });
-
-    console.log('🚀 TecnoQuiz 3.0 — Mejora completa con todo lo solicitado.');
+    document.getElementById('themeToggle').addEventListener('click', () => {
+      state.theme = state.theme === 'dark' ? 'light' : 'dark';
+      applyTheme(state.theme);
+      saveState();
+      soundClick();
+    });
+    // Inicializar coin display
+    document.getElementById('coins').textContent = '✦ ' + state.coins;
+    go('home');
+    saveState();
+    console.log('🚀 Nexo Orbital mejorado cargado.');
   </script>
 </body>
 </html>
