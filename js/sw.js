@@ -1,25 +1,23 @@
 // Importa Workbox desde la CDN (como tu versión original)
 importScripts('https://storage.googleapis.com/workbox-cdn/releases/5.1.2/workbox-sw.js');
 
-const CACHE_NAME = 'tecnomath-offline-v2';
+const CACHE_NAME = 'tecnomath-offline-v3';
 const OFFLINE_FALLBACK_PAGE = '/index.html';
 
 // Lista de recursos importantes que se cachean al instalar
 const PRECACHE_ASSETS = [
   '/',
   '/index.html',
-  '/shared.js',
+  '/js/shared.js',
   '/manifest.json',
-  '/auth.html',
-  '/game.html',
-  '/eco-collector.html',
-  '/animalandia.html',
-  '/ods-2048.html',
-  '/coral-guardian.html',
-  '/orbit-cleaner.html',
-  '/marine-cleaner.html',
-  '/eco-barrio.html',
-  '/emoji-math.html',
+  '/pages/auth.html',
+  '/pages/game.html',
+  '/pages/eco-collector.html',
+  '/pages/animalandia.html',
+  '/pages/ods-2048.html',
+  '/pages/coral-guardian.html',
+  '/pages/eco-barrio.html',
+  '/pages/emoji-math.html',
   '/img/icon-192.png',
   '/img/icon-512.png'
 ];

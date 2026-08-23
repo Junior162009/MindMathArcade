@@ -8,7 +8,15 @@
 
   function getUsers() {
     const data = localStorage.getItem(STORAGE_KEY);
-    return data ? JSON.parse(data) : [];
+    if (!data) return [];
+    try {
+      const users = JSON.parse(data);
+      return Array.isArray(users) ? users : [];
+    } catch (error) {
+      // No bloquea el acceso si una versión anterior dejó datos dañados.
+      localStorage.removeItem(STORAGE_KEY);
+      return [];
+    }
   }
 
   function saveUsers(users) {
@@ -20,28 +28,41 @@
     return users.find(u => u.username === username);
   }
 
-  function upsertUser(username, password) {
+  function createUser(username, password) {
     const users = getUsers();
     let user = findUser(username);
-    if (!user) {
-      user = {
-        username: username,
-        password: password,
-        isAdmin: false,
-        created: new Date().toISOString()
-      };
-      users.push(user);
-    } else {
-      user.password = password;
-    }
+    if (user) return null;
+    user = {
+      username: username,
+      password: password,
+      isAdmin: false,
+      created: new Date().toISOString()
+    };
+    users.push(user);
     saveUsers(users);
     return user;
   }
 
   window.Tecnomath = {
     login: function(username, password) {
+      username = (username || '').trim();
+      password = (password || '').trim();
       if (!username || !password) return { success: false, message: 'Usuario y contraseña requeridos' };
-      const user = upsertUser(username, password);
+      const user = findUser(username);
+      if (!user || user.password !== password) {
+        return { success: false, message: 'Usuario o contraseña incorrectos' };
+      }
+      localStorage.setItem(SESSION_KEY, JSON.stringify({ username: user.username }));
+      return { success: true, username: user.username };
+    },
+
+    register: function(username, password) {
+      username = (username || '').trim();
+      password = (password || '').trim();
+      if (username.length < 3) return { success: false, message: 'El usuario debe tener al menos 3 caracteres' };
+      if (password.length < 4) return { success: false, message: 'La contraseña debe tener al menos 4 caracteres' };
+      if (findUser(username)) return { success: false, message: 'Ese usuario ya existe. Usa ENTRAR.' };
+      const user = createUser(username, password);
       localStorage.setItem(SESSION_KEY, JSON.stringify({ username: user.username }));
       return { success: true, username: user.username };
     },
@@ -58,6 +79,7 @@
         const user = findUser(username);
         return user ? { username: user.username } : null;
       } catch (e) {
+        localStorage.removeItem(SESSION_KEY);
         return null;
       }
     },

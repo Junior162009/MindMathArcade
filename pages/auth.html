@@ -52,17 +52,19 @@
   <h2>🌐 ACCEDER</h2>
   <input type="text" id="username" placeholder="Usuario" autocomplete="off">
   <input type="password" id="password" placeholder="Contraseña">
-  <button class="btn" id="btnLogin">ENTRAR / CREAR CUENTA</button>
+  <button class="btn" id="btnLogin">ENTRAR</button>
+  <button class="btn btn-secondary" id="btnRegister">CREAR CUENTA</button>
   <button class="btn btn-secondary" id="btnLogout" style="display:none;">CERRAR SESIÓN</button>
   <div class="message" id="message"></div>
-  <a href="index.html" class="back-link">← Volver al portal</a>
+  <a href="../index.html" class="back-link">← Volver al portal</a>
 </div>
 
-<script src="shared.js"></script>
+<script src="../js/shared.js"></script>
 <script>
   const usernameEl = document.getElementById('username');
   const passwordEl = document.getElementById('password');
   const btnLogin = document.getElementById('btnLogin');
+  const btnRegister = document.getElementById('btnRegister');
   const btnLogout = document.getElementById('btnLogout');
   const messageEl = document.getElementById('message');
 
@@ -73,6 +75,7 @@
       usernameEl.disabled = true;
       passwordEl.style.display = 'none';
       btnLogin.style.display = 'none';
+      btnRegister.style.display = 'none';
       btnLogout.style.display = 'block';
       messageEl.textContent = `Sesión activa: ${user.username} · ${Tecnomath.getCoins()} monedas`;
       messageEl.style.color = 'var(--neon-cyan)';
@@ -81,23 +84,37 @@
       usernameEl.disabled = false;
       passwordEl.style.display = 'block';
       btnLogin.style.display = 'block';
+      btnRegister.style.display = 'block';
       btnLogout.style.display = 'none';
       messageEl.textContent = '';
     }
   }
 
-  btnLogin.addEventListener('click', () => {
+  function submit(action) {
     const username = usernameEl.value.trim();
     const password = passwordEl.value.trim();
-    const result = Tecnomath.login(username, password);
+    const result = Tecnomath[action](username, password);
     if (result.success) {
       messageEl.textContent = `¡Bienvenido/a ${result.username}!`;
       messageEl.style.color = '#39FF14';
       updateUI();
+      setTimeout(() => { window.location.href = '../index.html'; }, 500);
     } else {
       messageEl.textContent = result.message;
       messageEl.style.color = '#FF0033';
     }
+  }
+
+  btnLogin.addEventListener('click', () => {
+    submit('login');
+  });
+
+  btnRegister.addEventListener('click', () => {
+    submit('register');
+  });
+
+  passwordEl.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter') submit('login');
   });
 
   btnLogout.addEventListener('click', () => {
