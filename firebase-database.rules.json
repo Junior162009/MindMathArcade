@@ -9,7 +9,7 @@
     "usernames": {
       "$username": {
         ".read": true,
-        ".write": "auth != null && !data.exists() && newData.val() === auth.uid"
+        ".write": "auth != null && ((!data.exists() && newData.val() === auth.uid) || (data.val() === auth.uid && newData.val() === null))"
       }
     },
     "tecnomath": {

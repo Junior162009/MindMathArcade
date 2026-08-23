@@ -309,10 +309,23 @@
           email: user.email || '',
           createdAt: cloud.serverTimestamp
         });
+        await offerGooglePassword(user);
       }
       await finishSession(user);
     } catch (error) { showMessage(friendlyError(error)); }
   });
+
+  async function offerGooglePassword(user) {
+    const hasPassword = user.providerData.some(provider => provider.providerId === 'password');
+    if (hasPassword || !user.email) return;
+    const wantsPassword = window.confirm('¿Quieres establecer una contraseña para recuperar tu cuenta si pierdes acceso a Google?');
+    if (!wantsPassword) return;
+    const password = window.prompt('Elige una contraseña de al menos 6 caracteres:');
+    if (password === null || password === '') return;
+    if (password.length < 6) throw new Error('La contraseña debe tener mínimo 6 caracteres.');
+    const credential = firebase.auth.EmailAuthProvider.credential(user.email, password);
+    await user.linkWithCredential(credential);
+  }
 
   btnRecover.addEventListener('click', async () => {
     try {

@@ -2176,18 +2176,25 @@
                 const coins = Tecnomath.getCoins();
                 userDisplay.textContent = `${user.username} · 💰 ${coins}`;
                 if (logoutBtn) logoutBtn.style.display = 'inline-block';
+                if (authLink) {
+                    authLink.href = 'pages/profile.html';
+                    authLink.textContent = '👤 PERFIL';
+                    authLink.style.display = 'inline-block';
+                }
                 if (Tecnomath.isAdmin()) {
                     if (adminCloud) adminCloud.style.display = 'block';
-                    if (authLink) authLink.style.display = 'none';
                 } else {
                     if (adminCloud) adminCloud.style.display = 'none';
-                    if (authLink) authLink.style.display = 'inline-block';
                 }
             } else {
                 userDisplay.textContent = 'Invitado';
                 if (logoutBtn) logoutBtn.style.display = 'none';
                 if (adminCloud) adminCloud.style.display = 'none';
-                if (authLink) authLink.style.display = 'inline-block';
+                if (authLink) {
+                    authLink.href = 'pages/auth.html';
+                    authLink.textContent = '🔑 ACCEDER';
+                    authLink.style.display = 'inline-block';
+                }
             }
         }
 

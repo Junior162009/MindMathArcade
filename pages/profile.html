@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Tecnomath · Perfil</title>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <style>
+    :root { --cyan:#00ffff; --pink:#ff00ff; --bg:#060610; --card:#0d0d1a; --green:#39ff14; }
+    * { box-sizing:border-box; }
+    body { margin:0; min-height:100vh; display:grid; place-items:center; padding:20px; background:radial-gradient(ellipse at 30% 50%,rgba(0,255,255,.1),transparent 50%),var(--bg); color:#fff; font-family:'Press Start 2P',cursive; }
+    .card { width:min(100%,430px); padding:22px; border:2px solid var(--cyan); border-radius:12px; background:var(--card); box-shadow:0 0 20px rgba(0,255,255,.3); }
+    h1 { margin:0 0 20px; color:var(--cyan); font-size:14px; text-align:center; }
+    label { display:block; margin:16px 0 6px; font-size:7px; color:#aefefe; }
+    input { width:100%; padding:12px; border:2px solid #333; border-radius:6px; outline:none; color:var(--cyan); background:#0a0a1a; font:8px 'Press Start 2P',cursive; }
+    input:focus { border-color:var(--pink); }
+    button { width:100%; margin-top:10px; padding:12px; border:0; border-radius:6px; color:#fff; background:var(--pink); box-shadow:0 0 10px var(--pink); cursor:pointer; font:8px 'Press Start 2P',cursive; }
+    button.secondary { border:1px solid var(--cyan); color:var(--cyan); background:transparent; box-shadow:none; }
+    button:disabled { opacity:.55; cursor:wait; }
+    .message { min-height:20px; margin-top:14px; color:var(--pink); font-size:7px; line-height:1.8; text-align:center; }
+    .back { display:block; margin-top:18px; color:#aaa; font-size:6px; text-align:center; text-decoration:none; }
+    .hint { color:#aaa; font-size:6px; line-height:1.8; }
+  </style>
+</head>
+<body>
+  <main class="card">
+    <h1>👤 MI PERFIL</h1>
+    <label for="username">USUARIO ÚNICO</label>
+    <input id="username" autocomplete="username" maxlength="20">
+    <button id="saveUsername">GUARDAR USUARIO</button>
+
+    <label for="email">CORREO</label>
+    <input id="email" type="email" autocomplete="email">
+    <p class="hint">Al cambiarlo recibirás un enlace de verificación.</p>
+    <button id="saveEmail">CAMBIAR CORREO</button>
+
+    <label for="password">NUEVA CONTRASEÑA</label>
+    <input id="password" type="password" autocomplete="new-password" placeholder="Mínimo 6 caracteres">
+    <button id="savePassword">CAMBIAR CONTRASEÑA</button>
+
+    <button id="logout" class="secondary">🚪 CERRAR SESIÓN</button>
+    <div id="message" class="message" role="status"></div>
+    <a class="back" href="../index.html">← VOLVER AL PORTAL</a>
+  </main>
+
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <script src="../js/firebase-config.js"></script>
+  <script src="../js/shared.js"></script>
+  <script>
+    const cloud = TecnomathFirebase;
+    const usernameEl = document.getElementById('username');
+    const emailEl = document.getElementById('email');
+    const passwordEl = document.getElementById('password');
+    const messageEl = document.getElementById('message');
+    let currentUser = null;
+    let currentProfile = null;
+
+    function showMessage(text, color = '#ff00ff') { messageEl.textContent = text; messageEl.style.color = color; }
+    function usernameKey(username) { return username.trim().toLowerCase(); }
+    function validUsername(username) { return /^[a-zA-Z0-9._-]{3,20}$/.test(username); }
+    function setBusy(button, busy, label) { button.disabled = busy; button.textContent = busy ? 'GUARDANDO…' : label; }
+    function requireUser() {
+      if (!currentUser) { window.location.replace('auth.html'); return false; }
+      return true;
+    }
+
+    async function loadProfile(user) {
+      currentUser = user;
+      const snapshot = await cloud.database.ref('users/' + user.uid).once('value');
+      currentProfile = snapshot.val();
+      if (!currentProfile || !currentProfile.username) {
+        showMessage('No encontramos tu perfil. Vuelve a iniciar sesión.', '#ff00ff');
+        return;
+      }
+      usernameEl.value = currentProfile.username;
+      emailEl.value = user.email || currentProfile.email || '';
+      Tecnomath.setSession(currentProfile.username);
+    }
+
+    cloud.auth.onAuthStateChanged(user => {
+      if (!user) { window.location.replace('auth.html'); return; }
+      loadProfile(user).catch(error => showMessage(error.message || 'No pudimos cargar tu perfil.'));
+    });
+
+    document.getElementById('saveUsername').addEventListener('click', async function() {
+      if (!requireUser()) return;
+      const nextUsername = usernameEl.value.trim();
+      if (!validUsername(nextUsername)) { showMessage('El usuario debe tener 3 a 20 caracteres: letras, números, punto, guion o guion bajo.'); return; }
+      if (nextUsername === currentProfile.username) { showMessage('Ese ya es tu usuario actual.', '#39ff14'); return; }
+      setBusy(this, true, 'GUARDAR USUARIO');
+      try {
+        const oldKey = usernameKey(currentProfile.username);
+        const newKey = usernameKey(nextUsername);
+        const reservation = await cloud.database.ref('usernames/' + newKey).transaction(value => value === null ? currentUser.uid : undefined);
+        if (!reservation.committed) throw new Error('Ese nombre de usuario ya está ocupado.');
+        await cloud.database.ref('users/' + currentUser.uid).update({ username: nextUsername, usernameKey: newKey });
+        await cloud.database.ref('usernames/' + oldKey).remove();
+        currentProfile.username = nextUsername;
+        Tecnomath.setSession(nextUsername);
+        showMessage('Usuario actualizado.', '#39ff14');
+      } catch (error) {
+        showMessage(error.message || 'No se pudo cambiar el usuario.');
+      } finally { setBusy(this, false, 'GUARDAR USUARIO'); }
+    });
+
+    document.getElementById('saveEmail').addEventListener('click', async function() {
+      if (!requireUser()) return;
+      const nextEmail = emailEl.value.trim();
+      if (!nextEmail) { showMessage('Escribe un correo válido.'); return; }
+      setBusy(this, true, 'CAMBIAR CORREO');
+      try {
+        await currentUser.updateEmail(nextEmail);
+        await currentUser.sendEmailVerification();
+        await cloud.database.ref('users/' + currentUser.uid).update({ email: nextEmail });
+        showMessage('Correo actualizado. Revisa el enlace de verificación.', '#39ff14');
+      } catch (error) {
+        showMessage(error.code === 'auth/requires-recent-login' ? 'Por seguridad, cierra sesión y entra de nuevo antes de cambiar el correo.' : (error.message || 'No se pudo cambiar el correo.'));
+      } finally { setBusy(this, false, 'CAMBIAR CORREO'); }
+    });
+
+    document.getElementById('savePassword').addEventListener('click', async function() {
+      if (!requireUser()) return;
+      const password = passwordEl.value;
+      if (password.length < 6) { showMessage('La contraseña debe tener al menos 6 caracteres.'); return; }
+      setBusy(this, true, 'CAMBIAR CONTRASEÑA');
+      try {
+        await currentUser.updatePassword(password);
+        passwordEl.value = '';
+        showMessage('Contraseña actualizada.', '#39ff14');
+      } catch (error) {
+        showMessage(error.code === 'auth/requires-recent-login' ? 'Por seguridad, cierra sesión y entra de nuevo antes de cambiar la contraseña.' : (error.message || 'No se pudo cambiar la contraseña.'));
+      } finally { setBusy(this, false, 'CAMBIAR CONTRASEÑA'); }
+    });
+
+    document.getElementById('logout').addEventListener('click', async () => {
+      await cloud.auth.signOut();
+      Tecnomath.logout();
+      window.location.replace('../index.html');
+    });
+  </script>
+</body>
+</html>
