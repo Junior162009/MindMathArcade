@@ -1404,6 +1404,8 @@
                     default:
                         break;
                 }
+            }, (error) => {
+                console.warn('No se pudieron cargar los eventos globales:', error.code);
             });
             syncInitialized = true;
             console.log('📡 Escuchando cambios en Firebase...');
