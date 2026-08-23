@@ -60,6 +60,7 @@
   <button class="btn" id="btnLogin">ENTRAR</button>
   <button class="btn btn-secondary" id="btnRegister">CREAR CUENTA</button>
   <button class="btn btn-secondary" id="btnRecover">RECUPERAR ACCESO</button>
+  <button class="btn btn-secondary" id="btnEmailRecovery" style="display:none;">ENVIAR ENLACE AL CORREO</button>
   <button class="btn" id="btnVerify" style="display:none;">VERIFICAR CÓDIGO</button>
   <button class="btn btn-secondary" id="btnBack" style="display:none;">← VOLVER</button>
   <button class="btn btn-secondary" id="btnLogout" style="display:none;">CERRAR SESIÓN</button>
@@ -84,6 +85,7 @@
   const btnLogin = document.getElementById('btnLogin');
   const btnRegister = document.getElementById('btnRegister');
   const btnRecover = document.getElementById('btnRecover');
+  const btnEmailRecovery = document.getElementById('btnEmailRecovery');
   const btnVerify = document.getElementById('btnVerify');
   const btnBack = document.getElementById('btnBack');
   const btnLogout = document.getElementById('btnLogout');
@@ -115,7 +117,7 @@
     const recovering = mode === 'recover';
     const verifying = mode === 'verify-registration' || mode === 'verify-recovery';
     usernameEl.style.display = registering ? 'block' : 'none';
-    emailEl.style.display = verifying && mode === 'verify-recovery' ? 'none' : (recovering ? 'none' : 'block');
+    emailEl.style.display = verifying && mode === 'verify-recovery' ? 'none' : 'block';
     phoneEl.style.display = registering || recovering ? 'block' : 'none';
     passwordEl.style.display = registering || mode === 'login' ? 'block' : 'none';
     newPasswordEl.style.display = mode === 'verify-recovery' ? 'block' : 'none';
@@ -125,10 +127,11 @@
     btnRegister.textContent = registering ? 'ENVIAR CÓDIGO SMS' : 'CREAR CUENTA';
     btnRecover.style.display = mode === 'login' || recovering ? 'block' : 'none';
     btnRecover.textContent = recovering ? 'ENVIAR CÓDIGO SMS' : 'RECUPERAR ACCESO';
+    btnEmailRecovery.style.display = recovering ? 'block' : 'none';
     btnVerify.style.display = verifying ? 'block' : 'none';
     btnBack.style.display = mode === 'login' ? 'none' : 'block';
     btnLogout.style.display = 'none';
-    introEl.textContent = registering ? 'Crea tu cuenta: todos los datos son obligatorios' : recovering ? 'Ingresa tu teléfono para recuperar tu usuario o contraseña' : verifying ? 'Escribe el código enviado por SMS' : 'Accede con tu correo y contraseña';
+    introEl.textContent = registering ? 'Crea tu cuenta: todos los datos son obligatorios' : recovering ? 'Recupera con un código SMS o un enlace enviado a tu correo' : verifying ? 'Escribe el código enviado por SMS' : 'Accede con tu correo y contraseña';
     showMessage('', '');
   }
 
@@ -200,6 +203,15 @@
     } catch (error) { showMessage(friendlyError(error)); }
   });
 
+  btnEmailRecovery.addEventListener('click', async () => {
+    try {
+      const email = emailEl.value.trim();
+      if (!email) throw new Error('Escribe el correo con el que creaste la cuenta.');
+      await cloud.auth.sendPasswordResetEmail(email);
+      showMessage('Te enviamos un enlace para cambiar la contraseña. Revisa tu correo y la carpeta de spam.', '#39FF14');
+    } catch (error) { showMessage(friendlyError(error)); }
+  });
+
   async function startRecovery() {
     const phone = normalPhone();
     confirmationResult = await cloud.auth.signInWithPhoneNumber(phone, getRecaptcha());
@@ -248,6 +260,7 @@
     const messages = {
       'auth/email-already-in-use': 'Ese correo ya tiene una cuenta. Prueba iniciar sesión.',
       'auth/invalid-email': 'Escribe un correo electrónico válido.',
+      'auth/missing-email': 'Escribe el correo con el que creaste la cuenta.',
       'auth/invalid-login-credentials': 'El correo o la contraseña no son correctos.',
       'auth/wrong-password': 'El correo o la contraseña no son correctos.',
       'auth/user-not-found': 'El correo o la contraseña no son correctos.',
@@ -264,6 +277,7 @@
       'auth/network-request-failed': 'No hay conexión. Revisa internet e inténtalo otra vez.',
       'auth/unauthorized-domain': 'Este sitio no está autorizado para verificar teléfonos. Avisa al administrador.',
       'auth/operation-not-allowed': 'El método de acceso aún no está activado. Avisa al administrador.',
+      'auth/invalid-continue-uri': 'No pudimos preparar el enlace de recuperación. Avisa al administrador.',
       'auth/credential-already-in-use': 'Ese teléfono ya está asociado a otra cuenta.',
       'auth/provider-already-linked': 'Ese teléfono ya está verificado en esta cuenta.',
       'auth/requires-recent-login': 'Por seguridad, inicia sesión de nuevo antes de cambiar la contraseña.',
