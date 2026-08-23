@@ -119,6 +119,7 @@
     usernameEl.style.display = registering ? 'block' : 'none';
     emailEl.style.display = verifying && mode === 'verify-recovery' ? 'none' : 'block';
     phoneEl.style.display = registering || recovering ? 'block' : 'none';
+    phoneEl.placeholder = recovering ? 'Teléfono +57...' : 'Teléfono +57... (solo al registrarte)';
     passwordEl.style.display = registering || mode === 'login' ? 'block' : 'none';
     newPasswordEl.style.display = mode === 'verify-recovery' ? 'block' : 'none';
     smsCodeEl.style.display = verifying ? 'block' : 'none';
@@ -262,25 +263,32 @@
       'auth/invalid-email': 'Escribe un correo electrónico válido.',
       'auth/missing-email': 'Escribe el correo con el que creaste la cuenta.',
       'auth/invalid-login-credentials': 'El correo o la contraseña no son correctos.',
+      'auth/invalid-credential': 'El correo o la contraseña no son correctos.',
       'auth/wrong-password': 'El correo o la contraseña no son correctos.',
       'auth/user-not-found': 'El correo o la contraseña no son correctos.',
       'auth/user-disabled': 'Esta cuenta está desactivada. Pide ayuda a un administrador.',
+      'auth/missing-password': 'Escribe tu contraseña.',
       'auth/weak-password': 'Usa una contraseña de al menos 6 caracteres.',
       'auth/invalid-phone-number': 'Revisa el teléfono. Debe llevar el prefijo del país, por ejemplo +57.',
       'auth/missing-phone-number': 'Escribe tu número de teléfono.',
       'auth/invalid-verification-code': 'El código SMS no es correcto. Revísalo e inténtalo otra vez.',
       'auth/code-expired': 'El código venció. Solicita uno nuevo.',
       'auth/session-expired': 'El código venció. Solicita uno nuevo.',
+      'auth/invalid-verification-id': 'El código ya no es válido. Solicita uno nuevo.',
       'auth/quota-exceeded': 'Por ahora no podemos enviar más mensajes a este número. Intenta más tarde.',
       'auth/too-many-requests': 'Demasiados intentos. Espera unos minutos e inténtalo de nuevo.',
       'auth/captcha-check-failed': 'No se pudo comprobar que eres una persona. Inténtalo nuevamente.',
       'auth/network-request-failed': 'No hay conexión. Revisa internet e inténtalo otra vez.',
       'auth/unauthorized-domain': 'Este sitio no está autorizado para verificar teléfonos. Avisa al administrador.',
+      'auth/app-not-authorized': 'Esta aplicación no está autorizada para usar Firebase. Avisa al administrador.',
+      'auth/web-storage-unsupported': 'Tu navegador bloqueó el almacenamiento necesario. Prueba sin modo incógnito.',
       'auth/operation-not-allowed': 'El método de acceso aún no está activado. Avisa al administrador.',
       'auth/invalid-continue-uri': 'No pudimos preparar el enlace de recuperación. Avisa al administrador.',
       'auth/credential-already-in-use': 'Ese teléfono ya está asociado a otra cuenta.',
       'auth/provider-already-linked': 'Ese teléfono ya está verificado en esta cuenta.',
       'auth/requires-recent-login': 'Por seguridad, inicia sesión de nuevo antes de cambiar la contraseña.',
+      'auth/expired-action-code': 'El enlace de recuperación venció. Solicita uno nuevo.',
+      'auth/invalid-action-code': 'Ese enlace de recuperación no es válido. Solicita uno nuevo.',
       'PERMISSION_DENIED': 'Tu cuenta entró, pero no podemos abrir su perfil. Intenta de nuevo; si continúa, avisa al administrador.',
       'permission_denied': 'Tu cuenta entró, pero no podemos abrir su perfil. Intenta de nuevo; si continúa, avisa al administrador.'
     };
