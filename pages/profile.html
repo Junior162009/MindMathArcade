@@ -93,10 +93,25 @@
       try {
         const oldKey = usernameKey(currentProfile.username);
         const newKey = usernameKey(nextUsername);
+        if (oldKey === newKey) {
+          await cloud.database.ref('users/' + currentUser.uid).update({ username: nextUsername });
+          currentProfile.username = nextUsername;
+          Tecnomath.setSession(nextUsername);
+          showMessage('Usuario actualizado.', '#39ff14');
+          return;
+        }
         const reservation = await cloud.database.ref('usernames/' + newKey).transaction(value => value === null ? currentUser.uid : undefined);
         if (!reservation.committed) throw new Error('Ese nombre de usuario ya está ocupado.');
-        await cloud.database.ref('users/' + currentUser.uid).update({ username: nextUsername, usernameKey: newKey });
-        await cloud.database.ref('usernames/' + oldKey).remove();
+        try {
+          await cloud.database.ref().update({
+            ['users/' + currentUser.uid + '/username']: nextUsername,
+            ['users/' + currentUser.uid + '/usernameKey']: newKey,
+            ['usernames/' + oldKey]: null
+          });
+        } catch (error) {
+          await cloud.database.ref('usernames/' + newKey).remove().catch(() => {});
+          throw error;
+        }
         currentProfile.username = nextUsername;
         Tecnomath.setSession(nextUsername);
         showMessage('Usuario actualizado.', '#39ff14');
@@ -126,9 +141,16 @@
       if (password.length < 6) { showMessage('La contraseña debe tener al menos 6 caracteres.'); return; }
       setBusy(this, true, 'CAMBIAR CONTRASEÑA');
       try {
-        await currentUser.updatePassword(password);
+        const hasPassword = currentUser.providerData.some(provider => provider.providerId === 'password');
+        if (hasPassword) {
+          await currentUser.updatePassword(password);
+        } else {
+          if (!currentUser.email) throw new Error('Tu cuenta de Google no tiene un correo disponible para crear una contraseña.');
+          const credential = firebase.auth.EmailAuthProvider.credential(currentUser.email, password);
+          await currentUser.linkWithCredential(credential);
+        }
         passwordEl.value = '';
-        showMessage('Contraseña actualizada.', '#39ff14');
+        showMessage(hasPassword ? 'Contraseña actualizada.' : 'Contraseña de respaldo creada.', '#39ff14');
       } catch (error) {
         showMessage(error.code === 'auth/requires-recent-login' ? 'Por seguridad, cierra sesión y entra de nuevo antes de cambiar la contraseña.' : (error.message || 'No se pudo cambiar la contraseña.'));
       } finally { setBusy(this, false, 'CAMBIAR CONTRASEÑA'); }

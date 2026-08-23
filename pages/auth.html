@@ -182,34 +182,29 @@
   }
 
   async function reserveUsername(username, uid) {
-    const result = await cloud.database.ref('usernames/' + usernameKey(username)).transaction(current => current === null ? uid : undefined);
-    if (!result.committed) throw new Error('Ese usuario ya está registrado. Elige otro.');
+    const usernameRef = cloud.database.ref('usernames/' + usernameKey(username));
+    const existing = (await usernameRef.once('value')).val();
+    if (existing === uid) return;
+    if (existing !== null) throw new Error('Ese usuario ya está registrado. Elige otro.');
+    const result = await usernameRef.transaction(current => current === null ? uid : undefined);
+    if (!result.committed && result.snapshot.val() !== uid) throw new Error('Ese usuario ya está registrado. Elige otro.');
   }
 
   async function finishSession(user) {
     if (redirectingHome) return;
     redirectingHome = true;
     setLoginBusy(true);
+    // Nunca conservamos el perfil local de una cuenta anterior mientras
+    // comprobamos la nueva sesión autenticada.
+    Tecnomath.logout();
 
     try {
-      let profile = null;
-      try {
-        const snapshot = await cloud.database.ref('users/' + user.uid).once('value');
-        profile = snapshot.val();
-      } catch (profileError) {
-        // El acceso ya fue validado por Firebase Auth. No impedimos volver al
-        // portal si el perfil tarda en sincronizarse o no puede leerse.
-        console.warn('No se pudo cargar el perfil; se usará el correo.', profileError);
+      const snapshot = await cloud.database.ref('users/' + user.uid).once('value');
+      const profile = snapshot.val();
+      if (!profile || !profile.username) {
+        throw new Error('No encontramos un perfil para esta cuenta. Contacta al administrador para recuperar tu usuario.');
       }
-      // Las cuentas antiguas pueden no tener un perfil en la base de datos.
-      // Firebase ya confirmó la identidad, así que se les permite entrar con
-      // un nombre derivado del correo en lugar de dejarlas atrapadas aquí.
-      const rememberedUser = Tecnomath.getCurrentUser();
-      const username = profile && profile.username
-        ? profile.username
-        : rememberedUser && rememberedUser.username
-          ? rememberedUser.username
-          : (user.email || 'jugador').split('@')[0];
+      const username = profile.username;
       Tecnomath.setSession(username);
       showMessage('¡Bienvenido/a ' + username + '! Volviendo al portal…', '#39FF14');
       window.setTimeout(() => window.location.replace(HOME_URL), 250);
@@ -230,8 +225,11 @@
       const credential = await cloud.auth.signInWithEmailAndPassword(emailEl.value.trim(), passwordEl.value);
       const hasPhoneVerification = credential.user.providerData.some(provider => provider.providerId === 'phone');
       if (!credential.user.emailVerified && !hasPhoneVerification) {
-        await credential.user.sendEmailVerification();
-        await cloud.auth.signOut();
+        try {
+          await credential.user.sendEmailVerification();
+        } finally {
+          await cloud.auth.signOut();
+        }
         throw new Error('Verifica el enlace que enviamos a tu correo antes de iniciar sesión.');
       }
       await finishSession(credential.user);
@@ -261,28 +259,45 @@
     const { username, email, password } = registrationData();
     const phone = normalPhone();
     const credential = await cloud.auth.createUserWithEmailAndPassword(email, password);
-    pendingRegistration = { user: credential.user, username, email, phone };
-    confirmationResult = await cloud.auth.signInWithPhoneNumber(phone, getRecaptcha());
-    setMode('verify-registration');
+    try {
+      pendingRegistration = { user: credential.user, username, email, phone };
+      confirmationResult = await cloud.auth.signInWithPhoneNumber(phone, getRecaptcha());
+      setMode('verify-registration');
+    } catch (error) {
+      pendingRegistration = null;
+      await credential.user.delete().catch(() => {});
+      await cloud.auth.signOut().catch(() => {});
+      throw error;
+    }
   }
 
   btnEmailVerification.addEventListener('click', async () => {
     try {
       const { username, email, password } = registrationData();
       const credential = await cloud.auth.createUserWithEmailAndPassword(email, password);
-      await reserveUsername(username, credential.user.uid);
-      await cloud.database.ref('users/' + credential.user.uid).set({
-        username,
-        usernameKey: usernameKey(username),
-        email,
-        createdAt: cloud.serverTimestamp
-      });
-      await credential.user.sendEmailVerification();
-      await cloud.auth.signOut();
-      Tecnomath.logout();
-      setMode('login');
-      emailEl.value = email;
-      showMessage('Revisa tu correo y confirma el enlace. Después inicia sesión con tu correo y contraseña.', '#39FF14');
+      let usernameReserved = false;
+      try {
+        await reserveUsername(username, credential.user.uid);
+        usernameReserved = true;
+        await cloud.database.ref('users/' + credential.user.uid).set({
+          username,
+          usernameKey: usernameKey(username),
+          email,
+          createdAt: cloud.serverTimestamp
+        });
+        await credential.user.sendEmailVerification();
+        await cloud.auth.signOut();
+        Tecnomath.logout();
+        setMode('login');
+        emailEl.value = email;
+        showMessage('Revisa tu correo y confirma el enlace. Después inicia sesión con tu correo y contraseña.', '#39FF14');
+      } catch (error) {
+        if (usernameReserved) await cloud.database.ref('usernames/' + usernameKey(username)).remove().catch(() => {});
+        await cloud.database.ref('users/' + credential.user.uid).remove().catch(() => {});
+        await credential.user.delete().catch(() => {});
+        await cloud.auth.signOut().catch(() => {});
+        throw error;
+      }
     } catch (error) { showMessage(friendlyError(error)); }
   });
 
@@ -302,14 +317,24 @@
         if (!/^[a-zA-Z0-9._-]{3,20}$/.test(username.trim())) {
           throw new Error('El usuario debe tener 3 a 20 caracteres: letras, números, punto, guion o guion bajo.');
         }
-        await reserveUsername(username, user.uid);
-        await cloud.database.ref('users/' + user.uid).set({
-          username: username.trim(),
-          usernameKey: usernameKey(username),
-          email: user.email || '',
-          createdAt: cloud.serverTimestamp
-        });
-        await offerGooglePassword(user);
+        let usernameReserved = false;
+        try {
+          await reserveUsername(username, user.uid);
+          usernameReserved = true;
+          await cloud.database.ref('users/' + user.uid).set({
+            username: username.trim(),
+            usernameKey: usernameKey(username),
+            email: user.email || '',
+            createdAt: cloud.serverTimestamp
+          });
+        } catch (error) {
+          if (usernameReserved) await cloud.database.ref('usernames/' + usernameKey(username)).remove().catch(() => {});
+          await cloud.auth.signOut().catch(() => {});
+          throw error;
+        }
+        // No bloquea el ingreso si la contraseña de respaldo no se pudo crear.
+        try { await offerGooglePassword(user); }
+        catch (error) { console.warn('No se pudo crear la contraseña de respaldo.', error); }
       }
       await finishSession(user);
     } catch (error) { showMessage(friendlyError(error)); }
@@ -353,14 +378,24 @@
     if (!pendingRegistration) throw new Error('Vuelve a iniciar el registro.');
     const credential = firebase.auth.PhoneAuthProvider.credential(confirmationResult.verificationId, smsCodeEl.value.trim());
     await pendingRegistration.user.linkWithCredential(credential);
-    await reserveUsername(pendingRegistration.username, pendingRegistration.user.uid);
-    await cloud.database.ref('users/' + pendingRegistration.user.uid).set({
-      username: pendingRegistration.username,
-      usernameKey: usernameKey(pendingRegistration.username),
-      email: pendingRegistration.email,
-      phone: pendingRegistration.phone,
-      createdAt: cloud.serverTimestamp
-    });
+    let usernameReserved = false;
+    try {
+      await reserveUsername(pendingRegistration.username, pendingRegistration.user.uid);
+      usernameReserved = true;
+      await cloud.database.ref('users/' + pendingRegistration.user.uid).set({
+        username: pendingRegistration.username,
+        usernameKey: usernameKey(pendingRegistration.username),
+        email: pendingRegistration.email,
+        phone: pendingRegistration.phone,
+        createdAt: cloud.serverTimestamp
+      });
+    } catch (error) {
+      if (usernameReserved) await cloud.database.ref('usernames/' + usernameKey(pendingRegistration.username)).remove().catch(() => {});
+      await cloud.database.ref('users/' + pendingRegistration.user.uid).remove().catch(() => {});
+      await pendingRegistration.user.delete().catch(() => {});
+      await cloud.auth.signOut().catch(() => {});
+      throw error;
+    }
     await finishSession(pendingRegistration.user);
   }
 
