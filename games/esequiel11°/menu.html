@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Selector de juegos · Nexo Orbital</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      min-height: 100vh;
+      background: radial-gradient(ellipse at 30% 20%, #1b2b5e, #070b1a 70%);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      color: #edf4ff;
+    }
+
+    .selector {
+      max-width: 800px;
+      width: 100%;
+      text-align: center;
+    }
+
+    .selector h1 {
+      font-size: clamp(2.2rem, 6vw, 3.8rem);
+      font-weight: 700;
+      letter-spacing: -0.04em;
+      margin-bottom: 0.2em;
+    }
+    .selector h1 span {
+      background: linear-gradient(135deg, #5fe9ff, #a084ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .selector p {
+      color: #a2afd0;
+      font-size: 1.1rem;
+      margin-bottom: 2.5rem;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 30px;
+      justify-items: center;
+    }
+
+    .card {
+      background: rgba(27, 44, 97, 0.75);
+      backdrop-filter: blur(6px);
+      border: 1px solid rgba(168, 201, 255, 0.15);
+      border-radius: 32px;
+      padding: 40px 20px 35px;
+      width: 100%;
+      max-width: 320px;
+      cursor: pointer;
+      transition: transform 0.25s ease, box-shadow 0.3s ease, border-color 0.3s;
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5);
+      text-decoration: none;
+      color: inherit;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .card:hover {
+      transform: translateY(-10px) scale(1.02);
+      border-color: #5fe9ff;
+      box-shadow: 0 25px 60px rgba(95, 233, 255, 0.2);
+    }
+
+    .card .icon {
+      font-size: 5rem;
+      margin-bottom: 16px;
+      line-height: 1;
+      filter: drop-shadow(0 0 12px rgba(95, 233, 255, 0.25));
+      transition: transform 0.2s;
+    }
+    .card:hover .icon {
+      transform: scale(1.08);
+    }
+
+    .card h2 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+      letter-spacing: -0.02em;
+    }
+
+    .card .desc {
+      color: #a2afd0;
+      font-size: 0.95rem;
+      line-height: 1.5;
+      margin-bottom: 6px;
+    }
+
+    .card .badge {
+      display: inline-block;
+      background: rgba(95, 233, 255, 0.12);
+      border: 1px solid rgba(95, 233, 255, 0.25);
+      border-radius: 40px;
+      padding: 6px 16px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: #5fe9ff;
+      margin-top: 6px;
+    }
+
+    .card.questions .badge {
+      color: #5fe9ff;
+      border-color: #5fe9ff55;
+    }
+
+    .card.flags .badge {
+      color: #ffb347;
+      border-color: #ffb34755;
+    }
+
+    .card.flags {
+      background: rgba(48, 35, 20, 0.75);
+      border-color: #ffb34733;
+    }
+    .card.flags:hover {
+      border-color: #ffb347;
+      box-shadow: 0 25px 60px rgba(255, 179, 71, 0.2);
+    }
+    .card.flags .icon {
+      filter: drop-shadow(0 0 12px rgba(255, 179, 71, 0.3));
+    }
+
+    .footer {
+      margin-top: 40px;
+      color: #5a6a8a;
+      font-size: 0.9rem;
+    }
+
+    @media (max-width: 550px) {
+      .card {
+        padding: 30px 16px 25px;
+      }
+      .card .icon {
+        font-size: 4rem;
+      }
+      .card h2 {
+        font-size: 1.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="selector">
+    <h1>Nexo <span>Orbital</span></h1>
+    <p>Elige tu modo de juego</p>
+
+    <div class="grid">
+      <!-- Tarjeta Modo Preguntas -->
+      <a href="#" class="card questions" data-game="questions">
+        <div class="icon">📚</div>
+        <h2>Modo Preguntas</h2>
+        <div class="desc">Matemáticas, ciencias, tecnología y más.</div>
+        <div class="badge">elige materia y dificultad</div>
+      </a>
+
+      <!-- Tarjeta Modo Banderas -->
+      <a href="#" class="card flags" data-game="flags">
+        <div class="icon">🏳️</div>
+        <h2>Modo Banderas</h2>
+        <div class="desc">Adivina el país por su bandera.</div>
+        <div class="badge">10 rondas · teclado virtual</div>
+      </a>
+    </div>
+
+    <div class="footer">✦ Haz clic en el juego que quieras iniciar</div>
+  </div>
+
+  <script>
+    // Rutas a tus juegos (ajusta si los archivos están en otra carpeta)
+    const GAME_URLS = {
+      questions: 'index.html',   // ← tu juego de preguntas
+      flags: 'bandera.html'      // ← tu juego de banderas
+    };
+
+    document.querySelectorAll('.card[data-game]').forEach(card => {
+      card.addEventListener('click', function(e) {
+        e.preventDefault();
+        const game = this.dataset.game;
+        const url = GAME_URLS[game];
+        if (url) {
+          // Redirige directamente al juego
+          window.location.href = url;
+        } else {
+          alert('Juego no encontrado');
+        }
+      });
+    });
+  </script>
+</body>
+</html>
