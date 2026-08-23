@@ -536,6 +536,7 @@
             <div class="user-area">
                 <span id="userDisplay">Invitado</span>
                 <a href="pages/auth.html" class="auth-link" id="authLink">🔑 ACCEDER</a>
+                <button id="logoutBtn" class="auth-link" type="button" style="display:none; background:transparent; cursor:pointer; font-family:'Press Start 2P', cursive; font-size:clamp(4px, 1.5vw, 6px);">🚪 SALIR</button>
                 <button id="adminAccessBtn" class="auth-link" style="border-color: var(--gold); color: var(--gold); background: transparent; cursor: pointer; font-family: 'Press Start 2P', cursive; font-size: clamp(4px, 1.5vw, 6px); padding: 4px 8px; border-radius: 4px;">👑 ADMIN</button>
             </div>
         </div>
@@ -2164,15 +2165,17 @@
             }
         }
 
-        (function updateUserBar() {
+        function updateUserBar() {
             const userDisplay = document.getElementById('userDisplay');
             const authLink = document.getElementById('authLink');
+            const logoutBtn = document.getElementById('logoutBtn');
             const adminCloud = document.getElementById('admin-cloud');
             if (!userDisplay) return;
             const user = Tecnomath.getCurrentUser();
             if (user) {
                 const coins = Tecnomath.getCoins();
                 userDisplay.textContent = `${user.username} · 💰 ${coins}`;
+                if (logoutBtn) logoutBtn.style.display = 'inline-block';
                 if (Tecnomath.isAdmin()) {
                     if (adminCloud) adminCloud.style.display = 'block';
                     if (authLink) authLink.style.display = 'none';
@@ -2182,10 +2185,26 @@
                 }
             } else {
                 userDisplay.textContent = 'Invitado';
+                if (logoutBtn) logoutBtn.style.display = 'none';
                 if (adminCloud) adminCloud.style.display = 'none';
                 if (authLink) authLink.style.display = 'inline-block';
             }
-        })();
+        }
+
+        updateUserBar();
+
+        document.getElementById('logoutBtn').addEventListener('click', async function() {
+            this.disabled = true;
+            this.textContent = 'SALIENDO…';
+            try {
+                await firebase.auth().signOut();
+            } catch (error) {
+                console.warn('No se pudo cerrar la sesión de Firebase.', error);
+            } finally {
+                Tecnomath.logout();
+                updateUserBar();
+            }
+        });
 
         document.addEventListener('DOMContentLoaded', function() {
             const adminBtn = document.getElementById('adminAccessBtn');
