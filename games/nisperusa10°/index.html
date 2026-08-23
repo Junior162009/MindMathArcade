@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#101827">
+<title>NISPERUSA 10° · Cultura General</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:"Segoe UI",Arial,sans-serif}
+html,body{min-height:100%;width:100%}
+body{min-height:100dvh;background:radial-gradient(circle at top,#243b55 0%,#0b1220 72%);color:#17202b;display:flex;justify-content:center;align-items:center;padding:12px;overflow:auto}
+button{font:inherit}
+.game{width:min(100%,980px);min-height:min(96dvh,900px);background:rgba(248,250,252,.97);border-radius:30px;padding:22px;box-shadow:0 24px 70px rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.35);display:flex;flex-direction:column}
+.header{display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:2px solid #dbe2ea;padding-bottom:15px;margin-bottom:16px}
+.brand{display:flex;align-items:center;gap:10px}.brand h1{font-size:clamp(1.65rem,4vw,2.45rem);letter-spacing:1px;color:#101827}.brand small{display:block;color:#64748b;font-size:.72rem;letter-spacing:1.5px;font-weight:800}
+.brain{font-size:2.2rem}.badge{background:#101827;color:white;padding:8px 14px;border-radius:999px;font-weight:800;font-size:.78rem;white-space:nowrap}
+.subject-selector{text-align:center;display:flex;flex-direction:column;align-items:center;flex:1}.subject-selector h2{font-size:clamp(1.25rem,3vw,1.65rem);margin:8px 0 18px;color:#263445}.subject-grid{display:grid;grid-template-columns:repeat(4,minmax(120px,1fr));gap:12px;width:min(100%,760px)}
+.subject-btn{border:2px solid #cbd5e1;background:white;border-radius:18px;padding:15px 10px;font-weight:900;color:#17202b;cursor:pointer;box-shadow:0 4px 0 #aab7c5;transition:.12s}.subject-btn:hover{transform:translateY(-2px);filter:brightness(.98)}.subject-btn:active{transform:translateY(3px);box-shadow:0 1px 0 #aab7c5}.subject-icon{display:block;font-size:1.6rem;margin-bottom:5px}.subject-name{display:block}
+.subject-btn[data-subject="Matemáticas"]{background:#dbeafe;border-color:#3b82f6;box-shadow:0 4px 0 #2563eb}.subject-btn[data-subject="Arte"]{background:#fee2e2;border-color:#ef4444;box-shadow:0 4px 0 #dc2626}.subject-btn[data-subject="Tecnología"]{background:#fff;border-color:#9ca3af;box-shadow:0 4px 0 #6b7280}.subject-btn[data-subject="Historia"]{background:#fef3c7;border-color:#f59e0b;box-shadow:0 4px 0 #d97706}.subject-btn[data-subject="Ciencia"]{background:#d1fae5;border-color:#10b981;box-shadow:0 4px 0 #059669}.subject-btn[data-subject="Geografía"]{background:#e0e7ff;border-color:#6366f1;box-shadow:0 4px 0 #4f46e5}.subject-btn[data-subject="Literatura"]{background:#fce7f3;border-color:#ec4899;box-shadow:0 4px 0 #db2777}.subject-btn[data-subject="Cultura general"]{background:#f1f5f9;border-color:#64748b;box-shadow:0 4px 0 #475569}
+.intro{max-width:720px;color:#64748b;line-height:1.55;margin-bottom:20px}.hidden{display:none!important}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}.stat{background:#eef2f7;border:1px solid #d7dee7;border-radius:16px;padding:10px;text-align:center}.stat span{display:block;color:#64748b;font-size:.72rem;font-weight:700}.stat strong{display:block;color:#101827;font-size:1.1rem;margin-top:2px}
+.progress-wrap{height:8px;background:#e2e8f0;border-radius:99px;overflow:hidden;margin-bottom:18px}.progress{height:100%;width:0;background:#101827;border-radius:99px;transition:width .3s ease}
+.question-box{border-radius:25px;padding:26px;margin-bottom:18px;border:2px solid #cbd5e1;box-shadow:inset 0 3px 8px rgba(0,0,0,.04),0 10px 24px rgba(0,0,0,.08);transition:background .35s,border-color .35s,transform .25s}.question-box.animate{animation:questionIn .35s ease}.question-box.cat-matematicas{background:#dbeafe;border-color:#3b82f6}.question-box.cat-arte{background:#fee2e2;border-color:#ef4444}.question-box.cat-tecnologia{background:#fff;border-color:#9ca3af}.question-box.cat-historia{background:#fef3c7;border-color:#f59e0b}.question-box.cat-ciencia{background:#d1fae5;border-color:#10b981}.question-box.cat-geografia{background:#e0e7ff;border-color:#6366f1}.question-box.cat-literatura{background:#fce7f3;border-color:#ec4899}.question-box.cat-cultura{background:#f1f5f9;border-color:#64748b}
+.question-tag{display:inline-block;background:rgba(255,255,255,.72);padding:5px 12px;border-radius:999px;font-size:.75rem;font-weight:900;margin-bottom:12px}.question-text{font-size:clamp(1.35rem,3.2vw,2rem);font-weight:800;line-height:1.35;color:#101827}
+.options-grid{display:grid;grid-template-columns:1fr;gap:11px;margin-bottom:15px}.option-btn{width:100%;background:#fff;border:2px solid #d5dde6;border-radius:18px;padding:15px 18px;text-align:left;display:flex;align-items:center;gap:14px;color:#17202b;font-size:1.05rem;font-weight:650;cursor:pointer;box-shadow:0 4px 0 #b7c2ce;transition:.12s}.option-btn:hover:not(:disabled){transform:translateY(-2px);border-color:#94a3b8;background:#f8fafc}.option-btn:active:not(:disabled){transform:translateY(2px);box-shadow:0 1px 0 #b7c2ce}.option-btn .letter{width:38px;height:38px;border-radius:50%;background:#e2e8f0;display:flex;align-items:center;justify-content:center;font-weight:900;flex:none}.option-btn.correct{background:#dcfce7;border-color:#22c55e;box-shadow:0 4px 0 #16a34a}.option-btn.correct .letter{background:#16a34a;color:white}.option-btn.incorrect{background:#fee2e2;border-color:#ef4444;box-shadow:0 4px 0 #dc2626}.option-btn.incorrect .letter{background:#dc2626;color:white}.option-btn:disabled{cursor:default}
+.feedback-box{min-height:74px;border-radius:18px;background:#eef2f7;border-left:6px solid #64748b;padding:15px 17px;line-height:1.5;color:#263445;margin-bottom:15px}.feedback-box.success{background:#ecfdf5;border-left-color:#16a34a}.feedback-box.error{background:#fff1f2;border-left-color:#dc2626}
+.actions{display:flex;gap:10px;justify-content:space-between;flex-wrap:wrap}.btn{border:0;border-radius:999px;padding:13px 22px;font-weight:900;cursor:pointer}.btn-next{background:#101827;color:white;box-shadow:0 5px 0 #030712}.btn-next:active{transform:translateY(3px);box-shadow:0 2px 0 #030712}.btn-next:disabled{opacity:.4;cursor:not-allowed}.btn-reset{background:#e2e8f0;color:#17202b;box-shadow:0 4px 0 #aab7c5}.btn-reset:active{transform:translateY(3px);box-shadow:0 1px 0 #aab7c5}
+.final{margin-top:15px;text-align:center;padding:18px;border-radius:20px;background:#f1f5f9}.final h2{margin-bottom:6px}.final strong{font-size:1.5rem}
+.footer{text-align:center;color:#64748b;font-size:.72rem;margin-top:auto;padding-top:18px}
+@keyframes questionIn{from{opacity:.2;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:700px){body{padding:6px}.game{min-height:calc(100dvh - 12px);padding:16px;border-radius:22px}.header{align-items:flex-start}.badge{font-size:.68rem;padding:7px 10px}.subject-grid{grid-template-columns:repeat(2,1fr)}.stats{grid-template-columns:repeat(2,1fr)}.question-box{padding:20px;border-radius:20px}.option-btn{font-size:.98rem;padding:13px 14px}.actions{flex-direction:column}.btn{width:100%}}
+@media(max-width:380px){.subject-grid{grid-template-columns:1fr}.brand h1{font-size:1.5rem}.brain{font-size:1.8rem}}
+</style>
+</head>
+<body>
+<main class="game">
+<header class="header"><div class="brand"><span class="brain">🧠</span><div><h1>NISPERUSA 10°</h1><small>CULTURA GENERAL · APRENDER JUGANDO</small></div></div><div class="badge">🎓 QUIZ EDUCATIVO</div></header>
+
+<section id="subjectSelector" class="subject-selector">
+<h2>📚 Elige una materia para comenzar</h2>
+<p class="intro">Responde preguntas de opción múltiple, gana puntos y aprende con una explicación después de cada respuesta. El color de la pregunta cambia según la materia.</p>
+<div id="subjectGrid" class="subject-grid"></div>
+</section>
+
+<section id="gameArea" class="hidden">
+<div class="stats">
+<div class="stat"><span>🏆 PUNTOS</span><strong id="scoreDisplay">0</strong></div>
+<div class="stat"><span>❓ PREGUNTA</span><strong><span id="questionCounter">1</span>/<span id="totalQuestions">0</span></strong></div>
+<div class="stat"><span>✅ ACIERTOS</span><strong id="correctDisplay">0</strong></div>
+<div class="stat"><span>📊 PRECISIÓN</span><strong id="accuracyDisplay">0%</strong></div>
+</div>
+<div class="progress-wrap"><div id="progressBar" class="progress"></div></div>
+
+<div id="questionBox" class="question-box cat-cultura">
+<div id="questionTag" class="question-tag">📚 Cultura general</div>
+<div id="questionText" class="question-text">Cargando pregunta...</div>
+</div>
+
+<div id="optionsContainer" class="options-grid">
+<button class="option-btn" data-index="0"><span class="letter">A</span><span class="option-text"></span></button>
+<button class="option-btn" data-index="1"><span class="letter">B</span><span class="option-text"></span></button>
+<button class="option-btn" data-index="2"><span class="letter">C</span><span class="option-text"></span></button>
+</div>
+
+<div id="feedbackBox" class="feedback-box">💡 Selecciona una respuesta para comprobar tus conocimientos.</div>
+<div class="actions"><button id="nextBtn" class="btn btn-next" disabled>▶ Siguiente pregunta</button><button id="resetBtn" class="btn btn-reset">🔄 Cambiar materia</button></div>
+<div id="finalBox" class="final hidden"></div>
+</section>
+
+<footer class="footer">NISPERUSA 10° · Educación + entretenimiento · Cada respuesta es una oportunidad para aprender.</footer>
+</main>
+
+<script>
+(function(){
+'use strict';
+
+const QUESTIONS=[
+{category:'Historia',question:'¿En qué año cayó el Imperio Romano de Occidente?',options:['395 d.C.','476 d.C.','565 d.C.'],correct:1,explanation:'El Imperio Romano de Occidente cayó en 476 d.C., cuando Odoacro depuso a Rómulo Augústulo.'},
+{category:'Historia',question:'¿Qué civilización construyó Machu Picchu?',options:['Azteca','Inca','Maya'],correct:1,explanation:'Machu Picchu fue construida por el Imperio Inca en el siglo XV, en los Andes peruanos.'},
+{category:'Historia',question:'¿Quién fue el primer presidente de Colombia?',options:['Simón Bolívar','Jorge Eliécer Gaitán','José Miguel Pey'],correct:2,explanation:'José Miguel Pey ejerció como primer presidente de las Provincias Unidas de la Nueva Granada en 1810-1811.'},
+{category:'Historia',question:'¿En qué continente surgió la antigua civilización egipcia?',options:['África','Asia','Europa'],correct:0,explanation:'El antiguo Egipto se desarrolló en el noreste de África, principalmente alrededor del río Nilo.'},
+{category:'Ciencia',question:'¿Qué molécula transporta oxígeno en los glóbulos rojos?',options:['Hemoglobina','Insulina','Colágeno'],correct:0,explanation:'La hemoglobina es la proteína de los glóbulos rojos que se une al oxígeno y ayuda a transportarlo por el cuerpo.'},
+{category:'Ciencia',question:'¿Qué planeta es conocido como el planeta rojo?',options:['Venus','Marte','Júpiter'],correct:1,explanation:'Marte recibe ese nombre por el tono rojizo producido principalmente por minerales de hierro oxidados en su superficie.'},
+{category:'Ciencia',question:'¿Cuál es el órgano principal del sistema circulatorio?',options:['Corazón','Pulmón','Estómago'],correct:0,explanation:'El corazón bombea la sangre por todo el cuerpo mediante el sistema circulatorio.'},
+{category:'Ciencia',question:'¿Qué gas absorben las plantas principalmente durante la fotosíntesis?',options:['Oxígeno','Nitrógeno','Dióxido de carbono'],correct:2,explanation:'Durante la fotosíntesis las plantas utilizan dióxido de carbono, agua y luz para producir materia orgánica y liberar oxígeno.'},
+{category:'Geografía',question:'¿Cuál es el país más extenso de Sudamérica?',options:['Argentina','Brasil','Colombia'],correct:1,explanation:'Brasil es el país más grande de Sudamérica, con una superficie de más de 8,5 millones de km².'},
+{category:'Geografía',question:'¿Cuál es el océano más grande del planeta?',options:['Atlántico','Índico','Pacífico'],correct:2,explanation:'El océano Pacífico es el más extenso del planeta y cubre aproximadamente un tercio de la superficie terrestre.'},
+{category:'Geografía',question:'¿Cuál es la capital de Colombia?',options:['Medellín','Bogotá','Cali'],correct:1,explanation:'Bogotá es la capital de Colombia y está ubicada en la cordillera Oriental de los Andes.'},
+{category:'Geografía',question:'¿En qué continente está Egipto?',options:['África','Europa','Oceanía'],correct:0,explanation:'Egipto se encuentra principalmente en África, aunque la península del Sinaí pertenece geográficamente a Asia.'},
+{category:'Matemáticas',question:'¿Cuánto es la raíz cuadrada de 144?',options:['10','11','12'],correct:2,explanation:'12 × 12 = 144, por lo tanto la raíz cuadrada de 144 es 12.'},
+{category:'Matemáticas',question:'¿Cuánto es 15 × 8?',options:['100','120','130'],correct:1,explanation:'15 × 8 = 120.'},
+{category:'Matemáticas',question:'¿Cuál es el resultado de 3² + 4²?',options:['25','14','49'],correct:0,explanation:'3² = 9 y 4² = 16. Entonces 9 + 16 = 25.'},
+{category:'Matemáticas',question:'¿Qué fracción equivale a 0,5?',options:['1/3','1/2','2/3'],correct:1,explanation:'0,5 representa la mitad de una unidad, por eso equivale a 1/2.'},
+{category:'Literatura',question:'¿Quién escribió Cien años de soledad?',options:['Mario Vargas Llosa','Gabriel García Márquez','Julio Cortázar'],correct:1,explanation:'Gabriel García Márquez escribió Cien años de soledad, publicada en 1967.'},
+{category:'Literatura',question:'¿Quién escribió Don Quijote de la Mancha?',options:['Miguel de Cervantes','Pablo Neruda','Jorge Luis Borges'],correct:0,explanation:'Miguel de Cervantes escribió Don Quijote de la Mancha, una de las obras fundamentales de la literatura en español.'},
+{category:'Literatura',question:'¿Qué género literario cuenta hechos imaginarios mediante una narración?',options:['Narrativo','Lírico','Dramático'],correct:0,explanation:'El género narrativo presenta acontecimientos mediante un narrador, personajes y una secuencia de hechos.'},
+{category:'Literatura',question:'¿Qué es una metáfora?',options:['Una comparación indirecta','Una pregunta matemática','Una lista de personajes'],correct:0,explanation:'La metáfora relaciona dos elementos de manera figurada para expresar una idea sin utilizar necesariamente palabras comparativas como “como”.'},
+{category:'Tecnología',question:'¿Qué lenguaje se utiliza ampliamente para crear interactividad en páginas web?',options:['JavaScript','SQL','Bash'],correct:0,explanation:'JavaScript permite crear comportamientos interactivos y dinámicos en las páginas web.'},
+{category:'Tecnología',question:'¿Qué significa HTML?',options:['HyperText Markup Language','High Technology Machine Logic','Home Tool Management Language'],correct:0,explanation:'HTML significa HyperText Markup Language y se utiliza para estructurar el contenido de las páginas web.'},
+{category:'Tecnología',question:'¿Cuál de estos es un sistema operativo?',options:['Linux','HTML','Wi-Fi'],correct:0,explanation:'Linux es una familia de sistemas operativos. HTML es un lenguaje de marcado y Wi-Fi es una tecnología de comunicación inalámbrica.'},
+{category:'Tecnología',question:'¿Qué dispositivo se utiliza para almacenar datos de forma permanente?',options:['SSD','Monitor','Teclado'],correct:0,explanation:'Una unidad SSD almacena datos de manera persistente incluso cuando el equipo está apagado.'},
+{category:'Arte',question:'¿Quién pintó La noche estrellada?',options:['Vincent van Gogh','Pablo Picasso','Claude Monet'],correct:0,explanation:'Vincent van Gogh pintó La noche estrellada en 1889 mientras se encontraba en Saint-Rémy-de-Provence.'},
+{category:'Arte',question:'¿Qué escultor creó el David de mármol más famoso del Renacimiento?',options:['Miguel Ángel','Donatello','Leonardo da Vinci'],correct:0,explanation:'Miguel Ángel esculpió su famoso David entre 1501 y 1504 en Florencia.'},
+{category:'Arte',question:'¿Cuál de estos pertenece a las artes visuales?',options:['Pintura','Química','Álgebra'],correct:0,explanation:'La pintura es una disciplina de las artes visuales porque utiliza elementos visuales para crear una obra artística.'},
+{category:'Arte',question:'¿Qué técnica artística utiliza pequeños puntos de color para formar una imagen?',options:['Puntillismo','Grabado','Fresco'],correct:0,explanation:'El puntillismo construye imágenes mediante pequeños puntos de colores que se perciben combinados a cierta distancia.'},
+{category:'Cultura general',question:'¿Cuántos lados tiene un hexágono?',options:['5','6','8'],correct:1,explanation:'Un hexágono es un polígono que tiene seis lados.'},
+{category:'Cultura general',question:'¿Cuál es el idioma con más hablantes nativos del mundo?',options:['Español','Inglés','Chino mandarín'],correct:2,explanation:'El chino mandarín tiene la mayor cantidad de hablantes nativos del mundo.'},
+{category:'Cultura general',question:'¿Cuántos días tiene un año bisiesto?',options:['365','366','364'],correct:1,explanation:'Un año bisiesto tiene 366 días porque febrero tiene 29 días.'},
+{category:'Cultura general',question:'¿Qué instrumento tiene teclas blancas y negras y cuerdas en su interior?',options:['Violín','Piano','Flauta'],correct:1,explanation:'El piano posee un teclado y produce sonido cuando sus martillos golpean cuerdas en su interior.'}
+];
+
+const SUBJECTS=[
+['Matemáticas','➗'],['Arte','🎨'],['Tecnología','💻'],['Historia','🏛️'],['Ciencia','🔬'],['Geografía','🌎'],['Literatura','📖'],['Cultura general','🧠']
+];
+let currentQuestions=[],currentIndex=0,score=0,correctCount=0,answered=false,selectedSubject='';
+const subjectSelector=document.getElementById('subjectSelector'),subjectGrid=document.getElementById('subjectGrid'),gameArea=document.getElementById('gameArea'),questionBox=document.getElementById('questionBox'),questionText=document.getElementById('questionText'),questionTag=document.getElementById('questionTag'),optionsContainer=document.getElementById('optionsContainer'),optionBtns=optionsContainer.querySelectorAll('.option-btn'),optionTexts=optionsContainer.querySelectorAll('.option-text'),feedbackBox=document.getElementById('feedbackBox'),scoreDisplay=document.getElementById('scoreDisplay'),questionCounter=document.getElementById('questionCounter'),totalQuestions=document.getElementById('totalQuestions'),correctDisplay=document.getElementById('correctDisplay'),accuracyDisplay=document.getElementById('accuracyDisplay'),progressBar=document.getElementById('progressBar'),nextBtn=document.getElementById('nextBtn'),resetBtn=document.getElementById('resetBtn'),finalBox=document.getElementById('finalBox');
+
+function shuffle(array){const a=[...array];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function categoryClass(category){const c=category.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');if(c.includes('matematic'))return'cat-matematicas';if(c.includes('arte'))return'cat-arte';if(c.includes('tecnolog'))return'cat-tecnologia';if(c.includes('historia'))return'cat-historia';if(c.includes('ciencia'))return'cat-ciencia';if(c.includes('geografia'))return'cat-geografia';if(c.includes('literatura'))return'cat-literatura';return'cat-cultura'}
+function applyCategory(category){['cat-matematicas','cat-arte','cat-tecnologia','cat-historia','cat-ciencia','cat-geografia','cat-literatura','cat-cultura'].forEach(c=>questionBox.classList.remove(c));questionBox.classList.add(categoryClass(category))}
+function updateStats(){scoreDisplay.textContent=score;correctDisplay.textContent=correctCount;questionCounter.textContent=Math.min(currentIndex+1,currentQuestions.length);totalQuestions.textContent=currentQuestions.length;accuracyDisplay.textContent=(currentIndex===0?'0':Math.round(correctCount/currentIndex*100))+'%';progressBar.style.width=(currentQuestions.length?((currentIndex)/currentQuestions.length*100):0)+'%'}
+function renderSubjects(){subjectGrid.innerHTML='';SUBJECTS.forEach(([name,icon])=>{const b=document.createElement('button');b.className='subject-btn';b.dataset.subject=name;b.innerHTML='<span class="subject-icon">'+icon+'</span><span class="subject-name">'+name+'</span>';b.onclick=()=>startGame(name);subjectGrid.appendChild(b)})}
+function startGame(subject){selectedSubject=subject;currentQuestions=shuffle(QUESTIONS.filter(q=>q.category===subject));if(!currentQuestions.length){alert('No hay preguntas disponibles para esta materia.');return}currentIndex=0;score=0;correctCount=0;answered=false;subjectSelector.classList.add('hidden');gameArea.classList.remove('hidden');finalBox.classList.add('hidden');renderQuestion();updateStats()}
+function renderQuestion(){const q=currentQuestions[currentIndex];if(!q){finishGame();return}questionBox.classList.remove('animate');void questionBox.offsetWidth;questionBox.classList.add('animate');applyCategory(q.category);questionTag.textContent='📚 '+q.category;questionText.textContent=q.question;q.options.forEach((opt,i)=>{optionTexts[i].textContent=opt;optionBtns[i].classList.remove('correct','incorrect');optionBtns[i].disabled=false});feedbackBox.className='feedback-box';feedbackBox.innerHTML='💡 Selecciona una respuesta para comprobar tus conocimientos.';answered=false;nextBtn.disabled=true;nextBtn.textContent=currentIndex===currentQuestions.length-1?'🏁 Ver resultado':'▶ Siguiente pregunta';updateStats()}
+function handleAnswer(index){if(answered)return;const q=currentQuestions[currentIndex];if(!q)return;answered=true;const ok=index===q.correct;optionBtns.forEach((btn,i)=>{btn.disabled=true;if(i===q.correct)btn.classList.add('correct');else if(i===index)btn.classList.add('incorrect')});if(ok){score+=10;correctCount++;feedbackBox.className='feedback-box success';feedbackBox.innerHTML='✅ <strong>¡Correcto! +10 puntos.</strong><br>'+q.explanation}else{feedbackBox.className='feedback-box error';feedbackBox.innerHTML='❌ <strong>Incorrecto.</strong> La respuesta correcta era <strong>'+q.options[q.correct]+'</strong>.<br>'+q.explanation}nextBtn.disabled=false;updateStats()}
+function nextQuestion(){if(!answered){feedbackBox.className='feedback-box error';feedbackBox.innerHTML='⚠️ <strong>Primero selecciona una respuesta.</strong>';return}if(currentIndex>=currentQuestions.length-1){finishGame();return}currentIndex++;renderQuestion()}
+function finishGame(){progressBar.style.width='100%';questionText.textContent='🏆 ¡Quiz completado!';questionTag.textContent='🎉 Resultado final';optionBtns.forEach(b=>b.disabled=true);const total=currentQuestions.length;const accuracy=Math.round(correctCount/total*100);let message=accuracy>=80?'🌟 ¡Excelente dominio!':accuracy>=60?'👏 ¡Muy bien! Sigue practicando.':'💪 ¡Buen intento! Repasar te ayudará a mejorar.';feedbackBox.className='feedback-box';feedbackBox.innerHTML='<strong>'+message+'</strong><br>Respondiste correctamente '+correctCount+' de '+total+' preguntas.';finalBox.classList.remove('hidden');finalBox.innerHTML='<h2>🎓 Tu resultado</h2><p><strong>'+score+' puntos</strong></p><p>'+correctCount+'/'+total+' correctas · '+accuracy+'% de precisión</p>';nextBtn.disabled=true;updateStats()}
+function resetGame(){subjectSelector.classList.remove('hidden');gameArea.classList.add('hidden');currentQuestions=[];currentIndex=0;score=0;correctCount=0;answered=false;selectedSubject='';progressBar.style.width='0';finalBox.classList.add('hidden')}
+optionBtns.forEach((btn,i)=>btn.addEventListener('click',()=>handleAnswer(i)));nextBtn.addEventListener('click',nextQuestion);resetBtn.addEventListener('click',resetGame);
+document.addEventListener('keydown',e=>{if(gameArea.classList.contains('hidden'))return;if(['1','2','3'].includes(e.key)){const i=Number(e.key)-1;if(!answered)handleAnswer(i)}if(e.key==='Enter'&&!nextBtn.disabled)nextQuestion()});
+renderSubjects();
+})();
+</script>
+</body>
+</html>
