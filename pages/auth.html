@@ -31,6 +31,9 @@
       border-radius: 6px; text-align: center;
     }
     input:focus { border-color: var(--neon-pink); }
+    .phone-group { display:flex; gap:6px; margin:8px 0; }
+    .phone-group select { width:82px; padding:12px 6px; background:#0a0a1a; border:2px solid #333; color:var(--neon-cyan); font-family:'Press Start 2P', cursive; font-size:8px; border-radius:6px; }
+    .phone-group input { margin:0; flex:1; }
     .btn {
       width: 100%; padding: 12px; margin-top: 15px;
       background: var(--neon-pink); color: white; border: none;
@@ -53,12 +56,24 @@
   <p id="intro" class="message" style="color:var(--neon-cyan);">Accede con tu correo y contraseña</p>
   <input type="text" id="username" placeholder="Usuario (solo al registrarte)" autocomplete="username" style="display:none;">
   <input type="email" id="email" placeholder="Correo electrónico" autocomplete="email">
-  <input type="tel" id="phone" placeholder="Teléfono +57... (solo al registrarte)" autocomplete="tel" style="display:none;">
+  <div class="phone-group" id="phoneGroup" style="display:none;">
+    <select id="countryPrefix" aria-label="Prefijo telefónico">
+      <option value="+57" selected>+57</option>
+      <option value="+1">+1</option>
+      <option value="+52">+52</option>
+      <option value="+54">+54</option>
+      <option value="+56">+56</option>
+      <option value="+58">+58</option>
+    </select>
+    <input type="tel" id="phone" placeholder="Número (solo dígitos)" autocomplete="tel">
+  </div>
   <input type="password" id="password" placeholder="Contraseña" autocomplete="current-password">
   <input type="password" id="newPassword" placeholder="Nueva contraseña" autocomplete="new-password" style="display:none;">
   <input type="text" id="smsCode" placeholder="Código SMS" inputmode="numeric" autocomplete="one-time-code" style="display:none;">
   <button class="btn" id="btnLogin">ENTRAR</button>
   <button class="btn btn-secondary" id="btnRegister">CREAR CUENTA</button>
+  <button class="btn btn-secondary" id="btnEmailVerification" style="display:none;">VERIFICAR POR CORREO</button>
+  <button class="btn btn-secondary" id="btnGoogle">CONTINUAR CON GOOGLE</button>
   <button class="btn btn-secondary" id="btnRecover">RECUPERAR ACCESO</button>
   <button class="btn btn-secondary" id="btnEmailRecovery" style="display:none;">ENVIAR ENLACE AL CORREO</button>
   <button class="btn" id="btnVerify" style="display:none;">VERIFICAR CÓDIGO</button>
@@ -78,12 +93,16 @@
   const cloud = TecnomathFirebase;
   const usernameEl = document.getElementById('username');
   const emailEl = document.getElementById('email');
+  const phoneGroupEl = document.getElementById('phoneGroup');
+  const countryPrefixEl = document.getElementById('countryPrefix');
   const phoneEl = document.getElementById('phone');
   const passwordEl = document.getElementById('password');
   const newPasswordEl = document.getElementById('newPassword');
   const smsCodeEl = document.getElementById('smsCode');
   const btnLogin = document.getElementById('btnLogin');
   const btnRegister = document.getElementById('btnRegister');
+  const btnEmailVerification = document.getElementById('btnEmailVerification');
+  const btnGoogle = document.getElementById('btnGoogle');
   const btnRecover = document.getElementById('btnRecover');
   const btnEmailRecovery = document.getElementById('btnEmailRecovery');
   const btnVerify = document.getElementById('btnVerify');
@@ -128,20 +147,22 @@
     const verifying = mode === 'verify-registration' || mode === 'verify-recovery';
     usernameEl.style.display = registering ? 'block' : 'none';
     emailEl.style.display = verifying && mode === 'verify-recovery' ? 'none' : 'block';
-    phoneEl.style.display = registering || recovering ? 'block' : 'none';
-    phoneEl.placeholder = recovering ? 'Teléfono +57...' : 'Teléfono +57... (solo al registrarte)';
+    phoneGroupEl.style.display = registering || recovering ? 'flex' : 'none';
+    phoneEl.placeholder = recovering ? 'Número para recuperar acceso' : 'Número (solo dígitos)';
     passwordEl.style.display = registering || mode === 'login' ? 'block' : 'none';
     newPasswordEl.style.display = mode === 'verify-recovery' ? 'block' : 'none';
     smsCodeEl.style.display = verifying ? 'block' : 'none';
     btnLogin.style.display = mode === 'login' ? 'block' : 'none';
     btnRegister.style.display = mode === 'login' || registering ? 'block' : 'none';
     btnRegister.textContent = registering ? 'ENVIAR CÓDIGO SMS' : 'CREAR CUENTA';
+    btnEmailVerification.style.display = registering ? 'block' : 'none';
     btnRecover.style.display = mode === 'login' || recovering ? 'block' : 'none';
     btnRecover.textContent = recovering ? 'ENVIAR CÓDIGO SMS' : 'RECUPERAR ACCESO';
     btnEmailRecovery.style.display = recovering ? 'block' : 'none';
     btnVerify.style.display = verifying ? 'block' : 'none';
     btnBack.style.display = mode === 'login' ? 'none' : 'block';
     btnLogout.style.display = 'none';
+    btnGoogle.style.display = mode === 'login' ? 'block' : 'none';
     introEl.textContent = registering ? 'Crea tu cuenta: todos los datos son obligatorios' : recovering ? 'Recupera con un código SMS o un enlace enviado a tu correo' : verifying ? 'Escribe el código enviado por SMS' : 'Accede con tu correo y contraseña';
     showMessage('', '');
   }
@@ -154,7 +175,8 @@
   }
 
   function normalPhone() {
-    const phone = phoneEl.value.trim().replace(/[\s()-]/g, '');
+    const localNumber = phoneEl.value.trim().replace(/\D/g, '');
+    const phone = countryPrefixEl.value + localNumber;
     if (!/^\+[1-9]\d{7,14}$/.test(phone)) throw new Error('Usa el teléfono internacional, por ejemplo +573001234567');
     return phone;
   }
@@ -206,6 +228,12 @@
     if (redirectingHome) return;
     try {
       const credential = await cloud.auth.signInWithEmailAndPassword(emailEl.value.trim(), passwordEl.value);
+      const hasPhoneVerification = credential.user.providerData.some(provider => provider.providerId === 'phone');
+      if (!credential.user.emailVerified && !hasPhoneVerification) {
+        await credential.user.sendEmailVerification();
+        await cloud.auth.signOut();
+        throw new Error('Verifica el enlace que enviamos a tu correo antes de iniciar sesión.');
+      }
       await finishSession(credential.user);
     } catch (error) { showMessage(friendlyError(error)); }
   });
@@ -219,19 +247,72 @@
 
   btnBack.addEventListener('click', () => setMode('login'));
 
-  async function startRegistration() {
+  function registrationData() {
     const username = usernameEl.value.trim();
     const email = emailEl.value.trim();
     const password = passwordEl.value;
     if (!/^[a-zA-Z0-9._-]{3,20}$/.test(username)) throw new Error('El usuario debe tener 3 a 20 caracteres: letras, números, punto, guion o guion bajo.');
     if (!email || !password) throw new Error('Correo y contraseña son obligatorios.');
     if (password.length < 6) throw new Error('La contraseña debe tener mínimo 6 caracteres.');
+    return { username, email, password };
+  }
+
+  async function startRegistration() {
+    const { username, email, password } = registrationData();
     const phone = normalPhone();
     const credential = await cloud.auth.createUserWithEmailAndPassword(email, password);
     pendingRegistration = { user: credential.user, username, email, phone };
     confirmationResult = await cloud.auth.signInWithPhoneNumber(phone, getRecaptcha());
     setMode('verify-registration');
   }
+
+  btnEmailVerification.addEventListener('click', async () => {
+    try {
+      const { username, email, password } = registrationData();
+      const credential = await cloud.auth.createUserWithEmailAndPassword(email, password);
+      await reserveUsername(username, credential.user.uid);
+      await cloud.database.ref('users/' + credential.user.uid).set({
+        username,
+        usernameKey: usernameKey(username),
+        email,
+        createdAt: cloud.serverTimestamp
+      });
+      await credential.user.sendEmailVerification();
+      await cloud.auth.signOut();
+      Tecnomath.logout();
+      setMode('login');
+      emailEl.value = email;
+      showMessage('Revisa tu correo y confirma el enlace. Después inicia sesión con tu correo y contraseña.', '#39FF14');
+    } catch (error) { showMessage(friendlyError(error)); }
+  });
+
+  btnGoogle.addEventListener('click', async () => {
+    try {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      const credential = await cloud.auth.signInWithPopup(provider);
+      const user = credential.user;
+      const snapshot = await cloud.database.ref('users/' + user.uid).once('value');
+      const profile = snapshot.val();
+      if (!profile || !profile.username) {
+        const username = window.prompt('Elige tu nombre de usuario único (3 a 20 caracteres):', user.displayName || '');
+        if (username === null) {
+          await cloud.auth.signOut();
+          throw new Error('Debes elegir un nombre de usuario para continuar.');
+        }
+        if (!/^[a-zA-Z0-9._-]{3,20}$/.test(username.trim())) {
+          throw new Error('El usuario debe tener 3 a 20 caracteres: letras, números, punto, guion o guion bajo.');
+        }
+        await reserveUsername(username, user.uid);
+        await cloud.database.ref('users/' + user.uid).set({
+          username: username.trim(),
+          usernameKey: usernameKey(username),
+          email: user.email || '',
+          createdAt: cloud.serverTimestamp
+        });
+      }
+      await finishSession(user);
+    } catch (error) { showMessage(friendlyError(error)); }
+  });
 
   btnRecover.addEventListener('click', async () => {
     try {
@@ -323,11 +404,16 @@
       'auth/requires-recent-login': 'Por seguridad, inicia sesión de nuevo antes de cambiar la contraseña.',
       'auth/expired-action-code': 'El enlace de recuperación venció. Solicita uno nuevo.',
       'auth/invalid-action-code': 'Ese enlace de recuperación no es válido. Solicita uno nuevo.',
+      'auth/popup-closed-by-user': 'Cerraste la ventana de Google antes de terminar el acceso.',
+      'auth/popup-blocked': 'El navegador bloqueó la ventana de Google. Permite ventanas emergentes e inténtalo de nuevo.',
+      'auth/account-exists-with-different-credential': 'Este correo ya usa otro método de acceso. Entra con el método original.',
       'PERMISSION_DENIED': 'Tu cuenta entró, pero no podemos abrir su perfil. Intenta de nuevo; si continúa, avisa al administrador.',
       'permission_denied': 'Tu cuenta entró, pero no podemos abrir su perfil. Intenta de nuevo; si continúa, avisa al administrador.'
     };
     console.warn('Error de autenticación controlado:', code, error);
-    return messages[code] || 'No pudimos completar la acción. Revisa los datos e inténtalo otra vez.';
+    if (messages[code]) return messages[code];
+    if (error && error.message && !/^Firebase:/i.test(error.message)) return error.message;
+    return code ? `No pudimos completar la acción (${code}). Inténtalo de nuevo.` : 'No pudimos completar la acción. Revisa los datos e inténtalo otra vez.';
   }
 
   btnLogout.addEventListener('click', () => {
