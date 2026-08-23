@@ -1,0 +1,2769 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Basta - Ruleta</title>
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    user-select:none;
+}
+
+body{
+    min-height:100vh;
+    background:
+        radial-gradient(circle at top,#263f58 0%,#111b26 65%);
+    color:white;
+    font-family:"Segoe UI",Arial,sans-serif;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    padding:15px;
+}
+
+.card{
+    width:100%;
+    max-width:720px;
+
+    background:#2d4055;
+
+    border-radius:35px;
+
+    padding:25px;
+
+    box-shadow:
+        0 25px 60px rgba(0,0,0,.65),
+        inset 0 1px 0 rgba(255,255,255,.08);
+}
+
+h1{
+    text-align:center;
+
+    color:#f7e05e;
+
+    font-size:2.3rem;
+    font-weight:900;
+
+    letter-spacing:2px;
+
+    margin-bottom:20px;
+
+    text-shadow:
+        0 4px 0 #92740c,
+        0 7px 15px rgba(0,0,0,.5);
+}
+
+
+/* =====================================================
+   RULETA
+===================================================== */
+
+.canvas-wrapper{
+    position:relative;
+
+    width:min(90vw,560px);
+
+    aspect-ratio:1;
+
+    margin:0 auto 20px;
+}
+
+canvas{
+    width:100%;
+    height:100%;
+
+    display:block;
+
+    border-radius:50%;
+
+    background:#ecf0f1;
+
+    box-shadow:
+        0 0 0 8px #f0d28c,
+        0 0 0 12px #a87838,
+        0 15px 40px rgba(0,0,0,.7);
+
+    cursor:pointer;
+}
+
+
+/* =====================================================
+   FLECHA
+===================================================== */
+
+.arrow{
+    position:absolute;
+
+    top:-23px;
+    left:50%;
+
+    transform:translateX(-50%);
+
+    z-index:20;
+
+    font-size:4rem;
+
+    color:#ffd84d;
+
+    filter:
+        drop-shadow(0 5px 5px rgba(0,0,0,.8));
+
+    pointer-events:none;
+}
+
+
+/* =====================================================
+   CENTRO
+===================================================== */
+
+.center-box{
+    position:absolute;
+
+    top:50%;
+    left:50%;
+
+    transform:translate(-50%,-50%);
+
+    width:150px;
+    height:120px;
+
+    background:rgba(25,39,53,.96);
+
+    border:3px solid #f7e05e;
+
+    border-radius:30px;
+
+    display:flex;
+    flex-direction:column;
+
+    justify-content:center;
+    align-items:center;
+
+    box-shadow:
+        0 10px 30px rgba(0,0,0,.65);
+
+    pointer-events:none;
+}
+
+.letter-result{
+    font-size:3.5rem;
+
+    font-weight:900;
+
+    line-height:1;
+
+    color:#f7e05e;
+}
+
+.category-label{
+    margin-top:6px;
+
+    background:#172736;
+
+    border:1px solid #68819b;
+
+    border-radius:20px;
+
+    padding:4px 10px;
+
+    max-width:125px;
+
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+
+    font-size:.75rem;
+
+    color:#d8e5f2;
+}
+
+.sub{
+    margin-top:5px;
+
+    font-size:.65rem;
+
+    color:#9db3c8;
+}
+
+
+/* =====================================================
+   CONTROLES
+===================================================== */
+
+.controls{
+    display:flex;
+
+    flex-wrap:wrap;
+
+    gap:10px;
+
+    justify-content:center;
+
+    margin-top:10px;
+}
+
+select,
+input{
+    border:none;
+
+    outline:none;
+
+    border-radius:50px;
+
+    background:#1b2c3d;
+
+    color:white;
+
+    padding:13px 17px;
+
+    font-size:1rem;
+
+    box-shadow:
+        inset 0 2px 5px rgba(0,0,0,.4);
+}
+
+select{
+    flex:1 1 190px;
+}
+
+input{
+    flex:1 1 190px;
+}
+
+select:focus,
+input:focus{
+    box-shadow:
+        0 0 0 2px #f7e05e,
+        inset 0 2px 5px rgba(0,0,0,.4);
+}
+
+input::placeholder{
+    color:#849aae;
+}
+
+
+/* =====================================================
+   BOTON GIRAR
+===================================================== */
+
+.btn-girar{
+    border:none;
+
+    border-radius:50px;
+
+    padding:12px 30px;
+
+    background:#f7e05e;
+
+    color:#202a34;
+
+    font-size:1.15rem;
+
+    font-weight:900;
+
+    cursor:pointer;
+
+    box-shadow:
+        0 6px 0 #9a7809,
+        0 10px 20px rgba(0,0,0,.4);
+
+    transition:.08s;
+}
+
+.btn-girar:active{
+    transform:translateY(5px);
+
+    box-shadow:
+        0 1px 0 #9a7809;
+}
+
+.btn-girar:disabled{
+    opacity:.5;
+
+    cursor:not-allowed;
+}
+
+
+/* =====================================================
+   INFORMACION DE RONDA
+===================================================== */
+
+.round-info{
+    margin-top:15px;
+
+    display:flex;
+
+    justify-content:center;
+
+    gap:12px;
+
+    flex-wrap:wrap;
+}
+
+.info{
+    background:#1c2d3e;
+
+    border-radius:30px;
+
+    padding:7px 14px;
+
+    font-size:.8rem;
+
+    color:#aec0d0;
+
+    border:1px solid #48637d;
+}
+
+.info strong{
+    color:#f7e05e;
+}
+
+
+/* =====================================================
+   RESPUESTA
+===================================================== */
+
+.answer-box{
+    display:none;
+
+    margin-top:18px;
+
+    background:#1a2c3d;
+
+    border:2px solid #55718c;
+
+    border-radius:25px;
+
+    padding:20px;
+
+    flex-direction:column;
+
+    align-items:center;
+
+    gap:12px;
+}
+
+.answer-box.active{
+    display:flex;
+}
+
+.answer-title{
+    text-align:center;
+
+    color:#dbe7f2;
+
+    font-size:1.05rem;
+
+    font-weight:700;
+}
+
+.answer-letter{
+    color:#f7e05e;
+
+    font-size:1.5rem;
+
+    font-weight:900;
+}
+
+.answer-input{
+    width:100%;
+
+    max-width:500px;
+
+    text-align:center;
+
+    font-size:1.2rem;
+
+    font-weight:700;
+
+    background:#0e1c29;
+}
+
+.btn-comprobar{
+    border:none;
+
+    border-radius:50px;
+
+    padding:11px 28px;
+
+    background:#58d68d;
+
+    color:#10271a;
+
+    font-weight:900;
+
+    font-size:1rem;
+
+    cursor:pointer;
+}
+
+.btn-comprobar:active{
+    transform:scale(.97);
+}
+
+.btn-comprobar:disabled{
+    opacity:.4;
+    cursor:not-allowed;
+}
+
+
+/* =====================================================
+   RESULTADO
+===================================================== */
+
+.resultado{
+    min-height:25px;
+
+    text-align:center;
+
+    font-size:1rem;
+
+    font-weight:800;
+}
+
+.correcto{
+    color:#58d68d;
+}
+
+.incorrecto{
+    color:#ff7070;
+}
+
+
+/* =====================================================
+   TIMER
+===================================================== */
+
+.timer{
+    display:none;
+
+    margin-top:15px;
+
+    text-align:center;
+
+    color:#a9bfd2;
+
+    font-size:.9rem;
+}
+
+.timer.active{
+    display:block;
+}
+
+.timer span{
+    color:#f7e05e;
+
+    font-size:1.4rem;
+
+    font-weight:900;
+}
+
+
+/* =====================================================
+   MENSAJE DE CARGA
+===================================================== */
+
+.loading{
+    position:fixed;
+
+    inset:0;
+
+    background:#101b27;
+
+    display:flex;
+
+    align-items:center;
+    justify-content:center;
+
+    z-index:1000;
+
+    font-size:1.2rem;
+
+    font-weight:700;
+
+    color:#f7e05e;
+}
+
+.loading.hidden{
+    display:none;
+}
+
+
+/* =====================================================
+   FOOTER
+===================================================== */
+
+.footer{
+    text-align:center;
+
+    margin-top:16px;
+
+    color:#7992aa;
+
+    font-size:.75rem;
+}
+
+
+/* =====================================================
+   CELULAR
+===================================================== */
+
+@media(max-width:500px){
+
+    body{
+        padding:8px;
+    }
+
+    .card{
+        padding:18px 12px 22px;
+
+        border-radius:25px;
+    }
+
+    h1{
+        font-size:1.7rem;
+
+        margin-bottom:15px;
+    }
+
+    .arrow{
+        font-size:3rem;
+
+        top:-18px;
+    }
+
+    .center-box{
+        width:115px;
+        height:95px;
+
+        border-radius:24px;
+    }
+
+    .letter-result{
+        font-size:2.7rem;
+    }
+
+    .category-label{
+        font-size:.65rem;
+
+        max-width:95px;
+    }
+
+    .controls{
+        flex-direction:column;
+    }
+
+    select,
+    input,
+    .btn-girar{
+        width:100%;
+    }
+
+}
+
+</style>
+</head>
+
+
+<body>
+
+
+<div
+class="loading"
+id="loading">
+
+📚 Cargando palabras...
+
+</div>
+
+
+<div class="card">
+
+
+<h1>
+🅱️ BASTA 🎡
+</h1>
+
+
+<!-- ==================================================
+     RULETA
+================================================== -->
+
+<div class="canvas-wrapper">
+
+<canvas
+id="ruletaCanvas"
+width="600"
+height="600">
+</canvas>
+
+
+<div class="arrow">
+▼
+</div>
+
+
+<div class="center-box">
+
+<div
+class="letter-result"
+id="letterDisplay">
+?
+</div>
+
+<div
+class="category-label"
+id="categoryDisplay">
+Categoría
+</div>
+
+<div
+class="sub"
+id="subDisplay">
+Escoge una categoría
+</div>
+
+</div>
+
+</div>
+
+
+<!-- ==================================================
+     CONTROLES
+================================================== -->
+
+<div class="controls">
+
+
+<select
+id="categoriaSelect">
+
+<option value="Animal">
+🐾 Animal
+</option>
+
+<option value="Fruta">
+🍎 Fruta
+</option>
+
+<option value="Pais">
+🌎 País
+</option>
+
+<option value="Color">
+🎨 Color
+</option>
+
+<option value="Comida">
+🍕 Comida
+</option>
+
+<option value="Nombre">
+🧑 Nombre
+</option>
+
+<option value="Ciudad">
+🏙️ Ciudad
+</option>
+
+<option value="Objeto">
+📦 Objeto
+</option>
+
+<option value="Profesion">
+👨‍⚕️ Profesión
+</option>
+
+<option value="Deporte">
+⚽ Deporte
+</option>
+
+<option value="Bebida">
+🥤 Bebida
+</option>
+
+<option value="Marca">
+🏷️ Marca
+</option>
+
+<option value="Película">
+🎬 Película
+</option>
+
+<option value="Videojuego">
+🎮 Videojuego
+</option>
+
+</select>
+
+
+<input
+type="text"
+id="categoriaPersonalizada"
+placeholder="✏️ Categoría personalizada"
+maxlength="30"
+>
+
+
+<button
+class="btn-girar"
+id="btnGirar">
+
+🎲 GIRAR
+
+</button>
+
+
+</div>
+
+
+<!-- ==================================================
+     INFORMACIÓN
+================================================== -->
+
+<div class="round-info">
+
+<div class="info">
+
+🔤 Disponibles:
+<strong id="letrasDisponibles">
+27
+</strong>
+
+</div>
+
+
+<div class="info">
+
+🚫 Usadas:
+<strong id="letrasUsadas">
+0
+</strong>
+
+</div>
+
+
+<div class="info">
+
+🔄 Ronda:
+<strong id="numeroRonda">
+1
+</strong>
+
+</div>
+
+</div>
+
+
+<!-- ==================================================
+     RESPUESTA
+================================================== -->
+
+<div
+class="answer-box"
+id="answerBox">
+
+
+<div class="answer-title">
+
+Escribe una palabra de
+
+<strong id="answerCategory">
+categoría
+</strong>
+
+que empiece por
+
+<span
+class="answer-letter"
+id="answerLetter">
+A
+</span>
+
+</div>
+
+
+<input
+type="text"
+class="answer-input"
+id="answerInput"
+placeholder="Escribe tu respuesta..."
+autocomplete="off"
+spellcheck="false"
+>
+
+
+<button
+class="btn-comprobar"
+id="btnComprobar">
+
+✅ COMPROBAR
+
+</button>
+
+
+<div
+class="resultado"
+id="resultado">
+</div>
+
+
+</div>
+
+
+<!-- ==================================================
+     TEMPORIZADOR
+================================================== -->
+
+<div
+class="timer"
+id="timer">
+
+⏱️ Tiempo:
+
+<span id="timerNumber">
+30
+</span>
+
+segundos
+
+</div>
+
+
+<div class="footer">
+
+La letra que salga no podrá repetirse durante esta ronda.
+
+</div>
+
+
+</div>
+
+
+<script>
+
+
+/* =====================================================
+   VARIABLES PRINCIPALES
+===================================================== */
+
+
+/*
+    IMPORTANTE:
+
+    index.html y palabras_basta.json
+    deben estar en la misma carpeta.
+*/
+
+let baseDePalabras = {};
+
+let datosCargados = false;
+
+
+/* Letras de la ruleta */
+
+const LETRAS =
+[
+    "A","B","C","D","E","F","G","H","I",
+    "J","K","L","M","N","Ñ","O","P","Q",
+    "R","S","T","U","V","W","X","Y","Z"
+];
+
+
+/*
+    Letras que todavía pueden salir
+    durante la ronda.
+*/
+
+let letrasDisponibles =
+[
+    ...LETRAS
+];
+
+
+/*
+    Letras que ya salieron.
+*/
+
+let letrasUsadas = [];
+
+
+/*
+    Número de ronda.
+*/
+
+let numeroRonda = 1;
+
+
+/*
+    Letra actual.
+*/
+
+let currentLetter = null;
+
+
+/*
+    Categoría actual.
+*/
+
+let currentCategory = null;
+
+
+/*
+    Estado de la ruleta.
+*/
+
+let isSpinning = false;
+
+
+/*
+    Rotación actual.
+*/
+
+let currentRotation = 0;
+
+
+/*
+    Temporizador.
+*/
+
+let timerInterval = null;
+
+let timeLeft = 30;
+
+
+/* =====================================================
+   CANVAS
+===================================================== */
+
+const canvas =
+document.getElementById(
+    "ruletaCanvas"
+);
+
+const ctx =
+canvas.getContext("2d");
+
+
+const centerX = 300;
+const centerY = 300;
+const radius = 270;
+
+const sliceAngle =
+    (Math.PI * 2) / LETRAS.length;
+
+
+/* =====================================================
+   ELEMENTOS HTML
+===================================================== */
+
+const loading =
+document.getElementById(
+    "loading"
+);
+
+const letterDisplay =
+document.getElementById(
+    "letterDisplay"
+);
+
+const categoryDisplay =
+document.getElementById(
+    "categoryDisplay"
+);
+
+const subDisplay =
+document.getElementById(
+    "subDisplay"
+);
+
+const categoriaSelect =
+document.getElementById(
+    "categoriaSelect"
+);
+
+const categoriaPersonalizada =
+document.getElementById(
+    "categoriaPersonalizada"
+);
+
+const btnGirar =
+document.getElementById(
+    "btnGirar"
+);
+
+const answerBox =
+document.getElementById(
+    "answerBox"
+);
+
+const answerLetter =
+document.getElementById(
+    "answerLetter"
+);
+
+const answerCategory =
+document.getElementById(
+    "answerCategory"
+);
+
+const answerInput =
+document.getElementById(
+    "answerInput"
+);
+
+const btnComprobar =
+document.getElementById(
+    "btnComprobar"
+);
+
+const resultado =
+document.getElementById(
+    "resultado"
+);
+
+const timer =
+document.getElementById(
+    "timer"
+);
+
+const timerNumber =
+document.getElementById(
+    "timerNumber"
+);
+
+const letrasDisponiblesTexto =
+document.getElementById(
+    "letrasDisponibles"
+);
+
+const letrasUsadasTexto =
+document.getElementById(
+    "letrasUsadas"
+);
+
+const numeroRondaTexto =
+document.getElementById(
+    "numeroRonda"
+);
+
+
+/* =====================================================
+   COLORES DE LA RULETA
+===================================================== */
+
+const colores =
+[
+    "#FF6B6B",
+    "#4ECDC4",
+    "#FFE66D",
+    "#A8E6CF",
+    "#FF8A5C",
+    "#6C5B7B",
+    "#F8B500",
+    "#3F8EFC",
+    "#F7DC6F",
+    "#BB8FCE",
+    "#85C1E9",
+    "#F1948A",
+    "#82E0AA",
+    "#F8C471",
+    "#AF7AC5",
+    "#5DADE2",
+    "#F0B27A",
+    "#58D68D",
+    "#F4D03F",
+    "#E59866",
+    "#7FB3D8",
+    "#F5B7B1",
+    "#A3E4D7",
+    "#F9E79F",
+    "#D2B4DE",
+    "#A9CCE3",
+    "#FAD7A0"
+];
+
+
+/* =====================================================
+   NORMALIZAR TEXTO
+===================================================== */
+
+function normalizar(texto){
+
+    return String(texto)
+
+        .normalize("NFD")
+
+        .replace(
+            /[\u0300-\u036f]/g,
+            ""
+        )
+
+        .toLowerCase()
+
+        .trim()
+
+        .replace(/\s+/g," ");
+
+}
+
+
+/* =====================================================
+   NORMALIZAR LETRA
+===================================================== */
+
+function normalizarLetra(texto){
+
+    return String(texto)
+
+        .normalize("NFD")
+
+        .replace(
+            /[\u0300-\u036f]/g,
+            ""
+        )
+
+        .toUpperCase();
+
+}
+
+
+/* =====================================================
+   CARGAR JSON
+===================================================== */
+
+async function cargarPalabras(){
+
+    try{
+
+        const respuesta =
+            await fetch(
+                "palabras_basta.json"
+            );
+
+
+        if(!respuesta.ok){
+
+            throw new Error(
+                "No se pudo cargar palabras_basta.json"
+            );
+
+        }
+
+
+        baseDePalabras =
+            await respuesta.json();
+
+
+        datosCargados = true;
+
+
+        loading.classList.add(
+            "hidden"
+        );
+
+
+        console.log(
+            "Base de palabras cargada:",
+            baseDePalabras
+        );
+
+
+    }
+
+    catch(error){
+
+        console.error(error);
+
+
+        loading.textContent =
+            "❌ No se pudo cargar palabras_basta.json";
+
+
+        alert(
+            "No se pudo cargar palabras_basta.json.\n\n" +
+            "Asegúrate de que index.html y palabras_basta.json " +
+            "estén en la misma carpeta."
+        );
+
+    }
+
+}
+
+
+/* =====================================================
+   OBTENER CATEGORÍA
+===================================================== */
+
+function getCategoria(){
+
+    const personalizada =
+        categoriaPersonalizada.value.trim();
+
+
+    if(personalizada !== ""){
+
+        return personalizada;
+
+    }
+
+
+    return categoriaSelect.value;
+
+}
+
+
+/* =====================================================
+   BUSCAR CATEGORÍA
+===================================================== */
+
+function buscarCategoria(){
+
+    const categoria =
+        getCategoria();
+
+
+    /*
+        Primero intentamos coincidencia exacta.
+    */
+
+    if(
+        baseDePalabras[categoria]
+    ){
+
+        return categoria;
+
+    }
+
+
+    /*
+        Después buscamos ignorando mayúsculas,
+        tildes y algunas diferencias.
+    */
+
+    const objetivo =
+        normalizar(categoria);
+
+
+    for(
+        const nombre in baseDePalabras
+    ){
+
+        if(
+            normalizar(nombre) ===
+            objetivo
+        ){
+
+            return nombre;
+
+        }
+
+    }
+
+
+    return null;
+
+}
+
+
+/* =====================================================
+   ACTUALIZAR INFORMACIÓN
+===================================================== */
+
+function actualizarInfo(){
+
+    letrasDisponiblesTexto.textContent =
+        letrasDisponibles.length;
+
+
+    letrasUsadasTexto.textContent =
+        letrasUsadas.length;
+
+
+    numeroRondaTexto.textContent =
+        numeroRonda;
+
+}
+
+
+/* =====================================================
+   DIBUJAR RULETA
+===================================================== */
+
+function drawWheel(rotation){
+
+    ctx.clearRect(
+        0,
+        0,
+        canvas.width,
+        canvas.height
+    );
+
+
+    ctx.save();
+
+
+    ctx.translate(
+        centerX,
+        centerY
+    );
+
+
+    ctx.rotate(
+        rotation
+    );
+
+
+    for(
+        let i = 0;
+        i < LETRAS.length;
+        i++
+    ){
+
+        const letra =
+            LETRAS[i];
+
+
+        const start =
+            i * sliceAngle;
+
+
+        const end =
+            start + sliceAngle;
+
+
+        const mid =
+            start + sliceAngle / 2;
+
+
+        /*
+            Si la letra ya salió,
+            la dibujamos oscura.
+        */
+
+        const usada =
+            letrasUsadas.includes(
+                letra
+            );
+
+
+        ctx.beginPath();
+
+
+        ctx.moveTo(
+            0,
+            0
+        );
+
+
+        ctx.arc(
+            0,
+            0,
+            radius,
+            start,
+            end
+        );
+
+
+        ctx.closePath();
+
+
+        if(usada){
+
+            ctx.fillStyle =
+                "#34404b";
+
+        }
+
+        else{
+
+            ctx.fillStyle =
+                colores[
+                    i % colores.length
+                ];
+
+        }
+
+
+        ctx.fill();
+
+
+        ctx.strokeStyle =
+            "#263746";
+
+        ctx.lineWidth = 1.5;
+
+        ctx.stroke();
+
+
+        /*
+            Letra
+        */
+
+        ctx.save();
+
+
+        ctx.rotate(
+            mid
+        );
+
+
+        ctx.textAlign =
+            "center";
+
+        ctx.textBaseline =
+            "middle";
+
+
+        ctx.font =
+            "bold 19px Segoe UI";
+
+
+        ctx.fillStyle =
+            usada
+                ? "#71808d"
+                : "#1e2a36";
+
+
+        ctx.shadowColor =
+            "rgba(255,255,255,.3)";
+
+        ctx.shadowBlur =
+            usada ? 0 : 4;
+
+
+        ctx.fillText(
+            letra,
+            radius * .72,
+            0
+        );
+
+
+        ctx.restore();
+
+    }
+
+
+    /*
+        Centro
+    */
+
+    ctx.beginPath();
+
+
+    ctx.arc(
+        0,
+        0,
+        50,
+        0,
+        Math.PI * 2
+    );
+
+
+    ctx.fillStyle =
+        "#1f3142";
+
+
+    ctx.shadowColor =
+        "rgba(0,0,0,.6)";
+
+    ctx.shadowBlur =
+        20;
+
+
+    ctx.fill();
+
+
+    ctx.shadowBlur = 0;
+
+
+    ctx.strokeStyle =
+        "#f7e05e";
+
+    ctx.lineWidth = 3;
+
+
+    ctx.stroke();
+
+
+    /*
+        Decoración
+    */
+
+    for(
+        let i = 0;
+        i < 12;
+        i++
+    ){
+
+        const ang =
+            (i / 12) *
+            Math.PI *
+            2;
+
+
+        ctx.beginPath();
+
+
+        ctx.arc(
+            42 * Math.cos(ang),
+            42 * Math.sin(ang),
+            4,
+            0,
+            Math.PI * 2
+        );
+
+
+        ctx.fillStyle =
+            "#f7e05e";
+
+
+        ctx.fill();
+
+    }
+
+
+    ctx.restore();
+
+}
+
+
+/* =====================================================
+   OBTENER LETRA DE LA FLECHA
+===================================================== */
+
+function getWinningLetter(
+    rotation
+){
+
+    /*
+        La flecha está arriba.
+    */
+
+    const arrowAngle =
+        -Math.PI / 2;
+
+
+    let raw =
+        (
+            arrowAngle -
+            rotation
+        )
+        %
+        (Math.PI * 2);
+
+
+    if(raw < 0){
+
+        raw +=
+            Math.PI * 2;
+
+    }
+
+
+    const index =
+        Math.floor(
+            raw / sliceAngle
+        );
+
+
+    return LETRAS[
+        index % LETRAS.length
+    ];
+
+}
+
+
+/* =====================================================
+   OBTENER LETRAS DISPONIBLES
+===================================================== */
+
+function obtenerLetraDisponible(
+    rotation
+){
+
+    /*
+        Primero calculamos la letra
+        que estaría debajo de la flecha.
+    */
+
+    let letra =
+        getWinningLetter(
+            rotation
+        );
+
+
+    /*
+        Si por casualidad cae en una letra
+        ya utilizada, buscamos otra disponible.
+    */
+
+    if(
+        letrasDisponibles.includes(
+            letra
+        )
+    ){
+
+        return letra;
+
+    }
+
+
+    /*
+        Buscamos la letra disponible
+        más cercana.
+    */
+
+    let mejor =
+        null;
+
+    let menorDistancia =
+        Infinity;
+
+
+    for(
+        const candidata of letrasDisponibles
+    ){
+
+        const index =
+            LETRAS.indexOf(
+                candidata
+            );
+
+
+        const objetivo =
+            index *
+            sliceAngle;
+
+
+        let diferencia =
+            Math.abs(
+                objetivo -
+                (
+                    -Math.PI / 2 -
+                    rotation
+                )
+            );
+
+
+        diferencia =
+            diferencia %
+            (Math.PI * 2);
+
+
+        if(
+            diferencia >
+            Math.PI
+        ){
+
+            diferencia =
+                Math.PI * 2 -
+                diferencia;
+
+        }
+
+
+        if(
+            diferencia <
+            menorDistancia
+        ){
+
+            menorDistancia =
+                diferencia;
+
+            mejor =
+                candidata;
+
+        }
+
+    }
+
+
+    return mejor;
+
+}
+
+
+/* =====================================================
+   USAR LETRA
+===================================================== */
+
+function usarLetra(
+    letra
+){
+
+    /*
+        Evitar duplicados.
+    */
+
+    if(
+        !letrasUsadas.includes(
+            letra
+        )
+    ){
+
+        letrasUsadas.push(
+            letra
+        );
+
+    }
+
+
+    letrasDisponibles =
+        LETRAS.filter(
+            letra =>
+                !letrasUsadas.includes(
+                    letra
+                )
+        );
+
+
+    actualizarInfo();
+
+    drawWheel(
+        currentRotation
+    );
+
+}
+
+
+/* =====================================================
+   NUEVA RONDA
+===================================================== */
+
+function nuevaRonda(){
+
+    letrasUsadas = [];
+
+    letrasDisponibles =
+        [
+            ...LETRAS
+        ];
+
+
+    numeroRonda++;
+
+
+    actualizarInfo();
+
+
+    drawWheel(
+        currentRotation
+    );
+
+
+    subDisplay.textContent =
+        "🔄 ¡Nueva ronda!";
+
+
+    setTimeout(
+        function(){
+
+            subDisplay.textContent =
+                "Escoge una categoría";
+
+        },
+        1800
+    );
+
+}
+
+
+/* =====================================================
+   COMPROBAR SI TERMINÓ LA RONDA
+===================================================== */
+
+function comprobarFinRonda(){
+
+    if(
+        letrasDisponibles.length === 0
+    ){
+
+        setTimeout(
+            function(){
+
+                alert(
+                    "🎉 ¡Terminaste todas las letras!\n\n" +
+                    "Comienza una nueva ronda."
+                );
+
+
+                nuevaRonda();
+
+            },
+            500
+        );
+
+        return true;
+
+    }
+
+
+    return false;
+
+}
+
+
+/* =====================================================
+   SONIDOS
+===================================================== */
+
+function playSound(tipo){
+
+    try{
+
+        const AudioContext =
+            window.AudioContext ||
+            window.webkitAudioContext;
+
+
+        const audio =
+            new AudioContext();
+
+
+        const oscillator =
+            audio.createOscillator();
+
+
+        const gain =
+            audio.createGain();
+
+
+        oscillator.connect(
+            gain
+        );
+
+
+        gain.connect(
+            audio.destination
+        );
+
+
+        if(
+            tipo === "giro"
+        ){
+
+            oscillator.frequency.value =
+                180;
+
+        }
+
+        else if(
+            tipo === "correcto"
+        ){
+
+            oscillator.frequency.value =
+                700;
+
+        }
+
+        else{
+
+            oscillator.frequency.value =
+                150;
+
+        }
+
+
+        oscillator.type =
+            "sine";
+
+
+        gain.gain.setValueAtTime(
+            .12,
+            audio.currentTime
+        );
+
+
+        gain.gain.exponentialRampToValueAtTime(
+            .001,
+            audio.currentTime + .3
+        );
+
+
+        oscillator.start();
+
+
+        oscillator.stop(
+            audio.currentTime + .3
+        );
+
+    }
+
+    catch(error){}
+
+}
+
+
+/* =====================================================
+   TEMPORIZADOR
+===================================================== */
+
+function iniciarTemporizador(){
+
+    clearInterval(
+        timerInterval
+    );
+
+
+    timeLeft = 30;
+
+
+    timerNumber.textContent =
+        timeLeft;
+
+
+    timer.classList.add(
+        "active"
+    );
+
+
+    timerInterval =
+        setInterval(
+            function(){
+
+                timeLeft--;
+
+
+                timerNumber.textContent =
+                    timeLeft;
+
+
+                if(
+                    timeLeft <= 0
+                ){
+
+                    clearInterval(
+                        timerInterval
+                    );
+
+
+                    resultado.textContent =
+                        "⏰ Se acabó el tiempo.";
+
+
+                    resultado.className =
+                        "resultado incorrecto";
+
+
+                    answerInput.disabled =
+                        true;
+
+
+                    btnComprobar.disabled =
+                        true;
+
+
+                    subDisplay.textContent =
+                        "⏰ Tiempo agotado";
+
+
+                    playSound(
+                        "error"
+                    );
+
+                }
+
+            },
+            1000
+        );
+
+}
+
+
+/* =====================================================
+   DETENER TEMPORIZADOR
+===================================================== */
+
+function detenerTemporizador(){
+
+    clearInterval(
+        timerInterval
+    );
+
+    timer.classList.remove(
+        "active"
+    );
+
+}
+
+
+/* =====================================================
+   GIRAR RULETA
+===================================================== */
+
+function spinWheel(){
+
+    if(isSpinning){
+
+        return;
+
+    }
+
+
+    if(!datosCargados){
+
+        alert(
+            "La base de palabras todavía está cargando."
+        );
+
+        return;
+
+    }
+
+
+    /*
+        Si no hay letras disponibles,
+        empezar nueva ronda.
+    */
+
+    if(
+        letrasDisponibles.length === 0
+    ){
+
+        nuevaRonda();
+
+        return;
+
+    }
+
+
+    const categoriaSeleccionada =
+        getCategoria();
+
+
+    if(
+        !categoriaSeleccionada
+    ){
+
+        alert(
+            "Escoge una categoría."
+        );
+
+        return;
+
+    }
+
+
+    /*
+        La categoría debe existir en JSON
+        si no es personalizada.
+    */
+
+    const categoriaJSON =
+        buscarCategoria();
+
+
+    if(
+        !categoriaJSON
+    ){
+
+        /*
+            Si es personalizada,
+            no podemos comprobarla con el JSON.
+        */
+
+        if(
+            categoriaPersonalizada.value.trim() !== ""
+        ){
+
+            alert(
+                "⚠️ Esa categoría personalizada no existe " +
+                "en palabras_basta.json.\n\n" +
+                "Para poder comprobar automáticamente " +
+                "las palabras, agrega esa categoría al JSON."
+            );
+
+            return;
+
+        }
+
+        alert(
+            "No existe esa categoría en la base de palabras."
+        );
+
+        return;
+
+    }
+
+
+    currentCategory =
+        categoriaJSON;
+
+
+    /*
+        Ocultar respuesta anterior.
+    */
+
+    answerBox.classList.remove(
+        "active"
+    );
+
+
+    resultado.textContent =
+        "";
+
+
+    answerInput.value =
+        "";
+
+
+    answerInput.disabled =
+        false;
+
+
+    btnComprobar.disabled =
+        false;
+
+
+    detenerTemporizador();
+
+
+    /*
+        Estado.
+    */
+
+    isSpinning =
+        true;
+
+
+    btnGirar.disabled =
+        true;
+
+
+    subDisplay.textContent =
+        "🎡 Girando...";
+
+
+    playSound(
+        "giro"
+    );
+
+
+    /*
+        Elegir una letra que todavía
+        esté disponible.
+    */
+
+    const letraObjetivo =
+        letrasDisponibles[
+            Math.floor(
+                Math.random() *
+                letrasDisponibles.length
+            )
+        ];
+
+
+    const indexObjetivo =
+        LETRAS.indexOf(
+            letraObjetivo
+        );
+
+
+    /*
+        Ángulo necesario para colocar
+        la letra bajo la flecha.
+    */
+
+    const anguloCentro =
+        indexObjetivo *
+        sliceAngle +
+        sliceAngle / 2;
+
+
+    const arrowAngle =
+        -Math.PI / 2;
+
+
+    const vueltas =
+        5 +
+        Math.floor(
+            Math.random() * 3
+        );
+
+
+    const variacion =
+        (
+            Math.random() - .5
+        ) *
+        sliceAngle *
+        .65;
+
+
+    let targetRotation =
+        currentRotation +
+        vueltas *
+        Math.PI *
+        2 +
+        (
+            arrowAngle -
+            anguloCentro -
+            currentRotation
+        ) +
+        variacion;
+
+
+    /*
+        Animación.
+    */
+
+    const startRotation =
+        currentRotation;
+
+
+    const duration =
+        3500 +
+        Math.random() *
+        1000;
+
+
+    const startTime =
+        performance.now();
+
+
+    function animate(now){
+
+        const elapsed =
+            now -
+            startTime;
+
+
+        const progress =
+            Math.min(
+                elapsed /
+                duration,
+                1
+            );
+
+
+        /*
+            Easing de frenado.
+        */
+
+        const ease =
+            1 -
+            Math.pow(
+                1 - progress,
+                4
+            );
+
+
+        const rotation =
+            startRotation +
+            (
+                targetRotation -
+                startRotation
+            ) *
+            ease;
+
+
+        drawWheel(
+            rotation
+        );
+
+
+        if(
+            progress < 1
+        ){
+
+            requestAnimationFrame(
+                animate
+            );
+
+        }
+
+        else{
+
+            /*
+                Fin del giro.
+            */
+
+            currentRotation =
+                targetRotation;
+
+
+            drawWheel(
+                currentRotation
+            );
+
+
+            /*
+                Usamos la letra que
+                seleccionamos como objetivo.
+            */
+
+            currentLetter =
+                letraObjetivo;
+
+
+            /*
+                Registrar letra usada.
+            */
+
+            usarLetra(
+                currentLetter
+            );
+
+
+            /*
+                Mostrar resultado.
+            */
+
+            letterDisplay.textContent =
+                currentLetter;
+
+
+            categoryDisplay.textContent =
+                currentCategory;
+
+
+            subDisplay.textContent =
+                "¡Es tu turno!";
+
+
+            answerLetter.textContent =
+                currentLetter;
+
+
+            answerCategory.textContent =
+                currentCategory;
+
+
+            answerBox.classList.add(
+                "active"
+            );
+
+
+            /*
+                Temporizador.
+            */
+
+            iniciarTemporizador();
+
+
+            /*
+                Enfocar campo.
+            */
+
+            setTimeout(
+                function(){
+
+                    answerInput.focus();
+
+                },
+                150
+            );
+
+
+            isSpinning =
+                false;
+
+
+            btnGirar.disabled =
+                false;
+
+
+            /*
+                Si era la última letra,
+                la respuesta todavía puede
+                contestarse normalmente.
+            */
+
+        }
+
+    }
+
+
+    requestAnimationFrame(
+        animate
+    );
+
+}
+
+
+/* =====================================================
+   COMPROBAR RESPUESTA
+===================================================== */
+
+function comprobarRespuesta(){
+
+    if(
+        !currentLetter ||
+        !currentCategory
+    ){
+
+        return;
+
+    }
+
+
+    const respuesta =
+        answerInput.value.trim();
+
+
+    if(
+        respuesta === ""
+    ){
+
+        resultado.textContent =
+            "⚠️ Escribe una palabra.";
+
+
+        resultado.className =
+            "resultado incorrecto";
+
+
+        return;
+
+    }
+
+
+    /*
+        Normalizamos la respuesta.
+        Esto elimina tildes.
+    */
+
+    const respuestaNormalizada =
+        normalizar(
+            respuesta
+        );
+
+
+    /*
+        La primera letra debe coincidir.
+    */
+
+    const primeraLetra =
+        normalizarLetra(
+            respuesta.charAt(0)
+        );
+
+
+    const letraActual =
+        normalizarLetra(
+            currentLetter
+        );
+
+
+    if(
+        primeraLetra !==
+        letraActual
+    ){
+
+        resultado.textContent =
+            "❌ Debe comenzar con la letra " +
+            currentLetter +
+            ".";
+
+
+        resultado.className =
+            "resultado incorrecto";
+
+
+        playSound(
+            "error"
+        );
+
+
+        return;
+
+    }
+
+
+    /*
+        Buscar categoría.
+    */
+
+    const categoria =
+        baseDePalabras[
+            currentCategory
+        ];
+
+
+    if(!categoria){
+
+        resultado.textContent =
+            "⚠️ No existe esta categoría en el JSON.";
+
+
+        resultado.className =
+            "resultado incorrecto";
+
+
+        return;
+
+    }
+
+
+    /*
+        Obtener palabras válidas
+        para la letra.
+    */
+
+    const lista =
+        categoria[
+            currentLetter
+        ] || [];
+
+
+    /*
+        Comparar sin tildes.
+    */
+
+    const encontrada =
+        lista.some(
+            palabra =>
+                normalizar(
+                    palabra
+                ) ===
+                respuestaNormalizada
+        );
+
+
+    if(
+        encontrada
+    ){
+
+        resultado.textContent =
+            "✅ ¡Correcto! " +
+            respuesta;
+
+
+        resultado.className =
+            "resultado correcto";
+
+
+        subDisplay.textContent =
+            "🎉 ¡Respuesta válida!";
+
+
+        playSound(
+            "correcto"
+        );
+
+
+        detenerTemporizador();
+
+
+        /*
+            Bloquear para que no cambien
+            la respuesta después de acertar.
+        */
+
+        answerInput.disabled =
+            true;
+
+
+        btnComprobar.disabled =
+            true;
+
+
+        /*
+            Avisar si se terminó la ronda.
+        */
+
+        comprobarFinRonda();
+
+    }
+
+    else{
+
+        resultado.textContent =
+            "❌ Esa palabra no está en la categoría " +
+            currentCategory +
+            ".";
+
+
+        resultado.className =
+            "resultado incorrecto";
+
+
+        subDisplay.textContent =
+            "❌ Palabra no válida";
+
+
+        playSound(
+            "error"
+        );
+
+    }
+
+}
+
+
+/* =====================================================
+   BOTÓN COMPROBAR
+===================================================== */
+
+btnComprobar.addEventListener(
+    "click",
+    comprobarRespuesta
+);
+
+
+/* =====================================================
+   ENTER
+===================================================== */
+
+answerInput.addEventListener(
+    "keydown",
+    function(event){
+
+        if(
+            event.key === "Enter"
+        ){
+
+            event.preventDefault();
+
+            comprobarRespuesta();
+
+        }
+
+    }
+);
+
+
+/* =====================================================
+   BOTÓN GIRAR
+===================================================== */
+
+btnGirar.addEventListener(
+    "click",
+    spinWheel
+);
+
+
+/* =====================================================
+   CLIC SOBRE RULETA
+===================================================== */
+
+canvas.addEventListener(
+    "click",
+    function(){
+
+        spinWheel();
+
+    }
+);
+
+
+/* =====================================================
+   CATEGORÍA PERSONALIZADA
+===================================================== */
+
+categoriaPersonalizada.addEventListener(
+    "input",
+    function(){
+
+        if(
+            this.value.trim() !== ""
+        ){
+
+            categoriaSelect.value =
+                "";
+
+        }
+
+    }
+);
+
+
+/* =====================================================
+   SELECT DE CATEGORÍA
+===================================================== */
+
+categoriaSelect.addEventListener(
+    "change",
+    function(){
+
+        if(
+            this.value !== ""
+        ){
+
+            categoriaPersonalizada.value =
+                "";
+
+        }
+
+    }
+);
+
+
+/* =====================================================
+   ESPACIO = GIRAR
+===================================================== */
+
+document.addEventListener(
+    "keydown",
+    function(event){
+
+        /*
+            No girar mientras el usuario
+            está escribiendo.
+        */
+
+        if(
+            event.code === "Space" &&
+            document.activeElement !==
+            answerInput &&
+            document.activeElement !==
+            categoriaPersonalizada
+        ){
+
+            event.preventDefault();
+
+
+            if(
+                !isSpinning
+            ){
+
+                spinWheel();
+
+            }
+
+        }
+
+    }
+);
+
+
+/* =====================================================
+   INICIALIZAR
+===================================================== */
+
+function init(){
+
+    currentRotation =
+        Math.random() *
+        Math.PI *
+        2;
+
+
+    drawWheel(
+        currentRotation
+    );
+
+
+    actualizarInfo();
+
+
+    cargarPalabras();
+
+}
+
+
+init();
+
+
+</script>
+
+</body>
+</html>
