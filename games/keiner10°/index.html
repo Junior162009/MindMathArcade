@@ -644,27 +644,11 @@ Escoge una categoría
 
 
 <select id="categoriaSelect">
-
-    <option value="Animal">
-        🐾 Animal
-    </option>
-
-    <option value="Fruta">
-        🍎 Fruta
-    </option>
-
-    <option value="Pais">
-        🌎 País
-    </option>
-
-    <option value="Color">
-        🎨 Color
-    </option>
-
-    <option value="Objeto">
-        📦 Objeto
-    </option>
-
+    <option value="Animal">🐾 Animal</option>
+    <option value="Fruta">🍎 Fruta</option>
+    <option value="Pais">🌎 País</option>
+    <option value="Color">🎨 Color</option>
+    <option value="Objeto">📦 Objeto</option>
 </select>
 
 
@@ -1155,17 +1139,6 @@ async function cargarPalabras(){
 ===================================================== */
 
 function getCategoria(){
-
-    const personalizada =
-        categoriaPersonalizada.value.trim();
-
-
-    if(personalizada !== ""){
-
-        return personalizada;
-
-    }
-
 
     return categoriaSelect.value;
 
@@ -2598,16 +2571,7 @@ canvas.addEventListener(
 categoriaSelect.addEventListener(
     "change",
     function(){
-
-        if(
-            this.value !== ""
-        ){
-
-            categoriaPersonalizada.value =
-                "";
-
-        }
-
+        // Solo usamos las 5 categorias del selector.
     }
 );
 
@@ -2630,7 +2594,7 @@ document.addEventListener(
             document.activeElement !==
             answerInput &&
             document.activeElement !==
-            categoriaPersonalizada
+            categoriaSelect
         ){
 
             event.preventDefault();
