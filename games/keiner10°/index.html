@@ -171,6 +171,19 @@ canvas{
     line-height:1;
 
     color:#f7e05e;
+    transition: transform .25s ease, color .25s ease, text-shadow .25s ease;
+}
+
+.letter-result.correct-letter{
+    color:#58d68d;
+    transform:scale(1.15);
+    text-shadow:0 0 18px rgba(88,214,141,.65);
+}
+
+.letter-result.wrong-letter{
+    color:#ff5f5f;
+    transform:scale(1.15);
+    text-shadow:0 0 18px rgba(255,95,95,.65);
 }
 
 .category-label{
@@ -654,16 +667,6 @@ input::placeholder{
 }
 
 
-
-/* REVELACION DE LETRA */
-.letter-reveal{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;background:rgba(10,20,30,.72);backdrop-filter:blur(4px);opacity:0;pointer-events:none;transition:opacity .2s ease}
-.letter-reveal.show{opacity:1}
-.reveal-card{background:#1b2d3e;border:3px solid #f7e05e;border-radius:32px;padding:28px 55px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.7);transform:scale(.65);transition:transform .35s cubic-bezier(.17,.89,.32,1.35)}
-.letter-reveal.show .reveal-card{transform:scale(1)}
-.reveal-small{font-size:1rem;color:#c4d3df;font-weight:700}.reveal-letter{font-size:7rem;line-height:1;font-weight:1000;color:#f7e05e;text-shadow:0 6px 0 #9a7809,0 0 30px rgba(247,224,94,.5)}
-.reveal-text{font-size:1.1rem;color:#fff;margin-top:8px}.reveal-category{color:#58d68d;font-weight:900}
-@media(max-width:500px){.reveal-card{padding:24px 42px}.reveal-letter{font-size:5.5rem}}
-
 </style>
 </head>
 
@@ -679,15 +682,6 @@ id="loading">
 
 </div>
 
-
-
-<div class="letter-reveal" id="letterReveal">
-  <div class="reveal-card">
-    <div class="reveal-small">¡LA LETRA ES!</div>
-    <div class="reveal-letter" id="revealLetter">A</div>
-    <div class="reveal-text">Categoría: <span class="reveal-category" id="revealCategory">Animal</span></div>
-  </div>
-</div>
 
 <div class="card">
 
@@ -1093,10 +1087,6 @@ const numeroRondaTexto =
 document.getElementById(
     "numeroRonda"
 );
-
-const letterReveal = document.getElementById("letterReveal");
-const revealLetter = document.getElementById("revealLetter");
-const revealCategory = document.getElementById("revealCategory");
 
 
 /* =====================================================
@@ -1989,14 +1979,23 @@ function iniciarTemporizador(){
                     answerInput.disabled =
                         true;
 
-
                     btnComprobar.disabled =
                         true;
 
-
+                    /*
+                       No respondió: la letra NO se elimina.
+                       Puede volver a girar y la letra seguirá disponible.
+                    */
+                    limpiarColorLetra();
                     subDisplay.textContent =
-                        "⏰ Tiempo agotado";
+                        "⏰ Sin respuesta — puedes volver a girar";
 
+                    btnGirar.disabled = false;
+                    isSpinning = false;
+
+                    answerBox.classList.remove(
+                        "active"
+                    );
 
                     playSound(
                         "error"
@@ -2029,21 +2028,62 @@ function detenerTemporizador(){
 
 
 /* =====================================================
-   GIRAR RULETA
+   ESTADO DE LA RESPUESTA / SIGUIENTE GIRO
 ===================================================== */
 
-function mostrarLetraAnimada(letra, categoria){
-    revealLetter.textContent = letra;
-    revealCategory.textContent = categoria;
-    letterReveal.classList.add("show");
-    setTimeout(() => {
-        letterReveal.classList.remove("show");
-        setTimeout(() => {
-            answerBox.classList.add("active");
-            answerInput.focus();
-        }, 220);
-    }, 1200);
+function prepararSiguienteGiro(){
+
+    detenerTemporizador();
+
+    answerBox.classList.remove(
+        "active"
+    );
+
+    answerInput.value = "";
+    answerInput.disabled = false;
+    btnComprobar.disabled = false;
+
+    btnGirar.disabled = false;
+    isSpinning = false;
+
+    resultado.textContent = "";
+    resultado.className = "resultado";
+
+    subDisplay.textContent = "Listo para girar";
 }
+
+
+function marcarLetraCorrecta(){
+    letterDisplay.classList.remove(
+        "wrong-letter"
+    );
+    letterDisplay.classList.add(
+        "correct-letter"
+    );
+}
+
+
+function marcarLetraIncorrecta(){
+    letterDisplay.classList.remove(
+        "correct-letter"
+    );
+    letterDisplay.classList.add(
+        "wrong-letter"
+    );
+}
+
+
+function limpiarColorLetra(){
+    letterDisplay.classList.remove(
+        "correct-letter",
+        "wrong-letter"
+    );
+}
+
+
+/* =====================================================
+   GIRAR RULETA
+===================================================== */
 
 function spinWheel(){
 
@@ -2335,12 +2375,12 @@ function spinWheel(){
 
 
             /*
-                Registrar letra usada.
+                IMPORTANTE:
+                La letra todavía NO se elimina.
+                Solo se elimina cuando el usuario responde correctamente.
             */
 
-            usarLetra(
-                currentLetter
-            );
+            limpiarColorLetra();
 
 
             /*
@@ -2367,12 +2407,30 @@ function spinWheel(){
                 currentCategory;
 
 
-            mostrarLetraAnimada(currentLetter, currentCategory);
+            answerBox.classList.add(
+                "active"
+            );
 
-            /* El jugador responde después de ver la letra. */
-            setTimeout(function(){
-                iniciarTemporizador();
-            }, 1500);
+
+            /*
+                Temporizador.
+            */
+
+            iniciarTemporizador();
+
+
+            /*
+                Enfocar campo.
+            */
+
+            setTimeout(
+                function(){
+
+                    answerInput.focus();
+
+                },
+                150
+            );
 
 
             isSpinning =
@@ -2426,12 +2484,10 @@ function comprobarRespuesta(){
     ){
 
         resultado.textContent =
-            "⚠️ Escribe una palabra.";
-
+            "⚠️ Escribe una palabra o espera a que termine el tiempo para volver a girar.";
 
         resultado.className =
             "resultado incorrecto";
-
 
         return;
 
@@ -2479,12 +2535,13 @@ function comprobarRespuesta(){
         resultado.className =
             "resultado incorrecto";
 
+        marcarLetraIncorrecta();
 
         playSound(
             "error"
         );
 
-
+        /* La letra sigue disponible; puede intentarlo de nuevo. */
         return;
 
     }
@@ -2556,32 +2613,42 @@ function comprobarRespuesta(){
         subDisplay.textContent =
             "🎉 ¡Respuesta válida!";
 
+        marcarLetraCorrecta();
 
         playSound(
             "correcto"
         );
 
-
         detenerTemporizador();
 
-
         /*
-            Bloquear para que no cambien
-            la respuesta después de acertar.
+            RESPUESTA CORRECTA:
+            ahora sí quitamos la letra de la ronda.
         */
+        usarLetra(
+            currentLetter
+        );
 
         answerInput.disabled =
             true;
 
-
         btnComprobar.disabled =
             true;
 
+        /* Puede volver a girar después de acertar. */
+        setTimeout(function(){
+            answerBox.classList.remove(
+                "active"
+            );
+            btnGirar.disabled = false;
+            isSpinning = false;
+            subDisplay.textContent =
+                "¡Correcto! Puedes volver a girar";
+        }, 900);
 
         /*
             Avisar si se terminó la ronda.
         */
-
         comprobarFinRonda();
 
     }
@@ -2599,12 +2666,33 @@ function comprobarRespuesta(){
 
 
         subDisplay.textContent =
-            "❌ Palabra no válida";
+            "❌ Palabra no válida — la letra sigue disponible";
 
+        marcarLetraIncorrecta();
 
         playSound(
             "error"
         );
+
+        detenerTemporizador();
+
+        answerInput.disabled = true;
+        btnComprobar.disabled = true;
+
+        /*
+            RESPUESTA INCORRECTA:
+            la letra NO se elimina.
+            Después de mostrar el rojo, puede volver a girar.
+        */
+        setTimeout(function(){
+            answerBox.classList.remove(
+                "active"
+            );
+            btnGirar.disabled = false;
+            isSpinning = false;
+            subDisplay.textContent =
+                "Incorrecto. La letra queda disponible";
+        }, 900);
 
     }
 
