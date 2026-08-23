@@ -654,6 +654,16 @@ input::placeholder{
 }
 
 
+
+/* REVELACION DE LETRA */
+.letter-reveal{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;background:rgba(10,20,30,.72);backdrop-filter:blur(4px);opacity:0;pointer-events:none;transition:opacity .2s ease}
+.letter-reveal.show{opacity:1}
+.reveal-card{background:#1b2d3e;border:3px solid #f7e05e;border-radius:32px;padding:28px 55px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.7);transform:scale(.65);transition:transform .35s cubic-bezier(.17,.89,.32,1.35)}
+.letter-reveal.show .reveal-card{transform:scale(1)}
+.reveal-small{font-size:1rem;color:#c4d3df;font-weight:700}.reveal-letter{font-size:7rem;line-height:1;font-weight:1000;color:#f7e05e;text-shadow:0 6px 0 #9a7809,0 0 30px rgba(247,224,94,.5)}
+.reveal-text{font-size:1.1rem;color:#fff;margin-top:8px}.reveal-category{color:#58d68d;font-weight:900}
+@media(max-width:500px){.reveal-card{padding:24px 42px}.reveal-letter{font-size:5.5rem}}
+
 </style>
 </head>
 
@@ -669,6 +679,15 @@ id="loading">
 
 </div>
 
+
+
+<div class="letter-reveal" id="letterReveal">
+  <div class="reveal-card">
+    <div class="reveal-small">¡LA LETRA ES!</div>
+    <div class="reveal-letter" id="revealLetter">A</div>
+    <div class="reveal-text">Categoría: <span class="reveal-category" id="revealCategory">Animal</span></div>
+  </div>
+</div>
 
 <div class="card">
 
@@ -1074,6 +1093,10 @@ const numeroRondaTexto =
 document.getElementById(
     "numeroRonda"
 );
+
+const letterReveal = document.getElementById("letterReveal");
+const revealLetter = document.getElementById("revealLetter");
+const revealCategory = document.getElementById("revealCategory");
 
 
 /* =====================================================
@@ -2009,6 +2032,19 @@ function detenerTemporizador(){
    GIRAR RULETA
 ===================================================== */
 
+function mostrarLetraAnimada(letra, categoria){
+    revealLetter.textContent = letra;
+    revealCategory.textContent = categoria;
+    letterReveal.classList.add("show");
+    setTimeout(() => {
+        letterReveal.classList.remove("show");
+        setTimeout(() => {
+            answerBox.classList.add("active");
+            answerInput.focus();
+        }, 220);
+    }, 1200);
+}
+
 function spinWheel(){
 
     if(isSpinning){
@@ -2331,30 +2367,12 @@ function spinWheel(){
                 currentCategory;
 
 
-            answerBox.classList.add(
-                "active"
-            );
+            mostrarLetraAnimada(currentLetter, currentCategory);
 
-
-            /*
-                Temporizador.
-            */
-
-            iniciarTemporizador();
-
-
-            /*
-                Enfocar campo.
-            */
-
-            setTimeout(
-                function(){
-
-                    answerInput.focus();
-
-                },
-                150
-            );
+            /* El jugador responde después de ver la letra. */
+            setTimeout(function(){
+                iniciarTemporizador();
+            }, 1500);
 
 
             isSpinning =
