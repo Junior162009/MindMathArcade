@@ -16,7 +16,9 @@
 }
 
 body{
-    min-height:100vh;
+    height:100dvh;
+    min-height:100dvh;
+    overflow:hidden;
     background:
         radial-gradient(circle at top,#263f58 0%,#111b26 65%);
     color:white;
@@ -26,18 +28,26 @@ body{
     justify-content:center;
     align-items:center;
 
-    padding:15px;
+    padding:10px;
 }
 
 .card{
     width:100%;
-    max-width:720px;
+    max-width:900px;
+    height:calc(100dvh - 20px);
+    max-height:calc(100dvh - 20px);
+    overflow:hidden;
 
     background:#2d4055;
 
     border-radius:35px;
 
-    padding:25px;
+    padding:14px 18px;
+
+    display:flex;
+    flex-direction:column;
+    justify-content:flex-start;
+    align-items:center;
 
     box-shadow:
         0 25px 60px rgba(0,0,0,.65),
@@ -69,11 +79,11 @@ h1{
 .canvas-wrapper{
     position:relative;
 
-    width:min(90vw,560px);
-
+    width:min(88vw, 52dvh, 560px);
+    height:min(88vw, 52dvh, 560px);
     aspect-ratio:1;
-
-    margin:0 auto 20px;
+    flex:0 0 auto;
+    margin:0 auto 10px;
 }
 
 canvas{
@@ -297,7 +307,7 @@ input::placeholder{
 ===================================================== */
 
 .round-info{
-    margin-top:15px;
+    margin-top:7px;
 
     display:flex;
 
@@ -334,7 +344,7 @@ input::placeholder{
 .answer-box{
     display:none;
 
-    margin-top:18px;
+    margin-top:8px;
 
     background:#1a2c3d;
 
@@ -445,7 +455,7 @@ input::placeholder{
 .timer{
     display:none;
 
-    margin-top:15px;
+    margin-top:6px;
 
     text-align:center;
 
@@ -519,55 +529,130 @@ input::placeholder{
 @media(max-width:500px){
 
     body{
-        padding:8px;
+        padding:4px;
     }
 
     .card{
-        padding:18px 12px 22px;
-
-        border-radius:25px;
+        height:calc(100dvh - 8px);
+        max-height:calc(100dvh - 8px);
+        padding:8px 8px 10px;
+        border-radius:22px;
     }
 
     h1{
-        font-size:1.7rem;
+        font-size:1.45rem;
+        margin-bottom:6px;
+        letter-spacing:1px;
+    }
 
-        margin-bottom:15px;
+    .canvas-wrapper{
+        width:min(88vw, 43dvh, 430px);
+        height:min(88vw, 43dvh, 430px);
+        margin-bottom:7px;
     }
 
     .arrow{
-        font-size:3rem;
-
-        top:-18px;
+        font-size:2.6rem;
+        top:-16px;
     }
 
     .center-box{
-        width:115px;
-        height:95px;
-
-        border-radius:24px;
+        width:100px;
+        height:82px;
+        border-radius:20px;
     }
 
     .letter-result{
-        font-size:2.7rem;
+        font-size:2.35rem;
     }
 
     .category-label{
-        font-size:.65rem;
+        font-size:.58rem;
+        max-width:82px;
+        padding:3px 7px;
+    }
 
-        max-width:95px;
+    .sub{
+        font-size:.55rem;
     }
 
     .controls{
-        flex-direction:column;
-    }
-
-    select,
-    input,
-    .btn-girar{
         width:100%;
+        flex-direction:row;
+        gap:6px;
+        margin-top:2px;
     }
 
+    select{
+        flex:1 1 100%;
+        width:100%;
+        padding:9px 12px;
+        font-size:.9rem;
+    }
+
+    .btn-girar{
+        flex:1 1 100%;
+        width:100%;
+        padding:9px 20px;
+        font-size:1rem;
+    }
+
+    .round-info{
+        width:100%;
+        gap:5px;
+        margin-top:5px;
+    }
+
+    .info{
+        padding:5px 9px;
+        font-size:.68rem;
+    }
+
+    .answer-box{
+        width:100%;
+        margin-top:6px;
+        padding:9px;
+        gap:6px;
+        border-radius:16px;
+    }
+
+    .answer-title{
+        font-size:.8rem;
+    }
+
+    .answer-letter{
+        font-size:1rem;
+    }
+
+    .answer-input{
+        padding:8px 12px;
+        font-size:.95rem;
+    }
+
+    .btn-comprobar{
+        padding:8px 20px;
+        font-size:.85rem;
+    }
+
+    .resultado{
+        font-size:.8rem;
+    }
+
+    .timer{
+        margin-top:3px;
+        font-size:.7rem;
+    }
+
+    .timer span{
+        font-size:1rem;
+    }
+
+    .footer{
+        margin-top:4px;
+        font-size:.6rem;
+    }
 }
+
 
 </style>
 </head>
