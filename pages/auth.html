@@ -96,10 +96,20 @@
   let pendingRegistration = null;
   let recoveryUser = null;
   let recaptchaVerifier = null;
+  let redirectingHome = false;
+
+  // Siempre volvemos al portal desde esta página, sin dejar una copia de
+  // "auth.html" en el historial del navegador.
+  const HOME_URL = new URL('../index.html', window.location.href).href;
 
   function showMessage(text, color = '#FF0033') {
     messageEl.textContent = text;
     messageEl.style.color = color;
+  }
+
+  function setLoginBusy(isBusy) {
+    btnLogin.disabled = isBusy;
+    btnLogin.textContent = isBusy ? 'ENTRANDO…' : 'ENTRAR';
   }
 
   function usernameKey(username) {
@@ -155,12 +165,34 @@
   }
 
   async function finishSession(user) {
-    const snapshot = await cloud.database.ref('users/' + user.uid).once('value');
-    const profile = snapshot.val();
-    if (!profile || !profile.username) throw new Error('No se encontró el perfil de esta cuenta.');
-    Tecnomath.setSession(profile.username);
-    showMessage('¡Bienvenido/a ' + profile.username + '!', '#39FF14');
-    setTimeout(() => { window.location.href = '../index.html'; }, 500);
+    if (redirectingHome) return;
+    redirectingHome = true;
+    setLoginBusy(true);
+
+    try {
+      let profile = null;
+      try {
+        const snapshot = await cloud.database.ref('users/' + user.uid).once('value');
+        profile = snapshot.val();
+      } catch (profileError) {
+        // El acceso ya fue validado por Firebase Auth. No impedimos volver al
+        // portal si el perfil tarda en sincronizarse o no puede leerse.
+        console.warn('No se pudo cargar el perfil; se usará el correo.', profileError);
+      }
+      // Las cuentas antiguas pueden no tener un perfil en la base de datos.
+      // Firebase ya confirmó la identidad, así que se les permite entrar con
+      // un nombre derivado del correo en lugar de dejarlas atrapadas aquí.
+      const username = profile && profile.username
+        ? profile.username
+        : (user.email || 'jugador').split('@')[0];
+      Tecnomath.setSession(username);
+      showMessage('¡Bienvenido/a ' + username + '! Volviendo al portal…', '#39FF14');
+      window.setTimeout(() => window.location.replace(HOME_URL), 250);
+    } catch (error) {
+      redirectingHome = false;
+      setLoginBusy(false);
+      throw error;
+    }
   }
 
   function updateUI() {
@@ -168,6 +200,7 @@
   }
 
   btnLogin.addEventListener('click', async () => {
+    if (redirectingHome) return;
     try {
       const credential = await cloud.auth.signInWithEmailAndPassword(emailEl.value.trim(), passwordEl.value);
       await finishSession(credential.user);
@@ -244,9 +277,7 @@
     }
     if (newPasswordEl.value.length < 6) throw new Error('La nueva contraseña debe tener mínimo 6 caracteres.');
     await recoveryUser.updatePassword(newPasswordEl.value);
-    Tecnomath.setSession(profile.username);
-    showMessage('Contraseña actualizada. Redirigiendo…', '#39FF14');
-    setTimeout(() => { window.location.href = '../index.html'; }, 500);
+    await finishSession(recoveryUser);
   }
 
   btnVerify.addEventListener('click', async () => {
@@ -301,6 +332,13 @@
   });
 
   updateUI();
+  // Si Firebase restauró una sesión al cargar esta página, sincroniza el
+  // identificador local y vuelve directamente al inicio.
+  cloud.auth.onAuthStateChanged(user => {
+    if (user && !redirectingHome) {
+      finishSession(user).catch(error => showMessage(friendlyError(error)));
+    }
+  });
 </script>
 </body>
 </html>
