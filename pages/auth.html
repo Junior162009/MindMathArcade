@@ -182,9 +182,12 @@
       // Las cuentas antiguas pueden no tener un perfil en la base de datos.
       // Firebase ya confirmó la identidad, así que se les permite entrar con
       // un nombre derivado del correo en lugar de dejarlas atrapadas aquí.
+      const rememberedUser = Tecnomath.getCurrentUser();
       const username = profile && profile.username
         ? profile.username
-        : (user.email || 'jugador').split('@')[0];
+        : rememberedUser && rememberedUser.username
+          ? rememberedUser.username
+          : (user.email || 'jugador').split('@')[0];
       Tecnomath.setSession(username);
       showMessage('¡Bienvenido/a ' + username + '! Volviendo al portal…', '#39FF14');
       window.setTimeout(() => window.location.replace(HOME_URL), 250);
@@ -332,13 +335,6 @@
   });
 
   updateUI();
-  // Si Firebase restauró una sesión al cargar esta página, sincroniza el
-  // identificador local y vuelve directamente al inicio.
-  cloud.auth.onAuthStateChanged(user => {
-    if (user && !redirectingHome) {
-      finishSession(user).catch(error => showMessage(friendlyError(error)));
-    }
-  });
 </script>
 </body>
 </html>
