@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Adivina la Bandera - Teclado Virtual</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(145deg, #0b0b0b, #1a1a1a);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #fff;
+            padding: 20px;
+            margin: 0;
+        }
+
+        .game-container {
+            background: #2a2a2a;
+            border-radius: 30px;
+            padding: 40px 30px;
+            max-width: 700px;
+            width: 100%;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.8);
+            text-align: center;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .title {
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            color: #f0c040;
+        }
+
+        .stats {
+            display: flex;
+            gap: 16px;
+            font-size: 16px;
+            background: #1e1e1e;
+            padding: 8px 16px;
+            border-radius: 40px;
+            flex-wrap: wrap;
+        }
+
+        .stats span {
+            color: #aaa;
+        }
+
+        .stats .num {
+            color: #fff;
+            font-weight: 600;
+        }
+
+        .flag-container {
+            margin: 20px 0;
+            background: #1e1e1e;
+            border-radius: 20px;
+            padding: 20px;
+            min-height: 160px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .flag-container img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+            width: 160px;
+            height: auto;
+        }
+
+        .letters-container {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin: 20px 0 10px;
+            min-height: 60px;
+        }
+
+        .letter-slot {
+            width: 50px;
+            height: 50px;
+            background: #1e1e1e;
+            border: 2px solid #444;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            font-weight: 700;
+            color: #fff;
+            text-transform: uppercase;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .letter-slot.revealed {
+            border-color: #f0c040;
+            background: #2a2a2a;
+            box-shadow: 0 0 12px rgba(240, 192, 64, 0.3);
+            cursor: default;
+        }
+
+        .letter-slot.selected {
+            border-color: #4fc3f7;
+            background: #1e3a4a;
+            box-shadow: 0 0 16px rgba(79, 195, 247, 0.5);
+            transform: scale(1.05);
+        }
+
+        .letter-slot.filled {
+            border-color: #888;
+        }
+
+        .keyboard {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            margin: 16px 0 12px;
+        }
+
+        .keyboard-row {
+            display: flex;
+            gap: 6px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .key {
+            width: 42px;
+            height: 48px;
+            border-radius: 8px;
+            border: none;
+            background: #3a3a3a;
+            color: #fff;
+            font-size: 20px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-transform: uppercase;
+        }
+
+        .key:hover {
+            background: #555;
+            transform: scale(1.05);
+        }
+
+        .key:active {
+            transform: scale(0.95);
+            background: #666;
+        }
+
+        .key.special {
+            background: #555;
+            width: 70px;
+            font-size: 16px;
+        }
+
+        .key.special:hover {
+            background: #777;
+        }
+
+        .key:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .feedback {
+            margin: 12px 0;
+            font-size: 20px;
+            min-height: 36px;
+            font-weight: 600;
+        }
+
+        .feedback.correct {
+            color: #4caf50;
+        }
+
+        .feedback.wrong {
+            color: #f44336;
+        }
+
+        .feedback.info {
+            color: #f0c040;
+        }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 30px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .btn-primary {
+            background: #f0c040;
+            color: #1a1a1a;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background: #e0b030;
+            transform: scale(1.02);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            background: #555;
+            color: #fff;
+        }
+
+        .btn-secondary:hover {
+            background: #666;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: #fff;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: #fff;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+        .footer {
+            margin-top: 20px;
+            font-size: 14px;
+            color: #777;
+        }
+
+        .game-over {
+            margin: 20px 0;
+            font-size: 22px;
+            font-weight: 700;
+        }
+
+        .game-over .highlight {
+            color: #f0c040;
+        }
+
+        @media (max-width: 500px) {
+            .game-container {
+                padding: 20px 16px;
+            }
+            .letter-slot {
+                width: 38px;
+                height: 38px;
+                font-size: 22px;
+            }
+            .flag-container img {
+                width: 120px;
+            }
+            .title {
+                font-size: 22px;
+            }
+            .stats {
+                font-size: 14px;
+                gap: 10px;
+            }
+            .key {
+                width: 32px;
+                height: 40px;
+                font-size: 16px;
+            }
+            .key.special {
+                width: 60px;
+                font-size: 14px;
+            }
+            .btn {
+                font-size: 16px;
+                padding: 10px 18px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="game-container" id="app">
+        <div class="header">
+            <div class="title">PAÍSES 1</div>
+            <div class="stats">
+                <span><span class="num" id="aciertos">0</span>/<span id="totalJugados">0</span></span>
+                <span><span class="num" id="intentosRestantes">5</span>/5</span>
+                <span>MAX. <span class="num" id="maxAciertos">24</span></span>
+            </div>
+        </div>
+
+        <div class="flag-container" id="flagDisplay">
+            <img src="https://flagcdn.com/128x96/es.png" alt="Bandera" />
+        </div>
+
+        <div class="letters-container" id="lettersContainer"></div>
+
+        <div class="keyboard" id="keyboard">
+            <div class="keyboard-row">
+                <button class="key" data-letter="q">q</button>
+                <button class="key" data-letter="w">w</button>
+                <button class="key" data-letter="e">e</button>
+                <button class="key" data-letter="r">r</button>
+                <button class="key" data-letter="t">t</button>
+                <button class="key" data-letter="y">y</button>
+                <button class="key" data-letter="u">u</button>
+                <button class="key" data-letter="i">i</button>
+                <button class="key" data-letter="o">o</button>
+                <button class="key" data-letter="p">p</button>
+            </div>
+            <div class="keyboard-row">
+                <button class="key" data-letter="a">a</button>
+                <button class="key" data-letter="s">s</button>
+                <button class="key" data-letter="d">d</button>
+                <button class="key" data-letter="f">f</button>
+                <button class="key" data-letter="g">g</button>
+                <button class="key" data-letter="h">h</button>
+                <button class="key" data-letter="j">j</button>
+                <button class="key" data-letter="k">k</button>
+                <button class="key" data-letter="l">l</button>
+                <button class="key" data-letter="ñ">ñ</button>
+            </div>
+            <div class="keyboard-row">
+                <button class="key" data-letter="z">z</button>
+                <button class="key" data-letter="x">x</button>
+                <button class="key" data-letter="c">c</button>
+                <button class="key" data-letter="v">v</button>
+                <button class="key" data-letter="b">b</button>
+                <button class="key" data-letter="n">n</button>
+                <button class="key" data-letter="m">m</button>
+                <button class="key special" data-letter="backspace">⌫ Borrar</button>
+            </div>
+        </div>
+
+        <div class="feedback" id="feedback"></div>
+
+        <div class="actions">
+            <button class="btn btn-secondary" id="giveUpBtn">Rendirse</button>
+            <button class="btn btn-primary" id="guessBtn">Adivinar</button>
+            <button class="btn btn-success" id="nextBtn" style="display: none;">Siguiente</button>
+        </div>
+
+        <div class="footer" id="gameOverMessage"></div>
+    </div>
+
+    <script>
+        // ---------- DATOS ----------
+        const paises = [
+            { nombre: "ESPANA", codigo: "es" },
+            { nombre: "FRANCIA", codigo: "fr" },
+            { nombre: "ITALIA", codigo: "it" },
+            { nombre: "ALEMANIA", codigo: "de" },
+            { nombre: "PORTUGAL", codigo: "pt" },
+            { nombre: "BRASIL", codigo: "br" },
+            { nombre: "ARGENTINA", codigo: "ar" },
+            { nombre: "MEXICO", codigo: "mx" },
+            { nombre: "ESTADOS UNIDOS", codigo: "us" },
+            { nombre: "REINO UNIDO", codigo: "gb" },
+            { nombre: "JAPON", codigo: "jp" },
+            { nombre: "CHINA", codigo: "cn" },
+            { nombre: "INDIA", codigo: "in" },
+            { nombre: "AUSTRALIA", codigo: "au" },
+            { nombre: "CANADA", codigo: "ca" },
+            { nombre: "RUSIA", codigo: "ru" },
+            { nombre: "EGIPTO", codigo: "eg" },
+            { nombre: "SUDAFRICA", codigo: "za" },
+            { nombre: "COREA DEL SUR", codigo: "kr" },
+            { nombre: "TURQUIA", codigo: "tr" },
+            { nombre: "HOLANDA", codigo: "nl" },
+            { nombre: "BELGICA", codigo: "be" },
+            { nombre: "SUIZA", codigo: "ch" },
+            { nombre: "SUECIA", codigo: "se" }
+        ];
+
+        paises.forEach(p => p.nombreSinEspacios = p.nombre.replace(/ /g, '').toUpperCase());
+
+        const TOTAL_PAISES = paises.length;
+        document.getElementById('maxAciertos').textContent = TOTAL_PAISES;
+
+        // ---------- ESTADO ----------
+        let paisesJugados = [];
+        let indiceActual = 0;
+        let aciertos = 0;
+        let totalJugados = 0;
+        let fallos = 0;
+        const MAX_FALLOS = 5;
+        let letrasReveladas = new Set();
+        let paisActual = null;
+        let juegoTerminado = false;
+        let paisResuelto = false;
+        let letrasIngresadas = [];
+        let selectedIndex = null;
+
+        // ---------- DOM ----------
+        const flagDisplay = document.getElementById('flagDisplay');
+        const lettersContainer = document.getElementById('lettersContainer');
+        const feedbackEl = document.getElementById('feedback');
+        const guessBtn = document.getElementById('guessBtn');
+        const giveUpBtn = document.getElementById('giveUpBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const aciertosSpan = document.getElementById('aciertos');
+        const totalJugadosSpan = document.getElementById('totalJugados');
+        const intentosRestantesSpan = document.getElementById('intentosRestantes');
+        const gameOverMessage = document.getElementById('gameOverMessage');
+        const keyboard = document.getElementById('keyboard');
+
+        // ---------- UTILIDADES ----------
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        // ---------- SELECCIÓN ----------
+        function limpiarSeleccion() {
+            if (selectedIndex !== null) {
+                const prev = lettersContainer.querySelector(`.letter-slot[data-index="${selectedIndex}"]`);
+                if (prev) prev.classList.remove('selected');
+            }
+        }
+
+        function seleccionarCasilla(index) {
+            if (paisResuelto || juegoTerminado) return;
+            if (index < 0 || index >= letrasIngresadas.length) return;
+            // No seleccionar si está revelada
+            if (letrasReveladas.has(index)) return;
+            limpiarSeleccion();
+            selectedIndex = index;
+            const slot = lettersContainer.querySelector(`.letter-slot[data-index="${index}"]`);
+            if (slot) slot.classList.add('selected');
+        }
+
+        function seleccionarPrimeraCasillaVacia() {
+            if (paisResuelto || juegoTerminado) return;
+            for (let i = 0; i < letrasIngresadas.length; i++) {
+                if (!letrasReveladas.has(i) && letrasIngresadas[i] === null) {
+                    seleccionarCasilla(i);
+                    return;
+                }
+            }
+            // Si no hay vacías, seleccionar la última no revelada (aunque esté llena)
+            for (let i = letrasIngresadas.length - 1; i >= 0; i--) {
+                if (!letrasReveladas.has(i)) {
+                    seleccionarCasilla(i);
+                    return;
+                }
+            }
+            // Si todo revelado, deseleccionar
+            limpiarSeleccion();
+            selectedIndex = null;
+        }
+
+        function avanzarSiguienteVacia() {
+            if (paisResuelto || juegoTerminado) return;
+            // Buscar desde el índice actual + 1
+            const start = (selectedIndex !== null) ? selectedIndex + 1 : 0;
+            for (let i = start; i < letrasIngresadas.length; i++) {
+                if (!letrasReveladas.has(i) && letrasIngresadas[i] === null) {
+                    seleccionarCasilla(i);
+                    return;
+                }
+            }
+            // Si no hay vacías, mantener la actual (o la última no revelada)
+            // pero mejor buscar la primera no revelada desde el principio
+            for (let i = 0; i < letrasIngresadas.length; i++) {
+                if (!letrasReveladas.has(i)) {
+                    seleccionarCasilla(i);
+                    return;
+                }
+            }
+            limpiarSeleccion();
+            selectedIndex = null;
+        }
+
+        function retrocederUnaCasilla() {
+            if (paisResuelto || juegoTerminado) return;
+            if (selectedIndex === null) {
+                seleccionarPrimeraCasillaVacia();
+                return;
+            }
+            let nuevoIndex = selectedIndex - 1;
+            // Buscar hacia atrás la primera no revelada
+            while (nuevoIndex >= 0 && letrasReveladas.has(nuevoIndex)) {
+                nuevoIndex--;
+            }
+            if (nuevoIndex < 0) {
+                // No hay casilla anterior no revelada, seleccionar la primera vacía
+                seleccionarPrimeraCasillaVacia();
+            } else {
+                seleccionarCasilla(nuevoIndex);
+            }
+        }
+
+        // ---------- ACTUALIZAR UI ----------
+        function actualizarUI() {
+            flagDisplay.innerHTML = `<img src="https://flagcdn.com/128x96/${paisActual.codigo}.png" alt="Bandera de ${paisActual.nombre}" />`;
+
+            lettersContainer.innerHTML = '';
+            const numLetras = paisActual.nombreSinEspacios.length;
+            for (let i = 0; i < numLetras; i++) {
+                const slot = document.createElement('div');
+                slot.className = 'letter-slot';
+                slot.dataset.index = i;
+                if (letrasReveladas.has(i)) {
+                    slot.classList.add('revealed');
+                    slot.textContent = paisActual.nombreSinEspacios[i];
+                } else {
+                    if (letrasIngresadas[i] !== null) {
+                        slot.textContent = letrasIngresadas[i];
+                        slot.classList.add('filled');
+                    } else {
+                        slot.textContent = '';
+                    }
+                    slot.addEventListener('click', () => {
+                        if (!paisResuelto && !juegoTerminado) {
+                            seleccionarCasilla(i);
+                        }
+                    });
+                }
+                if (selectedIndex === i && !letrasReveladas.has(i)) {
+                    slot.classList.add('selected');
+                }
+                lettersContainer.appendChild(slot);
+            }
+        }
+
+        function actualizarEstadisticas() {
+            aciertosSpan.textContent = aciertos;
+            totalJugadosSpan.textContent = totalJugados;
+            const restantes = Math.max(0, MAX_FALLOS - fallos);
+            intentosRestantesSpan.textContent = restantes;
+        }
+
+        function habilitarTeclado(habilitado) {
+            const keys = keyboard.querySelectorAll('.key');
+            keys.forEach(key => {
+                key.disabled = !habilitado || paisResuelto || juegoTerminado;
+            });
+        }
+
+        // ---------- LÓGICA DE JUEGO ----------
+        function cargarPais() {
+            if (indiceActual >= paisesJugados.length) {
+                terminarJuego();
+                return;
+            }
+
+            paisActual = paisesJugados[indiceActual];
+            totalJugados++;
+            fallos = 0;
+            letrasReveladas = new Set();
+            paisResuelto = false;
+            guessBtn.disabled = false;
+            giveUpBtn.style.display = 'inline-block';
+            nextBtn.style.display = 'none';
+            feedbackEl.textContent = '';
+            feedbackEl.className = 'feedback';
+
+            const numLetras = paisActual.nombreSinEspacios.length;
+            letrasIngresadas = new Array(numLetras).fill(null);
+
+            // Revelar 2 letras iniciales
+            const indicesLetras = [];
+            for (let i = 0; i < numLetras; i++) indicesLetras.push(i);
+            shuffle(indicesLetras);
+            const numIniciales = Math.min(2, indicesLetras.length);
+            for (let i = 0; i < numIniciales; i++) {
+                const idx = indicesLetras[i];
+                letrasReveladas.add(idx);
+                letrasIngresadas[idx] = paisActual.nombreSinEspacios[idx];
+            }
+
+            actualizarUI();
+            actualizarEstadisticas();
+            habilitarTeclado(true);
+            // Seleccionar primera casilla vacía
+            seleccionarPrimeraCasillaVacia();
+        }
+
+        function ponerLetraEnCasilla(letra) {
+            if (selectedIndex === null) {
+                // Si no hay selección, seleccionar la primera vacía
+                seleccionarPrimeraCasillaVacia();
+                if (selectedIndex === null) return;
+            }
+            if (paisResuelto || juegoTerminado) return;
+            if (letrasReveladas.has(selectedIndex)) {
+                feedbackEl.textContent = '⚠️ Esta casilla ya está revelada.';
+                feedbackEl.className = 'feedback info';
+                return;
+            }
+            // Si ya tiene la misma letra, no hacer nada
+            if (letrasIngresadas[selectedIndex] === letra) return;
+
+            letrasIngresadas[selectedIndex] = letra;
+            // Actualizar la casilla
+            const slot = lettersContainer.querySelector(`.letter-slot[data-index="${selectedIndex}"]`);
+            if (slot) {
+                slot.textContent = letra;
+                slot.classList.add('filled');
+            }
+            feedbackEl.textContent = '';
+            feedbackEl.className = 'feedback';
+            // Avanzar a la siguiente casilla vacía
+            avanzarSiguienteVacia();
+        }
+
+        function borrarLetra() {
+            if (selectedIndex === null) {
+                // Si no hay selección, no hacer nada
+                return;
+            }
+            if (paisResuelto || juegoTerminado) return;
+            if (letrasReveladas.has(selectedIndex)) {
+                feedbackEl.textContent = '⚠️ No puedes borrar una casilla revelada.';
+                feedbackEl.className = 'feedback info';
+                return;
+            }
+            // Si la casilla ya está vacía, igual retrocedemos
+            if (letrasIngresadas[selectedIndex] !== null) {
+                letrasIngresadas[selectedIndex] = null;
+                const slot = lettersContainer.querySelector(`.letter-slot[data-index="${selectedIndex}"]`);
+                if (slot) {
+                    slot.textContent = '';
+                    slot.classList.remove('filled');
+                }
+            }
+            feedbackEl.textContent = '';
+            feedbackEl.className = 'feedback';
+            // Retroceder a la casilla anterior
+            retrocederUnaCasilla();
+        }
+
+        function manejarAcierto() {
+            if (paisResuelto) return;
+            paisResuelto = true;
+            aciertos++;
+            feedbackEl.textContent = '✅ ¡Correcto!';
+            feedbackEl.className = 'feedback correct';
+            deshabilitarInput();
+            mostrarBotonSiguiente();
+            actualizarEstadisticas();
+            habilitarTeclado(false);
+            limpiarSeleccion();
+            selectedIndex = null;
+        }
+
+        function manejarFallo() {
+            if (paisResuelto) return;
+            fallos++;
+            actualizarEstadisticas();
+
+            if (fallos >= MAX_FALLOS) {
+                paisResuelto = true;
+                feedbackEl.textContent = `❌ Has fallado. La respuesta era: ${paisActual.nombre}`;
+                feedbackEl.className = 'feedback wrong';
+                const numLetras = paisActual.nombreSinEspacios.length;
+                for (let i = 0; i < numLetras; i++) {
+                    if (!letrasReveladas.has(i)) {
+                        letrasReveladas.add(i);
+                        letrasIngresadas[i] = paisActual.nombreSinEspacios[i];
+                    }
+                }
+                actualizarUI();
+                deshabilitarInput();
+                mostrarBotonSiguiente();
+                habilitarTeclado(false);
+                limpiarSeleccion();
+                selectedIndex = null;
+            } else {
+                // Revelar una letra aleatoria
+                const indicesNoRevelados = [];
+                for (let i = 0; i < paisActual.nombreSinEspacios.length; i++) {
+                    if (!letrasReveladas.has(i)) indicesNoRevelados.push(i);
+                }
+                if (indicesNoRevelados.length > 0) {
+                    const idx = indicesNoRevelados[Math.floor(Math.random() * indicesNoRevelados.length)];
+                    letrasReveladas.add(idx);
+                    letrasIngresadas[idx] = paisActual.nombreSinEspacios[idx];
+                }
+                actualizarUI();
+                feedbackEl.textContent = `❌ Incorrecto. Intentos restantes: ${MAX_FALLOS - fallos}`;
+                feedbackEl.className = 'feedback wrong';
+                // Mantener selección o seleccionar primera vacía
+                if (selectedIndex === null || letrasReveladas.has(selectedIndex)) {
+                    seleccionarPrimeraCasillaVacia();
+                } else {
+                    // Si la selección actual sigue siendo válida, la mantenemos
+                }
+            }
+        }
+
+        function manejarRendirse() {
+            if (paisResuelto || juegoTerminado) return;
+            paisResuelto = true;
+            feedbackEl.textContent = `😞 Te has rendido. La respuesta era: ${paisActual.nombre}`;
+            feedbackEl.className = 'feedback info';
+            const numLetras = paisActual.nombreSinEspacios.length;
+            for (let i = 0; i < numLetras; i++) {
+                if (!letrasReveladas.has(i)) {
+                    letrasReveladas.add(i);
+                    letrasIngresadas[i] = paisActual.nombreSinEspacios[i];
+                }
+            }
+            actualizarUI();
+            deshabilitarInput();
+            mostrarBotonSiguiente();
+            habilitarTeclado(false);
+            limpiarSeleccion();
+            selectedIndex = null;
+        }
+
+        function comprobarRespuesta() {
+            if (paisResuelto || juegoTerminado) return;
+            // Verificar si todas las casillas están llenas
+            const numLetras = paisActual.nombreSinEspacios.length;
+            let todasLlenas = true;
+            for (let i = 0; i < numLetras; i++) {
+                if (letrasIngresadas[i] === null) {
+                    todasLlenas = false;
+                    break;
+                }
+            }
+            if (!todasLlenas) {
+                feedbackEl.textContent = '✏️ Rellena todas las casillas.';
+                feedbackEl.className = 'feedback info';
+                return;
+            }
+            const palabraIngresada = letrasIngresadas.join('');
+            if (palabraIngresada === paisActual.nombreSinEspacios) {
+                manejarAcierto();
+            } else {
+                manejarFallo();
+            }
+        }
+
+        function deshabilitarInput() {
+            guessBtn.disabled = true;
+            giveUpBtn.style.display = 'none';
+        }
+
+        function mostrarBotonSiguiente() {
+            nextBtn.style.display = 'inline-block';
+        }
+
+        function siguientePais() {
+            if (juegoTerminado) return;
+            indiceActual++;
+            cargarPais();
+        }
+
+        function terminarJuego() {
+            juegoTerminado = true;
+            guessBtn.disabled = true;
+            giveUpBtn.style.display = 'none';
+            nextBtn.style.display = 'none';
+            flagDisplay.innerHTML = '<span style="font-size: 4rem;">🏁</span>';
+            lettersContainer.innerHTML = '';
+            feedbackEl.textContent = '';
+            feedbackEl.className = 'feedback';
+            habilitarTeclado(false);
+            limpiarSeleccion();
+            selectedIndex = null;
+            const porcentaje = Math.round((aciertos / TOTAL_PAISES) * 100);
+            gameOverMessage.innerHTML = `
+                <div class="game-over">
+                    🎉 <span class="highlight">¡Juego terminado!</span><br>
+                    Acertaste <span class="highlight">${aciertos}</span> de ${TOTAL_PAISES} países (${porcentaje}%)
+                </div>
+                <button class="btn btn-primary" id="reiniciarBtn" style="margin-top: 15px;">🔄 Jugar de nuevo</button>
+            `;
+            document.getElementById('reiniciarBtn').addEventListener('click', () => {
+                gameOverMessage.innerHTML = '';
+                iniciarJuego();
+            });
+            actualizarEstadisticas();
+        }
+
+        function iniciarJuego() {
+            paisesJugados = shuffle([...paises]);
+            indiceActual = 0;
+            aciertos = 0;
+            totalJugados = 0;
+            juegoTerminado = false;
+            gameOverMessage.innerHTML = '';
+            nextBtn.style.display = 'none';
+            giveUpBtn.style.display = 'inline-block';
+            guessBtn.disabled = false;
+            selectedIndex = null;
+            cargarPais();
+        }
+
+        // ---------- EVENTOS ----------
+        keyboard.addEventListener('click', (e) => {
+            const key = e.target.closest('.key');
+            if (!key) return;
+            if (key.disabled) return;
+            const letter = key.dataset.letter;
+            if (letter === 'backspace') {
+                borrarLetra();
+            } else {
+                ponerLetraEnCasilla(letter.toUpperCase());
+            }
+        });
+
+        guessBtn.addEventListener('click', comprobarRespuesta);
+        giveUpBtn.addEventListener('click', manejarRendirse);
+        nextBtn.addEventListener('click', siguientePais);
+
+        // ---------- INICIO ----------
+        iniciarJuego();
+    </script>
+
+</body>
+</html>
