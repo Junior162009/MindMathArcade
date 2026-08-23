@@ -71,13 +71,18 @@
       localStorage.removeItem(SESSION_KEY);
     },
 
+    // La autenticación principal vive en Firebase; los juegos conservan este
+    // identificador local para asociar monedas y progreso al perfil correcto.
+    setSession: function(username) {
+      localStorage.setItem(SESSION_KEY, JSON.stringify({ username: username }));
+    },
+
     getCurrentUser: function() {
       const session = localStorage.getItem(SESSION_KEY);
       if (!session) return null;
       try {
         const { username } = JSON.parse(session);
-        const user = findUser(username);
-        return user ? { username: user.username } : null;
+        return username ? { username: username } : null;
       } catch (e) {
         localStorage.removeItem(SESSION_KEY);
         return null;
@@ -95,11 +100,16 @@
     // Convierte a un usuario en administrador
     setAdmin: function(username) {
       const users = getUsers();
-      const user = users.find(u => u.username === username);
-      if (user) {
+      let user = users.find(u => u.username === username);
+      if (!user) {
+        // Solo conserva la marca local del modo administrador; la contraseña
+        // de una cuenta autenticada con Firebase nunca se guarda aquí.
+        user = { username: username, password: '', isAdmin: true, created: new Date().toISOString() };
+        users.push(user);
+      } else {
         user.isAdmin = true;
-        saveUsers(users);
       }
+      saveUsers(users);
     },
 
     // NUEVA FUNCIÓN: Quita los privilegios de administrador

@@ -1,7 +1,7 @@
 // Importa Workbox desde la CDN (como tu versión original)
 importScripts('https://storage.googleapis.com/workbox-cdn/releases/5.1.2/workbox-sw.js');
 
-const CACHE_NAME = 'tecnomath-offline-v3';
+const CACHE_NAME = 'tecnomath-offline-v4';
 const OFFLINE_FALLBACK_PAGE = '/index.html';
 
 // Lista de recursos importantes que se cachean al instalar
@@ -9,6 +9,7 @@ const PRECACHE_ASSETS = [
   '/',
   '/index.html',
   '/js/shared.js',
+  '/js/firebase-config.js',
   '/manifest.json',
   '/pages/auth.html',
   '/pages/game.html',

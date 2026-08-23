@@ -50,76 +50,232 @@
 <body>
 <div class="login-box">
   <h2>🌐 ACCEDER</h2>
-  <input type="text" id="username" placeholder="Usuario" autocomplete="off">
-  <input type="password" id="password" placeholder="Contraseña">
+  <p id="intro" class="message" style="color:var(--neon-cyan);">Accede con tu correo y contraseña</p>
+  <input type="text" id="username" placeholder="Usuario (solo al registrarte)" autocomplete="username" style="display:none;">
+  <input type="email" id="email" placeholder="Correo electrónico" autocomplete="email">
+  <input type="tel" id="phone" placeholder="Teléfono +57... (solo al registrarte)" autocomplete="tel" style="display:none;">
+  <input type="password" id="password" placeholder="Contraseña" autocomplete="current-password">
+  <input type="password" id="newPassword" placeholder="Nueva contraseña" autocomplete="new-password" style="display:none;">
+  <input type="text" id="smsCode" placeholder="Código SMS" inputmode="numeric" autocomplete="one-time-code" style="display:none;">
   <button class="btn" id="btnLogin">ENTRAR</button>
   <button class="btn btn-secondary" id="btnRegister">CREAR CUENTA</button>
+  <button class="btn btn-secondary" id="btnRecover">RECUPERAR ACCESO</button>
+  <button class="btn" id="btnVerify" style="display:none;">VERIFICAR CÓDIGO</button>
+  <button class="btn btn-secondary" id="btnBack" style="display:none;">← VOLVER</button>
   <button class="btn btn-secondary" id="btnLogout" style="display:none;">CERRAR SESIÓN</button>
   <div class="message" id="message"></div>
+  <div id="recaptcha-container"></div>
   <a href="../index.html" class="back-link">← Volver al portal</a>
 </div>
 
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script src="../js/firebase-config.js"></script>
 <script src="../js/shared.js"></script>
 <script>
+  const cloud = TecnomathFirebase;
   const usernameEl = document.getElementById('username');
+  const emailEl = document.getElementById('email');
+  const phoneEl = document.getElementById('phone');
   const passwordEl = document.getElementById('password');
+  const newPasswordEl = document.getElementById('newPassword');
+  const smsCodeEl = document.getElementById('smsCode');
   const btnLogin = document.getElementById('btnLogin');
   const btnRegister = document.getElementById('btnRegister');
+  const btnRecover = document.getElementById('btnRecover');
+  const btnVerify = document.getElementById('btnVerify');
+  const btnBack = document.getElementById('btnBack');
   const btnLogout = document.getElementById('btnLogout');
   const messageEl = document.getElementById('message');
+  const introEl = document.getElementById('intro');
+  let mode = 'login';
+  let confirmationResult = null;
+  let pendingRegistration = null;
+  let recoveryUser = null;
+  let recaptchaVerifier = null;
+
+  function showMessage(text, color = '#FF0033') {
+    messageEl.textContent = text;
+    messageEl.style.color = color;
+  }
+
+  function usernameKey(username) {
+    return username.trim().toLowerCase();
+  }
+
+  function setMode(nextMode) {
+    mode = nextMode;
+    if (mode !== 'verify-registration' && mode !== 'verify-recovery') {
+      confirmationResult = null;
+      pendingRegistration = null;
+      recoveryUser = null;
+    }
+    const registering = mode === 'register';
+    const recovering = mode === 'recover';
+    const verifying = mode === 'verify-registration' || mode === 'verify-recovery';
+    usernameEl.style.display = registering ? 'block' : 'none';
+    emailEl.style.display = verifying && mode === 'verify-recovery' ? 'none' : (recovering ? 'none' : 'block');
+    phoneEl.style.display = registering || recovering ? 'block' : 'none';
+    passwordEl.style.display = registering || mode === 'login' ? 'block' : 'none';
+    newPasswordEl.style.display = mode === 'verify-recovery' ? 'block' : 'none';
+    smsCodeEl.style.display = verifying ? 'block' : 'none';
+    btnLogin.style.display = mode === 'login' ? 'block' : 'none';
+    btnRegister.style.display = mode === 'login' || registering ? 'block' : 'none';
+    btnRegister.textContent = registering ? 'ENVIAR CÓDIGO SMS' : 'CREAR CUENTA';
+    btnRecover.style.display = mode === 'login' || recovering ? 'block' : 'none';
+    btnRecover.textContent = recovering ? 'ENVIAR CÓDIGO SMS' : 'RECUPERAR ACCESO';
+    btnVerify.style.display = verifying ? 'block' : 'none';
+    btnBack.style.display = mode === 'login' ? 'none' : 'block';
+    btnLogout.style.display = 'none';
+    introEl.textContent = registering ? 'Crea tu cuenta: todos los datos son obligatorios' : recovering ? 'Ingresa tu teléfono para recuperar tu usuario o contraseña' : verifying ? 'Escribe el código enviado por SMS' : 'Accede con tu correo y contraseña';
+    showMessage('', '');
+  }
+
+  function getRecaptcha() {
+    if (!recaptchaVerifier) {
+      recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', { size: 'invisible' });
+    }
+    return recaptchaVerifier;
+  }
+
+  function normalPhone() {
+    const phone = phoneEl.value.trim().replace(/[\s()-]/g, '');
+    if (!/^\+[1-9]\d{7,14}$/.test(phone)) throw new Error('Usa el teléfono internacional, por ejemplo +573001234567');
+    return phone;
+  }
+
+  async function reserveUsername(username, uid) {
+    const result = await cloud.database.ref('usernames/' + usernameKey(username)).transaction(current => current === null ? uid : undefined);
+    if (!result.committed) throw new Error('Ese usuario ya está registrado. Elige otro.');
+  }
+
+  async function finishSession(user) {
+    const snapshot = await cloud.database.ref('users/' + user.uid).once('value');
+    const profile = snapshot.val();
+    if (!profile || !profile.username) throw new Error('No se encontró el perfil de esta cuenta.');
+    Tecnomath.setSession(profile.username);
+    showMessage('¡Bienvenido/a ' + profile.username + '!', '#39FF14');
+    setTimeout(() => { window.location.href = '../index.html'; }, 500);
+  }
 
   function updateUI() {
-    const user = Tecnomath.getCurrentUser();
-    if (user) {
-      usernameEl.value = user.username;
-      usernameEl.disabled = true;
-      passwordEl.style.display = 'none';
-      btnLogin.style.display = 'none';
-      btnRegister.style.display = 'none';
-      btnLogout.style.display = 'block';
-      messageEl.textContent = `Sesión activa: ${user.username} · ${Tecnomath.getCoins()} monedas`;
-      messageEl.style.color = 'var(--neon-cyan)';
-    } else {
-      usernameEl.value = '';
-      usernameEl.disabled = false;
-      passwordEl.style.display = 'block';
-      btnLogin.style.display = 'block';
-      btnRegister.style.display = 'block';
-      btnLogout.style.display = 'none';
-      messageEl.textContent = '';
-    }
+    setMode('login');
   }
 
-  function submit(action) {
+  btnLogin.addEventListener('click', async () => {
+    try {
+      const credential = await cloud.auth.signInWithEmailAndPassword(emailEl.value.trim(), passwordEl.value);
+      await finishSession(credential.user);
+    } catch (error) { showMessage(friendlyError(error)); }
+  });
+
+  btnRegister.addEventListener('click', async () => {
+    try {
+      if (mode === 'login') setMode('register');
+      else await startRegistration();
+    } catch (error) { showMessage(friendlyError(error)); }
+  });
+
+  btnBack.addEventListener('click', () => setMode('login'));
+
+  async function startRegistration() {
     const username = usernameEl.value.trim();
-    const password = passwordEl.value.trim();
-    const result = Tecnomath[action](username, password);
-    if (result.success) {
-      messageEl.textContent = `¡Bienvenido/a ${result.username}!`;
-      messageEl.style.color = '#39FF14';
-      updateUI();
-      setTimeout(() => { window.location.href = '../index.html'; }, 500);
-    } else {
-      messageEl.textContent = result.message;
-      messageEl.style.color = '#FF0033';
-    }
+    const email = emailEl.value.trim();
+    const password = passwordEl.value;
+    if (!/^[a-zA-Z0-9._-]{3,20}$/.test(username)) throw new Error('El usuario debe tener 3 a 20 caracteres: letras, números, punto, guion o guion bajo.');
+    if (!email || !password) throw new Error('Correo y contraseña son obligatorios.');
+    if (password.length < 6) throw new Error('La contraseña debe tener mínimo 6 caracteres.');
+    const phone = normalPhone();
+    const credential = await cloud.auth.createUserWithEmailAndPassword(email, password);
+    pendingRegistration = { user: credential.user, username, email, phone };
+    confirmationResult = await cloud.auth.signInWithPhoneNumber(phone, getRecaptcha());
+    setMode('verify-registration');
   }
 
-  btnLogin.addEventListener('click', () => {
-    submit('login');
+  btnRecover.addEventListener('click', async () => {
+    try {
+      if (mode === 'login') setMode('recover');
+      else await startRecovery();
+    } catch (error) { showMessage(friendlyError(error)); }
   });
 
-  btnRegister.addEventListener('click', () => {
-    submit('register');
+  async function startRecovery() {
+    const phone = normalPhone();
+    confirmationResult = await cloud.auth.signInWithPhoneNumber(phone, getRecaptcha());
+    setMode('verify-recovery');
+  }
+
+  async function completeRegistration() {
+    if (!pendingRegistration) throw new Error('Vuelve a iniciar el registro.');
+    const credential = firebase.auth.PhoneAuthProvider.credential(confirmationResult.verificationId, smsCodeEl.value.trim());
+    await pendingRegistration.user.linkWithCredential(credential);
+    await reserveUsername(pendingRegistration.username, pendingRegistration.user.uid);
+    await cloud.database.ref('users/' + pendingRegistration.user.uid).set({
+      username: pendingRegistration.username,
+      usernameKey: usernameKey(pendingRegistration.username),
+      email: pendingRegistration.email,
+      phone: pendingRegistration.phone,
+      createdAt: cloud.serverTimestamp
+    });
+    await finishSession(pendingRegistration.user);
+  }
+
+  async function completeRecovery() {
+    if (!recoveryUser) recoveryUser = (await confirmationResult.confirm(smsCodeEl.value.trim())).user;
+    const profile = (await cloud.database.ref('users/' + recoveryUser.uid).once('value')).val();
+    if (!profile) throw new Error('No se encontró una cuenta asociada a este teléfono.');
+    if (!newPasswordEl.value) {
+      showMessage('Tu usuario es: ' + profile.username + '. Escribe una nueva contraseña para continuar.', '#39FF14');
+      return;
+    }
+    if (newPasswordEl.value.length < 6) throw new Error('La nueva contraseña debe tener mínimo 6 caracteres.');
+    await recoveryUser.updatePassword(newPasswordEl.value);
+    Tecnomath.setSession(profile.username);
+    showMessage('Contraseña actualizada. Redirigiendo…', '#39FF14');
+    setTimeout(() => { window.location.href = '../index.html'; }, 500);
+  }
+
+  btnVerify.addEventListener('click', async () => {
+    try {
+      if (mode === 'verify-registration') await completeRegistration();
+      if (mode === 'verify-recovery') await completeRecovery();
+    } catch (error) { showMessage(friendlyError(error)); }
   });
 
-  passwordEl.addEventListener('keydown', (event) => {
-    if (event.key === 'Enter') submit('login');
-  });
+  function friendlyError(error) {
+    const code = error && error.code ? error.code : '';
+    const messages = {
+      'auth/email-already-in-use': 'Ese correo ya tiene una cuenta. Prueba iniciar sesión.',
+      'auth/invalid-email': 'Escribe un correo electrónico válido.',
+      'auth/invalid-login-credentials': 'El correo o la contraseña no son correctos.',
+      'auth/wrong-password': 'El correo o la contraseña no son correctos.',
+      'auth/user-not-found': 'El correo o la contraseña no son correctos.',
+      'auth/user-disabled': 'Esta cuenta está desactivada. Pide ayuda a un administrador.',
+      'auth/weak-password': 'Usa una contraseña de al menos 6 caracteres.',
+      'auth/invalid-phone-number': 'Revisa el teléfono. Debe llevar el prefijo del país, por ejemplo +57.',
+      'auth/missing-phone-number': 'Escribe tu número de teléfono.',
+      'auth/invalid-verification-code': 'El código SMS no es correcto. Revísalo e inténtalo otra vez.',
+      'auth/code-expired': 'El código venció. Solicita uno nuevo.',
+      'auth/session-expired': 'El código venció. Solicita uno nuevo.',
+      'auth/quota-exceeded': 'Por ahora no podemos enviar más mensajes a este número. Intenta más tarde.',
+      'auth/too-many-requests': 'Demasiados intentos. Espera unos minutos e inténtalo de nuevo.',
+      'auth/captcha-check-failed': 'No se pudo comprobar que eres una persona. Inténtalo nuevamente.',
+      'auth/network-request-failed': 'No hay conexión. Revisa internet e inténtalo otra vez.',
+      'auth/unauthorized-domain': 'Este sitio no está autorizado para verificar teléfonos. Avisa al administrador.',
+      'auth/operation-not-allowed': 'El método de acceso aún no está activado. Avisa al administrador.',
+      'auth/credential-already-in-use': 'Ese teléfono ya está asociado a otra cuenta.',
+      'auth/provider-already-linked': 'Ese teléfono ya está verificado en esta cuenta.',
+      'auth/requires-recent-login': 'Por seguridad, inicia sesión de nuevo antes de cambiar la contraseña.',
+      'PERMISSION_DENIED': 'Tu cuenta entró, pero no podemos abrir su perfil. Intenta de nuevo; si continúa, avisa al administrador.',
+      'permission_denied': 'Tu cuenta entró, pero no podemos abrir su perfil. Intenta de nuevo; si continúa, avisa al administrador.'
+    };
+    console.warn('Error de autenticación controlado:', code, error);
+    return messages[code] || 'No pudimos completar la acción. Revisa los datos e inténtalo otra vez.';
+  }
 
   btnLogout.addEventListener('click', () => {
-    Tecnomath.logout();
-    updateUI();
+    cloud.auth.signOut().finally(() => { Tecnomath.logout(); updateUI(); });
   });
 
   updateUI();
