@@ -1,0 +1,2450 @@
+{
+  "Animal": {
+    "A": [
+      "abeja",
+      "aguila",
+      "alce",
+      "almeja",
+      "alpaca",
+      "anaconda",
+      "anguila",
+      "antilope",
+      "arana",
+      "ardilla",
+      "armadillo",
+      "asno",
+      "avestruz",
+      "avispa"
+    ],
+    "B": [
+      "babosa",
+      "ballena",
+      "bisonte",
+      "boa",
+      "bogavante",
+      "bonobo",
+      "bufalo",
+      "buho",
+      "burro",
+      "babirusa",
+      "babuino",
+      "buitre",
+      "buey",
+      "bacalao",
+      "barracuda"
+    ],
+    "C": [
+      "caballo",
+      "cabra",
+      "cachorro",
+      "caiman",
+      "camaleon",
+      "camello",
+      "canario",
+      "cangrejo",
+      "canguro",
+      "caracol",
+      "cardenal",
+      "castor",
+      "cebra",
+      "chimpance",
+      "ciervo",
+      "cisne",
+      "cocodrilo",
+      "colibri",
+      "conejo",
+      "coyote",
+      "cuervo"
+    ],
+    "D": [
+      "delfin",
+      "dingo",
+      "dromedario",
+      "dragon",
+      "daman",
+      "danta",
+      "diablo de tasmania",
+      "doncella",
+      "dorado",
+      "dugong"
+    ],
+    "E": [
+      "elefante",
+      "elote marino",
+      "emu",
+      "erizo",
+      "escarabajo",
+      "escorpion",
+      "esponja",
+      "estornino",
+      "estrella de mar",
+      "equidna"
+    ],
+    "F": [
+      "faisan",
+      "flamenco",
+      "foca",
+      "foton",
+      "frailecillo",
+      "fregon",
+      "frison",
+      "faisan dorado"
+    ],
+    "G": [
+      "gacela",
+      "gallo",
+      "gallina",
+      "gamba",
+      "ganso",
+      "garza",
+      "gato",
+      "gavilan",
+      "gecko",
+      "golondrina",
+      "gorila",
+      "gorrion",
+      "grulla",
+      "guacamaya",
+      "gusano"
+    ],
+    "H": [
+      "halcon",
+      "hamster",
+      "hiena",
+      "hipopotamo",
+      "hormiga",
+      "huron",
+      "halcon peregrino",
+      "hiena manchada"
+    ],
+    "I": [
+      "ibis",
+      "iguana",
+      "impala",
+      "insecto palo",
+      "isopodo",
+      "irbis",
+      "iguana marina"
+    ],
+    "J": [
+      "jabali",
+      "jaguar",
+      "jicotea",
+      "jirafa",
+      "jilguero",
+      "jurel",
+      "jaiba",
+      "jerbo"
+    ],
+    "K": [
+      "kakapo",
+      "kiwi",
+      "koala",
+      "krill",
+      "kudu",
+      "komodo"
+    ],
+    "L": [
+      "lagarto",
+      "langosta",
+      "lechuza",
+      "lemur",
+      "leon",
+      "leopardo",
+      "liebre",
+      "lince",
+      "llama",
+      "lombriz",
+      "loro",
+      "luciernaga",
+      "lucioperca",
+      "lobo",
+      "langur"
+    ],
+    "M": [
+      "mamut",
+      "manati",
+      "mandril",
+      "mariposa",
+      "marmota",
+      "medusa",
+      "merluza",
+      "mico",
+      "milano",
+      "mofeta",
+      "mono",
+      "monstruo de gila",
+      "morsa",
+      "mosca",
+      "mosquito",
+      "murcielago"
+    ],
+    "N": [
+      "narval",
+      "nautilo",
+      "negron",
+      "nutria",
+      "nandu",
+      "naja",
+      "ninfa",
+      "necora"
+    ],
+    "Ñ": [
+      "nandu"
+    ],
+    "O": [
+      "ocelote",
+      "okapi",
+      "orca",
+      "ornitorrinco",
+      "oso",
+      "oveja",
+      "ostra",
+      "orangutan",
+      "oropendola"
+    ],
+    "P": [
+      "panda",
+      "pantera",
+      "papagayo",
+      "pato",
+      "pavo",
+      "pelicano",
+      "perdiz",
+      "perro",
+      "pez",
+      "pinguino",
+      "pirana",
+      "polilla",
+      "puma",
+      "pulpo",
+      "puercoespin",
+      "puerco"
+    ],
+    "Q": [
+      "quetzal",
+      "quokka",
+      "quirquincho",
+      "quimera"
+    ],
+    "R": [
+      "rana",
+      "rata",
+      "raton",
+      "raya",
+      "reno",
+      "rinoceronte",
+      "roedor",
+      "ruisenor",
+      "robalo",
+      "robin",
+      "rupicabra"
+    ],
+    "S": [
+      "salamandra",
+      "saltamontes",
+      "sapo",
+      "sardina",
+      "serpiente",
+      "suricata",
+      "salmon",
+      "sanguijuela",
+      "sepia",
+      "sierra",
+      "sison"
+    ],
+    "T": [
+      "tacuazin",
+      "tapir",
+      "tarantula",
+      "tejon",
+      "tiburon",
+      "tigre",
+      "tilapia",
+      "topo",
+      "tortuga",
+      "trucha",
+      "tucan",
+      "turon"
+    ],
+    "U": [
+      "urraca",
+      "urubu",
+      "urogallo",
+      "urial",
+      "uapiti"
+    ],
+    "V": [
+      "vaca",
+      "vampiro",
+      "venado",
+      "verraco",
+      "vespula",
+      "vicuna",
+      "vison",
+      "volatinero"
+    ],
+    "W": [
+      "wombat",
+      "walabi",
+      "wapiti"
+    ],
+    "X": [
+      "xenopus",
+      "xifias",
+      "xoloitzcuintle"
+    ],
+    "Y": [
+      "yak",
+      "yegua",
+      "yubarta"
+    ],
+    "Z": [
+      "zancudo",
+      "zarigueya",
+      "zorro",
+      "zopilote",
+      "zorzal",
+      "zebu",
+      "zapatero"
+    ]
+  },
+  "Fruta": {
+    "A": [
+      "aguacate",
+      "albaricoque",
+      "algarroba",
+      "arandano",
+      "acerola",
+      "anon",
+      "anona",
+      "azufaifa"
+    ],
+    "B": [
+      "banana",
+      "banano",
+      "breva",
+      "baya",
+      "bergamota",
+      "borojo"
+    ],
+    "C": [
+      "cacao",
+      "cafe",
+      "caqui",
+      "cereza",
+      "ciruela",
+      "coco",
+      "clementina",
+      "cupuazu"
+    ],
+    "D": [
+      "datil",
+      "durazno",
+      "dragon fruit",
+      "damasco"
+    ],
+    "E": [
+      "endrina",
+      "escaramujo"
+    ],
+    "F": [
+      "feijoa",
+      "frambuesa",
+      "fresa",
+      "fruta de pan"
+    ],
+    "G": [
+      "granada",
+      "granadilla",
+      "guanabana",
+      "guayaba",
+      "grosella"
+    ],
+    "H": [
+      "higo",
+      "higo chumbo"
+    ],
+    "I": [
+      "icaco",
+      "inga"
+    ],
+    "J": [
+      "jocote",
+      "jaca",
+      "jambolan"
+    ],
+    "K": [
+      "kiwi",
+      "kumquat"
+    ],
+    "L": [
+      "lima",
+      "limon",
+      "lichi",
+      "lulo",
+      "lucuma"
+    ],
+    "M": [
+      "mamey",
+      "mandarina",
+      "mango",
+      "manzana",
+      "maranon",
+      "melocoton",
+      "melon",
+      "membrillo",
+      "mora"
+    ],
+    "N": [
+      "naranja",
+      "nectarina",
+      "nispero",
+      "nance"
+    ],
+    "Ñ": [],
+    "O": [
+      "oliva"
+    ],
+    "P": [
+      "papaya",
+      "parchita",
+      "pera",
+      "pina",
+      "pitahaya",
+      "pomelo",
+      "pomarrosa"
+    ],
+    "Q": [
+      "quina"
+    ],
+    "R": [
+      "rambutan",
+      "remolacha",
+      "rosa mosqueta"
+    ],
+    "S": [
+      "sandia",
+      "sapote",
+      "satsuma",
+      "serba"
+    ],
+    "T": [
+      "tamarindo",
+      "tangelo",
+      "toronja",
+      "tomate",
+      "tuna"
+    ],
+    "U": [
+      "uva",
+      "uchuva",
+      "umbu"
+    ],
+    "V": [],
+    "W": [],
+    "X": [],
+    "Y": [
+      "yuzu"
+    ],
+    "Z": [
+      "zarzamora",
+      "zapote"
+    ]
+  },
+  "Pais": {
+    "A": [
+      "afganistan",
+      "albania",
+      "alemania",
+      "andorra",
+      "angola",
+      "antigua y barbuda",
+      "arabia saudi",
+      "argelia",
+      "argentina",
+      "armenia",
+      "australia",
+      "austria",
+      "azerbaiyan"
+    ],
+    "B": [
+      "bahamas",
+      "bahrein",
+      "bangladesh",
+      "barbados",
+      "belarus",
+      "belgica",
+      "belice",
+      "benin",
+      "bhutan",
+      "bolivia",
+      "bosnia y herzegovina",
+      "botsuana",
+      "brasil",
+      "brunei",
+      "bulgaria",
+      "burkina faso",
+      "burundi"
+    ],
+    "C": [
+      "cabo verde",
+      "camboya",
+      "camerun",
+      "canada",
+      "catar",
+      "chad",
+      "chile",
+      "china",
+      "chipre",
+      "colombia",
+      "comoras",
+      "congo",
+      "corea del norte",
+      "corea del sur",
+      "costa de marfil",
+      "costa rica",
+      "croacia",
+      "cuba"
+    ],
+    "D": [
+      "dinamarca",
+      "dominica",
+      "dominicana"
+    ],
+    "E": [
+      "ecuador",
+      "egipto",
+      "el salvador",
+      "emiratos arabes unidos",
+      "eritrea",
+      "eslovaquia",
+      "eslovenia",
+      "espana",
+      "estados unidos",
+      "estonia",
+      "etiopia"
+    ],
+    "F": [
+      "fiji",
+      "filipinas",
+      "finlandia",
+      "francia"
+    ],
+    "G": [
+      "gabon",
+      "gambia",
+      "georgia",
+      "ghana",
+      "granada",
+      "grecia",
+      "guatemala",
+      "guinea",
+      "guinea bisau",
+      "guinea ecuatorial",
+      "guyana"
+    ],
+    "H": [
+      "haiti",
+      "honduras",
+      "hungria"
+    ],
+    "I": [
+      "india",
+      "indonesia",
+      "irak",
+      "iran",
+      "irlanda",
+      "islandia",
+      "israel",
+      "italia"
+    ],
+    "J": [
+      "jamaica",
+      "japon",
+      "jordania"
+    ],
+    "K": [
+      "kazajistan",
+      "kenia",
+      "kirguistan",
+      "kiribati",
+      "kuwait"
+    ],
+    "L": [
+      "laos",
+      "letonia",
+      "libano",
+      "liberia",
+      "libia",
+      "liechtenstein",
+      "lituania",
+      "luxemburgo"
+    ],
+    "M": [
+      "madagascar",
+      "malasia",
+      "malaui",
+      "maldivas",
+      "mali",
+      "malta",
+      "marruecos",
+      "mauritania",
+      "mauricio",
+      "mexico",
+      "micronesia",
+      "moldavia",
+      "monaco",
+      "mongolia",
+      "montenegro",
+      "mozambique",
+      "myanmar"
+    ],
+    "N": [
+      "namibia",
+      "nauru",
+      "nepal",
+      "nicaragua",
+      "niger",
+      "nigeria",
+      "noruega",
+      "nueva zelanda"
+    ],
+    "Ñ": [],
+    "O": [
+      "oman"
+    ],
+    "P": [
+      "paises bajos",
+      "pakistan",
+      "palaos",
+      "panama",
+      "papua nueva guinea",
+      "paraguay",
+      "peru",
+      "polonia",
+      "portugal"
+    ],
+    "Q": [
+      "qatar"
+    ],
+    "R": [
+      "reino unido",
+      "republica centroafricana",
+      "republica checa",
+      "republica democratica del congo",
+      "republica dominicana",
+      "ruanda",
+      "rumania",
+      "rusia"
+    ],
+    "S": [
+      "samoa",
+      "san cristobal y nieves",
+      "san marino",
+      "san vicente y las granadinas",
+      "santa lucia",
+      "santo tome y principe",
+      "senegal",
+      "serbia",
+      "seychelles",
+      "sierra leona",
+      "singapur",
+      "siria",
+      "somalia",
+      "sri lanka",
+      "sudafrica",
+      "sudan",
+      "sudan del sur",
+      "suecia",
+      "suiza",
+      "surinam"
+    ],
+    "T": [
+      "tailandia",
+      "tanzania",
+      "tayikistan",
+      "timor oriental",
+      "togo",
+      "tonga",
+      "trinidad y tobago",
+      "tunez",
+      "turkmenistan",
+      "tuvalu",
+      "turquia"
+    ],
+    "U": [
+      "ucrania",
+      "uganda",
+      "uruguay",
+      "uzbekistan"
+    ],
+    "V": [
+      "vanuatu",
+      "vaticano",
+      "venezuela",
+      "vietnam"
+    ],
+    "W": [],
+    "X": [],
+    "Y": [
+      "yemen"
+    ],
+    "Z": [
+      "zambia",
+      "zimbabue"
+    ]
+  },
+  "Color": {
+    "A": [
+      "amarillo",
+      "ambar",
+      "azabache",
+      "azul",
+      "azul cielo",
+      "azul marino",
+      "azul turquesa",
+      "aguamarina"
+    ],
+    "B": [
+      "beige",
+      "blanco",
+      "borgona",
+      "bronce",
+      "bermellon"
+    ],
+    "C": [
+      "cafe",
+      "caqui",
+      "carmesi",
+      "celeste",
+      "cian",
+      "cobre",
+      "coral",
+      "crema",
+      "cromado"
+    ],
+    "D": [
+      "dorado"
+    ],
+    "E": [
+      "esmeralda",
+      "escarlata"
+    ],
+    "F": [
+      "fucsia"
+    ],
+    "G": [
+      "gris",
+      "granate"
+    ],
+    "H": [
+      "hueso"
+    ],
+    "I": [
+      "indigo",
+      "ivory"
+    ],
+    "J": [],
+    "K": [
+      "kaki"
+    ],
+    "L": [
+      "lavanda",
+      "lila",
+      "lima"
+    ],
+    "M": [
+      "magenta",
+      "marron",
+      "mostaza",
+      "malva"
+    ],
+    "N": [
+      "negro",
+      "naranja"
+    ],
+    "Ñ": [],
+    "O": [
+      "ocre",
+      "oliva"
+    ],
+    "P": [
+      "purpura",
+      "plata",
+      "perla"
+    ],
+    "Q": [],
+    "R": [
+      "rojo",
+      "rosa",
+      "rubi"
+    ],
+    "S": [
+      "salmon",
+      "sepia"
+    ],
+    "T": [
+      "turquesa",
+      "terracota"
+    ],
+    "U": [],
+    "V": [
+      "verde",
+      "verde lima",
+      "verde oliva",
+      "violeta"
+    ],
+    "W": [],
+    "X": [],
+    "Y": [],
+    "Z": []
+  },
+  "Comida": {
+    "A": [
+      "arepa",
+      "arroz",
+      "asado",
+      "ajiaco",
+      "albondiga",
+      "alitas",
+      "arroz con pollo",
+      "avena",
+      "aguachile",
+      "anticucho",
+      "alfajor",
+      "arequipe"
+    ],
+    "B": [
+      "bandeja paisa",
+      "barbacoa",
+      "barquillo",
+      "bistec",
+      "bunuelo",
+      "burrito",
+      "brownie",
+      "bacalao",
+      "bagel"
+    ],
+    "C": [
+      "cachapa",
+      "caldo",
+      "calzone",
+      "canelones",
+      "carne",
+      "ceviche",
+      "chicharron",
+      "chilaquiles",
+      "chocolate",
+      "chorizo",
+      "croqueta",
+      "cuscus"
+    ],
+    "D": [
+      "donut",
+      "dumpling",
+      "durum",
+      "deditos de queso"
+    ],
+    "E": [
+      "empanada",
+      "enchilada",
+      "ensalada",
+      "escalope",
+      "espagueti",
+      "estofado"
+    ],
+    "F": [
+      "falafel",
+      "feijoada",
+      "fideos",
+      "flan",
+      "fondue",
+      "fritura"
+    ],
+    "G": [
+      "gazpacho",
+      "gnocchi",
+      "gofre",
+      "goulash",
+      "guacamole",
+      "guiso"
+    ],
+    "H": [
+      "hamburguesa",
+      "hummus",
+      "hot dog"
+    ],
+    "I": [
+      "inari",
+      "injera",
+      "isla flotante"
+    ],
+    "J": [
+      "jamon",
+      "jambalaya"
+    ],
+    "K": [
+      "kebab",
+      "kimchi",
+      "kuchen"
+    ],
+    "L": [
+      "lasana",
+      "lechona",
+      "lentejas",
+      "lasagna",
+      "lomo"
+    ],
+    "M": [
+      "macarrones",
+      "maiz",
+      "mango",
+      "manjar",
+      "marmita",
+      "mazamorra",
+      "menudo",
+      "milanesa",
+      "mole"
+    ],
+    "N": [
+      "nachos",
+      "natilla",
+      "nuggets",
+      "noquis"
+    ],
+    "Ñ": [
+      "name"
+    ],
+    "O": [
+      "omelet",
+      "onigiri"
+    ],
+    "P": [
+      "paella",
+      "pancake",
+      "papa",
+      "papas fritas",
+      "pasta",
+      "pastel",
+      "patacon",
+      "pizza",
+      "pollo",
+      "pozole",
+      "pupusa"
+    ],
+    "Q": [
+      "quesadilla",
+      "quiche",
+      "queso"
+    ],
+    "R": [
+      "ravioli",
+      "repollo",
+      "risotto",
+      "rollito",
+      "ramen"
+    ],
+    "S": [
+      "salchipapa",
+      "sancocho",
+      "samosa",
+      "sopa",
+      "sushi",
+      "sandwich"
+    ],
+    "T": [
+      "tacos",
+      "tamales",
+      "tarta",
+      "tostada",
+      "tortilla",
+      "tiramisu"
+    ],
+    "U": [
+      "udon"
+    ],
+    "V": [
+      "vainilla",
+      "verduras",
+      "vichyssoise"
+    ],
+    "W": [
+      "waffle"
+    ],
+    "X": [
+      "xnipec"
+    ],
+    "Y": [
+      "yogur"
+    ],
+    "Z": [
+      "zapallo"
+    ]
+  },
+  "Nombre": {
+    "A": [
+      "ana",
+      "andres",
+      "alejandro",
+      "alberto",
+      "alicia",
+      "amanda",
+      "antonio",
+      "arturo",
+      "adriana",
+      "angela",
+      "armando",
+      "augusto"
+    ],
+    "B": [
+      "beatriz",
+      "benjamin",
+      "bernardo",
+      "bruno",
+      "brenda",
+      "belen",
+      "brian"
+    ],
+    "C": [
+      "carlos",
+      "carmen",
+      "camila",
+      "carolina",
+      "cesar",
+      "cristian",
+      "claudia",
+      "catalina",
+      "clemente"
+    ],
+    "D": [
+      "daniel",
+      "david",
+      "diana",
+      "diego",
+      "dolores",
+      "dominic",
+      "dario"
+    ],
+    "E": [
+      "eduardo",
+      "elena",
+      "emilio",
+      "emmanuel",
+      "esteban",
+      "elizabeth",
+      "erika"
+    ],
+    "F": [
+      "fabian",
+      "fabio",
+      "fernando",
+      "felipe",
+      "fatima",
+      "florencia",
+      "francisco"
+    ],
+    "G": [
+      "gabriel",
+      "gabriela",
+      "gerardo",
+      "gloria",
+      "german",
+      "gisela"
+    ],
+    "H": [
+      "hector",
+      "helena",
+      "hugo",
+      "humberto"
+    ],
+    "I": [
+      "ivan",
+      "isabel",
+      "irene",
+      "ignacio",
+      "ines"
+    ],
+    "J": [
+      "juan",
+      "jose",
+      "javier",
+      "juliana",
+      "jorge",
+      "jimena",
+      "jonathan"
+    ],
+    "K": [
+      "karla",
+      "kevin",
+      "karen",
+      "karina",
+      "katherine",
+      "kenneth"
+    ],
+    "L": [
+      "laura",
+      "luis",
+      "lucas",
+      "lucia",
+      "leonardo",
+      "lorena",
+      "lina"
+    ],
+    "M": [
+      "maria",
+      "miguel",
+      "manuel",
+      "mariana",
+      "mateo",
+      "martin",
+      "monica",
+      "marcos"
+    ],
+    "N": [
+      "natalia",
+      "nicolas",
+      "nora",
+      "nelson",
+      "noelia"
+    ],
+    "Ñ": [],
+    "O": [
+      "olga",
+      "oscar",
+      "octavio",
+      "oliver"
+    ],
+    "P": [
+      "paola",
+      "pablo",
+      "pedro",
+      "patricia",
+      "paulina",
+      "pilar"
+    ],
+    "Q": [
+      "quintin",
+      "queila"
+    ],
+    "R": [
+      "rafael",
+      "raul",
+      "roberto",
+      "rosa",
+      "ricardo",
+      "romina",
+      "ramiro"
+    ],
+    "S": [
+      "santiago",
+      "sofia",
+      "sebastian",
+      "sara",
+      "samuel",
+      "silvia",
+      "sergio"
+    ],
+    "T": [
+      "tomas",
+      "teresa",
+      "thiago",
+      "tatiana",
+      "teodoro"
+    ],
+    "U": [
+      "ulises",
+      "ursula"
+    ],
+    "V": [
+      "valentina",
+      "victor",
+      "veronica",
+      "vanessa",
+      "violeta"
+    ],
+    "W": [
+      "walter",
+      "wendy",
+      "william"
+    ],
+    "X": [
+      "ximena",
+      "xavier"
+    ],
+    "Y": [
+      "yadira",
+      "yeray",
+      "yolanda"
+    ],
+    "Z": [
+      "zaira",
+      "zulema",
+      "zacarias"
+    ]
+  },
+  "Ciudad": {
+    "A": [
+      "amsterdam",
+      "atenas",
+      "ankara",
+      "abu dhabi",
+      "adelaide",
+      "alejandria",
+      "almeria",
+      "asuncion",
+      "arequipa",
+      "armenia"
+    ],
+    "B": [
+      "bogota",
+      "barcelona",
+      "berlin",
+      "brasilia",
+      "bruselas",
+      "bucaramanga",
+      "barranquilla",
+      "boston",
+      "buenos aires",
+      "bilbao"
+    ],
+    "C": [
+      "cali",
+      "cartagena",
+      "caracas",
+      "cancun",
+      "canberra",
+      "chicago",
+      "chihuahua",
+      "copenhague",
+      "cordoba",
+      "cuenca"
+    ],
+    "D": [
+      "dallas",
+      "dakar",
+      "delhi",
+      "dublin",
+      "dubai",
+      "durban"
+    ],
+    "E": [
+      "estambul",
+      "edimburgo",
+      "quito",
+      "esmirna"
+    ],
+    "F": [
+      "florencia",
+      "frankfurt",
+      "filadelfia",
+      "fortaleza"
+    ],
+    "G": [
+      "ginebra",
+      "glasgow",
+      "guadalajara",
+      "guayaquil",
+      "guatemala"
+    ],
+    "H": [
+      "hamburgo",
+      "havana",
+      "helsinki",
+      "hong kong"
+    ],
+    "I": [
+      "ibague",
+      "ibiza",
+      "islamabad",
+      "istanbul"
+    ],
+    "J": [
+      "jakarta",
+      "jerusalen",
+      "johannesburgo"
+    ],
+    "K": [
+      "kiev",
+      "kigali",
+      "kingston",
+      "kuala lumpur"
+    ],
+    "L": [
+      "lima",
+      "londres",
+      "lisboa",
+      "la paz",
+      "los angeles",
+      "luxemburgo"
+    ],
+    "M": [
+      "madrid",
+      "medellin",
+      "miami",
+      "milano",
+      "montevideo",
+      "moscu",
+      "munich"
+    ],
+    "N": [
+      "nairobi",
+      "napoles",
+      "nueva york",
+      "nantes"
+    ],
+    "Ñ": [],
+    "O": [
+      "oslo",
+      "ottawa",
+      "oxford",
+      "orlando"
+    ],
+    "P": [
+      "paris",
+      "quito",
+      "panama",
+      "pasto",
+      "pereira",
+      "praga",
+      "puebla",
+      "puerto rico"
+    ],
+    "Q": [
+      "quito",
+      "queens"
+    ],
+    "R": [
+      "roma",
+      "rotterdam",
+      "rio de janeiro",
+      "riga",
+      "riyadh"
+    ],
+    "S": [
+      "santiago",
+      "seul",
+      "singapur",
+      "sydney",
+      "salvador"
+    ],
+    "T": [
+      "tokio",
+      "toronto",
+      "tunis",
+      "tijuana",
+      "turin"
+    ],
+    "U": [
+      "ushuaia",
+      "utrecht"
+    ],
+    "V": [
+      "valencia",
+      "venecia",
+      "viena",
+      "vancouver",
+      "vilna"
+    ],
+    "W": [
+      "washington",
+      "wellington",
+      "winnipeg"
+    ],
+    "X": [
+      "xalapa"
+    ],
+    "Y": [
+      "yokohama",
+      "yangon"
+    ],
+    "Z": [
+      "zaragoza",
+      "zagreb"
+    ]
+  },
+  "Objeto": {
+    "A": [
+      "abanico",
+      "abrelatas",
+      "agenda",
+      "alfombra",
+      "almohada",
+      "anillo",
+      "armario",
+      "aspiradora",
+      "audifonos",
+      "azucarera"
+    ],
+    "B": [
+      "balon",
+      "bandera",
+      "banco",
+      "baraja",
+      "baston",
+      "bateria",
+      "bicicleta",
+      "boligrafo",
+      "botella",
+      "bufanda"
+    ],
+    "C": [
+      "caja",
+      "cama",
+      "camara",
+      "candado",
+      "carpeta",
+      "cartera",
+      "cepillo",
+      "cinturon",
+      "cocina",
+      "computador",
+      "cuaderno",
+      "cuchara"
+    ],
+    "D": [
+      "dado",
+      "delantal",
+      "destornillador",
+      "diario",
+      "disco",
+      "ducha"
+    ],
+    "E": [
+      "escoba",
+      "escritorio",
+      "espejo",
+      "estuche",
+      "etiqueta"
+    ],
+    "F": [
+      "faja",
+      "farol",
+      "filtro",
+      "florero",
+      "foco",
+      "fonendoscopio"
+    ],
+    "G": [
+      "gafas",
+      "gancho",
+      "garrafa",
+      "goma",
+      "gorra",
+      "grabadora"
+    ],
+    "H": [
+      "hacha",
+      "hamaca",
+      "harnero",
+      "herradura"
+    ],
+    "I": [
+      "iman",
+      "impresora",
+      "interruptor",
+      "instrumento"
+    ],
+    "J": [
+      "jarron",
+      "jarra",
+      "juguete",
+      "jaula",
+      "jersey"
+    ],
+    "K": [
+      "kayak",
+      "kilo",
+      "kimono",
+      "kit"
+    ],
+    "L": [
+      "lampara",
+      "lapiz",
+      "lata",
+      "lentes",
+      "libreta",
+      "llave"
+    ],
+    "M": [
+      "maleta",
+      "martillo",
+      "mesa",
+      "microfono",
+      "mochila",
+      "monedero",
+      "monitor"
+    ],
+    "N": [
+      "navaja",
+      "nevera",
+      "nivel",
+      "notebook"
+    ],
+    "Ñ": [],
+    "O": [
+      "olla",
+      "organizador",
+      "orejera"
+    ],
+    "P": [
+      "pala",
+      "palillo",
+      "panera",
+      "papel",
+      "paraguas",
+      "peine",
+      "pelota",
+      "percha",
+      "plato",
+      "puerta"
+    ],
+    "Q": [
+      "quemador",
+      "quesera"
+    ],
+    "R": [
+      "radio",
+      "raqueta",
+      "reloj",
+      "regla",
+      "rodillo",
+      "rueda"
+    ],
+    "S": [
+      "sarten",
+      "silla",
+      "sofa",
+      "sombrero",
+      "soga",
+      "soplador"
+    ],
+    "T": [
+      "taza",
+      "teclado",
+      "telefono",
+      "televisor",
+      "tijera",
+      "toalla",
+      "tornillo",
+      "trapo"
+    ],
+    "U": [
+      "uniforme",
+      "urna",
+      "utensilio"
+    ],
+    "V": [
+      "vaso",
+      "vela",
+      "ventilador",
+      "vestido",
+      "vidrio"
+    ],
+    "W": [
+      "walkie talkie",
+      "webcam"
+    ],
+    "X": [
+      "xilofono"
+    ],
+    "Y": [
+      "yo-yo"
+    ],
+    "Z": [
+      "zapato",
+      "zapatilla"
+    ]
+  },
+  "Profesion": {
+    "A": [
+      "abogado",
+      "actor",
+      "actriz",
+      "administrador",
+      "agricultor",
+      "albanil",
+      "analista",
+      "arquitecto",
+      "artista",
+      "astronauta",
+      "atleta"
+    ],
+    "B": [
+      "barbero",
+      "bibliotecario",
+      "biologo",
+      "bombero",
+      "botanico"
+    ],
+    "C": [
+      "cajero",
+      "cantante",
+      "carpintero",
+      "chef",
+      "cirujano",
+      "contador",
+      "cientifico",
+      "cocinero",
+      "conductor"
+    ],
+    "D": [
+      "dentista",
+      "detective",
+      "dibujante",
+      "disenador",
+      "docente",
+      "doctor"
+    ],
+    "E": [
+      "economista",
+      "editor",
+      "electricista",
+      "enfermero",
+      "escritor"
+    ],
+    "F": [
+      "farmaceutico",
+      "fotografo",
+      "fisico",
+      "florista"
+    ],
+    "G": [
+      "geologo",
+      "geografo",
+      "gerente",
+      "guia"
+    ],
+    "H": [
+      "herrero",
+      "historiador",
+      "hostelero"
+    ],
+    "I": [
+      "ingeniero",
+      "ilustrador",
+      "instructor",
+      "investigador"
+    ],
+    "J": [
+      "jardinero",
+      "juez",
+      "joyero",
+      "journalista"
+    ],
+    "K": [
+      "kinesiologo"
+    ],
+    "L": [
+      "locutor",
+      "logopeda",
+      "lenador",
+      "librero"
+    ],
+    "M": [
+      "maestro",
+      "mecanico",
+      "medico",
+      "meteorologo",
+      "musico",
+      "marinero"
+    ],
+    "N": [
+      "nutricionista",
+      "notario",
+      "neumologo"
+    ],
+    "Ñ": [],
+    "O": [
+      "odontologo",
+      "oftalmologo",
+      "operador",
+      "orfebre"
+    ],
+    "P": [
+      "panadero",
+      "paramedico",
+      "periodista",
+      "pescador",
+      "piloto",
+      "pintor",
+      "policia",
+      "programador",
+      "profesor",
+      "psicologo"
+    ],
+    "Q": [
+      "quimico",
+      "quiropedista"
+    ],
+    "R": [
+      "recepcionista",
+      "repartidor",
+      "reportero",
+      "restaurador",
+      "reumatologo"
+    ],
+    "S": [
+      "sastre",
+      "secretario",
+      "soldado",
+      "sociologo",
+      "sommelier"
+    ],
+    "T": [
+      "taxista",
+      "tecnico",
+      "terapeuta",
+      "topografo",
+      "traductor"
+    ],
+    "U": [
+      "urbanista"
+    ],
+    "V": [
+      "veterinario",
+      "vendedor",
+      "vidriero"
+    ],
+    "W": [
+      "webmaster"
+    ],
+    "X": [
+      "xilografo"
+    ],
+    "Y": [
+      "youtuber"
+    ],
+    "Z": [
+      "zapatero",
+      "zootecnista"
+    ]
+  },
+  "Deporte": {
+    "A": [
+      "atletismo",
+      "automovilismo",
+      "ajedrez",
+      "alpinismo",
+      "aerobic",
+      "apnea",
+      "arqueria"
+    ],
+    "B": [
+      "baloncesto",
+      "beisbol",
+      "boxeo",
+      "billar",
+      "bmx",
+      "badminton",
+      "bobsleigh"
+    ],
+    "C": [
+      "ciclismo",
+      "correr",
+      "curling",
+      "canotaje",
+      "cricket",
+      "crossfit"
+    ],
+    "D": [
+      "danza",
+      "dardos",
+      "deportes acuaticos",
+      "decathlon"
+    ],
+    "E": [
+      "esgrima",
+      "escalada",
+      "equitacion"
+    ],
+    "F": [
+      "futbol",
+      "futsal",
+      "formula 1",
+      "fronton"
+    ],
+    "G": [
+      "golf",
+      "gimnasia",
+      "gimnasia ritmica"
+    ],
+    "H": [
+      "halterofilia",
+      "hockey",
+      "hipismo"
+    ],
+    "I": [
+      "indycar"
+    ],
+    "J": [
+      "judo",
+      "jabalina"
+    ],
+    "K": [
+      "karate",
+      "karting",
+      "kickboxing"
+    ],
+    "L": [
+      "lucha",
+      "levantamiento de pesas",
+      "lacrosse"
+    ],
+    "M": [
+      "maraton",
+      "motociclismo",
+      "montanismo",
+      "muay thai"
+    ],
+    "N": [
+      "natacion",
+      "navegacion"
+    ],
+    "Ñ": [],
+    "O": [
+      "orientacion"
+    ],
+    "P": [
+      "padel",
+      "paracaidismo",
+      "patinaje",
+      "polo",
+      "powerlifting"
+    ],
+    "Q": [],
+    "R": [
+      "rugby",
+      "remo",
+      "rafting"
+    ],
+    "S": [
+      "surf",
+      "snowboard",
+      "skate",
+      "salto",
+      "softbol"
+    ],
+    "T": [
+      "tenis",
+      "triathlon",
+      "taekwondo",
+      "tiro",
+      "triatlon"
+    ],
+    "U": [],
+    "V": [
+      "voleibol"
+    ],
+    "W": [
+      "waterpolo",
+      "windsurf"
+    ],
+    "X": [],
+    "Y": [
+      "yoga"
+    ],
+    "Z": [
+      "zumba"
+    ]
+  },
+  "Bebida": {
+    "A": [
+      "agua",
+      "agua mineral",
+      "aguapanela",
+      "atole",
+      "avena"
+    ],
+    "B": [
+      "batido",
+      "batido de frutas",
+      "bubble tea",
+      "brebaje"
+    ],
+    "C": [
+      "cafe",
+      "cappuccino",
+      "cerveza",
+      "chocolate",
+      "champurrado",
+      "chai",
+      "cider"
+    ],
+    "D": [
+      "daiquiri",
+      "detox"
+    ],
+    "E": [
+      "espresso",
+      "energizante"
+    ],
+    "F": [
+      "frappe",
+      "frutillada"
+    ],
+    "G": [
+      "gaseosa",
+      "granizado"
+    ],
+    "H": [
+      "horchata",
+      "hidromiel"
+    ],
+    "I": [
+      "infusion"
+    ],
+    "J": [
+      "jugo"
+    ],
+    "K": [
+      "kombucha",
+      "kefir"
+    ],
+    "L": [
+      "limonada",
+      "latte",
+      "licuado"
+    ],
+    "M": [
+      "malteada",
+      "mate",
+      "mezcal",
+      "milkshake",
+      "mojito"
+    ],
+    "N": [
+      "nectar"
+    ],
+    "Ñ": [],
+    "O": [
+      "orxata"
+    ],
+    "P": [
+      "ponche",
+      "punch"
+    ],
+    "Q": [
+      "quina"
+    ],
+    "R": [
+      "refresco",
+      "ron",
+      "rooibos"
+    ],
+    "S": [
+      "soda",
+      "smoothie",
+      "sidra"
+    ],
+    "T": [
+      "te",
+      "tisana",
+      "tonica"
+    ],
+    "U": [
+      "uva"
+    ],
+    "V": [
+      "vino",
+      "vodka"
+    ],
+    "W": [
+      "whisky"
+    ],
+    "X": [],
+    "Y": [
+      "yogur bebible"
+    ],
+    "Z": [
+      "zumo"
+    ]
+  },
+  "Marca": {
+    "A": [
+      "adidas",
+      "apple",
+      "amazon",
+      "acer",
+      "asus",
+      "audi",
+      "avon",
+      "adobe"
+    ],
+    "B": [
+      "bimbo",
+      "bmw",
+      "bosch",
+      "burger king",
+      "brooks"
+    ],
+    "C": [
+      "coca cola",
+      "canon",
+      "casio",
+      "chevrolet",
+      "chanel",
+      "cisco",
+      "citroen",
+      "converse"
+    ],
+    "D": [
+      "dell",
+      "dior",
+      "disney",
+      "dodge",
+      "dyson"
+    ],
+    "E": [
+      "epson",
+      "ebay",
+      "electrolux",
+      "everlast"
+    ],
+    "F": [
+      "ferrari",
+      "fila",
+      "ford",
+      "fanta",
+      "facebook"
+    ],
+    "G": [
+      "google",
+      "garnier",
+      "gillette",
+      "gibson",
+      "gucci"
+    ],
+    "H": [
+      "honda",
+      "hp",
+      "hyundai",
+      "huawei",
+      "harley davidson"
+    ],
+    "I": [
+      "ikea",
+      "intel",
+      "instagram",
+      "isuzu"
+    ],
+    "J": [
+      "jeep",
+      "jaguar",
+      "jbl"
+    ],
+    "K": [
+      "kia",
+      "kleenex",
+      "kodak",
+      "keurig"
+    ],
+    "L": [
+      "lego",
+      "lenovo",
+      "lexus",
+      "lg",
+      "lacoste"
+    ],
+    "M": [
+      "microsoft",
+      "motorola",
+      "mazda",
+      "mcdonalds",
+      "mercedes",
+      "mango"
+    ],
+    "N": [
+      "nike",
+      "nissan",
+      "nescafe",
+      "nintendo",
+      "nivea"
+    ],
+    "Ñ": [],
+    "O": [
+      "opel",
+      "oracle",
+      "oreo",
+      "oster"
+    ],
+    "P": [
+      "pepsi",
+      "philips",
+      "puma",
+      "porsche",
+      "playstation",
+      "paypal",
+      "panasonic"
+    ],
+    "Q": [],
+    "R": [
+      "ray ban",
+      "reebok",
+      "red bull",
+      "renault",
+      "rolex",
+      "roku"
+    ],
+    "S": [
+      "samsung",
+      "sony",
+      "spotify",
+      "subaru",
+      "shell",
+      "siemens"
+    ],
+    "T": [
+      "toyota",
+      "tesla",
+      "tiktok",
+      "tissot",
+      "toblerone"
+    ],
+    "U": [
+      "uber",
+      "unilever",
+      "ups"
+    ],
+    "V": [
+      "visa",
+      "volkswagen",
+      "volvo",
+      "vans"
+    ],
+    "W": [
+      "walmart",
+      "western union",
+      "whirlpool"
+    ],
+    "X": [
+      "xerox",
+      "xiaomi"
+    ],
+    "Y": [
+      "yamaha",
+      "yahoo",
+      "youtube"
+    ],
+    "Z": [
+      "zara",
+      "zippo"
+    ]
+  },
+  "Película": {
+    "A": [
+      "avatar",
+      "alien",
+      "aladdin",
+      "amelie",
+      "aquaman",
+      "annabelle",
+      "avengers",
+      "armageddon"
+    ],
+    "B": [
+      "barbie",
+      "batman",
+      "braveheart",
+      "beetlejuice",
+      "bolt",
+      "ben hur"
+    ],
+    "C": [
+      "cars",
+      "coco",
+      "coraline",
+      "casablanca",
+      "cinderella",
+      "creed",
+      "constantine"
+    ],
+    "D": [
+      "dune",
+      "deadpool",
+      "dumbo",
+      "dracula",
+      "django",
+      "dunkirk"
+    ],
+    "E": [
+      "el padrino",
+      "encanto",
+      "et",
+      "enredados",
+      "el exorcista"
+    ],
+    "F": [
+      "frozen",
+      "forrest gump",
+      "fight club",
+      "fantasia"
+    ],
+    "G": [
+      "gladiator",
+      "godzilla",
+      "gravity",
+      "grease",
+      "gattaca"
+    ],
+    "H": [
+      "hulk",
+      "her",
+      "hercules",
+      "halloween",
+      "hitch"
+    ],
+    "I": [
+      "inception",
+      "interstellar",
+      "it",
+      "iron man",
+      "intocable"
+    ],
+    "J": [
+      "joker",
+      "jumanji",
+      "jaws",
+      "john wick"
+    ],
+    "K": [
+      "karate kid",
+      "king kong",
+      "kung fu panda"
+    ],
+    "L": [
+      "logan",
+      "lucy",
+      "la la land",
+      "lord of the rings",
+      "luca"
+    ],
+    "M": [
+      "matrix",
+      "mulan",
+      "moana",
+      "mad max",
+      "memento",
+      "monsters inc"
+    ],
+    "N": [
+      "narnia",
+      "nope",
+      "notting hill",
+      "nightmare before christmas"
+    ],
+    "Ñ": [],
+    "O": [
+      "oppenheimer",
+      "oceans eleven",
+      "onward"
+    ],
+    "P": [
+      "parasite",
+      "pinocho",
+      "piratas del caribe",
+      "psycho",
+      "pulp fiction",
+      "pokemon"
+    ],
+    "Q": [],
+    "R": [
+      "rocky",
+      "ratatouille",
+      "red",
+      "rio",
+      "robin hood"
+    ],
+    "S": [
+      "shrek",
+      "scarface",
+      "spider man",
+      "superman",
+      "scream",
+      "sing",
+      "soul"
+    ],
+    "T": [
+      "titanic",
+      "terminator",
+      "thor",
+      "toy story",
+      "transformers",
+      "trolls"
+    ],
+    "U": [
+      "up"
+    ],
+    "V": [
+      "venom",
+      "vertigo",
+      "v for vendetta"
+    ],
+    "W": [
+      "wall e",
+      "wonder woman",
+      "wolverine"
+    ],
+    "X": [
+      "x men"
+    ],
+    "Y": [
+      "your name"
+    ],
+    "Z": [
+      "zootopia"
+    ]
+  },
+  "Videojuego": {
+    "A": [
+      "among us",
+      "assassins creed",
+      "apex legends",
+      "ark",
+      "age of empires",
+      "animal crossing"
+    ],
+    "B": [
+      "battlefield",
+      "bioshock",
+      "borderlands",
+      "brawl stars",
+      "batman arkham"
+    ],
+    "C": [
+      "call of duty",
+      "celeste",
+      "counter strike",
+      "crash bandicoot",
+      "cuphead",
+      "cyberpunk"
+    ],
+    "D": [
+      "diablo",
+      "doom",
+      "destiny",
+      "dota",
+      "donkey kong"
+    ],
+    "E": [
+      "elden ring",
+      "earthbound",
+      "enter the gungeon"
+    ],
+    "F": [
+      "fortnite",
+      "fifa",
+      "fall guys",
+      "far cry",
+      "farming simulator"
+    ],
+    "G": [
+      "gta",
+      "god of war",
+      "geometry dash",
+      "guitar hero"
+    ],
+    "H": [
+      "halo",
+      "hitman",
+      "hades",
+      "hollow knight"
+    ],
+    "I": [
+      "injustice",
+      "inside",
+      "infamous"
+    ],
+    "J": [
+      "just cause",
+      "jump force"
+    ],
+    "K": [
+      "kirby",
+      "kingdom hearts",
+      "killing floor"
+    ],
+    "L": [
+      "league of legends",
+      "minecraft",
+      "limbo",
+      "little nightmares",
+      "lost ark"
+    ],
+    "M": [
+      "minecraft",
+      "mario",
+      "metroid",
+      "mortal kombat",
+      "monster hunter"
+    ],
+    "N": [
+      "need for speed",
+      "nier",
+      "nba 2k",
+      "no mans sky"
+    ],
+    "Ñ": [],
+    "O": [
+      "overwatch",
+      "osu"
+    ],
+    "P": [
+      "pokemon",
+      "pubg",
+      "portal",
+      "payday",
+      "pac man",
+      "plants vs zombies"
+    ],
+    "Q": [
+      "quake"
+    ],
+    "R": [
+      "roblox",
+      "resident evil",
+      "rocket league",
+      "rayman",
+      "ragnarok"
+    ],
+    "S": [
+      "sonic",
+      "skyrim",
+      "street fighter",
+      "starcraft",
+      "stardew valley",
+      "subnautica"
+    ],
+    "T": [
+      "tetris",
+      "terraria",
+      "tekken",
+      "tomb raider",
+      "the sims"
+    ],
+    "U": [
+      "undertale"
+    ],
+    "V": [
+      "valorant",
+      "vampire survivors"
+    ],
+    "W": [
+      "warcraft",
+      "witcher",
+      "worms",
+      "watch dogs"
+    ],
+    "X": [
+      "xcom"
+    ],
+    "Y": [
+      "yakuza",
+      "yoshi"
+    ],
+    "Z": [
+      "zelda",
+      "zuma"
+    ]
+  }
+}
