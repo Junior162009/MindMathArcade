@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Selector de juegos · Nexo Orbital</title>
+  <title>Nexo Orbital · Selector</title>
   <style>
     * {
       margin: 0;
@@ -185,10 +185,12 @@
   </div>
 
   <script>
-    // Rutas a tus juegos (ajusta si los archivos están en otra carpeta)
+    // Rutas actualizadas:
+    // - El juego de preguntas ahora se llama quizzer.html
+    // - El juego de banderas se llama bandera.html
     const GAME_URLS = {
-      questions: 'index.html',   // ← tu juego de preguntas
-      flags: 'bandera.html'      // ← tu juego de banderas
+      questions: 'quizzer.html',   // ← tu antiguo index.html renombrado
+      flags: 'bandera.html'        // ← juego de banderas
     };
 
     document.querySelectorAll('.card[data-game]').forEach(card => {
@@ -197,7 +199,6 @@
         const game = this.dataset.game;
         const url = GAME_URLS[game];
         if (url) {
-          // Redirige directamente al juego
           window.location.href = url;
         } else {
           alert('Juego no encontrado');
