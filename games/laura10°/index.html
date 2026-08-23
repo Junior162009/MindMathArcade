@@ -1,0 +1,1697 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Banderquiz · edición mejorada</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0f0c29">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Banderquiz">
+    <link rel="icon" type="image/png" href="logo.png">
+    <link rel="apple-touch-icon" href="logo.png">
+    <style>
+        /* ===== variables & reset ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-start: #0f0c29;
+            --bg-mid: #1a1a3a;
+            --bg-end: #0a0a1a;
+            --card-bg: rgba(22, 33, 62, 0.8);
+            --accent: #e94560;
+            --accent-glow: rgba(233, 69, 96, 0.6);
+            --gold: #f5c518;
+            --gold-glow: rgba(245, 197, 24, 0.4);
+            --text: #f0f0f0;
+            --muted: #b0b0c0;
+            --radius-xl: 2.5rem;
+            --radius-md: 1.8rem;
+            --flag-size: clamp(5rem, 20vw, 10rem);
+            --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --shadow-card: 0 20px 40px -12px rgba(0, 0, 0, 0.7);
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Poppins', system-ui, sans-serif;
+            min-height: 100vh;
+            background: radial-gradient(ellipse at 30% 20%, var(--bg-start), var(--bg-mid) 60%, var(--bg-end));
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 1.2rem;
+            color: var(--text);
+            transition: background 0.5s;
+        }
+
+        .app-container {
+            max-width: 720px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 1.2rem;
+            animation: fadeSlideUp 0.6s ease-out;
+        }
+
+        /* ===== animaciones ===== */
+        @keyframes fadeSlideUp {
+            0% {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes pulse {
+            0%,
+            100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        @keyframes shake {
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+            20% {
+                transform: translateX(-12px);
+            }
+            40% {
+                transform: translateX(12px);
+            }
+            60% {
+                transform: translateX(-6px);
+            }
+            80% {
+                transform: translateX(6px);
+            }
+        }
+
+        .shake {
+            animation: shake 0.4s ease;
+        }
+
+        @keyframes heartBeat {
+            0%,
+            100% {
+                transform: scale(1);
+            }
+            30% {
+                transform: scale(1.2);
+            }
+            60% {
+                transform: scale(0.9);
+            }
+        }
+
+        .heart-beat {
+            animation: heartBeat 0.6s ease;
+        }
+
+        /* ===== portal ===== */
+        .portal {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.2rem;
+            text-align: center;
+        }
+
+        .logo-wrapper {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            margin: 0.2rem 0;
+        }
+
+        .logo-img {
+            width: clamp(160px, 40vw, 300px);
+            height: auto;
+            filter: drop-shadow(0 12px 28px rgba(0, 0, 0, 0.5)) drop-shadow(0 0 16px var(--gold-glow));
+            transition: filter 0.3s;
+        }
+
+        .logo-img:hover {
+            filter: drop-shadow(0 12px 32px rgba(0, 0, 0, 0.7)) drop-shadow(0 0 24px var(--gold));
+        }
+
+        .hero-question {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #fff, #ffe6b3);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            letter-spacing: -0.5px;
+        }
+
+        .invite-line {
+            color: var(--muted);
+            background: rgba(255, 255, 255, 0.06);
+            backdrop-filter: blur(8px);
+            padding: 0.4rem 1.6rem;
+            border-radius: 40px;
+            font-weight: 500;
+            font-size: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 1.5rem;
+            width: 100%;
+            margin-top: 0.5rem;
+        }
+
+        .level-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius-xl);
+            padding: 1.8rem 1rem;
+            transition: all var(--transition);
+            box-shadow: var(--shadow-card);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.6rem;
+            cursor: pointer;
+            text-decoration: none;
+            color: var(--text);
+        }
+
+        .level-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            border-color: var(--accent);
+            background: rgba(233, 69, 96, 0.15);
+            box-shadow: 0 28px 48px -12px var(--accent-glow);
+        }
+
+        .level-card:active {
+            transform: scale(0.96);
+        }
+
+        .level-emoji {
+            font-size: 3.6rem;
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+        }
+
+        .level-name {
+            font-weight: 800;
+            font-size: 1.6rem;
+            background: linear-gradient(145deg, #fff, #e0e0ff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .level-desc {
+            color: #cbcbe0;
+            font-size: 0.85rem;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 0.2rem 0.9rem;
+            border-radius: 30px;
+            font-weight: 500;
+        }
+
+        .footer {
+            color: #9b9bb0;
+            font-size: 0.8rem;
+            margin-top: 0.4rem;
+            border-top: 1px dashed rgba(255, 255, 255, 0.12);
+            padding-top: 1.2rem;
+            width: 80%;
+            letter-spacing: 0.3px;
+        }
+
+        .footer .stats-badge {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.06);
+            padding: 0.2rem 0.8rem;
+            border-radius: 30px;
+            margin: 0 0.2rem;
+            font-weight: 600;
+            color: var(--gold);
+        }
+
+        /* ===== game header ===== */
+        .game-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 0.6rem;
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            border-radius: var(--radius-md);
+            padding: 0.6rem 1.2rem;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: var(--shadow-card);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .header-logo {
+            width: 32px;
+            height: auto;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+        }
+
+        .title {
+            font-weight: 900;
+            font-size: 1.2rem;
+            background: linear-gradient(135deg, #f5c518, #ffaa00);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .scores {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            flex-wrap: wrap;
+        }
+
+        .scores span {
+            background: rgba(255, 255, 255, 0.07);
+            border-radius: 3rem;
+            padding: 0.2rem 0.8rem;
+            font-weight: 700;
+            font-size: 0.9rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.2rem;
+        }
+
+        .scores .badge-streak {
+            background: var(--accent);
+            color: #fff;
+            padding: 0.2rem 0.7rem;
+        }
+
+        .lives-display {
+            display: flex;
+            align-items: center;
+            gap: 0.2rem;
+            font-size: 1.4rem;
+        }
+
+        .lives-display .heart {
+            transition: all 0.3s;
+        }
+        .lives-display .heart.lost {
+            filter: grayscale(1);
+            opacity: 0.3;
+            transform: scale(0.8);
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 0.4rem;
+        }
+
+        .btn {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #fff;
+            padding: 0.4rem 0.9rem;
+            border-radius: 3rem;
+            font-weight: 700;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all var(--transition);
+            backdrop-filter: blur(4px);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .btn:hover {
+            background: rgba(255, 255, 255, 0.18);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn:active {
+            transform: scale(0.94);
+        }
+
+        .btn-reset {
+            background: rgba(233, 69, 96, 0.2);
+            border-color: var(--accent);
+        }
+
+        .btn-reset:hover {
+            background: rgba(233, 69, 96, 0.4);
+        }
+
+        /* ===== game card ===== */
+        .game-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            border-radius: var(--radius-xl);
+            padding: 1.8rem 1.5rem 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: var(--shadow-card);
+            transition: all var(--transition);
+            position: relative;
+        }
+
+        .flag-container {
+            background: rgba(0, 0, 0, 0.35);
+            border-radius: 2rem;
+            padding: 1rem 1.8rem;
+            box-shadow: inset 0 4px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        .flag-emoji {
+            font-size: var(--flag-size);
+            filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.5));
+            transition: transform 0.3s;
+            display: block;
+        }
+
+        .flag-emoji:hover {
+            transform: scale(1.05);
+        }
+
+        .question-prompt {
+            color: var(--muted);
+            font-size: 1.1rem;
+            font-weight: 500;
+            letter-spacing: 0.3px;
+        }
+
+        .answers-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.7rem;
+            width: 100%;
+            margin-top: 0.2rem;
+        }
+
+        .answer-btn {
+            background: rgba(255, 255, 255, 0.07);
+            border: 2px solid rgba(255, 255, 255, 0.12);
+            color: #eee;
+            font-weight: 700;
+            font-size: 1rem;
+            padding: 0.9rem 0.5rem;
+            border-radius: 1.2rem;
+            cursor: pointer;
+            transition: all var(--transition);
+            word-break: break-word;
+            text-align: center;
+            line-height: 1.3;
+            backdrop-filter: blur(4px);
+        }
+
+        .answer-btn:not(:disabled):hover {
+            background: rgba(255, 255, 255, 0.18);
+            transform: scale(1.02);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .answer-btn:not(:disabled):active {
+            transform: scale(0.94);
+        }
+
+        .answer-btn:disabled {
+            opacity: 0.8;
+            cursor: not-allowed;
+        }
+
+        .answer-btn.correct {
+            background: #2ecc71 !important;
+            border-color: #27ae60 !important;
+            box-shadow: 0 0 24px rgba(46, 204, 113, 0.4);
+            transform: scale(1.02);
+        }
+
+        .answer-btn.wrong {
+            background: #e74c3c !important;
+            border-color: #c0392b !important;
+            box-shadow: 0 0 24px rgba(231, 76, 60, 0.4);
+            animation: shake 0.4s ease;
+        }
+
+        /* ===== timer ===== */
+        .timer-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.8rem;
+            width: 100%;
+            margin-top: 0.2rem;
+        }
+
+        .timer-bar-bg {
+            flex: 1;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .timer-bar-fill {
+            height: 100%;
+            width: 100%;
+            background: linear-gradient(90deg, var(--gold), var(--accent));
+            border-radius: 10px;
+            transition: width 0.3s linear;
+        }
+
+        .timer-text {
+            font-weight: 700;
+            font-size: 1rem;
+            min-width: 2.2rem;
+            text-align: center;
+            color: var(--gold);
+        }
+
+        /* ===== extra info ===== */
+        .extra-info {
+            margin-top: 0.6rem;
+            padding: 0.8rem 1.2rem;
+            border-radius: 1.2rem;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            width: 100%;
+            text-align: center;
+            font-size: 0.95rem;
+            color: #d0d0e0;
+            transition: all 0.4s;
+            min-height: 2.8rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 0.3rem 0.8rem;
+        }
+
+        .extra-info .capital {
+            color: var(--gold);
+            font-weight: 600;
+        }
+
+        .extra-info .region {
+            background: rgba(255, 255, 255, 0.08);
+            padding: 0.1rem 0.8rem;
+            border-radius: 30px;
+            font-size: 0.8rem;
+        }
+
+        .extra-info .badge-correct {
+            color: #2ecc71;
+            font-weight: 700;
+        }
+
+        .extra-info .badge-wrong {
+            color: #e74c3c;
+            font-weight: 700;
+        }
+
+        /* ===== progress stats ===== */
+        .progress-stats {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            width: 100%;
+            gap: 0.6rem;
+            margin-top: 0.2rem;
+            font-size: 0.9rem;
+            color: var(--muted);
+        }
+
+        .progress-bar-bg {
+            flex: 1;
+            min-width: 80px;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--accent), var(--gold));
+            border-radius: 10px;
+            transition: width 0.4s ease;
+        }
+
+        .motivational-msg {
+            font-weight: 600;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 0.1rem 0.8rem;
+            border-radius: 30px;
+            font-size: 0.85rem;
+            white-space: nowrap;
+        }
+
+        /* ===== game over overlay ===== */
+        .game-over-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(8px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            animation: fadeSlideUp 0.5s ease;
+        }
+
+        .game-over-card {
+            background: var(--card-bg);
+            border-radius: var(--radius-xl);
+            padding: 2.5rem 2rem;
+            max-width: 420px;
+            width: 90%;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 40px 80px rgba(0, 0, 0, 0.8);
+        }
+
+        .game-over-card h2 {
+            font-size: 2.4rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--accent), #ff6b6b);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .game-over-card .summary {
+            margin: 1.2rem 0;
+            font-size: 1.1rem;
+            color: var(--muted);
+        }
+
+        .game-over-card .summary span {
+            display: block;
+            margin: 0.3rem 0;
+        }
+
+        .game-over-card .summary .highlight {
+            color: var(--gold);
+            font-weight: 700;
+        }
+
+        .game-over-card .btn {
+            margin: 0.4rem 0.2rem;
+            padding: 0.6rem 1.6rem;
+            font-size: 1rem;
+        }
+
+        /* ===== confeti canvas ===== */
+        #confetti-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 9999;
+        }
+
+        /* ===== responsive ===== */
+        @media (max-width: 550px) {
+            body {
+                padding: 0.6rem;
+            }
+            .hero-question {
+                font-size: 1.6rem;
+            }
+            .answers-grid {
+                grid-template-columns: 1fr;
+                gap: 0.6rem;
+            }
+            .game-card {
+                padding: 1.2rem 1rem;
+            }
+            .game-header {
+                padding: 0.5rem 0.8rem;
+            }
+            .scores span {
+                font-size: 0.75rem;
+                padding: 0.1rem 0.6rem;
+            }
+            .btn {
+                font-size: 0.75rem;
+                padding: 0.3rem 0.7rem;
+            }
+            .extra-info {
+                font-size: 0.85rem;
+                padding: 0.6rem 0.8rem;
+            }
+            .cards-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 0.8rem;
+            }
+            .level-card {
+                padding: 1.2rem 0.6rem;
+            }
+            .level-emoji {
+                font-size: 2.6rem;
+            }
+            .level-name {
+                font-size: 1.2rem;
+            }
+            .lives-display {
+                font-size: 1.2rem;
+            }
+            .timer-text {
+                font-size: 0.9rem;
+                min-width: 1.8rem;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .cards-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container" id="app"></div>
+    <canvas id="confetti-canvas"></canvas>
+
+    <script>
+        // ============================================================
+        //  SERVICE WORKER
+        // ============================================================
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js').catch(() => {});
+        }
+
+        // ============================================================
+        //  DATOS DE PAÍSES (código CCA2, nombre en español)
+        // ============================================================
+        const RAW = [
+            ["AD", "Andorra"],
+            ["AE", "Emiratos Árabes Unidos"],
+            ["AF", "Afganistán"],
+            ["AG", "Antigua y Barbuda"],
+            ["AI", "Anguila"],
+            ["AL", "Albania"],
+            ["AM", "Armenia"],
+            ["AO", "Angola"],
+            ["AQ", "Antártida"],
+            ["AR", "Argentina"],
+            ["AS", "Samoa Americana"],
+            ["AT", "Austria"],
+            ["AU", "Australia"],
+            ["AW", "Aruba"],
+            ["AX", "Islas Åland"],
+            ["AZ", "Azerbaiyán"],
+            ["BA", "Bosnia y Herzegovina"],
+            ["BB", "Barbados"],
+            ["BD", "Bangladés"],
+            ["BE", "Bélgica"],
+            ["BF", "Burkina Faso"],
+            ["BG", "Bulgaria"],
+            ["BH", "Baréin"],
+            ["BI", "Burundi"],
+            ["BJ", "Benín"],
+            ["BL", "San Bartolomé"],
+            ["BM", "Bermudas"],
+            ["BN", "Brunéi"],
+            ["BO", "Bolivia"],
+            ["BQ", "Caribe Neerlandés"],
+            ["BR", "Brasil"],
+            ["BS", "Bahamas"],
+            ["BT", "Bután"],
+            ["BV", "Isla Bouvet"],
+            ["BW", "Botsuana"],
+            ["BY", "Bielorrusia"],
+            ["BZ", "Belice"],
+            ["CA", "Canadá"],
+            ["CC", "Islas Cocos"],
+            ["CD", "República Democrática del Congo"],
+            ["CF", "República Centroafricana"],
+            ["CG", "Congo"],
+            ["CH", "Suiza"],
+            ["CI", "Costa de Marfil"],
+            ["CK", "Islas Cook"],
+            ["CL", "Chile"],
+            ["CM", "Camerún"],
+            ["CN", "China"],
+            ["CO", "Colombia"],
+            ["CR", "Costa Rica"],
+            ["CU", "Cuba"],
+            ["CV", "Cabo Verde"],
+            ["CW", "Curazao"],
+            ["CX", "Isla de Navidad"],
+            ["CY", "Chipre"],
+            ["CZ", "República Checa"],
+            ["DE", "Alemania"],
+            ["DJ", "Yibuti"],
+            ["DK", "Dinamarca"],
+            ["DM", "Dominica"],
+            ["DO", "República Dominicana"],
+            ["DZ", "Argelia"],
+            ["EC", "Ecuador"],
+            ["EE", "Estonia"],
+            ["EG", "Egipto"],
+            ["EH", "Sahara Occidental"],
+            ["ER", "Eritrea"],
+            ["ES", "España"],
+            ["ET", "Etiopía"],
+            ["FI", "Finlandia"],
+            ["FJ", "Fiyi"],
+            ["FK", "Islas Malvinas"],
+            ["FM", "Micronesia"],
+            ["FO", "Islas Feroe"],
+            ["FR", "Francia"],
+            ["GA", "Gabón"],
+            ["GB", "Reino Unido"],
+            ["GD", "Granada"],
+            ["GE", "Georgia"],
+            ["GF", "Guayana Francesa"],
+            ["GG", "Guernsey"],
+            ["GH", "Ghana"],
+            ["GI", "Gibraltar"],
+            ["GL", "Groenlandia"],
+            ["GM", "Gambia"],
+            ["GN", "Guinea"],
+            ["GP", "Guadalupe"],
+            ["GQ", "Guinea Ecuatorial"],
+            ["GR", "Grecia"],
+            ["GS", "Islas Georgias del Sur y Sandwich del Sur"],
+            ["GT", "Guatemala"],
+            ["GU", "Guam"],
+            ["GW", "Guinea-Bisáu"],
+            ["GY", "Guyana"],
+            ["HK", "Hong Kong"],
+            ["HM", "Islas Heard y McDonald"],
+            ["HN", "Honduras"],
+            ["HR", "Croacia"],
+            ["HT", "Haití"],
+            ["HU", "Hungría"],
+            ["ID", "Indonesia"],
+            ["IE", "Irlanda"],
+            ["IL", "Israel"],
+            ["IM", "Isla de Man"],
+            ["IN", "India"],
+            ["IO", "Territorio Británico del Océano Índico"],
+            ["IQ", "Irak"],
+            ["IR", "Irán"],
+            ["IS", "Islandia"],
+            ["IT", "Italia"],
+            ["JE", "Jersey"],
+            ["JM", "Jamaica"],
+            ["JO", "Jordania"],
+            ["JP", "Japón"],
+            ["KE", "Kenia"],
+            ["KG", "Kirguistán"],
+            ["KH", "Camboya"],
+            ["KI", "Kiribati"],
+            ["KM", "Comoras"],
+            ["KN", "San Cristóbal y Nieves"],
+            ["KP", "Corea del Norte"],
+            ["KR", "Corea del Sur"],
+            ["KW", "Kuwait"],
+            ["KY", "Islas Caimán"],
+            ["KZ", "Kazajistán"],
+            ["LA", "Laos"],
+            ["LB", "Líbano"],
+            ["LC", "Santa Lucía"],
+            ["LI", "Liechtenstein"],
+            ["LK", "Sri Lanka"],
+            ["LR", "Liberia"],
+            ["LS", "Lesoto"],
+            ["LT", "Lituania"],
+            ["LU", "Luxemburgo"],
+            ["LV", "Letonia"],
+            ["LY", "Libia"],
+            ["MA", "Marruecos"],
+            ["MC", "Mónaco"],
+            ["MD", "Moldavia"],
+            ["ME", "Montenegro"],
+            ["MF", "San Martín"],
+            ["MG", "Madagascar"],
+            ["MH", "Islas Marshall"],
+            ["MK", "Macedonia del Norte"],
+            ["ML", "Mali"],
+            ["MM", "Myanmar"],
+            ["MN", "Mongolia"],
+            ["MO", "Macao"],
+            ["MP", "Islas Marianas del Norte"],
+            ["MQ", "Martinica"],
+            ["MR", "Mauritania"],
+            ["MS", "Montserrat"],
+            ["MT", "Malta"],
+            ["MU", "Mauricio"],
+            ["MV", "Maldivas"],
+            ["MW", "Malaui"],
+            ["MX", "México"],
+            ["MY", "Malasia"],
+            ["MZ", "Mozambique"],
+            ["NA", "Namibia"],
+            ["NC", "Nueva Caledonia"],
+            ["NE", "Níger"],
+            ["NF", "Isla Norfolk"],
+            ["NG", "Nigeria"],
+            ["NI", "Nicaragua"],
+            ["NL", "Países Bajos"],
+            ["NO", "Noruega"],
+            ["NP", "Nepal"],
+            ["NR", "Nauru"],
+            ["NU", "Niue"],
+            ["NZ", "Nueva Zelanda"],
+            ["OM", "Omán"],
+            ["PA", "Panamá"],
+            ["PE", "Perú"],
+            ["PF", "Polinesia Francesa"],
+            ["PG", "Papúa Nueva Guinea"],
+            ["PH", "Filipinas"],
+            ["PK", "Pakistán"],
+            ["PL", "Polonia"],
+            ["PM", "San Pedro y Miquelón"],
+            ["PN", "Islas Pitcairn"],
+            ["PR", "Puerto Rico"],
+            ["PS", "Palestina"],
+            ["PT", "Portugal"],
+            ["PW", "Palaos"],
+            ["PY", "Paraguay"],
+            ["QA", "Catar"],
+            ["RE", "Reunión"],
+            ["RO", "Rumania"],
+            ["RS", "Serbia"],
+            ["RU", "Rusia"],
+            ["RW", "Ruanda"],
+            ["SA", "Arabia Saudita"],
+            ["SB", "Islas Salomón"],
+            ["SC", "Seychelles"],
+            ["SD", "Sudán"],
+            ["SE", "Suecia"],
+            ["SG", "Singapur"],
+            ["SH", "Santa Elena"],
+            ["SI", "Eslovenia"],
+            ["SJ", "Svalbard y Jan Mayen"],
+            ["SK", "Eslovaquia"],
+            ["SL", "Sierra Leona"],
+            ["SM", "San Marino"],
+            ["SN", "Senegal"],
+            ["SO", "Somalia"],
+            ["SR", "Surinam"],
+            ["SS", "Sudán del Sur"],
+            ["ST", "Santo Tomé y Príncipe"],
+            ["SV", "El Salvador"],
+            ["SX", "Sint Maarten"],
+            ["SY", "Siria"],
+            ["SZ", "Suazilandia"],
+            ["TC", "Islas Turcas y Caicos"],
+            ["TD", "Chad"],
+            ["TF", "Territorios Australes Franceses"],
+            ["TG", "Togo"],
+            ["TH", "Tailandia"],
+            ["TJ", "Tayikistán"],
+            ["TK", "Tokelau"],
+            ["TL", "Timor Oriental"],
+            ["TM", "Turkmenistán"],
+            ["TN", "Túnez"],
+            ["TO", "Tonga"],
+            ["TR", "Turquía"],
+            ["TT", "Trinidad y Tobago"],
+            ["TV", "Tuvalu"],
+            ["TW", "Taiwán"],
+            ["TZ", "Tanzania"],
+            ["UA", "Ucrania"],
+            ["UG", "Uganda"],
+            ["UM", "Islas menores alejadas de EE.UU."],
+            ["US", "Estados Unidos"],
+            ["UY", "Uruguay"],
+            ["UZ", "Uzbekistán"],
+            ["VA", "Ciudad del Vaticano"],
+            ["VC", "San Vicente y las Granadinas"],
+            ["VE", "Venezuela"],
+            ["VG", "Islas Vírgenes Británicas"],
+            ["VI", "Islas Vírgenes de EE.UU."],
+            ["VN", "Vietnam"],
+            ["VU", "Vanuatu"],
+            ["WF", "Wallis y Futuna"],
+            ["WS", "Samoa"],
+            ["YE", "Yemen"],
+            ["YT", "Mayotte"],
+            ["ZA", "Sudáfrica"],
+            ["ZM", "Zambia"],
+            ["ZW", "Zimbabue"]
+        ];
+
+        function flagEmoji(cca2) {
+            return String.fromCodePoint(...[...cca2.toUpperCase()].map(c => 0x1F1E6 + c.charCodeAt(0) - 65));
+        }
+
+        const COUNTRIES = RAW.map(([cca2, nameEs]) => ({ cca2, nameEs, flag: flagEmoji(cca2) }));
+
+        // ============================================================
+        //  CLASIFICACIÓN POR CONTINENTES
+        // ============================================================
+        const LATAM_AND_EUROPE = new Set([
+            "AG", "AI", "AR", "AW", "BB", "BL", "BM", "BO", "BQ", "BR", "BS", "BZ", "CA", "CL", "CO", "CR", "CU", "CW",
+            "DM", "DO", "EC", "FK", "GD", "GF", "GL", "GP", "GS", "GT", "GY", "HN", "HT", "JM", "KN", "KY", "LC", "MF",
+            "MQ", "MS", "MX", "NI", "PA", "PE", "PM", "PR", "PY", "SV", "SX", "TC", "TT", "US", "UY", "VC", "VE", "VG",
+            "VI",
+            "AD", "AL", "AT", "AX", "BA", "BE", "BG", "BY", "CH", "CY", "CZ", "DE", "DK", "EE", "ES", "FI", "FO", "FR",
+            "GB", "GG", "GI", "GR", "HR", "HU", "IE", "IM", "IS", "IT", "JE", "LI", "LT", "LU", "LV", "MC", "MD", "ME",
+            "MK", "MT", "NL", "NO", "PL", "PT", "RO", "RS", "RU", "SE", "SI", "SJ", "SK", "SM", "UA", "VA"
+        ]);
+
+        const AFRICA_SET = new Set([
+            "AO", "BF", "BI", "BJ", "BW", "CD", "CF", "CG", "CI", "CM", "CV", "DJ", "DZ", "EG", "EH", "ER", "ET", "GA",
+            "GH", "GM", "GN", "GQ", "GW", "KE", "KM", "LR", "LS", "LY", "MA", "MG", "ML", "MR", "MU", "MW", "MZ", "NA",
+            "NE", "NG", "RE", "RW", "SC", "SD", "SH", "SL", "SN", "SO", "SS", "ST", "SZ", "TD", "TG", "TN", "TZ", "UG",
+            "YT", "ZA", "ZM", "ZW"
+        ]);
+
+        // ============================================================
+        //  ESTADO DEL JUEGO
+        // ============================================================
+        let currentLevel = 'easy';
+        let filteredCountries = [];
+        let currentQuestion = null;
+        let score = 0;
+        let total = 0;
+        let streak = 0;
+        let bestStreak = 0;
+        let lives = 3;
+        const MAX_LIVES = 3;
+        let locked = false;
+        let extraInfoCache = new Map();
+        let timerSeconds = 12;
+        let timerInterval = null;
+        let timerRunning = false;
+        let gameActive = false;
+
+        // Estadísticas globales (localStorage)
+        let globalStats = {
+            gamesPlayed: 0,
+            totalCorrect: 0,
+            totalWrong: 0,
+            bestStreak: 0
+        };
+
+        function loadStats() {
+            try {
+                const stored = localStorage.getItem('banderquiz_global_stats');
+                if (stored) {
+                    const parsed = JSON.parse(stored);
+                    globalStats = { ...globalStats, ...parsed };
+                }
+            } catch (_) {}
+        }
+
+        function saveStats() {
+            try {
+                localStorage.setItem('banderquiz_global_stats', JSON.stringify(globalStats));
+            } catch (_) {}
+        }
+
+        loadStats();
+        // Sincronizar bestStreak local con el global
+        if (globalStats.bestStreak > bestStreak) bestStreak = globalStats.bestStreak;
+
+        // ============================================================
+        //  SONIDOS (Web Audio)
+        // ============================================================
+        let audioCtx = null;
+
+        function getAudio() {
+            if (!audioCtx) audioCtx = new(window.AudioContext || window.webkitAudioContext)();
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            return audioCtx;
+        }
+
+        function playTone(freq, duration = 0.25, type = 'sine', volume = 0.2) {
+            try {
+                const ctx = getAudio();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = type;
+                osc.frequency.value = freq;
+                gain.gain.setValueAtTime(volume, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start(ctx.currentTime);
+                osc.stop(ctx.currentTime + duration);
+            } catch (_) {}
+        }
+
+        function playCorrect() {
+            playTone(523.25, 0.2);
+            setTimeout(() => playTone(659.25, 0.2), 120);
+            setTimeout(() => playTone(783.99, 0.3), 240);
+        }
+
+        function playWrong() {
+            playTone(200, 0.3, 'sawtooth', 0.15);
+            setTimeout(() => playTone(150, 0.4, 'sawtooth', 0.12), 200);
+        }
+
+        function playGameOver() {
+            playTone(300, 0.5, 'sawtooth', 0.15);
+            setTimeout(() => playTone(200, 0.6, 'sawtooth', 0.12), 300);
+            setTimeout(() => playTone(100, 0.8, 'sawtooth', 0.1), 600);
+        }
+
+        // ============================================================
+        //  CONFETI
+        // ============================================================
+        const canvas = document.getElementById('confetti-canvas');
+        const ctx = canvas.getContext('2d');
+        let confettiPieces = [];
+        let confettiRunning = false;
+        let confettiRAF = null;
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        class ConfettiPiece {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = -20;
+                this.w = 8 + Math.random() * 8;
+                this.h = 4 + Math.random() * 6;
+                this.color = `hsl(${Math.random() * 360}, 80%, 60%)`;
+                this.rotation = Math.random() * 360;
+                this.rotSpeed = (Math.random() - 0.5) * 10;
+                this.speedX = (Math.random() - 0.5) * 4;
+                this.speedY = 2 + Math.random() * 4;
+                this.gravity = 0.08 + Math.random() * 0.06;
+                this.opacity = 1;
+            }
+            update() {
+                this.x += this.speedX + Math.sin(this.y * 0.02) * 0.3;
+                this.y += this.speedY;
+                this.speedY += this.gravity;
+                this.rotation += this.rotSpeed;
+                this.opacity -= 0.002;
+                if (this.y > canvas.height + 20) this.opacity = 0;
+                return this.opacity > 0;
+            }
+            draw() {
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                ctx.rotate((this.rotation * Math.PI) / 180);
+                ctx.globalAlpha = this.opacity;
+                ctx.fillStyle = this.color;
+                ctx.fillRect(-this.w / 2, -this.h / 2, this.w, this.h);
+                ctx.restore();
+            }
+        }
+
+        function launchConfetti(count = 120) {
+            if (confettiRunning) {
+                for (let i = 0; i < count; i++) {
+                    confettiPieces.push(new ConfettiPiece());
+                }
+                return;
+            }
+            confettiRunning = true;
+            confettiPieces = [];
+            for (let i = 0; i < count; i++) {
+                confettiPieces.push(new ConfettiPiece());
+            }
+
+            function animate() {
+                if (confettiPieces.length === 0) {
+                    confettiRunning = false;
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    return;
+                }
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                confettiPieces = confettiPieces.filter(p => p.update());
+                confettiPieces.forEach(p => p.draw());
+                confettiRAF = requestAnimationFrame(animate);
+            }
+            animate();
+        }
+
+        function stopConfetti() {
+            if (confettiRAF) {
+                cancelAnimationFrame(confettiRAF);
+                confettiRAF = null;
+                confettiRunning = false;
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                confettiPieces = [];
+            }
+        }
+
+        // ============================================================
+        //  MENSAJES MOTIVADORES
+        // ============================================================
+        function getMotivation(streak) {
+            if (streak === 0) return '¡Sigue intentando!';
+            if (streak < 3) return '✨ Buen comienzo';
+            if (streak < 5) return '🔥 ¡Vas bien!';
+            if (streak < 8) return '⚡ ¡Racha!';
+            if (streak < 12) return '🌟 ¡Impresionante!';
+            if (streak < 16) return '🏆 ¡Eres un experto!';
+            return '👑 ¡LEYENDA!';
+        }
+
+        // ============================================================
+        //  FILTRADO POR NIVEL
+        // ============================================================
+        function setFiltered() {
+            if (currentLevel === 'easy') {
+                filteredCountries = COUNTRIES.filter(c => LATAM_AND_EUROPE.has(c.cca2));
+            } else if (currentLevel === 'normal') {
+                filteredCountries = COUNTRIES.filter(c => AFRICA_SET.has(c.cca2));
+            } else {
+                filteredCountries = COUNTRIES.filter(c => !LATAM_AND_EUROPE.has(c.cca2) && !AFRICA_SET.has(c.cca2));
+            }
+        }
+
+        // ============================================================
+        //  GENERAR PREGUNTA
+        // ============================================================
+        function genQuestion() {
+            if (filteredCountries.length < 4) return null;
+            const correct = filteredCountries[Math.floor(Math.random() * filteredCountries.length)];
+            const distractors = filteredCountries
+                .filter(c => c.cca2 !== correct.cca2)
+                .sort(() => Math.random() - 0.5)
+                .slice(0, 3);
+            return { correct, options: [correct, ...distractors].sort(() => Math.random() - 0.5) };
+        }
+
+        // ============================================================
+        //  OBTENER INFO ADICIONAL (API REST COUNTRIES)
+        // ============================================================
+        async function fetchCountryInfo(cca2) {
+            if (extraInfoCache.has(cca2)) return extraInfoCache.get(cca2);
+            try {
+                const resp = await fetch(`https://restcountries.com/v3.1/alpha/${cca2}`);
+                if (!resp.ok) throw new Error('API error');
+                const data = await resp.json();
+                if (!data || data.length === 0) throw new Error('No data');
+                const country = data[0];
+                const capital = country.capital ? country.capital[0] : 'N/A';
+                const region = country.region || 'Desconocido';
+                const subregion = country.subregion || '';
+                const info = { capital, region, subregion };
+                extraInfoCache.set(cca2, info);
+                return info;
+            } catch (_) {
+                const info = { capital: '—', region: '—', subregion: '' };
+                extraInfoCache.set(cca2, info);
+                return info;
+            }
+        }
+
+        // ============================================================
+        //  TEMPORIZADOR
+        // ============================================================
+        function startTimer() {
+            clearInterval(timerInterval);
+            timerSeconds = 12;
+            timerRunning = true;
+            updateTimerUI();
+            timerInterval = setInterval(() => {
+                timerSeconds--;
+                updateTimerUI();
+                if (timerSeconds <= 0) {
+                    clearInterval(timerInterval);
+                    timerRunning = false;
+                    // Tiempo agotado -> fallo automático
+                    if (!locked && gameActive && currentQuestion) {
+                        handleTimeout();
+                    }
+                }
+            }, 1000);
+        }
+
+        function stopTimer() {
+            clearInterval(timerInterval);
+            timerRunning = false;
+        }
+
+        function updateTimerUI() {
+            const fill = document.getElementById('timer-fill');
+            const text = document.getElementById('timer-text');
+            if (fill) {
+                const pct = Math.max(0, (timerSeconds / 12) * 100);
+                fill.style.width = pct + '%';
+                // Cambiar color según tiempo
+                if (pct < 25) {
+                    fill.style.background = 'linear-gradient(90deg, #e74c3c, #e94560)';
+                } else if (pct < 50) {
+                    fill.style.background = 'linear-gradient(90deg, #f39c12, #e67e22)';
+                } else {
+                    fill.style.background = 'linear-gradient(90deg, var(--gold), var(--accent))';
+                }
+            }
+            if (text) {
+                text.textContent = timerSeconds + 's';
+                if (timerSeconds <= 3) text.style.color = '#e74c3c';
+                else text.style.color = 'var(--gold)';
+            }
+        }
+
+        // ============================================================
+        //  MANEJAR TIMEOUT (fallo por tiempo)
+        // ============================================================
+        async function handleTimeout() {
+            if (locked || !currentQuestion) return;
+            locked = true;
+            gameActive = false;
+            stopTimer();
+
+            const correct = currentQuestion.correct;
+            total++;
+            streak = 0;
+            lives--;
+            globalStats.totalWrong++;
+
+            // Sonido de fallo
+            playWrong();
+
+            // Mostrar feedback
+            document.querySelectorAll('.answer-btn').forEach(b => {
+                b.disabled = true;
+                if (b.dataset.cca2 === correct.cca2) b.classList.add('correct');
+            });
+
+            // Extra info
+            const info = await fetchCountryInfo(correct.cca2);
+            const extraDiv = document.getElementById('extra-info');
+            if (extraDiv) {
+                extraDiv.innerHTML = `
+                    <span class="badge-wrong">⏰ ¡Tiempo agotado!</span>
+                    <span class="capital">${correct.nameEs}</span>
+                    ${info.capital ? `<span>🏛️ ${info.capital}</span>` : ''}
+                    ${info.region ? `<span class="region">🌍 ${info.region}</span>` : ''}
+                `;
+            }
+
+            const msgDiv = document.getElementById('motivational-msg');
+            if (msgDiv) msgDiv.textContent = '⏰ ¡Más rápido la próxima!';
+
+            updateStatsUI();
+            updateLivesUI();
+
+            // Comprobar game over
+            if (lives <= 0) {
+                await new Promise(r => setTimeout(r, 800));
+                showGameOver();
+                return;
+            }
+
+            // Siguiente pregunta
+            setTimeout(() => {
+                locked = false;
+                gameActive = true;
+                currentQuestion = genQuestion();
+                renderGame();
+            }, 1500);
+        }
+
+        // ============================================================
+        //  MANEJAR RESPUESTA
+        // ============================================================
+        async function handleAnswer(cca2, btn) {
+            if (locked || !currentQuestion || !gameActive) return;
+            locked = true;
+            gameActive = false;
+            stopTimer();
+            const correct = currentQuestion.correct;
+            const isCorrect = cca2 === correct.cca2;
+
+            total++;
+            if (isCorrect) {
+                score++;
+                streak++;
+                globalStats.totalCorrect++;
+                if (streak > bestStreak) {
+                    bestStreak = streak;
+                    globalStats.bestStreak = bestStreak;
+                    localStorage.setItem('banderquiz_bestStreak', String(bestStreak));
+                }
+                playCorrect();
+                launchConfetti(80);
+            } else {
+                streak = 0;
+                lives--;
+                globalStats.totalWrong++;
+                playWrong();
+            }
+
+            // Actualizar UI
+            updateStatsUI();
+            updateLivesUI();
+
+            // Feedback en botones
+            document.querySelectorAll('.answer-btn').forEach(b => {
+                b.disabled = true;
+                if (b.dataset.cca2 === correct.cca2) b.classList.add('correct');
+                if (b === btn && !isCorrect) b.classList.add('wrong');
+            });
+
+            // Extra info
+            const info = await fetchCountryInfo(correct.cca2);
+            const extraDiv = document.getElementById('extra-info');
+            if (extraDiv) {
+                const emoji = isCorrect ? '✅' : '❌';
+                const badge = isCorrect ? 'badge-correct' : 'badge-wrong';
+                extraDiv.innerHTML = `
+                    <span class="${badge}">${emoji} ${isCorrect ? '¡Correcto!' : '¡Incorrecto!'}</span>
+                    <span class="capital">${correct.nameEs}</span>
+                    ${info.capital ? `<span>🏛️ ${info.capital}</span>` : ''}
+                    ${info.region ? `<span class="region">🌍 ${info.region}</span>` : ''}
+                `;
+            }
+
+            const msgDiv = document.getElementById('motivational-msg');
+            if (msgDiv) msgDiv.textContent = getMotivation(streak);
+
+            // Comprobar game over
+            if (lives <= 0) {
+                await new Promise(r => setTimeout(r, 800));
+                showGameOver();
+                return;
+            }
+
+            setTimeout(() => {
+                locked = false;
+                gameActive = true;
+                currentQuestion = genQuestion();
+                renderGame();
+            }, 1500);
+        }
+
+        // ============================================================
+        //  ACTUALIZAR UI
+        // ============================================================
+        function updateStatsUI() {
+            const corrEl = document.getElementById('corr');
+            const totEl = document.getElementById('tot');
+            const streakEl = document.getElementById('streak');
+            const bestEl = document.getElementById('best-streak');
+            const pctEl = document.getElementById('pct');
+            const progressFill = document.getElementById('progress-fill');
+
+            if (corrEl) corrEl.textContent = score;
+            if (totEl) totEl.textContent = total;
+            if (streakEl) streakEl.textContent = streak;
+            if (bestEl) bestEl.textContent = bestStreak;
+            if (pctEl) {
+                const pct = total === 0 ? 0 : Math.round((score / total) * 100);
+                pctEl.textContent = pct + '%';
+            }
+            if (progressFill) {
+                const pct = total === 0 ? 0 : Math.min(100, Math.round((score / total) * 100));
+                progressFill.style.width = pct + '%';
+            }
+        }
+
+        function updateLivesUI() {
+            const container = document.getElementById('lives-container');
+            if (!container) return;
+            let html = '';
+            for (let i = 0; i < MAX_LIVES; i++) {
+                const lost = i >= lives ? 'lost' : '';
+                html += `<span class="heart ${lost}">❤️</span>`;
+            }
+            container.innerHTML = html;
+            if (lives < MAX_LIVES) {
+                // animación de latido al perder vida
+                container.querySelectorAll('.heart:not(.lost)').forEach(el => {
+                    el.classList.add('heart-beat');
+                    setTimeout(() => el.classList.remove('heart-beat'), 600);
+                });
+            }
+        }
+
+        // ============================================================
+        //  RENDERIZAR JUEGO
+        // ============================================================
+        function renderGame() {
+            if (!currentQuestion) {
+                showPortal();
+                return;
+            }
+
+            const bestFromStorage = parseInt(localStorage.getItem('banderquiz_bestStreak')) || 0;
+            if (bestStreak < bestFromStorage) bestStreak = bestFromStorage;
+
+            const { correct, options } = currentQuestion;
+
+            app.innerHTML = `
+                <div class="game-header">
+                    <div class="header-left">
+                        <img src="logo.png" class="header-logo" alt="logo">
+                        <span class="title">Banderquiz</span>
+                    </div>
+                    <div class="scores">
+                        <span>⭐ <b id="corr">${score}</b></span>
+                        <span>🎯 <b id="tot">${total}</b></span>
+                        <span>🔥 <b id="streak">${streak}</b></span>
+                        <span class="badge-streak">🏆 <b id="best-streak">${bestStreak}</b></span>
+                        <span>📊 <b id="pct">${total===0?0:Math.round((score/total)*100)}%</b></span>
+                    </div>
+                    <div class="header-actions">
+                        <button class="btn btn-reset" id="resetStatsBtn" title="Reiniciar estadísticas">🔄</button>
+                        <button class="btn" id="backBtn">🏠</button>
+                    </div>
+                </div>
+
+                <div class="game-card">
+                    <div class="lives-display" id="lives-container">
+                        ${Array.from({length: MAX_LIVES}, (_, i) => `<span class="heart ${i >= lives ? 'lost' : ''}">❤️</span>`).join('')}
+                    </div>
+                    <div class="flag-container">
+                        <span class="flag-emoji">${correct.flag}</span>
+                    </div>
+                    <div class="question-prompt">¿A qué país pertenece?</div>
+                    <div class="answers-grid">
+                        ${options.map(o => `<button class="answer-btn" data-cca2="${o.cca2}">${o.nameEs}</button>`).join('')}
+                    </div>
+                    <div class="timer-container">
+                        <div class="timer-bar-bg">
+                            <div class="timer-bar-fill" id="timer-fill" style="width:100%"></div>
+                        </div>
+                        <span class="timer-text" id="timer-text">12s</span>
+                    </div>
+                    <div id="extra-info" class="extra-info">🌍 Haz tu elección</div>
+                    <div class="progress-stats">
+                        <span class="motivational-msg" id="motivational-msg">${getMotivation(streak)}</span>
+                        <div class="progress-bar-bg">
+                            <div class="progress-bar-fill" id="progress-fill" style="width:${total===0?0:Math.min(100,Math.round((score/total)*100))}%"></div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Eventos
+            document.querySelectorAll('.answer-btn').forEach(b => {
+                b.addEventListener('click', e => handleAnswer(e.target.dataset.cca2, e.target));
+            });
+
+            document.getElementById('resetStatsBtn').addEventListener('click', () => {
+                if (confirm('¿Reiniciar todas las estadísticas?')) {
+                    score = 0;
+                    total = 0;
+                    streak = 0;
+                    bestStreak = 0;
+                    lives = MAX_LIVES;
+                    globalStats = { gamesPlayed: 0, totalCorrect: 0, totalWrong: 0, bestStreak: 0 };
+                    localStorage.removeItem('banderquiz_bestStreak');
+                    saveStats();
+                    currentQuestion = genQuestion();
+                    renderGame();
+                }
+            });
+
+            document.getElementById('backBtn').addEventListener('click', () => {
+                stopTimer();
+                gameActive = false;
+                locked = false;
+                showPortal();
+            });
+
+            updateStatsUI();
+            updateLivesUI();
+
+            // Iniciar timer
+            gameActive = true;
+            startTimer();
+        }
+
+        // ============================================================
+        //  GAME OVER
+        // ============================================================
+        function showGameOver() {
+            stopTimer();
+            gameActive = false;
+            locked = true;
+            playGameOver();
+            stopConfetti();
+
+            // Guardar estadísticas globales
+            globalStats.gamesPlayed++;
+            saveStats();
+
+            const totalQuestions = total;
+            const correctAnswers = score;
+            const accuracy = totalQuestions === 0 ? 0 : Math.round((correctAnswers / totalQuestions) * 100);
+
+            // Overlay
+            const overlay = document.createElement('div');
+            overlay.className = 'game-over-overlay';
+            overlay.id = 'game-over-overlay';
+            overlay.innerHTML = `
+                <div class="game-over-card">
+                    <h2>💀 Game Over</h2>
+                    <div class="summary">
+                        <span>📊 <span class="highlight">${correctAnswers}</span> aciertos de <span class="highlight">${totalQuestions}</span></span>
+                        <span>🎯 Precisión: <span class="highlight">${accuracy}%</span></span>
+                        <span>🔥 Mejor racha: <span class="highlight">${bestStreak}</span></span>
+                        <span>❤️ Vidas perdidas: <span class="highlight">${MAX_LIVES - lives}</span></span>
+                    </div>
+                    <div>
+                        <button class="btn" id="go-retry">🔄 Reintentar</button>
+                        <button class="btn" id="go-menu">🏠 Menú</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(overlay);
+
+            document.getElementById('go-retry').addEventListener('click', () => {
+                document.getElementById('game-over-overlay').remove();
+                // Reiniciar con mismo nivel
+                lives = MAX_LIVES;
+                score = 0;
+                total = 0;
+                streak = 0;
+                locked = false;
+                gameActive = true;
+                currentQuestion = genQuestion();
+                renderGame();
+            });
+
+            document.getElementById('go-menu').addEventListener('click', () => {
+                document.getElementById('game-over-overlay').remove();
+                showPortal();
+            });
+        }
+
+        // ============================================================
+        //  INICIAR JUEGO
+        // ============================================================
+        function startGame(level) {
+            currentLevel = level;
+            score = 0;
+            total = 0;
+            streak = 0;
+            lives = MAX_LIVES;
+            const stored = parseInt(localStorage.getItem('banderquiz_bestStreak')) || 0;
+            bestStreak = stored;
+            if (globalStats.bestStreak > bestStreak) bestStreak = globalStats.bestStreak;
+            setFiltered();
+            currentQuestion = genQuestion();
+            if (!currentQuestion) {
+                alert('No hay suficientes países para este nivel. Intenta otro.');
+                showPortal();
+                return;
+            }
+            gameActive = true;
+            locked = false;
+            renderGame();
+        }
+
+        // ============================================================
+        //  PORTAL (MENÚ PRINCIPAL)
+        // ============================================================
+        function showPortal() {
+            stopTimer();
+            stopConfetti();
+            gameActive = false;
+            locked = false;
+            // Recargar stats globales
+            loadStats();
+
+            app.innerHTML = `
+                <div class="portal">
+                    <div class="logo-wrapper">
+                        <img src="logo.png" alt="Banderquiz" class="logo-img">
+                    </div>
+                    <div class="hero-question">¿Cuántas banderas conoces?</div>
+                    <div class="invite-line">🌟 elige tu desafío 🌟</div>
+                    <div class="cards-grid">
+                        <button class="level-card" data-level="easy">
+                            <span class="level-emoji">🌎🌍</span>
+                            <span class="level-name">Fácil</span>
+                            <span class="level-desc">América y Europa</span>
+                        </button>
+                        <button class="level-card" data-level="normal">
+                            <span class="level-emoji">🌍🐘</span>
+                            <span class="level-name">Normal</span>
+                            <span class="level-desc">África</span>
+                        </button>
+                        <button class="level-card" data-level="hard">
+                            <span class="level-emoji">🌏🐉</span>
+                            <span class="level-name">Difícil</span>
+                            <span class="level-desc">Asia y Oceanía</span>
+                        </button>
+                    </div>
+                    <p class="footer">
+                        🎌 pon a prueba tu mirada · aprende jugando
+                        <br>
+                        <span class="stats-badge">🏆 mejor racha: ${globalStats.bestStreak}</span>
+                        <span class="stats-badge">🎮 partidas: ${globalStats.gamesPlayed}</span>
+                        <span class="stats-badge">✅ aciertos: ${globalStats.totalCorrect}</span>
+                        <span class="stats-badge">❌ fallos: ${globalStats.totalWrong}</span>
+                    </p>
+                </div>
+            `;
+
+            document.querySelectorAll('.level-card').forEach(c => {
+                c.addEventListener('click', () => startGame(c.dataset.level));
+            });
+        }
+
+        // ============================================================
+        //  INICIO
+        // ============================================================
+        showPortal();
+
+        console.log('🎉 Banderquiz mejorado · con vidas, temporizador y estadísticas globales');
+    </script>
+</body>
+</html>
