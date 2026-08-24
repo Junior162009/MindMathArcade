@@ -559,10 +559,7 @@
     <div id="admin-panel">
         <a href="pages/admin/admin-promos.html" target="_blank">📢 GESTIONAR PROMOS</a>
         <a href="pages/admin/gestor-movil.html" target="_blank" class="btn-gold">➕ AGREGAR JUEGO</a>
-        <button onclick="showCodePrompt()" style="background: var(--neon-yellow); color: black; box-shadow: 0 4px 0 #b8860b;">🔢 CÓDIGOS</button>
-        <!-- 🟢 NUEVOS BOTONES GENÉRICOS -->
-        <button onclick="activarLocal()" style="background: #FFD700; color: black; box-shadow: 0 4px 0 #b8860b;">🛠️ ACTIVAR LOCAL</button>
-        <button onclick="sincronizarGlobal()" style="background: #FF4500; color: white; box-shadow: 0 4px 0 #8B0000;">📡 PUBLICAR GLOBAL</button>
+        <button onclick="showCodePrompt()" style="background: #FF4500; color: white; box-shadow: 0 4px 0 #8B0000;">📡 PUBLICAR EVENTO</button>
         <button onclick="exitAdminMode()" style="background:#c0392b;">🚪 SALIR ADMIN</button>
     </div>
 
@@ -1221,12 +1218,10 @@
         // FIREBASE SYNC
         // ============================================================
         let syncInitialized = false;
-        let localEventOverride = false;
         let pendingGlobalEvent = null;
 
         function syncEventToFirebase(eventName) {
             if (!firebase || !firebase.database) return;
-            localEventOverride = false;
             pendingGlobalEvent = eventName;
             const dbRef = firebase.database().ref('tecnomath/evento');
             dbRef.set({
@@ -1238,14 +1233,8 @@
                 console.log('✅ Evento sincronizado en Firebase:', eventName);
             }).catch(err => {
                 pendingGlobalEvent = null;
-                // Si Firebase rechaza la publicación (por ejemplo, porque la
-                // sesión no está autenticada), mantenemos el evento visible
-                // localmente en vez de dejar que el estado remoto anterior lo apague.
-                if (eventName !== 'stop') localEventOverride = true;
                 console.warn('⚠️ Error al sincronizar en Firebase:', err);
-                if (eventName !== 'stop') {
-                    alert('El evento quedó activo en este dispositivo. Para mostrarlo a todos, inicia sesión antes de publicarlo globalmente.');
-                }
+                alert('No se pudo publicar el evento. Inicia sesión y vuelve a intentarlo.');
             });
         }
 
@@ -1255,10 +1244,6 @@
             dbRef.on('value', (snapshot) => {
                 const data = snapshot.val();
                 if (!data) return;
-
-                // Un evento activado localmente no debe ser apagado por el
-                // último estado global. Solo cambia al usar "Publicar global".
-                if (localEventOverride) return;
 
                 // Mientras se publica un nuevo evento, ignoramos el estado
                 // anterior que Firebase pueda entregar antes de la escritura.
@@ -1936,7 +1921,6 @@
 
             if (lowerCode === 'stop') {
                 // Desactivar localmente
-                localEventOverride = true;
                 if (activeEvent) {
                     fairMode = false;
                     activeEvent = null;
@@ -1961,7 +1945,6 @@
 
             const eventConfig = getEventConfig(lowerCode);
             if (eventConfig) {
-                localEventOverride = true;
                 activatePermanentTheme(
                     eventConfig.title,
                     eventConfig.notification,
@@ -1989,14 +1972,12 @@
             const lowerCode = code.trim().toLowerCase();
 
             if (!lowerCode && activeEvent) {
-                localEventOverride = false;
                 syncEventToFirebase(activeEvent);
                 alert('✅ Evento "' + activeEvent + '" sincronizado a TODOS los usuarios.');
                 return;
             }
 
             if (lowerCode === 'stop') {
-                localEventOverride = false;
                 syncEventToFirebase('stop');
                 if (activeEvent) {
                     fairMode = false;
@@ -2019,7 +2000,6 @@
 
             const eventConfig = getEventConfig(lowerCode);
             if (eventConfig) {
-                localEventOverride = false;
                 activatePermanentTheme(
                     eventConfig.title,
                     eventConfig.notification,
@@ -2038,9 +2018,14 @@
         // CÓDIGOS DE EVENTOS
         // ============================================================
         function showCodePrompt() {
-            const code = prompt('🔐 CÓDIGO DE EVENTO:');
+            const user = Tecnomath.getCurrentUser();
+            if (!user || !Tecnomath.isAdmin() || !firebase.auth().currentUser) {
+                alert('Inicia sesión como administrador para publicar un evento para todos los dispositivos.');
+                return;
+            }
+            const code = prompt('🔐 CÓDIGO PARA PUBLICAR GLOBALMENTE:\n\nOpciones: halloween, navidad, cumpleanos, feria2026, feriaplus, mundial, primavera, espacio, ciencia, stop');
             if (!code) return;
-            const lowerCode = code.toLowerCase();
+            const lowerCode = code.trim().toLowerCase();
 
             switch (lowerCode) {
                 case 'feria2026':
@@ -2167,6 +2152,7 @@
             const authLink = document.getElementById('authLink');
             const logoutBtn = document.getElementById('logoutBtn');
             const adminCloud = document.getElementById('admin-cloud');
+            const adminBtn = document.getElementById('adminAccessBtn');
             if (!userDisplay) return;
             const user = Tecnomath.getCurrentUser();
             if (user) {
@@ -2180,13 +2166,16 @@
                 }
                 if (Tecnomath.isAdmin()) {
                     if (adminCloud) adminCloud.style.display = 'block';
+                    if (adminBtn) adminBtn.style.display = 'none';
                 } else {
                     if (adminCloud) adminCloud.style.display = 'none';
+                    if (adminBtn) adminBtn.style.display = 'inline-block';
                 }
             } else {
                 userDisplay.textContent = 'Invitado';
                 if (logoutBtn) logoutBtn.style.display = 'none';
                 if (adminCloud) adminCloud.style.display = 'none';
+                if (adminBtn) adminBtn.style.display = 'none';
                 if (authLink) {
                     authLink.href = 'pages/auth.html';
                     authLink.textContent = '🔑 ACCEDER';
@@ -2232,22 +2221,6 @@
             }
         });
 
-        const ADMINS_PORTAL = { "1983": "Junior", "2024": "Nicole", "7777": "Mateo", "8888": "Jaider", "ods2026": "ODS Master" };
-        const secretZone = document.createElement('div');
-        secretZone.style.cssText = 'position:fixed; bottom:0; right:0; width:70px; height:70px; z-index:499;';
-        secretZone.addEventListener('dblclick', function(e) {
-            e.preventDefault();
-            const user = Tecnomath.getCurrentUser();
-            if (!user) { alert('Debes iniciar sesión primero (usa el botón 🔑 ACCEDER).'); return; }
-            const code = prompt('🔐 CÓDIGO ADMIN:');
-            if (ADMINS_PORTAL[code]) {
-                Tecnomath.setAdmin(user.username);
-                alert('⚡ ' + ADMINS_PORTAL[code].toUpperCase() + ' · ADMIN ACTIVADO');
-                location.reload();
-            } else if (code) { alert('🔒 ACCESO DENEGADO'); }
-        });
-        document.body.appendChild(secretZone);
-
         // ============================================================
         // INICIO
         // ============================================================
@@ -2262,8 +2235,7 @@
         console.log('🎮 Sistema de juegos cargado correctamente.');
         console.log('📌 Códigos disponibles: feria2026, feriaoff, halloween, navidad, cumpleanos, feriaplus, mundial, stop');
         console.log('🔥 Firebase sincronización activa.');
-        console.log('🛠️ Botones genéricos: ACTIVAR LOCAL (prueba) y PUBLICAR GLOBAL (sincroniza).');
-        console.log('📡 PUBLICAR GLOBAL sincroniza el evento local activo; si no hay, pide un código.');
+        console.log('📡 Publica eventos globales con el código de administrador.');
         console.log('📱 Código QR con logo de Tecnomath generado en el footer.');
         console.log('🏗️ Juegos de Tower Building incluidos.');
         console.log('🎨 Escenas temáticas de eventos activas: fondos y efectos adaptados a cada celebración.');
