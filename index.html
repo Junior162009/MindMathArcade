@@ -545,4 +545,35 @@
             <div class="user-area">
                 <span id="userDisplay">Invitado</span>
                 <a href="pages/auth.html" class="auth-link" id="authLink">🔑 ACCEDER</a>
-                <button id="logoutBtn" class="auth-link" type="button" style="display:none; background:transparent; cursor:pointer; font-family:'Press Start 2P', cursive; font-size:clamp(4px, 1.5vw, 6[...]
+                <button id="logoutBtn" class="auth-link" type="button" style="display:none; background:transparent; cursor:pointer; font-family:'Press Start 2P', cursive; font-size:clamp(4px, 1.5vw, 6px);">🚪 SALIR</button>
+                <button id="adminAccessBtn" class="auth-link" style="border-color: var(--gold); color: var(--gold); background: transparent; cursor: pointer; font-family: 'Press Start 2P', cursive; font-size: clamp(4px, 1.5vw, 6px); padding: 4px 8px; border-radius: 4px;">👑 ADMIN</button>
+            </div>
+        </div>
+    </header>
+
+    <div class="news-ticker" id="newsTicker">
+        <span>🔥 ¡Tecnomath es la plataforma #1 en juegos educativos! 🚀 Más de 60 juegos ODS · Gana monedas · Desbloquea logros · ¡Únete ya! 🔥</span>
+    </div>
+
+    <div id="admin-cloud" onclick="toggleAdminPanel()">☁️</div>
+    <div id="admin-panel">
+        <a href="pages/admin/admin-promos.html" target="_blank">📢 GESTIONAR PROMOS</a>
+        <a href="pages/admin/gestor-movil.html" target="_blank" class="btn-gold">➕ AGREGAR JUEGO</a>
+        <button onclick="showCodePrompt()" style="background: #FF4500; color: white; box-shadow: 0 4px 0 #8B0000;">📡 PUBLICAR EVENTO</button>
+        <button onclick="exitAdminMode()" style="background:#c0392b;">🚪 SALIR ADMIN</button>
+    </div>
+
+    <div id="flash-overlay">
+        <div id="flash-player"></div>
+        <button id="flash-close" onclick="closeFlash()">❌ CERRAR</button>
+    </div>
+
+    <div class="promo-bubble-container" id="promoBubbleContainer">
+        <div class="promo-bubble inactive" id="promoBubble1"></div>
+        <div class="promo-bubble inactive" id="promoBubble2"></div>
+        <div class="promo-dots" id="promoDots"></div>
+    </div>
+
+    <div class="hero">
+        <h2>🎮 EXPLORA Y JUEGA</h2>
+        <p>Descubre minijuegos educativos sobre los ODS. Matemáticas, ciencias, ecologí... (truncated for brevity)
