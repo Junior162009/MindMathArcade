@@ -953,6 +953,7 @@
             categories.forEach(cat => {
                 const btn = document.createElement('button');
                 btn.className = 'filter-btn' + (cat === 'todos' ? ' active' : '');
+                btn.dataset.filter = cat; // <-- CORRECCIÓN: asignar data-filter
                 btn.textContent = cat === 'todos' ? '🌍 TODOS' :
                                   cat === 'mates' ? '➕ MATES' :
                                   cat === 'eco' ? '🌿 ECOLOGÍA' :
@@ -972,6 +973,7 @@
             });
             const recommendBtn = document.createElement('button');
             recommendBtn.className = 'filter-btn recommend';
+            recommendBtn.dataset.filter = 'recommended'; // <-- CORRECCIÓN
             recommendBtn.textContent = '🎯 RECOMENDADOS';
             recommendBtn.addEventListener('click', () => {
                 setActiveFilter('recommended');
@@ -983,11 +985,8 @@
         function setActiveFilter(filter) {
             currentActiveFilter = filter;
             document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-            const activeBtn = Array.from(document.querySelectorAll('.filter-btn')).find(b => {
-                if (filter === 'todos') return b.textContent.includes('TODOS');
-                if (filter === 'recommended') return b.textContent.includes('RECOMENDADOS');
-                return b.textContent.includes(categories.find(c => c === filter)?.toUpperCase());
-            });
+            // Buscar por data-filter en lugar de texto
+            const activeBtn = document.querySelector(`.filter-btn[data-filter="${filter}"]`);
             if (activeBtn) activeBtn.classList.add('active');
         }
 
@@ -1245,13 +1244,9 @@
                 const data = snapshot.val();
                 if (!data) return;
 
-                // Mientras se publica un nuevo evento, ignoramos el estado
-                // anterior que Firebase pueda entregar antes de la escritura.
                 if (pendingGlobalEvent && data.nombre !== pendingGlobalEvent) return;
                 if (data.nombre === pendingGlobalEvent) pendingGlobalEvent = null;
 
-                // Los registros antiguos no tenían la marca "activo". Se tratan
-                // como apagados para que un Halloween viejo no se reactive solo.
                 if (data.activo !== true || data.nombre === 'stop') {
                     if (fairMode) deactivateFairMode(false);
                     else {
@@ -1620,8 +1615,6 @@
         }
 
         // --- IMÁGENES DE EVENTOS ---
-        // Usamos los SVG de Twemoji desde CDN: así no dependemos de que el
-        // teléfono o computador tenga instalada una fuente de emojis.
         const EVENT_IMAGE_CDN = 'https://cdn.jsdelivr.net/gh/jdecked/twemoji@latest/assets/svg/';
 
         function emojiToTwemojiCode(emoji) {
@@ -1657,7 +1650,6 @@
             image.style.cssText = 'display:block; width:100%; height:100%; object-fit:contain;';
             image.onerror = () => {
                 image.remove();
-                // Reemplazo gráfico sin texto si la red no puede cargar la imagen.
                 el.style.background = 'radial-gradient(circle at 32% 28%, #fff 0 9%, #ffd700 10% 36%, #ff7a00 37% 66%, #7a1cff 67% 100%)';
                 el.style.borderRadius = '50%';
                 el.style.boxShadow = '0 0 14px rgba(255,215,0,.8)';
@@ -1741,6 +1733,10 @@
             startSparkles();
             startFireworks();
             highlightPromotions();
+            // <-- CORRECCIÓN: inicia la lluvia de emojis si se proporcionan
+            if (emojis && emojis.length > 0) {
+                startEmojiRain(emojis, speed);
+            }
         }
 
         function deactivateVisualEffects() {
@@ -1801,8 +1797,6 @@
         }
 
         function activatePermanentTheme(title, notification, confettiColors, emojis, themeName, sync = true) {
-            // Al cambiar de Feria a otro evento no se debe publicar primero un
-            // "stop", porque puede llegar después del nuevo evento y revertirlo.
             if (fairMode) deactivateFairMode(false);
             activeEvent = themeName;
             loadThemeCSS(themeName);
@@ -1846,7 +1840,6 @@
         // FUNCIONES GENÉRICAS: LOCAL Y GLOBAL (UNIFICADAS)
         // ============================================================
 
-        // Configuración de todos los eventos
         function getEventConfig(eventName) {
             if (eventName === 'feria2026') eventName = 'feria';
             const configs = {
@@ -1908,7 +1901,6 @@
             return configs[eventName] || null;
         }
 
-        // Activar evento LOCALMENTE (sin sincronizar)
         function activarLocal() {
             const user = Tecnomath.getCurrentUser();
             if (!user || !Tecnomath.isAdmin()) {
@@ -1920,7 +1912,6 @@
             const lowerCode = code.trim().toLowerCase();
 
             if (lowerCode === 'stop') {
-                // Desactivar localmente
                 if (activeEvent) {
                     fairMode = false;
                     activeEvent = null;
@@ -1951,7 +1942,7 @@
                     eventConfig.confettiColors,
                     eventConfig.emojis,
                     lowerCode === 'feria2026' ? 'feria' : lowerCode,
-                    false // <-- SIN sincronizar a Firebase
+                    false
                 );
                 alert('✅ Evento "' + lowerCode + '" activado LOCALMENTE (solo para ti).');
             } else {
@@ -1959,7 +1950,6 @@
             }
         }
 
-        // Sincronizar evento GLOBALMENTE (UNIFICADO)
         function sincronizarGlobal() {
             const user = Tecnomath.getCurrentUser();
             if (!user || !Tecnomath.isAdmin()) {
@@ -2211,10 +2201,25 @@
                     const code = prompt('🔐 Introduce el código de administrador:');
                     const ADMINS_PORTAL = { "1983": "Junior", "2024": "Nicole", "7777": "Mateo", "8888": "Jaider", "ods2026": "ODS Master" };
                     if (ADMINS_PORTAL[code]) {
-                        Tecnomath.setAdmin(user.username);
-                        alert('⚡ ' + ADMINS_PORTAL[code].toUpperCase() + ' · ADMIN ACTIVADO');
+
+                        const adminUsername = ADMINS_PORTAL[code];
+
+                        if (user.username.trim().toLowerCase() !== adminUsername.trim().toLowerCase()) {
+                            alert('🚫 ESTE CÓDIGO NO CORRESPONDE A TU CUENTA');
+                            return;
+                        }
+
+                        if (!Tecnomath.setAdmin(user.username)) {
+                            alert('🚫 USUARIO NO AUTORIZADO');
+                            return;
+                        }
+
+                        alert('⚡ ' + adminUsername.toUpperCase() + ' · ADMIN ACTIVADO');
                         updateUserBar();
                         document.getElementById('admin-cloud').click();
+
+                    } else if (code) {
+                        alert('🔒 CÓDIGO DE ADMINISTRADOR INVÁLIDO');
                     } else if (code) {
                         alert('🔒 ACCESO DENEGADO');
                     }
