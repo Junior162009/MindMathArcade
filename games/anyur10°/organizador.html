@@ -1,0 +1,2261 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Study · Organizador</title>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+    <script src="../../js/firebase-config.js"></script>
+    <script src="../../js/game-progress.js" data-tecnomath-game="study-organizador"></script>
+    <style>
+        /* ============================================================
+           ESTILOS BASE (compartidos)
+           ============================================================ */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: #0f172a;
+            color: #f1f5f9;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: background 0.3s, color 0.3s;
+            padding: 0;
+            margin: 0;
+        }
+
+        /* ========== VARIABLES CSS ========== */
+        :root {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1a2332;
+            --bg-card: #1e293b;
+            --bg-input: #0f172a;
+            --text-primary: #f1f5f9;
+            --text-secondary: #b0c4de;
+            --border-color: #334155;
+            --accent: #3b82f6;
+            --accent-hover: #2563eb;
+            --shadow: 0 12px 24px rgba(0,0,0,0.5);
+            --radius: 24px;
+            --transition: 0.25s ease;
+            --nav-bg: #1a2332;
+            --header-bg: #1a2332;
+            --font-base: 18px;
+            --touch-target: 56px;
+            --card-padding: 24px 22px;
+            --gap: 22px;
+            --app-radius: 32px;
+            --app-max-width: 520px;
+            --app-height: 820px;
+            --nav-padding: 8px 4px 18px 4px;
+            --nav-wrap: nowrap;
+            --nav-justify: space-around;
+        }
+
+        [data-theme="light"] {
+            --bg-primary: #f0f4f8;
+            --bg-secondary: #ffffff;
+            --bg-card: #ffffff;
+            --bg-input: #e9eef3;
+            --text-primary: #0b1a2a;
+            --text-secondary: #2d4b6e;
+            --border-color: #cbd5e1;
+            --shadow: 0 12px 24px rgba(0,0,0,0.08);
+            --nav-bg: #ffffff;
+            --header-bg: #ffffff;
+        }
+
+        [data-accent="green"] { --accent: #22c55e; --accent-hover: #16a34a; }
+        [data-accent="purple"] { --accent: #8b5cf6; --accent-hover: #7c3aed; }
+        [data-accent="orange"] { --accent: #f59e0b; --accent-hover: #d97706; }
+
+        /* ========== SELECTOR DE DISPOSITIVO ========== */
+        #device-selector {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.75);
+            backdrop-filter: blur(8px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            padding: 20px;
+            transition: opacity 0.5s;
+        }
+        #device-selector.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        #device-selector h2 {
+            font-size: 28px;
+            margin-bottom: 24px;
+            color: #f1f5f9;
+            text-align: center;
+        }
+        #device-selector .btn-group {
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        #device-selector .btn-group button {
+            background: #1e293b;
+            border: 2px solid #334155;
+            color: #f1f5f9;
+            padding: 20px 40px;
+            border-radius: 60px;
+            font-size: 24px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.2s;
+            min-width: 160px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+        #device-selector .btn-group button:hover {
+            border-color: #3b82f6;
+            background: #2d3748;
+            transform: scale(1.02);
+        }
+        #device-selector .btn-group button .icon { font-size: 48px; }
+        #device-selector .btn-group button .label { font-size: 18px; }
+        #device-selector .btn-group button .sub { font-size: 14px; color: #94a3b8; }
+
+        /* ========== CONTENEDOR PRINCIPAL ========== */
+        #app {
+            width: 100%;
+            max-width: var(--app-max-width);
+            height: var(--app-height);
+            background: var(--bg-secondary);
+            border-radius: var(--app-radius);
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+            border: 1px solid var(--border-color);
+            transition: background var(--transition), border-color var(--transition),
+                        max-width 0.3s, height 0.3s, border-radius 0.3s;
+        }
+
+        /* ========== HEADER ========== */
+        .header {
+            background: var(--header-bg);
+            padding: 16px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--border-color);
+            flex-shrink: 0;
+            transition: background var(--transition), border-color var(--transition);
+            min-height: 72px;
+        }
+        .header .brand {
+            font-weight: 800;
+            font-size: 26px;
+            color: var(--accent);
+            letter-spacing: -0.5px;
+        }
+        .header .brand span { color: var(--text-primary); }
+        .header-actions {
+            display: flex;
+            gap: 18px;
+            align-items: center;
+        }
+        .header-actions button {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 30px;
+            cursor: pointer;
+            transition: color var(--transition);
+            padding: 8px;
+            min-height: var(--touch-target);
+            min-width: var(--touch-target);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 40px;
+        }
+        .header-actions button:active { background: var(--bg-input); }
+
+        /* ========== PÁGINAS ========== */
+        .pages-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+        }
+        .page {
+            display: none;
+            animation: fadeUp 0.3s ease;
+        }
+        .page.active { display: block; }
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(16px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ========== NAVEGACIÓN INFERIOR ========== */
+        .bottom-nav {
+            background: var(--nav-bg);
+            display: flex;
+            justify-content: var(--nav-justify);
+            padding: var(--nav-padding);
+            border-top: 2px solid var(--border-color);
+            flex-shrink: 0;
+            transition: background var(--transition), border-color var(--transition);
+            flex-wrap: var(--nav-wrap);
+            gap: 4px;
+            overflow-x: auto;
+        }
+        .bottom-nav::-webkit-scrollbar { display: none; }
+
+        .nav-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 13px;
+            font-weight: 700;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+            padding: 8px 14px;
+            border-radius: 20px;
+            transition: 0.2s;
+            min-height: var(--touch-target);
+            min-width: 56px;
+            justify-content: center;
+            touch-action: manipulation;
+            white-space: nowrap;
+        }
+        .nav-btn .nav-icon { font-size: 28px; line-height: 1.2; }
+        .nav-btn.active {
+            color: var(--accent);
+            background: var(--bg-input);
+            padding: 8px 18px;
+        }
+        .nav-btn:active { transform: scale(0.92); }
+
+        /* ========== COMPONENTES ========== */
+        .card {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            padding: var(--card-padding);
+            margin-bottom: var(--gap);
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow);
+            transition: background var(--transition), border-color var(--transition);
+        }
+        .card-title {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 18px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .btn {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 14px 24px;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 18px;
+            cursor: pointer;
+            transition: background 0.15s, transform 0.1s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            min-height: var(--touch-target);
+            min-width: var(--touch-target);
+            touch-action: manipulation;
+            line-height: 1.2;
+        }
+        .btn:active { transform: scale(0.94); }
+        .btn:hover { background: var(--accent-hover); }
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--border-color);
+            color: var(--text-primary);
+        }
+        .btn-outline:hover { background: var(--bg-input); border-color: var(--accent); }
+        .btn-danger { background: #ef4444; }
+        .btn-danger:hover { background: #dc2626; }
+        .btn-success { background: #22c55e; }
+        .btn-success:hover { background: #16a34a; }
+        .btn-sm { padding: 12px 18px; font-size: 16px; min-height: 48px; }
+        .btn:disabled { opacity: 0.4; pointer-events: none; }
+
+        .input-group {
+            display: flex;
+            gap: 14px;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
+        }
+        .input-group input, .input-group select {
+            flex: 1;
+            min-width: 140px;
+            padding: 16px 18px;
+            border-radius: 50px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-input);
+            color: var(--text-primary);
+            font-size: 18px;
+            transition: border-color var(--transition);
+            min-height: var(--touch-target);
+        }
+        .input-group input:focus, .input-group select:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 30px 0;
+            color: var(--text-secondary);
+            font-size: 17px;
+        }
+
+        .list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 0;
+            border-bottom: 1px solid var(--border-color);
+            gap: 12px;
+        }
+        .list-item:last-child { border-bottom: none; }
+        .list-item .info { flex: 1; }
+        .list-item .info .title { font-weight: 700; font-size: 18px; }
+        .list-item .info .sub { font-size: 16px; color: var(--text-secondary); }
+        .list-item .actions {
+            display: flex;
+            gap: 12px;
+            flex-shrink: 0;
+        }
+        .list-item .actions .btn { min-height: 44px; min-width: 44px; padding: 8px 14px; font-size: 16px; }
+
+        .achievement-badge {
+            display: inline-block;
+            background: var(--bg-input);
+            border-radius: 40px;
+            padding: 8px 16px;
+            margin: 4px;
+            font-size: 16px;
+        }
+        .event-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 17px;
+        }
+        .event-date { color: var(--text-secondary); }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 16px;
+            text-align: center;
+        }
+        .stat-item .stat-icon { font-size: 34px; }
+        .stat-item strong { font-size: 20px; }
+        .stat-label { font-size: 15px; }
+
+        .progress-bar {
+            background: var(--bg-input);
+            border-radius: 40px;
+            height: 16px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        .progress-bar .fill {
+            height: 100%;
+            background: var(--accent);
+            border-radius: 40px;
+            transition: width 0.3s ease;
+        }
+
+        /* ========== CALENDARIO ========== */
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 8px;
+            text-align: center;
+            font-size: 17px;
+            margin-top: 10px;
+        }
+        .calendar-grid .day-name {
+            font-weight: 700;
+            color: var(--text-secondary);
+            padding: 10px 0;
+            font-size: 16px;
+        }
+        .calendar-grid .day-cell {
+            background: var(--bg-input);
+            border-radius: 16px;
+            padding: 14px 0;
+            cursor: pointer;
+            transition: 0.1s;
+            border: 1px solid transparent;
+            position: relative;
+            min-height: 54px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: 600;
+        }
+        .calendar-grid .day-cell.has-event {
+            border-color: var(--accent);
+            font-weight: 700;
+        }
+        .calendar-grid .day-cell.today {
+            background: var(--accent);
+            color: white;
+        }
+        .calendar-grid .day-cell .event-dot {
+            display: block;
+            width: 10px;
+            height: 10px;
+            background: var(--accent);
+            border-radius: 50%;
+            margin-top: 4px;
+        }
+        .calendar-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        .calendar-nav .month-year {
+            font-weight: 700;
+            font-size: 22px;
+        }
+        .calendar-legend {
+            margin-top: 14px;
+            font-size: 16px;
+            color: var(--text-secondary);
+        }
+        .legend-dot {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            background: var(--accent);
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        /* ========== POMODORO ========== */
+        .pomodoro-timer {
+            font-size: 68px;
+            font-weight: 800;
+            text-align: center;
+            font-variant-numeric: tabular-nums;
+            letter-spacing: 4px;
+            margin: 16px 0;
+        }
+        .pomodoro-phase {
+            text-align: center;
+            font-size: 20px;
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+        }
+        .pomodoro-buttons {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .pomodoro-cycles {
+            margin-top: 16px;
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 18px;
+        }
+        .pomodoro-cycles strong {
+            font-size: 22px;
+        }
+
+        /* ========== LOGROS ========== */
+        .achievement-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+        }
+        .achievement-item {
+            background: var(--bg-input);
+            border-radius: var(--radius);
+            padding: 18px 8px;
+            text-align: center;
+            border: 1px solid var(--border-color);
+            transition: 0.15s;
+        }
+        .achievement-item.unlocked {
+            border-color: var(--accent);
+            background: var(--bg-card);
+        }
+        .achievement-item .icon { font-size: 40px; }
+        .achievement-item .name { font-size: 15px; font-weight: 700; margin-top: 6px; }
+        .achievement-item .desc { font-size: 13px; color: var(--text-secondary); }
+
+        /* ========== FRASE ========== */
+        .quote-box {
+            background: var(--bg-input);
+            border-radius: var(--radius);
+            padding: 22px 24px;
+            border-left: 6px solid var(--accent);
+            font-style: italic;
+            color: var(--text-secondary);
+            margin-bottom: var(--gap);
+            font-size: 18px;
+        }
+        .quote-box .author {
+            display: block;
+            text-align: right;
+            font-style: normal;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-top: 8px;
+            font-size: 17px;
+        }
+
+        /* ========== PERSONALIZACIÓN ========== */
+        .player-profile {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            flex-wrap: wrap;
+        }
+        .player-avatar {
+            font-size: 72px;
+            background: var(--bg-input);
+            border-radius: 50%;
+            width: 100px;
+            height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 3px solid var(--border-color);
+            transition: border-color var(--transition);
+        }
+        .avatar-selector {
+            display: flex;
+            gap: 14px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+        .avatar-selector .avatar-option {
+            font-size: 38px;
+            background: var(--bg-input);
+            border: 3px solid var(--border-color);
+            border-radius: 50%;
+            width: 68px;
+            height: 68px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: 0.15s;
+        }
+        .avatar-selector .avatar-option.active {
+            border-color: var(--accent);
+            background: var(--bg-card);
+        }
+        .avatar-selector .avatar-option:active { transform: scale(0.9); }
+
+        /* ========== SWITCH ========== */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 32px;
+        }
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--border-color);
+            transition: .2s;
+            border-radius: 34px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 24px;
+            width: 24px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .2s;
+            border-radius: 50%;
+        }
+        input:checked + .slider {
+            background-color: var(--accent);
+        }
+        input:checked + .slider:before {
+            transform: translateX(28px);
+        }
+
+        /* ========== CONFIGURACIÓN ========== */
+        .settings-section { margin-bottom: 24px; }
+        .settings-label { font-weight: 700; font-size: 20px; margin-bottom: 12px; }
+        .settings-controls { display: flex; flex-direction: column; gap: 18px; }
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .setting-item span { font-size: 18px; font-weight: 600; }
+        .setting-item select {
+            background: var(--bg-input);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 40px;
+            padding: 10px 18px;
+            font-size: 17px;
+            min-height: 52px;
+        }
+        .mode-toggle-btn {
+            background: var(--bg-input);
+            border: 2px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 14px 20px;
+            border-radius: 40px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            width: 100%;
+            text-align: center;
+        }
+        .mode-toggle-btn:hover {
+            border-color: var(--accent);
+            background: var(--bg-card);
+        }
+        .mode-toggle-btn .icon { font-size: 24px; margin-right: 8px; }
+
+        /* ========== MENÚ LATERAL (DRAWER) ========== */
+        .drawer-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 999;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        .drawer-overlay.open {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .drawer {
+            position: fixed;
+            top: 0;
+            left: -280px;
+            width: 280px;
+            height: 100%;
+            background: var(--bg-secondary);
+            z-index: 1000;
+            transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 4px 0 20px rgba(0,0,0,0.4);
+            display: flex;
+            flex-direction: column;
+            padding: 16px 0;
+        }
+        .drawer.open { left: 0; }
+
+        .drawer-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px 16px 20px;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 12px;
+        }
+        .drawer-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--accent);
+        }
+        .drawer-close {
+            background: transparent;
+            border: none;
+            font-size: 24px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            padding: 4px 8px;
+        }
+
+        .drawer-nav {
+            flex: 1;
+            overflow-y: auto;
+            padding: 8px 0;
+        }
+        .drawer-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 14px 20px;
+            color: var(--text-primary);
+            text-decoration: none;
+            font-size: 17px;
+            font-weight: 600;
+            transition: 0.15s;
+            border-radius: 0 40px 40px 0;
+            margin-right: 12px;
+        }
+        .drawer-item:hover { background: var(--bg-input); }
+        .drawer-item.active {
+            background: var(--accent);
+            color: white;
+        }
+        .drawer-item .icon {
+            font-size: 22px;
+            width: 32px;
+            text-align: center;
+        }
+
+        .menu-btn {
+            background: transparent;
+            border: none;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            width: 30px;
+            height: 24px;
+            padding: 0;
+            cursor: pointer;
+            margin-right: 12px;
+            flex-shrink: 0;
+        }
+        .menu-btn span {
+            display: block;
+            height: 3px;
+            width: 100%;
+            background: var(--text-primary);
+            border-radius: 4px;
+            transition: 0.2s;
+        }
+
+        /* ========== SCROLL ========== */
+        .pages-container::-webkit-scrollbar { width: 6px; }
+        .pages-container::-webkit-scrollbar-track { background: transparent; }
+        .pages-container::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 10px; }
+
+        /* ========== HISTORIAL ACADÉMICO (tabla) ========== */
+        .history-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 15px;
+        }
+        .history-table th, .history-table td {
+            padding: 8px 6px;
+            text-align: center;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .history-table th {
+            background: var(--bg-input);
+            color: var(--text-secondary);
+            font-weight: 600;
+            font-size: 14px;
+        }
+        .history-table td:first-child {
+            text-align: left;
+            font-weight: 600;
+        }
+        .history-table input[type="number"] {
+            width: 60px;
+            padding: 6px 4px;
+            border-radius: 30px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-input);
+            color: var(--text-primary);
+            font-size: 15px;
+            text-align: center;
+            min-height: 40px;
+        }
+        .history-table .subject-avg {
+            font-weight: 700;
+            color: var(--accent);
+        }
+        .history-table .remove-subject-btn {
+            background: transparent;
+            border: none;
+            color: #ef4444;
+            font-size: 18px;
+            cursor: pointer;
+            padding: 4px 8px;
+        }
+        .history-table .remove-subject-btn:hover { background: var(--bg-input); border-radius: 50%; }
+
+        .period-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 12px;
+            flex-wrap: wrap;
+        }
+
+        /* ========== RESPONSIVE ========== */
+        @media (max-width: 520px) {
+            #app { height: 100vh; border-radius: 0; max-width: 100%; }
+            body { padding: 0; }
+        }
+
+        /* ========== MODO MÓVIL ========== */
+        body.mobile .bottom-nav { display: none !important; }
+        body.mobile .menu-btn { display: flex; }
+        body.mobile #app { border-radius: 0; max-width: 100%; height: 100vh; border: none; box-shadow: none; }
+        body.mobile .header { min-height: 60px; padding: 12px 16px; }
+        body.mobile .header .brand { font-size: 22px; }
+        body.mobile .header-actions button { font-size: 24px; min-height: 44px; min-width: 44px; }
+        body.mobile .pages-container { padding: 16px; }
+        body.mobile .stats-grid { gap: 8px; }
+        body.mobile .stat-item .stat-icon { font-size: 28px; }
+        body.mobile .stat-item strong { font-size: 18px; }
+
+        /* ========== MODO PC ========== */
+        body.desktop .menu-btn { display: none !important; }
+        body.desktop .drawer-overlay { display: none !important; }
+        body.desktop .drawer { display: none !important; }
+        body.desktop #app {
+            border-radius: 0; max-width: 100%; height: 100vh; border: none; box-shadow: none;
+        }
+        body.desktop .bottom-nav {
+            display: flex !important;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: center;
+            padding: 12px 24px 18px 24px;
+        }
+        body.desktop .nav-btn {
+            font-size: 15px;
+            padding: 12px 24px;
+            min-height: 64px;
+            min-width: 64px;
+        }
+        body.desktop .nav-btn .nav-icon { font-size: 30px; }
+        body.desktop .pages-container { padding: 28px 40px; }
+        body.desktop .card { padding: 32px 36px; }
+        body.desktop .input-group input, body.desktop .input-group select {
+            padding: 18px 22px; font-size: 20px; min-height: 64px;
+        }
+        body.desktop .btn { font-size: 20px; padding: 16px 28px; min-height: 64px; }
+        body.desktop .btn-sm { font-size: 18px; padding: 14px 20px; min-height: 52px; }
+        body.desktop .calendar-grid .day-cell { min-height: 68px; font-size: 20px; }
+        body.desktop .pomodoro-timer { font-size: 80px; }
+        body.desktop .player-avatar { width: 120px; height: 120px; font-size: 84px; }
+        body.desktop .avatar-selector .avatar-option { width: 80px; height: 80px; font-size: 44px; }
+        body.desktop .quote-box { font-size: 20px; padding: 26px 30px; }
+        body.desktop .list-item .info .title { font-size: 20px; }
+        body.desktop .list-item .info .sub { font-size: 17px; }
+        body.desktop .stat-item .stat-icon { font-size: 40px; }
+        body.desktop .stat-item strong { font-size: 24px; }
+        body.desktop .stat-item .stat-label { font-size: 17px; }
+
+        @media (max-width: 420px) {
+            .stats-grid { grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+            .achievement-grid { grid-template-columns: repeat(2, 1fr); }
+            .header .brand { font-size: 22px; }
+            .pomodoro-timer { font-size: 52px; }
+            .drawer { width: 240px; left: -240px; }
+            .drawer.open { left: 0; }
+            .drawer-item { font-size: 15px; padding: 12px 16px; }
+            .drawer-title { font-size: 18px; }
+            body.mobile .nav-btn { font-size: 11px; padding: 6px 8px; min-height: 48px; min-width: 44px; }
+            body.mobile .nav-btn .nav-icon { font-size: 22px; }
+            .history-table input[type="number"] { width: 50px; font-size: 14px; }
+        }
+    </style>
+</head>
+<body>
+    <a href="index.html" style="position:fixed;z-index:10001;top:12px;right:12px;background:#3b82f6;color:#fff;text-decoration:none;padding:10px 14px;border-radius:12px;font-weight:800;box-shadow:0 4px 12px rgba(0,0,0,.25)">← Juego Study</a>
+
+    <!-- ========== SELECTOR DE DISPOSITIVO ========== -->
+    <div id="device-selector">
+        <h2>📱💻 ¿Cómo quieres usar Study?</h2>
+        <div class="btn-group">
+            <button id="choose-mobile">
+                <span class="icon">📱</span>
+                <span class="label">Móvil / Tablet</span>
+                <span class="sub">Pantalla táctil, botones grandes</span>
+            </button>
+            <button id="choose-desktop">
+                <span class="icon">💻</span>
+                <span class="label">PC / Escritorio</span>
+                <span class="sub">Pantalla completa estilo YouTube</span>
+            </button>
+        </div>
+        <p style="margin-top: 30px; color: #94a3b8; font-size: 14px;">Esta elección se guardará para la próxima vez.</p>
+    </div>
+
+    <!-- ========== OVERLAY Y DRAWER ========== -->
+    <div id="drawer-overlay" class="drawer-overlay"></div>
+    <div id="drawer" class="drawer">
+        <div class="drawer-header">
+            <span class="drawer-title">📚 Study · Organizador</span>
+            <button id="drawer-close" class="drawer-close">✕</button>
+        </div>
+        <nav class="drawer-nav">
+            <a href="#" data-page="home" class="drawer-item active">🏠 Inicio</a>
+            <a href="#" data-page="schedule" class="drawer-item">📅 Horario</a>
+            <a href="#" data-page="subjects" class="drawer-item">📚 Materias</a>
+            <a href="#" data-page="tasks" class="drawer-item">📝 Tareas</a>
+            <a href="#" data-page="exams" class="drawer-item">📚 Exámenes</a>
+            <a href="#" data-page="grades" class="drawer-item">🧮 Notas</a>
+            <a href="#" data-page="pomodoro" class="drawer-item">🍅 Pomodoro</a>
+            <a href="#" data-page="goals" class="drawer-item">🎯 Metas</a>
+            <a href="#" data-page="achievements" class="drawer-item">🏅 Logros</a>
+            <a href="#" data-page="calendar" class="drawer-item">📆 Calendario</a>
+            <a href="#" data-page="history" class="drawer-item">📊 Historial</a>
+            <a href="#" data-page="settings" class="drawer-item">⚙️ Config</a>
+        </nav>
+    </div>
+
+    <!-- ========== APLICACIÓN PRINCIPAL ========== -->
+    <div id="app">
+        <!-- HEADER -->
+        <div class="header">
+            <button id="menuToggle" class="menu-btn" aria-label="Menú">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            <div class="brand">Study<span>Hub</span></div>
+            <div class="header-actions">
+                <button id="themeToggle" title="Cambiar tema">🌙</button>
+                <button id="accentToggle" title="Cambiar color">🎨</button>
+            </div>
+        </div>
+
+        <!-- PÁGINAS -->
+        <div class="pages-container" id="pagesContainer">
+
+            <!-- ===== INICIO ===== -->
+            <div class="page active" id="page-home">
+                <div class="quote-box" id="dailyQuote">
+                    "El éxito es la suma de pequeños esfuerzos repetidos día tras día."
+                    <span class="author">— Robert Collier</span>
+                </div>
+
+                <div class="card" style="border-left: 4px solid var(--accent);">
+                    <div class="card-title">📋 Agenda de hoy</div>
+                    <div id="today-agenda">
+                        <div style="margin-bottom:8px;">
+                            <span style="font-weight:600;">📅 Clases de hoy:</span>
+                            <div id="today-classes" class="empty-state" style="padding:8px 0;">Sin clases programadas.</div>
+                        </div>
+                        <div>
+                            <span style="font-weight:600;">📝 Tareas para hoy:</span>
+                            <div id="today-tasks" class="empty-state" style="padding:8px 0;">No hay tareas para hoy.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">📊 Resumen del día</div>
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <div class="stat-icon">📝</div>
+                            <div><strong id="home-tasks-pending">0</strong><br><span class="stat-label">tareas pend.</span></div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-icon">📅</div>
+                            <div><strong id="home-exams-today">0</strong><br><span class="stat-label">exámenes hoy</span></div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-icon">🎯</div>
+                            <div><strong id="home-goals-progress">0%</strong><br><span class="stat-label">metas</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">🏆 Logros recientes</div>
+                    <div id="home-achievements" class="empty-state">Aún no tienes logros. ¡Sigue estudiando!</div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">⏳ Próximos eventos</div>
+                    <div id="home-upcoming-events" class="empty-state">No hay eventos próximos.</div>
+                </div>
+            </div>
+
+            <!-- ===== HORARIO ===== -->
+            <div class="page" id="page-schedule">
+                <div class="card">
+                    <div class="card-title">📅 Horario</div>
+                    <div id="schedule-container"></div>
+                    <div class="input-group" style="margin-top:18px;">
+                        <select id="schedule-day-select">
+                            <option value="Lunes">Lunes</option>
+                            <option value="Martes">Martes</option>
+                            <option value="Miércoles">Miércoles</option>
+                            <option value="Jueves">Jueves</option>
+                            <option value="Viernes">Viernes</option>
+                            <option value="Sábado">Sábado</option>
+                        </select>
+                        <select id="schedule-subject-select">
+                            <option value="">Seleccionar materia...</option>
+                        </select>
+                        <input type="text" id="schedule-teacher" placeholder="Profesor (opcional)">
+                        <button class="btn btn-sm" id="schedule-add-btn">+ Añadir</button>
+                    </div>
+                    <div style="font-size:14px; color:var(--text-secondary); margin-top:4px;">
+                        💡 Si no ves tu materia, ve a la pestaña "Materias" y créala.
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== MATERIAS ===== -->
+            <div class="page" id="page-subjects">
+                <div class="card">
+                    <div class="card-title">📚 Mis Materias</div>
+                    <div id="subjects-container"></div>
+                    <div class="input-group" style="margin-top:16px; border-top:1px solid var(--border-color); padding-top:16px;">
+                        <input type="text" id="subject-name" placeholder="Nombre de la materia">
+                        <input type="text" id="subject-teacher" placeholder="Profesor">
+                        <button class="btn btn-sm" id="subject-add-btn">➕ Añadir</button>
+                    </div>
+                    <div id="subject-edit-area" style="display:none !important; margin-top:12px; padding:12px; background:var(--bg-input); border-radius:var(--radius); border:1px solid var(--accent);">
+                        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                            <input type="text" id="subject-edit-name" placeholder="Nuevo nombre">
+                            <input type="text" id="subject-edit-teacher" placeholder="Nuevo profesor">
+                            <button class="btn btn-sm btn-success" id="subject-edit-save">💾 Guardar</button>
+                            <button class="btn btn-sm btn-outline" id="subject-edit-cancel">✖ Cancelar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== TAREAS ===== -->
+            <div class="page" id="page-tasks">
+                <div class="card">
+                    <div class="card-title">📝 Tareas</div>
+                    <div class="input-group">
+                        <input type="text" id="task-title" placeholder="Título">
+                        <input type="date" id="task-due">
+                        <button class="btn btn-sm" id="task-add-btn">+ Añadir</button>
+                    </div>
+                    <div id="task-list"></div>
+                </div>
+            </div>
+
+            <!-- ===== EXÁMENES ===== -->
+            <div class="page" id="page-exams">
+                <div class="card">
+                    <div class="card-title">📚 Exámenes</div>
+                    <div class="input-group">
+                        <input type="text" id="exam-title" placeholder="Materia">
+                        <input type="date" id="exam-date">
+                        <button class="btn btn-sm" id="exam-add-btn">+ Añadir</button>
+                    </div>
+                    <div id="exam-list"></div>
+                </div>
+            </div>
+
+            <!-- ===== CALCULADORA DE NOTAS ===== -->
+            <div class="page" id="page-grades">
+                <div class="card">
+                    <div class="card-title">🧮 Calculadora de Notas</div>
+                    <div class="input-group">
+                        <input type="number" id="grade-input" placeholder="Nota (0-100)" min="0" max="100" step="0.1">
+                        <button class="btn btn-sm" id="grade-add-btn">+ Agregar</button>
+                    </div>
+                    <div id="grade-list"></div>
+                    <div class="grades-summary">
+                        <span><strong>Promedio:</strong> <span id="grade-average">-</span></span>
+                        <span><strong>Nota necesaria (70):</strong> <span id="grade-needed">-</span></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== POMODORO ===== -->
+            <div class="page" id="page-pomodoro">
+                <div class="card">
+                    <div class="card-title">🍅 Pomodoro</div>
+                    <div class="pomodoro-phase" id="pomodoro-phase">Estudio</div>
+                    <div class="pomodoro-timer" id="pomodoro-timer">25:00</div>
+                    <div class="pomodoro-buttons">
+                        <button class="btn" id="pomodoro-start">▶ Iniciar</button>
+                        <button class="btn btn-outline" id="pomodoro-pause">⏸️ Pausa</button>
+                        <button class="btn btn-danger" id="pomodoro-reset">⟳ Reiniciar</button>
+                    </div>
+                    <div class="pomodoro-cycles">
+                        Ciclos completados: <strong id="pomodoro-cycles">0</strong>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== METAS ===== -->
+            <div class="page" id="page-goals">
+                <div class="card">
+                    <div class="card-title">🎯 Metas</div>
+                    <div class="input-group">
+                        <input type="text" id="goal-title" placeholder="Nombre de la meta">
+                        <input type="number" id="goal-total" placeholder="Total (ej: 100)" min="1">
+                        <button class="btn btn-sm" id="goal-add-btn">+ Crear</button>
+                    </div>
+                    <div id="goal-list"></div>
+                </div>
+            </div>
+
+            <!-- ===== LOGROS ===== -->
+            <div class="page" id="page-achievements">
+                <div class="card">
+                    <div class="card-title">🏅 Logros</div>
+                    <div class="achievement-grid" id="achievement-grid"></div>
+                </div>
+            </div>
+
+            <!-- ===== CALENDARIO ===== -->
+            <div class="page" id="page-calendar">
+                <div class="card">
+                    <div class="calendar-nav">
+                        <button class="btn btn-outline btn-sm" id="cal-prev">‹</button>
+                        <span class="month-year" id="cal-month-year">Enero 2025</span>
+                        <button class="btn btn-outline btn-sm" id="cal-next">›</button>
+                    </div>
+                    <div class="calendar-grid" id="calendar-grid"></div>
+                    <div class="calendar-legend">
+                        <span class="legend-dot"></span> Evento
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== HISTORIAL ACADÉMICO ===== -->
+            <div class="page" id="page-history">
+                <div class="card">
+                    <div class="card-title">📊 Historial Académico</div>
+                    <div id="history-container"></div>
+                    <div style="margin-top:16px; border-top:1px solid var(--border-color); padding-top:16px;">
+                        <div style="font-size:18px; font-weight:600; margin-bottom:8px;">📈 Promedio General (1-5)</div>
+                        <div style="font-size:32px; font-weight:800; color:var(--accent);" id="general-average">-</div>
+                    </div>
+                    <div class="period-actions">
+                        <button class="btn btn-sm" id="add-period-btn">➕ Añadir periodo</button>
+                        <button class="btn btn-sm btn-danger" id="remove-last-period-btn" style="display:none;">➖ Eliminar último periodo</button>
+                    </div>
+                    <div style="margin-top:12px; font-size:14px; color:var(--text-secondary);">
+                        💡 Ingresa las notas de cada materia por periodo (1 a 5).<br>
+                        🔴 La <strong>X</strong> elimina todos los periodos de esa materia.
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== CONFIGURACIÓN ===== -->
+            <div class="page" id="page-settings">
+                <div class="card">
+                    <div class="card-title">⚙️ Configuración</div>
+                    <div class="settings-section">
+                        <div class="settings-label">👤 Mi perfil</div>
+                        <div class="player-profile">
+                            <div class="player-avatar" id="player-avatar-display">🧑‍🎓</div>
+                            <div class="player-info">
+                                <div class="input-group">
+                                    <input type="text" id="player-name-input" placeholder="Tu nombre">
+                                    <button class="btn btn-sm" id="player-name-btn">Guardar</button>
+                                </div>
+                                <div class="avatar-selector" id="avatar-selector">
+                                    <span class="avatar-option" data-avatar="🧑‍🎓">🧑‍🎓</span>
+                                    <span class="avatar-option" data-avatar="👨‍🎓">👨‍🎓</span>
+                                    <span class="avatar-option" data-avatar="👩‍🎓">👩‍🎓</span>
+                                    <span class="avatar-option" data-avatar="🐱">🐱</span>
+                                    <span class="avatar-option" data-avatar="🦊">🦊</span>
+                                    <span class="avatar-option" data-avatar="⭐">⭐</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="settings-controls">
+                        <div class="setting-item">
+                            <span>Tema oscuro</span>
+                            <label class="switch">
+                                <input type="checkbox" id="darkModeToggle" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="setting-item">
+                            <span>Color principal</span>
+                            <select id="accent-select">
+                                <option value="blue">Azul</option>
+                                <option value="green">Verde</option>
+                                <option value="purple">Púrpura</option>
+                                <option value="orange">Naranja</option>
+                            </select>
+                        </div>
+                        <button class="mode-toggle-btn" id="resetModeBtn">
+                            <span class="icon">🔄</span> Cambiar modo (PC/Móvil)
+                        </button>
+                        <button class="btn btn-danger" id="reset-data-btn">🔄 Restablecer todos los datos</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- NAVEGACIÓN INFERIOR (SOLO PC) -->
+        <div class="bottom-nav" id="bottomNav">
+            <button class="nav-btn active" data-page="home"><span class="nav-icon">🏠</span> Inicio</button>
+            <button class="nav-btn" data-page="schedule"><span class="nav-icon">📅</span> Horario</button>
+            <button class="nav-btn" data-page="subjects"><span class="nav-icon">📚</span> Materias</button>
+            <button class="nav-btn" data-page="tasks"><span class="nav-icon">📝</span> Tareas</button>
+            <button class="nav-btn" data-page="exams"><span class="nav-icon">📚</span> Exámenes</button>
+            <button class="nav-btn" data-page="grades"><span class="nav-icon">🧮</span> Notas</button>
+            <button class="nav-btn" data-page="pomodoro"><span class="nav-icon">🍅</span> Pomodoro</button>
+            <button class="nav-btn" data-page="goals"><span class="nav-icon">🎯</span> Metas</button>
+            <button class="nav-btn" data-page="achievements"><span class="nav-icon">🏅</span> Logros</button>
+            <button class="nav-btn" data-page="calendar"><span class="nav-icon">📆</span> Calendario</button>
+            <button class="nav-btn" data-page="history"><span class="nav-icon">📊</span> Historial</button>
+            <button class="nav-btn" data-page="settings"><span class="nav-icon">⚙️</span> Config</button>
+        </div>
+    </div>
+
+    <script>
+        // ================================================================
+        //  STUDYHUB - LÓGICA COMPLETA
+        // ================================================================
+
+        // ---------- GESTIÓN DE MODO ----------
+        const selector = document.getElementById('device-selector');
+        const body = document.body;
+
+        function applyMode(mode) {
+            body.classList.remove('mobile', 'desktop');
+            body.classList.add(mode);
+            const meta = document.querySelector('meta[name=viewport]');
+            if (mode === 'mobile') {
+                meta.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover');
+            } else {
+                meta.setAttribute('content', 'width=device-width, initial-scale=1.0, user-scalable=yes');
+            }
+            selector.classList.add('hidden');
+            localStorage.setItem('studyhubDeviceMode', mode);
+        }
+
+        document.getElementById('choose-mobile').addEventListener('click', () => applyMode('mobile'));
+        document.getElementById('choose-desktop').addEventListener('click', () => applyMode('desktop'));
+        document.getElementById('resetModeBtn').addEventListener('click', function() {
+            localStorage.removeItem('studyhubDeviceMode');
+            location.reload();
+        });
+
+        let savedMode = localStorage.getItem('studyhubDeviceMode');
+        if (savedMode) {
+            applyMode(savedMode);
+        } else {
+            selector.classList.remove('hidden');
+        }
+
+        // ---------- DRAWER ----------
+        const menuToggle = document.getElementById('menuToggle');
+        const drawer = document.getElementById('drawer');
+        const overlay = document.getElementById('drawer-overlay');
+        const drawerClose = document.getElementById('drawer-close');
+        const drawerItems = document.querySelectorAll('.drawer-item');
+
+        function openDrawer() {
+            drawer.classList.add('open');
+            overlay.classList.add('open');
+        }
+        function closeDrawer() {
+            drawer.classList.remove('open');
+            overlay.classList.remove('open');
+        }
+
+        if (menuToggle) menuToggle.addEventListener('click', openDrawer);
+        if (drawerClose) drawerClose.addEventListener('click', closeDrawer);
+        if (overlay) overlay.addEventListener('click', closeDrawer);
+
+        drawerItems.forEach(item => {
+            item.addEventListener('click', function(e) {
+                e.preventDefault();
+                const pageId = this.dataset.page;
+                if (pageId) {
+                    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+                    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+                    document.getElementById('page-' + pageId).classList.add('active');
+                    drawerItems.forEach(i => i.classList.remove('active'));
+                    this.classList.add('active');
+                    closeDrawer();
+                    document.getElementById('pagesContainer').scrollTop = 0;
+                    if (pageId === 'calendar') updateCalendar();
+                    if (pageId === 'achievements') updateAchievements();
+                    if (pageId === 'home') { updateHome(); updateTodayAgenda(); }
+                    if (pageId === 'subjects') updateSubjects();
+                    if (pageId === 'history') updateHistory();
+                }
+            });
+        });
+
+        // ---------- DATOS PREDETERMINADOS ----------
+        const defaultData = {
+            player: { name: 'Estudiante', avatar: '🧑‍🎓' },
+            subjects: [
+                { id: 'm1', name: 'Matemáticas', teacher: 'Pérez' },
+                { id: 'm2', name: 'Lengua', teacher: 'García' },
+                { id: 'm3', name: 'Historia', teacher: 'Martínez' },
+                { id: 'm4', name: 'Ciencias', teacher: 'López' },
+                { id: 'm5', name: 'Inglés', teacher: 'Smith' },
+                { id: 'm6', name: 'Arte', teacher: 'Fernández' },
+                { id: 'm7', name: 'Educación Física', teacher: 'Torres' }
+            ],
+            schedule: {
+                Lunes: [
+                    { subject: 'Matemáticas', teacher: 'Pérez' },
+                    { subject: 'Lengua', teacher: 'García' }
+                ],
+                Martes: [
+                    { subject: 'Historia', teacher: 'Martínez' },
+                    { subject: 'Ciencias', teacher: 'López' }
+                ],
+                Miércoles: [
+                    { subject: 'Matemáticas', teacher: 'Pérez' },
+                    { subject: 'Inglés', teacher: 'Smith' }
+                ],
+                Jueves: [
+                    { subject: 'Arte', teacher: 'Fernández' }
+                ],
+                Viernes: [
+                    { subject: 'Educación Física', teacher: 'Torres' }
+                ],
+                Sábado: []
+            },
+            tasks: [],
+            exams: [],
+            grades: [],
+            goals: [],
+            pomodoroCycles: 0,
+            achievements: {
+                firstTask: false, firstExam: false, studyStreak: 0,
+                lastStudyDate: null, fiveTasks: false, tenGoals: false, pomodoroMaster: false
+            },
+            // Historial: periodos (nombres) y notas por materia
+            historyPeriods: ['Periodo 1', 'Periodo 2', 'Periodo 3', 'Periodo 4'],
+            historyGrades: {}  // clave: nombre de materia, valor: array de notas (null o número)
+        };
+
+        let data = loadData();
+
+        function loadData() {
+            const raw = localStorage.getItem('studyhubData');
+            if (raw) {
+                try {
+                    const parsed = JSON.parse(raw);
+                    for (let key in defaultData) {
+                        if (!(key in parsed)) parsed[key] = defaultData[key];
+                    }
+                    if (!parsed.player) parsed.player = { name: 'Estudiante', avatar: '🧑‍🎓' };
+                    if (!parsed.subjects) parsed.subjects = defaultData.subjects;
+                    if (!parsed.schedule) parsed.schedule = defaultData.schedule;
+                    if (!parsed.achievements) parsed.achievements = defaultData.achievements;
+                    if (!parsed.historyPeriods) parsed.historyPeriods = defaultData.historyPeriods;
+                    if (!parsed.historyGrades) parsed.historyGrades = defaultData.historyGrades;
+                    if (!parsed.settings) parsed.settings = defaultData.settings;
+                    // Asegurar que todas las materias actuales tengan entrada en historyGrades
+                    parsed.subjects.forEach(subj => {
+                        if (!parsed.historyGrades[subj.name]) {
+                            parsed.historyGrades[subj.name] = new Array(parsed.historyPeriods.length).fill(null);
+                        } else {
+                            // Ajustar longitud si cambió el número de periodos
+                            while (parsed.historyGrades[subj.name].length < parsed.historyPeriods.length) {
+                                parsed.historyGrades[subj.name].push(null);
+                            }
+                        }
+                    });
+                    return parsed;
+                } catch (e) {
+                    return JSON.parse(JSON.stringify(defaultData));
+                }
+            }
+            return JSON.parse(JSON.stringify(defaultData));
+        }
+
+        function saveData() {
+            localStorage.setItem('studyhubData', JSON.stringify(data));
+            if (window.TecnomathProgress) window.TecnomathProgress.saveSnapshot('study-organizador', 'studyhubData');
+            updateAllUI();
+        }
+
+        function todayStr() { return new Date().toISOString().split('T')[0]; }
+        function formatDate(dateStr) {
+            if (!dateStr) return '';
+            const d = new Date(dateStr + 'T00:00:00');
+            return d.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
+        }
+
+        // ---------- ACTUALIZAR TODO ----------
+        let editingSubjectId = null;
+
+        function updateAllUI() {
+            document.getElementById('player-name-input').value = data.player.name || 'Estudiante';
+            document.getElementById('player-avatar-display').textContent = data.player.avatar || '🧑‍🎓';
+            document.querySelectorAll('.avatar-option').forEach(el => {
+                el.classList.toggle('active', el.dataset.avatar === data.player.avatar);
+            });
+
+            document.getElementById('subject-edit-area').style.display = 'none';
+            editingSubjectId = null;
+
+            updateHome();
+            updateTodayAgenda();
+            updateSchedule();
+            updateSubjects();
+            updateTasks();
+            updateExams();
+            updateGrades();
+            updateGoals();
+            updateAchievements();
+            updateCalendar();
+            updateHistory();
+            updatePomodoroUI();
+            applyTheme();
+            populateSubjectSelect();
+        }
+
+        // ---------- AGENDA DIARIA ----------
+        function updateTodayAgenda() {
+            const today = new Date();
+            const dayNames = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+            const dayName = dayNames[today.getDay()];
+            const todayStrDate = todayStr();
+
+            const classesToday = data.schedule[dayName] || [];
+            const classesContainer = document.getElementById('today-classes');
+            if (classesToday.length === 0) {
+                classesContainer.innerHTML = '📭 Sin clases programadas para hoy.';
+            } else {
+                classesContainer.innerHTML = classesToday.map(c =>
+                    `<div style="padding:4px 0;"><strong>${c.subject}</strong> ${c.teacher ? '· ' + c.teacher : ''}</div>`
+                ).join('');
+            }
+
+            const tasksToday = data.tasks.filter(t => t.due === todayStrDate && !t.completed);
+            const tasksContainer = document.getElementById('today-tasks');
+            if (tasksToday.length === 0) {
+                tasksContainer.innerHTML = '✅ No hay tareas pendientes para hoy.';
+            } else {
+                tasksContainer.innerHTML = tasksToday.map(t =>
+                    `<div style="padding:4px 0;">📌 ${t.title}</div>`
+                ).join('');
+            }
+        }
+
+        // ---------- HOME ----------
+        function updateHome() {
+            const pending = data.tasks.filter(t => !t.completed).length;
+            document.getElementById('home-tasks-pending').innerText = pending;
+            const today = todayStr();
+            const examsToday = data.exams.filter(e => e.date === today).length;
+            document.getElementById('home-exams-today').innerText = examsToday;
+            const goalsProgress = data.goals.length > 0 ?
+                Math.round(data.goals.reduce((acc, g) => acc + (g.progress / g.total * 100), 0) / data.goals.length) : 0;
+            document.getElementById('home-goals-progress').innerText = goalsProgress + '%';
+
+            const unlocked = Object.entries(data.achievements).filter(([k, v]) => v === true).map(([k]) => k);
+            const container = document.getElementById('home-achievements');
+            if (unlocked.length === 0) {
+                container.innerHTML = '<div class="empty-state">Aún no tienes logros. ¡Sigue estudiando!</div>';
+            } else {
+                const names = {
+                    firstTask: '📝 Primera tarea',
+                    firstExam: '📚 Primer examen',
+                    fiveTasks: '✅ 5 tareas completadas',
+                    tenGoals: '🎯 10 metas creadas',
+                    pomodoroMaster: '🍅 10 ciclos Pomodoro'
+                };
+                container.innerHTML = unlocked.slice(-3).map(k =>
+                    `<span class="achievement-badge">${names[k] || k}</span>`
+                ).join(' ');
+            }
+
+            const upcoming = [];
+            const todayDate = new Date();
+            data.tasks.forEach(t => {
+                if (!t.completed && t.due) {
+                    const diff = (new Date(t.due + 'T00:00:00') - todayDate) / (1000 * 60 * 60 * 24);
+                    if (diff >= 0 && diff <= 7) upcoming.push({ type: '📝', title: t.title, date: t.due });
+                }
+            });
+            data.exams.forEach(e => {
+                const diff = (new Date(e.date + 'T00:00:00') - todayDate) / (1000 * 60 * 60 * 24);
+                if (diff >= 0 && diff <= 7) upcoming.push({ type: '📚', title: e.title, date: e.date });
+            });
+            upcoming.sort((a, b) => new Date(a.date) - new Date(b.date));
+            const container2 = document.getElementById('home-upcoming-events');
+            if (upcoming.length === 0) {
+                container2.innerHTML = '<div class="empty-state">No hay eventos próximos.</div>';
+            } else {
+                container2.innerHTML = upcoming.slice(0, 5).map(e =>
+                    `<div class="event-item">
+                        <span>${e.type} ${e.title}</span>
+                        <span class="event-date">${formatDate(e.date)}</span>
+                    </div>`
+                ).join('');
+            }
+
+            const quotes = [
+                { text: "El éxito es la suma de pequeños esfuerzos repetidos día tras día.", author: "Robert Collier" },
+                { text: "El estudio no se mide por el tiempo que pasas, sino por lo que aprendes.", author: "Anónimo" },
+                { text: "La educación es el arma más poderosa para cambiar el mundo.", author: "Nelson Mandela" },
+                { text: "No te detengas cuando estés cansado, detente cuando hayas terminado.", author: "Anónimo" },
+                { text: "El conocimiento es poder, pero solo si se aplica.", author: "Anónimo" },
+                { text: "La disciplina es el puente entre metas y logros.", author: "Jim Rohn" },
+                { text: "El mejor momento para empezar fue ayer. El siguiente mejor momento es ahora.", author: "Anónimo" },
+                { text: "El único lugar donde el éxito viene antes que el trabajo es en el diccionario.", author: "Vidal Sassoon" }
+            ];
+            const dayOfYear = Math.floor((new Date() - new Date(new Date().getFullYear(), 0, 0)) / (1000 * 60 * 60 * 24));
+            const quote = quotes[dayOfYear % quotes.length];
+            document.getElementById('dailyQuote').innerHTML = `"${quote.text}" <span class="author">— ${quote.author}</span>`;
+        }
+
+        // ---------- HORARIO ----------
+        function populateSubjectSelect() {
+            const select = document.getElementById('schedule-subject-select');
+            select.innerHTML = '<option value="">Seleccionar materia...</option>';
+            data.subjects.forEach(s => {
+                const option = document.createElement('option');
+                option.value = s.name;
+                option.textContent = `${s.name} (${s.teacher || 'Sin profesor'})`;
+                select.appendChild(option);
+            });
+        }
+
+        function updateSchedule() {
+            const container = document.getElementById('schedule-container');
+            const days = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+            let html = '';
+            days.forEach(day => {
+                const entries = data.schedule[day] || [];
+                html += `<div class="schedule-day">
+                    <div class="schedule-day-name">${day}</div>
+                    ${entries.length === 0 ? '<div class="empty-state">Sin clases</div>' :
+                        entries.map((e, i) => `<div class="schedule-entry">
+                            <span><strong>${e.subject || 'Sin materia'}</strong> ${e.teacher ? '· ' + e.teacher : ''}</span>
+                            <button class="btn btn-danger btn-sm" onclick="removeSchedule('${day}', ${i})">✕</button>
+                        </div>`).join('')}
+                </div>`;
+            });
+            container.innerHTML = html;
+            populateSubjectSelect();
+        }
+
+        window.removeSchedule = function(day, index) {
+            data.schedule[day].splice(index, 1);
+            saveData();
+        };
+
+        document.getElementById('schedule-add-btn').addEventListener('click', function() {
+            const day = document.getElementById('schedule-day-select').value;
+            const subject = document.getElementById('schedule-subject-select').value;
+            const teacher = document.getElementById('schedule-teacher').value.trim();
+            if (!subject) return alert('Selecciona o crea una materia primero.');
+            if (!data.schedule[day]) data.schedule[day] = [];
+            data.schedule[day].push({ subject, teacher });
+            document.getElementById('schedule-teacher').value = '';
+            saveData();
+        });
+
+        // ---------- MATERIAS ----------
+        function updateSubjects() {
+            const container = document.getElementById('subjects-container');
+            if (data.subjects.length === 0) {
+                container.innerHTML = '<div class="empty-state">No hay materias. ¡Crea una!</div>';
+                return;
+            }
+            container.innerHTML = data.subjects.map((s) =>
+                `<div class="list-item" style="padding:12px 0;">
+                    <div class="info">
+                        <div class="title">${s.name}</div>
+                        <div class="sub">${s.teacher || 'Sin profesor'}</div>
+                    </div>
+                    <div class="actions">
+                        <button class="btn btn-outline btn-sm" onclick="editSubject('${s.id}')">✏️</button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteSubject('${s.id}')">🗑️</button>
+                    </div>
+                </div>`
+            ).join('');
+        }
+
+        document.getElementById('subject-add-btn').addEventListener('click', function() {
+            const name = document.getElementById('subject-name').value.trim();
+            const teacher = document.getElementById('subject-teacher').value.trim();
+            if (!name) return alert('Escribe el nombre de la materia.');
+            // Añadir a historia
+            const newSubject = { id: 's' + Date.now(), name, teacher };
+            data.subjects.push(newSubject);
+            // Inicializar notas en historyGrades
+            data.historyGrades[name] = new Array(data.historyPeriods.length).fill(null);
+            document.getElementById('subject-name').value = '';
+            document.getElementById('subject-teacher').value = '';
+            saveData();
+        });
+
+        window.deleteSubject = function(id) {
+            if (!confirm('¿Eliminar esta materia? También se eliminará del horario e historial.')) return;
+            const subjectToDelete = data.subjects.find(s => s.id === id);
+            if (!subjectToDelete) return;
+            data.subjects = data.subjects.filter(s => s.id !== id);
+            // Eliminar del horario
+            for (let day in data.schedule) {
+                data.schedule[day] = data.schedule[day].filter(e => e.subject !== subjectToDelete.name);
+            }
+            // Eliminar del historial
+            delete data.historyGrades[subjectToDelete.name];
+            saveData();
+        };
+
+        window.editSubject = function(id) {
+            const subject = data.subjects.find(s => s.id === id);
+            if (!subject) return;
+            editingSubjectId = id;
+            document.getElementById('subject-edit-name').value = subject.name;
+            document.getElementById('subject-edit-teacher').value = subject.teacher || '';
+            document.getElementById('subject-edit-area').style.display = 'block';
+            document.getElementById('subject-edit-area').scrollIntoView({ behavior: 'smooth' });
+        };
+
+        document.getElementById('subject-edit-save').addEventListener('click', function() {
+            if (!editingSubjectId) return;
+            const name = document.getElementById('subject-edit-name').value.trim();
+            const teacher = document.getElementById('subject-edit-teacher').value.trim();
+            if (!name) return alert('El nombre no puede estar vacío.');
+            const subject = data.subjects.find(s => s.id === editingSubjectId);
+            if (subject) {
+                const oldName = subject.name;
+                subject.name = name;
+                subject.teacher = teacher;
+                // Actualizar referencias en horario
+                for (let day in data.schedule) {
+                    data.schedule[day] = data.schedule[day].map(e => {
+                        if (e.subject === oldName) return { ...e, subject: name };
+                        return e;
+                    });
+                }
+                // Actualizar historial (transferir notas al nuevo nombre)
+                if (data.historyGrades[oldName] !== undefined) {
+                    data.historyGrades[name] = data.historyGrades[oldName];
+                    delete data.historyGrades[oldName];
+                }
+                saveData();
+                document.getElementById('subject-edit-area').style.display = 'none';
+                editingSubjectId = null;
+            }
+        });
+
+        document.getElementById('subject-edit-cancel').addEventListener('click', function() {
+            document.getElementById('subject-edit-area').style.display = 'none';
+            editingSubjectId = null;
+        });
+
+        // ---------- TAREAS ----------
+        function updateTasks() {
+            const list = document.getElementById('task-list');
+            if (data.tasks.length === 0) {
+                list.innerHTML = '<div class="empty-state">No hay tareas.</div>';
+                return;
+            }
+            list.innerHTML = data.tasks.map((t, i) =>
+                `<div class="list-item">
+                    <div class="info">
+                        <div class="title" style="${t.completed ? 'text-decoration:line-through; color:var(--text-secondary);' : ''}">${t.title}</div>
+                        <div class="sub">📅 ${t.due ? formatDate(t.due) : 'Sin fecha'} ${t.completed ? '✅ Completada' : ''}</div>
+                    </div>
+                    <div class="actions">
+                        <button class="btn btn-success btn-sm" onclick="toggleTask(${i})">${t.completed ? '↩️' : '✅'}</button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteTask(${i})">🗑️</button>
+                    </div>
+                </div>`
+            ).join('');
+            checkAchievements();
+        }
+
+        window.toggleTask = function(index) {
+            data.tasks[index].completed = !data.tasks[index].completed;
+            saveData();
+            checkAchievements();
+        };
+        window.deleteTask = function(index) {
+            data.tasks.splice(index, 1);
+            saveData();
+        };
+
+        document.getElementById('task-add-btn').addEventListener('click', function() {
+            const title = document.getElementById('task-title').value.trim();
+            const due = document.getElementById('task-due').value;
+            if (!title) return alert('Escribe un título.');
+            data.tasks.push({ title, due, completed: false });
+            document.getElementById('task-title').value = '';
+            document.getElementById('task-due').value = '';
+            saveData();
+            checkAchievements();
+        });
+
+        // ---------- EXÁMENES ----------
+        function updateExams() {
+            const list = document.getElementById('exam-list');
+            if (data.exams.length === 0) {
+                list.innerHTML = '<div class="empty-state">No hay exámenes.</div>';
+                return;
+            }
+            list.innerHTML = data.exams.map((e, i) =>
+                `<div class="list-item">
+                    <div class="info">
+                        <div class="title">${e.title}</div>
+                        <div class="sub">📅 ${formatDate(e.date)}</div>
+                    </div>
+                    <div class="actions">
+                        <button class="btn btn-danger btn-sm" onclick="deleteExam(${i})">🗑️</button>
+                    </div>
+                </div>`
+            ).join('');
+            const today = new Date();
+            const tomorrow = new Date(today);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            const tomorrowStr = tomorrow.toISOString().split('T')[0];
+            data.exams.forEach(e => {
+                if (e.date === tomorrowStr) {
+                    showNotification('📚 Recordatorio', `Mañana tienes examen de ${e.title}`);
+                }
+            });
+            checkAchievements();
+        }
+
+        window.deleteExam = function(index) {
+            data.exams.splice(index, 1);
+            saveData();
+        };
+
+        document.getElementById('exam-add-btn').addEventListener('click', function() {
+            const title = document.getElementById('exam-title').value.trim();
+            const date = document.getElementById('exam-date').value;
+            if (!title || !date) return alert('Completa todos los campos.');
+            data.exams.push({ title, date });
+            document.getElementById('exam-title').value = '';
+            document.getElementById('exam-date').value = '';
+            saveData();
+            checkAchievements();
+        });
+
+        // ---------- NOTAS ----------
+        function updateGrades() {
+            const list = document.getElementById('grade-list');
+            if (data.grades.length === 0) {
+                list.innerHTML = '<div class="empty-state">No hay notas ingresadas.</div>';
+            } else {
+                list.innerHTML = data.grades.map((g, i) =>
+                    `<div class="list-item">
+                        <span class="grade-value">${g}%</span>
+                        <button class="btn btn-danger btn-sm" onclick="deleteGrade(${i})">✕</button>
+                    </div>`
+                ).join('');
+            }
+            const avg = data.grades.length > 0 ? data.grades.reduce((a, b) => a + b, 0) / data.grades.length : null;
+            document.getElementById('grade-average').innerText = avg !== null ? avg.toFixed(1) + '%' : '-';
+            if (data.grades.length > 0 && avg < 70) {
+                const needed = 70 * (data.grades.length + 1) - data.grades.reduce((a, b) => a + b, 0);
+                document.getElementById('grade-needed').innerText = Math.max(0, needed).toFixed(1) + '%';
+            } else {
+                document.getElementById('grade-needed').innerText = avg >= 70 ? '✅ Aprobado' : '--';
+            }
+        }
+
+        window.deleteGrade = function(index) {
+            data.grades.splice(index, 1);
+            saveData();
+        };
+
+        document.getElementById('grade-add-btn').addEventListener('click', function() {
+            const val = parseFloat(document.getElementById('grade-input').value);
+            if (isNaN(val) || val < 0 || val > 100) return alert('Ingresa una nota entre 0 y 100.');
+            data.grades.push(val);
+            document.getElementById('grade-input').value = '';
+            saveData();
+        });
+
+        // ---------- POMODORO ----------
+        let pomodoroInterval = null;
+        let pomodoroTime = 25 * 60;
+        let pomodoroRunning = false;
+        let pomodoroPhase = 'study';
+
+        function updatePomodoroUI() {
+            const mins = Math.floor(pomodoroTime / 60);
+            const secs = pomodoroTime % 60;
+            document.getElementById('pomodoro-timer').innerText =
+                `${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}`;
+            document.getElementById('pomodoro-phase').innerText =
+                pomodoroPhase === 'study' ? '📖 Estudio' : '☕ Descanso';
+            document.getElementById('pomodoro-cycles').innerText = data.pomodoroCycles;
+        }
+
+        function pomodoroTick() {
+            if (pomodoroTime <= 0) {
+                if (pomodoroPhase === 'study') {
+                    data.pomodoroCycles += 1;
+                    if (data.pomodoroCycles >= 10) {
+                        data.achievements.pomodoroMaster = true;
+                        saveData();
+                    }
+                    pomodoroPhase = 'break';
+                    pomodoroTime = 5 * 60;
+                    showNotification('🍅 Pomodoro', '¡Descanso! 5 minutos.');
+                } else {
+                    pomodoroPhase = 'study';
+                    pomodoroTime = 25 * 60;
+                    showNotification('🍅 Pomodoro', '¡Vuelve a estudiar! 25 minutos.');
+                }
+                saveData();
+                updatePomodoroUI();
+                return;
+            }
+            pomodoroTime--;
+            updatePomodoroUI();
+        }
+
+        document.getElementById('pomodoro-start').addEventListener('click', function() {
+            if (pomodoroRunning) return;
+            pomodoroRunning = true;
+            pomodoroInterval = setInterval(pomodoroTick, 1000);
+            this.disabled = true;
+            document.getElementById('pomodoro-pause').disabled = false;
+        });
+
+        document.getElementById('pomodoro-pause').addEventListener('click', function() {
+            if (!pomodoroRunning) return;
+            clearInterval(pomodoroInterval);
+            pomodoroRunning = false;
+            document.getElementById('pomodoro-start').disabled = false;
+            this.disabled = true;
+        });
+
+        document.getElementById('pomodoro-reset').addEventListener('click', function() {
+            clearInterval(pomodoroInterval);
+            pomodoroRunning = false;
+            pomodoroPhase = 'study';
+            pomodoroTime = 25 * 60;
+            document.getElementById('pomodoro-start').disabled = false;
+            document.getElementById('pomodoro-pause').disabled = true;
+            updatePomodoroUI();
+            saveData();
+        });
+
+        // ---------- METAS ----------
+        function updateGoals() {
+            const list = document.getElementById('goal-list');
+            if (data.goals.length === 0) {
+                list.innerHTML = '<div class="empty-state">No hay metas.</div>';
+                return;
+            }
+            list.innerHTML = data.goals.map((g, i) => {
+                const pct = Math.min(100, (g.progress / g.total) * 100);
+                return `<div class="goal-item">
+                    <div class="goal-header">
+                        <span class="goal-title">${g.title}</span>
+                        <span>${Math.round(pct)}%</span>
+                    </div>
+                    <div class="progress-bar"><div class="fill" style="width:${pct}%;"></div></div>
+                    <div class="goal-footer">
+                        <span>${g.progress} / ${g.total}</span>
+                        <div class="goal-actions">
+                            <button class="btn btn-sm btn-success" onclick="goalProgress(${i}, 1)">+1</button>
+                            <button class="btn btn-sm btn-success" onclick="goalProgress(${i}, 5)">+5</button>
+                            <button class="btn btn-sm btn-danger" onclick="deleteGoal(${i})">🗑️</button>
+                        </div>
+                    </div>
+                </div>`;
+            }).join('');
+            checkAchievements();
+        }
+
+        window.goalProgress = function(index, amount) {
+            const g = data.goals[index];
+            g.progress = Math.min(g.total, g.progress + amount);
+            if (g.progress >= g.total) {
+                showNotification('🎯 Meta completada', `¡Lograste tu meta: ${g.title}!`);
+            }
+            saveData();
+            checkAchievements();
+        };
+        window.deleteGoal = function(index) {
+            data.goals.splice(index, 1);
+            saveData();
+        };
+
+        document.getElementById('goal-add-btn').addEventListener('click', function() {
+            const title = document.getElementById('goal-title').value.trim();
+            const total = parseInt(document.getElementById('goal-total').value);
+            if (!title || isNaN(total) || total < 1) return alert('Completa los campos correctamente.');
+            data.goals.push({ title, total, progress: 0 });
+            document.getElementById('goal-title').value = '';
+            document.getElementById('goal-total').value = '';
+            saveData();
+            checkAchievements();
+        });
+
+        // ---------- LOGROS ----------
+        function checkAchievements() {
+            let changed = false;
+            if (!data.achievements.firstTask && data.tasks.some(t => t.completed)) {
+                data.achievements.firstTask = true; changed = true;
+                showNotification('🏅 Logro desbloqueado', '¡Completaste tu primera tarea!');
+            }
+            if (!data.achievements.firstExam && data.exams.length > 0) {
+                data.achievements.firstExam = true; changed = true;
+                showNotification('🏅 Logro desbloqueado', '¡Agregaste tu primer examen!');
+            }
+            if (!data.achievements.fiveTasks && data.tasks.filter(t => t.completed).length >= 5) {
+                data.achievements.fiveTasks = true; changed = true;
+                showNotification('🏅 Logro desbloqueado', '¡Completaste 5 tareas!');
+            }
+            if (!data.achievements.tenGoals && data.goals.length >= 10) {
+                data.achievements.tenGoals = true; changed = true;
+                showNotification('🏅 Logro desbloqueado', '¡Creaste 10 metas!');
+            }
+            if (!data.achievements.pomodoroMaster && data.pomodoroCycles >= 10) {
+                data.achievements.pomodoroMaster = true; changed = true;
+                showNotification('🏅 Logro desbloqueado', '¡Completaste 10 ciclos Pomodoro!');
+            }
+            if (changed) saveData();
+            updateAchievements();
+            updateHome();
+        }
+
+        function updateAchievements() {
+            const grid = document.getElementById('achievement-grid');
+            const achievements = [
+                { id: 'firstTask', icon: '📝', name: 'Primera tarea', desc: 'Completa tu primera tarea' },
+                { id: 'firstExam', icon: '📚', name: 'Primer examen', desc: 'Agrega un examen' },
+                { id: 'fiveTasks', icon: '✅', name: '5 tareas', desc: 'Completa 5 tareas' },
+                { id: 'tenGoals', icon: '🎯', name: '10 metas', desc: 'Crea 10 metas' },
+                { id: 'pomodoroMaster', icon: '🍅', name: 'Pomodoro máster', desc: '10 ciclos completados' }
+            ];
+            grid.innerHTML = achievements.map(a =>
+                `<div class="achievement-item ${data.achievements[a.id] ? 'unlocked' : ''}">
+                    <div class="icon">${a.icon}</div>
+                    <div class="name">${a.name}</div>
+                    <div class="desc">${data.achievements[a.id] ? '✅ Desbloqueado' : a.desc}</div>
+                </div>`
+            ).join('');
+        }
+
+        // ---------- CALENDARIO ----------
+        let calDate = new Date();
+        function updateCalendar() {
+            const year = calDate.getFullYear();
+            const month = calDate.getMonth();
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            const today = new Date();
+            const todayStr = today.toISOString().split('T')[0];
+
+            document.getElementById('cal-month-year').innerText =
+                new Date(year, month).toLocaleDateString('es-ES', { month: 'long', year: 'numeric' });
+
+            let html = '';
+            const dayNames = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+            dayNames.forEach(d => html += `<div class="day-name">${d}</div>`);
+
+            for (let i = 0; i < firstDay; i++) {
+                html += `<div></div>`;
+            }
+
+            for (let d = 1; d <= daysInMonth; d++) {
+                const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+                const hasEvent = data.tasks.some(t => t.due === dateStr) || data.exams.some(e => e.date === dateStr);
+                const isToday = dateStr === todayStr;
+                html += `<div class="day-cell ${hasEvent ? 'has-event' : ''} ${isToday ? 'today' : ''}">
+                            ${d}
+                            ${hasEvent ? '<span class="event-dot"></span>' : ''}
+                        </div>`;
+            }
+            document.getElementById('calendar-grid').innerHTML = html;
+        }
+
+        document.getElementById('cal-prev').addEventListener('click', function() {
+            calDate.setMonth(calDate.getMonth() - 1);
+            updateCalendar();
+        });
+        document.getElementById('cal-next').addEventListener('click', function() {
+            calDate.setMonth(calDate.getMonth() + 1);
+            updateCalendar();
+        });
+
+        // ---------- HISTORIAL ACADÉMICO ----------
+        function updateHistory() {
+            const container = document.getElementById('history-container');
+
+            // Verificar que existan periodos
+            if (data.historyPeriods.length === 0) {
+                container.innerHTML = '<div class="empty-state">No hay periodos definidos. Añade uno.</div>';
+                document.getElementById('general-average').innerText = 'Sin datos';
+                return;
+            }
+
+            // Construir tabla
+            let html = `<table class="history-table">
+                <thead>
+                    <tr>
+                        <th>Materia</th>`;
+            data.historyPeriods.forEach(p => {
+                html += `<th>${p}</th>`;
+            });
+            html += `<th>Promedio</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>`;
+
+            // Obtener lista de materias que tienen historial (o todas las materias)
+            const subjectNames = data.subjects.map(s => s.name);
+            let totalAvgSum = 0;
+            let totalSubjectsWithGrades = 0;
+
+            subjectNames.forEach(subj => {
+                const grades = data.historyGrades[subj] || new Array(data.historyPeriods.length).fill(null);
+                // Asegurar que la longitud coincida con periodos
+                while (grades.length < data.historyPeriods.length) grades.push(null);
+                while (grades.length > data.historyPeriods.length) grades.pop();
+
+                // Calcular promedio de la materia (solo notas no nulas)
+                const validGrades = grades.filter(g => g !== null && g !== undefined && !isNaN(g) && g >= 1 && g <= 5);
+                const avg = validGrades.length > 0 ? validGrades.reduce((a, b) => a + b, 0) / validGrades.length : null;
+                if (avg !== null) {
+                    totalAvgSum += avg;
+                    totalSubjectsWithGrades++;
+                }
+
+                html += `<tr>
+                            <td>${subj}</td>`;
+                grades.forEach((g, idx) => {
+                    const val = (g !== null && g !== undefined && !isNaN(g)) ? g : '';
+                    html += `<td>
+                                <input type="number" class="history-grade-input"
+                                       data-subject="${subj}" data-period="${idx}"
+                                       placeholder="1-5" min="1" max="5" step="0.1"
+                                       value="${val}"
+                                       style="width:60px; padding:4px; border-radius:30px; border:1px solid var(--border-color); background:var(--bg-input); color:var(--text-primary); text-align:center;">
+                            </td>`;
+                });
+                html += `<td class="subject-avg">${avg !== null ? avg.toFixed(1) : '-'}</td>
+                            <td>
+                                <button class="remove-subject-btn" onclick="removeSubjectFromHistory('${subj}')" title="Eliminar todos los periodos de esta materia">✖</button>
+                            </td>
+                        </tr>`;
+            });
+
+            html += `</tbody></table>`;
+            container.innerHTML = html;
+
+            // Calcular promedio general
+            const generalAvg = totalSubjectsWithGrades > 0 ? totalAvgSum / totalSubjectsWithGrades : null;
+            document.getElementById('general-average').innerText = generalAvg !== null ? generalAvg.toFixed(1) + ' / 5' : 'Sin datos';
+
+            // Mostrar/ocultar botón de eliminar último periodo
+            const removeBtn = document.getElementById('remove-last-period-btn');
+            if (data.historyPeriods.length > 1) {
+                removeBtn.style.display = 'inline-flex';
+            } else {
+                removeBtn.style.display = 'none';
+            }
+
+            // Añadir event listeners a los inputs para guardar automáticamente
+            document.querySelectorAll('.history-grade-input').forEach(input => {
+                input.addEventListener('change', function() {
+                    const subject = this.dataset.subject;
+                    const period = parseInt(this.dataset.period);
+                    const val = parseFloat(this.value);
+                    // Inicializar si no existe
+                    if (!data.historyGrades[subject]) {
+                        data.historyGrades[subject] = new Array(data.historyPeriods.length).fill(null);
+                    }
+                    if (isNaN(val) || val < 1 || val > 5) {
+                        data.historyGrades[subject][period] = null;
+                    } else {
+                        data.historyGrades[subject][period] = Math.round(val * 10) / 10;
+                    }
+                    saveData();
+                    updateHistory();
+                });
+            });
+        }
+
+        // Eliminar una materia del historial (todos sus periodos)
+        window.removeSubjectFromHistory = function(subject) {
+            if (!confirm(`¿Eliminar todos los periodos de "${subject}"?`)) return;
+            if (data.historyGrades[subject]) {
+                delete data.historyGrades[subject];
+                saveData();
+                updateHistory();
+            }
+        };
+
+        // Añadir nuevo periodo
+        document.getElementById('add-period-btn').addEventListener('click', function() {
+            const newPeriodNumber = data.historyPeriods.length + 1;
+            const newName = `Periodo ${newPeriodNumber}`;
+            data.historyPeriods.push(newName);
+            // Añadir columna a todas las materias existentes
+            data.subjects.forEach(s => {
+                if (!data.historyGrades[s.name]) {
+                    data.historyGrades[s.name] = new Array(data.historyPeriods.length).fill(null);
+                } else {
+                    data.historyGrades[s.name].push(null);
+                }
+            });
+            saveData();
+            updateHistory();
+        });
+
+        // Eliminar último periodo
+        document.getElementById('remove-last-period-btn').addEventListener('click', function() {
+            if (data.historyPeriods.length <= 1) {
+                alert('Debe haber al menos un periodo.');
+                return;
+            }
+            if (!confirm(`¿Eliminar el último periodo (${data.historyPeriods[data.historyPeriods.length-1]})?`)) return;
+            const removed = data.historyPeriods.pop();
+            // Eliminar la última columna de todas las materias
+            data.subjects.forEach(s => {
+                if (data.historyGrades[s.name] && data.historyGrades[s.name].length > 0) {
+                    data.historyGrades[s.name].pop();
+                }
+            });
+            saveData();
+            updateHistory();
+        });
+
+        // ---------- NOTIFICACIONES ----------
+        function showNotification(title, body) {
+            if ('Notification' in window && Notification.permission === 'granted') {
+                new Notification(title, { body, icon: '📚' });
+            } else if ('Notification' in window && Notification.permission !== 'denied') {
+                Notification.requestPermission();
+            }
+        }
+
+        // ---------- PERSONALIZACIÓN ----------
+        document.getElementById('player-name-btn').addEventListener('click', function() {
+            const name = document.getElementById('player-name-input').value.trim();
+            if (name) { data.player.name = name; saveData(); }
+        });
+        document.querySelectorAll('.avatar-option').forEach(el => {
+            el.addEventListener('click', function() {
+                data.player.avatar = this.dataset.avatar;
+                saveData();
+            });
+        });
+
+        // ---------- TEMAS Y COLOR ----------
+        function applyTheme() {
+            const dark = data.settings.darkMode;
+            document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+            document.getElementById('darkModeToggle').checked = dark;
+            document.getElementById('themeToggle').innerText = dark ? '🌙' : '☀️';
+            const accent = data.settings.accent || 'blue';
+            document.documentElement.setAttribute('data-accent', accent);
+            document.getElementById('accent-select').value = accent;
+        }
+
+        document.getElementById('themeToggle').addEventListener('click', function() {
+            data.settings.darkMode = !data.settings.darkMode;
+            saveData();
+        });
+        document.getElementById('darkModeToggle').addEventListener('change', function() {
+            data.settings.darkMode = this.checked;
+            saveData();
+        });
+        document.getElementById('accent-select').addEventListener('change', function() {
+            data.settings.accent = this.value;
+            saveData();
+        });
+        document.getElementById('accentToggle').addEventListener('click', function() {
+            const colors = ['blue', 'green', 'purple', 'orange'];
+            const current = data.settings.accent || 'blue';
+            const idx = colors.indexOf(current);
+            const next = colors[(idx + 1) % colors.length];
+            data.settings.accent = next;
+            document.getElementById('accent-select').value = next;
+            saveData();
+        });
+
+        // ---------- REINICIAR ----------
+        document.getElementById('reset-data-btn').addEventListener('click', function() {
+            if (confirm('¿Seguro que quieres borrar todos los datos?')) {
+                localStorage.removeItem('studyhubData');
+                data = JSON.parse(JSON.stringify(defaultData));
+                saveData();
+                alert('Datos restablecidos.');
+                location.reload();
+            }
+        });
+
+        // ---------- NAVEGACIÓN (barra inferior) ----------
+        document.querySelectorAll('.nav-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const pageId = this.dataset.page;
+                document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+                document.getElementById('page-' + pageId).classList.add('active');
+                document.getElementById('pagesContainer').scrollTop = 0;
+                if (pageId === 'calendar') updateCalendar();
+                if (pageId === 'achievements') updateAchievements();
+                if (pageId === 'home') { updateHome(); updateTodayAgenda(); }
+                if (pageId === 'subjects') updateSubjects();
+                if (pageId === 'history') updateHistory();
+                drawerItems.forEach(item => {
+                    item.classList.toggle('active', item.dataset.page === pageId);
+                });
+            });
+        });
+
+        // ---------- INICIALIZACIÓN ----------
+        if ('Notification' in window && Notification.permission === 'default') {
+            Notification.requestPermission();
+        }
+
+        pomodoroTime = 25 * 60;
+        pomodoroPhase = 'study';
+        updatePomodoroUI();
+        document.getElementById('pomodoro-pause').disabled = true;
+
+        saveData();
+        console.log('📚 StudyHub cargado. Modo:', body.classList.contains('mobile') ? 'Móvil' : 'PC');
+    </script>
+</body>
+</html>
