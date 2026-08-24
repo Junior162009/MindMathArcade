@@ -1227,6 +1227,7 @@
             const dbRef = firebase.database().ref('tecnomath/evento');
             dbRef.set({
                 nombre: eventName,
+                activo: eventName !== 'stop',
                 timestamp: firebase.database.ServerValue.TIMESTAMP
             }).then(() => {
                 console.log('✅ Evento sincronizado en Firebase:', eventName);
@@ -1240,7 +1241,24 @@
             const dbRef = firebase.database().ref('tecnomath/evento');
             dbRef.on('value', (snapshot) => {
                 const data = snapshot.val();
-                if (!data || !data.nombre) return;
+                if (!data) return;
+
+                // Los registros antiguos no tenían la marca "activo". Se tratan
+                // como apagados para que un Halloween viejo no se reactive solo.
+                if (data.activo !== true || data.nombre === 'stop') {
+                    if (fairMode) deactivateFairMode(false);
+                    else {
+                        activeEvent = null;
+                        loadThemeCSS(null);
+                        updateFavicon('🎮');
+                        deactivateVisualEffects();
+                        document.getElementById('mainTitle').textContent = 'TECNOMATH';
+                        renderProjects(currentActiveFilter);
+                    }
+                    return;
+                }
+
+                if (!data.nombre) return;
                 const eventName = data.nombre;
                 console.log('📡 Evento recibido desde Firebase:', eventName);
                 if (eventName === activeEvent) return;
