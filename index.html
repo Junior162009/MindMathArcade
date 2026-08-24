@@ -545,8 +545,8 @@
             <div class="user-area">
                 <span id="userDisplay">Invitado</span>
                 <a href="pages/auth.html" class="auth-link" id="authLink">🔑 ACCEDER</a>
-                <button id="logoutBtn" class="auth-link" type="button" style="display:none; background:transparent; cursor:pointer; font-family:'Press Start 2P', cursive; font-size:clamp(4px, 1.5vw, 6px);">🚪 SALIR</button>
-                <button id="adminAccessBtn" class="auth-link" style="border-color: var(--gold); color: var(--gold); background: transparent; cursor: pointer; font-family: 'Press Start 2P', cursive; font-size: clamp(4px, 1.5vw, 6px); padding: 4px 8px; border-radius: 4px;">👑 ADMIN</button>
+                <button id="logoutBtn" class="auth-link" type="button" style="display:none; background:transparent; cursor:pointer; font-family:'Press Start 2P', cursive; font-size:clamp(4px, 1.5vw, 6px);">SALIR</button>
+                <button id="adminAccessBtn" class="auth-link" style="border-color: var(--gold); color: var(--gold); background: transparent; cursor: pointer; font-family: 'Press Start 2P', cursive; font-size: clamp(4px, 1.5vw, 6px);">👑 ADMIN</button>
             </div>
         </div>
     </header>
@@ -576,4 +576,179 @@
 
     <div class="hero">
         <h2>🎮 EXPLORA Y JUEGA</h2>
-        <p>Descubre minijuegos educativos sobre los ODS. Matemáticas, ciencias, ecologí... (truncated for brevity)
+        <p>Descubre minijuegos educativos sobre los ODS. Matemáticas, ciencias, ecología y mucho más. ¡Gana monedas y desbloquea logros!</p>
+    </div>
+
+    <div class="filters" id="filtersContainer"></div>
+
+    <div class="sponsors-section">
+        <div class="sponsors-label">— PATROCINADORES —</div>
+        <div class="sponsors-grid" id="sponsorsArea"></div>
+    </div>
+
+    <div class="ad-container">
+        <ins class="adsbygoogle"
+             style="display:block"
+             data-ad-client="ca-pub-9426294483156864"
+             data-ad-slot="1234567890"
+             data-ad-format="auto"
+             data-full-width-responsive="true"></ins>
+        <script>
+             (adsbygoogle = window.adsbygoogle || []).push({});
+        </script>
+    </div>
+
+    <div class="container" id="projectsContainer"></div>
+
+    <div id="leaderboard-panel">
+        <h2>🏆 TOP 10 JUGADORES</h2>
+        <ul id="leaderboard-list"></ul>
+        <button id="leaderboard-close" onclick="closeLeaderboard()">CERRAR</button>
+    </div>
+
+    <footer>
+        <div class="qr-section">
+            <span class="qr-label">📱 ESCANEA EL CÓDIGO QR</span>
+            <div class="qr-container">
+                <div id="qrcode"></div>
+            </div>
+            <div class="qr-actions">
+                <button id="downloadQrBtn" class="qr-btn-download">⬇ DESCARGAR QR</button>
+            </div>
+            <span class="qr-subtext">Accede a Tecnomath desde tu móvil</span>
+        </div>
+        <div class="copyright">© 2026 Tecnomath · Powered by GitHub Pages</div>
+    </footer>
+
+    <script src="js/shared.js"></script>
+<script>
+/* ===== Conectar UI de admin con la API compartida (Tecnomath) ===== */
+
+(function() {
+    // Códigos disponibles (debe coincidir nombre -> código con el resto del proyecto)
+    const ADMIN_CODES = {
+        "1983": "Junior",
+        "2024": "Nicole",
+        "7777": "Mateo",
+        "8888": "Jaider",
+        "ods2026": "ODS Master"
+    };
+
+    const adminCloud = document.getElementById('admin-cloud');
+    const adminPanel = document.getElementById('admin-panel');
+    const adminAccessBtn = document.getElementById('adminAccessBtn');
+
+    // Mostrar/ocultar panel admin (botón nube)
+    window.toggleAdminPanel = function() {
+        if (!adminPanel) return;
+        // usar flex para mantener estilos definidos en CSS
+        adminPanel.style.display = adminPanel.style.display === 'flex' ? 'none' : 'flex';
+    };
+
+    // Desactivar modo admin
+    window.exitAdminMode = function() {
+        try {
+            if (window.Tecnomath && Tecnomath.getCurrentUser) {
+                const u = Tecnomath.getCurrentUser();
+                if (u && Tecnomath.unsetAdmin) Tecnomath.unsetAdmin(u.username);
+            }
+        } catch (e) { /* ignore */ }
+        if (adminCloud) adminCloud.style.display = 'none';
+        if (adminPanel) adminPanel.style.display = 'none';
+        if (adminAccessBtn) adminAccessBtn.textContent = '👑 ADMIN';
+        alert('Modo administrador desactivado');
+    };
+
+    // Handler botón ADMIN del header: pide código y activa admin si coincide con el usuario
+    if (adminAccessBtn) {
+        adminAccessBtn.addEventListener('click', () => {
+            try {
+                if (!window.Tecnomath || !Tecnomath.getCurrentUser) { alert('Inicia sesión primero'); return; }
+                const user = Tecnomath.getCurrentUser();
+                if (!user) { alert('Inicia sesión para usar ADMIN'); return; }
+                const code = prompt('CÓDIGO ADMIN:');
+                if (!code) return;
+                const expectedName = ADMIN_CODES[code];
+                if (expectedName && expectedName.toLowerCase() === user.username.toLowerCase()) {
+                    // activa en la API compartida (guarda el nombre real)
+                    Tecnomath.setAdmin(expectedName);
+                    if (adminCloud) adminCloud.style.display = 'block';
+                    if (adminAccessBtn) adminAccessBtn.textContent = '👑 ADMIN ✓';
+                    alert('👑 Modo administrador activado: ' + expectedName);
+                } else {
+                    alert('🔒 Acceso denegado');
+                }
+            } catch (e) {
+                console.error('Error activando admin', e);
+                alert('Error activando admin');
+            }
+        });
+    }
+
+    // Función que publica el evento (usada por el botón PUBLICAR EVENTO)
+    window.showCodePrompt = async function() {
+        try {
+            if (!window.Tecnomath || !Tecnomath.getCurrentUser) { alert('Inicia sesión para publicar eventos'); return; }
+            const user = Tecnomath.getCurrentUser();
+            if (!user) { alert('Inicia sesión para publicar eventos'); return; }
+            if (!Tecnomath.isAdmin || !Tecnomath.isAdmin()) {
+                alert('Debes activar MODO ADMIN para publicar eventos');
+                return;
+            }
+
+            const title = prompt('Título del evento:');
+            if (!title) return;
+            const message = prompt('Mensaje del evento (texto que verán los usuarios):');
+            if (!message) return;
+            const payload = {
+                title: String(title).trim(),
+                message: String(message).trim(),
+                author: user.username,
+                createdAt: new Date().toISOString()
+            };
+
+            // Publicar en Firebase Realtime Database en /events (ajusta el path si usas otro)
+            if (typeof database !== 'undefined' && database && database.ref) {
+                const ref = database.ref('events');
+                await ref.push(payload);
+                alert('✅ Evento publicado correctamente');
+            } else {
+                // Fallback: guardar localmente si no hay Firebase
+                const local = JSON.parse(localStorage.getItem('tecnomath_events') || '[]');
+                local.unshift(payload);
+                localStorage.setItem('tecnomath_events', JSON.stringify(local));
+                alert('⚠️ Firebase no disponible. Evento guardado en localStorage como fallback.');
+            }
+
+        } catch (err) {
+            console.error('Error publicando evento', err);
+            alert('Error publicando evento: ' + (err && err.message ? err.message : 'desconocido'));
+        }
+    };
+
+    // Al cargar la página, mostrar la nube admin si el usuario ya tiene admin activado
+    function refreshAdminUI() {
+        try {
+            if (window.Tecnomath && Tecnomath.getCurrentUser && Tecnomath.isAdmin && Tecnomath.getCurrentUser()) {
+                const u = Tecnomath.getCurrentUser();
+                if (Tecnomath.isAdmin()) {
+                    if (adminCloud) adminCloud.style.display = 'block';
+                    if (adminAccessBtn) adminAccessBtn.textContent = '👑 ADMIN ✓';
+                    return;
+                }
+            }
+        } catch (e) { /* ignore */ }
+        if (adminCloud) adminCloud.style.display = 'none';
+        if (adminAccessBtn) adminAccessBtn.textContent = '👑 ADMIN';
+    }
+
+    // Ejecutar al inicio
+    document.addEventListener('DOMContentLoaded', refreshAdminUI);
+    // También ejecutarlo ahora por si el script se carga después del DOM
+    refreshAdminUI();
+
+})();
+</script>
+
+</body>
+</html>
