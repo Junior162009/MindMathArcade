@@ -6,6 +6,11 @@
     <title>Eco Collector · ODS 6 y 12</title>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <script src="shared.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+    <script src="../js/firebase-config.js"></script>
+    <script src="../js/game-progress.js" data-tecnomath-game="eco-collector"></script>
     <style>
         :root {
             --neon-cyan: #00FFFF; --neon-pink: #FF00FF; --neon-green: #39FF14;
@@ -300,6 +305,9 @@
         gameActive = false;
         clearInterval(gameInterval);
         clearInterval(spawnInterval);
+        if (window.TecnomathProgress) {
+            window.TecnomathProgress.save('eco-collector', { score, lives: Math.max(0, lives), timeLeft, localCoins, completed: true });
+        }
         cancelAnimationFrame(frameId);
         // Recompensa global
         if (typeof Tecnomath !== 'undefined' && Tecnomath.getCurrentUser()) {

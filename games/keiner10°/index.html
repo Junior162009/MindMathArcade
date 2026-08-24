@@ -4,6 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>SAPIENS - Ruleta</title>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script src="../../js/firebase-config.js"></script>
+<script src="../../js/game-progress.js" data-tecnomath-game="sapiens"></script>
 <style>
 /* ===== RESET Y BASE ===== */
 *{margin:0;padding:0;box-sizing:border-box;user-select:none}
@@ -856,6 +861,14 @@ function respuestaCorrecta(respuesta) {
     pintarLetraResultado("green");
     playSound("correcto");
     marcarLetraCorrecta(currentLetter);
+    if (window.TecnomathProgress) {
+        window.TecnomathProgress.save('sapiens', {
+            round: numeroRonda,
+            correctLetters: letrasUsadas.length,
+            remainingLetters: letrasDisponibles.length,
+            category: currentCategory
+        });
+    }
     answerInput.disabled = true;
     btnComprobar.disabled = true;
     isAnswering = false;
@@ -875,6 +888,15 @@ function respuestaIncorrecta(mensaje) {
     detenerTemporizador();
     if (currentLetter && !letrasFalladas.includes(currentLetter)) {
         letrasFalladas.push(currentLetter);
+    }
+    if (window.TecnomathProgress) {
+        window.TecnomathProgress.save('sapiens', {
+            round: numeroRonda,
+            correctLetters: letrasUsadas.length,
+            failedLetters: letrasFalladas.length,
+            remainingLetters: letrasDisponibles.length,
+            category: currentCategory
+        });
     }
     drawWheel(currentRotation);
     answerBox.classList.remove("active");

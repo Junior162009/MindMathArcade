@@ -4,6 +4,11 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Adivina la Bandera - Teclado Virtual</title>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+    <script src="../../js/firebase-config.js"></script>
+    <script src="../../js/game-progress.js" data-tecnomath-game="banderquiz"></script>
     <style>
         * {
             box-sizing: border-box;
@@ -86,6 +91,19 @@
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
             width: 160px;
             height: auto;
+        }
+
+        .question-prompt {
+            margin: 10px 0 4px;
+            color: #f0c040;
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .question-help {
+            color: #aaa;
+            font-size: 14px;
+            margin-bottom: 6px;
         }
 
         .letters-container {
@@ -337,6 +355,8 @@
         <div class="flag-container" id="flagDisplay">
             <img src="https://flagcdn.com/128x96/es.png" alt="Bandera" />
         </div>
+        <h1 class="question-prompt" id="questionPrompt">¿Qué país corresponde a esta bandera?</h1>
+        <p class="question-help">Completa el nombre del país usando el teclado.</p>
 
         <div class="letters-container" id="lettersContainer"></div>
 
@@ -448,6 +468,7 @@
         const intentosRestantesSpan = document.getElementById('intentosRestantes');
         const gameOverMessage = document.getElementById('gameOverMessage');
         const keyboard = document.getElementById('keyboard');
+        const questionPrompt = document.getElementById('questionPrompt');
 
         // ---------- UTILIDADES ----------
         function shuffle(array) {
@@ -593,6 +614,7 @@
             }
 
             paisActual = paisesJugados[indiceActual];
+            questionPrompt.textContent = '¿Qué país corresponde a esta bandera?';
             totalJugados++;
             fallos = 0;
             letrasReveladas = new Set();
@@ -802,6 +824,7 @@
             giveUpBtn.style.display = 'none';
             nextBtn.style.display = 'none';
             flagDisplay.innerHTML = '<span style="font-size: 4rem;">🏁</span>';
+            questionPrompt.textContent = '¡Terminaste el desafío de banderas!';
             lettersContainer.innerHTML = '';
             feedbackEl.textContent = '';
             feedbackEl.className = 'feedback';
@@ -821,6 +844,14 @@
                 iniciarJuego();
             });
             actualizarEstadisticas();
+            if (window.TecnomathProgress) {
+                window.TecnomathProgress.save('banderquiz', {
+                    score: aciertos,
+                    totalQuestions: TOTAL_PAISES,
+                    accuracy: porcentaje,
+                    completed: true
+                });
+            }
         }
 
         function iniciarJuego() {

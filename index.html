@@ -59,7 +59,7 @@
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         html, body {
-            height: 100%; overflow-y: auto; background: var(--theme-bg);
+            min-height: 100%; overflow-y: auto; background: var(--theme-bg);
             font-family: 'Press Start 2P', cursive; color: var(--theme-text);
             transition: background 0.6s, color 0.6s;
             background-image: radial-gradient(ellipse at 20% 50%, rgba(0,68,255,0.07) 0%, transparent 50%),
@@ -71,14 +71,15 @@
         }
         header {
             padding: clamp(10px, 2vw, 15px); border-bottom: 2px solid var(--neon-pink);
-            background: linear-gradient(90deg, rgba(255,0,255,0.05), transparent, rgba(0,255,255,0.05));
-            position: relative;
+            background: linear-gradient(90deg, rgba(255,0,255,0.09), rgba(8,8,24,.86), rgba(0,255,255,0.09));
+            position: sticky; top:0; z-index:100; backdrop-filter:blur(12px);
+            box-shadow:0 8px 28px rgba(0,0,0,.18);
             transition: background 0.6s, border-color 0.6s;
         }
         .header-content {
             display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: clamp(6px, 1vw, 10px);
         }
-        .logo-area { text-align: left; }
+        .logo-area { text-align: left; min-width:0; }
         h1 {
             font-size: clamp(12px, 4vw, 22px); color: var(--neon-cyan);
             text-shadow: 0 0 10px var(--neon-cyan), 0 0 30px var(--neon-cyan);
@@ -91,15 +92,16 @@
         }
         .subtitle { font-size: clamp(4px, 1.5vw, 6px); color: var(--neon-pink); text-shadow: 0 0 8px var(--neon-pink); margin-top: 5px; }
         .user-area {
-            display: flex; align-items: center; gap: clamp(8px, 2vw, 15px);
+            display: flex; align-items: center; gap: clamp(7px, 1.4vw, 12px); flex-wrap:wrap; justify-content:flex-end;
         }
-        #userDisplay { font-size: clamp(4px, 1.5vw, 6px); color: var(--neon-green); text-shadow: 0 0 6px var(--neon-green); }
+        #userDisplay { font-size: clamp(4px, 1.5vw, 6px); color: var(--neon-green); text-shadow: 0 0 6px var(--neon-green); line-height:1.6; }
         .auth-link {
             font-size: clamp(4px, 1.5vw, 6px); color: var(--neon-pink); text-decoration: none;
-            border: 1px solid var(--neon-pink); padding: 4px 8px; border-radius: 4px;
-            transition: 0.2s;
+            border: 1px solid var(--neon-pink); padding: 6px 9px; border-radius: 6px;
+            transition: transform .2s, background .2s, box-shadow .2s; line-height:1.2;
         }
-        .auth-link:hover { background: rgba(255,0,255,0.1); box-shadow: 0 0 10px var(--neon-pink); }
+        .auth-link:hover { background: rgba(255,0,255,0.1); box-shadow: 0 0 10px var(--neon-pink); transform:translateY(-1px); }
+        .auth-link:focus-visible, .filter-btn:focus-visible, .project-card:focus-visible, button:focus-visible, a:focus-visible { outline:2px solid var(--neon-yellow); outline-offset:3px; }
 
         /* Nube de admin */
         #admin-cloud {
@@ -194,8 +196,8 @@
         .promo-dot.active { background: var(--neon-pink); box-shadow: 0 0 10px var(--neon-pink); }
 
         .hero {
-            text-align: center; padding: clamp(20px, 4vw, 30px) 10px;
-            background: rgba(0,0,0,0.3); border-bottom: 1px solid var(--theme-border);
+            text-align: center; padding: clamp(25px, 5vw, 42px) 14px;
+            background: linear-gradient(180deg,rgba(0,0,0,.24),rgba(0,0,0,.42)); border-bottom: 1px solid var(--theme-border);
             transition: background 0.6s, border-color 0.6s;
         }
         .hero h2 {
@@ -231,7 +233,7 @@
         }
 
         .container {
-            max-width: 900px; margin: 20px auto; padding: 10px;
+            max-width: 900px; margin: clamp(20px,4vw,34px) auto; padding: 10px 14px;
             display: grid;
             grid-template-columns: repeat(var(--grid-cols), minmax(var(--card-min-width), 1fr));
             gap: clamp(8px, 2vw, 15px);
@@ -244,7 +246,7 @@
             text-align: center; cursor: pointer; transition: all 0.3s;
             text-decoration: none; display: flex; flex-direction: column; align-items: center;
             gap: clamp(6px, 1.5vw, 10px); opacity: 0; animation: fadeIn 0.6s ease-out forwards;
-            color: var(--theme-text);
+            color: var(--theme-text); min-height:100%;
         }
         .project-card:nth-child(1) { animation-delay: 0.1s; }
         .project-card:nth-child(2) { animation-delay: 0.2s; }
@@ -259,6 +261,7 @@
             border-color: var(--neon-cyan); box-shadow: 0 0 15px rgba(0,255,255,0.3);
             transform: translateY(-5px);
         }
+        .project-card:active { transform:translateY(-1px); }
         .project-icon {
             width: clamp(50px, 12vw, 70px); height: clamp(50px, 12vw, 70px);
             background: #0a0a1a; border-radius: 16px;
@@ -512,7 +515,10 @@
         @media (max-width: 480px) {
             :root { --grid-cols: 2; --card-min-width: 120px; }
             .header-content { flex-direction: column; align-items: flex-start; }
-            .user-area { width: 100%; justify-content: space-between; }
+            .user-area { width: 100%; justify-content: flex-start; }
+            .auth-link { padding:7px 8px; }
+            .promo-bubble-container { min-height:200px; }
+            .promo-bubble { width:92%; }
         }
         @media (min-width: 481px) and (max-width: 768px) {
             :root { --grid-cols: 3; --card-min-width: 140px; }
@@ -523,6 +529,9 @@
         @media (min-width: 1200px) {
             :root { --grid-cols: 5; --card-min-width: 160px; }
             .container { max-width: 1100px; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { animation-duration:.01ms !important; animation-iteration-count:1 !important; scroll-behavior:auto !important; transition-duration:.01ms !important; }
         }
     </style>
 </head>
@@ -551,7 +560,6 @@
         <a href="pages/admin/admin-promos.html" target="_blank">📢 GESTIONAR PROMOS</a>
         <a href="pages/admin/gestor-movil.html" target="_blank" class="btn-gold">➕ AGREGAR JUEGO</a>
         <button onclick="showCodePrompt()" style="background: var(--neon-yellow); color: black; box-shadow: 0 4px 0 #b8860b;">🔢 CÓDIGOS</button>
-        <button onclick="verificarYMostrarRotos()" style="background: var(--neon-cyan); color: black; box-shadow: 0 4px 0 #008080;">🔍 VERIFICAR ROTOS</button>
         <!-- 🟢 NUEVOS BOTONES GENÉRICOS -->
         <button onclick="activarLocal()" style="background: #FFD700; color: black; box-shadow: 0 4px 0 #b8860b;">🛠️ ACTIVAR LOCAL</button>
         <button onclick="sincronizarGlobal()" style="background: #FF4500; color: white; box-shadow: 0 4px 0 #8B0000;">📡 PUBLICAR GLOBAL</button>
@@ -870,7 +878,7 @@
             { name: "MindMath Arcade", desc: "Matemáticas retro", url: "pages/game.html", imageUrl: "img/mindmath.png", icon: "🧮", category: "mates", deviceCompatibility: "both", evento: null },
             { name: "BanderQuiz", desc: "Adivina banderas", url: "games/laura10°/index.html", imageUrl: "img/banderquiz.png", icon: "🏳️🌎", category: "edu", deviceCompatibility: "both", evento: null },
             { name: "Quizzer", desc: "Aprende de Forma Divertida ", url: "games/esequiel11°/index.html", imageUrl: "img/quizzer.jpeg", icon: "🧮", category: "mates", deviceCompatibility: "both", evento: null },
-            { name: "StudyHub", desc: "Organiza tu horario, tareas, exámenes y notas en un solo lugar", url: "games/Anyur10/index.html", imageUrl: "", icon: "📚", category: "educacion", deviceCompatibility: "both", evento: null },
+            { name: "Study", desc: "Aprende jugando con materias, retos y niveles", url: "games/anyur10°/index.html", imageUrl: "", icon: "📚", category: "educacion", deviceCompatibility: "both", evento: null },
             { name: "Eco Recolector", desc: "Atrapa agua y reciclables", url: "pages/eco-collector.html", imageUrl: "img/ecorecolector.png", icon: "🌍", category: "eco", deviceCompatibility: "both", evento: null },
             { name: "Animalandia", desc: "Alimenta animales", url: "pages/animalandia.html", imageUrl: "", icon: "🐮", category: "kids", deviceCompatibility: "mobile", evento: null },
             { name: "SAPIENS", desc: "Pon a Prueba tu Mente y Demuestra lo que Sabes", url: "games/keiner10°/index.html", imageUrl: "img/sapiens.jpeg", icon: "🧠", category: "mates", deviceCompatibility: "both", evento: null },
@@ -1037,15 +1045,6 @@
                 nameDiv.className = 'project-name';
                 nameDiv.textContent = proj.name;
 
-                if (proj.broken) {
-                    card.style.border = '3px solid red';
-                    card.style.opacity = '0.7';
-                    const badge = document.createElement('span');
-                    badge.textContent = '🚫 404';
-                    badge.style.cssText = 'background:red;color:white;padding:2px 8px;border-radius:4px;font-size:10px;margin-top:4px;display:inline-block;';
-                    nameDiv.appendChild(badge);
-                }
-
                 if (proj.evento && proj.evento !== null) {
                     const eventoEmojis = {
                         'halloween': '🎃',
@@ -1072,111 +1071,6 @@
                 card.appendChild(descDiv);
                 container.appendChild(card);
             });
-        }
-
-        // ============================================================
-        // FILTRO DE JUEGOS ROTOS (404)
-        // ============================================================
-        const BROKEN_CACHE_KEY = 'tecnomath_broken_cache';
-        let brokenCache = {};
-
-        try {
-            const cached = localStorage.getItem(BROKEN_CACHE_KEY);
-            if (cached) brokenCache = JSON.parse(cached);
-        } catch(e) {}
-
-        function guardarBrokenCache() {
-            localStorage.setItem(BROKEN_CACHE_KEY, JSON.stringify(brokenCache));
-        }
-
-        async function verificarUrl(url) {
-            const cacheKey = url;
-            const ahora = Date.now();
-            const cacheValidity = 24 * 60 * 60 * 1000;
-            if (brokenCache[cacheKey] && (ahora - brokenCache[cacheKey].timestamp) < cacheValidity) {
-                return brokenCache[cacheKey].broken;
-            }
-            try {
-                const esExterna = url.startsWith('http') && !url.includes(window.location.hostname);
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 5000);
-                const response = await fetch(url, {
-                    method: 'HEAD',
-                    mode: esExterna ? 'no-cors' : 'cors',
-                    signal: controller.signal
-                });
-                clearTimeout(timeoutId);
-                const broken = false;
-                brokenCache[cacheKey] = { broken, timestamp: ahora };
-                guardarBrokenCache();
-                return broken;
-            } catch (e) {
-                brokenCache[cacheKey] = { broken: true, timestamp: ahora };
-                guardarBrokenCache();
-                return true;
-            }
-        }
-
-        async function marcarJuegosRotos() {
-            const promesas = projects.map(async (proj) => {
-                const url = proj.swfUrl || proj.url;
-                if (!url) return;
-                proj.broken = await verificarUrl(url);
-            });
-            await Promise.allSettled(promesas);
-            renderProjects(currentActiveFilter);
-        }
-        window.addEventListener('load', () => {
-            setTimeout(marcarJuegosRotos, 1500);
-        });
-
-        // ============================================================
-        // VERIFICAR ROTOS (MANUAL)
-        // ============================================================
-        async function verificarYMostrarRotos() {
-            console.log('🔍 Escaneando juegos...');
-            const total = projects.length;
-            let rotos = [];
-            let verificados = 0;
-            for (const proj of projects) {
-                const url = proj.swfUrl || proj.url;
-                if (!url) continue;
-                try {
-                    const controller = new AbortController();
-                    const timeoutId = setTimeout(() => controller.abort(), 5000);
-                    const response = await fetch(url, {
-                        method: 'HEAD',
-                        mode: 'cors',
-                        signal: controller.signal
-                    });
-                    clearTimeout(timeoutId);
-                    if (!response.ok) {
-                        rotos.push({ name: proj.name, url, status: response.status });
-                        console.warn(`❌ ${proj.name} -> ${url} (${response.status})`);
-                    } else {
-                        console.log(`✅ ${proj.name} -> OK`);
-                    }
-                } catch (e) {
-                    rotos.push({ name: proj.name, url, reason: 'Error de red o CORS' });
-                    console.warn(`⚠️ Posible problema con ${proj.name}: ${url}`, e);
-                }
-                verificados++;
-                if (verificados % 10 === 0) {
-                    console.log(`Progreso: ${verificados}/${total}`);
-                }
-            }
-            if (rotos.length === 0) {
-                alert('✅ ¡Todos los juegos verificados parecen estar bien!');
-            } else {
-                let mensaje = `⚠️ Se encontraron ${rotos.length} juegos con problemas:\n\n`;
-                rotos.forEach((r, i) => {
-                    mensaje += `${i+1}. ${r.name} -> ${r.url} (${r.status || r.reason || 'error'})\n`;
-                });
-                mensaje += '\n📝 Revisa la consola para más detalles.';
-                alert(mensaje);
-                console.warn('📋 Lista de juegos rotos:');
-                console.table(rotos);
-            }
         }
 
         // ============================================================
@@ -1693,7 +1587,18 @@
             }
         }
 
-        // --- EMOJIS ---
+        // --- IMÁGENES DE EVENTOS ---
+        // Usamos los SVG de Twemoji desde CDN: así no dependemos de que el
+        // teléfono o computador tenga instalada una fuente de emojis.
+        const EVENT_IMAGE_CDN = 'https://cdn.jsdelivr.net/gh/jdecked/twemoji@latest/assets/svg/';
+
+        function emojiToTwemojiCode(emoji) {
+            return Array.from(emoji)
+                .map(character => character.codePointAt(0).toString(16))
+                .filter(code => code !== 'fe0f')
+                .join('-');
+        }
+
         function createEmoji(emojis) {
             const el = document.createElement('div');
             const emoji = emojis[Math.floor(Math.random() * emojis.length)];
@@ -1701,16 +1606,31 @@
             const left = Math.random() * 100;
             const duration = Math.random() * 5 + 4;
             const delay = Math.random() * 3;
-            el.textContent = emoji;
             el.style.cssText = `
                 position: absolute;
                 top: -50px;
                 left: ${left}%;
-                font-size: ${size}px;
+                width: ${size}px;
+                height: ${size}px;
                 animation: emojiFall ${duration}s ease-in ${delay}s forwards;
                 pointer-events: none;
                 filter: drop-shadow(0 0 5px rgba(255,255,255,0.3));
             `;
+            const image = document.createElement('img');
+            image.src = EVENT_IMAGE_CDN + emojiToTwemojiCode(emoji) + '.svg';
+            image.alt = '';
+            image.setAttribute('aria-hidden', 'true');
+            image.decoding = 'async';
+            image.referrerPolicy = 'no-referrer';
+            image.style.cssText = 'display:block; width:100%; height:100%; object-fit:contain;';
+            image.onerror = () => {
+                image.remove();
+                // Reemplazo gráfico sin texto si la red no puede cargar la imagen.
+                el.style.background = 'radial-gradient(circle at 32% 28%, #fff 0 9%, #ffd700 10% 36%, #ff7a00 37% 66%, #7a1cff 67% 100%)';
+                el.style.borderRadius = '50%';
+                el.style.boxShadow = '0 0 14px rgba(255,215,0,.8)';
+            };
+            el.appendChild(image);
             return el;
         }
 
@@ -2272,7 +2192,7 @@
         console.log('📡 PUBLICAR GLOBAL sincroniza el evento local activo; si no hay, pide un código.');
         console.log('📱 Código QR con logo de Tecnomath generado en el footer.');
         console.log('🏗️ Juegos de Tower Building incluidos.');
-        console.log('🎈 Lluvia de emojis corregida: funciona en todos los eventos.');
+        console.log('🖼️ Lluvia de imágenes de eventos activa: no depende de la fuente de emojis del dispositivo.');
         console.log('👀 Juegos de eventos ocultos hasta que se active su evento correspondiente.');
     </script>
 </body>

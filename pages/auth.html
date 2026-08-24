@@ -15,22 +15,25 @@
       background: var(--retro-bg); color: white;
       font-family: 'Press Start 2P', cursive;
       display: flex; align-items: center; justify-content: center;
-      height: 100vh; margin: 0;
-      background-image: radial-gradient(ellipse at 30% 50%, rgba(0,255,255,0.1) 0%, transparent 50%);
+      min-height: 100vh; margin: 0; padding: 24px 12px;
+      background-image: radial-gradient(ellipse at 30% 20%, rgba(0,255,255,0.14) 0%, transparent 48%), radial-gradient(ellipse at 80% 85%, rgba(255,0,255,0.09) 0%, transparent 42%);
     }
     .login-box {
       background: var(--card-bg); border: 2px solid var(--neon-cyan);
-      padding: 20px; border-radius: 12px; width: 90%; max-width: 350px;
-      box-shadow: 0 0 20px rgba(0,255,255,0.3); text-align: center;
+      padding: clamp(20px, 5vw, 30px); border-radius: 16px; width: min(100%, 390px);
+      box-shadow: 0 0 20px rgba(0,255,255,0.3), 0 22px 70px rgba(0,0,0,0.42); text-align: center;
+      position: relative; overflow: hidden;
     }
-    h2 { color: var(--neon-cyan); font-size: 12px; margin-bottom: 20px; text-shadow: 0 0 10px var(--neon-cyan); }
+    .login-box::before { content:''; position:absolute; inset:0; pointer-events:none; background:linear-gradient(135deg,rgba(0,255,255,.06),transparent 34%,rgba(255,0,255,.06)); }
+    .login-box > * { position:relative; }
+    h2 { color: var(--neon-cyan); font-size: 13px; margin-bottom: 20px; text-shadow: 0 0 10px var(--neon-cyan); letter-spacing:1px; }
     input {
       width: 100%; padding: 12px; margin: 8px 0;
       background: #0a0a1a; border: 2px solid #333; color: var(--neon-cyan);
       font-family: 'Press Start 2P', cursive; font-size: 8px; outline: none;
-      border-radius: 6px; text-align: center;
+      border-radius: 8px; text-align: center; transition:border-color .2s, box-shadow .2s, background .2s;
     }
-    input:focus { border-color: var(--neon-pink); }
+    input:focus { border-color: var(--neon-pink); box-shadow:0 0 0 3px rgba(255,0,255,.12); }
     .phone-group { display:flex; gap:6px; margin:8px 0; }
     .phone-group select { width:82px; padding:12px 6px; background:#0a0a1a; border:2px solid #333; color:var(--neon-cyan); font-family:'Press Start 2P', cursive; font-size:8px; border-radius:6px; }
     .phone-group input { margin:0; flex:1; }
@@ -38,16 +41,24 @@
       width: 100%; padding: 12px; margin-top: 15px;
       background: var(--neon-pink); color: white; border: none;
       font-family: 'Press Start 2P', cursive; font-size: 8px;
-      cursor: pointer; border-radius: 6px; box-shadow: 0 0 10px var(--neon-pink);
-      transition: 0.2s;
+      cursor: pointer; border-radius: 8px; box-shadow: 0 0 10px var(--neon-pink);
+      transition: transform .2s, box-shadow .2s, filter .2s;
     }
-    .btn:hover { transform: scale(1.02); }
+    .btn:hover { transform: translateY(-2px); box-shadow:0 5px 18px rgba(255,0,255,.42); }
+    .btn:active { transform:translateY(1px); }
+    .btn:focus-visible, input:focus-visible, select:focus-visible, .back-link:focus-visible { outline:2px solid var(--neon-yellow); outline-offset:3px; }
+    .btn:disabled { cursor:wait; opacity:.68; transform:none; }
     .btn-secondary {
       background: transparent; border: 1px solid var(--neon-cyan); color: var(--neon-cyan);
       box-shadow: none; margin-top: 10px;
     }
-    .message { font-size: 6px; margin-top: 10px; color: var(--neon-pink); min-height: 18px; }
-    .back-link { font-size: 5px; color: #888; margin-top: 15px; display: block; text-decoration: none; }
+    #btnGoogle { border-color:#f5f5f5; color:#f5f5f5; }
+    #btnGoogle:hover { background:rgba(255,255,255,.08); box-shadow:0 0 14px rgba(255,255,255,.18); }
+    .message { font-size: 6px; margin-top: 12px; color: var(--neon-pink); min-height: 20px; line-height:1.7; }
+    .back-link { font-size: 5px; color: #999; margin-top: 18px; display: block; text-decoration: none; }
+    .back-link:hover { color:var(--neon-cyan); }
+    @media (max-width:380px) { body { align-items:flex-start; } .login-box { margin:10px 0; } h2 { font-size:11px; } }
+    @media (prefers-reduced-motion:reduce) { *,*::before,*::after { scroll-behavior:auto!important; transition:none!important; animation:none!important; } }
   </style>
 </head>
 <body>

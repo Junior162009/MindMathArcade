@@ -6,6 +6,11 @@
     <title>Eco-Barrio 2030 · ODS 11, 12, 13, 7</title>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <script src="shared.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+    <script src="../js/firebase-config.js"></script>
+    <script src="../js/game-progress.js" data-tecnomath-game="eco-barrio"></script>
     <style>
         :root {
             --neon-cyan: #00FFFF; --neon-pink: #FF00FF; --neon-green: #39FF14;
@@ -392,6 +397,9 @@
         gameOver = true;
         const avg = (bars.nature + bars.energy + bars.community + bars.resources) / 4;
         let won = avg >= 60;
+        if (window.TecnomathProgress) {
+            window.TecnomathProgress.save('eco-barrio', { day: currentDay, average: Math.round(avg), won, hintsUsed, localCoins, bars });
+        }
         let rewardGlobal = 0;
         if (won) {
             rewardGlobal = Math.floor(avg * 2);

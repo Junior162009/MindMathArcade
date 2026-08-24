@@ -4,6 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>Banderquiz · edición mejorada</title>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+    <script src="../../js/firebase-config.js"></script>
+    <script src="../../js/game-progress.js" data-tecnomath-game="banderquiz"></script>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#0f0c29">
     <meta name="mobile-web-app-capable" content="yes">
@@ -1035,6 +1040,24 @@
             try {
                 localStorage.setItem('banderquiz_global_stats', JSON.stringify(globalStats));
             } catch (_) {}
+            syncProgress();
+        }
+
+        function syncProgress(completed = false) {
+            if (!window.TecnomathProgress) return;
+            window.TecnomathProgress.save('banderquiz', {
+                level: currentLevel,
+                score,
+                totalQuestions: total,
+                correctAnswers: score,
+                wrongAnswers: Math.max(0, total - score),
+                accuracy: total ? Math.round((score / total) * 100) : 0,
+                streak,
+                bestStreak,
+                lives,
+                completed,
+                globalStats: { ...globalStats }
+            });
         }
 
         loadStats();
@@ -1298,6 +1321,7 @@
             streak = 0;
             lives--;
             globalStats.totalWrong++;
+            syncProgress(false);
 
             // Sonido de fallo
             playWrong();
@@ -1371,6 +1395,7 @@
                 globalStats.totalWrong++;
                 playWrong();
             }
+            syncProgress(false);
 
             // Actualizar UI
             updateStatsUI();
@@ -1570,6 +1595,7 @@
             const totalQuestions = total;
             const correctAnswers = score;
             const accuracy = totalQuestions === 0 ? 0 : Math.round((correctAnswers / totalQuestions) * 100);
+            syncProgress(true);
 
             // Overlay
             const overlay = document.createElement('div');

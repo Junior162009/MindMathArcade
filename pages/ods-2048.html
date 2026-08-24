@@ -6,6 +6,11 @@
     <title>ODS-2048 · Fusiona los Objetivos Sostenibles</title>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <script src="shared.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+    <script src="../js/firebase-config.js"></script>
+    <script src="../js/game-progress.js" data-tecnomath-game="ods-2048"></script>
     <style>
         :root {
             --neon-cyan: #00FFFF; --neon-pink: #FF00FF; --gold: #FFD700;
@@ -217,6 +222,9 @@
         localStorage.setItem('ods2048_stats', JSON.stringify({
             highScore: highScore
         }));
+        if (window.TecnomathProgress) {
+            window.TecnomathProgress.save('ods-2048', { score: score, highScore: highScore, localCoins: localCoins });
+        }
         if (typeof Tecnomath !== 'undefined' && Tecnomath.getCurrentUser()) {
             Tecnomath.setGameCoins('ods2048', localCoins);
         }

@@ -4,6 +4,11 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Quizzer · TecnoQuiz</title>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <script src="../../js/firebase-config.js"></script>
+  <script src="../../js/game-progress.js" data-tecnomath-game="quizzer"></script>
   <style>
     /* ===== ESTILOS GLOBALES ===== */
     @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=DM+Mono&display=swap');
@@ -404,6 +409,11 @@
       letter-spacing: -.08em;
       margin: 16px;
     }
+    .problem.long {
+      font-size: clamp(1.55rem, 4vw, 2.45rem);
+      line-height: 1.14;
+      letter-spacing: -.045em;
+    }
     .answers {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -507,18 +517,37 @@
       transform: translate(-50%, 0);
     }
     /* PERFIL */
-    .profile-avatar {
+    .profile-layout {
+      display: grid;
+      grid-template-columns: minmax(250px, 330px) minmax(220px, 1fr);
+      gap: clamp(22px, 5vw, 54px);
+      align-items: center;
+      margin: 18px 0 28px;
+    }
+    .avatar-stage {
+      padding: 18px;
+      border: 1px solid #65eaff55;
+      border-radius: 24px;
+      background: radial-gradient(circle at 50% 22%, #355da855, #0b1535cc 66%);
+      box-shadow: inset 0 0 26px #5fe9ff12, 0 15px 35px #0005;
+    }
+    .avatar-stage h3 {
+      font: 12px 'DM Mono';
+      letter-spacing: .14em;
+      color: var(--c);
       text-align: center;
-      font-size: 65px;
+      text-transform: uppercase;
+      margin-bottom: 13px;
     }
     #profile-canvas {
-      width: 160px;
-      height: 213px;
+      width: min(100%, 210px);
+      height: auto;
       display: block;
       margin: 0 auto;
-      border-radius: 16px;
-      background: rgba(0,0,0,0.3);
-      border: 2px solid var(--line);
+      border-radius: 20px;
+      background: #09132f;
+      border: 2px solid #7defff66;
+      box-shadow: 0 0 0 5px #071127aa, 0 14px 28px #0009;
     }
     .xp-bar {
       width: 100%;
@@ -535,13 +564,110 @@
       border-radius: 20px;
       transition: width 0.5s;
     }
-    /* ACCESORIOS MINI */
-    .accesorios-mini {
+    .loadout-title {
+      font: 12px 'DM Mono';
+      letter-spacing: .14em;
+      color: var(--m);
+      margin: 14px 0 9px;
+      text-align: center;
+    }
+    .loadout {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 7px;
+    }
+    .outfit-slot {
+      min-width: 0;
+      padding: 8px 4px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #101b3c;
+      color: var(--t);
+      box-shadow: none;
+    }
+    .outfit-slot:hover:not(:disabled) {
+      border-color: var(--c);
+      background: #17436c;
+    }
+    .outfit-slot .slot-icon {
+      display: block;
+      min-height: 28px;
+      font-size: 24px;
+      line-height: 1.1;
+    }
+    .outfit-slot .slot-name {
+      display: block;
+      margin-top: 5px;
+      color: var(--m);
+      font-size: 10px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .pilot-data {
+      display: grid;
+      gap: 11px;
+    }
+    .pilot-name {
+      color: var(--t);
+      font-size: clamp(1.55rem, 4vw, 2.35rem);
+      font-weight: 800;
+      letter-spacing: -.05em;
+      margin-bottom: 4px;
+    }
+    .pilot-level {
+      font: 12px 'DM Mono';
+      color: var(--c);
+      letter-spacing: .1em;
+    }
+    .pilot-stats {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 9px;
+      margin-top: 4px;
+    }
+    .pilot-stat {
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 13px;
+      background: #101a3ad9;
+    }
+    .pilot-stat span {
+      display: block;
+      color: var(--m);
+      font-size: 12px;
+    }
+    .pilot-stat strong {
+      display: block;
+      margin-top: 3px;
+      color: var(--t);
+      font: 700 19px 'DM Mono';
+    }
+    .name-editor {
       display: flex;
-      gap: 0.3rem;
-      justify-content: center;
-      margin-top: 0.5rem;
-      font-size: 2rem;
+      gap: 9px;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-top: 13px;
+    }
+    .name-editor label { color: var(--m); font-size: 14px; }
+    .name-editor input {
+      flex: 1;
+      min-width: 150px;
+      background: #111c40;
+      color: #fff;
+      border: 1px solid var(--line);
+      border-radius: 30px;
+      padding: .6rem 1rem;
+      font: 600 15px 'Outfit';
+    }
+    @media (max-width: 650px) {
+      .profile-layout { grid-template-columns: 1fr; }
+      .avatar-stage { max-width: 330px; width: 100%; margin: 0 auto; }
+    }
+    @media (max-width: 390px) {
+      .outfit-slot .slot-name { font-size: 8px; }
+      .pilot-stats { grid-template-columns: 1fr 1fr; }
     }
     /* RESPONSIVE */
     @media (max-width: 650px) {
@@ -696,30 +822,35 @@
     <section id="profile" class="screen">
       <div class="panel">
         <div class="eyebrow">Tu identidad orbital</div>
-        <div style="display:flex;flex-wrap:wrap;gap:20px;justify-content:center;align-items:center;">
-          <div>
-            <canvas id="profile-canvas" width="180" height="240"></canvas>
-            <div class="accesorios-mini">
-              <span id="p-hat">🧢</span>
-              <span id="p-glasses">👓</span>
-              <span id="p-shirt">👕</span>
-              <span id="p-backpack">🎒</span>
-              <span id="p-wand">🪄</span>
+        <div class="profile-layout">
+          <div class="avatar-stage">
+            <h3>Tu piloto</h3>
+            <canvas id="profile-canvas" width="240" height="300"></canvas>
+            <div class="loadout-title">EQUIPAMIENTO · TOCA PARA CAMBIAR</div>
+            <div class="loadout" aria-label="Accesorios equipados">
+              <button class="outfit-slot" type="button" data-shop-cat="hat" aria-label="Cambiar sombrero"><span class="slot-icon" id="p-hat">🧢</span><span class="slot-name">Sombrero</span></button>
+              <button class="outfit-slot" type="button" data-shop-cat="glasses" aria-label="Cambiar gafas"><span class="slot-icon" id="p-glasses">👓</span><span class="slot-name">Gafas</span></button>
+              <button class="outfit-slot" type="button" data-shop-cat="shirt" aria-label="Cambiar camiseta"><span class="slot-icon" id="p-shirt">👕</span><span class="slot-name">Camiseta</span></button>
+              <button class="outfit-slot" type="button" data-shop-cat="backpack" aria-label="Cambiar mochila"><span class="slot-icon" id="p-backpack">🎒</span><span class="slot-name">Mochila</span></button>
+              <button class="outfit-slot" type="button" data-shop-cat="wand" aria-label="Cambiar varita"><span class="slot-icon" id="p-wand">🪄</span><span class="slot-name">Varita</span></button>
             </div>
           </div>
-          <div style="min-width:200px;">
-            <p><strong>Nombre:</strong> <span id="p-name">Jugador</span></p>
-            <p>Puntos: <strong id="p-points">0</strong></p>
-            <p>Nivel: <strong id="p-level">1</strong></p>
-            <p>XP: <strong id="p-xp">0</strong> / <span id="p-xp-next">100</span></p>
+          <div class="pilot-data">
+            <div class="pilot-name" id="p-name">Jugador</div>
+            <div class="pilot-level">PILOTO · NIVEL <span id="p-level">1</span></div>
+            <div class="pilot-stats">
+              <div class="pilot-stat"><span>Cristales</span><strong id="p-points">0</strong></div>
+              <div class="pilot-stat"><span>Racha actual</span><strong><span id="p-streak">0</span> 🔥</strong></div>
+              <div class="pilot-stat"><span>Mejor racha</span><strong><span id="p-best">0</span> 🏆</strong></div>
+              <div class="pilot-stat"><span>XP</span><strong><span id="p-xp">0</span>/<span id="p-xp-next">100</span></strong></div>
+            </div>
             <div class="xp-bar"><div class="xp-bar-fill" id="xp-fill" style="width:0%"></div></div>
-            <p>Racha actual: <strong id="p-streak">0</strong> 🔥</p>
-            <p>Mejor racha: <strong id="p-best">0</strong> 🏆</p>
+            <div class="name-editor">
+              <label for="nameInput">Cambiar nombre</label>
+              <input type="text" id="nameInput" placeholder="Tu nombre" maxlength="20">
+              <button id="saveName" class="primary">Guardar</button>
+            </div>
           </div>
-        </div>
-        <div style="margin:1rem 0;text-align:center;">
-          <label>Cambiar nombre: <input type="text" id="nameInput" placeholder="Tu nombre" style="background:#111c40;color:#fff;border:1px solid var(--line);border-radius:30px;padding:0.4rem 1rem;"></label>
-          <button id="saveName" class="primary" style="padding:0.4rem 1.2rem;">Guardar</button>
         </div>
         <button class="secondary" data-go="home">← Menú</button>
       </div>
@@ -946,6 +1077,17 @@
     function saveState() {
       try {
         localStorage.setItem('nexo_state', JSON.stringify(state));
+        if (window.TecnomathProgress) {
+          window.TecnomathProgress.save('quizzer', {
+            snapshot: {
+              name: state.name, coins: state.coins, xp: state.xp, level: state.level,
+              games: state.games, correct: state.correct, wrong: state.wrong,
+              streak: state.streak, bestStreak: state.bestStreak,
+              wardrobe: state.wardrobe, equipped: state.equipped,
+              achievements: state.achievements
+            }
+          });
+        }
       } catch (e) {}
     }
 
@@ -1206,9 +1348,17 @@
     }
 
     function getSelected(angle) {
+      // La flecha está fija arriba. Convertimos su posición al sistema de
+      // coordenadas de la ruleta para leer el mismo sector que se ve.
       let raw = (-Math.PI / 2 - angle) % (Math.PI * 2);
       if (raw < 0) raw += Math.PI * 2;
       return Math.floor(raw / SLICE) % LEVELS.length;
+    }
+
+    function rotationForLevel(index, extraTurns) {
+      // El centro del sector elegido debe quedar exactamente bajo la flecha.
+      const centerOfSlice = -Math.PI / 2 + (index + 0.5) * SLICE;
+      return -Math.PI / 2 - centerOfSlice + extraTurns * Math.PI * 2;
     }
 
     function initRoulette() {
@@ -1228,7 +1378,9 @@
       const beginBtn = document.getElementById('begin');
       beginBtn.disabled = true;
       const startRot = rotation;
-      const targetRot = startRot + (5 + Math.random() * 4) * Math.PI * 2 + Math.random() * Math.PI * 2;
+      const selectedIndex = Math.floor(Math.random() * LEVELS.length);
+      const extraTurns = Math.ceil(rotation / (Math.PI * 2)) + 6 + Math.floor(Math.random() * 4);
+      const targetRot = rotationForLevel(selectedIndex, extraTurns);
       const duration = 3400;
       const started = performance.now();
 
@@ -1264,6 +1416,69 @@
     let game = null;
     let timer = null;
     let timeLeft = 0;
+
+    function completeQuestionText(question, subject) {
+      const exactQuestions = {
+        '¿Raíz cuadrada de 9?': '¿Cuál es la raíz cuadrada de 9?',
+        '¿10 - 3?': '¿Cuál es el resultado de la operación 10 − 3?',
+        '¿5 × 5?': '¿Cuál es el resultado de la multiplicación 5 × 5?',
+        '¿Doble de 12?': '¿Cuál es el doble del número 12?',
+        '¿7 × 8?': '¿Cuál es el resultado de la multiplicación 7 × 8?',
+        '¿144 ÷ 12?': '¿Cuál es el resultado de dividir 144 entre 12?',
+        '¿3⁴?': '¿Cuál es el valor de 3 elevado a la cuarta potencia?',
+        '3x + 5 = 20': 'Si 3x + 5 = 20, ¿cuál es el valor de x?',
+        '¿2¹⁰?': '¿Cuál es el valor de 2 elevado a la décima potencia?',
+        '∫2x dx': '¿Cuál es la integral indefinida de 2x con respecto a x?',
+        '∫e^x dx': '¿Cuál es la integral indefinida de eˣ con respecto a x?',
+        'd/dx ln(x)': '¿Cuál es la derivada de ln(x) con respecto a x?',
+        'Área 5×3': '¿Cuál es el área de un rectángulo que mide 5 unidades de base y 3 unidades de altura?',
+        'MCD(12,18)': '¿Cuál es el máximo común divisor de 12 y 18?',
+        'Derivada de x²': '¿Cuál es la derivada de x² con respecto a x?',
+        'ln(e³)': '¿Cuál es el valor de ln(e³)?',
+        '0/0 es:': 'En cálculo, ¿cómo se clasifica la expresión 0/0?',
+        'Teorema fundamental': '¿Qué relación establece el teorema fundamental del cálculo?',
+        "y'' + y = 0": "¿Cuál es la forma general de una solución para la ecuación diferencial y'' + y = 0?",
+        'Planeta más cercano al Sol': '¿Cuál es el planeta más cercano al Sol?',
+        'Órgano que bombea sangre': '¿Qué órgano bombea la sangre por todo el cuerpo?',
+        'Huesos humano adulto': '¿Cuántos huesos tiene normalmente el cuerpo humano adulto?',
+        'Fotosíntesis': '¿Qué es la fotosíntesis?',
+        'Unidad de fuerza': '¿Cuál es la unidad de medida de la fuerza en el Sistema Internacional?',
+        'Ecosistema': '¿Qué elementos forman un ecosistema?',
+        'Relatividad': '¿Qué científico formuló la teoría de la relatividad?',
+        'Energía oscura': '¿Qué efecto se atribuye principalmente a la energía oscura?',
+        'Mitosis': '¿Qué proceso celular se llama mitosis?',
+        'Reacción exotérmica': '¿Qué ocurre en una reacción química exotérmica?',
+        'Mecánica cuántica': '¿Qué estudia principalmente la mecánica cuántica?',
+        'Bosón de Higgs': '¿Qué es el bosón de Higgs?',
+        'Entropía': 'En termodinámica, ¿qué mide la entropía?',
+        'Evolución': '¿Qué describe la evolución biológica?',
+        'Radiación de Hawking': '¿Con qué objetos astronómicos se relaciona la radiación de Hawking?',
+        'Teoría de cuerdas': '¿Qué propone la teoría de cuerdas sobre las partículas fundamentales?',
+        'Principio de incertidumbre': '¿Qué afirma el principio de incertidumbre de Heisenberg?',
+        'Agujero negro': '¿Cuál es la característica principal de un agujero negro?',
+        'Materia oscura': '¿Cómo se describe la materia oscura según la evidencia actual?',
+        'Función recursiva': '¿Qué caracteriza a una función recursiva?',
+        'Puntero en C': 'En el lenguaje C, ¿qué almacena un puntero?',
+        'Árbol binario': '¿Qué tipo de estructura es un árbol binario?',
+        'O(n) complejidad': '¿Qué significa que un algoritmo tenga complejidad O(n)?',
+        'Función lambda': '¿Qué es una función lambda en programación?',
+        'Puntero a función': '¿Qué puede almacenar un puntero a función?',
+        'Paso por referencia': '¿Qué se entrega a una función cuando se usa paso por referencia?',
+        'Herencia en POO': '¿Para qué sirve la herencia en la programación orientada a objetos?',
+        'Semáforo SO': '¿Para qué se utiliza un semáforo en un sistema operativo?',
+        'P vs NP': '¿Cómo se clasifica actualmente el problema P versus NP?',
+        'Autómata finito': '¿Cuál de las siguientes afirmaciones describe correctamente un autómata finito?',
+        'Máquina de Turing': '¿Qué es una máquina de Turing?',
+        'NP-completo': '¿Cómo se caracterizan los problemas NP-completos?',
+        'Criptografía asimétrica': '¿Qué tipo de claves utiliza la criptografía asimétrica?'
+      };
+      if (exactQuestions[question]) return exactQuestions[question];
+      if (/^¿/.test(question)) return question;
+      if (subject === 'mat' && /^[\d\s×÷+\-⁰¹²³⁴⁵⁶⁷⁸⁹]+\??$/.test(question)) {
+        return '¿Cuál es el resultado de la operación ' + question.replace(/[¿?]/g, '') + '?';
+      }
+      return '¿Cuál es la respuesta correcta sobre ' + question.replace(/[¿?]/g, '') + '?';
+    }
 
     function startGame(subject, count, difficulty) {
       // Construir pool
@@ -1341,7 +1556,10 @@
       document.getElementById('combo').textContent = 'COMBO ×' + (game.streak + 1);
       document.getElementById('shields').textContent = '◈ '.repeat(Math.max(0, 3 - game.wrongs.length));
       document.getElementById('tag').textContent = game.diff.toUpperCase();
-      document.getElementById('problem').textContent = q.q;
+      const problemEl = document.getElementById('problem');
+      const fullQuestion = completeQuestionText(q.q, game.subject);
+      problemEl.textContent = fullQuestion;
+      problemEl.classList.toggle('long', fullQuestion.length > 34);
       document.getElementById('feed').textContent = '';
       const box = document.getElementById('answers');
       box.innerHTML = '';
@@ -1405,7 +1623,7 @@
       } else {
         game.streak = 0;
         state.streak = 0;
-        game.wrongs.push({ question: q.q, correct: q.opts[correct], chosen: selected >= 0 ? q.opts[selected] : 'Tiempo',
+        game.wrongs.push({ question: completeQuestionText(q.q, game.subject), correct: q.opts[correct], chosen: selected >= 0 ? q.opts[selected] : 'Tiempo',
           explanation: q.exp || '' });
         state.wrong++;
         feed.textContent = '❌ Incorrecto. Era: ' + q.opts[correct];
@@ -1492,6 +1710,11 @@
       document.getElementById('p-shirt').textContent = state.equipped.shirt || '👕';
       document.getElementById('p-backpack').textContent = state.equipped.backpack || '🎒';
       document.getElementById('p-wand').textContent = state.equipped.wand || '🪄';
+      ['hat', 'glasses', 'shirt', 'backpack', 'wand'].forEach(category => {
+        const item = SHOP_DATA[category].find(entry => entry.emoji === state.equipped[category]);
+        const label = item ? item.label : 'Sin equipar';
+        document.querySelector('[data-shop-cat="' + category + '"] .slot-name').textContent = label;
+      });
       document.getElementById('nameInput').value = state.name;
       // Dibujar personaje
       drawCharacter('profile-canvas', state.equipped);
@@ -1504,6 +1727,14 @@
       renderProfile();
       soundClick();
       toast('Nombre guardado');
+    });
+
+    document.querySelectorAll('[data-shop-cat]').forEach(slot => {
+      slot.addEventListener('click', () => {
+        soundClick();
+        go('shop');
+        renderShop(slot.dataset.shopCat);
+      });
     });
 
     // ================================================================

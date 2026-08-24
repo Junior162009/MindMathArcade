@@ -6,6 +6,11 @@
     <title>🧮 EmojiMath Pro | Aprende mates con emojis</title>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&family=Press+Start+2P&display=swap" rel="stylesheet">
     <script src="shared.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+    <script src="../js/firebase-config.js"></script>
+    <script src="../js/game-progress.js" data-tecnomath-game="emoji-math"></script>
     <style>
         :root {
             --sky: #87CEEB; --grass: #7CFC00; --sun: #FFD700;
@@ -294,6 +299,9 @@
         localStorage.setItem('emojimath_stats', JSON.stringify({
             lives, shields, score, level
         }));
+        if (window.TecnomathProgress) {
+            window.TecnomathProgress.save('emoji-math', { score, level, lives, shields, localCoins });
+        }
         if (typeof Tecnomath !== 'undefined' && Tecnomath.getCurrentUser()) {
             Tecnomath.setGameCoins('emojimath', localCoins);
         }
