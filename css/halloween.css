@@ -1,42 +1,4 @@
-:root {
-    --theme-bg: #1a0e0e;
-    --theme-card: #2d1a1a;
-    --theme-border: #ff6600;
-    --theme-text: #ffaa33;
-}
-body {
-    background: #1a0e0e !important;
-    color: #ffaa33 !important;
-    position: relative;
-}
-body::after {
-    content: "🎃🧛🦇🧙🕷️🕸️👻💀🎃🧛🦇🧙🕷️🕸️👻💀";
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    font-size: 80px;
-    opacity: 0.06;
-    pointer-events: none;
-    z-index: 0;
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-around;
-    align-items: center;
-    word-break: break-all;
-    line-height: 1.2;
-    overflow: hidden;
-}
-header { border-bottom-color: #ff6600 !important; background: rgba(255,102,0,0.1) !important; }
-h1 { color: #ff6600 !important; text-shadow: 0 0 20px #ff6600, 0 0 40px #ff3300 !important; }
-h1::before { content: "🎃 "; }
-h1::after { content: " 🦇"; }
-.project-card { background: #2d1a1a !important; border-color: #ff6600 !important; }
-.project-card:hover { border-color: #ffaa00 !important; box-shadow: 0 0 20px #ff6600 !important; }
-.hero { background: rgba(255,102,0,0.1) !important; border-bottom-color: #ff6600 !important; }
-.filter-btn { border-color: #ff6600 !important; color: #ff6600 !important; }
-.filter-btn.active, .filter-btn:hover { background: rgba(255,102,0,0.2) !important; }
-.sponsor-card { background: #2d1a1a !important; border-color: #ff6600 !important; }
-footer { border-top-color: #ff6600 !important; }
-#admin-panel { border-color: #ff6600 !important; }
+:root{--theme-bg:#110b20;--theme-card:rgba(37,20,54,.88);--theme-border:#f47b20;--theme-text:#fff4df;--neon-cyan:#ffb11b;--neon-pink:#b54bdb}
+body{background:radial-gradient(circle at 78% 13%,#fff2bd 0 5%,#ffbb53 5.2% 7%,transparent 7.3%),radial-gradient(ellipse at 50% 120%,#4a1f56 0%,#1c1232 42%,#0b1024 100%)!important;color:var(--theme-text)!important}
+body::after{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.42;background:linear-gradient(115deg,transparent 0 48%,rgba(0,0,0,.16) 48.2% 49%,transparent 49.2% 100%),repeating-linear-gradient(90deg,transparent 0 72px,rgba(255,155,63,.055) 73px 75px);mask-image:linear-gradient(to bottom,transparent,black 24%,black)}
+header{border-bottom-color:#f47b20!important;background:rgba(20,12,39,.8)!important;backdrop-filter:blur(10px)}h1{color:#ffd166!important;text-shadow:0 0 20px #f47b20!important}.hero{background:linear-gradient(120deg,rgba(82,35,97,.65),rgba(20,12,39,.4))!important;border-bottom-color:#f47b20!important}.project-card,.sponsor-card{background:linear-gradient(145deg,rgba(52,29,73,.95),rgba(25,18,52,.92))!important;border-color:#77409d!important}.project-card:hover{border-color:#ffd166!important;box-shadow:0 14px 32px rgba(244,123,32,.35)!important}.filter-btn{border-color:#b54bdb!important;color:#ffd166!important}.filter-btn.active,.filter-btn:hover{background:rgba(244,123,32,.18)!important}footer,#admin-panel{border-color:#77409d!important}

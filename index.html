@@ -1288,6 +1288,13 @@
                             'mundial'
                         );
                         break;
+                    case 'primavera':
+                    case 'espacio':
+                    case 'ciencia': {
+                        const config = getEventConfig(eventName);
+                        if (config && activeEvent !== eventName) activatePermanentTheme(config.title, config.notification, config.confettiColors, config.emojis, eventName);
+                        break;
+                    }
                     case 'stop':
                         if (fairMode) deactivateFairMode();
                         else {
@@ -1706,12 +1713,8 @@
             if (fairContainer) fairContainer.style.display = 'block';
             injectFairCSS();
             startConfetti(confettiColors, speed);
-            startBalloons(speed);
             startSparkles();
             startFireworks();
-            if (emojis && emojis.length > 0) {
-                startEmojiRain(emojis, speed);
-            }
             highlightPromotions();
         }
 
@@ -1854,6 +1857,24 @@
                     notification: '⚽ ¡MODO MUNDIAL ACTIVADO! 🌍',
                     confettiColors: ['#FFD700', '#009A3E', '#FFFFFF', '#008000', '#FF4500'],
                     emojis: ['⚽', '🏆', '🌍', '🇦🇷', '🇧🇷', '🇫🇷', '🇪🇸', '🇩🇪', '🥅']
+                },
+                'primavera': {
+                    title: 'PRIMAVERA EN TECNOMATH',
+                    notification: '¡La aventura florece! Bienvenido a Primavera.',
+                    confettiColors: ['#ff91b5', '#fff3a6', '#8ce6c5', '#ffffff'],
+                    emojis: []
+                },
+                'espacio': {
+                    title: 'MISIÓN ESPACIAL TECNOMATH',
+                    notification: 'Misión iniciada: explora, calcula y despega.',
+                    confettiColors: ['#8977ff', '#62d8ff', '#c7edff', '#f087ff'],
+                    emojis: []
+                },
+                'ciencia': {
+                    title: 'LABORATORIO TECNOMATH',
+                    notification: 'Experimento activado: aprende, prueba y descubre.',
+                    confettiColors: ['#38d6c6', '#7cecff', '#a7f071', '#ffffff'],
+                    emojis: []
                 }
             };
             return configs[eventName] || null;
@@ -1866,7 +1887,7 @@
                 alert('⚠️ Solo el administrador puede activar el modo local.');
                 return;
             }
-            const code = prompt('🔐 Introduce el código de evento para ACTIVAR LOCALMENTE (solo para ti):\n\nOpciones: halloween, navidad, cumpleanos, feria2026, feriaplus, mundial, stop');
+            const code = prompt('🔐 Introduce el código de evento para ACTIVAR LOCALMENTE (solo para ti):\n\nOpciones: halloween, navidad, cumpleanos, feria2026, feriaplus, mundial, primavera, espacio, ciencia, stop');
             if (code === null) return;
             const lowerCode = code.toLowerCase();
 
@@ -1906,7 +1927,7 @@
                 );
                 alert('✅ Evento "' + lowerCode + '" activado LOCALMENTE (solo para ti).');
             } else {
-                alert('❌ CÓDIGO INVÁLIDO. Intenta con: halloween, navidad, cumpleanos, feria2026, feriaplus, mundial o stop.');
+                alert('❌ CÓDIGO INVÁLIDO. Prueba con: halloween, navidad, cumpleanos, feria2026, feriaplus, mundial, primavera, espacio, ciencia o stop.');
             }
         }
 
@@ -1926,7 +1947,7 @@
             }
 
             // Fallback: si no hay evento local activo, pedir un código
-            const code = prompt('🔐 No hay evento local activo. Introduce el código para PUBLICAR a TODOS:\n\nOpciones: halloween, navidad, cumpleanos, feria2026, feriaplus, mundial, stop');
+            const code = prompt('🔐 No hay evento local activo. Introduce el código para PUBLICAR a TODOS:\n\nOpciones: halloween, navidad, cumpleanos, feria2026, feriaplus, mundial, primavera, espacio, ciencia, stop');
             if (code === null) return;
             const lowerCode = code.toLowerCase();
 
@@ -2021,6 +2042,13 @@
                         'mundial'
                     );
                     break;
+                case 'primavera':
+                case 'espacio':
+                case 'ciencia': {
+                    const config = getEventConfig(lowerCode);
+                    activatePermanentTheme(config.title, config.notification, config.confettiColors, config.emojis, lowerCode);
+                    break;
+                }
                 case 'stop':
                     if (fairMode) deactivateFairMode();
                     else {
@@ -2192,7 +2220,7 @@
         console.log('📡 PUBLICAR GLOBAL sincroniza el evento local activo; si no hay, pide un código.');
         console.log('📱 Código QR con logo de Tecnomath generado en el footer.');
         console.log('🏗️ Juegos de Tower Building incluidos.');
-        console.log('🖼️ Lluvia de imágenes de eventos activa: no depende de la fuente de emojis del dispositivo.');
+        console.log('🎨 Escenas temáticas de eventos activas: fondos y efectos adaptados a cada celebración.');
         console.log('👀 Juegos de eventos ocultos hasta que se active su evento correspondiente.');
     </script>
 </body>
