@@ -2,6 +2,7 @@
 (function() {
   const STORAGE_KEY = 'tecnomath_users';
   const SESSION_KEY = 'tecnomath_session';
+  const ADMIN_SESSION_KEY = 'tecnomath_admin_session';
   const COINS_PREFIX = 'tecnomath_coins_';
   const GAME_COINS_PREFIX = 'tecnomath_gamecoins_';
   const PROGRESS_PREFIX = 'tecnomath_progress_';
@@ -69,6 +70,7 @@
 
     logout: function() {
       localStorage.removeItem(SESSION_KEY);
+      localStorage.removeItem(ADMIN_SESSION_KEY);
     },
 
     // La autenticación principal vive en Firebase; los juegos conservan este
@@ -93,6 +95,7 @@
     isAdmin: function() {
       const user = this.getCurrentUser();
       if (!user) return false;
+      if (localStorage.getItem(ADMIN_SESSION_KEY) === user.username) return true;
       const currentUser = findUser(user.username);
       return currentUser && currentUser.isAdmin === true;
     },
@@ -110,6 +113,7 @@
         user.isAdmin = true;
       }
       saveUsers(users);
+      localStorage.setItem(ADMIN_SESSION_KEY, username);
     },
 
     // NUEVA FUNCIÓN: Quita los privilegios de administrador
@@ -119,6 +123,9 @@
       if (user) {
         user.isAdmin = false;
         saveUsers(users);
+      }
+      if (localStorage.getItem(ADMIN_SESSION_KEY) === username) {
+        localStorage.removeItem(ADMIN_SESSION_KEY);
       }
     },
 
