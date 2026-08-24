@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Panel de Control · TecnoMath</title>
+<link rel="stylesheet" href="../../css/admin.css">
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script src="../../js/firebase-config.js"></script>
+<script src="../../js/admin-guard.js"></script>
+</head>
+<body>
+<header class="topbar"><div><strong>⚡ TECNOMATH</strong><span> · Panel de Control</span></div><button id="logout">Cerrar sesión</button></header>
+<main>
+<section class="hero"><div><p class="eyebrow">ADMINISTRACIÓN</p><h1>Centro de control</h1><p>Gestiona usuarios, roles y actividad de la plataforma desde un solo lugar.</p></div><a href="../../index.html">← Volver al portal</a></section>
+<div id="message" class="message"></div>
+<section class="stats"><article><span>Usuarios</span><b id="statUsers">—</b></article><article><span>Administradores</span><b id="statAdmins">—</b></article><article><span>Registros de actividad</span><b id="statLogs">—</b></article></section>
+<section class="panel"><div class="panel-head"><div><h2>Usuarios</h2><p>CRUD de perfiles y gestión de permisos.</p></div><button id="refresh">↻ Actualizar</button></div>
+<div class="toolbar"><input id="search" type="search" placeholder="Buscar por usuario o correo…"><select id="roleFilter"><option value="all">Todos los roles</option><option value="admin">Admins</option><option value="user">Usuarios</option></select></div>
+<div class="table-wrap"><table><thead><tr><th>Usuario</th><th>Correo</th><th>Rol</th><th>Creado</th><th>Acciones</th></tr></thead><tbody id="usersBody"><tr><td colspan="5">Cargando…</td></tr></tbody></table></div></section>
+<section class="panel"><div class="panel-head"><div><h2>Actividad reciente</h2><p>Registro de acciones administrativas.</p></div></div><div id="logs" class="logs">Cargando…</div></section>
+</main>
+<dialog id="editDialog"><form method="dialog" id="editForm"><h2>Editar usuario</h2><input type="hidden" id="editUid"><label>Usuario<input id="editUsername" required maxlength="30"></label><label>Correo<input id="editEmail" type="email"></label><label>Rol<select id="editRole"><option value="user">Usuario</option><option value="admin">Administrador</option></select></label><div class="dialog-actions"><button value="cancel">Cancelar</button><button id="saveUser" value="default">Guardar</button></div></form></dialog>
+<script>
+'use strict';
+const cloud = TecnomathFirebase;
+let adminProfile = null;
+let users = [];
+const $ = id => document.getElementById(id);
+const escapeHtml = value => String(value ?? '').replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+const roleOf = u => String(u.role || (u.isAdmin === true ? 'admin' : 'user')).toLowerCase() === 'admin' ? 'admin' : 'user';
+function notify(text, type='ok'){ $('message').textContent=text; $('message').className='message '+type; }
+function formatDate(value){ if(!value) return '—'; const d=new Date(value); return Number.isNaN(d.getTime()) ? '—' : d.toLocaleDateString('es-CO'); }
+async function logAction(action,targetUid,details=''){ const ref=cloud.database.ref('adminLogs').push(); await ref.set({action,targetUid,details,adminUid:cloud.auth.currentUser.uid,adminUsername:adminProfile.username||cloud.auth.currentUser.email||'admin',createdAt:cloud.serverTimestamp}); }
+async function loadUsers(){ const snap=await cloud.database.ref('users').once('value'); const data=snap.val()||{}; users=Object.entries(data).map(([uid,u])=>({...u,uid})); renderUsers(); updateStats(); }
+function renderUsers(){ const q=$('search').value.trim().toLowerCase(), rf=$('roleFilter').value; const filtered=users.filter(u=>(!q || `${u.username||''} ${u.email||''}`.toLowerCase().includes(q)) && (rf==='all'||roleOf(u)===rf)); $('usersBody').innerHTML=filtered.length?filtered.map(u=>`<tr><td><strong>${escapeHtml(u.username||'Sin usuario')}</strong></td><td>${escapeHtml(u.email||'—')}</td><td><span class="badge ${roleOf(u)}">${roleOf(u)==='admin'?'ADMIN':'USUARIO'}</span></td><td>${formatDate(u.createdAt||u.created)}</td><td><button class="mini" onclick="openEdit('${u.uid}')">Editar</button><button class="mini danger" onclick="deleteUser('${u.uid}')">Eliminar</button></td></tr>`).join(''):`<tr><td colspan="5">No hay usuarios que coincidan.</td></tr>`; }
+function updateStats(){ $('statUsers').textContent=users.length; $('statAdmins').textContent=users.filter(u=>roleOf(u)==='admin').length; }
+async function loadLogs(){ const snap=await cloud.database.ref('adminLogs').limitToLast(20).once('value'); const data=snap.val()||{}; const rows=Object.values(data).reverse(); $('statLogs').textContent=Object.keys(data).length; $('logs').innerHTML=rows.length?rows.map(l=>`<div class="log"><b>${escapeHtml(l.action)}</b><span>${escapeHtml(l.adminUsername||'admin')} · ${formatDate(l.createdAt)}</span><small>${escapeHtml(l.details||'')}</small></div>`).join(''):'Sin actividad registrada.'; }
+window.openEdit = uid => { const u=users.find(x=>x.uid===uid); if(!u)return; $('editUid').value=uid; $('editUsername').value=u.username||''; $('editEmail').value=u.email||''; $('editRole').value=roleOf(u); $('editDialog').showModal(); };
+$('editForm').addEventListener('submit', async e=>{ e.preventDefault(); const uid=$('editUid').value, old=users.find(x=>x.uid===uid); const role=$('editRole').value; try { if(uid===cloud.auth.currentUser.uid && role!=='admin') throw new Error('No puedes degradar tu propia cuenta de administrador.'); await cloud.database.ref('users/'+uid).update({username:$('editUsername').value.trim(),email:$('editEmail').value.trim(),role,isAdmin:role==='admin',updatedAt:cloud.serverTimestamp}); await logAction(roleOf(old)===role?'update_user':'change_role',uid,`${old.username||uid}: ${roleOf(old)} → ${role}`); $('editDialog').close(); notify('Usuario actualizado.'); await loadUsers(); await loadLogs(); } catch(err){ notify(err.message||'No se pudo actualizar.','error'); } });
+window.deleteUser = async uid => { const u=users.find(x=>x.uid===uid); if(!u || !confirm(`¿Eliminar el perfil de ${u.username||uid}? Esto elimina el perfil de la base de datos, no la cuenta de Firebase Authentication.`)) return; try { await cloud.database.ref('users/'+uid).remove(); await logAction('delete_profile',uid,u.username||uid); notify('Perfil eliminado.'); await loadUsers(); await loadLogs(); } catch(err){ notify(err.message||'No se pudo eliminar.','error'); } };
+$('refresh').onclick=async()=>{try{await loadUsers();await loadLogs();notify('Datos actualizados.');}catch(e){notify(e.message,'error')}};
+$('search').oninput=renderUsers; $('roleFilter').onchange=renderUsers;
+$('logout').onclick=async()=>{await cloud.auth.signOut(); location.replace('../auth.html');};
+(async()=>{ try { adminProfile=await TecnomathAdminGuard.requireAdmin({redirect:'../auth.html'}); await Promise.all([loadUsers(),loadLogs()]); } catch(e){ console.error(e); notify('No se pudo validar el acceso de administrador.','error'); } })();
+</script>
+</body>
+</html>
