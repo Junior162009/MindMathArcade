@@ -1238,7 +1238,14 @@
                 console.log('✅ Evento sincronizado en Firebase:', eventName);
             }).catch(err => {
                 pendingGlobalEvent = null;
+                // Si Firebase rechaza la publicación (por ejemplo, porque la
+                // sesión no está autenticada), mantenemos el evento visible
+                // localmente en vez de dejar que el estado remoto anterior lo apague.
+                if (eventName !== 'stop') localEventOverride = true;
                 console.warn('⚠️ Error al sincronizar en Firebase:', err);
+                if (eventName !== 'stop') {
+                    alert('El evento quedó activo en este dispositivo. Para mostrarlo a todos, inicia sesión antes de publicarlo globalmente.');
+                }
             });
         }
 
