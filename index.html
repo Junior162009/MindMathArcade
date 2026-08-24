@@ -1296,7 +1296,7 @@
                         break;
                     }
                     case 'stop':
-                        if (fairMode) deactivateFairMode();
+                        if (fairMode) deactivateFairMode(false);
                         else {
                             activeEvent = null;
                             loadThemeCSS(null);
@@ -1754,7 +1754,7 @@
             syncEventToFirebase('feria');
         }
 
-        function deactivateFairMode() {
+        function deactivateFairMode(sync = true) {
             if (!fairMode) return;
             fairMode = false;
             activeEvent = null;
@@ -1772,11 +1772,13 @@
             deactivateVisualEffects();
             alert('🔕 MODO FERIA DESACTIVADO');
             renderProjects(currentActiveFilter);
-            syncEventToFirebase('stop');
+            if (sync) syncEventToFirebase('stop');
         }
 
         function activatePermanentTheme(title, notification, confettiColors, emojis, themeName, sync = true) {
-            if (fairMode) deactivateFairMode();
+            // Al cambiar de Feria a otro evento no se debe publicar primero un
+            // "stop", porque puede llegar después del nuevo evento y revertirlo.
+            if (fairMode) deactivateFairMode(false);
             activeEvent = themeName;
             loadThemeCSS(themeName);
             updateFavicon(faviconEmojis[themeName] || '🎮');
@@ -1796,7 +1798,7 @@
         }
 
         function activateMegaFair() {
-            if (fairMode) deactivateFairMode();
+            if (fairMode) deactivateFairMode(false);
             fairMode = true;
             activeEvent = 'feriaplus';
             loadThemeCSS('megaferia');
@@ -1821,6 +1823,7 @@
 
         // Configuración de todos los eventos
         function getEventConfig(eventName) {
+            if (eventName === 'feria2026') eventName = 'feria';
             const configs = {
                 'halloween': {
                     title: '🎃 TECNOMATH HALLOWEEN 🎃',
@@ -1889,11 +1892,11 @@
             }
             const code = prompt('🔐 Introduce el código de evento para ACTIVAR LOCALMENTE (solo para ti):\n\nOpciones: halloween, navidad, cumpleanos, feria2026, feriaplus, mundial, primavera, espacio, ciencia, stop');
             if (code === null) return;
-            const lowerCode = code.toLowerCase();
+            const lowerCode = code.trim().toLowerCase();
 
             if (lowerCode === 'stop') {
                 // Desactivar localmente
-                if (fairMode) {
+                if (activeEvent) {
                     fairMode = false;
                     activeEvent = null;
                     loadThemeCSS(null);
@@ -1922,7 +1925,7 @@
                     eventConfig.notification,
                     eventConfig.confettiColors,
                     eventConfig.emojis,
-                    lowerCode,
+                    lowerCode === 'feria2026' ? 'feria' : lowerCode,
                     false // <-- SIN sincronizar a Firebase
                 );
                 alert('✅ Evento "' + lowerCode + '" activado LOCALMENTE (solo para ti).');
@@ -1939,21 +1942,19 @@
                 return;
             }
 
-            // Si hay un evento local activo, sincronizarlo directamente (sin pedir código)
-            if (activeEvent && activeEvent !== null) {
+            const code = prompt('🔐 Elige el evento para PUBLICAR a TODOS. Puedes dejar el actual para volver a publicarlo:\n\nOpciones: halloween, navidad, cumpleanos, feria2026, feriaplus, mundial, primavera, espacio, ciencia, stop', activeEvent || '');
+            if (code === null) return;
+            const lowerCode = code.trim().toLowerCase();
+
+            if (!lowerCode && activeEvent) {
                 syncEventToFirebase(activeEvent);
                 alert('✅ Evento "' + activeEvent + '" sincronizado a TODOS los usuarios.');
                 return;
             }
 
-            // Fallback: si no hay evento local activo, pedir un código
-            const code = prompt('🔐 No hay evento local activo. Introduce el código para PUBLICAR a TODOS:\n\nOpciones: halloween, navidad, cumpleanos, feria2026, feriaplus, mundial, primavera, espacio, ciencia, stop');
-            if (code === null) return;
-            const lowerCode = code.toLowerCase();
-
             if (lowerCode === 'stop') {
                 syncEventToFirebase('stop');
-                if (fairMode) {
+                if (activeEvent) {
                     fairMode = false;
                     activeEvent = null;
                     loadThemeCSS(null);
@@ -1979,7 +1980,7 @@
                     eventConfig.notification,
                     eventConfig.confettiColors,
                     eventConfig.emojis,
-                    lowerCode,
+                    lowerCode === 'feria2026' ? 'feria' : lowerCode,
                     true
                 );
                 alert('✅ Evento "' + lowerCode + '" PUBLICADO a todos los usuarios.');
