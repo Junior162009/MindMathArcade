@@ -1,8 +1,9 @@
-// Tecnomath Shared API v2.2
+// Tecnomath Shared API v2.3
 (function() {
     const STORAGE_KEY='tecnomath_users', SESSION_KEY='tecnomath_session', ADMIN_SESSION_KEY='tecnomath_admin_session';
     const COINS_PREFIX='tecnomath_coins_', GAME_COINS_PREFIX='tecnomath_gamecoins_', PROGRESS_PREFIX='tecnomath_progress_';
     const ADMIN_USERS=['Junior','Nicole','Mateo','Jaider'];
+    const APPROVED_ADMIN_EMAILS=['delahozbarcelojunior@gmail.com'];
     function getUsers(){const d=localStorage.getItem(STORAGE_KEY);if(!d)return[];try{const u=JSON.parse(d);return Array.isArray(u)?u:[]}catch(e){localStorage.removeItem(STORAGE_KEY);return[]}}
     function saveUsers(u){localStorage.setItem(STORAGE_KEY,JSON.stringify(u))}
     function findUser(n){return getUsers().find(u=>u.username.toLowerCase()===n.toLowerCase())}
@@ -28,27 +29,55 @@
         updateHighScore:function(id,score){const p=this.getProgress(id);if(!p.highScore||score>p.highScore){p.highScore=score;this.setProgress(id,p)}}
     };
 
-    // Firebase: si el usuario tiene role=admin, el boton ADMIN abre directamente el nuevo Dashboard.
+    // Firebase: los administradores aprobados por correo entran directamente al nuevo Dashboard.
+    // No se muestra ni se solicita el código antiguo para estos correos.
     function setupFirebaseAdminButton(){
         if(!window.firebase||!firebase.auth||!firebase.database)return;
         const dashboardUrl='pages/admin/index.html';
         let isFirebaseAdmin=false;
+        const buttonSelector='#admin-cloud';
+
         firebase.auth().onAuthStateChanged(async function(user){
             isFirebaseAdmin=false;
+            const button=document.querySelector(buttonSelector);
+            if(button){button.style.display='none';button.removeAttribute('title');}
             if(!user)return;
+
+            const email=String(user.email||'').trim().toLowerCase();
             try{
                 const snap=await firebase.database().ref('users/'+user.uid).once('value');
                 const profile=snap.val()||{};
                 const role=String(profile.role||(profile.isAdmin===true?'admin':'user')).toLowerCase();
-                isFirebaseAdmin=role==='admin';
-                const button=document.getElementById('admin-cloud');
-                if(button&&isFirebaseAdmin){button.style.display='block';button.title='Panel de Control';button.setAttribute('aria-label','Abrir Panel de Control');button.innerHTML='👑'}
-            }catch(error){console.error('TecnoMath: error comprobando rol admin',error)}
+                isFirebaseAdmin=role==='admin'||APPROVED_ADMIN_EMAILS.includes(email);
+
+                // Si Junior entra con Google o correo/contraseña, sincronizamos su perfil como admin.
+                if(APPROVED_ADMIN_EMAILS.includes(email) && role!=='admin'){
+                    await firebase.database().ref('users/'+user.uid).update({
+                        email:user.email,
+                        role:'admin',
+                        isAdmin:true,
+                        updatedAt:firebase.database.ServerValue.TIMESTAMP
+                    });
+                }
+
+                if(button&&isFirebaseAdmin){
+                    button.style.display='block';
+                    button.title='Panel de Control';
+                    button.setAttribute('aria-label','Abrir Panel de Control');
+                    button.innerHTML='👑';
+                }
+            }catch(error){
+                console.error('TecnoMath: error comprobando rol admin',error);
+            }
         });
+
+        // Capturamos el clic antes que el código antiguo del index.
         document.addEventListener('click',function(event){
-            const button=event.target.closest&&event.target.closest('#admin-cloud');
+            const button=event.target.closest&&event.target.closest(buttonSelector);
             if(!button||!isFirebaseAdmin)return;
-            event.preventDefault();event.stopImmediatePropagation();window.location.href=dashboardUrl;
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            window.location.assign(dashboardUrl);
         },true);
     }
     if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',setupFirebaseAdminButton,{once:true});else setupFirebaseAdminButton();
