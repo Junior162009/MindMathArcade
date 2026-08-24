@@ -901,6 +901,49 @@
             body.mobile .nav-btn .nav-icon { font-size: 22px; }
             .history-table input[type="number"] { width: 50px; font-size: 14px; }
         }
+
+        /* ========== ESTILO STUDY Y NAVEGACIÓN LATERAL ========== */
+        :root {
+            --bg-primary: #eaf7ff;
+            --bg-secondary: #fffdf5;
+            --bg-card: #ffffff;
+            --bg-input: #eef6ff;
+            --text-primary: #17203c;
+            --text-secondary: #63708c;
+            --border-color: #dce8fa;
+            --accent: #2168e8;
+            --accent-hover: #1758c9;
+            --nav-bg: #101d4a;
+            --header-bg: #ffffff;
+            --shadow: 0 12px 28px rgba(23, 60, 145, .14);
+        }
+        body { background: linear-gradient(150deg, #eaf7ff, #fff5c7 48%, #ffebdc); color: var(--text-primary); }
+        [data-theme="dark"] { --bg-primary:#101d4a; --bg-secondary:#172b62; --bg-card:#1d397d; --bg-input:#13275b; --text-primary:#fffdf5; --text-secondary:#dce8fa; --border-color:#456ebc; --header-bg:#173c91; --nav-bg:#101d4a; }
+        .header { border-bottom-color: var(--border-color); }
+        .header .brand { color: #2168e8; font-weight: 1000; }
+        .header .brand span { color: #ff5c51; }
+        .card { border-radius: 24px; }
+        .btn, .mode-toggle-btn { border-radius: 14px; }
+        .btn-primary { background: #2168e8; }
+        .quote-box { background: linear-gradient(125deg, #173c91, #247cf0 58%, #64d8ff); color: #fff; border-left: 0; border-radius: 24px; box-shadow: 0 14px 28px rgba(23,60,145,.22); }
+        .quote-box .author { color: #ffeb85; }
+        .study-assistant { display:flex; align-items:center; gap:16px; padding:18px; margin-bottom:var(--gap); border-radius:24px; background:#fff6d7; border:2px solid #ffd735; color:#17203c; }
+        .study-assistant img { width:86px; height:86px; flex:0 0 auto; object-fit:cover; object-position:50% 18%; border-radius:50%; border:4px solid #fff; background:#ffd735; box-shadow:0 8px 18px rgba(16,29,74,.18); }
+        .study-assistant h2 { margin:0 0 5px; color:#101d4a; font-size:1.2rem; }
+        .study-assistant p { margin:0; color:#63708c; line-height:1.4; }
+        .assistant-options { display:flex; gap:8px; margin-top:10px; flex-wrap:wrap; }
+        .assistant-option { border:2px solid #dce8fa; background:#fff; color:#101d4a; padding:8px 11px; border-radius:12px; font-weight:800; cursor:pointer; }
+        .assistant-option.active { background:#2168e8; border-color:#2168e8; color:#fff; }
+        .header-guide { display:flex; align-items:center; gap:8px; margin-right:4px; color:var(--text-primary); font-weight:800; font-size:.86rem; }
+        .header-guide img { width:40px; height:40px; object-fit:cover; object-position:50% 18%; border-radius:50%; background:#ffd735; border:2px solid #ffd735; }
+        body.desktop { display:block; padding:20px 20px 20px 282px; }
+        body.desktop #app { width:calc(100vw - 302px); max-width:none; height:calc(100vh - 40px); margin:0; border-radius:30px; border:1px solid var(--border-color); }
+        body.desktop .bottom-nav { position:fixed; z-index:25; left:20px; top:20px; bottom:20px; width:242px; display:flex !important; flex-direction:column; flex-wrap:nowrap; align-items:stretch; justify-content:flex-start; gap:4px; overflow-y:auto; padding:15px 12px; background:linear-gradient(180deg,#101d4a,#173c91); border:0; border-radius:28px; box-shadow:0 18px 42px rgba(16,29,74,.3); }
+        body.desktop .nav-btn { width:100%; min-height:45px; min-width:0; padding:9px 12px; flex-direction:row; justify-content:flex-start; gap:11px; border-radius:13px; color:#dce8fa; font-size:14px; text-align:left; }
+        body.desktop .nav-btn .nav-icon { font-size:22px; width:28px; text-align:center; }
+        body.desktop .nav-btn:hover, body.desktop .nav-btn.active { color:#101d4a; background:#ffd735; padding:9px 12px; }
+        @media (max-width: 820px) { body.desktop { padding:0; } body.desktop #app { width:100%; height:100vh; border-radius:0; border:0; } body.desktop .bottom-nav { display:none !important; } body.desktop .menu-btn { display:flex !important; } body.desktop .drawer, body.desktop .drawer-overlay { display:block !important; } }
+        @media (max-width: 520px) { .study-assistant { align-items:flex-start; padding:14px; gap:12px; } .study-assistant img { width:66px; height:66px; } .study-assistant h2 { font-size:1rem; } .study-assistant p { font-size:.86rem; } .header-guide span { display:none; } }
     </style>
 </head>
 <body>
@@ -958,6 +1001,7 @@
             </button>
             <div class="brand">Study<span>Hub</span></div>
             <div class="header-actions">
+                <div class="header-guide" aria-label="Asistente Study"><img id="header-assistant-image" src="../../img/study-rostro-hombre.png" alt="Asistente Study"><span>Guía Study</span></div>
                 <button id="themeToggle" title="Cambiar tema">🌙</button>
                 <button id="accentToggle" title="Cambiar color">🎨</button>
             </div>
@@ -968,6 +1012,17 @@
 
             <!-- ===== INICIO ===== -->
             <div class="page active" id="page-home">
+                <section class="study-assistant" aria-label="Asistente Study">
+                    <img id="assistant-image" src="../../img/study-rostro-hombre.png" alt="Compañero Study">
+                    <div>
+                        <h2 id="assistant-title">¡Hola! Soy tu compañero Study</h2>
+                        <p id="assistant-message">Organiza tus tareas y estudia paso a paso. Estoy aquí para acompañarte.</p>
+                        <div class="assistant-options" aria-label="Elige tu asistente">
+                            <button class="assistant-option" data-assistant="hombre">👦 Compañero</button>
+                            <button class="assistant-option" data-assistant="mujer">👧 Compañera</button>
+                        </div>
+                    </div>
+                </section>
                 <div class="quote-box" id="dailyQuote">
                     "El éxito es la suma de pequeños esfuerzos repetidos día tras día."
                     <span class="author">— Robert Collier</span>
@@ -1280,6 +1335,32 @@
         } else {
             selector.classList.remove('hidden');
         }
+
+        // ---------- ASISTENTE STUDY ----------
+        const ASSISTANT_KEY = 'studyAvatarChoice';
+        const assistants = {
+            hombre: { face: '../../img/study-rostro-hombre.png', label: 'Compañero Study', message: 'Organiza tus tareas y estudia paso a paso. Estoy aquí para acompañarte.' },
+            mujer: { face: '../../img/study-rostro-mujer.png', label: 'Compañera Study', message: 'Organicemos tu día y avancemos en tus metas. ¡Vamos juntas a aprender!' }
+        };
+        let assistantChoice = localStorage.getItem(ASSISTANT_KEY) || 'hombre';
+        if (!assistants[assistantChoice]) assistantChoice = 'hombre';
+
+        function applyAssistant() {
+            const assistant = assistants[assistantChoice];
+            document.getElementById('assistant-image').src = assistant.face;
+            document.getElementById('assistant-image').alt = assistant.label;
+            document.getElementById('header-assistant-image').src = assistant.face;
+            document.getElementById('header-assistant-image').alt = assistant.label;
+            document.getElementById('assistant-title').textContent = '¡Hola! Soy tu ' + assistant.label.toLowerCase();
+            document.getElementById('assistant-message').textContent = assistant.message;
+            document.querySelectorAll('.assistant-option').forEach(button => button.classList.toggle('active', button.dataset.assistant === assistantChoice));
+        }
+        document.querySelectorAll('.assistant-option').forEach(button => button.addEventListener('click', function() {
+            assistantChoice = this.dataset.assistant;
+            localStorage.setItem(ASSISTANT_KEY, assistantChoice);
+            applyAssistant();
+        }));
+        applyAssistant();
 
         // ---------- DRAWER ----------
         const menuToggle = document.getElementById('menuToggle');
