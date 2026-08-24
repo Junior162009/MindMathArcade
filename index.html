@@ -1221,17 +1221,23 @@
         // FIREBASE SYNC
         // ============================================================
         let syncInitialized = false;
+        let localEventOverride = false;
+        let pendingGlobalEvent = null;
 
         function syncEventToFirebase(eventName) {
             if (!firebase || !firebase.database) return;
+            localEventOverride = false;
+            pendingGlobalEvent = eventName;
             const dbRef = firebase.database().ref('tecnomath/evento');
             dbRef.set({
                 nombre: eventName,
                 activo: eventName !== 'stop',
                 timestamp: firebase.database.ServerValue.TIMESTAMP
             }).then(() => {
+                pendingGlobalEvent = null;
                 console.log('✅ Evento sincronizado en Firebase:', eventName);
             }).catch(err => {
+                pendingGlobalEvent = null;
                 console.warn('⚠️ Error al sincronizar en Firebase:', err);
             });
         }
@@ -1242,6 +1248,15 @@
             dbRef.on('value', (snapshot) => {
                 const data = snapshot.val();
                 if (!data) return;
+
+                // Un evento activado localmente no debe ser apagado por el
+                // último estado global. Solo cambia al usar "Publicar global".
+                if (localEventOverride) return;
+
+                // Mientras se publica un nuevo evento, ignoramos el estado
+                // anterior que Firebase pueda entregar antes de la escritura.
+                if (pendingGlobalEvent && data.nombre !== pendingGlobalEvent) return;
+                if (data.nombre === pendingGlobalEvent) pendingGlobalEvent = null;
 
                 // Los registros antiguos no tenían la marca "activo". Se tratan
                 // como apagados para que un Halloween viejo no se reactive solo.
@@ -1265,10 +1280,10 @@
 
                 switch (eventName) {
                     case 'feria':
-                        if (!fairMode) activateFairMode();
+                        if (!fairMode) activateFairMode(false);
                         break;
                     case 'feriaplus':
-                        if (!fairMode || activeEvent !== 'feriaplus') activateMegaFair();
+                        if (!fairMode || activeEvent !== 'feriaplus') activateMegaFair(false);
                         break;
                     case 'halloween':
                         if (activeEvent !== 'halloween') activatePermanentTheme(
@@ -1276,7 +1291,7 @@
                             '🎃 ¡MODO HALLOWEEN ACTIVADO! 🦇',
                             ['#FF6600', '#FFA500', '#800080', '#000000', '#FF4500'],
                             ['🎃', '🧛', '🦇', '🧙', '🕷️', '🕸️', '👻', '💀'],
-                            'halloween'
+                            'halloween', false
                         );
                         break;
                     case 'navidad':
@@ -1285,7 +1300,7 @@
                             '🎄 ¡FELIZ NAVIDAD! 🎅',
                             ['#FF0000', '#FFFFFF', '#00FF00', '#FFD700', '#008000'],
                             ['🎄', '🎅', '🧝', '🎁', '⛄', '🦌', '🌟', '🔔'],
-                            'navidad'
+                            'navidad', false
                         );
                         break;
                     case 'cumpleanos':
@@ -1294,7 +1309,7 @@
                             '🎂 ¡FELIZ CUMPLEAÑOS! 🎉',
                             ['#FF1493', '#FFD700', '#00BFFF', '#FF4500', '#32CD32'],
                             ['🎂', '🎈', '🎉', '🥳', '🎁', '🎊', '🎵', '🕺'],
-                            'cumpleanos'
+                            'cumpleanos', false
                         );
                         break;
                     case 'mundial':
@@ -1303,14 +1318,14 @@
                             '⚽ ¡MODO MUNDIAL ACTIVADO! 🌍',
                             ['#FFD700', '#009A3E', '#FFFFFF', '#008000', '#FF4500'],
                             ['⚽', '🏆', '🌍', '🇦🇷', '🇧🇷', '🇫🇷', '🇪🇸', '🇩🇪', '🥅'],
-                            'mundial'
+                            'mundial', false
                         );
                         break;
                     case 'primavera':
                     case 'espacio':
                     case 'ciencia': {
                         const config = getEventConfig(eventName);
-                        if (config && activeEvent !== eventName) activatePermanentTheme(config.title, config.notification, config.confettiColors, config.emojis, eventName);
+                        if (config && activeEvent !== eventName) activatePermanentTheme(config.title, config.notification, config.confettiColors, config.emojis, eventName, false);
                         break;
                     }
                     case 'stop':
@@ -1753,7 +1768,7 @@
         // ============================================================
         // FUNCIONES PRINCIPALES DE EVENTOS
         // ============================================================
-        function activateFairMode() {
+        function activateFairMode(sync = true) {
             if (fairMode) return;
             fairMode = true;
             activeEvent = 'feria';
@@ -1769,7 +1784,7 @@
             showFairNotification('🎉 ¡BIENVENIDO AL MODO FERIA! 🎈');
             alert('⚡ MODO FERIA ACTIVADO ⚡');
             renderProjects(currentActiveFilter);
-            syncEventToFirebase('feria');
+            if (sync) syncEventToFirebase('feria');
         }
 
         function deactivateFairMode(sync = true) {
@@ -1815,7 +1830,7 @@
             }
         }
 
-        function activateMegaFair() {
+        function activateMegaFair(sync = true) {
             if (fairMode) deactivateFairMode(false);
             fairMode = true;
             activeEvent = 'feriaplus';
@@ -1832,7 +1847,7 @@
             showFairNotification('🔥 ¡MEGA FERIA ACTIVADA! 🔥');
             alert('⚡ MEGA FERIA ACTIVADA (¡el doble de rápido!) ⚡');
             renderProjects(currentActiveFilter);
-            syncEventToFirebase('feriaplus');
+            if (sync) syncEventToFirebase('feriaplus');
         }
 
         // ============================================================
@@ -1914,6 +1929,7 @@
 
             if (lowerCode === 'stop') {
                 // Desactivar localmente
+                localEventOverride = true;
                 if (activeEvent) {
                     fairMode = false;
                     activeEvent = null;
@@ -1938,6 +1954,7 @@
 
             const eventConfig = getEventConfig(lowerCode);
             if (eventConfig) {
+                localEventOverride = true;
                 activatePermanentTheme(
                     eventConfig.title,
                     eventConfig.notification,
@@ -1965,12 +1982,14 @@
             const lowerCode = code.trim().toLowerCase();
 
             if (!lowerCode && activeEvent) {
+                localEventOverride = false;
                 syncEventToFirebase(activeEvent);
                 alert('✅ Evento "' + activeEvent + '" sincronizado a TODOS los usuarios.');
                 return;
             }
 
             if (lowerCode === 'stop') {
+                localEventOverride = false;
                 syncEventToFirebase('stop');
                 if (activeEvent) {
                     fairMode = false;
@@ -1993,6 +2012,7 @@
 
             const eventConfig = getEventConfig(lowerCode);
             if (eventConfig) {
+                localEventOverride = false;
                 activatePermanentTheme(
                     eventConfig.title,
                     eventConfig.notification,
