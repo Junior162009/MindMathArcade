@@ -71,32 +71,39 @@
     });
   }
 
-  document.addEventListener('DOMContentLoaded', () => {
+  function iniciar() {
     instalar();
     const display = document.getElementById('flagDisplay');
     if (!display) return;
 
-    const observer = new MutationObserver(() => {
+    const capturarBandera = () => {
       if (pintando) return;
       const img = display.querySelector('img');
-      if (img) {
-        const match = img.src.match(/\/([a-z]{2})\.png(?:\?.*)?$/i);
-        if (match) {
-          window.__BanderQuizPaisActual = {
-            codigo: match[1].toLowerCase(),
-            nombre: img.alt.replace(/^Bandera de\s*/i, '')
-          };
-        }
+      if (!img) return;
+      const match = img.src.match(/\/([a-z]{2})\.png(?:\?.*)?$/i);
+      if (match) {
+        window.__BanderQuizPaisActual = {
+          codigo: match[1].toLowerCase(),
+          nombre: img.alt.replace(/^Bandera de\s*/i, '')
+        };
       }
       if (modo === 'emoji' && window.__BanderQuizPaisActual) pintar();
-      else if (modo === 'externa') {
+      else {
         const externa = document.getElementById('bqModoExterno');
         const emoji = document.getElementById('bqModoEmoji');
         if (externa) externa.classList.add('active');
         if (emoji) emoji.classList.remove('active');
       }
-    });
+    };
 
+    const observer = new MutationObserver(capturarBandera);
     observer.observe(display, { childList: true, subtree: true, attributes: true });
-  });
+    capturarBandera();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', iniciar, { once: true });
+  } else {
+    iniciar();
+  }
 })();
