@@ -16,4 +16,30 @@
     database: firebase.database(),
     serverTimestamp: firebase.database.ServerValue.TIMESTAMP
   };
+
+  function setupAdminFairControl(){
+    if(!/\/pages\/admin\/index\.html$/.test(location.pathname)) return;
+    const inject=()=>{
+      const nav=document.querySelector('.admin-tabs');
+      const main=document.querySelector('main');
+      if(!nav||!main||document.getElementById('tm-admin-fair')) return;
+      const btn=document.createElement('button');
+      btn.className='tab';btn.dataset.tab='fair';btn.id='tm-fair-tab';btn.textContent='🎡 Feria';
+      nav.appendChild(btn);
+      const panel=document.createElement('section');
+      panel.className='tab-panel';panel.id='tab-fair';
+      panel.innerHTML=`<section class="panel tm-fair-panel"><div class="panel-head"><div><h2>🎡 Modo Feria</h2><p>Activa Feria o Mega Feria para todos los usuarios. El modo actual se sincroniza con Firebase.</p></div></div><div class="tm-fair-buttons"><button data-fair="feria">🎡 Activar Feria</button><button data-fair="feriaplus">🔥 Activar Mega Feria</button><button data-fair="normal">⛔ Desactivar Feria</button></div><div id="tm-fair-status" class="cloud-status">Consultando estado…</div></section>`;
+      main.appendChild(panel);
+      const style=document.createElement('style');style.textContent=`.tm-fair-panel{overflow:hidden}.tm-fair-buttons{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:18px}.tm-fair-buttons button{min-height:62px;border:1px solid #24243b;background:#101022;color:#fff;border-radius:12px;padding:12px;cursor:pointer;font:inherit}.tm-fair-buttons button:hover{border-color:#00ffff;color:#00ffff}.tm-fair-buttons button.active{border-color:#39ff14;color:#39ff14;box-shadow:0 0 18px rgba(57,255,20,.16)}@media(max-width:700px){.tm-fair-buttons{grid-template-columns:1fr}.tm-fair-buttons button{min-height:52px;font-size:11px}}`;document.head.appendChild(style);
+      nav.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>{nav.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.tab-panel').forEach(x=>x.classList.remove('active'));b.classList.add('active');document.getElementById('tab-'+b.dataset.tab)?.classList.add('active')}));
+      const ref=window.TecnomathFirebase.database.ref('tecnomath/tematicaActiva');
+      const status=document.getElementById('tm-fair-status');
+      const paint=theme=>{status.textContent='Estado actual: '+(theme==='feria'?'🎡 Feria':theme==='feriaplus'?'🔥 Mega Feria':'⛔ Feria desactivada');panel.querySelectorAll('[data-fair]').forEach(x=>x.classList.toggle('active',x.dataset.fair===theme))};
+      ref.on('value',s=>paint(s.val()||'normal'));
+      panel.querySelectorAll('[data-fair]').forEach(x=>x.addEventListener('click',async()=>{try{const theme=x.dataset.fair;await ref.set(theme);const states={};['normal','feria','feriaplus'].forEach(k=>states[k]=k===theme);await window.TecnomathFirebase.database.ref('tecnomath/tematicas').update(states);await window.TecnomathFirebase.database.ref('adminLogs').push({action:'change_fair_mode',theme,adminUid:window.TecnomathFirebase.auth.currentUser?.uid||'',adminEmail:window.TecnomathFirebase.auth.currentUser?.email||'',createdAt:window.TecnomathFirebase.serverTimestamp});}catch(e){status.textContent='❌ '+e.message}}));
+      const script=document.createElement('script');script.src='../../js/fair-effects.js?v=1';script.async=true;document.head.appendChild(script);
+    };
+    if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',inject,{once:true});else inject();
+  }
+  setupAdminFairControl();
 })();
