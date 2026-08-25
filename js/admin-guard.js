@@ -2,7 +2,13 @@
 (function () {
   'use strict';
 
-  const ADMIN_EMAILS = ['delahozbarcelojunior@gmail.com'];
+  // Correos autorizados para convertirse automáticamente en administradores
+  // al iniciar sesión con Google o con correo/contraseña.
+  const ADMIN_EMAILS = [
+    'delahozbarcelojunior@gmail.com',
+    'nicolenatera26@gmail.com',
+    'mateobarbosamatos@gmail.com'
+  ];
 
   function firebaseReady() {
     if (!window.TecnomathFirebase) throw new Error('Firebase no está inicializado.');
@@ -18,13 +24,18 @@
     const user = cloud.auth.currentUser;
     if (!user) return null;
 
-    // El correo aprobado es la autoridad inicial. Así no dependemos de leer
-    // role antes de tener permiso para leer role.
+    // El correo aprobado es la autoridad inicial. Esto permite que una persona
+    // que todavía no tiene perfil en /users sea creada como admin al entrar.
     if (isApprovedEmail(user)) {
       const ref = cloud.database.ref('users/' + user.uid);
       const snapshot = await ref.once('value');
       const current = snapshot.val() || {};
-      const username = current.username || 'Junior';
+      const defaultUsername = user.email === 'nicolenatera26@gmail.com'
+        ? 'Nicole'
+        : user.email === 'mateobarbosamatos@gmail.com'
+          ? 'Mateo'
+          : 'Junior';
+      const username = current.username || defaultUsername;
       await ref.update({
         username,
         email: user.email,
@@ -65,5 +76,5 @@
     });
   }
 
-  window.TecnomathAdminGuard = { getAdminProfile, requireAdmin, isApprovedEmail };
+  window.TecnomathAdminGuard = { getAdminProfile, requireAdmin, isApprovedEmail, ADMIN_EMAILS };
 })();
