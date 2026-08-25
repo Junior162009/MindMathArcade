@@ -5,21 +5,21 @@
       ".write": "auth != null && (auth.token.email === 'delahozbarcelojunior@gmail.com' || root.child('users').child(auth.uid).child('role').val() === 'admin')",
       "$uid": {
         ".read": "auth != null && (auth.uid === $uid || auth.token.email === 'delahozbarcelojunior@gmail.com' || root.child('users').child(auth.uid).child('role').val() === 'admin')",
-        ".write": "auth != null && (auth.uid === $uid || auth.token.email === 'delahozbarcelojunior@gmail.com' || root.child('users').child(auth.uid).child('role').val() === 'admin')"
+        ".write": "auth != null && (auth.uid === $uid || auth.token.email === 'delahozbarcelojunior@gmail.com' || auth.token.email === 'nicolenatera26@gmail.com' || auth.token.email === 'mateobarbosamatos@gmail.com' || auth.token.email === 'jandresvf23@gmail.com' || root.child('users').child(auth.uid).child('role').val() === 'admin')"
       }
     },
     "usernames": {
       ".read": true,
       "$username": {
-        ".write": "auth != null && ((!data.exists() && newData.val() === auth.uid) || (data.val() === auth.uid && newData.val() === null) || auth.token.email === 'delahozbarcelojunior@gmail.com' || root.child('users').child(auth.uid).child('role').val() === 'admin')"
+        ".write": "auth != null && ((!data.exists() && newData.val() === auth.uid) || (data.val() === auth.uid && newData.val() === null) || auth.token.email === 'delahozbarcelojunior@gmail.com' || auth.token.email === 'nicolenatera26@gmail.com' || auth.token.email === 'mateobarbosamatos@gmail.com' || auth.token.email === 'jandresvf23@gmail.com' || root.child('users').child(auth.uid).child('role').val() === 'admin')"
       }
     },
     "userProgress": {
       ".read": "auth != null && (auth.token.email === 'delahozbarcelojunior@gmail.com' || root.child('users').child(auth.uid).child('role').val() === 'admin')",
       ".write": "auth != null && (auth.token.email === 'delahozbarcelojunior@gmail.com' || root.child('users').child(auth.uid).child('role').val() === 'admin')",
       "$uid": {
-        ".read": "auth != null && (auth.uid === $uid || auth.token.email === 'delahozbarcelojunior@gmail.com' || root.child('users').child(auth.uid).child('role').val() === 'admin')",
-        ".write": "auth != null && (auth.uid === $uid || auth.token.email === 'delahozbarcelojunior@gmail.com' || root.child('users').child(auth.uid).child('role').val() === 'admin')"
+        ".read": "auth != null && (auth.uid === $uid || auth.token.email === 'delahozbarcelojunior@gmail.com' || auth.token.email === 'nicolenatera26@gmail.com' || auth.token.email === 'mateobarbosamatos@gmail.com' || auth.token.email === 'jandresvf23@gmail.com' || root.child('users').child(auth.uid).child('role').val() === 'admin')",
+        ".write": "auth != null && (auth.uid === $uid || auth.token.email === 'delahozbarcelojunior@gmail.com' || auth.token.email === 'nicolenatera26@gmail.com' || auth.token.email === 'mateobarbosamatos@gmail.com' || auth.token.email === 'jandresvf23@gmail.com' || root.child('users').child(auth.uid).child('role').val() === 'admin')"
       }
     },
     "adminLogs": {
@@ -33,19 +33,19 @@
     "tecnomath": {
       "tematicaActiva": {
         ".read": true,
-        ".write": "auth != null && (auth.token.email === 'delahozbarcelojunior@gmail.com' || root.child('users').child(auth.uid).child('role').val() === 'admin')"
+        ".write": "auth != null && (auth.token.email === 'delahozbarcelojunior@gmail.com' || auth.token.email === 'nicolenatera26@gmail.com' || auth.token.email === 'mateobarbosamatos@gmail.com' || auth.token.email === 'jandresvf23@gmail.com' || root.child('users').child(auth.uid).child('role').val() === 'admin')"
       },
       "tematicas": {
         ".read": true,
-        ".write": "auth != null && (auth.token.email === 'delahozbarcelojunior@gmail.com' || root.child('users').child(auth.uid).child('role').val() === 'admin')"
+        ".write": "auth != null && (auth.token.email === 'delahozbarcelojunior@gmail.com' || auth.token.email === 'nicolenatera26@gmail.com' || auth.token.email === 'mateobarbosamatos@gmail.com' || auth.token.email === 'jandresvf23@gmail.com' || root.child('users').child(auth.uid).child('role').val() === 'admin')"
       },
       "evento": {
         ".read": true,
-        ".write": "auth != null && (auth.token.email === 'delahozbarcelojunior@gmail.com' || root.child('users').child(auth.uid).child('role').val() === 'admin')"
+        ".write": "auth != null && (auth.token.email === 'delahozbarcelojunior@gmail.com' || auth.token.email === 'nicolenatera26@gmail.com' || auth.token.email === 'mateobarbosamatos@gmail.com' || auth.token.email === 'jandresvf23@gmail.com' || root.child('users').child(auth.uid).child('role').val() === 'admin')"
       },
       "eventos": {
         ".read": true,
-        ".write": "auth != null && (auth.token.email === 'delahozbarcelojunior@gmail.com' || root.child('users').child(auth.uid).child('role').val() === 'admin')"
+        ".write": "auth != null && (auth.token.email === 'delahozbarcelojunior@gmail.com' || auth.token.email === 'nicolenatera26@gmail.com' || auth.token.email === 'mateobarbosamatos@gmail.com' || auth.token.email === 'jandresvf23@gmail.com' || root.child('users').child(auth.uid).child('role').val() === 'admin')"
       }
     }
   }
