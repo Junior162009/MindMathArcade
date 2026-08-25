@@ -7,7 +7,8 @@
   const ADMIN_EMAILS = [
     'delahozbarcelojunior@gmail.com',
     'nicolenatera26@gmail.com',
-    'mateobarbosamatos@gmail.com'
+    'mateobarbosamatos@gmail.com',
+    'jandresvf23@gmail.com'
   ];
 
   function firebaseReady() {
@@ -24,17 +25,18 @@
     const user = cloud.auth.currentUser;
     if (!user) return null;
 
-    // El correo aprobado es la autoridad inicial. Esto permite que una persona
-    // que todavía no tiene perfil en /users sea creada como admin al entrar.
     if (isApprovedEmail(user)) {
       const ref = cloud.database.ref('users/' + user.uid);
       const snapshot = await ref.once('value');
       const current = snapshot.val() || {};
-      const defaultUsername = user.email === 'nicolenatera26@gmail.com'
+      const email = String(user.email || '').trim().toLowerCase();
+      const defaultUsername = email === 'nicolenatera26@gmail.com'
         ? 'Nicole'
-        : user.email === 'mateobarbosamatos@gmail.com'
+        : email === 'mateobarbosamatos@gmail.com'
           ? 'Mateo'
-          : 'Junior';
+          : email === 'jandresvf23@gmail.com'
+            ? 'Jaider'
+            : 'Junior';
       const username = current.username || defaultUsername;
       await ref.update({
         username,
