@@ -1,515 +1,72 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Eco Collector · ODS 6 y 12</title>
-    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
-    <script src="shared.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-    <script src="../js/firebase-config.js"></script>
-    <script src="../js/game-progress.js" data-tecnomath-game="eco-collector"></script>
-    <style>
-        :root {
-            --neon-cyan: #00FFFF; --neon-pink: #FF00FF; --neon-green: #39FF14;
-            --gold: #FFD700; --retro-bg: #060610; --card-bg: #0d0d1a;
-        }
-        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; }
-        html, body {
-            height: 100%; width: 100%; overflow: hidden;
-            background: var(--retro-bg);
-            font-family: 'Press Start 2P', cursive; color: white;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-        }
-        body::before {
-            content: ''; position: fixed; inset: 0; z-index: 0;
-            background: radial-gradient(ellipse at 50% 30%, rgba(0,255,255,0.15) 0%, transparent 50%),
-                        radial-gradient(ellipse at 80% 70%, rgba(57,255,20,0.15) 0%, transparent 50%);
-            animation: gradientShift 8s ease-in-out infinite;
-        }
-        @keyframes gradientShift {
-            0%,100%{ opacity:0.7; } 50%{ opacity:1; }
-        }
-        .game-wrapper {
-            position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center;
-            width: 100%; max-width: 500px; height: 100vh; padding: 10px;
-        }
-        .hud {
-            display: flex; justify-content: space-between; align-items: center;
-            width: 100%; padding: 8px 12px; font-size: 7px; color: var(--neon-green);
-            text-shadow: 0 0 8px var(--neon-green); background: rgba(0,0,0,0.6);
-            border-radius: 8px; margin-bottom: 8px; flex-wrap: wrap; gap: 5px;
-        }
-        .hud-item { display: flex; align-items: center; gap: 4px; }
-        .hud-item span { color: var(--gold); }
-        canvas {
-            border: 2px solid var(--neon-cyan); box-shadow: 0 0 15px var(--neon-cyan), 0 0 30px rgba(0,255,255,0.3);
-            border-radius: 8px; width: 100%; aspect-ratio: 400/600; background: #0a0a1a;
-        }
-        .ods-badge {
-            font-size: 5px; color: var(--gold); text-align: center; margin: 5px 0;
-            text-shadow: 0 0 6px var(--gold);
-        }
-        .button-row { display: flex; gap: 10px; margin-top: 8px; width: 100%; justify-content: center; flex-wrap: wrap; }
-        .btn {
-            font-family: 'Press Start 2P', cursive; font-size: 7px; padding: 10px 18px;
-            border: none; border-radius: 8px; cursor: pointer; color: white;
-            box-shadow: 0 0 10px currentColor; transition: 0.2s; text-transform: uppercase;
-        }
-        .btn-shop { background: var(--neon-pink); box-shadow: 0 0 15px var(--neon-pink); }
-        .btn-restart { background: var(--neon-cyan); color: #000; box-shadow: 0 0 15px var(--neon-cyan); }
-        .btn:hover { transform: scale(1.05); }
-        /* Modal de tienda */
-        .shop-modal {
-            position: fixed; top:0; left:0; width:100%; height:100%;
-            background: rgba(0,0,0,0.85); z-index: 100;
-            display: flex; align-items: center; justify-content: center;
-            visibility: hidden; opacity: 0; transition: 0.3s;
-        }
-        .shop-modal.open { visibility: visible; opacity: 1; }
-        .shop-content {
-            background: var(--card-bg); border: 2px solid var(--neon-pink);
-            border-radius: 12px; padding: 20px; width: 90%; max-width: 380px;
-            box-shadow: 0 0 30px rgba(255,0,255,0.4); text-align: center;
-        }
-        .shop-content h3 { font-size: 10px; color: var(--neon-pink); margin-bottom: 15px; text-shadow: 0 0 10px var(--neon-pink); }
-        .shop-item {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 12px; border: 1px solid #333; border-radius: 8px; margin-bottom: 8px;
-            background: rgba(255,255,255,0.03); font-size: 6px;
-        }
-        .shop-item button {
-            font-family: 'Press Start 2P', cursive; font-size: 6px; padding: 6px 10px;
-            background: var(--neon-cyan); color: black; border: none; border-radius: 6px;
-            cursor: pointer; box-shadow: 0 0 8px var(--neon-cyan);
-        }
-        .shop-item button:disabled { opacity:0.5; cursor:not-allowed; }
-        .close-shop {
-            margin-top: 15px; background: transparent; border:1px solid var(--neon-pink);
-            color: var(--neon-pink); font-family: 'Press Start 2P', cursive;
-            font-size: 7px; padding: 8px 16px; cursor: pointer; border-radius: 6px;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Eco Collector · ODS 6 y 12</title>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+<script src="shared.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script src="../js/firebase-config.js"></script>
+<script src="../js/game-progress.js" data-tecnomath-game="eco-collector"></script>
+<style>
+:root{--cyan:#00ffff;--pink:#ff00ff;--green:#39ff14;--gold:#ffd700;--red:#ff1744;--bg:#050811;--card:#0c1220}*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none}html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-family:'Press Start 2P',cursive;color:#fff;display:flex;justify-content:center}body:before{content:'';position:fixed;inset:0;z-index:0;background:radial-gradient(circle at 50% 20%,rgba(0,255,255,.14),transparent 45%),radial-gradient(circle at 80% 80%,rgba(57,255,20,.12),transparent 45%);animation:bgPulse 7s ease-in-out infinite}@keyframes bgPulse{50%{opacity:.7}}.game-wrapper{position:relative;z-index:1;width:100%;max-width:520px;height:100vh;padding:8px;display:flex;flex-direction:column;align-items:center}.hud{width:100%;display:flex;justify-content:center;gap:7px;flex-wrap:wrap;padding:7px;background:rgba(0,0,0,.72);border:1px solid rgba(0,255,255,.3);border-radius:10px;margin-bottom:7px;font-size:6px;color:var(--green);text-shadow:0 0 7px var(--green)}.hud-item{display:flex;gap:3px;align-items:center}.hud-item span{color:var(--gold)}canvas{width:100%;max-height:calc(100vh - 125px);aspect-ratio:400/600;background:#07121a;border:2px solid var(--cyan);border-radius:9px;box-shadow:0 0 15px var(--cyan),0 0 35px rgba(0,255,255,.25);touch-action:none}.ods-badge{font-size:5px;color:var(--gold);text-align:center;margin:5px;text-shadow:0 0 6px var(--gold)}.button-row{display:flex;gap:7px;justify-content:center;flex-wrap:wrap;width:100%;margin-top:5px}.btn{font-family:'Press Start 2P',cursive;font-size:6px;padding:9px 12px;border:0;border-radius:8px;cursor:pointer;color:#fff;box-shadow:0 0 12px currentColor;transition:.15s}.btn:active{transform:scale(.95)}.btn-shop{background:var(--pink);box-shadow:0 0 15px var(--pink)}#pauseBtn{background:#704cff;box-shadow:0 0 15px #704cff}.btn-restart{background:var(--cyan);color:#000;box-shadow:0 0 15px var(--cyan)}.shop-modal{position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:100;display:flex;align-items:center;justify-content:center;visibility:hidden;opacity:0;transition:.25s}.shop-modal.open{visibility:visible;opacity:1}.shop-content{background:var(--card);border:2px solid var(--pink);border-radius:14px;padding:18px;width:92%;max-width:390px;box-shadow:0 0 35px rgba(255,0,255,.35);text-align:center;max-height:85vh;overflow:auto}.shop-content h3{font-size:10px;color:var(--pink);margin-bottom:13px}.shop-item{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px;border:1px solid #293044;border-radius:8px;margin-bottom:7px;background:rgba(255,255,255,.04);font-size:5px;line-height:1.6}.shop-item button{font-family:'Press Start 2P';font-size:5px;padding:7px;background:var(--cyan);color:#000;border:0;border-radius:6px}.shop-item button:disabled{opacity:.4}.close-shop{margin-top:8px;background:transparent;border:1px solid var(--pink);color:var(--pink);font-family:'Press Start 2P';font-size:6px;padding:8px 14px;border-radius:6px}.float-text{position:fixed;z-index:80;pointer-events:none;font-size:9px;font-weight:bold;text-shadow:0 0 8px currentColor;animation:floatUp .8s ease-out forwards}@keyframes floatUp{from{transform:translate(-50%,0) scale(.8);opacity:1}to{transform:translate(-50%,-55px) scale(1.15);opacity:0}}.level-up{position:fixed;inset:0;z-index:120;display:flex;align-items:center;justify-content:center;pointer-events:none;opacity:0}.level-up.show{animation:levelPop 1.4s ease-out}.level-card{background:rgba(0,0,0,.92);border:2px solid var(--gold);box-shadow:0 0 35px rgba(255,215,0,.45);border-radius:16px;padding:24px;text-align:center;color:var(--gold);font-size:10px;line-height:1.8}@keyframes levelPop{0%{opacity:0;transform:scale(.7)}15%,75%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(1.08)}}#missionBanner{position:fixed;top:70px;left:50%;transform:translateX(-50%);z-index:20;display:none;background:rgba(0,0,0,.82);border:1px solid var(--green);border-radius:10px;padding:8px 10px;text-align:center;font-size:5px;box-shadow:0 0 16px rgba(57,255,20,.25);max-width:92%}@media(max-width:420px){.hud{font-size:5px;gap:5px}.btn{font-size:5px;padding:8px 9px}}
+</style>
 </head>
 <body>
 <div class="game-wrapper">
-    <div class="hud">
-        <div class="hud-item">💧 <span id="scoreDisplay">0</span></div>
-        <div class="hud-item">❤️ <span id="livesDisplay">3</span></div>
-        <div class="hud-item">🛡️ <span id="shieldIndicator">0</span></div>
-        <div class="hud-item">⏱️ <span id="timeDisplay">60</span></div>
-        <div class="hud-item">🌐 <span id="globalCoinsDisplay">0</span></div>
-        <div class="hud-item" style="color:var(--neon-yellow);">💰 <span id="localCoinsDisplay">0</span></div>
-    </div>
-    <canvas id="gameCanvas" width="400" height="600"></canvas>
-    <div class="ods-badge">🌍 ODS 6: Agua limpia · ODS 12: Reciclaje responsable</div>
-    <div class="button-row">
-        <button class="btn btn-shop" id="shopBtn">🛒 TIENDA</button>
-    </div>
+<div class="hud">
+<div class="hud-item">💧 <span id="scoreDisplay">0</span></div><div class="hud-item">❤️ <span id="livesDisplay">3</span></div><div class="hud-item">🛡️ <span id="shieldIndicator">0</span></div><div class="hud-item">⏱️ <span id="timeDisplay">60</span></div><div class="hud-item">🌐 <span id="globalCoinsDisplay">0</span></div><div class="hud-item">💰 <span id="localCoinsDisplay">0</span></div><div class="hud-item">🔥 <span id="comboDisplay">0</span></div><div class="hud-item">⭐ <span id="levelDisplay">1</span></div>
 </div>
-
-<!-- Modal de tienda -->
-<div class="shop-modal" id="shopModal">
-    <div class="shop-content">
-        <h3>🛒 TIENDA ECO</h3>
-        <div id="shopItemsContainer"></div>
-        <button class="close-shop" id="closeShopBtn">CERRAR</button>
-    </div>
+<canvas id="gameCanvas" width="400" height="600"></canvas>
+<div class="ods-badge">🌍 ODS 6: Agua limpia · ODS 12: Reciclaje responsable</div>
+<div class="button-row"><button class="btn btn-shop" id="shopBtn">🛒 TIENDA</button><button class="btn" id="pauseBtn">⏸️ PAUSA</button></div>
 </div>
-
+<div id="missionBanner">🎯 MISIÓN: <span id="missionText">Recoge 10 objetos buenos</span></div>
+<div class="level-up" id="levelUp"><div class="level-card">🚀 ¡NUEVO NIVEL!<br>⭐ NIVEL <span id="levelUpNumber">2</span></div></div>
+<div class="shop-modal" id="shopModal"><div class="shop-content"><h3>🛒 TIENDA ECO</h3><div id="shopItemsContainer"></div><button class="close-shop" id="closeShopBtn">CERRAR</button></div></div>
 <script>
-    // ═══════════════════════════════════════
-    //  VARIABLES DEL JUEGO
-    // ═══════════════════════════════════════
-    const canvas = document.getElementById('gameCanvas');
-    const ctx = canvas.getContext('2d');
-
-    let player = { x: canvas.width/2 - 25, y: canvas.height - 70, width: 50, height: 30 };
-    let items = [];
-    let score = 0;
-    let lives = 3;
-    let timeLeft = 60;
-    let gameActive = true;
-    let gamePaused = false;
-    let gameInterval;
-    let spawnInterval;
-    let frameId;
-    // Power-ups comprados
-    let shieldActive = false;
-    let magnetActive = false, magnetTimer = 0;
-    let slowActive = false, slowTimer = 0;
-    // Monedas locales del juego
-    let localCoins = 0;
-
-    // Elementos HUD
-    const scoreDisplay = document.getElementById('scoreDisplay');
-    const livesDisplay = document.getElementById('livesDisplay');
-    const timeDisplay = document.getElementById('timeDisplay');
-    const shieldIndicator = document.getElementById('shieldIndicator');
-    const globalCoinsDisplay = document.getElementById('globalCoinsDisplay');
-    const localCoinsDisplay = document.getElementById('localCoinsDisplay');
-    const shopBtn = document.getElementById('shopBtn');
-    const shopModal = document.getElementById('shopModal');
-    const closeShopBtn = document.getElementById('closeShopBtn');
-    const shopItemsContainer = document.getElementById('shopItemsContainer');
-
-    // Tipos de objetos
-    const itemTypes = [
-        { type:'good', emoji:'💧', points:10, color:'#00BFFF' },
-        { type:'good', emoji:'♻️', points:15, color:'#4CAF50' },
-        { type:'bad',  emoji:'☣️', points:-20, color:'#FF0033' },
-        { type:'good', emoji:'🌱', points:20, color:'#8BC34A' }
-    ];
-
-    // Power-ups de la tienda (precios en monedas locales)
-    const shopItems = [
-        { id:'shield', name:'🛡️ Escudo', desc:'Bloquea 1 contaminante', price:30, action:()=>{ shieldActive = true; shieldIndicator.textContent = '1'; } },
-        { id:'life',   name:'❤️ Vida extra', desc:'+1 vida (máx 5)', price:50, action:()=>{ if(lives<5){ lives++; updateHUD(); } } },
-        { id:'magnet', name:'🧲 Imán 15s', desc:'Atrae objetos buenos', price:40, action:()=>{ magnetActive = true; magnetTimer = 15*60; } },
-        { id:'slow',   name:'🐢 Cámara lenta 10s', desc:'Reduce velocidad 50%', price:25, action:()=>{ slowActive = true; slowTimer = 10*60; } }
-    ];
-
-    // ═══════════════════════════════════════
-    //  FUNCIONES DE MONEDAS
-    // ═══════════════════════════════════════
-    function loadLocalCoins() {
-        if (typeof Tecnomath !== 'undefined' && Tecnomath.getCurrentUser()) {
-            localCoins = Tecnomath.getGameCoins('eco-collector');
-        } else {
-            localCoins = 0;
-        }
-    }
-
-    function saveLocalCoins() {
-        if (typeof Tecnomath !== 'undefined' && Tecnomath.getCurrentUser()) {
-            Tecnomath.setGameCoins('eco-collector', localCoins);
-        }
-    }
-
-    function updateGlobalCoinsDisplay() {
-        const user = (typeof Tecnomath !== 'undefined') ? Tecnomath.getCurrentUser() : null;
-        globalCoinsDisplay.textContent = user ? Tecnomath.getCoins() : '0';
-    }
-
-    function updateHUD() {
-        scoreDisplay.textContent = score;
-        livesDisplay.textContent = lives;
-        localCoinsDisplay.textContent = localCoins;
-        updateGlobalCoinsDisplay();
-    }
-
-    // ═══════════════════════════════════════
-    //  SPAWN DE OBJETOS
-    // ═══════════════════════════════════════
-    function spawnItem() {
-        if (!gameActive || gamePaused) return;
-        const typeIndex = Math.random() < 0.3 ? 2 : Math.floor(Math.random() * 3);
-        const itemType = itemTypes[typeIndex];
-        const x = Math.random() * (canvas.width - 30) + 15;
-        items.push({
-            x: x, y: -25, radius: 18, type: itemType,
-            speed: slowActive ? 1.5 : 3 + Math.random() * 3
-        });
-    }
-
-    // ═══════════════════════════════════════
-    //  DIBUJO
-    // ═══════════════════════════════════════
-    function drawBackground() {
-        for(let i=0; i<40; i++) {
-            ctx.fillStyle = `rgba(255,255,255,${Math.random()*0.6+0.2})`;
-            ctx.beginPath();
-            ctx.arc(Math.random()*canvas.width, Math.random()*canvas.height, Math.random()*1.5+0.5, 0, Math.PI*2);
-            ctx.fill();
-        }
-    }
-
-    function drawPlayer() {
-        ctx.fillStyle = '#FFD700';
-        ctx.shadowColor = '#FFD700';
-        ctx.shadowBlur = 12;
-        ctx.beginPath();
-        ctx.roundRect(player.x, player.y, player.width, player.height, 6);
-        ctx.fill();
-        ctx.shadowBlur = 0;
-        ctx.fillStyle = '#fff';
-        ctx.font = '14px "Press Start 2P"';
-        ctx.fillText('🛸', player.x+12, player.y+22);
-    }
-
-    function drawItems() {
-        items.forEach(item => {
-            ctx.beginPath();
-            ctx.arc(item.x, item.y, item.radius, 0, Math.PI*2);
-            ctx.fillStyle = item.type.color;
-            ctx.shadowColor = item.type.color;
-            ctx.shadowBlur = 10;
-            ctx.fill();
-            ctx.shadowBlur = 0;
-            ctx.fillStyle = 'white';
-            ctx.font = '18px "Press Start 2P"';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText(item.type.emoji, item.x, item.y);
-        });
-    }
-
-    // ═══════════════════════════════════════
-    //  ACTUALIZACIÓN Y COLISIONES
-    // ═══════════════════════════════════════
-    function updateItems() {
-        for (let i=items.length-1; i>=0; i--) {
-            items[i].y += items[i].speed;
-            // Efecto imán
-            if (magnetActive && items[i].type.type === 'good' && items[i].y > canvas.height/2) {
-                if (Math.abs(items[i].x - (player.x+player.width/2)) < 80) {
-                    items[i].x += (player.x+player.width/2 - items[i].x) * 0.05;
-                }
-            }
-            // Colisión
-            if (items[i].y + items[i].radius > player.y &&
-                items[i].x > player.x && items[i].x < player.x + player.width) {
-                handleCollision(items[i]);
-                items.splice(i,1);
-                continue;
-            }
-            if (items[i].y - items[i].radius > canvas.height) items.splice(i,1);
-        }
-    }
-
-    function handleCollision(item) {
-        if (item.type.type === 'good') {
-            score += item.type.points;
-            if (item.type.emoji === '🌱') score += 5;
-            // Pequeña recompensa en monedas locales
-            localCoins += Math.floor(item.type.points / 5);
-            saveLocalCoins();
-        } else {
-            if (shieldActive) {
-                shieldActive = false;
-                shieldIndicator.textContent = '0';
-            } else {
-                lives--;
-                if (lives <= 0) { gameOver(); return; }
-            }
-        }
-        updateHUD();
-    }
-
-    // ═══════════════════════════════════════
-    //  GAME OVER Y REINICIO
-    // ═══════════════════════════════════════
-    function gameOver() {
-        gameActive = false;
-        clearInterval(gameInterval);
-        clearInterval(spawnInterval);
-        if (window.TecnomathProgress) {
-            window.TecnomathProgress.save('eco-collector', { score, lives: Math.max(0, lives), timeLeft, localCoins, completed: true });
-        }
-        cancelAnimationFrame(frameId);
-        // Recompensa global
-        if (typeof Tecnomath !== 'undefined' && Tecnomath.getCurrentUser()) {
-            const reward = Math.floor(score / 2);
-            Tecnomath.addCoins(reward);
-            Tecnomath.updateHighScore('eco-collector', score);
-            updateGlobalCoinsDisplay();
-        }
-        // Pantalla final
-        ctx.fillStyle = 'rgba(0,0,0,0.7)';
-        ctx.fillRect(0, canvas.height/2-60, canvas.width, 120);
-        ctx.fillStyle = '#FF0033';
-        ctx.font = '14px "Press Start 2P"';
-        ctx.textAlign = 'center';
-        ctx.fillText('JUEGO TERMINADO', canvas.width/2, canvas.height/2-20);
-        ctx.fillStyle = '#fff';
-        ctx.font = '8px "Press Start 2P"';
-        ctx.fillText('Puntaje: '+score, canvas.width/2, canvas.height/2+20);
-        // Botón reiniciar
-        const oldBtn = document.getElementById('restartBtn');
-        if (oldBtn) oldBtn.remove();
-        const btn = document.createElement('button');
-        btn.id = 'restartBtn';
-        btn.className = 'btn btn-restart';
-        btn.textContent = '🔄 REINICIAR';
-        btn.onclick = restartGame;
-        document.querySelector('.button-row').appendChild(btn);
-    }
-
-    function restartGame() {
-        items = [];
-        score = 0;
-        lives = 3;
-        timeLeft = 60;
-        gameActive = true;
-        gamePaused = false;
-        shieldActive = false; shieldIndicator.textContent = '0';
-        magnetActive = false; magnetTimer = 0;
-        slowActive = false; slowTimer = 0;
-        // Cargar monedas locales de nuevo (por si cambiaron)
-        loadLocalCoins();
-        updateHUD();
-        timeDisplay.textContent = timeLeft;
-        // Limpiar intervalos anteriores
-        clearInterval(gameInterval);
-        clearInterval(spawnInterval);
-        if (frameId) cancelAnimationFrame(frameId);
-        startTimer();
-        spawnInterval = setInterval(spawnItem, 800);
-        frameId = requestAnimationFrame(gameLoop);
-        // Quitar botón reiniciar si existe
-        const oldBtn = document.getElementById('restartBtn');
-        if (oldBtn) oldBtn.remove();
-    }
-
-    // ═══════════════════════════════════════
-    //  TIENDA
-    // ═══════════════════════════════════════
-    function toggleShop(open) {
-        if (open) {
-            if (gameActive) { gamePaused = true; clearInterval(gameInterval); clearInterval(spawnInterval); cancelAnimationFrame(frameId); }
-            renderShopItems();
-            shopModal.classList.add('open');
-        } else {
-            shopModal.classList.remove('open');
-            if (gameActive && gamePaused) {
-                gamePaused = false;
-                startTimer();
-                spawnInterval = setInterval(spawnItem, 800);
-                frameId = requestAnimationFrame(gameLoop);
-            }
-        }
-    }
-
-    function renderShopItems() {
-        shopItemsContainer.innerHTML = '';
-        shopItems.forEach(item => {
-            const div = document.createElement('div');
-            div.className = 'shop-item';
-            div.innerHTML = `<span>${item.name} - ${item.desc}</span><span style="color:var(--gold)">${item.price} 💰</span>`;
-            const buyBtn = document.createElement('button');
-            buyBtn.textContent = 'Comprar';
-            buyBtn.disabled = localCoins < item.price;
-            buyBtn.onclick = () => {
-                if (localCoins >= item.price) {
-                    localCoins -= item.price;
-                    item.action();
-                    saveLocalCoins();
-                    updateHUD();
-                    renderShopItems();
-                }
-            };
-            div.appendChild(buyBtn);
-            shopItemsContainer.appendChild(div);
-        });
-        // Botón extra para convertir monedas globales
-        const exchangeDiv = document.createElement('div');
-        exchangeDiv.className = 'shop-item';
-        exchangeDiv.innerHTML = '<span>💱 Convertir 🌐 → 💰</span><span style="color:var(--gold)">10% com</span>';
-        const exchangeBtn = document.createElement('button');
-        exchangeBtn.textContent = 'Convertir';
-        exchangeBtn.onclick = () => openExchangeModal();
-        exchangeDiv.appendChild(exchangeBtn);
-        shopItemsContainer.appendChild(exchangeDiv);
-    }
-
-    function openExchangeModal() {
-        if (typeof Tecnomath === 'undefined' || !Tecnomath.getCurrentUser()) {
-            alert('Inicia sesión para convertir monedas');
-            return;
-        }
-        const globalCoins = Tecnomath.getCoins();
-        const amountStr = prompt(`Tienes ${globalCoins} 🌐 monedas globales.\n¿Cuántas deseas convertir a monedas locales de Eco Collector? (10% comisión)`);
-        if (amountStr === null) return;
-        const amount = parseInt(amountStr);
-        if (isNaN(amount) || amount <= 0) {
-            alert('Cantidad inválida');
-            return;
-        }
-        if (Tecnomath.exchangeGlobalToLocal('eco-collector', amount)) {
-            localCoins = Tecnomath.getGameCoins('eco-collector');
-            saveLocalCoins();
-            updateHUD();
-            renderShopItems();
-            alert('Conversión exitosa');
-        } else {
-            alert('Fondos insuficientes');
-        }
-    }
-
-    // ═══════════════════════════════════════
-    //  TEMPORIZADOR Y LOOP
-    // ═══════════════════════════════════════
-    function startTimer() {
-        gameInterval = setInterval(() => {
-            timeLeft--;
-            timeDisplay.textContent = timeLeft;
-            if (magnetActive) {
-                magnetTimer--;
-                if (magnetTimer <= 0) magnetActive = false;
-            }
-            if (slowActive) {
-                slowTimer--;
-                if (slowTimer <= 0) slowActive = false;
-            }
-            if (timeLeft <= 0) gameOver();
-        }, 1000);
-    }
-
-    function gameLoop() {
-        if (!gameActive || gamePaused) return;
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        drawBackground();
-        drawItems();
-        drawPlayer();
-        updateItems();
-        frameId = requestAnimationFrame(gameLoop);
-    }
-
-    // ═══════════════════════════════════════
-    //  CONTROLES
-    // ═══════════════════════════════════════
-    function movePlayer(e) {
-        if (!gameActive || gamePaused) return;
-        let clientX;
-        if (e.touches) {
-            clientX = e.touches[0].clientX;
-            e.preventDefault();
-        } else {
-            clientX = e.clientX;
-        }
-        const rect = canvas.getBoundingClientRect();
-        const scaleX = canvas.width / rect.width;
-        const relativeX = (clientX - rect.left) * scaleX;
-        player.x = Math.max(0, Math.min(canvas.width - player.width, relativeX - player.width/2));
-    }
-
-    canvas.addEventListener('mousemove', movePlayer);
-    canvas.addEventListener('touchmove', movePlayer, { passive: false });
-    canvas.addEventListener('touchstart', movePlayer, { passive: false });
-    document.addEventListener('keydown', (e) => {
-        if (!gameActive || gamePaused) return;
-        if (e.key === 'ArrowLeft') player.x = Math.max(0, player.x - 20);
-        if (e.key === 'ArrowRight') player.x = Math.min(canvas.width - player.width, player.x + 20);
-    });
-
-    shopBtn.addEventListener('click', () => toggleShop(true));
-    closeShopBtn.addEventListener('click', () => toggleShop(false));
-
-    // ═══════════════════════════════════════
-    //  INICIAR
-    // ═══════════════════════════════════════
-    function init() {
-        loadLocalCoins();
-        updateHUD();
-        timeDisplay.textContent = timeLeft;
-        startTimer();
-        spawnInterval = setInterval(spawnItem, 800);
-        frameId = requestAnimationFrame(gameLoop);
-    }
-
-    init();
+const canvas=document.getElementById('gameCanvas'),ctx=canvas.getContext('2d');
+let player={x:175,y:530,width:50,height:30},items=[],score=0,lives=3,timeLeft=60,gameActive=true,gamePaused=false,gameInterval,spawnInterval,frameId;
+let shieldActive=false,magnetActive=false,magnetTimer=0,slowActive=false,slowTimer=0,localCoins=0,combo=0,bestCombo=0,level=1,xp=0,missed=0,collected=0,missionTarget=10,missionProgress=0,lastGoodTime=0,particles=[],stars=[];
+const scoreDisplay=document.getElementById('scoreDisplay'),livesDisplay=document.getElementById('livesDisplay'),timeDisplay=document.getElementById('timeDisplay'),shieldIndicator=document.getElementById('shieldIndicator'),globalCoinsDisplay=document.getElementById('globalCoinsDisplay'),localCoinsDisplay=document.getElementById('localCoinsDisplay'),comboDisplay=document.getElementById('comboDisplay'),levelDisplay=document.getElementById('levelDisplay'),pauseBtn=document.getElementById('pauseBtn'),missionBanner=document.getElementById('missionBanner'),missionText=document.getElementById('missionText'),levelUp=document.getElementById('levelUp'),levelUpNumber=document.getElementById('levelUpNumber');
+const shopBtn=document.getElementById('shopBtn'),shopModal=document.getElementById('shopModal'),closeShopBtn=document.getElementById('closeShopBtn'),shopItemsContainer=document.getElementById('shopItemsContainer');
+const itemTypes=[{type:'good',emoji:'💧',points:10,color:'#00BFFF'},{type:'good',emoji:'♻️',points:15,color:'#4CAF50'},{type:'bad',emoji:'☣️',points:-20,color:'#FF0033'},{type:'good',emoji:'🌱',points:20,color:'#8BC34A'},{type:'good',emoji:'🍎',points:12,color:'#ff7043'},{type:'good',emoji:'🧴',points:14,color:'#64b5f6'}];
+const shopItems=[
+{id:'shield',name:'🛡️ Escudo',desc:'Bloquea 1 contaminante',price:30,action:()=>{shieldActive=true;shieldIndicator.textContent='1'}},
+{id:'life',name:'❤️ Vida extra',desc:'+1 vida, máximo 5',price:50,action:()=>{if(lives<5)lives++;else return false}},
+{id:'magnet',name:'🧲 Imán 15s',desc:'Atrae objetos buenos',price:40,action:()=>{magnetActive=true;magnetTimer=15*60}},
+{id:'slow',name:'🐢 Cámara lenta 10s',desc:'Reduce velocidad',price:25,action:()=>{slowActive=true;slowTimer=10*60}},
+{id:'boost',name:'⚡ Turbo x2',desc:'Duplica puntos 12s',price:55,action:()=>{boostTimer=12*60}},
+{id:'heal',name:'💚 Curación',desc:'+2 vidas si no superas 5',price:80,action:()=>{lives=Math.min(5,lives+2)}}];
+let boostTimer=0;
+function loadLocalCoins(){if(typeof Tecnomath!=='undefined'&&Tecnomath.getCurrentUser())localCoins=Number(Tecnomath.getGameCoins('eco-collector')||0);else localCoins=0}
+function saveLocalCoins(){if(typeof Tecnomath!=='undefined'&&Tecnomath.getCurrentUser())Tecnomath.setGameCoins('eco-collector',localCoins)}
+function updateGlobalCoinsDisplay(){const u=typeof Tecnomath!=='undefined'?Tecnomath.getCurrentUser():null;globalCoinsDisplay.textContent=u?Tecnomath.getCoins():'0'}
+function updateHUD(){scoreDisplay.textContent=score;livesDisplay.textContent=lives;localCoinsDisplay.textContent=localCoins;comboDisplay.textContent=combo>1?'x'+combo:combo;levelDisplay.textContent=level;updateGlobalCoinsDisplay();missionText.textContent=`Recoge ${missionTarget} objetos buenos (${missionProgress}/${missionTarget})`;missionBanner.style.display=gameActive?'block':'none'}
+function addXP(amount){xp+=amount;const need=50+(level-1)*30;if(xp>=need){xp-=need;level++;missionTarget=10+level*2;missionProgress=0;levelUpNumber.textContent=level;levelUp.classList.remove('show');void levelUp.offsetWidth;levelUp.classList.add('show')}}
+function spawnItem(){if(!gameActive||gamePaused)return;const difficulty=Math.min(1.9,1+(level-1)*.12),badChance=Math.min(.48,.22+(level-1)*.025);let typeIndex=Math.random()<badChance?2:Math.floor(Math.random()*5);const special=Math.random()<Math.min(.07,.025+level*.002);let t=itemTypes[typeIndex];if(special)t={type:'bonus',emoji:Math.random()<.5?'⭐':'🌎',points:35+level*3,color:'#FFD700'};items.push({x:Math.random()*(canvas.width-36)+18,y:-25,radius:special?20:18,type:t,special,speed:(slowActive?1.5:3+Math.random()*3)*difficulty})}
+function drawBackground(){const g=ctx.createLinearGradient(0,0,0,canvas.height);g.addColorStop(0,'#071522');g.addColorStop(1,'#03100b');ctx.fillStyle=g;ctx.fillRect(0,0,canvas.width,canvas.height);if(!stars.length)for(let i=0;i<45;i++)stars.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,r:.4+Math.random()*1.3,s:.15+Math.random()*.45});ctx.fillStyle='rgba(255,255,255,.7)';stars.forEach(s=>{s.y+=s.s;if(s.y>canvas.height)s.y=0;ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,Math.PI*2);ctx.fill()});ctx.fillStyle='rgba(0,255,180,.07)';ctx.fillRect(0,canvas.height-120,canvas.width,120)}
+function spawnParticles(x,y,color,count=10){for(let i=0;i<count;i++)particles.push({x,y,vx:(Math.random()-.5)*5,vy:(Math.random()-.8)*5,life:30+Math.random()*20,color})}
+function drawParticles(){for(let i=particles.length-1;i>=0;i--){const p=particles[i];p.x+=p.vx;p.y+=p.vy;p.vy+=.08;p.life--;ctx.globalAlpha=Math.max(0,p.life/45);ctx.fillStyle=p.color;ctx.fillRect(p.x,p.y,3,3);if(p.life<=0)particles.splice(i,1)}ctx.globalAlpha=1}
+function floatText(text,x,y,color){const el=document.createElement('div');el.className='float-text';el.textContent=text;el.style.left=(x/canvas.width*100)+'vw';el.style.top=(y/canvas.height*100)+'vh';el.style.color=color;document.body.appendChild(el);setTimeout(()=>el.remove(),850)}
+function drawPlayer(){ctx.fillStyle='#FFD700';ctx.shadowColor='#FFD700';ctx.shadowBlur=12;ctx.beginPath();ctx.roundRect(player.x,player.y,player.width,player.height,6);ctx.fill();ctx.shadowBlur=0;ctx.fillStyle='#fff';ctx.font='14px "Press Start 2P"';ctx.fillText('🛸',player.x+12,player.y+22);if(shieldActive){ctx.strokeStyle='#7cf7ff';ctx.lineWidth=3;ctx.shadowColor='#7cf7ff';ctx.shadowBlur=14;ctx.beginPath();ctx.arc(player.x+25,player.y+15,34,0,Math.PI*2);ctx.stroke();ctx.shadowBlur=0}}
+function drawItems(){items.forEach(item=>{ctx.beginPath();ctx.arc(item.x,item.y,item.radius,0,Math.PI*2);ctx.fillStyle=item.type.color;ctx.shadowColor=item.type.color;ctx.shadowBlur=item.special?18:10;ctx.fill();ctx.shadowBlur=0;ctx.fillStyle='#fff';ctx.font=item.special?'19px "Press Start 2P"':'18px "Press Start 2P"';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(item.type.emoji,item.x,item.y)})}
+function handleCollision(item){const now=performance.now();if(item.type.type==='good'||item.type.type==='bonus'){combo=now-lastGoodTime<1800?combo+1:1;lastGoodTime=now;bestCombo=Math.max(bestCombo,combo);const multiplier=Math.min(5,1+Math.floor(combo/3));const points=(item.type.points||10)*multiplier*(boostTimer>0?2:1);score+=points;collected++;missionProgress++;localCoins+=Math.max(1,Math.floor(points/8));addXP(item.type.type==='bonus'?15:8);spawnParticles(item.x,item.y,item.type.color,item.special?20:10);floatText(`+${points} ${multiplier>1?'x'+multiplier:''}`,item.x,item.y,item.type.color);if(item.special){localCoins+=5;floatText('🌟 BONUS +5💰',item.x,item.y-22,'#FFD700')}if(missionProgress>=missionTarget){score+=50;localCoins+=10;missionProgress=0;floatText('🎯 MISIÓN +50',player.x+25,player.y,'#39FF14')}saveLocalCoins()}else if(shieldActive){shieldActive=false;shieldIndicator.textContent='0';spawnParticles(item.x,item.y,'#7cf7ff',16);floatText('🛡️ BLOQUEADO',item.x,item.y,'#7cf7ff')}else{lives--;combo=0;missed++;spawnParticles(item.x,item.y,'#FF0033',14);floatText('💥 -1 VIDA',item.x,item.y,'#FF0033');if(lives<=0){gameOver();return}}updateHUD()}
+function updateItems(){for(let i=items.length-1;i>=0;i--){const it=items[i];it.y+=it.speed;if(magnetActive&&it.type.type!=='bad'&&it.y>canvas.height/2&&Math.abs(it.x-(player.x+25))<100)it.x+=(player.x+25-it.x)*.06;if(it.y+it.radius>player.y&&it.x>player.x-4&&it.x<player.x+player.width+4){handleCollision(it);items.splice(i,1);continue}if(it.y-it.radius>canvas.height)items.splice(i,1)}}
+function gameOver(){gameActive=false;clearInterval(gameInterval);clearInterval(spawnInterval);missionBanner.style.display='none';if(window.TecnomathProgress)window.TecnomathProgress.save('eco-collector',{score,lives:Math.max(0,lives),timeLeft,localCoins,level,xp,combo,bestCombo,collected,missed,completed:true});if(typeof Tecnomath!=='undefined'&&Tecnomath.getCurrentUser()){Tecnomath.addCoins(Math.max(0,Math.floor(score/2)));Tecnomath.updateHighScore('eco-collector',score);updateGlobalCoinsDisplay()}ctx.fillStyle='rgba(0,0,0,.76)';ctx.fillRect(0,canvas.height/2-80,canvas.width,160);ctx.fillStyle='#FF0033';ctx.font='13px "Press Start 2P"';ctx.textAlign='center';ctx.fillText('JUEGO TERMINADO',canvas.width/2,canvas.height/2-35);ctx.fillStyle='#fff';ctx.font='7px "Press Start 2P"';ctx.fillText('Puntaje: '+score,canvas.width/2,canvas.height/2-5);ctx.fillText('Nivel: '+level+'  |  Mejor combo: x'+bestCombo,canvas.width/2,canvas.height/2+20);const old=document.getElementById('restartBtn');if(old)old.remove();const b=document.createElement('button');b.id='restartBtn';b.className='btn btn-restart';b.textContent='🔄 REINICIAR';b.onclick=restartGame;document.querySelector('.button-row').appendChild(b)}
+function restartGame(){items=[];score=0;lives=3;timeLeft=60;combo=0;level=1;xp=0;collected=0;missed=0;missionTarget=10;missionProgress=0;gameActive=true;gamePaused=false;shieldActive=false;shieldIndicator.textContent='0';magnetActive=false;magnetTimer=0;slowActive=false;slowTimer=0;boostTimer=0;loadLocalCoins();updateHUD();clearInterval(gameInterval);clearInterval(spawnInterval);if(frameId)cancelAnimationFrame(frameId);pauseBtn.textContent='⏸️ PAUSA';startTimer();spawnInterval=setInterval(spawnItem,Math.max(360,800-(level-1)*20));frameId=requestAnimationFrame(gameLoop);const old=document.getElementById('restartBtn');if(old)old.remove()}
+function renderShopItems(){shopItemsContainer.innerHTML='';shopItems.forEach(item=>{const d=document.createElement('div');d.className='shop-item';const text=document.createElement('span');text.innerHTML=`${item.name}<br>${item.desc}<br><b style="color:var(--gold)">${item.price} 💰</b>`;const b=document.createElement('button');b.textContent='Comprar';b.disabled=localCoins<item.price||(item.id==='life'&&lives>=5);b.onclick=()=>{if(localCoins<item.price)return;const before=lives;const result=item.action();if(result===false||item.id==='life'&&before===5)return;localCoins-=item.price;saveLocalCoins();updateHUD();renderShopItems()};d.append(text,b);shopItemsContainer.appendChild(d)});const ex=document.createElement('div');ex.className='shop-item';ex.innerHTML='<span>💱 Convertir 🌐 → 💰<br>10% comisión</span>';const eb=document.createElement('button');eb.textContent='Convertir';eb.onclick=openExchangeModal;ex.appendChild(eb);shopItemsContainer.appendChild(ex)}
+function openExchangeModal(){if(typeof Tecnomath==='undefined'||!Tecnomath.getCurrentUser()){alert('Inicia sesión para convertir monedas');return}const gc=Tecnomath.getCoins();const s=prompt(`Tienes ${gc} 🌐 monedas.\n¿Cuántas deseas convertir? (10% comisión)`);if(s===null)return;const a=parseInt(s);if(!Number.isFinite(a)||a<=0){alert('Cantidad inválida');return}if(Tecnomath.exchangeGlobalToLocal('eco-collector',a)){localCoins=Tecnomath.getGameCoins('eco-collector');saveLocalCoins();updateHUD();renderShopItems();alert('Conversión exitosa')}else alert('Fondos insuficientes')}
+function toggleShop(open){if(open){if(gameActive&&!gamePaused){gamePaused=true;clearInterval(gameInterval);clearInterval(spawnInterval);cancelAnimationFrame(frameId)}renderShopItems();shopModal.classList.add('open')}else{shopModal.classList.remove('open');if(gameActive&&gamePaused){gamePaused=false;pauseBtn.textContent='⏸️ PAUSA';startTimer();spawnInterval=setInterval(spawnItem,Math.max(360,800-(level-1)*20));frameId=requestAnimationFrame(gameLoop)}}}
+function startTimer(){clearInterval(gameInterval);gameInterval=setInterval(()=>{if(gamePaused||!gameActive)return;timeLeft--;timeDisplay.textContent=timeLeft;if(magnetActive&&--magnetTimer<=0)magnetActive=false;if(slowActive&&--slowTimer<=0)slowActive=false;if(boostTimer>0)boostTimer--;if(timeLeft<=0)gameOver()},1000)}
+function togglePause(){if(!gameActive)return;gamePaused=!gamePaused;pauseBtn.textContent=gamePaused?'▶️ CONTINUAR':'⏸️ PAUSA';if(gamePaused){clearInterval(gameInterval);clearInterval(spawnInterval);cancelAnimationFrame(frameId)}else{startTimer();spawnInterval=setInterval(spawnItem,Math.max(360,800-(level-1)*20));frameId=requestAnimationFrame(gameLoop)}}
+function gameLoop(){if(!gameActive||gamePaused)return;drawBackground();drawItems();drawPlayer();updateItems();drawParticles();if(combo>0&&performance.now()-lastGoodTime>2200){combo=0;updateHUD()}frameId=requestAnimationFrame(gameLoop)}
+function movePlayer(e){if(!gameActive||gamePaused)return;let clientX=e.touches?e.touches[0].clientX:e.clientX;if(e.touches)e.preventDefault();const r=canvas.getBoundingClientRect(),x=(clientX-r.left)*(canvas.width/r.width);player.x=Math.max(0,Math.min(canvas.width-player.width,x-player.width/2))}
+canvas.addEventListener('mousemove',movePlayer);canvas.addEventListener('touchmove',movePlayer,{passive:false});canvas.addEventListener('touchstart',movePlayer,{passive:false});document.addEventListener('keydown',e=>{if(!gameActive||gamePaused)return;if(e.key==='ArrowLeft'||e.key==='a')player.x=Math.max(0,player.x-22);if(e.key==='ArrowRight'||e.key==='d')player.x=Math.min(canvas.width-player.width,player.x+22);if(e.key===' '){e.preventDefault();togglePause()}});shopBtn.onclick=()=>toggleShop(true);closeShopBtn.onclick=()=>toggleShop(false);pauseBtn.onclick=togglePause;
+function init(){loadLocalCoins();updateHUD();timeDisplay.textContent=timeLeft;missionBanner.style.display='block';startTimer();spawnInterval=setInterval(spawnItem,800);frameId=requestAnimationFrame(gameLoop)}init();
 </script>
 </body>
 </html>
