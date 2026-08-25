@@ -13,6 +13,16 @@
   if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
   window.TecnomathFirebase = { auth: firebase.auth(), database: firebase.database(), serverTimestamp: firebase.database.ServerValue.TIMESTAMP };
 
+  // Cargar el reconocimiento automático de administradores en cualquier página
+  // que use esta configuración. Así no es necesario entrar primero a /admin.
+  if (!document.querySelector('script[data-tecnomath-admin-guard]')) {
+    const adminGuard = document.createElement('script');
+    adminGuard.src = '/js/admin-guard.js?v=1';
+    adminGuard.async = false;
+    adminGuard.dataset.tecnomathAdminGuard = 'true';
+    document.head.appendChild(adminGuard);
+  }
+
   function setupAdminFairControl(){
     if(!/\/pages\/admin\/index\.html$/.test(location.pathname)) return;
     const inject=()=>{
