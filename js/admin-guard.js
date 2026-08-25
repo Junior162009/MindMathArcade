@@ -68,8 +68,6 @@
       : null;
   }
 
-  // Reconoce al administrador inmediatamente después del login,
-  // tanto con Google como con correo/contraseña.
   async function initializeAdminRecognition() {
     const cloud = firebaseReady();
     return new Promise(function (resolve) {
@@ -138,7 +136,6 @@
     requireAdmin: requireAdmin
   };
 
-  // Ejecutar también en el index principal: no hay que abrir /admin primero.
   function startRecognition() {
     try {
       if (window.TecnomathFirebase) initializeAdminRecognition();
@@ -152,6 +149,55 @@
     document.addEventListener('DOMContentLoaded', startRecognition, { once: true });
   } else {
     startRecognition();
+  }
+
+  // Barra lateral del panel de administración: usa las mismas opciones existentes.
+  function initAdminSidebar() {
+    if (!/\/pages\/admin\/index\.html$/.test(location.pathname) && !/\/pages\/admin\/?$/.test(location.pathname)) return;
+    if (document.getElementById('adminSidebarToggle')) return;
+
+    const nav = document.querySelector('.admin-tabs');
+    if (!nav) return;
+
+    const button = document.createElement('button');
+    button.id = 'adminSidebarToggle';
+    button.type = 'button';
+    button.className = 'admin-sidebar-toggle';
+    button.setAttribute('aria-label', 'Mostrar u ocultar menú');
+    button.setAttribute('aria-expanded', 'false');
+    button.innerHTML = '<span></span><span></span><span></span>';
+    document.body.appendChild(button);
+
+    const backdrop = document.createElement('button');
+    backdrop.id = 'adminSidebarBackdrop';
+    backdrop.type = 'button';
+    backdrop.setAttribute('aria-label', 'Cerrar menú');
+    document.body.appendChild(backdrop);
+
+    const setOpen = function (open) {
+      document.body.classList.toggle('admin-sidebar-open', open);
+      button.setAttribute('aria-expanded', String(open));
+    };
+
+    button.addEventListener('click', function () {
+      setOpen(!document.body.classList.contains('admin-sidebar-open'));
+    });
+    backdrop.addEventListener('click', function () { setOpen(false); });
+
+    nav.addEventListener('click', function (event) {
+      const tab = event.target.closest('.tab');
+      if (tab && window.matchMedia('(max-width: 800px)').matches) setOpen(false);
+    });
+
+    window.addEventListener('keydown', function (event) {
+      if (event.key === 'Escape') setOpen(false);
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initAdminSidebar, { once: true });
+  } else {
+    initAdminSidebar();
   }
 
   // Cargar el selector de bandera externa/emoji únicamente en BanderQuiz.
