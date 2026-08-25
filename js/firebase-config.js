@@ -23,6 +23,18 @@
     document.head.appendChild(adminGuard);
   }
 
+  // Sincronización universal: los minijuegos antiguos que todavía usan
+  // localStorage también quedan ligados a la cuenta Firebase del usuario.
+  // La ruta se calcula para funcionar en la raíz, /pages/ y /games/*.
+  if (!document.querySelector('script[data-tecnomath-cloud-sync]')) {
+    const cloudSync = document.createElement('script');
+    const path = location.pathname;
+    cloudSync.src = path.includes('/games/') ? '../../js/cloud-progress-sync.js?v=1' : (path.includes('/pages/') ? '../js/cloud-progress-sync.js?v=1' : 'js/cloud-progress-sync.js?v=1');
+    cloudSync.async = false;
+    cloudSync.dataset.tecnomathCloudSync = 'true';
+    document.head.appendChild(cloudSync);
+  }
+
   function setupAdminFairControl(){
     if(!/\/pages\/admin\/index\.html$/.test(location.pathname)) return;
     const inject=()=>{
