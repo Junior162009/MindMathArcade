@@ -31,6 +31,14 @@
       }
     },
     "tecnomath": {
+      "tematicaActiva": {
+        ".read": true,
+        ".write": "auth != null && (auth.token.email === 'delahozbarcelojunior@gmail.com' || root.child('users').child(auth.uid).child('role').val() === 'admin')"
+      },
+      "tematicas": {
+        ".read": true,
+        ".write": "auth != null && (auth.token.email === 'delahozbarcelojunior@gmail.com' || root.child('users').child(auth.uid).child('role').val() === 'admin')"
+      },
       "evento": {
         ".read": true,
         ".write": "auth != null && (auth.token.email === 'delahozbarcelojunior@gmail.com' || root.child('users').child(auth.uid).child('role').val() === 'admin')"
