@@ -1,10 +1,10 @@
 importScripts('https://storage.googleapis.com/workbox-cdn/releases/5.1.2/workbox-sw.js');
 
-// v9: invalida cualquier copia anterior del sistema de administración.
-const CACHE_NAME = 'tecnomath-offline-v9';
+// v10: sincroniza la temática global de TecnoMath en las páginas HTML.
+const CACHE_NAME = 'tecnomath-offline-v10';
 const OFFLINE_FALLBACK_PAGE = '/index.html';
 const PRECACHE_ASSETS = [
-  '/', '/index.html', '/js/shared.js', '/js/firebase-config.js', '/js/admin-guard.js',
+  '/', '/index.html', '/js/shared.js', '/js/firebase-config.js', '/js/admin-guard.js', '/js/theme-sync.js',
   '/manifest.json', '/pages/auth.html', '/pages/admin/index.html', '/css/admin.css',
   '/pages/game.html', '/pages/eco-collector.html', '/pages/animalandia.html',
   '/pages/ods-2048.html', '/pages/coral-guardian.html', '/pages/eco-barrio.html',
@@ -21,20 +21,40 @@ self.addEventListener('activate', event => {
 });
 if (workbox.navigationPreload && workbox.navigationPreload.isSupported()) workbox.navigationPreload.enable();
 
+async function injectThemeScript(response) {
+  if (!response || !response.ok) return response;
+  const type = response.headers.get('content-type') || '';
+  if (!type.includes('text/html')) return response;
+  try {
+    const html = await response.text();
+    if (html.includes('/js/theme-sync.js')) return new Response(html, {status:response.status, statusText:response.statusText, headers:response.headers});
+    const injected = html.replace(/<\/body>/i, '<script src="/js/theme-sync.js?v=10"></script></body>');
+    const headers = new Headers(response.headers);
+    headers.set('content-type', 'text/html; charset=utf-8');
+    return new Response(injected, {status:response.status, statusText:response.statusText, headers});
+  } catch (_) {
+    return response;
+  }
+}
+
 self.addEventListener('fetch', event => {
   if (event.request.method !== 'GET') return;
   event.respondWith((async () => {
     try {
       const networkResponse = await fetch(event.request);
-      if (networkResponse && networkResponse.status === 200) {
+      const response = await injectThemeScript(networkResponse);
+      if (response && response.status === 200) {
         const cache = await caches.open(CACHE_NAME);
-        await cache.put(event.request, networkResponse.clone());
+        await cache.put(event.request, response.clone());
       }
-      return networkResponse;
+      return response;
     } catch (_) {
-      const cached = await caches.match(event.request);
-      if (cached) return cached;
-      if (event.request.mode === 'navigate') return caches.match(OFFLINE_FALLBACK_PAGE);
+      let cached = await caches.match(event.request);
+      if (cached) return injectThemeScript(cached);
+      if (event.request.mode === 'navigate') {
+        cached = await caches.match(OFFLINE_FALLBACK_PAGE);
+        if (cached) return injectThemeScript(cached);
+      }
       return new Response('Sin conexión', { status: 503 });
     }
   })());
