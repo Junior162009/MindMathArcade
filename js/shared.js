@@ -59,4 +59,6 @@
     firebase.database().ref('tecnomath/tematicaActiva').on('value',snap=>{const theme=snap.val()||'normal';let tries=0;const wait=()=>{if(typeof window.activatePermanentTheme==='function'||typeof window.renderProjects==='function'||theme==='normal')apply(theme);else if(tries++<100)setTimeout(wait,100)};wait()},error=>console.warn('TecnoMath: no se pudo leer la temática global:',error.code));
   }
   setupThemeBridge();
+  function loadEventEffects(){if(window.TecnoMathEventEffects)return;const s=document.createElement('script');s.src=(location.pathname.includes('/pages/')?'../../':'')+'js/fair-effects.js?v=1';s.async=true;document.head.appendChild(s)}
+  loadEventEffects();
 })();
