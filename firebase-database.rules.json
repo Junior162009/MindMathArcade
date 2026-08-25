@@ -13,13 +13,18 @@
     },
 
     "usernames": {
+      ".read": true,
+
       "$username": {
-        ".read": true,
         ".write": "auth != null && ((!data.exists() && newData.val() === auth.uid) || (data.val() === auth.uid && newData.val() === null) || auth.token.email === 'delahozbarcelojunior@gmail.com' || root.child('users').child(auth.uid).child('role').val() === 'admin')"
       }
     },
 
     "userProgress": {
+      ".read": "auth != null && (auth.token.email === 'delahozbarcelojunior@gmail.com' || root.child('users').child(auth.uid).child('role').val() === 'admin')",
+
+      ".write": "auth != null && (auth.token.email === 'delahozbarcelojunior@gmail.com' || root.child('users').child(auth.uid).child('role').val() === 'admin')",
+
       "$uid": {
         ".read": "auth != null && (auth.uid === $uid || auth.token.email === 'delahozbarcelojunior@gmail.com' || root.child('users').child(auth.uid).child('role').val() === 'admin')",
 
@@ -30,13 +35,20 @@
     "adminLogs": {
       ".read": "auth != null && (auth.token.email === 'delahozbarcelojunior@gmail.com' || root.child('users').child(auth.uid).child('role').val() === 'admin')",
 
-      ".write": "auth != null && (auth.token.email === 'delahozbarcelojunior@gmail.com' || root.child('users').child(auth.uid).child('role').val() === 'admin')"
+      ".write": "auth != null && (auth.token.email === 'delahozbarcelojunior@gmail.com' || root.child('users').child(auth.uid).child('role').val() === 'admin')",
+
+      "$logId": {
+        ".read": "auth != null && (auth.token.email === 'delahozbarcelojunior@gmail.com' || root.child('users').child(auth.uid).child('role').val() === 'admin')",
+
+        ".write": "auth != null && (auth.token.email === 'delahozbarcelojunior@gmail.com' || root.child('users').child(auth.uid).child('role').val() === 'admin')"
+      }
     },
 
     "tecnomath": {
       "evento": {
         ".read": true,
-        ".write": "auth != null"
+
+        ".write": "auth != null && (auth.token.email === 'delahozbarcelojunior@gmail.com' || root.child('users').child(auth.uid).child('role').val() === 'admin')"
       }
     }
   }
