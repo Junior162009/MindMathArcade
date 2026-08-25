@@ -153,4 +153,21 @@
   } else {
     startRecognition();
   }
+
+  // Cargar el selector de bandera externa/emoji únicamente en BanderQuiz.
+  if (/\/games\/esequiel11%C2%B0\/bandera\.html$/.test(location.pathname) || /\/games\/esequiel11°\/bandera\.html$/.test(location.pathname)) {
+    const loadBanderQuizDisplay = function () {
+      if (document.querySelector('script[data-tecnomath-banderquiz-display]')) return;
+      const script = document.createElement('script');
+      script.src = '/js/banderquiz-display.js?v=2';
+      script.async = false;
+      script.dataset.tecnomathBanderquizDisplay = 'true';
+      document.head.appendChild(script);
+    };
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', loadBanderQuizDisplay, { once: true });
+    } else {
+      loadBanderQuizDisplay();
+    }
+  }
 })();
