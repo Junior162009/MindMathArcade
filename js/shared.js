@@ -3,7 +3,8 @@
   'use strict';
   const STORAGE_KEY='tecnomath_users', SESSION_KEY='tecnomath_session';
   const COINS_PREFIX='tecnomath_coins_', GAME_COINS_PREFIX='tecnomath_gamecoins_', PROGRESS_PREFIX='tecnomath_progress_';
-  const ADMIN_EMAILS=['delahozbarcelojunior@gmail.com'];
+  const ADMIN_EMAILS=['delahozbarcelojunior@gmail.com','nicolenatera26@gmail.com','mateobarbosamatos@gmail.com','jandresvf23@gmail.com'];
+  const ADMIN_NAMES={'delahozbarcelojunior@gmail.com':'Junior','nicolenatera26@gmail.com':'Nicole','mateobarbosamatos@gmail.com':'Mateo','jandresvf23@gmail.com':'Jaider'};
   function getUsers(){const d=localStorage.getItem(STORAGE_KEY);if(!d)return[];try{const u=JSON.parse(d);return Array.isArray(u)?u:[]}catch(e){localStorage.removeItem(STORAGE_KEY);return[]}}
   function saveUsers(u){localStorage.setItem(STORAGE_KEY,JSON.stringify(u))}
   function findUser(n){return getUsers().find(u=>String(u.username||'').toLowerCase()===String(n||'').toLowerCase())}
@@ -11,7 +12,7 @@
   function firebaseUser(){try{return window.firebase?.auth?.().currentUser||null}catch(_){return null}}
   function isAdminEmail(email){return ADMIN_EMAILS.includes(String(email||'').trim().toLowerCase())}
   function isAdmin(){const u=firebaseUser();return !!u&&isAdminEmail(u.email)}
-  function adminUsername(user){const e=String(user?.email||'').trim().toLowerCase();return e==='delahozbarcelojunior@gmail.com'?'Junior':(e.split('@')[0].replace(/[^a-z0-9._-]/g,'')||'Admin')}
+  function adminUsername(user){const e=String(user?.email||'').trim().toLowerCase();return ADMIN_NAMES[e]||e.split('@')[0].replace(/[^a-z0-9._-]/g,'')||'Admin'}
   async function ensureFirebaseProfile(user){if(!user||!isAdminEmail(user.email)||!window.firebase?.database)return null;const ref=firebase.database().ref('users/'+user.uid);const snap=await ref.once('value');const current=snap.val()||{};const data={...current,username:current.username||adminUsername(user),email:user.email,role:'admin',isAdmin:true,provider:user.providerData?.[0]?.providerId||'firebase',updatedAt:firebase.database.ServerValue.TIMESTAMP};await ref.update(data);localStorage.setItem(SESSION_KEY,JSON.stringify({username:data.username}));return data}
   window.Tecnomath={
     login(username,password){username=(username||'').trim();password=(password||'').trim();if(!username||!password)return{success:false,message:'Usuario y contraseña requeridos'};const u=findUser(username);if(!u||u.password!==password)return{success:false,message:'Usuario o contraseña incorrectos'};localStorage.setItem(SESSION_KEY,JSON.stringify({username:u.username}));return{success:true,username:u.username}},
@@ -48,14 +49,7 @@
       ciencia:['LABORATORIO TECNOMATH','Experimento activado: aprende, prueba y descubre.',['#38d6c6','#7cecff','#a7f071','#ffffff'],[]]
     };
     let last='__unset__';
-    const apply=theme=>{
-      theme=String(theme||'normal').toLowerCase();
-      if(theme==='normal'||!MAP[theme]){if(last==='normal')return;last='normal';if(typeof window.deactivateFairMode==='function'&&window.fairMode)window.deactivateFairMode(false);if(typeof window.deactivateVisualEffects==='function')window.deactivateVisualEffects();if(typeof window.loadThemeCSS==='function')window.loadThemeCSS(null);if(typeof window.updateFavicon==='function')window.updateFavicon('🎮');const t=document.getElementById('mainTitle');if(t)t.textContent='TECNOMATH';if(typeof window.renderProjects==='function')window.renderProjects(window.currentActiveFilter||'todos');return}
-      const c=MAP[theme];last=theme;
-      if(theme==='feria'&&typeof window.activateFairMode==='function'){window.activateFairMode(false);return}
-      if(theme==='feriaplus'&&typeof window.activateMegaFair==='function'){window.activateMegaFair(false);return}
-      if(typeof window.activatePermanentTheme==='function')window.activatePermanentTheme(c[0],c[1],c[2],c[3],theme,false);
-    };
+    const apply=theme=>{theme=String(theme||'normal').toLowerCase();if(theme==='normal'||!MAP[theme]){if(last==='normal')return;last='normal';if(typeof window.deactivateFairMode==='function'&&window.fairMode)window.deactivateFairMode(false);if(typeof window.deactivateVisualEffects==='function')window.deactivateVisualEffects();if(typeof window.loadThemeCSS==='function')window.loadThemeCSS(null);if(typeof window.updateFavicon==='function')window.updateFavicon('🎮');const t=document.getElementById('mainTitle');if(t)t.textContent='TECNOMATH';if(typeof window.renderProjects==='function')window.renderProjects(window.currentActiveFilter||'todos');return}const c=MAP[theme];last=theme;if(theme==='feria'&&typeof window.activateFairMode==='function'){window.activateFairMode(false);return}if(theme==='feriaplus'&&typeof window.activateMegaFair==='function'){window.activateMegaFair(false);return}if(typeof window.activatePermanentTheme==='function')window.activatePermanentTheme(c[0],c[1],c[2],c[3],theme,false)};
     firebase.database().ref('tecnomath/tematicaActiva').on('value',snap=>{const theme=snap.val()||'normal';let tries=0;const wait=()=>{if(typeof window.activatePermanentTheme==='function'||typeof window.renderProjects==='function'||theme==='normal')apply(theme);else if(tries++<100)setTimeout(wait,100)};wait()},error=>console.warn('TecnoMath: no se pudo leer la temática global:',error.code));
   }
   setupThemeBridge();
