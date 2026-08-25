@@ -1,8 +1,16 @@
-// Progreso común de Tecnomath. Requiere Firebase Auth y Realtime Database.
+// Progreso global de Tecnomath. Requiere Firebase Auth + Realtime Database.
 (function () {
   const pending = [];
   let startedAt = Date.now();
   let currentGameId = null;
+
+  const DEFAULT_EVENTS = {
+    halloween: { id: 'halloween', name: 'Halloween', code: 'HALLOWEEN', emoji: '🎃' },
+    navidad: { id: 'navidad', name: 'Navidad', code: 'NAVIDAD', emoji: '🎄' },
+    verano: { id: 'verano', name: 'Verano', code: 'VERANO', emoji: '☀️' },
+    mundial: { id: 'mundial', name: 'Mundial', code: 'MUNDIAL', emoji: '🏆' },
+    regreso: { id: 'regreso', name: 'Regreso a clases', code: 'REGRESO', emoji: '🎒' }
+  };
 
   function getServices() {
     if (!window.firebase || !firebase.auth || !firebase.database) return null;
@@ -25,6 +33,13 @@
     return services.database.ref('userProgress/' + user.uid + '/games/' + gameKey(gameId));
   }
 
+  function totalsRef() {
+    const services = getServices();
+    const user = getUser();
+    if (!services || !user) return null;
+    return services.database.ref('userProgress/' + user.uid + '/totals');
+  }
+
   async function write(gameId, data, mode) {
     const ref = gameRef(gameId);
     if (!ref) return false;
@@ -38,9 +53,31 @@
         lastPlayedAt: timestamp,
         updatedAt: timestamp
       }));
+      const totals = totalsRef();
+      if (totals) await totals.transaction(current => ({
+        ...(current || {}),
+        totalSessions: ((current && current.totalSessions) || 0) + 1,
+        gamesStarted: Math.max(((current && current.gamesStarted) || 0), 0),
+        lastGame: gameKey(gameId),
+        lastPlayedAt: timestamp,
+        updatedAt: timestamp
+      }));
       return true;
     }
     await ref.update({ ...data, gameId: gameKey(gameId), lastPlayedAt: timestamp, updatedAt: timestamp });
+    return true;
+  }
+
+  async function addPlayTime(seconds) {
+    const totals = totalsRef();
+    if (!totals || !Number.isFinite(seconds) || seconds <= 0) return false;
+    const safeSeconds = Math.min(Math.round(seconds), 86400);
+    await totals.transaction(current => ({
+      ...(current || {}),
+      totalSeconds: ((current && current.totalSeconds) || 0) + safeSeconds,
+      totalMinutes: Math.floor((((current && current.totalSeconds) || 0) + safeSeconds) / 60),
+      updatedAt: firebase.database.ServerValue.TIMESTAMP
+    }));
     return true;
   }
 
@@ -58,6 +95,47 @@
       console.warn('No se pudo sincronizar el progreso de Tecnomath.', error);
       return false;
     });
+  }
+
+  async function getEvents() {
+    const services = getServices();
+    const base = { ...DEFAULT_EVENTS };
+    if (!services) return base;
+    try {
+      const snap = await services.database.ref('tecnomath/eventos').once('value');
+      const remote = snap.val() || {};
+      Object.keys(remote).forEach(key => {
+        base[key] = { ...(base[key] || { id: key }), ...remote[key], id: key };
+      });
+    } catch (error) {
+      console.warn('No se pudieron cargar los eventos remotos.', error);
+    }
+    return base;
+  }
+
+  async function unlockEvent(eventId, code) {
+    const user = getUser();
+    if (!user) return { ok: false, reason: 'login_required' };
+    const events = await getEvents();
+    const event = events[String(eventId).toLowerCase()];
+    if (!event || event.active === false) return { ok: false, reason: 'inactive' };
+    if (String(code || '').trim().toUpperCase() !== String(event.code || '').trim().toUpperCase()) {
+      return { ok: false, reason: 'invalid_code' };
+    }
+    await getServices().database.ref('userProgress/' + user.uid + '/events/' + gameKey(event.id)).set({
+      unlocked: true,
+      name: event.name || event.id,
+      unlockedAt: firebase.database.ServerValue.TIMESTAMP
+    });
+    return { ok: true, event };
+  }
+
+  async function isEventUnlocked(eventId) {
+    const services = getServices();
+    const user = getUser();
+    if (!services || !user) return false;
+    const snap = await services.database.ref('userProgress/' + user.uid + '/events/' + gameKey(eventId)).once('value');
+    return !!(snap.val() && snap.val().unlocked);
   }
 
   window.TecnomathProgress = {
@@ -82,19 +160,30 @@
         return Promise.resolve(false);
       }
     },
-    async load(gameId) {
+    load(gameId) {
       const ref = gameRef(gameKey(gameId || currentGameId));
-      if (!ref) return null;
-      const snapshot = await ref.once('value');
-      return snapshot.val();
+      if (!ref) return Promise.resolve(null);
+      return ref.once('value').then(snapshot => snapshot.val());
+    },
+    savePlayTime(seconds) { return addPlayTime(seconds); },
+    events: {
+      list: getEvents,
+      unlock: unlockEvent,
+      isUnlocked: isEventUnlocked
     }
   };
 
   const services = getServices();
   if (services) services.auth.onAuthStateChanged(() => flush());
+
   window.addEventListener('pagehide', () => {
-    if (currentGameId) enqueue(currentGameId, { secondsPlayed: Math.max(1, Math.round((Date.now() - startedAt) / 1000)) }, 'save');
+    if (currentGameId) {
+      const seconds = Math.max(1, Math.round((Date.now() - startedAt) / 1000));
+      enqueue(currentGameId, { secondsPlayed: seconds }, 'save');
+      addPlayTime(seconds).catch(() => {});
+    }
   });
+
   const scriptTag = document.currentScript;
   if (scriptTag && scriptTag.dataset.tecnomathGame) {
     window.TecnomathProgress.start(scriptTag.dataset.tecnomathGame);
