@@ -2,27 +2,43 @@
   "rules": {
     ".read": false,
     ".write": false,
+
     "users": {
       ".read": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || auth.token.email === 'delahozbarcelojunior@gmail.com')",
+
       ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || auth.token.email === 'delahozbarcelojunior@gmail.com')",
+
       "$uid": {
         ".read": "auth != null && (auth.uid === $uid || root.child('users').child(auth.uid).child('role').val() === 'admin' || auth.token.email === 'delahozbarcelojunior@gmail.com')",
+
         ".write": "auth != null && (auth.uid === $uid || root.child('users').child(auth.uid).child('role').val() === 'admin' || auth.token.email === 'delahozbarcelojunior@gmail.com')",
-        "role": { ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || auth.token.email === 'delahozbarcelojunior@gmail.com')" },
-        "isAdmin": { ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || auth.token.email === 'delahozbarcelojunior@gmail.com')" }
+
+        "role": {
+          ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || auth.token.email === 'delahozbarcelojunior@gmail.com')"
+        },
+
+        "isAdmin": {
+          ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || auth.token.email === 'delahozbarcelojunior@gmail.com')"
+        }
       }
     },
+
     "usernames": {
       "$username": {
         ".read": "auth != null",
+
         ".write": "auth != null && (data.val() === auth.uid || !data.exists() || root.child('users').child(auth.uid).child('role').val() === 'admin' || auth.token.email === 'delahozbarcelojunior@gmail.com')"
       }
     },
+
     "adminLogs": {
       ".read": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || auth.token.email === 'delahozbarcelojunior@gmail.com')",
+
       ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || auth.token.email === 'delahozbarcelojunior@gmail.com')",
+
       "$logId": {
         ".read": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || auth.token.email === 'delahozbarcelojunior@gmail.com')",
+
         ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || auth.token.email === 'delahozbarcelojunior@gmail.com')"
       }
     }
