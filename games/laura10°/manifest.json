@@ -1,0 +1,16 @@
+{
+    "name": "Banderquiz",
+    "short_name": "Banderquiz",
+    "start_url": "./index.html",
+    "display": "standalone",
+    "background_color": "#0f0c29",
+    "theme_color": "#0f0c29",
+    "orientation": "portrait-primary",
+    "icons": [
+        {
+            "src": "logo.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ]
+}
