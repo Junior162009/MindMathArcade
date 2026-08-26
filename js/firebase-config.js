@@ -33,7 +33,7 @@
   function loadGameSubmissionSystem(){
     if(document.querySelector('script[data-tecnomath-game-submissions]')) return;
     const script=document.createElement('script');
-    script.src='../js/game-submissions.js?v=1';
+    script.src='/js/game-submissions.js?v=1';
     script.async=true;
     script.dataset.tecnomathGameSubmissions='true';
     document.head.appendChild(script);
