@@ -1,19 +1,185 @@
-name: Procesar juegos enviados sin Firebase Storage
+name: Publicar juegos aprobados desde GitHub Issues
 
 on:
   issues:
-    types: [opened]
+    types: [labeled]
 
 permissions:
   contents: write
   issues: write
 
 jobs:
-  prepare:
-    if: contains(github.event.issue.labels.*.name, 'game-upload')
+  publish:
+    if: github.event.label.name == 'approved' && github.event.issue.state == 'open'
     runs-on: ubuntu-latest
+    env:
+      ISSUE_NUMBER: ${{ github.event.issue.number }}
+      REPO: ${{ github.repository }}
     steps:
-      - uses: actions/checkout@v4
-      - name: Preparar publicación
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Analizar solicitud y descargar adjuntos
+        id: prepare
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
         run: |
-          echo "Sistema Spark: los juegos se procesan mediante GitHub Issues."
+          set -euo pipefail
+          python - <<'PY'
+          import json, os, re, subprocess
+          from pathlib import Path
+          import urllib.request
+
+          repo=os.environ['REPO']
+          issue=os.environ['ISSUE_NUMBER']
+          data=subprocess.check_output(['gh','api',f'repos/{repo}/issues/{issue}'],text=True)
+          obj=json.loads(data)
+          body=obj.get('body') or ''
+          title=obj.get('title') or 'Juego'
+
+          if '<!-- TECNOMATH_GAME_SUBMISSION -->' not in body:
+              raise SystemExit('La Issue no es una solicitud TecnoMath válida.')
+
+          def field(label, default=''):
+              m=re.search(r'^\\*\\*'+re.escape(label)+r':\\*\\*\\s*(.*?)\\s*$',body,re.M)
+              return (m.group(1).strip() if m else default)
+
+          name=field('Nombre',title.replace('🎮 Juego enviado:','').strip())
+          desc=field('Descripción','Juego educativo de TecnoMath')
+          category=field('Categoría','otros')
+          author=field('Autor','Usuario')
+          email=field('Correo','')
+          source=field('Tipo','upload')
+          image=field('Portada','')
+          gameurl=field('URL del juego','')
+
+          safe=re.sub(r'[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑ_-]+','-',name).strip('-')[:70]
+          safe=safe.lower() or 'juego'
+          # Evitar colisiones sin hacer nombres ilegibles.
+          folder=f'{safe}-{issue}'
+          work=Path('.game-work'); work.mkdir(exist_ok=True)
+          attach=work/'attachments'; attach.mkdir(exist_ok=True)
+
+          urls=re.findall(r'https://(?:github\\.com/user-attachments/(?:files|assets)/[^\\s)<>]+|private-user-images\\.githubusercontent\\.com/[^\\s)<>]+)',body)
+          urls=[u.rstrip('.,') for u in urls]
+
+          meta={
+            'name':name,'desc':desc,'category':category,'authorName':author,
+            'authorEmail':email,'imageUrl':image,'sourceType':source,
+            'gameUrl':gameurl,'issueNumber':int(issue),'issueUrl':obj.get('html_url',''),
+            'folder':folder,'attachmentCount':len(urls)
+          }
+          Path(work/'meta.json').write_text(json.dumps(meta,ensure_ascii=False,indent=2),encoding='utf-8')
+
+          if source == 'url':
+              if not re.match(r'^https?://',gameurl,re.I): raise SystemExit('La URL del juego no es válida.')
+              print('URL submission; no attachment download required.')
+          else:
+              if not urls:
+                  raise SystemExit('No se encontraron adjuntos en la Issue. Adjunta el ZIP/RAR/7Z o los archivos del juego y vuelve a añadir la etiqueta approved.')
+              for i,url in enumerate(urls,1):
+                  namepart=url.split('/')[-1].split('?')[0] or f'attachment-{i}'
+                  target=attach/namepart
+                  print(f'Descargando adjunto {i}/{len(urls)}: {url}')
+                  req=urllib.request.Request(url,headers={'User-Agent':'TecnoMath-GitHub-Action'})
+                  with urllib.request.urlopen(req,timeout=60) as r, open(target,'wb') as f:
+                      f.write(r.read())
+                  if target.stat().st_size > 50*1024*1024:
+                      raise SystemExit(f'El adjunto {namepart} supera 50 MB.')
+          PY
+
+          if [ -f .game-work/meta.json ]; then cat .game-work/meta.json; fi
+
+      - name: Preparar carpeta del juego
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json, os, shutil, subprocess
+          from pathlib import Path
+          meta=json.loads(Path('.game-work/meta.json').read_text(encoding='utf-8'))
+          if meta['sourceType']=='url':
+              raise SystemExit(0)
+          root=Path('.game-work/root'); root.mkdir(parents=True,exist_ok=True)
+          extracted=Path('.game-work/extracted'); extracted.mkdir(parents=True,exist_ok=True)
+          attachments=Path('.game-work/attachments')
+          for f in attachments.iterdir():
+              ext=f.suffix.lower()
+              if ext in {'.zip','.rar','.7z','.tar','.gz','.bz2','.xz','.tgz'}:
+                  out=extracted/f.stem
+                  out.mkdir(parents=True,exist_ok=True)
+                  subprocess.run(['7z','x','-y',f'-o{out}',str(f)],check=True,stdout=subprocess.DEVNULL)
+              else:
+                  shutil.copy2(f, extracted/f.name)
+          # Never publish symlinks.
+          for p in extracted.rglob('*'):
+              if p.is_symlink(): p.unlink()
+          indexes=list(extracted.rglob('index.html'))+list(extracted.rglob('index.htm'))
+          if not indexes:
+              raise SystemExit('El juego no contiene index.html o index.htm.')
+          idx=indexes[0]
+          game_root=idx.parent
+          for p in game_root.iterdir():
+              dest=root/p.name
+              if p.is_dir(): shutil.copytree(p,dest,dirs_exist_ok=True)
+              else: shutil.copy2(p,dest)
+          if not (root/'index.html').exists() and not (root/'index.htm').exists():
+              raise SystemExit('No se pudo colocar index.html en la raíz del juego.')
+          print('Contenido preparado:')
+          for p in root.rglob('*'): print(p)
+          PY
+
+      - name: Publicar archivos y actualizar catálogo
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json, os, shutil
+          from pathlib import Path
+          meta=json.loads(Path('.game-work/meta.json').read_text(encoding='utf-8'))
+          folder=meta['folder']
+          games=Path('games'); games.mkdir(exist_ok=True)
+          dest=games/folder
+          if dest.exists():
+              print(f'games/{folder} ya existe; no se sobrescribe.')
+          elif meta['sourceType']=='url':
+              dest.mkdir(parents=True,exist_ok=True)
+              html='<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>'+meta['name']+'</title></head><body><p>Cargando juego…</p><script>location.replace('+json.dumps(meta['gameUrl'])+')</script></body></html>'
+              (dest/'index.html').write_text(html,encoding='utf-8')
+          else:
+              shutil.copytree('.game-work/root',dest)
+
+          cat=Path('data/games.json'); cat.parent.mkdir(exist_ok=True)
+          try: arr=json.loads(cat.read_text(encoding='utf-8')) if cat.exists() else []
+          except Exception: arr=[]
+          arr=[x for x in arr if str(x.get('submissionId','')) != str(meta['issueNumber'])]
+          arr.append({
+            'name':meta['name'],'desc':meta['desc'],'url':f'games/{folder}/index.html',
+            'imageUrl':meta.get('imageUrl',''),'icon':'🎮','category':meta['category'] or 'otros',
+            'deviceCompatibility':'both','evento':None,'submissionId':str(meta['issueNumber']),
+            'authorName':meta.get('authorName') or 'Usuario','sourceType':meta.get('sourceType','upload'),
+            'githubIssue':meta.get('issueUrl','')
+          })
+          cat.write_text(json.dumps(arr,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+          PY
+
+      - name: Commit y cerrar solicitud
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add games data/games.json
+          if git diff --cached --quiet; then
+            echo 'No hay cambios que guardar.'
+          else
+            git commit -m "feat: publish approved game #${ISSUE_NUMBER}"
+            git push
+          fi
+          gh issue comment "$ISSUE_NUMBER" --repo "$REPO" --body "✅ Juego procesado y publicado por TecnoMath. Carpeta: \`games/$(python -c 'import json; print(json.load(open(".game-work/meta.json"))["folder"])')/\`"
+          gh issue close "$ISSUE_NUMBER" --repo "$REPO" --reason completed
