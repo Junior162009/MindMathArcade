@@ -1,0 +1,1 @@
+The Spark-only game submission flow is active. No Storage or Cloud Functions are required.
