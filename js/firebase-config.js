@@ -13,8 +13,6 @@
   if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
   window.TecnomathFirebase = { auth: firebase.auth(), database: firebase.database(), serverTimestamp: firebase.database.ServerValue.TIMESTAMP };
 
-  // Cargar el reconocimiento automático de administradores en cualquier página
-  // que use esta configuración. Así no es necesario entrar primero a /admin.
   if (!document.querySelector('script[data-tecnomath-admin-guard]')) {
     const adminGuard = document.createElement('script');
     adminGuard.src = '/js/admin-guard.js?v=1';
@@ -23,9 +21,6 @@
     document.head.appendChild(adminGuard);
   }
 
-  // Sincronización universal: los minijuegos antiguos que todavía usan
-  // localStorage también quedan ligados a la cuenta Firebase del usuario.
-  // La ruta se calcula para funcionar en la raíz, /pages/ y /games/*.
   if (!document.querySelector('script[data-tecnomath-cloud-sync]')) {
     const cloudSync = document.createElement('script');
     const path = location.pathname;
@@ -34,6 +29,16 @@
     cloudSync.dataset.tecnomathCloudSync = 'true';
     document.head.appendChild(cloudSync);
   }
+
+  function loadGameSubmissionSystem(){
+    if(document.querySelector('script[data-tecnomath-game-submissions]')) return;
+    const script=document.createElement('script');
+    script.src='../js/game-submissions.js?v=1';
+    script.async=true;
+    script.dataset.tecnomathGameSubmissions='true';
+    document.head.appendChild(script);
+  }
+  loadGameSubmissionSystem();
 
   function setupAdminFairControl(){
     if(!/\/pages\/admin\/index\.html$/.test(location.pathname)) return;
