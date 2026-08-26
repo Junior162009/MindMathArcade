@@ -20,9 +20,11 @@ document.addEventListener('DOMContentLoaded',()=>{
  const show=(m,t='ok')=>{st.innerHTML=m;st.className='status show '+t};
  const valid=v=>{try{const x=new URL(v);return x.protocol==='https:'||x.protocol==='http:'}catch(_){return false}};
  const esc=v=>String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
- // IMPORTANTE: mostrar el nombre real de la cuenta, no el correo ni un nombre fijo.
- // Firebase Auth displayName tiene prioridad. Solo si no existe se usa el nombre del perfil y, por último, el correo.
+ // La identidad visible y la que se guarda en la propuesta sale del perfil de Firebase.
+ // username es la fuente principal: displayName puede pertenecer a otra sesión de Google.
  const identityName=(user,profile={})=>{
+   const username=String(profile?.username||'').trim();
+   if(username)return username;
    const display=String(user?.displayName||'').trim();
    if(display)return display;
    const profileName=String(profile?.name||profile?.displayName||profile?.nombre||'').trim();
