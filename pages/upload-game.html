@@ -17,25 +17,30 @@ document.addEventListener('DOMContentLoaded',()=>{
  const f=document.getElementById('gameUploadForm'),st=document.getElementById('uploadStatus'),ub=document.getElementById('uploadUser'),btn=document.getElementById('submitGame'),fi=document.getElementById('gameFiles'),fl=document.getElementById('fileList'),uploadSource=document.getElementById('uploadSource'),urlSource=document.getElementById('urlSource'),gameUrl=document.getElementById('gameUrl');let u=null,submitted=false;
  const show=(m,t='ok')=>{st.innerHTML=m;st.className='status show '+t};
  const valid=v=>{try{const x=new URL(v);return x.protocol==='https:'||x.protocol==='http:'}catch(_){return false}};
- const identityName=user=>{const dn=String(user?.displayName||'').trim();if(dn)return dn;const email=String(user?.email||'').trim();return email?email.split('@')[0]:'Usuario'};
- fi.addEventListener('change',()=>{fl.innerHTML=fi.files.length?[...fi.files].map(x=>'<div>📄 '+x.name+' · '+(x.size/1024/1024).toFixed(2)+' MB</div>').join(''):'Ningún archivo seleccionado.'});
+ // La identidad de la propuesta sale exclusivamente de Firebase Authentication.
+ // No se usa la sesión antigua de localStorage ni un nombre fijo.
+ const identityName=user=>{const email=String(user?.email||'').trim();if(email){const local=email.split('@')[0].replace(/[._-]+/g,' ').trim();if(local)return local.replace(/\b\w/g,c=>c.toUpperCase())}const dn=String(user?.displayName||'').trim();return dn||'Usuario'};
+ const escapeHtml=v=>String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+ fi.addEventListener('change',()=>{fl.innerHTML=fi.files.length?[...fi.files].map(x=>'<div>📄 '+escapeHtml(x.name)+' · '+(x.size/1024/1024).toFixed(2)+' MB</div>').join(''):'Ningún archivo seleccionado.'});
  document.querySelectorAll('input[name="sourceType"]').forEach(r=>r.addEventListener('change',()=>{const isUrl=r.value==='url'&&r.checked;uploadSource.style.display=isUrl?'none':'block';urlSource.style.display=isUrl?'block':'none';fi.required=!isUrl;gameUrl.required=isUrl;btn.textContent=isUrl?'🚀 ENVIAR URL':'🚀 ENVIAR JUEGO'}));
  const ready=()=>window.TecnomathFirebase?.auth&&window.TecnomathFirebase?.database;
- function loadUser(user){u=user||null;if(!u){ub.innerHTML='🔒 Debes iniciar sesión. <a href="auth.html">Iniciar sesión</a>';btn.disabled=true;return false}const username=identityName(u);ub.innerHTML='👤 <b>'+username+'</b><br><small>'+String(u.email||'')+'</small>';btn.disabled=false;return true}
+ function loadUser(user){u=user||null;if(!u){ub.innerHTML='🔒 Debes iniciar sesión. <a href="auth.html">Iniciar sesión</a>';btn.disabled=true;return false}const username=identityName(u);ub.innerHTML='👤 <b>'+escapeHtml(username)+'</b><br><small>'+escapeHtml(u.email||'')+'</small><br><small>UID: '+escapeHtml(u.uid)+'</small>';btn.disabled=false;return true}
  let n=0;const wait=()=>{if(ready())return window.TecnomathFirebase.auth.onAuthStateChanged(loadUser);if(++n>100){ub.textContent='❌ Firebase no terminó de inicializarse.';btn.disabled=true}else setTimeout(wait,100)};wait();
- async function uploadFile(file,root,index,total){const path=root+'/'+(file.webkitRelativePath||file.name).replace(/^\/+/, '');const ref=window.TecnomathFirebase.storage.ref(path);await new Promise((resolve,reject)=>{const task=ref.put(file,{contentType:file.type||'application/octet-stream'});task.on('state_changed',snap=>{const pct=snap.totalBytes?Math.round(((index+snap.bytesTransferred/snap.totalBytes)/total)*100):0;show('📤 Subiendo archivos… <b>'+pct+'%</b><br><small>'+file.name+'</small>','ok')},reject,resolve)});return path}
- f.addEventListener('submit',async e=>{e.preventDefault();if(submitted)return;if(!u)return show('Debes iniciar sesión.','error');
+ async function uploadFile(file,root,index,total){const path=root+'/'+(file.webkitRelativePath||file.name).replace(/^\/+/, '');const ref=window.TecnomathFirebase.storage.ref(path);await new Promise((resolve,reject)=>{const task=ref.put(file,{contentType:file.type||'application/octet-stream'});task.on('state_changed',snap=>{const pct=snap.totalBytes?Math.round(((index+snap.bytesTransferred/snap.totalBytes)/total)*100):0;show('📤 Subiendo archivos… <b>'+pct+'%</b><br><small>'+escapeHtml(file.name)+'</small>','ok')},reject,resolve)});return path}
+ f.addEventListener('submit',async e=>{e.preventDefault();if(submitted)return;
+  const activeUser=window.TecnomathFirebase?.auth?.currentUser;if(!activeUser)return show('Debes iniciar sesión.','error');
+  u=activeUser;
   const name=document.getElementById('gameName').value.trim(),description=document.getElementById('gameDescription').value.trim(),category=document.getElementById('gameCategory').value,imageUrl=document.getElementById('gameImageUrl').value.trim(),sourceType=document.querySelector('input[name="sourceType"]:checked').value,externalUrl=gameUrl.value.trim();
   if(!name||!description)return show('Completa el nombre y la descripción.','error');if(imageUrl&&!valid(imageUrl))return show('La URL de portada no es válida.','error');if(sourceType==='url'&&!valid(externalUrl))return show('La URL del juego no es válida.','error');if(sourceType==='upload'&&!fi.files.length)return show('Selecciona al menos un archivo.','error');
   submitted=true;btn.disabled=true;show('⏳ Preparando subida…','ok');
   try{
-   const activeUser=window.TecnomathFirebase.auth.currentUser;if(!activeUser||activeUser.uid!==u.uid)throw Error('La sesión cambió. Recarga la página e inténtalo de nuevo.');
-   const username=identityName(activeUser),email=String(activeUser.email||''),id=window.TecnomathFirebase.database.ref('gameSubmissions').push().key,root='gameSubmissions/'+activeUser.uid+'/'+id,files=sourceType==='upload'?[...fi.files]:[];let storagePrefix='',fileCount=0;
+   const verifyUser=window.TecnomathFirebase.auth.currentUser;if(!verifyUser||verifyUser.uid!==activeUser.uid)throw Error('La sesión cambió. Recarga la página e inténtalo de nuevo.');
+   const username=identityName(verifyUser),email=String(verifyUser.email||''),id=window.TecnomathFirebase.database.ref('gameSubmissions').push().key,root='gameSubmissions/'+verifyUser.uid+'/'+id,files=sourceType==='upload'?[...fi.files]:[];let storagePrefix='',fileCount=0;
    if(sourceType==='upload'){if(!window.TecnomathFirebase.storage)throw Error('Firebase Storage no está disponible.');storagePrefix=root;const total=files.length;for(let i=0;i<files.length;i++){await uploadFile(files[i],root,i,total);fileCount++}}
-   const data={name,description,category,authorName:username,authorEmail:email,authorUid:activeUser.uid,sourceType,gameUrl:sourceType==='url'?externalUrl:'',imageUrl:imageUrl||'',icon:'🎮',storagePrefix,fileCount,status:'pending',createdAt:window.TecnomathFirebase.serverTimestamp};
+   const data={name,description,category,authorName:username,authorEmail:email,authorUid:verifyUser.uid,sourceType,gameUrl:sourceType==='url'?externalUrl:'',imageUrl:imageUrl||'',icon:'🎮',storagePrefix,fileCount,status:'pending',createdAt:window.TecnomathFirebase.serverTimestamp};
    await window.TecnomathFirebase.database.ref('gameSubmissions/'+id).set(data);
-   show('✅ <b>Juego enviado correctamente.</b><br><br>El administrador recibirá la solicitud y podrá probar el juego antes de aprobarlo.<br><small>Tu cuenta: '+username+'</small>','ok');f.reset();fl.textContent='Ningún archivo seleccionado.';btn.textContent='✅ ENVIADO';
-  }catch(err){submitted=false;btn.disabled=false;show('❌ No se pudo enviar el juego.<br><small>'+String(err.message||err)+'</small>','error');}
+   show('✅ <b>Juego enviado correctamente.</b><br><br>El administrador recibirá la solicitud y podrá probar el juego antes de aprobarlo.<br><small>Cuenta detectada: '+escapeHtml(username)+'<br>'+escapeHtml(email)+'</small>','ok');f.reset();fl.textContent='Ningún archivo seleccionado.';btn.textContent='✅ ENVIADO';
+  }catch(err){submitted=false;btn.disabled=false;show('❌ No se pudo enviar el juego.<br><small>'+escapeHtml(String(err.message||err))+'</small>');}
  });
 });
 </script></body></html>
