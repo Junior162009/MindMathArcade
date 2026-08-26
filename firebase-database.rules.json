@@ -30,10 +30,17 @@
       }
     },
     "gameSubmissions": {
-      ".read": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || auth.token.email === 'delahozbarcelojunior@gmail.com' || auth.token.email === 'nicolenatera26@gmail.com' || auth.token.email === 'mateobarbosamatos@gmail.com' || auth.token.email === 'jandresvf23@gmail.com')",
+      ".read": "auth != null && (auth.token.email === 'delahozbarcelojunior@gmail.com' || auth.token.email === 'nicolenatera26@gmail.com' || auth.token.email === 'mateobarbosamatos@gmail.com' || auth.token.email === 'jandresvf23@gmail.com' || root.child('users').child(auth.uid).child('role').val() === 'admin')",
       "$submissionId": {
-        ".read": "auth != null && (data.child('authorUid').val() === auth.uid || root.child('users').child(auth.uid).child('role').val() === 'admin' || auth.token.email === 'delahozbarcelojunior@gmail.com' || auth.token.email === 'nicolenatera26@gmail.com' || auth.token.email === 'mateobarbosamatos@gmail.com' || auth.token.email === 'jandresvf23@gmail.com')",
-        ".write": "auth != null && ((!data.exists() && newData.child('authorUid').val() === auth.uid) || root.child('users').child(auth.uid).child('role').val() === 'admin' || auth.token.email === 'delahozbarcelojunior@gmail.com' || auth.token.email === 'nicolenatera26@gmail.com' || auth.token.email === 'mateobarbosamatos@gmail.com' || auth.token.email === 'jandresvf23@gmail.com')"
+        ".read": "auth != null && (data.child('authorUid').val() === auth.uid || auth.token.email === 'delahozbarcelojunior@gmail.com' || auth.token.email === 'nicolenatera26@gmail.com' || auth.token.email === 'mateobarbosamatos@gmail.com' || auth.token.email === 'jandresvf23@gmail.com' || root.child('users').child(auth.uid).child('role').val() === 'admin')",
+        ".write": "auth != null && ((!data.exists() && newData.child('authorUid').val() === auth.uid && newData.child('status').val() === 'pending' && newData.child('zipBase64').isString() && newData.child('zipBase64').val().length < 12000000) || root.child('users').child(auth.uid).child('role').val() === 'admin' || auth.token.email === 'delahozbarcelojunior@gmail.com' || auth.token.email === 'nicolenatera26@gmail.com' || auth.token.email === 'mateobarbosamatos@gmail.com' || auth.token.email === 'jandresvf23@gmail.com')"
+      }
+    },
+    "approvedGames": {
+      ".read": true,
+      "$gameId": {
+        ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || auth.token.email === 'delahozbarcelojunior@gmail.com' || auth.token.email === 'nicolenatera26@gmail.com' || auth.token.email === 'mateobarbosamatos@gmail.com' || auth.token.email === 'jandresvf23@gmail.com')",
+        ".validate": "newData.hasChildren(['name','zipBase64','publishFolder','submissionId']) && newData.child('zipBase64').isString() && newData.child('zipBase64').val().length < 12000000"
       }
     },
     "publishedGames": {
