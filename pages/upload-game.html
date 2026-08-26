@@ -20,11 +20,29 @@ document.addEventListener('DOMContentLoaded',()=>{
  const show=(m,t='ok')=>{st.innerHTML=m;st.className='status show '+t};
  const valid=v=>{try{const x=new URL(v);return x.protocol==='https:'||x.protocol==='http:'}catch(_){return false}};
  const esc=v=>String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
- const identityName=user=>{const email=String(user?.email||'').trim();if(email){const local=email.split('@')[0].replace(/[._-]+/g,' ').trim();if(local)return local.replace(/\b\w/g,c=>c.toUpperCase())}return String(user?.displayName||'').trim()||'Usuario'};
+ // IMPORTANTE: mostrar el nombre real de la cuenta, no el correo ni un nombre fijo.
+ // Firebase Auth displayName tiene prioridad. Solo si no existe se usa el nombre del perfil y, por último, el correo.
+ const identityName=(user,profile={})=>{
+   const display=String(user?.displayName||'').trim();
+   if(display)return display;
+   const profileName=String(profile?.name||profile?.displayName||profile?.nombre||'').trim();
+   if(profileName)return profileName;
+   const email=String(user?.email||'').trim();
+   if(email){const local=email.split('@')[0].replace(/[._-]+/g,' ').trim();if(local)return local.replace(/\b\w/g,c=>c.toUpperCase())}
+   return 'Usuario';
+ };
  fi.addEventListener('change',()=>{fl.innerHTML=fi.files.length?[...fi.files].map(x=>'<div>📄 '+esc(x.name)+' · '+(x.size/1024/1024).toFixed(2)+' MB</div>').join(''):'Ningún archivo seleccionado.'});
  document.querySelectorAll('input[name="sourceType"]').forEach(r=>r.addEventListener('change',()=>{const isUrl=r.value==='url'&&r.checked;uploadSource.style.display=isUrl?'none':'block';urlSource.style.display=isUrl?'block':'none';fi.required=!isUrl;gameUrl.required=isUrl;btn.textContent=isUrl?'🚀 ENVIAR URL':'🚀 ENVIAR JUEGO'}));
  const ready=()=>window.TecnomathFirebase?.auth&&window.TecnomathFirebase?.database;
- function loadUser(user){u=user||null;if(!u){ub.innerHTML='🔒 Debes iniciar sesión. <a href="auth.html">Iniciar sesión</a>';btn.disabled=true;return}ub.innerHTML='👤 <b>'+esc(identityName(u))+'</b><br><small>'+esc(u.email||'')+'</small>';btn.disabled=false}
+ async function loadUser(user){
+   u=user||null;
+   if(!u){ub.innerHTML='🔒 Debes iniciar sesión. <a href="auth.html">Iniciar sesión</a>';btn.disabled=true;return}
+   let profile={};
+   try{const snap=await window.TecnomathFirebase.database.ref('users/'+u.uid).once('value');profile=snap.val()||{}}catch(e){console.warn('No se pudo leer el perfil:',e)}
+   const username=identityName(u,profile);
+   ub.innerHTML='👤 <b>'+esc(username)+'</b><br><small>'+esc(u.email||'')+'</small>';
+   btn.disabled=false;
+ }
  let n=0;const wait=()=>{if(ready())return window.TecnomathFirebase.auth.onAuthStateChanged(loadUser);if(++n>100){ub.textContent='❌ Firebase no terminó de inicializarse.';btn.disabled=true}else setTimeout(wait,100)};wait();
  const blobToBase64=blob=>new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(String(r.result).split(',')[1]||'');r.onerror=reject;r.readAsDataURL(blob)});
  async function makePackage(files){
@@ -46,7 +64,8 @@ document.addEventListener('DOMContentLoaded',()=>{
        if(packageSize>7*1024*1024)throw Error('El paquete comprimido supera 7 MB. Reduce el tamaño del juego o usa una URL pública.');
        show('📦 Preparando paquete… <b>25%</b>','ok');packageBase64=await blobToBase64(pack.blob);show('☁️ Enviando propuesta… <b>75%</b>','ok');
      }
-     const username=identityName(active),data={name,description,category,authorName:username,authorEmail:String(active.email||''),authorUid:active.uid,sourceType,gameUrl:sourceType==='url'?externalUrl:'',imageUrl:imageUrl||'',icon:'🎮',fileCount,packageName,packageSize,packageBase64,status:'pending',createdAt:Date.now()};
+     let profile={};try{const snap=await window.TecnomathFirebase.database.ref('users/'+active.uid).once('value');profile=snap.val()||{}}catch(e){}
+     const username=identityName(active,profile),data={name,description,category,authorName:username,authorEmail:String(active.email||''),authorUid:active.uid,sourceType,gameUrl:sourceType==='url'?externalUrl:'',imageUrl:imageUrl||'',icon:'🎮',fileCount,packageName,packageSize,packageBase64,status:'pending',createdAt:Date.now()};
      await window.TecnomathFirebase.database.ref('gameSubmissions/'+id).set({...data,gameUrl:data.gameUrl||''});
      if(sourceType==='upload')await window.TecnomathFirebase.database.ref('gameUploadQueue/'+id).set({...data,submissionId:id});
      else await window.TecnomathFirebase.database.ref('gameUploadQueue/'+id).set({...data,submissionId:id,packageBase64:''});
