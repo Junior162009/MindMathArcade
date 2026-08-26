@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>BIT RUSH</title><link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="game">
+  <header><div class="brand">⚡ BIT RUSH</div><div class="stats"><span>❤️ <b id="lives">3</b></span><span>🏆 <b id="score">0</b></span><span>🔥 <b id="combo">0</b></span><span>⏱️ <b id="time">60</b>s</span></div></header>
+  <main>
+    <section id="menu" class="panel"><div class="robot">🤖</div><h1>BIT RUSH</h1><p>Corre, calcula y pisa la respuesta correcta.</p><button id="start">INICIAR RUSH</button><p class="hint">PC: ← → o A/D · ESPACIO para saltar<br>Móvil: desliza izquierda/derecha o toca una plataforma</p></section>
+    <section id="hud" class="hidden">
+      <div class="question"><small>CONVIERTE Y RESUELVE</small><strong id="question">101 + 10 = ?</strong><div id="phase">FASE 1 · CONVERSIÓN</div></div>
+      <div class="track"><div class="bridge"></div><div id="player">🤖</div><div id="platforms"></div></div>
+      <div class="powerbar"><button data-power="shield">🛡️</button><button data-power="hack">🧠</button><button data-power="slow">🐢</button><button data-power="turbo">⚡</button></div>
+    </section>
+    <section id="result" class="panel hidden"><div class="robot">🏁🤖</div><h2>RUSH TERMINADO</h2><p>Puntuación: <b id="finalScore">0</b></p><p>Distancia: <b id="distance">0</b> m · Mejor combo: <b id="bestCombo">0</b></p><button id="again">JUGAR DE NUEVO</button></section>
+  </main>
+</div>
+<script src="game.js"></script>
+</body></html>
