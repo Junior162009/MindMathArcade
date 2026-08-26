@@ -30,6 +30,7 @@
       }
     },
     "gameSubmissions": {
+      ".read": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || auth.token.email === 'delahozbarcelojunior@gmail.com' || auth.token.email === 'nicolenatera26@gmail.com' || auth.token.email === 'mateobarbosamatos@gmail.com' || auth.token.email === 'jandresvf23@gmail.com')",
       "$submissionId": {
         ".read": "auth != null && (data.child('authorUid').val() === auth.uid || root.child('users').child(auth.uid).child('role').val() === 'admin' || auth.token.email === 'delahozbarcelojunior@gmail.com' || auth.token.email === 'nicolenatera26@gmail.com' || auth.token.email === 'mateobarbosamatos@gmail.com' || auth.token.email === 'jandresvf23@gmail.com')",
         ".write": "auth != null && ((!data.exists() && newData.child('authorUid').val() === auth.uid) || root.child('users').child(auth.uid).child('role').val() === 'admin' || auth.token.email === 'delahozbarcelojunior@gmail.com' || auth.token.email === 'nicolenatera26@gmail.com' || auth.token.email === 'mateobarbosamatos@gmail.com' || auth.token.email === 'jandresvf23@gmail.com')"
