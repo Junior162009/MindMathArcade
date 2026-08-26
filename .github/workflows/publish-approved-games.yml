@@ -12,131 +12,39 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     steps:
-      - name: Descargar repositorio
-        uses: actions/checkout@v4
-
-      - name: Publicar juegos aprobados
+      - uses: actions/checkout@v4
+      - name: Generar wrappers y catálogo
         env:
-          DB_URL: https://tecnomath-sync-6058a-default-rtdb.firebaseio.com
-          SITE_URL: https://tecnomath.online/
+          FIREBASE_DB: https://tecnomath-sync-6058a-default-rtdb.firebaseio.com
         run: |
-          python3 <<'PY'
-          import base64, json, os, re, shutil, tempfile, unicodedata, urllib.request, zipfile
+          python - <<'PY'
+          import json, os, re
           from pathlib import Path
-
-          db_url=os.environ['DB_URL'].rstrip('/')
-          site_url=os.environ['SITE_URL'].rstrip('/')+'/'
-          with urllib.request.urlopen(db_url+'/approvedGames.json', timeout=30) as r:
-              raw=json.load(r) or {}
-
-          manifest_path=Path('games/published-games.json')
-          try:
-              manifest=json.loads(manifest_path.read_text(encoding='utf-8'))
-          except Exception:
-              manifest=[]
-          if not isinstance(manifest,list): manifest=[]
-          published={str(x.get('submissionId')):x for x in manifest if isinstance(x,dict) and x.get('submissionId')}
-
+          from urllib.request import urlopen, Request
+          db=os.environ['FIREBASE_DB'].rstrip('/')
+          req=Request(db+'/publishedGames.json',headers={'Accept':'application/json'})
+          with urlopen(req,timeout=30) as r: data=json.loads(r.read().decode() or 'null')
+          root=Path('games'); root.mkdir(exist_ok=True); out=[]
           def slug(v):
-              v=unicodedata.normalize('NFD',str(v or 'juego')).encode('ascii','ignore').decode().lower()
-              v=re.sub(r'[^a-z0-9_-]+','-',v).strip('-')[:45]
-              return v or 'juego'
-
-          changed=False
-          for sid,item in raw.items():
-              if not isinstance(item,dict) or not item.get('zipBase64'):
-                  continue
-              folder=str(item.get('publishFolder') or ('games/'+slug(item.get('name'))+'-'+sid))
-              if not folder.startswith('games/') or '..' in Path(folder).parts:
-                  print('Omitido por ruta insegura:',sid)
-                  continue
-              if sid in published:
-                  continue
-
-              with tempfile.TemporaryDirectory() as td:
-                  td=Path(td)
-                  archive=td/'game.zip'
-                  archive.write_bytes(base64.b64decode(item['zipBase64']))
-                  extract=td/'extract'
-                  extract.mkdir()
-                  with zipfile.ZipFile(archive) as z:
-                      infos=z.infolist()
-                      if len(infos)>200:
-                          print('Omitido: demasiados archivos',sid)
-                          continue
-                      total=sum(i.file_size for i in infos)
-                      if total>50*1024*1024:
-                          print('Omitido: ZIP descomprimido demasiado grande',sid)
-                          continue
-                      for info in infos:
-                          name=info.filename.replace('\\','/')
-                          target=(extract/name).resolve()
-                          if not str(target).startswith(str(extract.resolve())+os.sep):
-                              raise RuntimeError('ZIP con ruta insegura')
-                          if name.startswith('.github/') or '/.github/' in name:
-                              continue
-                          if not info.is_dir():
-                              target.parent.mkdir(parents=True,exist_ok=True)
-                              with z.open(info) as src, open(target,'wb') as dst:
-                                  shutil.copyfileobj(src,dst)
-
-                  indexes=list(extract.rglob('index.html'))+list(extract.rglob('Index.html'))
-                  if not indexes:
-                      print('Omitido: no contiene index.html',sid)
-                      continue
-                  index=indexes[0]
-                  source=index.parent
-                  destination=Path(folder)
-                  destination.mkdir(parents=True,exist_ok=True)
-                  for p in source.rglob('*'):
-                      rel=p.relative_to(source)
-                      out=destination/rel
-                      if p.is_dir(): out.mkdir(parents=True,exist_ok=True)
-                      else:
-                          out.parent.mkdir(parents=True,exist_ok=True)
-                          shutil.copy2(p,out)
-
-                  image_url=''
-                  cover=item.get('coverBase64')
-                  if cover:
-                      mime=item.get('coverMime','image/jpeg')
-                      ext='png' if mime=='image/png' else ('webp' if mime=='image/webp' else 'jpg')
-                      cover_path=destination/f'cover.{ext}'
-                      cover_path.write_bytes(base64.b64decode(cover))
-                      image_url=site_url+str(cover_path).replace('\\','/')
-
-                  url=site_url+str(destination/'index.html').replace('\\','/')
-                  entry={
-                      'name':str(item.get('name') or 'Juego'),
-                      'desc':str(item.get('desc') or ''),
-                      'url':url,
-                      'imageUrl':image_url,
-                      'icon':str(item.get('icon') or '🎮'),
-                      'category':str(item.get('category') or 'otros'),
-                      'deviceCompatibility':'both',
-                      'evento':None,
-                      'authorName':str(item.get('authorName') or 'Usuario'),
-                      'submissionId':str(sid)
-                  }
-                  published[str(sid)]=entry
-                  changed=True
-                  print('Publicado:',sid,url)
-
-          if changed:
-              manifest=sorted(published.values(), key=lambda x: str(x.get('name','')).lower())
-              manifest_path.write_text(json.dumps(manifest,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
-          else:
-              print('No hay juegos nuevos aprobados.')
+              s=re.sub(r'[^a-z0-9]+','-',str(v or 'juego').lower()).strip('-')
+              return s[:45] or 'juego'
+          for gid,g in (data or {}).items():
+              if not isinstance(g,dict) or not g.get('url'): continue
+              folder=f"{slug(g.get('name'))}-{slug(gid)[-16:]}"
+              d=root/folder; d.mkdir(parents=True,exist_ok=True)
+              url=str(g['url']).replace('\\','\\\\').replace('"','\\"')
+              title=str(g.get('name') or 'Juego TecnoMath').replace('&','&amp;').replace('<','&lt;').replace('>','&gt;')
+              html=f'''<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>{title} · TecnoMath</title><meta http-equiv="refresh" content="0;url={url}"><style>html,body{{margin:0;height:100%;background:#060610;color:#00ffff;font-family:Arial;display:grid;place-items:center;text-align:center}}a{{color:#39ff14}}</style></head><body><div><h1>🎮 {title}</h1><p>Cargando…</p><a href="{url}">Abrir juego</a><script>location.replace("{url}")</script></div></body></html>'''
+              (d/'index.html').write_text(html,encoding='utf-8')
+              out.append({'name':g.get('name') or 'Juego','desc':g.get('desc') or 'Juego educativo de TecnoMath','url':f'games/{folder}/index.html','imageUrl':g.get('imageUrl') or '','icon':g.get('icon') or '🎮','category':g.get('category') or 'otros','deviceCompatibility':'both','evento':g.get('evento'),'submissionId':gid,'authorName':g.get('authorName') or 'Usuario'})
+          (root/'published-games.json').write_text(json.dumps(out,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+          print('Juegos publicados:',len(out))
           PY
-
-      - name: Guardar cambios
+      - name: Commit y publicar
         run: |
-          git config user.name "MindMath Arcade Bot"
+          if git diff --quiet; then exit 0; fi
+          git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add games/published-games.json games/
-          if git diff --cached --quiet; then
-            echo "Sin cambios para publicar."
-          else
-            git commit -m "🎮 Publicar juegos aprobados"
-            git push
-          fi
+          git add games/published-games.json games/*/index.html
+          git commit -m "chore: publish approved games"
+          git push
