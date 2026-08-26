@@ -1,81 +1,66 @@
-# Sistema de juegos enviados — versión sin facturación
+# Sistema de juegos enviados — versión Spark
 
-El sistema fue adaptado para funcionar sin Cloud Functions, sin Firebase Storage y sin una cuenta de facturación de Google Cloud.
+El sistema fue adaptado para funcionar sin Cloud Functions, Firebase Storage, Secret Manager ni cuenta de facturación.
 
-## Archivos principales
-
-- `pages/upload-game.html`: formulario de envío.
-- `js/game-submissions.js`: guarda el ZIP en Realtime Database, muestra las solicitudes y publica desde el panel admin.
-- `js/admin-guard.js`: carga el módulo de juegos enviados dentro del panel de administradores.
-- `js/published-games.js`: incorpora automáticamente los juegos publicados al catálogo.
-- `firebase-database.rules.json`: permisos y validaciones de los envíos.
-- `firebase.json`: únicamente despliega las reglas de Realtime Database.
-
-## Cómo funciona
+## Flujo actual
 
 ```text
 Usuario inicia sesión
         ↓
 🎮 SUBIR JUEGO
         ↓
-ZIP convertido a Base64
+Introduce nombre + descripción + categoría + URL del juego
         ↓
-Realtime Database /gameSubmissions
+Realtime Database → gameSubmissions/{id}
         ↓
-Estado: pending
+👑 Los 4 administradores lo revisan
         ↓
-👑 Panel de los 4 administradores
+✅ Aprobar y publicar
         ↓
-✅ Aprobar
-        ↓
-🚀 Publicar en GitHub
-        ↓
-games/<juego-id>/index.html
-        ↓
-publishedGames/<id>
+publishedGames/{id}
         ↓
 🎮 aparece automáticamente en MindMathArcade
 ```
 
-## Límite
+## Qué se eliminó
 
-Para evitar Firebase Storage, el ZIP tiene un límite de **7 MB**. La base de datos guarda el contenido como Base64, por lo que el archivo ocupa más que su tamaño original. Realtime Database permite strings de hasta 10 MB y el plan Spark incluye 1 GB de almacenamiento y 10 GB/mes de descargas. urlLímites de Realtime Databasehttps://firebase.google.com/docs/database/usage/limits
+- Firebase Storage para los envíos.
+- Cloud Functions.
+- Secret Manager.
+- Resend/EmailJS como requisito del backend.
+- Cuenta de facturación de Google Cloud.
+- GitHub token dentro de la aplicación.
 
-## Publicación en GitHub
+El proyecto puede continuar usando el plan Spark mientras se mantenga dentro de sus cuotas de Realtime Database. Firebase indica que Spark incluye 1 GB de almacenamiento de Realtime Database y 10 GB/mes de descargas, con un límite de 100 conexiones simultáneas. urlFirebase Pricinghttps://firebase.google.com/pricing
 
-La publicación ya no necesita Cloud Functions.
+## Cómo se publica un juego
 
-Un administrador introduce temporalmente un **Fine-grained Personal Access Token** en el panel. El token:
+El usuario debe tener el juego ya disponible en una URL web, por ejemplo:
 
-- no se guarda en Firebase;
-- no se guarda en GitHub;
-- solamente permanece en `sessionStorage` de esa pestaña;
-- puede limpiarse con el botón **Limpiar token**.
+- GitHub Pages
+- Netlify
+- Vercel
+- Otro hosting web que entregue un `index.html`
 
-El token debe estar limitado al repositorio `Junior162009/MindMathArcade` y tener **Contents → Read and write**. GitHub documenta que el endpoint de creación/actualización de contenidos admite tokens fine-grained con permiso `Contents: write`. urlGitHub — Create or update file contentshttps://docs.github.com/en/rest/repos/contents
+El formulario guarda únicamente la URL y los metadatos en Realtime Database. El administrador prueba la URL y pulsa **Aprobar y publicar**. En ese momento se crea `publishedGames/{id}` y el catálogo lo incorpora automáticamente.
+
+### Importante sobre la carpeta `games/`
+
+Sin un backend con credenciales de escritura en GitHub, una página web pública **no puede modificar de forma segura el repositorio GitHub automáticamente**. Por eso esta versión publica el juego en el catálogo mediante su URL externa.
+
+Si más adelante consigues una cuenta de facturación funcional, se puede volver a habilitar un backend para copiar automáticamente los archivos aprobados a `games/`.
+
+## Reglas
+
+Las reglas mantienen las funciones anteriores y añaden:
+
+- Usuarios autenticados pueden crear su propia solicitud.
+- El usuario no puede aprobarse su propio juego.
+- El usuario no puede cambiar su `authorUid`.
+- Los administradores pueden revisar y publicar.
+- `publishedGames` es público para que el catálogo pueda leerlo.
+- Los 4 administradores fundadores conservan sus privilegios.
 
 ## Firebase
 
-Ya no necesitas desplegar:
-
-```text
-storage
-functions
-```
-
-Solo las reglas de Realtime Database:
-
-```bash
-firebase deploy --only database
-```
-
-Los cuatro administradores fundadores continúan siendo:
-
-- Junior — `delahozbarcelojunior@gmail.com`
-- Nicole — `nicolenatera26@gmail.com`
-- Mateo — `mateobarbosamatos@gmail.com`
-- Jaider — `jandresvf23@gmail.com`
-
-## Correos
-
-El correo automático mediante Cloud Functions fue eliminado de esta versión porque requería backend/facturación. El panel de administradores funciona como centro de notificaciones: muestra las solicitudes pendientes a los cuatro administradores.
+El `firebase.json` de esta versión solamente despliega Realtime Database. No es necesario configurar Storage ni Functions.
