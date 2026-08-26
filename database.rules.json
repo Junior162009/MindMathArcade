@@ -5,27 +5,29 @@
 
     "users": {
       ".read": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || auth.token.email === 'delahozbarcelojunior@gmail.com' || auth.token.email === 'nicolenatera26@gmail.com' || auth.token.email === 'mateobarbosamatos@gmail.com' || auth.token.email === 'jandresvf23@gmail.com')",
-
       "$uid": {
         ".read": "auth != null && (auth.uid === $uid || root.child('users').child(auth.uid).child('role').val() === 'admin' || auth.token.email === 'delahozbarcelojunior@gmail.com' || auth.token.email === 'nicolenatera26@gmail.com' || auth.token.email === 'mateobarbosamatos@gmail.com' || auth.token.email === 'jandresvf23@gmail.com')",
-
         ".write": "auth != null && ((auth.uid === $uid && (!data.exists() || (newData.exists() && newData.child('role').val() === data.child('role').val() && newData.child('isAdmin').val() === data.child('isAdmin').val()))) || (!data.exists() && (auth.token.email === 'delahozbarcelojunior@gmail.com' || auth.token.email === 'nicolenatera26@gmail.com' || auth.token.email === 'mateobarbosamatos@gmail.com' || auth.token.email === 'jandresvf23@gmail.com') && newData.exists() && newData.child('role').val() === 'admin' && newData.child('isAdmin').val() === true) || ((auth.token.email === 'delahozbarcelojunior@gmail.com' || auth.token.email === 'nicolenatera26@gmail.com' || auth.token.email === 'mateobarbosamatos@gmail.com' || auth.token.email === 'jandresvf23@gmail.com') && data.exists() && (data.child('email').val() === 'delahozbarcelojunior@gmail.com' || data.child('email').val() === 'nicolenatera26@gmail.com' || data.child('email').val() === 'mateobarbosamatos@gmail.com' || data.child('email').val() === 'jandresvf23@gmail.com') && newData.exists() && newData.child('email').val() === data.child('email').val() && newData.child('role').val() === 'admin' && newData.child('isAdmin').val() === true) || (root.child('users').child(auth.uid).child('role').val() === 'admin' && data.exists() && !(data.child('email').val() === 'delahozbarcelojunior@gmail.com' || data.child('email').val() === 'nicolenatera26@gmail.com' || data.child('email').val() === 'mateobarbosamatos@gmail.com' || data.child('email').val() === 'jandresvf23@gmail.com'))))"
       }
     },
-
     "usernames": {
       "$username": {
         ".read": "auth != null",
         ".write": "auth != null && (data.val() === auth.uid || !data.exists() || root.child('users').child(auth.uid).child('role').val() === 'admin' || auth.token.email === 'delahozbarcelojunior@gmail.com' || auth.token.email === 'nicolenatera26@gmail.com' || auth.token.email === 'mateobarbosamatos@gmail.com' || auth.token.email === 'jandresvf23@gmail.com')"
       }
     },
-
     "adminLogs": {
       ".read": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || auth.token.email === 'delahozbarcelojunior@gmail.com' || auth.token.email === 'nicolenatera26@gmail.com' || auth.token.email === 'mateobarbosamatos@gmail.com' || auth.token.email === 'jandresvf23@gmail.com')",
       ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || auth.token.email === 'delahozbarcelojunior@gmail.com' || auth.token.email === 'nicolenatera26@gmail.com' || auth.token.email === 'mateobarbosamatos@gmail.com' || auth.token.email === 'jandresvf23@gmail.com')",
       "$logId": {
         ".read": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || auth.token.email === 'delahozbarcelojunior@gmail.com' || auth.token.email === 'nicolenatera26@gmail.com' || auth.token.email === 'mateobarbosamatos@gmail.com' || auth.token.email === 'jandresvf23@gmail.com')",
         ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || auth.token.email === 'delahozbarcelojunior@gmail.com' || auth.token.email === 'nicolenatera26@gmail.com' || auth.token.email === 'mateobarbosamatos@gmail.com' || auth.token.email === 'jandresvf23@gmail.com')"
+      }
+    },
+    "gameSubmissions": {
+      "$submissionId": {
+        ".read": "auth != null && (data.child('authorUid').val() === auth.uid || root.child('users').child(auth.uid).child('role').val() === 'admin' || auth.token.email === 'delahozbarcelojunior@gmail.com' || auth.token.email === 'nicolenatera26@gmail.com' || auth.token.email === 'mateobarbosamatos@gmail.com' || auth.token.email === 'jandresvf23@gmail.com')",
+        ".write": "auth != null && ((!data.exists() && newData.child('authorUid').val() === auth.uid) || root.child('users').child(auth.uid).child('role').val() === 'admin' || auth.token.email === 'delahozbarcelojunior@gmail.com' || auth.token.email === 'nicolenatera26@gmail.com' || auth.token.email === 'mateobarbosamatos@gmail.com' || auth.token.email === 'jandresvf23@gmail.com')"
       }
     }
   }
