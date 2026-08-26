@@ -1,0 +1,140 @@
+name: Publicar juegos aprobados
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '*/5 * * * *'
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar repositorio
+        uses: actions/checkout@v4
+
+      - name: Publicar juegos aprobados
+        env:
+          DB_URL: https://tecnomath-sync-6058a-default-rtdb.firebaseio.com
+        run: |
+          python3 <<'PY'
+          import base64, json, os, re, shutil, tempfile, unicodedata, urllib.request, zipfile
+          from pathlib import Path
+
+          db_url=os.environ['DB_URL'].rstrip('/')
+          with urllib.request.urlopen(db_url+'/approvedGames.json', timeout=30) as r:
+              raw=json.load(r) or {}
+
+          manifest_path=Path('games/published-games.json')
+          try:
+              manifest=json.loads(manifest_path.read_text(encoding='utf-8'))
+          except Exception:
+              manifest=[]
+          if not isinstance(manifest,list): manifest=[]
+          published={str(x.get('submissionId')):x for x in manifest if isinstance(x,dict) and x.get('submissionId')}
+
+          def slug(v):
+              v=unicodedata.normalize('NFD',str(v or 'juego')).encode('ascii','ignore').decode().lower()
+              v=re.sub(r'[^a-z0-9_-]+','-',v).strip('-')[:45]
+              return v or 'juego'
+
+          changed=False
+          for sid,item in raw.items():
+              if not isinstance(item,dict) or not item.get('zipBase64'):
+                  continue
+              folder=str(item.get('publishFolder') or ('games/'+slug(item.get('name'))+'-'+sid))
+              if not folder.startswith('games/') or '..' in Path(folder).parts:
+                  print('Omitido por ruta insegura:',sid)
+                  continue
+              if sid in published:
+                  continue
+
+              with tempfile.TemporaryDirectory() as td:
+                  td=Path(td)
+                  archive=td/'game.zip'
+                  archive.write_bytes(base64.b64decode(item['zipBase64']))
+                  extract=td/'extract'
+                  extract.mkdir()
+                  with zipfile.ZipFile(archive) as z:
+                      infos=z.infolist()
+                      if len(infos)>200:
+                          print('Omitido: demasiados archivos',sid)
+                          continue
+                      total=sum(i.file_size for i in infos)
+                      if total>50*1024*1024:
+                          print('Omitido: ZIP descomprimido demasiado grande',sid)
+                          continue
+                      for info in infos:
+                          name=info.filename.replace('\\','/')
+                          target=(extract/name).resolve()
+                          if not str(target).startswith(str(extract.resolve())+os.sep):
+                              raise RuntimeError('ZIP con ruta insegura')
+                          if name.startswith('.github/') or '/.github/' in name:
+                              continue
+                          if not info.is_dir():
+                              target.parent.mkdir(parents=True,exist_ok=True)
+                              with z.open(info) as src, open(target,'wb') as dst:
+                                  shutil.copyfileobj(src,dst)
+
+                  indexes=list(extract.rglob('index.html'))+list(extract.rglob('Index.html'))
+                  if not indexes:
+                      print('Omitido: no contiene index.html',sid)
+                      continue
+                  index=indexes[0]
+                  source=index.parent
+                  destination=Path(folder)
+                  destination.mkdir(parents=True,exist_ok=True)
+                  for p in source.rglob('*'):
+                      rel=p.relative_to(source)
+                      out=destination/rel
+                      if p.is_dir(): out.mkdir(parents=True,exist_ok=True)
+                      else:
+                          out.parent.mkdir(parents=True,exist_ok=True)
+                          shutil.copy2(p,out)
+
+                  image_url=''
+                  cover=item.get('coverBase64')
+                  if cover:
+                      mime=item.get('coverMime','image/jpeg')
+                      ext='png' if mime=='image/png' else ('webp' if mime=='image/webp' else 'jpg')
+                      cover_path=destination/f'cover.{ext}'
+                      cover_path.write_bytes(base64.b64decode(cover))
+                      image_url='https://junior162009.github.io/MindMathArcade/'+str(cover_path).replace('\\','/')
+
+                  url='https://junior162009.github.io/MindMathArcade/'+str(destination/'index.html').replace('\\','/')
+                  entry={
+                      'name':str(item.get('name') or 'Juego'),
+                      'desc':str(item.get('desc') or ''),
+                      'url':url,
+                      'imageUrl':image_url,
+                      'icon':str(item.get('icon') or '🎮'),
+                      'category':str(item.get('category') or 'otros'),
+                      'deviceCompatibility':'both',
+                      'evento':None,
+                      'authorName':str(item.get('authorName') or 'Usuario'),
+                      'submissionId':str(sid)
+                  }
+                  published[str(sid)]=entry
+                  changed=True
+                  print('Publicado:',sid,url)
+
+          if changed:
+              manifest=sorted(published.values(), key=lambda x: str(x.get('name','')).lower())
+              manifest_path.write_text(json.dumps(manifest,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+          else:
+              print('No hay juegos nuevos aprobados.')
+          PY
+
+      - name: Guardar cambios
+        run: |
+          git config user.name "MindMath Arcade Bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add games/published-games.json games/
+          if git diff --cached --quiet; then
+            echo "Sin cambios para publicar."
+          else
+            git commit -m "🎮 Publicar juegos aprobados"
+            git push
+          fi
