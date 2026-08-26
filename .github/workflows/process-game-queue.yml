@@ -1,0 +1,120 @@
+name: Procesar juegos enviados desde Spark
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '*/5 * * * *'
+
+permissions:
+  contents: write
+
+jobs:
+  process:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Instalar herramientas
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq p7zip-full >/dev/null
+      - name: Preparar previews y publicar aprobados
+        env:
+          FIREBASE_DB: https://tecnomath-sync-6058a-default-rtdb.firebaseio.com
+          OWNER: Junior162009
+          REPO: MindMathArcade
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import base64,json,os,re,shutil,subprocess,tempfile,urllib.request,zipfile
+          from pathlib import Path
+
+          db=os.environ['FIREBASE_DB'].rstrip('/')
+          with urllib.request.urlopen(db+'/gameUploadQueue.json',timeout=30) as r:
+              queue=json.loads(r.read().decode() or 'null') or {}
+          root=Path('games-preview'); root.mkdir(exist_ok=True)
+          changed=False
+
+          def slug(v):
+              s=re.sub(r'[^a-z0-9]+','-',str(v or 'juego').lower()).strip('-')
+              return s[:60] or 'juego'
+          def safe_extract_zip(z,out):
+              for info in z.infolist():
+                  n=info.filename.replace('\\','/').lstrip('/')
+                  parts=[p for p in n.split('/') if p]
+                  if not parts or '..' in parts: continue
+                  target=out.joinpath(*parts)
+                  if info.is_dir(): target.mkdir(parents=True,exist_ok=True); continue
+                  target.parent.mkdir(parents=True,exist_ok=True)
+                  with z.open(info) as src, open(target,'wb') as dst: shutil.copyfileobj(src,dst)
+          def extract_package(raw,out):
+              p=Path('/tmp/package.bin');p.write_bytes(raw)
+              extracted=out/'_extract';extracted.mkdir(parents=True,exist_ok=True)
+              try:
+                  with zipfile.ZipFile(p) as z: safe_extract_zip(z,extracted)
+              except zipfile.BadZipFile:
+                  subprocess.run(['7z','x','-y',f'-o{extracted}',str(p)],check=True,stdout=subprocess.DEVNULL)
+              return extracted
+          def find_index(base):
+              idx=list(base.rglob('index.html'))+list(base.rglob('index.htm'))
+              return idx[0] if idx else None
+          def copy_game_root(src,dst):
+              idx=find_index(src)
+              if not idx: raise RuntimeError('El juego debe contener index.html o index.htm.')
+              game_root=idx.parent
+              if dst.exists(): shutil.rmtree(dst)
+              dst.mkdir(parents=True)
+              for p in game_root.iterdir():
+                  if p.name=='.preview-info.json': continue
+                  target=dst/p.name
+                  if p.is_dir(): shutil.copytree(p,target)
+                  else: shutil.copy2(p,target)
+
+          for gid,g in queue.items():
+              if not isinstance(g,dict): continue
+              name=g.get('name') or 'Juego'; folder=f'{slug(name)}-{gid}'
+              preview=root/folder; status=g.get('status','pending')
+              if status=='pending' and not preview.exists() and g.get('sourceType')=='upload' and g.get('packageBase64'):
+                  work=Path('/tmp')/f'game-{gid}'; shutil.rmtree(work,ignore_errors=True);work.mkdir(parents=True)
+                  try:
+                      raw=base64.b64decode(g['packageBase64'])
+                      src=extract_package(raw,work)
+                      copy_game_root(src,preview)
+                      (preview/'.preview-info.json').write_text(json.dumps({'submissionId':gid,'name':name},ensure_ascii=False),encoding='utf-8')
+                      changed=True
+                      print('Preview creado:',preview)
+                  except Exception as e:
+                      print('ERROR preview',gid,e)
+              if status=='approved':
+                  dest=Path('games')/folder
+                  if dest.exists() and (dest/'index.html').exists(): continue
+                  if g.get('sourceType')=='url':
+                      url=str(g.get('gameUrl') or '')
+                      if not re.match(r'^https?://',url,re.I): print('URL inválida',gid); continue
+                      dest.mkdir(parents=True,exist_ok=True)
+                      (dest/'index.html').write_text('<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>'+name.replace('&','&amp;').replace('<','&lt;')+'</title></head><body><script>location.replace('+json.dumps(url)+')</script></body></html>',encoding='utf-8')
+                  else:
+                      if not g.get('packageBase64'): print('Sin paquete',gid); continue
+                      work=Path('/tmp')/f'publish-{gid}'; shutil.rmtree(work,ignore_errors=True);work.mkdir(parents=True)
+                      try:
+                          raw=base64.b64decode(g['packageBase64']);src=extract_package(raw,work);copy_game_root(src,dest)
+                      except Exception as e:
+                          print('ERROR publicar',gid,e);continue
+                  (dest/'.preview-info.json').unlink(missing_ok=True)
+                  changed=True
+                  print('Publicado:',dest)
+                  catfile=Path('data/games.json');catfile.parent.mkdir(exist_ok=True)
+                  try: arr=json.loads(catfile.read_text(encoding='utf-8')) if catfile.exists() else []
+                  except Exception: arr=[]
+                  arr=[x for x in arr if str(x.get('submissionId',''))!=str(gid)]
+                  arr.append({'name':name,'desc':g.get('description') or 'Juego educativo de TecnoMath','url':f'games/{folder}/index.html','imageUrl':g.get('imageUrl') or '','icon':g.get('icon') or '🎮','category':g.get('category') or 'otros','deviceCompatibility':'both','evento':None,'submissionId':str(gid),'authorName':g.get('authorName') or 'Usuario','sourceType':g.get('sourceType') or 'upload'})
+                  catfile.write_text(json.dumps(arr,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+
+          if changed:
+              subprocess.run(['git','config','user.name','github-actions[bot]'],check=True)
+              subprocess.run(['git','config','user.email','41898282+github-actions[bot]@users.noreply.github.com'],check=True)
+              subprocess.run(['git','add','games-preview','games','data/games.json'],check=True)
+              r=subprocess.run(['git','diff','--cached','--quiet'])
+              if r.returncode!=0:
+                  subprocess.run(['git','commit','-m','feat: process Spark game submissions'],check=True)
+                  subprocess.run(['git','push'],check=True)
+          else: print('Sin cambios.')
+          PY
