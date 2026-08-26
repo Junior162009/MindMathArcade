@@ -55,4 +55,6 @@
   setupThemeBridge();
   function loadEventEffects(){if(window.TecnoMathEventEffects)return;const s=document.createElement('script');s.src=(location.pathname.includes('/pages/')?'../../':'')+'js/fair-effects.js?v=1';s.async=true;document.head.appendChild(s)}
   loadEventEffects();
+  function loadGameSubmissionSystem(){if(document.querySelector('script[data-tecnomath-game-submissions]'))return;const s=document.createElement('script');s.src=(location.pathname.includes('/pages/')?'../':'')+'js/game-submissions.js?v=1';s.async=true;s.dataset.tecnomathGameSubmissions='true';document.head.appendChild(s)}
+  loadGameSubmissionSystem();
 })();
