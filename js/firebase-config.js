@@ -33,12 +33,20 @@
   function loadGameSubmissionSystem(){
     if(document.querySelector('script[data-tecnomath-game-submissions]')) return;
     const script=document.createElement('script');
-    script.src='/js/game-submissions.js?v=1';
+    script.src='/js/game-submissions.js?v=2';
     script.async=true;
     script.dataset.tecnomathGameSubmissions='true';
     document.head.appendChild(script);
   }
-  loadGameSubmissionSystem();
+  function ensureStorageThenLoad(){
+    if(window.firebase.storage){loadGameSubmissionSystem();return;}
+    const storageScript=document.createElement('script');
+    storageScript.src='https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js';
+    storageScript.onload=loadGameSubmissionSystem;
+    storageScript.onerror=()=>console.error('TecnoMath: no se pudo cargar Firebase Storage.');
+    document.head.appendChild(storageScript);
+  }
+  ensureStorageThenLoad();
 
   function setupAdminFairControl(){
     if(!/\/pages\/admin\/index\.html$/.test(location.pathname)) return;
