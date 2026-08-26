@@ -1,0 +1,52 @@
+name: Restaurar index principal y conectar catálogo
+
+on:
+  push:
+    paths:
+      - '.github/workflows/restore-main-index.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  restore:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Restaurar index original y conectar games-loader
+        run: |
+          git checkout 3a6cb6a4ad4e732c679e25c926155a3139e6cd72 -- index.html
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('index.html')
+          s = p.read_text(encoding='utf-8')
+          tag = '<script src="js/games-loader.js?v=1" defer></script>'
+          if tag not in s:
+              marker = '</head>'
+              if marker not in s:
+                  raise SystemExit('No se encontró </head> en index.html')
+              s = s.replace(marker, '    '+tag+'\n'+marker, 1)
+              p.write_text(s, encoding='utf-8')
+          PY
+
+      - name: Verificar integridad del catálogo
+        run: |
+          test -s index.html
+          grep -q 'js/games-loader.js' index.html
+          grep -q 'id="projectsContainer"' index.html
+          grep -q 'const juegosRecomendados' index.html
+          test -s js/games-loader.js
+          test -s data/games.json
+
+      - name: Guardar cambios
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "fix: connect games loader without replacing main catalog"
+          git push
