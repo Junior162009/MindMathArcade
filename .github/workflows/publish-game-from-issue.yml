@@ -35,7 +35,8 @@ jobs:
               return m.group(1).strip() if m else default
           name=field('Nombre','Juego'); source=field('Tipo','upload'); gameurl=field('URL del juego','')
           safe=re.sub(r'[^a-zA-Z0-9_-]+','-',name).strip('-').lower()[:60] or 'juego'
-          preview=Path('games-preview')/f'{safe}-{issue}'
+          folder=f'{safe}-{issue}'
+          preview=Path('games-preview')/folder
           if preview.exists(): shutil.rmtree(preview)
           preview.mkdir(parents=True)
           if source == 'url':
@@ -62,7 +63,6 @@ jobs:
                   if p.is_dir(): shutil.copytree(p,preview/p.name,dirs_exist_ok=True)
                   else: shutil.copy2(p,preview/p.name)
           (preview/'.preview-info.json').write_text(json.dumps({'issue':int(issue),'name':name},ensure_ascii=False),encoding='utf-8')
-          PY
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add games-preview
@@ -70,9 +70,8 @@ jobs:
           git push
           gh label create tested --repo "$REPO" --color 00FFFF --description "Administrador probó el juego" --force || true
           gh label create approved --repo "$REPO" --color 39FF14 --description "Administrador aprobó el juego" --force || true
-          echo "🧪 Preview preparado en games-preview/"
-          gh issue comment "$ISSUE" --repo "$REPO" --body "🧪 **Juego listo para prueba del administrador.**\n\n📂 Preview: \`games-preview/\`\n🌐 Si GitHub Pages está habilitado, abre: https://${repo%%/*}.github.io/${repo##*/}/games-preview/\n\n👨‍💼 **IMPORTANTE:** primero prueba el juego. Después añade la etiqueta **tested**. Solo después de tener **tested** puedes añadir **approved** para publicarlo definitivamente."
-
+          gh issue comment "$ISSUE" --repo "$REPO" --body "🧪 **Juego listo para prueba del administrador.**\n\n🌐 Preview: https://$REPO_OWNER.github.io/$REPO_NAME/games-preview/${folder}/\n\n👨‍💼 Primero prueba el juego y añade **tested**. Después añade **approved** para publicarlo definitivamente."
+        
   publish:
     if: github.event.action == 'labeled' && github.event.label.name == 'approved' && contains(github.event.issue.body, '<!-- TECNOMATH_GAME_SUBMISSION -->')
     runs-on: ubuntu-latest
@@ -95,28 +94,30 @@ jobs:
         run: |
           set -euo pipefail
           python - <<'PY'
-          import json,re,shutil,subprocess,urllib.request
+          import json,re,shutil,subprocess
           from pathlib import Path
           repo='${{ github.repository }}'; issue='${{ github.event.issue.number }}'
           obj=json.loads(subprocess.check_output(['gh','api',f'repos/{repo}/issues/{issue}'],text=True)); body=obj.get('body') or ''
           def field(label, default=''):
               m=re.search(r'^\*\*'+re.escape(label)+r':\*\*\s*(.*?)\s*$',body,re.M); return m.group(1).strip() if m else default
-          name=field('Nombre','Juego'); desc=field('Descripción','Juego educativo de TecnoMath'); cat=field('Categoría','otros'); author=field('Autor','Usuario'); image=field('Portada',''); source=field('Tipo','upload'); gameurl=field('URL del juego','')
+          name=field('Nombre','Juego'); desc=field('Descripción','Juego educativo de TecnoMath'); cat=field('Categoría','otros'); author=field('Autor','Usuario'); image=field('Portada',''); source=field('Tipo','upload')
           safe=re.sub(r'[^a-zA-Z0-9_-]+','-',name).strip('-').lower()[:60] or 'juego'; folder=f'{safe}-{issue}'; dest=Path('games')/folder; dest.parent.mkdir(exist_ok=True)
           preview=Path('games-preview')/folder
-          if preview.exists():
-              if dest.exists(): shutil.rmtree(dest)
-              shutil.copytree(preview,dest); (dest/'.preview-info.json').unlink(missing_ok=True)
-          else: raise SystemExit('No existe el preview. Vuelve a preparar la solicitud.')
+          if not preview.exists(): raise SystemExit('No existe el preview. Vuelve a preparar la solicitud.')
+          if dest.exists(): shutil.rmtree(dest)
+          shutil.copytree(preview,dest); (dest/'.preview-info.json').unlink(missing_ok=True)
           catfile=Path('data/games.json'); catfile.parent.mkdir(exist_ok=True)
-          arr=json.loads(catfile.read_text(encoding='utf-8')) if catfile.exists() else []
+          try: arr=json.loads(catfile.read_text(encoding='utf-8')) if catfile.exists() else []
+          except Exception: arr=[]
           arr=[x for x in arr if str(x.get('submissionId',''))!=str(issue)]
           arr.append({'name':name,'desc':desc,'url':f'games/{folder}/index.html','imageUrl':image,'icon':'🎮','category':cat or 'otros','deviceCompatibility':'both','evento':None,'submissionId':str(issue),'authorName':author,'sourceType':source,'githubIssue':obj.get('html_url','')})
-          catfile.write_text(json.dumps(arr,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+          # Un juego por línea: formato compacto, manteniendo JSON válido.
+          lines=['[']+[json.dumps(x,ensure_ascii=False,separators=(',',':'))+(',' if i<len(arr)-1 else '') for i,x in enumerate(arr)]+[']']
+          catfile.write_text('\n'.join(lines)+'\n',encoding='utf-8')
           PY
           git config user.name 'github-actions[bot]'; git config user.email '41898282+github-actions[bot]@noreply.github.com'
           git add games data/games.json
           git diff --cached --quiet || git commit -m "feat: publish approved game #${ISSUE}"
           git push
-          gh issue comment "$ISSUE" --repo "$REPO" --body "✅ **Juego probado y publicado correctamente.**\n\n📁 Carpeta: \`games/\`\n🎮 El juego ya forma parte del catálogo."
+          gh issue comment "$ISSUE" --repo "$REPO" --body "✅ **Juego probado y publicado correctamente.**\n\n📁 Carpeta creada en \`games/$folder/\` y catálogo actualizado."
           gh issue close "$ISSUE" --repo "$REPO" --reason completed
