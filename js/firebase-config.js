@@ -1,4 +1,4 @@
-// Configuración compartida de Firebase para autenticación, perfiles y sincronización.
+// Configuración compartida de Firebase para autenticación, perfiles, juegos y sincronización.
 (function () {
   const firebaseConfig = {
     apiKey: "AIzaSyCfY0VT4fQ5emX4R2LdUXU3FxjBTtY7Gzc",
@@ -14,12 +14,13 @@
   window.TecnomathFirebase = {
     auth: firebase.auth(),
     database: firebase.database(),
+    storage: typeof firebase.storage === 'function' ? firebase.storage() : null,
     serverTimestamp: firebase.database.ServerValue.TIMESTAMP
   };
 
   if (!document.querySelector('script[data-tecnomath-admin-guard]')) {
     const adminGuard = document.createElement('script');
-    adminGuard.src = '/js/admin-guard.js?v=2';
+    adminGuard.src = '/js/admin-guard.js?v=3';
     adminGuard.async = false;
     adminGuard.dataset.tecnomathAdminGuard = 'true';
     document.head.appendChild(adminGuard);
@@ -28,19 +29,16 @@
   if (!document.querySelector('script[data-tecnomath-cloud-sync]')) {
     const cloudSync = document.createElement('script');
     const path = location.pathname;
-    cloudSync.src = path.includes('/games/')
-      ? '../../js/cloud-progress-sync.js?v=2'
-      : (path.includes('/pages/') ? '../js/cloud-progress-sync.js?v=2' : 'js/cloud-progress-sync.js?v=2');
+    cloudSync.src = path.includes('/games/') ? '../../js/cloud-progress-sync.js?v=3' : (path.includes('/pages/') ? '../js/cloud-progress-sync.js?v=3' : 'js/cloud-progress-sync.js?v=3');
     cloudSync.async = false;
     cloudSync.dataset.tecnomathCloudSync = 'true';
     document.head.appendChild(cloudSync);
   }
 
-  // Sistema de envíos sin Firebase Storage, Cloud Functions ni secretos.
   function loadGameSubmissionSystem(){
     if(document.querySelector('script[data-tecnomath-game-submissions]')) return;
     const script=document.createElement('script');
-    script.src='/js/game-submissions.js?v=3';
+    script.src='/js/game-submissions.js?v=5';
     script.async=true;
     script.dataset.tecnomathGameSubmissions='true';
     document.head.appendChild(script);
