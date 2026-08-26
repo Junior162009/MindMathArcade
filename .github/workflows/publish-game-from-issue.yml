@@ -1,0 +1,19 @@
+name: Procesar juegos enviados sin Firebase Storage
+
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  prepare:
+    if: contains(github.event.issue.labels.*.name, 'game-upload')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Preparar publicación
+        run: |
+          echo "Sistema Spark: los juegos se procesan mediante GitHub Issues."
