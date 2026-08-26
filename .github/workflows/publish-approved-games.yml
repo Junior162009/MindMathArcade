@@ -26,101 +26,150 @@ jobs:
           import json, os
           from urllib.request import Request, urlopen
 
-          db = os.environ["FIREBASE_DB"].rstrip("/")
-          req = Request(db + "/publishedGames.json", headers={"Accept": "application/json"})
+          db = os.environ['FIREBASE_DB'].rstrip('/')
+          req = Request(db + '/publishedGames.json', headers={'Accept':'application/json'})
           try:
               with urlopen(req, timeout=30) as r:
-                  data = json.loads(r.read().decode() or "null") or {}
+                  data = json.loads(r.read().decode() or 'null') or {}
           except Exception as e:
-              print(f"Firebase no disponible: {e}")
+              print('Firebase no disponible:', e)
               data = {}
-
           if not isinstance(data, dict):
               data = {}
-          os.makedirs("tmp", exist_ok=True)
-          with open("tmp/published-games.json", "w", encoding="utf-8") as f:
-              json.dump(data, f, ensure_ascii=False, indent=2)
-          print(f"Juegos aprobados encontrados: {len(data)}")
+          os.makedirs('tmp', exist_ok=True)
+          with open('tmp/published-games.json','w',encoding='utf-8') as f:
+              json.dump(data,f,ensure_ascii=False,indent=2)
+          print('Juegos aprobados:', len(data))
           PY
 
-      - name: Generar catálogo separado
+      - name: Descargar juegos locales aprobados
+        run: |
+          python - <<'PY'
+          import json, os, re, subprocess
+          from pathlib import Path
+
+          data=json.loads(Path('tmp/published-games.json').read_text(encoding='utf-8'))
+          if not isinstance(data,dict): data={}
+
+          def slug(v):
+              s=re.sub(r'[^a-z0-9]+','-',str(v or 'juego').lower()).strip('-')
+              return s[:50] or 'juego'
+
+          def safe_rel(p):
+              parts=[]
+              for part in str(p or '').replace('\\','/').split('/'):
+                  if not part or part in ('.','..') or '\x00' in part: continue
+                  part=re.sub(r'[^A-Za-z0-9._()\- ]+','-',part).strip()
+                  if part: parts.append(part[:180])
+              return '/'.join(parts)
+
+          for gid,g in data.items():
+              if not isinstance(g,dict): continue
+              source=str(g.get('sourceType') or 'url').lower()
+              manifest=g.get('fileManifest') or []
+              if source not in {'upload','files','zip','rar','archive','local'} or not isinstance(manifest,list) or not manifest:
+                  continue
+
+              folder=f"{slug(g.get('name'))}-{slug(gid)[-16:]}"
+              root=Path('games')/folder
+              root.mkdir(parents=True,exist_ok=True)
+
+              for item in manifest:
+                  if not isinstance(item,dict): continue
+                  url=str(item.get('url') or '').strip()
+                  rel=safe_rel(item.get('path'))
+                  if not url or not rel: continue
+                  target=root/rel
+                  target.parent.mkdir(parents=True,exist_ok=True)
+                  subprocess.run(['curl','-fL','--retry','3','--connect-timeout','20','--max-time','120','-o',str(target),url],check=True)
+
+              index_files=list(root.rglob('index.html'))+list(root.rglob('index.htm'))
+              if not index_files:
+                  raise SystemExit(f'El juego aprobado {gid} no contiene index.html/index.htm')
+
+              # Si el index quedó dentro de una carpeta raíz innecesaria, súbelo al nivel del juego.
+              index=index_files[0]
+              if index.parent != root:
+                  prefix=index.parent
+                  for child in list(prefix.iterdir()):
+                      dest=root/child.name
+                      if not dest.exists(): child.rename(dest)
+                  try: prefix.rmdir()
+                  except OSError: pass
+
+              print(f'Publicado localmente: {root}')
+          PY
+
+      - name: Generar data/games.json
         run: |
           python - <<'PY'
           import json, re
           from pathlib import Path
 
-          source = Path("tmp/published-games.json")
-          data = json.loads(source.read_text(encoding="utf-8")) if source.exists() else {}
-          if not isinstance(data, dict):
-              data = {}
+          data=json.loads(Path('tmp/published-games.json').read_text(encoding='utf-8'))
+          if not isinstance(data,dict): data={}
+          catalog=[]
 
-          catalog = []
+          def slug(v):
+              s=re.sub(r'[^a-z0-9]+','-',str(v or 'juego').lower()).strip('-')
+              return s[:50] or 'juego'
 
-          def slug(value):
-              s = re.sub(r"[^a-z0-9]+", "-", str(value or "juego").lower()).strip("-")
-              return s[:50] or "juego"
+          for gid,g in data.items():
+              if not isinstance(g,dict): continue
+              name=str(g.get('name') or 'Juego')
+              source=str(g.get('sourceType') or 'url').lower()
+              folder=f"{slug(name)}-{slug(gid)[-16:]}"
+              local_index=Path('games')/folder/'index.html'
+              local_htm=Path('games')/folder/'index.htm'
 
-          for gid, game in data.items():
-              if not isinstance(game, dict):
-                  continue
+              if source in {'upload','files','zip','rar','archive','local'} and (local_index.exists() or local_htm.exists()):
+                  final_url=f"games/{folder}/" + ('index.html' if local_index.exists() else 'index.htm')
+              else:
+                  final_url=str(g.get('url') or g.get('publishedUrl') or '').strip()
 
-              name = str(game.get("name") or "Juego")
-              source_type = str(game.get("sourceType") or "url").lower()
-              local_url = str(game.get("publishedUrl") or "").strip()
-              external_url = str(game.get("url") or "").strip()
-
-              if source_type in {"upload", "files", "zip", "rar", "archive", "local"} and not local_url:
-                  folder = f"{slug(name)}-{slug(gid)[-16:]}"
-                  candidate = Path("games") / folder / "index.html"
-                  if candidate.exists():
-                      local_url = f"games/{folder}/index.html"
-
-              final_url = local_url or external_url
-              if not final_url:
-                  continue
+              if not final_url: continue
 
               catalog.append({
-                  "name": name,
-                  "desc": game.get("desc") or game.get("description") or "Juego educativo de TecnoMath",
-                  "description": game.get("description") or game.get("desc") or "Juego educativo de TecnoMath",
-                  "category": game.get("category") or "otros",
-                  "url": final_url,
-                  "imageUrl": game.get("imageUrl") or "",
-                  "icon": game.get("icon") or "🎮",
-                  "deviceCompatibility": game.get("deviceCompatibility") or "both",
-                  "evento": game.get("evento"),
-                  "submissionId": gid,
-                  "authorName": game.get("authorName") or "Usuario",
-                  "sourceType": source_type
+                  'name':name,
+                  'desc':g.get('desc') or g.get('description') or 'Juego educativo de TecnoMath',
+                  'description':g.get('description') or g.get('desc') or 'Juego educativo de TecnoMath',
+                  'category':g.get('category') or 'otros',
+                  'url':final_url,
+                  'imageUrl':g.get('imageUrl') or '',
+                  'icon':g.get('icon') or '🎮',
+                  'deviceCompatibility':g.get('deviceCompatibility') or 'both',
+                  'evento':g.get('evento'),
+                  'submissionId':gid,
+                  'authorName':g.get('authorName') or 'Usuario',
+                  'sourceType':source
               })
 
-          out = Path("data/games.json")
-          out.parent.mkdir(parents=True, exist_ok=True)
-          out.write_text(json.dumps(catalog, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-          print(f"Catálogo generado: {len(catalog)} juegos")
+          out=Path('data/games.json')
+          out.parent.mkdir(parents=True,exist_ok=True)
+          out.write_text(json.dumps(catalog,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+          print('Catálogo generado:',len(catalog),'juegos')
           PY
 
-      - name: Validar catálogo
+      - name: Validar juegos y catálogo
         run: |
           python - <<'PY'
           import json
           from pathlib import Path
-          p = Path("data/games.json")
-          games = json.loads(p.read_text(encoding="utf-8"))
-          assert isinstance(games, list), "games.json debe ser un array"
-          seen = set()
-          for game in games:
-              assert game.get("name"), "Juego sin nombre"
-              assert game.get("url"), "Juego sin URL"
-              key = game.get("submissionId") or game.get("url")
-              assert key not in seen, f"Juego duplicado: {key}"
+          games=json.loads(Path('data/games.json').read_text(encoding='utf-8'))
+          assert isinstance(games,list)
+          seen=set()
+          for g in games:
+              assert g.get('name')
+              assert g.get('url')
+              key=g.get('submissionId') or g.get('url')
+              assert key not in seen, f'Duplicado: {key}'
               seen.add(key)
-              if game.get("url", "").startswith("games/"):
-                  assert Path(game["url"]).exists(), f"No existe el juego local: {game['url']}"
-          print("Catálogo válido")
+              if g['url'].startswith('games/'):
+                  assert Path(g['url']).exists(), f"No existe: {g['url']}"
+          print('Catálogo válido')
           PY
 
-      - name: Commit catálogo y juegos publicados
+      - name: Commit catálogo y juegos
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -129,5 +178,5 @@ jobs:
             echo "No hay cambios."
             exit 0
           fi
-          git commit -m "chore: sincronizar juegos aprobados y catálogo"
+          git commit -m "chore: publicar juegos aprobados"
           git push
