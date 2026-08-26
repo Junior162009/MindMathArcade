@@ -1,4 +1,4 @@
-// Configuración compartida de Firebase para la autenticación y los perfiles.
+// Configuración compartida de Firebase para autenticación, perfiles y sincronización.
 (function () {
   const firebaseConfig = {
     apiKey: "AIzaSyCfY0VT4fQ5emX4R2LdUXU3FxjBTtY7Gzc",
@@ -11,11 +11,15 @@
   };
 
   if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-  window.TecnomathFirebase = { auth: firebase.auth(), database: firebase.database(), serverTimestamp: firebase.database.ServerValue.TIMESTAMP };
+  window.TecnomathFirebase = {
+    auth: firebase.auth(),
+    database: firebase.database(),
+    serverTimestamp: firebase.database.ServerValue.TIMESTAMP
+  };
 
   if (!document.querySelector('script[data-tecnomath-admin-guard]')) {
     const adminGuard = document.createElement('script');
-    adminGuard.src = '/js/admin-guard.js?v=1';
+    adminGuard.src = '/js/admin-guard.js?v=2';
     adminGuard.async = false;
     adminGuard.dataset.tecnomathAdminGuard = 'true';
     document.head.appendChild(adminGuard);
@@ -24,29 +28,24 @@
   if (!document.querySelector('script[data-tecnomath-cloud-sync]')) {
     const cloudSync = document.createElement('script');
     const path = location.pathname;
-    cloudSync.src = path.includes('/games/') ? '../../js/cloud-progress-sync.js?v=1' : (path.includes('/pages/') ? '../js/cloud-progress-sync.js?v=1' : 'js/cloud-progress-sync.js?v=1');
+    cloudSync.src = path.includes('/games/')
+      ? '../../js/cloud-progress-sync.js?v=2'
+      : (path.includes('/pages/') ? '../js/cloud-progress-sync.js?v=2' : 'js/cloud-progress-sync.js?v=2');
     cloudSync.async = false;
     cloudSync.dataset.tecnomathCloudSync = 'true';
     document.head.appendChild(cloudSync);
   }
 
+  // Sistema de envíos sin Firebase Storage, Cloud Functions ni secretos.
   function loadGameSubmissionSystem(){
     if(document.querySelector('script[data-tecnomath-game-submissions]')) return;
     const script=document.createElement('script');
-    script.src='/js/game-submissions.js?v=2';
+    script.src='/js/game-submissions.js?v=3';
     script.async=true;
     script.dataset.tecnomathGameSubmissions='true';
     document.head.appendChild(script);
   }
-  function ensureStorageThenLoad(){
-    if(window.firebase.storage){loadGameSubmissionSystem();return;}
-    const storageScript=document.createElement('script');
-    storageScript.src='https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js';
-    storageScript.onload=loadGameSubmissionSystem;
-    storageScript.onerror=()=>console.error('TecnoMath: no se pudo cargar Firebase Storage.');
-    document.head.appendChild(storageScript);
-  }
-  ensureStorageThenLoad();
+  loadGameSubmissionSystem();
 
   function setupAdminFairControl(){
     if(!/\/pages\/admin\/index\.html$/.test(location.pathname)) return;
@@ -64,15 +63,7 @@
         const paint=theme=>{status.textContent='Estado actual: '+(theme==='feria'?'🎡 Feria':theme==='feriaplus'?'🔥 Mega Feria':'⛔ Feria desactivada');panel.querySelectorAll('[data-fair]').forEach(x=>x.classList.toggle('active',x.dataset.fair===theme))};ref.on('value',s=>paint(s.val()||'normal'));
         panel.querySelectorAll('[data-fair]').forEach(x=>x.addEventListener('click',async()=>{try{const theme=x.dataset.fair;await ref.set(theme);const states={normal:theme==='normal',feria:theme==='feria',feriaplus:theme==='feriaplus'};await window.TecnomathFirebase.database.ref('tecnomath/tematicas').update(states);await window.TecnomathFirebase.database.ref('adminLogs').push({action:'change_fair_mode',theme,adminUid:window.TecnomathFirebase.auth.currentUser?.uid||'',adminEmail:window.TecnomathFirebase.auth.currentUser?.email||'',createdAt:window.TecnomathFirebase.serverTimestamp})}catch(e){status.textContent='❌ '+e.message}}));
       }
-
-      const addNewThemes=()=>{
-        const box=document.getElementById('themesList');if(!box)return;
-        const extra={cumpleanos:'🥳 Cumpleaños',feria:'🎡 Feria',feriaplus:'🔥 Mega Feria',primavera:'🌸 Primavera',espacio:'🚀 Espacio',ciencia:'🔬 Ciencia'};
-        const activeRef=window.TecnomathFirebase.database.ref('tecnomath/tematicaActiva');
-        activeRef.once('value').then(s=>{const active=s.val()||'normal';Object.entries(extra).forEach(([id,name])=>{if(box.querySelector('[data-extra-theme="'+id+'"]'))return;const row=document.createElement('div');row.className='theme-row';row.dataset.extraTheme=id;row.innerHTML=`<div><strong>${name}</strong><small>${id===active?'ACTIVA':'Inactiva'}</small></div><label class="switch"><input type="checkbox" ${id===active?'checked':''}><span class="slider"></span></label>`;const input=row.querySelector('input');input.addEventListener('change',async()=>{if(!input.checked){input.checked=true;return}try{const all={normal:false,halloween:false,navidad:false,verano:false,mundial:false,regreso:false,cumpleanos:false,feria:false,feriaplus:false,primavera:false,espacio:false,ciencia:false};all[id]=true;await activeRef.set(id);await window.TecnomathFirebase.database.ref('tecnomath/tematicas').set(all);await window.TecnomathFirebase.database.ref('adminLogs').push({action:'change_theme',theme:id,adminUid:window.TecnomathFirebase.auth.currentUser?.uid||'',adminEmail:window.TecnomathFirebase.auth.currentUser?.email||'',createdAt:window.TecnomathFirebase.serverTimestamp})}catch(e){console.error(e)}});box.appendChild(row)})})
-      };
-      const box=document.getElementById('themesList');if(box){new MutationObserver(addNewThemes).observe(box,{childList:true});addNewThemes()}
-      const script=document.createElement('script');script.src='../../js/fair-effects.js?v=2';script.async=true;document.head.appendChild(script);
+      const addNewThemes=()=>{const box=document.getElementById('themesList');if(!box)return;const extra={cumpleanos:'🥳 Cumpleaños',feria:'🎡 Feria',feriaplus:'🔥 Mega Feria',primavera:'🌸 Primavera',espacio:'🚀 Espacio',ciencia:'🔬 Ciencia'};const activeRef=window.TecnomathFirebase.database.ref('tecnomath/tematicaActiva');activeRef.once('value').then(s=>{const active=s.val()||'normal';Object.entries(extra).forEach(([id,name])=>{if(box.querySelector('[data-extra-theme="'+id+'"]'))return;const row=document.createElement('div');row.className='theme-row';row.dataset.extraTheme=id;row.innerHTML=`<div><strong>${name}</strong><small>${id===active?'ACTIVA':'Inactiva'}</small></div><label class="switch"><input type="checkbox" ${id===active?'checked':''}><span class="slider"></span></label>`;const input=row.querySelector('input');input.addEventListener('change',async()=>{if(!input.checked){input.checked=true;return}try{const all={normal:false,halloween:false,navidad:false,verano:false,mundial:false,regreso:false,cumpleanos:false,feria:false,feriaplus:false,primavera:false,espacio:false,ciencia:false};all[id]=true;await activeRef.set(id);await window.TecnomathFirebase.database.ref('tecnomath/tematicas').set(all);await window.TecnomathFirebase.database.ref('adminLogs').push({action:'change_theme',theme:id,adminUid:window.TecnomathFirebase.auth.currentUser?.uid||'',adminEmail:window.TecnomathFirebase.auth.currentUser?.email||'',createdAt:window.TecnomathFirebase.serverTimestamp})}catch(e){console.error(e)}});box.appendChild(row)})})};const box=document.getElementById('themesList');if(box){new MutationObserver(addNewThemes).observe(box,{childList:true});addNewThemes()}const script=document.createElement('script');script.src='../../js/fair-effects.js?v=2';script.async=true;document.head.appendChild(script);
     };
     if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',inject,{once:true});else inject();
   }
