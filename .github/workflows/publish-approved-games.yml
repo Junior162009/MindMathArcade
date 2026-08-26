@@ -18,12 +18,14 @@ jobs:
       - name: Publicar juegos aprobados
         env:
           DB_URL: https://tecnomath-sync-6058a-default-rtdb.firebaseio.com
+          SITE_URL: https://tecnomath.online/
         run: |
           python3 <<'PY'
           import base64, json, os, re, shutil, tempfile, unicodedata, urllib.request, zipfile
           from pathlib import Path
 
           db_url=os.environ['DB_URL'].rstrip('/')
+          site_url=os.environ['SITE_URL'].rstrip('/')+'/'
           with urllib.request.urlopen(db_url+'/approvedGames.json', timeout=30) as r:
               raw=json.load(r) or {}
 
@@ -101,9 +103,9 @@ jobs:
                       ext='png' if mime=='image/png' else ('webp' if mime=='image/webp' else 'jpg')
                       cover_path=destination/f'cover.{ext}'
                       cover_path.write_bytes(base64.b64decode(cover))
-                      image_url='https://junior162009.github.io/MindMathArcade/'+str(cover_path).replace('\\','/')
+                      image_url=site_url+str(cover_path).replace('\\','/')
 
-                  url='https://junior162009.github.io/MindMathArcade/'+str(destination/'index.html').replace('\\','/')
+                  url=site_url+str(destination/'index.html').replace('\\','/')
                   entry={
                       'name':str(item.get('name') or 'Juego'),
                       'desc':str(item.get('desc') or ''),
