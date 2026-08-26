@@ -1,0 +1,30 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    function isFounderAdmin() {
+      return request.auth != null && (
+        request.auth.token.email == 'delahozbarcelojunior@gmail.com' ||
+        request.auth.token.email == 'nicolenatera26@gmail.com' ||
+        request.auth.token.email == 'mateobarbosamatos@gmail.com' ||
+        request.auth.token.email == 'jandresvf23@gmail.com'
+      );
+    }
+
+    match /gameSubmissions/{uid}/{submissionId}/{fileName} {
+      allow read: if request.auth != null && (request.auth.uid == uid || isFounderAdmin());
+      allow write: if request.auth != null && request.auth.uid == uid
+        && resource == null
+        && request.resource.size <= 20 * 1024 * 1024
+        && (request.resource.contentType == 'application/zip'
+            || request.resource.contentType == 'image/jpeg'
+            || request.resource.contentType == 'image/png'
+            || request.resource.contentType == 'image/webp');
+    }
+
+    match /games/{allPaths=**} {
+      allow read: if true;
+      allow write: if isFounderAdmin();
+    }
+  }
+}
