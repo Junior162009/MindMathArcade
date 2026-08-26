@@ -1,100 +1,81 @@
-# Sistema de juegos enviados — puesta en marcha final
+# Sistema de juegos enviados — versión sin facturación
 
-El código del sistema ya está en el repositorio:
+El sistema fue adaptado para funcionar sin Cloud Functions, sin Firebase Storage y sin una cuenta de facturación de Google Cloud.
 
-- `pages/upload-game.html`: formulario para usuarios.
-- `js/game-submissions.js`: subida a Storage y panel de revisión.
+## Archivos principales
+
+- `pages/upload-game.html`: formulario de envío.
+- `js/game-submissions.js`: guarda el ZIP en Realtime Database, muestra las solicitudes y publica desde el panel admin.
+- `js/admin-guard.js`: carga el módulo de juegos enviados dentro del panel de administradores.
 - `js/published-games.js`: incorpora automáticamente los juegos publicados al catálogo.
-- `functions/index.js`: avisa a los 4 fundadores y publica el ZIP aprobado en `games/`.
-- `firebase-database.rules.json`: permisos de Realtime Database.
-- `storage.rules`: permisos y límite de archivos.
+- `firebase-database.rules.json`: permisos y validaciones de los envíos.
+- `firebase.json`: únicamente despliega las reglas de Realtime Database.
 
-## 1. Instalar Firebase CLI
-
-```bash
-npm install -g firebase-tools
-firebase login
-```
-
-Selecciona el proyecto `tecnomath-sync-6058a`.
-
-## 2. Instalar las Functions
-
-Desde la raíz del repositorio:
-
-```bash
-cd functions
-npm install
-cd ..
-```
-
-## 3. Crear los secretos de Google Cloud Secret Manager
-
-```bash
-firebase functions:secrets:set RESEND_API_KEY
-firebase functions:secrets:set EMAIL_FROM
-firebase functions:secrets:set GITHUB_TOKEN
-```
-
-Firebase pedirá el valor de cada secreto de forma interactiva. No los pongas en HTML, JavaScript del navegador ni en el repositorio.
-
-### RESEND_API_KEY
-
-La clave de API de Resend que utilizará `notifyGameSubmission`.
-
-### EMAIL_FROM
-
-El remitente que tengas autorizado en Resend. Ejemplo:
-
-```text
-TecnoMath <avisos@tecnomath.online>
-```
-
-### GITHUB_TOKEN
-
-Token de GitHub con permiso de escritura sobre `Junior162009/MindMathArcade`. Se utiliza únicamente desde Cloud Functions para crear los archivos aprobados dentro de `games/`.
-
-## 4. Desplegar
-
-```bash
-firebase deploy --only database,storage,functions
-```
-
-Las funciones usan Secrets de Firebase/Google Cloud, por lo que el despliegue debe realizarse después de configurar los tres secretos.
-
-## 5. Flujo final
+## Cómo funciona
 
 ```text
 Usuario inicia sesión
         ↓
 🎮 SUBIR JUEGO
         ↓
-ZIP → Firebase Storage
+ZIP convertido a Base64
         ↓
-gameSubmissions/{id} = pending
+Realtime Database /gameSubmissions
         ↓
-📧 correo a Junior, Nicole, Mateo y Jaider
+Estado: pending
         ↓
-Panel de administración
+👑 Panel de los 4 administradores
         ↓
-✅ Aprobar / ❌ Rechazar
+✅ Aprobar
         ↓
-Cloud Function
+🚀 Publicar en GitHub
         ↓
-GitHub → games/nombre-id/
+games/<juego-id>/index.html
         ↓
-publishedGames/{id}
+publishedGames/<id>
         ↓
-🎮 aparece automáticamente en el catálogo
+🎮 aparece automáticamente en MindMathArcade
 ```
 
-## Importante
+## Límite
 
-Aprobar desde el navegador **no publica directamente en GitHub**. El navegador solamente cambia el estado de la solicitud. La publicación la realiza `publishApprovedGame` en Cloud Functions con el secreto `GITHUB_TOKEN`.
+Para evitar Firebase Storage, el ZIP tiene un límite de **7 MB**. La base de datos guarda el contenido como Base64, por lo que el archivo ocupa más que su tamaño original. Realtime Database permite strings de hasta 10 MB y el plan Spark incluye 1 GB de almacenamiento y 10 GB/mes de descargas. urlLímites de Realtime Databasehttps://firebase.google.com/docs/database/usage/limits
 
-Los cuatro administradores fundadores son:
+## Publicación en GitHub
+
+La publicación ya no necesita Cloud Functions.
+
+Un administrador introduce temporalmente un **Fine-grained Personal Access Token** en el panel. El token:
+
+- no se guarda en Firebase;
+- no se guarda en GitHub;
+- solamente permanece en `sessionStorage` de esa pestaña;
+- puede limpiarse con el botón **Limpiar token**.
+
+El token debe estar limitado al repositorio `Junior162009/MindMathArcade` y tener **Contents → Read and write**. GitHub documenta que el endpoint de creación/actualización de contenidos admite tokens fine-grained con permiso `Contents: write`. urlGitHub — Create or update file contentshttps://docs.github.com/en/rest/repos/contents
+
+## Firebase
+
+Ya no necesitas desplegar:
+
+```text
+storage
+functions
+```
+
+Solo las reglas de Realtime Database:
+
+```bash
+firebase deploy --only database
+```
+
+Los cuatro administradores fundadores continúan siendo:
 
 - Junior — `delahozbarcelojunior@gmail.com`
 - Nicole — `nicolenatera26@gmail.com`
 - Mateo — `mateobarbosamatos@gmail.com`
 - Jaider — `jandresvf23@gmail.com`
+
+## Correos
+
+El correo automático mediante Cloud Functions fue eliminado de esta versión porque requería backend/facturación. El panel de administradores funciona como centro de notificaciones: muestra las solicitudes pendientes a los cuatro administradores.
