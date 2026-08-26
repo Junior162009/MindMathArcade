@@ -1,0 +1,1 @@
+No billing required for Realtime Database game submissions.
