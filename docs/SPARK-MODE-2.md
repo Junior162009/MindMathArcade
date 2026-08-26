@@ -1,0 +1,1 @@
+Spark mode: game submissions use Realtime Database only. Users submit a public game URL; administrators approve or reject; approved entries are stored in publishedGames and appear in the catalog. No Firebase Storage, Cloud Functions, Secret Manager, or billing is required.
