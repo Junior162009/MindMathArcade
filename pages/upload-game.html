@@ -25,8 +25,8 @@ body{background:#060610;color:#fff;font-family:Arial,sans-serif;margin:0}.upload
 <div class="field"><label for="gameName">Nombre del juego</label><input id="gameName" maxlength="60" required placeholder="Ej. Bit Rush"></div>
 <div class="field"><label for="gameDescription">Descripción</label><textarea id="gameDescription" maxlength="500" required placeholder="Explica brevemente de qué trata tu juego."></textarea></div>
 <div class="field"><label for="gameCategory">Categoría</label><select id="gameCategory"><option value="mates">🧮 Matemáticas</option><option value="logica">🧠 Lógica</option><option value="ciencia">🔬 Ciencia</option><option value="ingles">🇬🇧 Inglés</option><option value="sociales">🌎 Sociales</option><option value="arte">🎨 Arte</option><option value="otros">🎮 Otros</option></select></div>
-<div class="field"><label for="gameZip">📦 Juego completo (.zip)</label><input id="gameZip" type="file" accept=".zip,application/zip" required><div class="hint">Máximo 8 MB. El ZIP debe contener un <code>index.html</code>.</div></div>
-<div class="field"><label for="gameCover">🖼️ Logo / portada (opcional)</label><input id="gameCover" type="file" accept="image/png,image/jpeg,image/webp"><div class="hint">Máximo 512 KB.</div></div>
+<div class="field"><label for="gameZip">📦 Juego completo (.zip)</label><input id="gameZip" type="file" accept=".zip,application/zip" required><div class="hint">Máximo 7 MB. El ZIP debe contener un <code>index.html</code>.</div></div>
+<div class="field"><label for="gameCover">🖼️ Logo / portada (opcional)</label><input id="gameCover" type="file" accept="image/png,image/jpeg,image/webp"><div class="hint">Máximo 1 MB.</div></div>
 <div class="actions"><button class="btn secondary" type="button" onclick="location.href='../index.html'">Cancelar</button><button class="btn" id="submitGame" type="submit">🚀 ENVIAR PARA REVISIÓN</button></div>
 </form>
 <div id="uploadStatus" class="status"></div>
@@ -35,27 +35,11 @@ body{background:#060610;color:#fff;font-family:Arial,sans-serif;margin:0}.upload
 <script>
 document.addEventListener('DOMContentLoaded',()=>{
  const form=document.getElementById('gameUploadForm'),status=document.getElementById('uploadStatus'),userBox=document.getElementById('uploadUser'),submit=document.getElementById('submitGame');
- let currentUser=null;
- const MAX_ZIP=8*1024*1024,MAX_COVER=512*1024;
- const show=(msg,type)=>{status.textContent=msg;status.className='status show '+type};
- const safe=v=>String(v||'').replace(/[<>]/g,'');
+ let currentUser=null;const MAX_ZIP=7*1024*1024,MAX_COVER=1024*1024;
+ const show=(msg,type)=>{status.textContent=msg;status.className='status show '+type};const safe=v=>String(v||'').replace(/[<>]/g,'');
  const toBase64=file=>new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>{const s=String(r.result||'');resolve(s.includes(',')?s.slice(s.indexOf(',')+1):s)};r.onerror=()=>reject(r.error||new Error('No se pudo leer el archivo'));r.readAsDataURL(file)});
  window.TecnomathFirebase.auth.onAuthStateChanged(u=>{currentUser=u||null;if(!u){userBox.innerHTML='🔒 Debes iniciar sesión para subir un juego. <a href="auth.html" style="color:#00ffff">Iniciar sesión</a>';submit.disabled=true}else{userBox.innerHTML=`👤 Enviando como <strong>${safe(u.displayName||u.email||'usuario')}</strong> · ${safe(u.email||'')}`;submit.disabled=false}});
- form.addEventListener('submit',async e=>{
-  e.preventDefault();if(!currentUser){show('Debes iniciar sesión antes de enviar el juego.','error');return}
-  const zip=document.getElementById('gameZip').files[0],cover=document.getElementById('gameCover').files[0];
-  if(!zip||!zip.name.toLowerCase().endsWith('.zip')){show('Selecciona un archivo .zip.','error');return}
-  if(zip.size>MAX_ZIP){show('El ZIP supera el límite de 8 MB.','error');return}
-  if(cover&&cover.size>MAX_COVER){show('La portada supera el límite de 512 KB.','error');return}
-  submit.disabled=true;submit.textContent='⏳ PREPARANDO…';
-  try{
-   const zipBase64=await toBase64(zip),coverBase64=cover?await toBase64(cover):'';
-   const ref=window.TecnomathFirebase.database.ref('gameSubmissions').push(),id=ref.key;
-   const data={name:document.getElementById('gameName').value.trim(),description:document.getElementById('gameDescription').value.trim(),category:document.getElementById('gameCategory').value,authorUid:currentUser.uid,authorName:currentUser.displayName||currentUser.email?.split('@')[0]||'Usuario',authorEmail:currentUser.email||'',status:'pending',createdAt:window.TecnomathFirebase.serverTimestamp,submissionVersion:3,zipFileName:zip.name,zipBase64,coverBase64,coverMime:cover?.type||'',storageRequired:false};
-   submit.textContent='⏳ GUARDANDO…';await ref.set(data);form.reset();show('✅ Juego enviado correctamente. Los 4 administradores pueden revisarlo. Cuando uno lo apruebe, GitHub Actions lo publicará automáticamente en games/.','ok');
-  }catch(err){console.error(err);show('❌ No se pudo enviar el juego: '+(err.message||err),'error')}
-  submit.disabled=false;submit.textContent='🚀 ENVIAR PARA REVISIÓN';
- });
+ form.addEventListener('submit',async e=>{e.preventDefault();if(!currentUser){show('Debes iniciar sesión antes de enviar el juego.','error');return}const zip=document.getElementById('gameZip').files[0],cover=document.getElementById('gameCover').files[0];if(!zip||!zip.name.toLowerCase().endsWith('.zip')){show('Selecciona un archivo .zip.','error');return}if(zip.size>MAX_ZIP){show('El ZIP supera el límite de 7 MB.','error');return}if(cover&&cover.size>MAX_COVER){show('La portada supera el límite de 1 MB.','error');return}submit.disabled=true;submit.textContent='⏳ PREPARANDO…';try{const zipBase64=await toBase64(zip),coverBase64=cover?await toBase64(cover):'';const ref=window.TecnomathFirebase.database.ref('gameSubmissions').push(),id=ref.key;await ref.set({name:document.getElementById('gameName').value.trim(),description:document.getElementById('gameDescription').value.trim(),category:document.getElementById('gameCategory').value,authorUid:currentUser.uid,authorName:currentUser.displayName||currentUser.email?.split('@')[0]||'Usuario',authorEmail:currentUser.email||'',status:'pending',createdAt:window.TecnomathFirebase.serverTimestamp,submissionVersion:3,zipName:zip.name,zipBytes:zip.size,zipBase64,coverBase64,coverMime:cover?.type||'',storageRequired:false});form.reset();show('✅ Juego enviado correctamente. Los 4 administradores pueden revisarlo. Cuando uno lo apruebe, GitHub Actions lo publicará automáticamente en games/.','ok')}catch(err){console.error(err);show('❌ No se pudo enviar el juego: '+(err.message||err),'error')}submit.disabled=false;submit.textContent='🚀 ENVIAR PARA REVISIÓN'})
 });
 </script>
 </body>
