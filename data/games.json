@@ -1,14 +1,1 @@
-[
-  {
-    "name": "Atrapa el Número",
-    "desc": "Encuentra el número correcto antes de que se acabe el tiempo.",
-    "category": "educacion",
-    "url": "games/atrapa-el-numero/index.html",
-    "imageUrl": "",
-    "icon": "🎯",
-    "deviceCompatibility": "both",
-    "evento": null,
-    "authorName": "TecnoMath",
-    "submissionId": "demo-atrapa-el-numero"
-  }
-]
+[]
