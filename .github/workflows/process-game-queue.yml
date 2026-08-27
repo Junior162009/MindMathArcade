@@ -7,8 +7,6 @@ on:
         description: 'ID opcional del envío aprobado'
         required: false
         type: string
-  repository_dispatch:
-    types: [game-approved]
   schedule:
     - cron: '*/5 * * * *'
 
@@ -31,10 +29,18 @@ jobs:
         with:
           fetch-depth: 1
 
+      - name: Autenticar para leer Firebase Realtime Database
+        id: auth
+        uses: google-github-actions/auth@v3
+        with:
+          credentials_json: '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}'
+          token_format: access_token
+
       - name: Instalar herramientas
         run: sudo apt-get update -qq && sudo apt-get install -y -qq p7zip-full >/dev/null
 
       - name: Publicar aprobados directamente en GitHub
         env:
+          FIREBASE_ACCESS_TOKEN: ${{ steps.auth.outputs.access_token }}
           EVENT_SUBMISSION_ID: ${{ github.event.client_payload.submissionId || inputs.submission_id }}
         run: python scripts/publish-approved-games.py
