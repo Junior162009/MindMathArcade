@@ -11,11 +11,18 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 DB = os.environ['FIREBASE_DB'].rstrip('/')
+ACCESS_TOKEN = os.environ.get('FIREBASE_ACCESS_TOKEN', '').strip()
+
+if not ACCESS_TOKEN:
+    raise RuntimeError('FIREBASE_ACCESS_TOKEN no está disponible. Configura FIREBASE_SERVICE_ACCOUNT en GitHub Actions.')
+
 query = urllib.parse.urlencode({'orderBy': '"status"', 'equalTo': '"approved"', 'limitToFirst': '20'})
-request = urllib.request.Request(
-    f'{DB}/publicGameQueue.json?{query}',
-    headers={'User-Agent': 'TecnoMath-GitHub-Publisher/6.0', 'Accept': 'application/json'},
-)
+headers = {
+    'User-Agent': 'TecnoMath-GitHub-Publisher/7.0',
+    'Accept': 'application/json',
+    'Authorization': f'Bearer {ACCESS_TOKEN}',
+}
+request = urllib.request.Request(f'{DB}/publicGameQueue.json?{query}', headers=headers)
 with urllib.request.urlopen(request, timeout=120) as response:
     queue = json.loads(response.read().decode('utf-8') or '{}') or {}
 
@@ -157,7 +164,7 @@ if changed:
     subprocess.run(['git', 'config', 'user.email', '41898282+github-actions[bot]@users.noreply.github.com'], check=True)
     subprocess.run(['git', 'add', 'games', 'data/games.json'], check=True)
     if subprocess.run(['git', 'diff', '--cached', '--quiet']).returncode != 0:
-        subprocess.run(['git', 'commit', '-m', 'feat: publish approved games directly to GitHub'], check=True)
+        subprocess.run(['git', 'commit', '-m', 'feat: publish approved games without Cloud Functions'], check=True)
         subprocess.run(['git', 'push'], check=True)
 else:
     print('No hubo juegos nuevos para publicar.')
