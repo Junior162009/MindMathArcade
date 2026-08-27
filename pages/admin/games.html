@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Juegos enviados · TecnoMath</title>
+<link rel="stylesheet" href="../../css/admin.css">
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script src="../../js/firebase-config.js"></script>
+<script src="../../js/admin-guard.js"></script>
+<style>
+body{background:#060610;color:#fff;font-family:Arial,sans-serif}.wrap{max-width:1100px;margin:30px auto;padding:20px}.card{background:#0d0d1a;border:1px solid #292943;border-radius:16px;padding:20px;margin:16px 0}.game{border:1px solid #292943;border-radius:14px;padding:18px;margin:14px 0;background:#090914}.head{display:flex;justify-content:space-between;gap:15px;align-items:flex-start;flex-wrap:wrap}.muted{color:#aaa}.badge{display:inline-block;padding:5px 9px;border-radius:8px;background:#222238}.pending{color:#ffe600}.approved{color:#39ff14}.rejected{color:#ff8aa2}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:15px}.btn{border:0;border-radius:9px;padding:10px 14px;font-weight:bold;cursor:pointer}.approve{background:#39ff14;color:#001}.reject{background:#ff416c;color:#fff}.download{background:#00ffff;color:#001}.refresh{background:#222238;color:#fff}.status{margin-top:15px;padding:12px;border-radius:10px;background:#111126}.empty{padding:30px;text-align:center;color:#aaa}
+</style>
+</head>
+<body>
+<div class="wrap">
+<a href="index.html" style="color:#00ffff">← Volver al panel</a>
+<div class="card">
+<h1>🎮 Juegos enviados</h1>
+<p class="muted">Aquí el administrador revisa, descarga y aprueba los juegos. Al aprobar, GitHub Actions los publica automáticamente en <code>games/</code>.</p>
+<div id="status" class="status">Cargando solicitudes…</div>
+<div id="list"></div>
+</div>
+</div>
+<script>
+'use strict';
+const db=TecnomathFirebase.database,auth=TecnomathFirebase.auth;
+const $=id=>document.getElementById(id);
+const esc=v=>String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+const isAdmin=u=>{if(!u)return false;return ['delahozbarcelojunior@gmail.com','nicolenatera26@gmail.com','mateobarbosamatos@gmail.com','jandresvf23@gmail.com'].includes(String(u.email||'').toLowerCase());};
+function status(t,ok=true){$('status').textContent=t;$('status').style.border=ok?'1px solid #39ff14':'1px solid #ff416c';}
+function date(v){if(!v)return'—';const d=new Date(v);return Number.isNaN(d.getTime())?'—':d.toLocaleString('es-CO');}
+function bytes(n){n=Number(n||0);if(!n)return'—';if(n<1024)return n+' B';if(n<1048576)return (n/1024).toFixed(1)+' KB';return (n/1048576).toFixed(2)+' MB';}
+function render(data){
+ const rows=Object.entries(data||{}).filter(([,g])=>g&&typeof g==='object');
+ if(!rows.length){$('list').innerHTML='<div class="empty">No hay juegos enviados.</div>';return;}
+ rows.sort((a,b)=>Number(b[1].createdAt||0)-Number(a[1].createdAt||0));
+ $('list').innerHTML=rows.map(([id,g])=>{
+   const s=String(g.status||'pending');
+   return `<article class="game"><div class="head"><div><h2>${esc(g.name||'Juego')}</h2><div class="muted">👤 ${esc(g.authorName||'Usuario')} · ${esc(g.authorEmail||'')}</div><div class="muted">📅 ${esc(date(g.createdAt))} · 📦 ${esc(bytes(g.packageSize))}</div></div><span class="badge ${esc(s)}">${esc(s.toUpperCase())}</span></div><p>${esc(g.description||'Sin descripción')}</p><p class="muted">Categoría: ${esc(g.category||'otros')} · Tipo: ${esc(g.sourceType||'upload')}</p><div class="actions">${g.packageBase64?`<button class="btn download" onclick="downloadGame('${esc(id)}')">⬇️ Descargar ZIP</button>`:''}${g.gameUrl?`<a class="btn download" href="${esc(g.gameUrl)}" target="_blank" rel="noopener">🔗 Probar URL</a>`:''}${s==='pending'?`<button class="btn approve" onclick="approveGame('${esc(id)}')">✅ Aprobar y publicar</button><button class="btn reject" onclick="rejectGame('${esc(id)}')">❌ Rechazar</button>`:''}</div></article>`;
+ }).join('');
+}
+async function load(){try{const s=await db.ref('gameUploadQueue').once('value');render(s.val()||{});status('Actualizado.');}catch(e){status('❌ '+(e.message||e),false);}}
+window.approveGame=async id=>{if(!confirm('¿Aprobar este juego? GitHub Actions lo publicará automáticamente.'))return;try{await db.ref('gameUploadQueue/'+id).update({status:'approved',approvedAt:Date.now(),approvedBy:auth.currentUser.uid});if(window.TecnomathFirebase.database)await db.ref('gameSubmissions/'+id).update({status:'approved',approvedAt:Date.now(),approvedBy:auth.currentUser.uid});status('✅ Aprobado. GitHub Actions lo publicará automáticamente.');await load();}catch(e){status('❌ '+(e.message||e),false);}};
+window.rejectGame=async id=>{const reason=prompt('Motivo del rechazo (opcional):')??'';try{await db.ref('gameUploadQueue/'+id).update({status:'rejected',rejectedAt:Date.now(),rejectedBy:auth.currentUser.uid,rejectionReason:reason});if(window.TecnomathFirebase.database)await db.ref('gameSubmissions/'+id).update({status:'rejected',rejectedAt:Date.now(),rejectedBy:auth.currentUser.uid,rejectionReason:reason});status('❌ Juego rechazado.');await load();}catch(e){status('❌ '+(e.message||e),false);}};
+window.downloadGame=async id=>{try{const s=await db.ref('gameUploadQueue/'+id).once('value'),g=s.val()||{};if(!g.packageBase64)throw Error('Este envío no contiene un ZIP.');const raw=atob(g.packageBase64),u=new Uint8Array(raw.length);for(let i=0;i<raw.length;i++)u[i]=raw.charCodeAt(i);const blob=new Blob([u],{type:'application/zip'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=(g.name||'juego').replace(/[^a-z0-9_-]+/gi,'-')+'.zip';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1500);}catch(e){status('❌ '+(e.message||e),false);}};
+auth.onAuthStateChanged(u=>{if(!u||!isAdmin(u)){location.href='../../auth.html';return;}load();});
+</script>
+</body>
+</html>
