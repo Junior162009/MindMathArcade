@@ -7,17 +7,37 @@ _utf8_encode:function(string){string=string.replace(/\r\n/g,"\n");var utftext=""
 _utf8_decode:function(utftext){var string="",i=0,c=0,c2=0;while(i<utftext.length){c=utftext.charCodeAt(i);if(c<128){string+=String.fromCharCode(c);i++;}else if(c>191&&c<224){c2=utftext.charCodeAt(i+1);string+=String.fromCharCode(((c&31)<<6)|(c2&63));i+=2;}else{c2=utftext.charCodeAt(i+1);var c3=utftext.charCodeAt(i+2);string+=String.fromCharCode(((c&15)<<12)|((c2&63)<<6)|(c3&63));i+=3;}}return string;}
 };
 
-/* TecnoMath Firebase bootstrap: everything required by Cookie Clicker is
-   loaded synchronously before main.js. */
+/* TecnoMath Firebase integration.
+   IMPORTANT: Cookie Clicker must never wait for Firebase. Some browsers,
+   privacy extensions, or blocked third-party requests can delay external
+   scripts. The game therefore starts normally and Firebase sync initializes
+   independently in the background. */
 (function(){
  if(window.__TecnomathCookieFirebaseBridge)return;
  window.__TecnomathCookieFirebaseBridge=true;
- function writeScript(src,attrs){document.write('<script src="'+src+'"'+(attrs||'')+'><\\/script>');}
- if(!window.firebase){
-  writeScript('https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js');
-  writeScript('https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js');
-  writeScript('https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js');
+
+ function load(src,onload){
+  var s=document.createElement('script');
+  s.src=src;
+  s.async=true;
+  if(onload)s.onload=onload;
+  s.onerror=function(){console.warn('[TecnoMath] Optional Firebase script failed:',src);};
+  document.head.appendChild(s);
  }
- if(!window.TecnomathFirebase)writeScript('../../js/firebase-config.js');
- if(!document.querySelector('script[data-tecnomath-cloud-sync]'))writeScript('../../js/cloud-progress-sync.js?v=3',' data-tecnomath-cloud-sync="true"');
+ function start(){
+  if(window.TecnomathFirebase)return;
+  if(window.firebase){
+   load('../../js/firebase-config.js');
+   return;
+  }
+  load('https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js',function(){
+   load('https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js',function(){
+    load('https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js',function(){
+     load('../../js/firebase-config.js');
+    });
+   });
+  });
+ }
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});
+ else start();
 })();
