@@ -37,8 +37,8 @@ jobs:
 
           DB = os.environ['FIREBASE_DB'].rstrip('/')
           query = urllib.parse.urlencode({'orderBy':'"status"','equalTo':'"approved"','limitToFirst':'20'})
-          url = f'{DB}/gameUploadQueue.json?{query}'
-          req = urllib.request.Request(url, headers={'User-Agent':'TecnoMath-AutoPublisher/3.0','Accept':'application/json'})
+          url = f'{DB}/publicGameQueue.json?{query}'
+          req = urllib.request.Request(url, headers={'User-Agent':'TecnoMath-AutoPublisher/4.0','Accept':'application/json'})
           with urllib.request.urlopen(req, timeout=120) as response:
               queue = json.loads(response.read().decode('utf-8') or '{}') or {}
 
@@ -114,7 +114,7 @@ jobs:
           changed = False
 
           if not queue:
-              print('No hay juegos con status=approved pendientes de publicar.')
+              print('No hay juegos aprobados pendientes de publicar.')
 
           for submission_id, game in queue.items():
               if not isinstance(game, dict):
@@ -137,7 +137,7 @@ jobs:
                       if destination.exists():
                           shutil.rmtree(destination)
                       destination.mkdir(parents=True, exist_ok=True)
-                      title = (name.replace('&','&amp;').replace('<','&lt;').replace('>','&gt;').replace('"','&quot;'))
+                      title = name.replace('&','&amp;').replace('<','&lt;').replace('>','&gt;').replace('"','&quot;')
                       html = f'<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>{title}</title></head><body><script>location.replace({json.dumps(game_url)});</script><noscript><a href={json.dumps(game_url)}>Abrir juego</a></noscript></body></html>'
                       (destination / 'index.html').write_text(html, encoding='utf-8')
                   else:
