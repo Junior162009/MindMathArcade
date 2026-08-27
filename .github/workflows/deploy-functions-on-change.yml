@@ -18,7 +18,7 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  FIREBASE_PROJECT_ID: tecnomath-sync-6058
+  FIREBASE_PROJECT_ID: tecnomath-sync-6058a
 
 jobs:
   deploy:
