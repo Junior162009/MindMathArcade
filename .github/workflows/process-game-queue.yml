@@ -12,138 +12,250 @@ jobs:
   process:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Descargar repositorio
+        uses: actions/checkout@v4
+
       - name: Instalar herramientas
         run: sudo apt-get update -qq && sudo apt-get install -y -qq p7zip-full >/dev/null
+
       - name: Preparar previews y publicar aprobados
         env:
           FIREBASE_DB: https://tecnomath-sync-6058a-default-rtdb.firebaseio.com
-          OWNER: Junior162009
-          REPO: MindMathArcade
         shell: bash
         run: |
           set -euo pipefail
           python - <<'PY'
-          import base64,json,os,re,shutil,subprocess,urllib.error,urllib.request,zipfile
+          import base64
+          import json
+          import os
+          import re
+          import shutil
+          import subprocess
+          import urllib.error
+          import urllib.request
+          import zipfile
           from pathlib import Path
 
-          db=os.environ['FIREBASE_DB'].rstrip('/')
+          db = os.environ['FIREBASE_DB'].rstrip('/')
+
+          # Spark no dispone aquí de una credencial de servidor para GitHub Actions.
+          # Por eso el workflow SOLO LEE la cola pública y NO intenta escribir
+          # previewStatus desde Actions. Los cambios de estado los hace el usuario
+          # autenticado/admin desde la web.
           def get_json(path):
-              req=urllib.request.Request(db+'/'+path+'.json',headers={'User-Agent':'TecnoMath-GitHub-Actions'})
+              req = urllib.request.Request(
+                  db + '/' + path + '.json',
+                  headers={'User-Agent': 'TecnoMath-GitHub-Actions'}
+              )
               try:
-                  with urllib.request.urlopen(req,timeout=60) as r:
-                      return json.loads(r.read().decode() or 'null') or {}
+                  with urllib.request.urlopen(req, timeout=60) as r:
+                      raw = r.read().decode('utf-8')
+                      return json.loads(raw or 'null') or {}
               except urllib.error.HTTPError as e:
-                  body=e.read().decode(errors='replace')
-                  raise RuntimeError(f'Firebase respondió HTTP {e.code} al leer {path}. Revisa las reglas de gameUploadQueue. Respuesta: {body[:300]}')
+                  body = e.read().decode(errors='replace')
+                  raise RuntimeError(
+                      f'Firebase respondió HTTP {e.code} al leer {path}. '
+                      f'La ruta gameUploadQueue debe permitir lectura. '
+                      f'Respuesta: {body[:300]}'
+                  )
 
-          def put_json(path,value):
-              data=json.dumps(value,ensure_ascii=False).encode()
-              req=urllib.request.Request(db+'/'+path+'.json',data=data,method='PUT',headers={'Content-Type':'application/json','User-Agent':'TecnoMath-GitHub-Actions'})
-              with urllib.request.urlopen(req,timeout=60) as r: return r.read()
+          queue = get_json('gameUploadQueue')
+          root = Path('games-preview')
+          root.mkdir(parents=True, exist_ok=True)
+          changed = False
 
-          queue=get_json('gameUploadQueue')
-          root=Path('games-preview'); root.mkdir(exist_ok=True)
-          changed=False
+          def slug(value):
+              value = str(value or 'juego').lower()
+              value = re.sub(r'[^a-z0-9]+', '-', value).strip('-')
+              return value[:60] or 'juego'
 
-          def slug(v):
-              s=re.sub(r'[^a-z0-9]+','-',str(v or 'juego').lower()).strip('-')
-              return s[:60] or 'juego'
-
-          def safe_extract_zip(z,out):
+          def safe_extract_zip(z, out):
               for info in z.infolist():
-                  n=info.filename.replace('\\','/').lstrip('/')
-                  parts=[p for p in n.split('/') if p]
-                  if not parts or '..' in parts: continue
-                  target=out.joinpath(*parts)
-                  if info.is_dir(): target.mkdir(parents=True,exist_ok=True); continue
-                  target.parent.mkdir(parents=True,exist_ok=True)
-                  with z.open(info) as src, open(target,'wb') as dst: shutil.copyfileobj(src,dst)
+                  name = info.filename.replace('\\', '/').lstrip('/')
+                  parts = [p for p in name.split('/') if p]
+                  if not parts or '..' in parts:
+                      continue
+                  target = out.joinpath(*parts)
+                  if info.is_dir():
+                      target.mkdir(parents=True, exist_ok=True)
+                      continue
+                  target.parent.mkdir(parents=True, exist_ok=True)
+                  with z.open(info) as src, open(target, 'wb') as dst:
+                      shutil.copyfileobj(src, dst)
 
-          def extract_package(raw,out):
-              p=Path('/tmp/package.bin'); p.write_bytes(raw)
-              extracted=out/'_extract'; extracted.mkdir(parents=True,exist_ok=True)
+          def extract_package(raw, out):
+              package = Path('/tmp/game-package.bin')
+              package.write_bytes(raw)
+              extracted = out / '_extract'
+              extracted.mkdir(parents=True, exist_ok=True)
               try:
-                  with zipfile.ZipFile(p) as z: safe_extract_zip(z,extracted)
+                  with zipfile.ZipFile(package) as z:
+                      safe_extract_zip(z, extracted)
               except zipfile.BadZipFile:
-                  subprocess.run(['7z','x','-y',f'-o{extracted}',str(p)],check=True,stdout=subprocess.DEVNULL)
+                  subprocess.run(
+                      ['7z', 'x', '-y', f'-o{extracted}', str(package)],
+                      check=True,
+                      stdout=subprocess.DEVNULL
+                  )
               return extracted
 
           def find_index(base):
-              idx=list(base.rglob('index.html'))+list(base.rglob('index.htm'))
-              return idx[0] if idx else None
+              indexes = list(base.rglob('index.html')) + list(base.rglob('index.htm'))
+              return indexes[0] if indexes else None
 
-          def copy_game_root(src,dst):
-              idx=find_index(src)
-              if not idx: raise RuntimeError('El juego debe contener index.html o index.htm.')
-              game_root=idx.parent
-              if dst.exists(): shutil.rmtree(dst)
-              dst.mkdir(parents=True)
-              for p in game_root.iterdir():
-                  if p.name=='.preview-info.json': continue
-                  target=dst/p.name
-                  if p.is_dir(): shutil.copytree(p,target)
-                  else: shutil.copy2(p,target)
+          def copy_game_root(src, dst):
+              index = find_index(src)
+              if not index:
+                  raise RuntimeError('El juego debe contener index.html o index.htm.')
+
+              game_root = index.parent
+              if dst.exists():
+                  shutil.rmtree(dst)
+              dst.mkdir(parents=True, exist_ok=True)
+
+              for item in game_root.iterdir():
+                  if item.name == '.preview-info.json':
+                      continue
+                  target = dst / item.name
+                  if item.is_dir():
+                      shutil.copytree(item, target)
+                  else:
+                      shutil.copy2(item, target)
 
           if not queue:
-              print('Sin juegos pendientes en gameUploadQueue.')
+              print('Sin juegos en gameUploadQueue.')
 
-          for gid,g in queue.items():
-              if not isinstance(g,dict): continue
-              name=g.get('name') or 'Juego'
-              folder=f'{slug(name)}-{gid}'
-              preview=root/folder
-              status=g.get('status','pending')
+          for gid, game in queue.items():
+              if not isinstance(game, dict):
+                  continue
 
-              if status=='pending' and not preview.exists():
+              name = game.get('name') or 'Juego'
+              folder = f'{slug(name)}-{gid}'
+              preview = root / folder
+              status = game.get('status', 'pending')
+
+              # Crear preview para cualquier propuesta pendiente.
+              if status == 'pending' and not (preview / 'index.html').exists():
                   try:
-                      if g.get('sourceType')=='url':
-                          url=str(g.get('gameUrl') or '')
-                          if not re.match(r'^https?://',url,re.I): raise RuntimeError('URL inválida')
-                          preview.mkdir(parents=True,exist_ok=True)
-                          title=(name.replace('&','&amp;').replace('<','&lt;').replace('>','&gt;'))
-                          (preview/'index.html').write_text('<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>'+title+'</title></head><body><script>location.replace('+json.dumps(url)+')</script></body></html>',encoding='utf-8')
-                      else:
-                          package=g.get('packageBase64')
-                          if not package: raise RuntimeError('La propuesta no contiene packageBase64.')
-                          work=Path('/tmp')/f'game-{gid}'; shutil.rmtree(work,ignore_errors=True); work.mkdir(parents=True)
-                          raw=base64.b64decode(package,validate=True)
-                          src=extract_package(raw,work)
-                          copy_game_root(src,preview)
-                      (preview/'.preview-info.json').write_text(json.dumps({'submissionId':str(g.get('submissionId') or gid),'name':name},ensure_ascii=False),encoding='utf-8')
-                      changed=True
-                      put_json('gameUploadQueue/'+gid+'/previewStatus','ready')
-                      print('Preview creado:',preview)
-                  except Exception as e:
-                      print('ERROR preview',gid,e)
-                      try: put_json('gameUploadQueue/'+gid+'/previewStatus','error: '+str(e)[:300])
-                      except Exception: pass
+                      source_type = game.get('sourceType') or 'upload'
 
-              if status=='approved':
-                  dest=Path('games')/folder
-                  if dest.exists() and (dest/'index.html').exists(): continue
-                  if not preview.exists():
-                      print('No existe preview para publicar:',gid)
+                      if source_type == 'url':
+                          url = str(game.get('gameUrl') or '').strip()
+                          if not re.match(r'^https?://', url, re.I):
+                              raise RuntimeError('URL inválida')
+
+                          preview.mkdir(parents=True, exist_ok=True)
+                          title = (
+                              name.replace('&', '&amp;')
+                              .replace('<', '&lt;')
+                              .replace('>', '&gt;')
+                              .replace('"', '&quot;')
+                          )
+                          html = (
+                              '<!doctype html><html lang="es"><head>'
+                              '<meta charset="utf-8">'
+                              '<meta name="viewport" content="width=device-width,initial-scale=1">'
+                              f'<title>{title}</title></head><body>'
+                              '<script>location.replace(' + json.dumps(url) + ')</script>'
+                              '</body></html>'
+                          )
+                          (preview / 'index.html').write_text(html, encoding='utf-8')
+
+                      else:
+                          package = game.get('packageBase64')
+                          if not package:
+                              raise RuntimeError('La propuesta no contiene packageBase64.')
+
+                          work = Path('/tmp') / f'game-{gid}'
+                          shutil.rmtree(work, ignore_errors=True)
+                          work.mkdir(parents=True, exist_ok=True)
+
+                          raw = base64.b64decode(package, validate=True)
+                          src = extract_package(raw, work)
+                          copy_game_root(src, preview)
+
+                      (preview / '.preview-info.json').write_text(
+                          json.dumps({
+                              'submissionId': str(game.get('submissionId') or gid),
+                              'name': name,
+                              'authorName': game.get('authorName') or 'Usuario',
+                              'status': 'ready'
+                          }, ensure_ascii=False, indent=2),
+                          encoding='utf-8'
+                      )
+
+                      # Validación final: NUNCA se publica la URL como lista si no
+                      # existe físicamente el index.html dentro del repositorio.
+                      if not (preview / 'index.html').is_file():
+                          raise RuntimeError('El preview fue creado sin index.html.')
+
+                      changed = True
+                      print('Preview creado correctamente:', preview)
+
+                  except Exception as exc:
+                      print(f'ERROR creando preview {gid}: {exc}')
+
+              # Publicar únicamente después de que el administrador haya aprobado.
+              if status == 'approved':
+                  if not (preview / 'index.html').is_file():
+                      print('Aprobado pero sin preview válido todavía:', gid)
                       continue
-                  shutil.copytree(preview,dest,dirs_exist_ok=True)
-                  (dest/'.preview-info.json').unlink(missing_ok=True)
-                  changed=True
-                  catfile=Path('data/games.json'); catfile.parent.mkdir(exist_ok=True)
-                  try: arr=json.loads(catfile.read_text(encoding='utf-8')) if catfile.exists() else []
-                  except Exception: arr=[]
-                  arr=[x for x in arr if str(x.get('submissionId',''))!=str(gid)]
-                  arr.append({'name':name,'desc':g.get('description') or 'Juego educativo de TecnoMath','url':f'games/{folder}/index.html','imageUrl':g.get('imageUrl') or '','icon':g.get('icon') or '🎮','category':g.get('category') or 'otros','deviceCompatibility':'both','evento':None,'submissionId':str(gid),'authorName':g.get('authorName') or 'Usuario','sourceType':g.get('sourceType') or 'upload'})
-                  catfile.write_text(json.dumps(arr,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
-                  print('Publicado:',dest)
+
+                  destination = Path('games') / folder
+                  if not (destination / 'index.html').is_file():
+                      if destination.exists():
+                          shutil.rmtree(destination)
+                      shutil.copytree(preview, destination)
+                      (destination / '.preview-info.json').unlink(missing_ok=True)
+                      changed = True
+                      print('Juego publicado:', destination)
+
+                  catalog = Path('data/games.json')
+                  catalog.parent.mkdir(parents=True, exist_ok=True)
+                  try:
+                      games = json.loads(catalog.read_text(encoding='utf-8')) if catalog.exists() else []
+                  except Exception:
+                      games = []
+
+                  games = [
+                      item for item in games
+                      if str(item.get('submissionId', '')) != str(gid)
+                  ]
+                  games.append({
+                      'name': name,
+                      'desc': game.get('description') or 'Juego educativo de TecnoMath',
+                      'url': f'games/{folder}/index.html',
+                      'imageUrl': game.get('imageUrl') or '',
+                      'icon': game.get('icon') or '🎮',
+                      'category': game.get('category') or 'otros',
+                      'deviceCompatibility': 'both',
+                      'evento': None,
+                      'submissionId': str(gid),
+                      'authorName': game.get('authorName') or 'Usuario',
+                      'sourceType': game.get('sourceType') or 'upload'
+                  })
+                  catalog.write_text(
+                      json.dumps(games, ensure_ascii=False, indent=2) + '\n',
+                      encoding='utf-8'
+                  )
+                  changed = True
 
           if changed:
-              subprocess.run(['git','config','user.name','github-actions[bot]'],check=True)
-              subprocess.run(['git','config','user.email','41898282+github-actions[bot]@users.noreply.github.com'],check=True)
-              subprocess.run(['git','add','games-preview','games','data/games.json'],check=True)
-              r=subprocess.run(['git','diff','--cached','--quiet'])
-              if r.returncode!=0:
-                  subprocess.run(['git','commit','-m','fix: process Spark game previews'],check=True)
-                  subprocess.run(['git','push'],check=True)
+              subprocess.run(['git', 'config', 'user.name', 'github-actions[bot]'], check=True)
+              subprocess.run([
+                  'git', 'config', 'user.email',
+                  '41898282+github-actions[bot]@users.noreply.github.com'
+              ], check=True)
+              subprocess.run(['git', 'add', 'games-preview', 'games', 'data/games.json'], check=True)
+
+              if subprocess.run(['git', 'diff', '--cached', '--quiet']).returncode != 0:
+                  subprocess.run([
+                      'git', 'commit', '-m', 'fix: publish Spark game previews correctly'
+                  ], check=True)
+                  subprocess.run(['git', 'push'], check=True)
+                  print('Cambios enviados a main. GitHub Pages se desplegará automáticamente.')
+              else:
+                  print('No hay cambios para confirmar.')
           else:
               print('Sin cambios.')
           PY
