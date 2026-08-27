@@ -1,2 +1,70 @@
-// TecnoMath - sincronización automática de localStorage por cuenta Firebase.
-(function () { 'use strict'; if (window.TecnomathCloudSync) return; const ROOT='userProgress', EXCLUDED=new Set(['tecnomath_session','tecnomath_users']); let uid=null,ready=false,syncing=false,restoring=false,lastLocal=''; const services=()=>window.firebase&&firebase.auth&&firebase.database?{auth:firebase.auth(),db:firebase.database()}:null; const enc=k=>btoa(unescape(encodeURIComponent(k))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/g,''); const dec=k=>{try{return decodeURIComponent(escape(atob(k.replace(/-/g,'+').replace(/_/g,'/'))))}catch(_){return null}}; const allowed=k=>!!k&&!EXCLUDED.has(k)&&!k.startsWith('firebase:')&&!k.startsWith('firebaseui::'); const local=()=>{const o={};for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(allowed(k))try{o[enc(k)]=localStorage.getItem(k)}catch(_){} }return o}; const sig=o=>{try{return JSON.stringify(o)}catch(_){return''}}; const ref=()=>{const s=services();return s&&uid?s.db.ref(ROOT+'/'+uid+'/localState'):null}; async function push(force,only){const r=ref();if(!r||syncing||restoring)return false;const state=only||local(),s=sig(state);if(!force&&s===lastLocal)return true;syncing=true;try{const u={};Object.keys(state).forEach(k=>u[k]={value:state[k],updatedAt:firebase.database.ServerValue.TIMESTAMP});if(Object.keys(u).length)await r.update(u);lastLocal=s;return true}catch(e){console.warn('TecnoMath: no se pudo guardar el progreso en Firebase.',e);return false}finally{syncing=false}} async function restore(){const r=ref();if(!r)return;restoring=true;try{const cloud=(await r.once('value')).val()||{},keys=Object.keys(cloud),old=local();if(!keys.length){await push(true)}else{for(const k of keys){const key=dec(k),item=cloud[k];if(key&&allowed(key)&&item&&Object.prototype.hasOwnProperty.call(item,'value'))try{localStorage.setItem(key,String(item.value))}catch(_){} }const missing={};Object.keys(old).forEach(k=>{if(!Object.prototype.hasOwnProperty.call(cloud,k))missing[k]=old[k]});if(Object.keys(missing).length)await push(false,missing)}lastLocal=sig(local())}catch(e){console.warn('TecnoMath: no se pudo restaurar el progreso desde Firebase.',e)}finally{restoring=false}} function start(user){if(!user){uid=null;ready=false;lastLocal='';return}if(uid===user.uid&&ready)return;uid=user.uid;ready=false;restore().then(()=>{ready=true;lastLocal=sig(local());push(true)})} function init(){const s=services();if(!s)return setTimeout(init,300);s.auth.onAuthStateChanged(start);setInterval(()=>{if(uid&&ready&&!restoring)push(false)},3000);window.addEventListener('pagehide',()=>{if(uid&&ready&&!restoring)push(true)});window.addEventListener('beforeunload',()=>{if(uid&&ready&&!restoring)push(true)})} window.TecnomathCloudSync={sync:()=>push(true),restore};init(); })();
+// TecnoMath - sincronización cloud por cuenta y por juego.
+(function () {
+  'use strict';
+  if (window.TecnomathCloudSync) return;
+
+  var ROOT='userProgress';
+  var LEGACY='localState';
+  var META_KEY='__tecnomath_cloud_sync_meta__';
+  var EXCLUDED={'tecnomath_session':1,'tecnomath_users':1,'firebaseui::rememberedAccounts':1};
+  var uid=null,ready=false,syncing=false,restoring=false,timer=null;
+  var gameId=getGameId(),lastSignature='',lastWrite=0;
+
+  function getGameId(){
+    var m=String(location.pathname||'').match(/\/games\/([^\/]+)/i);
+    if(!m)return 'site';
+    try{return decodeURIComponent(m[1]).toLowerCase();}catch(_){return m[1].toLowerCase();}
+  }
+  function services(){return window.firebase&&firebase.auth&&firebase.database?{auth:firebase.auth(),db:firebase.database()}:null;}
+  function enc(k){try{return btoa(unescape(encodeURIComponent(k))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/g,'');}catch(_){return null;}}
+  function dec(k){try{var s=k.replace(/-/g,'+').replace(/_/g,'/');while(s.length%4)s+='=';return decodeURIComponent(escape(atob(s)));}catch(_){return null;}}
+  function allowed(k){return !!k&&k!==META_KEY&&!EXCLUDED[k]&&k.indexOf('firebase:')!==0&&k.indexOf('firebaseui::')!==0;}
+  function local(){var o={};for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(!allowed(k))continue;try{var e=enc(k);if(e)o[e]=localStorage.getItem(k);}catch(_){}}return o;}
+  function sig(o){try{return JSON.stringify(o);}catch(_){return '';}}
+  function root(){var s=services();return s&&uid?s.db.ref(ROOT+'/'+uid):null;}
+  function game(){var r=root();return r?r.child('games').child(gameId):null;}
+  function status(state,message){window.TecnomathCloudSyncStatus=state;window.TecnomathCloudSyncMessage=message||'';try{window.dispatchEvent(new CustomEvent('tecnomath:cloud-status',{detail:{state:state,message:message||'',gameId:gameId}}));}catch(_){} }
+  function saveMeta(){try{localStorage.setItem(META_KEY,JSON.stringify({version:2,gameId:gameId,lastCloudWrite:lastWrite}));}catch(_){} }
+
+  async function push(force,state){
+    var r=game();if(!r||syncing||restoring||!ready)return false;
+    state=state||local();var s=sig(state);if(!force&&s===lastSignature)return true;
+    syncing=true;status('syncing','Sincronizando…');
+    try{
+      var updates={},keys=Object.keys(state);
+      for(var i=0;i<keys.length;i++){updates['state/'+keys[i]+'/value']=state[keys[i]];updates['state/'+keys[i]+'/updatedAt']=firebase.database.ServerValue.TIMESTAMP;}
+      updates['meta/updatedAt']=firebase.database.ServerValue.TIMESTAMP;updates['meta/version']=2;updates['meta/gameId']=gameId;
+      await r.update(updates);lastSignature=s;lastWrite=Date.now();saveMeta();status('saved','Guardado en la nube');return true;
+    }catch(e){console.warn('TecnoMath: no se pudo guardar el progreso en Firebase.',e);status('offline','Guardado local; nube no disponible');return false;}
+    finally{syncing=false;}
+  }
+
+  async function restore(){
+    var r=game();if(!r||restoring)return;
+    restoring=true;status('syncing','Cargando progreso…');
+    try{
+      var cloud=(await r.once('value')).val();
+      // Compatibilidad con la estructura antigua userProgress/{uid}/localState.
+      if(!cloud||!cloud.state){var legacy=(await root().child(LEGACY).once('value')).val()||{};if(Object.keys(legacy).length)cloud={state:legacy,meta:{version:1,legacy:true}};}
+      var state=cloud&&cloud.state?cloud.state:{},keys=Object.keys(state);
+      for(var i=0;i<keys.length;i++){var e=keys[i],k=dec(e),item=state[e];if(!k||!allowed(k)||!item||!Object.prototype.hasOwnProperty.call(item,'value'))continue;try{localStorage.setItem(k,String(item.value));}catch(_){} }
+      lastSignature=sig(local());ready=true;status(keys.length?'saved':'ready',keys.length?'Progreso restaurado':'Listo para guardar');
+    }catch(e){console.warn('TecnoMath: no se pudo restaurar el progreso desde Firebase.',e);ready=true;status('offline','Sin conexión; usando guardado local');}
+    finally{restoring=false;}
+  }
+
+  function start(user){
+    if(!user){uid=null;ready=false;lastSignature='';status('signed-out','Sin cuenta conectada');return;}
+    if(uid===user.uid&&ready)return;
+    uid=user.uid;ready=false;restore().then(function(){ready=true;push(false);});
+  }
+  function flush(){if(uid&&ready&&!restoring&&!syncing)push(true);}
+  function init(){
+    var s=services();if(!s){status('waiting','Esperando Firebase…');setTimeout(init,300);return;}
+    status('waiting','Esperando cuenta…');s.auth.onAuthStateChanged(start);
+    timer=setInterval(function(){if(uid&&ready&&!restoring&&!syncing)push(false);},5000);
+    window.addEventListener('pagehide',flush);window.addEventListener('beforeunload',flush);
+    window.TecnomathCloudSync={sync:function(){return push(true);},restore:restore,getGameId:function(){return gameId;},getStatus:function(){return window.TecnomathCloudSyncStatus||'unknown';}};
+  }
+  window.TecnomathCloudSync={getGameId:function(){return gameId;}};init();
+})();
