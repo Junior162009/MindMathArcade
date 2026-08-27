@@ -29,7 +29,7 @@
   if (!document.querySelector('script[data-tecnomath-cloud-sync]')) {
     const cloudSync = document.createElement('script');
     const path = location.pathname;
-    cloudSync.src = path.includes('/games/') ? '../../js/cloud-progress-sync.js?v=3' : (path.includes('/pages/') ? '../js/cloud-progress-sync.js?v=3' : 'js/cloud-progress-sync.js?v=3');
+    cloudSync.src = path.includes('/games/') ? '../../js/cloud-progress-sync.js?v=4' : (path.includes('/pages/') ? '../js/cloud-progress-sync.js?v=4' : 'js/cloud-progress-sync.js?v=4');
     cloudSync.async = false;
     cloudSync.dataset.tecnomathCloudSync = 'true';
     document.head.appendChild(cloudSync);
