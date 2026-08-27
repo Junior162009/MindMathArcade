@@ -5,6 +5,9 @@ on:
     branches: [main]
     paths:
       - 'functions/index.js'
+      - 'functions/**'
+      - 'firebase.json'
+      - '.firebaserc'
   workflow_dispatch:
 
 permissions:
@@ -15,24 +18,24 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  FIREBASE_PROJECT_ID: tecnomath-sync-6058a
+  FIREBASE_PROJECT_ID: tecnomath-sync-6058
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Autenticar en Google Cloud
         uses: google-github-actions/auth@v2
         with:
           credentials_json: '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}'
 
-      - name: Configurar Node.js 20
-        uses: actions/setup-node@v4
+      - name: Configurar Node.js 24
+        uses: actions/setup-node@v5
         with:
-          node-version: 20
+          node-version: 24
           cache: npm
           cache-dependency-path: functions/package.json
 
