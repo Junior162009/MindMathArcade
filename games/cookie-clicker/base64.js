@@ -139,4 +139,27 @@ var Base64 = {
 		return string;
 	}
  
-}
+};
+
+/* TecnoMath Firebase bridge.
+ * Cookie Clicker loads this file before main.js, so these scripts are
+ * inserted synchronously and the existing game's localStorage remains the
+ * source of truth. firebase-config.js then activates the shared per-account
+ * cloud synchronizer for /games/ pages.
+ */
+(function () {
+	if (window.__TecnomathCookieFirebaseBridge) return;
+	window.__TecnomathCookieFirebaseBridge = true;
+
+	function writeScript(src) {
+		document.write('<script src="' + src + '"><\\/script>');
+	}
+
+	if (!window.firebase) {
+		writeScript('https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js');
+		writeScript('https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js');
+		writeScript('https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js');
+	}
+
+	writeScript('../../js/firebase-config.js');
+})();
