@@ -2,6 +2,13 @@ name: Publicar juegos aprobados automáticamente
 
 on:
   workflow_dispatch:
+    inputs:
+      submission_id:
+        description: 'ID opcional del envío aprobado'
+        required: false
+        type: string
+  repository_dispatch:
+    types: [game-approved]
   schedule:
     - cron: '*/5 * * * *'
 
@@ -28,4 +35,6 @@ jobs:
         run: sudo apt-get update -qq && sudo apt-get install -y -qq p7zip-full >/dev/null
 
       - name: Publicar aprobados directamente en GitHub
+        env:
+          EVENT_SUBMISSION_ID: ${{ github.event.client_payload.submissionId || inputs.submission_id }}
         run: python scripts/publish-approved-games.py
