@@ -20,192 +20,113 @@ jobs:
       - name: Instalar herramientas
         run: sudo apt-get update -qq && sudo apt-get install -y -qq p7zip-full >/dev/null
 
-      - name: Preparar previews y publicar aprobados
+      - name: Publicar juegos aprobados
         env:
           FIREBASE_DB: https://tecnomath-sync-6058a-default-rtdb.firebaseio.com
         shell: bash
         run: |
           set -euo pipefail
           python - <<'PY'
-          import base64
-          import json
-          import os
-          import re
-          import shutil
-          import subprocess
-          import urllib.error
-          import urllib.request
-          import zipfile
+          import base64, json, os, re, shutil, subprocess, urllib.error, urllib.request, zipfile
           from pathlib import Path
 
-          db = os.environ['FIREBASE_DB'].rstrip('/')
+          db=os.environ['FIREBASE_DB'].rstrip('/')
 
           def get_json(path):
-              req = urllib.request.Request(
-                  db + '/' + path + '.json',
-                  headers={'User-Agent': 'TecnoMath-GitHub-Actions'}
-              )
+              req=urllib.request.Request(db+'/'+path+'.json',headers={'User-Agent':'TecnoMath-GitHub-Actions'})
               try:
-                  with urllib.request.urlopen(req, timeout=90) as r:
-                      raw = r.read().decode('utf-8')
-                      return json.loads(raw or 'null') or {}
+                  with urllib.request.urlopen(req,timeout=90) as r:
+                      return json.loads(r.read().decode('utf-8') or 'null') or {}
               except urllib.error.HTTPError as e:
-                  body = e.read().decode(errors='replace')
+                  body=e.read().decode(errors='replace')
                   raise RuntimeError(f'Firebase HTTP {e.code} leyendo {path}: {body[:500]}')
 
-          queue = get_json('gameUploadQueue')
-          root = Path('games-preview')
-          root.mkdir(parents=True, exist_ok=True)
-          changed = False
+          def slug(v):
+              v=str(v or 'juego').lower()
+              v=re.sub(r'[^a-z0-9]+','-',v).strip('-')
+              return v[:60] or 'juego'
 
-          def slug(value):
-              value = str(value or 'juego').lower()
-              value = re.sub(r'[^a-z0-9]+', '-', value).strip('-')
-              return value[:60] or 'juego'
-
-          def safe_extract_zip(z, out):
+          def safe_extract_zip(z,out):
               for info in z.infolist():
-                  name = info.filename.replace('\\', '/').lstrip('/')
-                  parts = [p for p in name.split('/') if p]
-                  if not parts or '..' in parts:
-                      continue
-                  target = out.joinpath(*parts)
-                  if info.is_dir():
-                      target.mkdir(parents=True, exist_ok=True)
+                  name=info.filename.replace('\\','/').lstrip('/')
+                  parts=[p for p in name.split('/') if p]
+                  if not parts or '..' in parts: continue
+                  target=out.joinpath(*parts)
+                  if info.is_dir(): target.mkdir(parents=True,exist_ok=True)
                   else:
-                      target.parent.mkdir(parents=True, exist_ok=True)
-                      with z.open(info) as src, open(target, 'wb') as dst:
-                          shutil.copyfileobj(src, dst)
+                      target.parent.mkdir(parents=True,exist_ok=True)
+                      with z.open(info) as src, open(target,'wb') as dst: shutil.copyfileobj(src,dst)
 
-          def extract_package(raw, out):
-              package = Path('/tmp/game-package.bin')
-              package.write_bytes(raw)
-              extracted = out / '_extract'
-              extracted.mkdir(parents=True, exist_ok=True)
+          def extract_package(raw,out):
+              package=out/'package.bin'; package.write_bytes(raw)
+              extracted=out/'extracted'; extracted.mkdir(parents=True,exist_ok=True)
               try:
-                  with zipfile.ZipFile(package) as z:
-                      safe_extract_zip(z, extracted)
+                  with zipfile.ZipFile(package) as z: safe_extract_zip(z,extracted)
               except zipfile.BadZipFile:
-                  subprocess.run(['7z', 'x', '-y', f'-o{extracted}', str(package)], check=True, stdout=subprocess.DEVNULL)
+                  subprocess.run(['7z','x','-y',f'-o{extracted}',str(package)],check=True,stdout=subprocess.DEVNULL)
               return extracted
 
           def find_index(base):
-              indexes = list(base.rglob('index.html')) + list(base.rglob('index.htm'))
-              return indexes[0] if indexes else None
+              return next(iter(list(base.rglob('index.html'))+list(base.rglob('index.htm'))),None)
 
-          def copy_game_root(src, dst):
-              index = find_index(src)
-              if not index:
-                  raise RuntimeError('El juego debe contener index.html o index.htm.')
-              game_root = index.parent
-              if dst.exists():
-                  shutil.rmtree(dst)
-              dst.mkdir(parents=True, exist_ok=True)
+          def install_game(src,dst):
+              index=find_index(src)
+              if not index: raise RuntimeError('El juego aprobado no contiene index.html o index.htm.')
+              game_root=index.parent
+              if dst.exists(): shutil.rmtree(dst)
+              dst.mkdir(parents=True,exist_ok=True)
               for item in game_root.iterdir():
-                  if item.name == '.preview-info.json':
-                      continue
-                  target = dst / item.name
-                  if item.is_dir():
-                      shutil.copytree(item, target)
+                  if item.name.startswith('.'): continue
+                  target=dst/item.name
+                  if item.is_dir(): shutil.copytree(item,target)
+                  else: shutil.copy2(item,target)
+
+          queue=get_json('gameUploadQueue')
+          games_dir=Path('games'); games_dir.mkdir(parents=True,exist_ok=True)
+          catalog_path=Path('data/games.json'); catalog_path.parent.mkdir(parents=True,exist_ok=True)
+          try: catalog=json.loads(catalog_path.read_text(encoding='utf-8')) if catalog_path.exists() else []
+          except Exception: catalog=[]
+          changed=False
+
+          for gid,game in queue.items():
+              if not isinstance(game,dict) or game.get('status')!='approved': continue
+              name=game.get('name') or 'Juego'
+              folder=f'{slug(name)}-{str(gid).lstrip("-")}'
+              destination=games_dir/folder
+              try:
+                  source=game.get('sourceType') or 'upload'
+                  if source=='url':
+                      url=str(game.get('gameUrl') or '').strip()
+                      if not re.match(r'^https?://',url,re.I): raise RuntimeError('URL inválida')
+                      if destination.exists(): shutil.rmtree(destination)
+                      destination.mkdir(parents=True,exist_ok=True)
+                      safe_name=(name.replace('&','&amp;').replace('<','&lt;').replace('>','&gt;').replace('"','&quot;'))
+                      html='<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>'+safe_name+'</title></head><body><script>location.replace('+json.dumps(url)+')</script></body></html>'
+                      (destination/'index.html').write_text(html,encoding='utf-8')
                   else:
-                      shutil.copy2(item, target)
+                      package=game.get('packageBase64')
+                      if not package: raise RuntimeError('No existe packageBase64 para este juego.')
+                      work=Path('/tmp')/('game-'+str(gid))
+                      shutil.rmtree(work,ignore_errors=True); work.mkdir(parents=True,exist_ok=True)
+                      raw=base64.b64decode(package,validate=True)
+                      src=extract_package(raw,work)
+                      install_game(src,destination)
 
-          if not queue:
-              print('Sin juegos en gameUploadQueue.')
-
-          for gid, game in queue.items():
-              if not isinstance(game, dict):
-                  continue
-              name = game.get('name') or 'Juego'
-              # El ID de Firebase puede comenzar con '-' ; evitar dobles guiones.
-              folder = f'{slug(name)}-{str(gid).lstrip("-")}'
-              preview = root / folder
-              status = game.get('status', 'pending')
-
-              if status == 'pending' and not (preview / 'index.html').is_file():
-                  try:
-                      source_type = game.get('sourceType') or 'upload'
-                      if source_type == 'url':
-                          url = str(game.get('gameUrl') or '').strip()
-                          if not re.match(r'^https?://', url, re.I):
-                              raise RuntimeError('URL inválida')
-                          preview.mkdir(parents=True, exist_ok=True)
-                          title = (name.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;').replace('"', '&quot;'))
-                          html = ('<!doctype html><html lang="es"><head><meta charset="utf-8">'
-                                  '<meta name="viewport" content="width=device-width,initial-scale=1">'
-                                  f'<title>{title}</title></head><body>'
-                                  '<script>location.replace(' + json.dumps(url) + ')</script></body></html>')
-                          (preview / 'index.html').write_text(html, encoding='utf-8')
-                      else:
-                          package = game.get('packageBase64')
-                          if not package:
-                              raise RuntimeError('La propuesta no contiene packageBase64. Vuelve a enviar el juego.')
-                          work = Path('/tmp') / f'game-{gid}'
-                          shutil.rmtree(work, ignore_errors=True)
-                          work.mkdir(parents=True, exist_ok=True)
-                          raw = base64.b64decode(package, validate=True)
-                          src = extract_package(raw, work)
-                          copy_game_root(src, preview)
-
-                      (preview / '.preview-info.json').write_text(
-                          json.dumps({
-                              'submissionId': str(game.get('submissionId') or gid),
-                              'name': name,
-                              'authorName': game.get('authorName') or 'Usuario',
-                              'status': 'ready'
-                          }, ensure_ascii=False, indent=2), encoding='utf-8')
-
-                      if not (preview / 'index.html').is_file():
-                          raise RuntimeError('El preview fue creado sin index.html.')
-                      changed = True
-                      print('Preview creado correctamente:', preview)
-                  except Exception as exc:
-                      print(f'ERROR creando preview {gid}: {exc}')
-
-              if status == 'approved':
-                  if not (preview / 'index.html').is_file():
-                      print('Aprobado pero sin preview válido todavía:', gid)
-                      continue
-                  destination = Path('games') / folder
-                  if not (destination / 'index.html').is_file():
-                      if destination.exists():
-                          shutil.rmtree(destination)
-                      shutil.copytree(preview, destination)
-                      (destination / '.preview-info.json').unlink(missing_ok=True)
-                      changed = True
-                  catalog = Path('data/games.json')
-                  catalog.parent.mkdir(parents=True, exist_ok=True)
-                  try:
-                      games = json.loads(catalog.read_text(encoding='utf-8')) if catalog.exists() else []
-                  except Exception:
-                      games = []
-                  games = [item for item in games if str(item.get('submissionId', '')) != str(gid)]
-                  games.append({
-                      'name': name,
-                      'desc': game.get('description') or 'Juego educativo de TecnoMath',
-                      'url': f'games/{folder}/index.html',
-                      'imageUrl': game.get('imageUrl') or '',
-                      'icon': game.get('icon') or '🎮',
-                      'category': game.get('category') or 'otros',
-                      'deviceCompatibility': 'both',
-                      'evento': None,
-                      'submissionId': str(gid),
-                      'authorName': game.get('authorName') or 'Usuario',
-                      'sourceType': game.get('sourceType') or 'upload'
-                  })
-                  catalog.write_text(json.dumps(games, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
-                  changed = True
+                  catalog=[x for x in catalog if str(x.get('submissionId',''))!=str(gid)]
+                  catalog.append({'name':name,'desc':game.get('description') or 'Juego educativo de TecnoMath','url':f'games/{folder}/index.html','imageUrl':game.get('imageUrl') or '','icon':game.get('icon') or '🎮','category':game.get('category') or 'otros','deviceCompatibility':'both','evento':None,'submissionId':str(gid),'authorName':game.get('authorName') or 'Usuario','sourceType':source})
+                  changed=True
+                  print('Juego publicado:',folder)
+              except Exception as exc:
+                  print(f'ERROR publicando {gid}: {exc}')
 
           if changed:
-              subprocess.run(['git', 'config', 'user.name', 'github-actions[bot]'], check=True)
-              subprocess.run(['git', 'config', 'user.email', '41898282+github-actions[bot]@users.noreply.github.com'], check=True)
-              subprocess.run(['git', 'add', 'games-preview', 'games', 'data/games.json'], check=True)
-              if subprocess.run(['git', 'diff', '--cached', '--quiet']).returncode != 0:
-                  subprocess.run(['git', 'commit', '-m', 'fix: create Spark game preview'], check=True)
-                  subprocess.run(['git', 'push'], check=True)
-                  print('Preview guardado en main; GitHub Pages se desplegará automáticamente.')
-              else:
-                  print('No hay cambios para confirmar.')
+              catalog_path.write_text(json.dumps(catalog,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+              subprocess.run(['git','config','user.name','github-actions[bot]'],check=True)
+              subprocess.run(['git','config','user.email','41898282+github-actions[bot]@users.noreply.github.com'],check=True)
+              subprocess.run(['git','add','games','data/games.json'],check=True)
+              if subprocess.run(['git','diff','--cached','--quiet']).returncode!=0:
+                  subprocess.run(['git','commit','-m','feat: publish approved Spark game'],check=True)
+                  subprocess.run(['git','push'],check=True)
           else:
-              print('Sin cambios.')
+              print('No hay juegos aprobados para publicar.')
           PY
