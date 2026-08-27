@@ -1,1 +1,14 @@
-[]
+[
+  {
+    "name": "Cookie Clicker",
+    "desc": "Haz clic, compra mejoras y guarda tu progreso con tu cuenta de Google.",
+    "description": "Cookie Clicker de TecnoMath con progreso sincronizado en Firebase para cada cuenta.",
+    "category": "otros",
+    "url": "games/cookie-clicker/index.html",
+    "imageUrl": "",
+    "icon": "🍪",
+    "deviceCompatibility": "both",
+    "authorName": "TecnoMath",
+    "sourceType": "url"
+  }
+]
