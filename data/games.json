@@ -10,5 +10,20 @@
     "deviceCompatibility": "both",
     "authorName": "TecnoMath",
     "sourceType": "url"
+  },
+  {
+    "name": "Atrapa El Número",
+    "desc": "Encuentra El Número Lo Más Rápido Posible",
+    "url": "games/atrapa-el-n-mero--P053Fq81cfDss2EU5hY/index.html",
+    "imageUrl": "",
+    "icon": "🎮",
+    "category": "mates",
+    "deviceCompatibility": "both",
+    "evento": null,
+    "submissionId": "-P053Fq81cfDss2EU5hY",
+    "authorName": "Jose",
+    "authorEmail": "hack19861983@gmail.com",
+    "sourceType": "upload",
+    "publishedAt": "2026-08-28T01:56:06.473543+00:00"
   }
 ]
