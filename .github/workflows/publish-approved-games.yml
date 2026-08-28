@@ -1,4 +1,4 @@
-name: Legacy - publicación Firebase Storage desactivada
+name: Legacy - publicador anterior desactivado
 
 on:
   workflow_dispatch:
@@ -12,5 +12,7 @@ jobs:
     steps:
       - name: Información
         run: |
-          echo "El publicador antiguo basado en Firebase Storage está desactivado porque TecnoMath usa Firebase Spark."
-          echo "Los nuevos juegos se publican mediante GitHub Issues + etiqueta approved + GitHub Actions."
+          echo "Este workflow histórico está desactivado."
+          echo "NO publica juegos y NO utiliza Firebase Storage ni GitHub Issues."
+          echo "La publicación vigente usa .github/workflows/process-game-queue.yml."
+          echo "Flujo actual: gameSubmissions -> publicGameQueue -> Firebase Function -> game-approved -> GitHub Actions -> games/."
