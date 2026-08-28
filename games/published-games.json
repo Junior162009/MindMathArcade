@@ -38,5 +38,18 @@
     "evento": null,
     "authorName": "Jose",
     "sourceType": "upload"
+  },
+  {
+    "name": "100 Minijuegos Matemáticos",
+    "desc": "Colección de 100 desafíos interactivos de cálculo, lógica y geometría.",
+    "description": "100 retos jugables con puntuación, vidas, respuestas múltiples y progreso.",
+    "category": "mates",
+    "url": "games/jolberth11°/minijuegos/index.html",
+    "imageUrl": "",
+    "icon": "🧩",
+    "deviceCompatibility": "both",
+    "evento": null,
+    "authorName": "Jose",
+    "sourceType": "upload"
   }
 ]
