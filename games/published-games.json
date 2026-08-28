@@ -25,5 +25,18 @@
     "authorEmail": "hack19861983@gmail.com",
     "sourceType": "upload",
     "publishedAt": "2026-08-28T01:56:06.473543+00:00"
+  },
+  {
+    "name": "Reino Pixelado",
+    "desc": "Aventura de plataformas con enemigos, monedas, preguntas y checkpoints.",
+    "description": "Juego de aventura estilo consola portátil con preguntas matemáticas al perder una vida.",
+    "category": "mates",
+    "url": "games/jolberth11°/index.html",
+    "imageUrl": "",
+    "icon": "🏰",
+    "deviceCompatibility": "both",
+    "evento": null,
+    "authorName": "Jose",
+    "sourceType": "upload"
   }
 ]
