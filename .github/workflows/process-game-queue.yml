@@ -44,7 +44,7 @@ jobs:
           FIREBASE_ACCESS_TOKEN: ${{ steps.auth.outputs.access_token }}
         run: |
           python - <<'PY'
-          import os, urllib.request
+          import os, urllib.request, urllib.error
           db=os.environ['FIREBASE_DB']
           token=os.environ['FIREBASE_ACCESS_TOKEN']
           url=f'{db}/publicGameQueue.json?shallow=true'
@@ -63,30 +63,14 @@ jobs:
               raise SystemExit(f'Firebase: autenticación fallida: {e}')
           PY
 
+      - name: Reparar cola de juegos aprobados
+        env:
+          FIREBASE_ACCESS_TOKEN: ${{ steps.auth.outputs.access_token }}
+          FIREBASE_DB: ${{ env.FIREBASE_DB }}
+        run: python scripts/repair-approved-queue.py
+
       - name: Instalar herramientas
         run: sudo apt-get update -qq && sudo apt-get install -y -qq p7zip-full >/dev/null
-
-      - name: Adaptar publicador para autenticación OAuth2
-        run: |
-          python - <<'PY'
-          from pathlib import Path
-          p=Path('scripts/publish-approved-games.py')
-          s=p.read_text(encoding='utf-8')
-          old="queue_url = f'{DB}/publicGameQueue.json?access_token={ACCESS_TOKEN}'"
-          new="queue_url = f'{DB}/publicGameQueue.json'"
-          s=s.replace(old,new)
-          old2="url = f'{DB}/{path}.json?access_token={ACCESS_TOKEN}'"
-          new2="url = f'{DB}/{path}.json'"
-          s=s.replace(old2,new2)
-          marker="queue_request = urllib.request.Request(\n    queue_url,\n    headers={\n"
-          replacement="queue_request = urllib.request.Request(\n    queue_url,\n    headers={\n        'Authorization': f'Bearer {ACCESS_TOKEN}',\n"
-          s=s.replace(marker,replacement,1)
-          marker2="req = urllib.request.Request(\n        url,\n        data=body,\n        headers={\n"
-          replacement2="req = urllib.request.Request(\n        url,\n        data=body,\n        headers={\n            'Authorization': f'Bearer {ACCESS_TOKEN}',\n"
-          s=s.replace(marker2,replacement2,1)
-          p.write_text(s,encoding='utf-8')
-          print('Publicador adaptado para Authorization: Bearer.')
-          PY
 
       - name: Publicar aprobados y enviar correo de publicación
         env:
