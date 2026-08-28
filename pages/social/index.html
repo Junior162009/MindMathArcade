@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#0d1026">
+  <title>TecnoMath Social</title>
+  <link rel="stylesheet" href="social.css">
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <script src="../../js/firebase-config.js"></script>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <button class="icon-btn" id="menuBtn" aria-label="Menú">☰</button>
+      <a class="brand" href="../../index.html"><span>🧠</span><b>TecnoMath</b><em>Social</em></a>
+      <div class="top-actions">
+        <button class="icon-btn" id="searchBtn" aria-label="Buscar">⌕</button>
+        <button class="icon-btn notification" id="notifBtn" aria-label="Notificaciones">🔔<i id="notifDot"></i></button>
+        <button class="avatar mini" id="profileTop">?</button>
+      </div>
+    </header>
+
+    <div class="mobile-search" id="mobileSearch"><input id="searchInput" placeholder="Buscar estudiantes, publicaciones..." autocomplete="off"><button id="closeSearch">×</button></div>
+
+    <div class="layout">
+      <aside class="sidebar" id="sidebar">
+        <nav>
+          <a class="nav-item active" href="#inicio">🏠 <span>Inicio</span></a>
+          <a class="nav-item" href="#explorar">🔎 <span>Explorar</span></a>
+          <a class="nav-item" href="#amigos">👥 <span>Amigos</span></a>
+          <a class="nav-item" href="#ranking">🏆 <span>Ranking</span></a>
+          <a class="nav-item" href="#logros">🎖️ <span>Logros</span></a>
+          <a class="nav-item" href="#mensajes">💬 <span>Mensajes</span></a>
+        </nav>
+        <div class="sidebar-card">
+          <strong>🎮 Juega y comparte</strong>
+          <p>Publica tus récords y reta a tus amigos.</p>
+          <a href="../../index.html">Ver juegos →</a>
+        </div>
+        <button class="logout" id="logoutBtn">↪ Cerrar sesión</button>
+      </aside>
+
+      <main class="feed" id="inicio">
+        <section class="welcome-card">
+          <div class="welcome-copy"><span class="eyebrow">COMUNIDAD EDUCATIVA</span><h1>¡Hola, <span id="helloName">jugador</span>! 👋</h1><p>Aprende, compite y comparte tus avances.</p></div>
+          <div class="streak"><b>🔥 <span id="streak">0</span></b><small>racha</small></div>
+        </section>
+
+        <section class="composer card">
+          <div class="composer-row"><button class="avatar" id="composerAvatar">?</button><textarea id="postText" maxlength="500" placeholder="¿Qué estás aprendiendo hoy?"></textarea></div>
+          <div class="composer-bottom"><div class="quick-tags"><button data-tag="🎮 Reto">🎮 Reto</button><button data-tag="💡 Aprendizaje">💡 Aprendizaje</button><button data-tag="🏆 Logro">🏆 Logro</button></div><button class="primary" id="publishBtn">Publicar</button></div>
+        </section>
+
+        <div class="section-title"><div><span class="eyebrow">COMUNIDAD</span><h2>Últimas publicaciones</h2></div><select id="feedFilter"><option value="all">Todo</option><option value="mine">Mis publicaciones</option><option value="achievements">Logros</option></select></div>
+        <section id="feedList" class="feed-list"><div class="loading">Cargando comunidad…</div></section>
+      </main>
+
+      <aside class="rightbar">
+        <section class="side-card" id="myCard"><div class="side-head"><h3>👤 Mi perfil</h3><button id="editProfile">Editar</button></div><div class="profile-preview"><button class="avatar large" id="profileAvatar">?</button><div><b id="profileName">Jugador</b><small id="profileEmail">Inicia sesión para participar</small></div></div><div class="stats"><div><b id="statPoints">0</b><small>Puntos</small></div><div><b id="statGames">0</b><small>Juegos</small></div><div><b id="statFriends">0</b><small>Amigos</small></div></div></section>
+        <section class="side-card" id="ranking"><div class="side-head"><h3>🏆 Top de hoy</h3><a href="#ranking">Ver todo</a></div><div id="rankingList" class="ranking-list"><div class="loading">Cargando…</div></div></section>
+        <section class="side-card" id="amigos"><div class="side-head"><h3>👥 Sugerencias</h3><a href="#amigos">Ver todo</a></div><div id="suggestions"><div class="suggestion"><button class="avatar">TM</button><div><b>Comunidad TecnoMath</b><small>Aprende jugando</small></div><button class="follow">+</button></div><div class="suggestion"><button class="avatar">🧠</button><div><b>Retos diarios</b><small>Únete al desafío</small></div><button class="follow">+</button></div></div></section>
+      </aside>
+    </div>
+
+    <nav class="bottom-nav"><a class="active" href="#inicio">🏠<span>Inicio</span></a><a href="#explorar">🔎<span>Explorar</span></a><button id="bottomCreate">＋<span>Publicar</span></button><a href="#ranking">🏆<span>Ranking</span></a><a href="#perfil">👤<span>Perfil</span></a></nav>
+  </div>
+
+  <div class="modal hidden" id="loginModal"><div class="modal-box"><button class="modal-close" data-close>×</button><div class="modal-icon">🔐</div><h2>Inicia sesión</h2><p>Necesitas una cuenta de TecnoMath para publicar e interactuar.</p><a class="primary wide" href="../../pages/login/index.html">Ir a iniciar sesión</a></div></div>
+  <div class="modal hidden" id="profileModal"><div class="modal-box"><button class="modal-close" data-close>×</button><h2>✏️ Editar perfil</h2><label>Nombre visible<input id="displayNameInput" maxlength="40" placeholder="Tu nombre"></label><label>Emoji de avatar<input id="avatarInput" maxlength="4" placeholder="🧠"></label><button class="primary wide" id="saveProfile">Guardar cambios</button></div></div>
+  <div class="toast" id="toast"></div>
+  <script src="social.js"></script>
+</body>
+</html>
