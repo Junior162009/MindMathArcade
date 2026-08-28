@@ -1,6 +1,6 @@
-# Sistema de juegos enviados — versión Spark
+# Sistema de juegos enviados — arquitectura actual
 
-El sistema fue adaptado para funcionar sin Cloud Functions, Firebase Storage, Secret Manager ni cuenta de facturación.
+Este documento reemplaza la descripción anterior del sistema Spark. La implementación actual sí utiliza Firebase Functions para automatizar la aprobación y GitHub Actions para publicar los archivos en el repositorio.
 
 ## Flujo actual
 
@@ -9,58 +9,58 @@ Usuario inicia sesión
         ↓
 🎮 SUBIR JUEGO
         ↓
-Introduce nombre + descripción + categoría + URL del juego
+gameSubmissions/{id} + gameUploadQueue/{id}
         ↓
-Realtime Database → gameSubmissions/{id}
-        ↓
-👑 Los 4 administradores lo revisan
+👑 Administrador revisa
         ↓
 ✅ Aprobar y publicar
         ↓
-publishedGames/{id}
+publicGameQueue/{id}
         ↓
-🎮 aparece automáticamente en MindMathArcade
+Firebase Function: publishApprovedGame
+        ↓
+GitHub repository_dispatch: game-approved
+        ↓
+GitHub Actions: process-game-queue.yml
+        ↓
+scripts/publish-approved-games.py
+        ↓
+games/<slug>-<id>/
+        ↓
+data/games.json + games/published-games.json
+        ↓
+🎮 catálogo de MindMathArcade
 ```
 
-## Qué se eliminó
+## Carga
 
-- Firebase Storage para los envíos.
-- Cloud Functions.
-- Secret Manager.
-- Resend/EmailJS como requisito del backend.
-- Cuenta de facturación de Google Cloud.
-- GitHub token dentro de la aplicación.
+El formulario permite subir archivos del juego o usar una URL externa. Las cargas se empaquetan en el navegador y se conservan temporalmente en Realtime Database. El formulario limita el paquete comprimido a 7 MB y exige `index.html` o `index.htm` para las cargas.
 
-El proyecto puede continuar usando el plan Spark mientras se mantenga dentro de sus cuotas de Realtime Database. Firebase indica que Spark incluye 1 GB de almacenamiento de Realtime Database y 10 GB/mes de descargas, con un límite de 100 conexiones simultáneas. urlFirebase Pricinghttps://firebase.google.com/pricing
+## Estados
 
-## Cómo se publica un juego
+Una solicitud puede pasar por `pending`, `reviewing`, `approved`, `rejected` y finalmente `published`.
 
-El usuario debe tener el juego ya disponible en una URL web, por ejemplo:
+Al aprobar, se guarda `approvedAt` y `approvedBy`, se actualizan `gameSubmissions` y `gameUploadQueue`, y se crea `publicGameQueue/{id}`. Después de una publicación correcta, `gameSubmissions/{id}` recibe `status: published`, `publishedAt` y `publishedUrl`.
 
-- GitHub Pages
-- Netlify
-- Vercel
-- Otro hosting web que entregue un `index.html`
+## Componentes
 
-El formulario guarda únicamente la URL y los metadatos en Realtime Database. El administrador prueba la URL y pulsa **Aprobar y publicar**. En ese momento se crea `publishedGames/{id}` y el catálogo lo incorpora automáticamente.
+- `pages/upload-game.html`: formulario de envío.
+- `pages/admin/games.html`: revisión, prueba, aprobación y rechazo.
+- `functions/index.js`: notificaciones y disparo de la publicación automática.
+- `.github/workflows/process-game-queue.yml`: consumidor de `publicGameQueue`, ejecutado por evento, manualmente o cada 5 minutos.
+- `scripts/repair-approved-queue.py`: recupera aprobaciones que no hayan llegado a la cola pública.
+- `scripts/publish-approved-games.py`: publica los archivos y actualiza los catálogos.
+- `data/games.json`: catálogo maestro.
+- `games/published-games.json`: copia del catálogo generado.
 
-### Importante sobre la carpeta `games/`
+## Lo que ya no debe documentarse como arquitectura actual
 
-Sin un backend con credenciales de escritura en GitHub, una página web pública **no puede modificar de forma segura el repositorio GitHub automáticamente**. Por eso esta versión publica el juego en el catálogo mediante su URL externa.
+Los nombres `approvedGames` y `publishedGames/{id}` pertenecen a diseños anteriores. Tampoco es correcto afirmar que el sistema actual funciona solamente con URL externas o que no utiliza Functions. Esas descripciones fueron sustituidas por el flujo de `gameSubmissions → publicGameQueue → GitHub Actions`.
 
-Si más adelante consigues una cuenta de facturación funcional, se puede volver a habilitar un backend para copiar automáticamente los archivos aprobados a `games/`.
+## Secretos y seguridad
 
-## Reglas
+No se expone ningún token de GitHub al navegador. Las funciones y workflows utilizan secretos de backend y el `GITHUB_TOKEN` interno de GitHub Actions. Las reglas de Realtime Database restringen la creación y modificación de solicitudes a sus autores y administradores según corresponda.
 
-Las reglas mantienen las funciones anteriores y añaden:
+## Nota sobre Spark
 
-- Usuarios autenticados pueden crear su propia solicitud.
-- El usuario no puede aprobarse su propio juego.
-- El usuario no puede cambiar su `authorUid`.
-- Los administradores pueden revisar y publicar.
-- `publishedGames` es público para que el catálogo pueda leerlo.
-- Los 4 administradores fundadores conservan sus privilegios.
-
-## Firebase
-
-El `firebase.json` de esta versión solamente despliega Realtime Database. No es necesario configurar Storage ni Functions.
+Realtime Database sigue siendo parte del sistema, pero la etiqueta “modo Spark sin Functions” de los documentos anteriores ya no describe la implementación actual. Este archivo debe considerarse la referencia correcta del flujo de publicación vigente.
