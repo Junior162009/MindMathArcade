@@ -15,10 +15,6 @@ on:
 permissions:
   contents: write
 
-concurrency:
-  group: publish-approved-games
-  cancel-in-progress: false
-
 env:
   FIREBASE_DB: https://tecnomath-sync-6058a-default-rtdb.firebaseio.com
   RESEND_FROM: TecnoMath <notificaciones@tecnomath.online>
@@ -38,6 +34,22 @@ jobs:
         with:
           credentials_json: '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}'
           token_format: access_token
+
+      - name: Verificar autenticación de Firebase
+        env:
+          FIREBASE_ACCESS_TOKEN: ${{ steps.auth.outputs.access_token }}
+        run: |
+          python - <<'PY'
+          import os, urllib.request
+          db=os.environ['FIREBASE_DB']
+          token=os.environ['FIREBASE_ACCESS_TOKEN']
+          req=urllib.request.Request(f'{db}/publicGameQueue.json?shallow=true',headers={'Authorization':f'Bearer {token}','User-Agent':'TecnoMath-GitHub-Publisher'})
+          try:
+              with urllib.request.urlopen(req,timeout=30) as r:
+                  print('Firebase: autenticación correcta. HTTP',r.status)
+          except Exception as e:
+              raise SystemExit(f'Firebase: autenticación fallida: {e}')
+          PY
 
       - name: Instalar herramientas
         run: sudo apt-get update -qq && sudo apt-get install -y -qq p7zip-full >/dev/null
