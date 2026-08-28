@@ -59,4 +59,53 @@
   function loadPublishedGames(){if(document.querySelector('script[data-tecnomath-published-games]'))return;const s=document.createElement('script');s.src=(location.pathname.includes('/pages/')?'../':'')+'js/published-games.js?v=1';s.async=true;s.dataset.tecnomathPublishedGames='true';document.head.appendChild(s)}
   loadGameSubmissionSystem();
   loadPublishedGames();
+
+  // ============================================================
+  // 🌐 TECNOMATH SOCIAL — NAVEGACIÓN DESDE EL INDEX PRINCIPAL
+  // Se inyecta desde shared.js para no duplicar ni alterar el catálogo.
+  // ============================================================
+  function setupSocialNavigation(){
+    const isMainIndex = /(^|\/)index\.html?$/.test(location.pathname) || location.pathname.endsWith('/');
+    if(!isMainIndex) return;
+    const socialUrl='pages/social/index.html';
+
+    const style=document.createElement('style');
+    style.id='tecnomath-social-nav-styles';
+    style.textContent=`
+      #socialNavBtn{display:inline-flex;align-items:center;justify-content:center;gap:5px;font-family:'Press Start 2P',cursive;font-size:clamp(4px,1.5vw,6px);color:#00FFFF;background:transparent;border:1px solid #00FFFF;padding:6px 9px;border-radius:6px;text-decoration:none;line-height:1.2;transition:transform .2s,background .2s,box-shadow .2s}
+      #socialNavBtn:hover{background:rgba(0,255,255,.1);box-shadow:0 0 12px #00FFFF;transform:translateY(-1px)}
+      #tecnomathBottomNav{display:none}
+      @media(max-width:768px){
+        body{padding-bottom:74px}
+        #tecnomathBottomNav{position:fixed;left:0;right:0;bottom:0;z-index:10000;display:grid;grid-template-columns:repeat(4,1fr);gap:2px;padding:7px max(6px,env(safe-area-inset-left)) calc(7px + env(safe-area-inset-bottom)) max(6px,env(safe-area-inset-right));background:rgba(6,6,16,.96);backdrop-filter:blur(14px);border-top:2px solid #00FFFF;box-shadow:0 -8px 25px rgba(0,0,0,.35)}
+        #tecnomathBottomNav a{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;min-height:52px;color:#aaa;text-decoration:none;font-family:'Press Start 2P',cursive;font-size:7px;border-radius:8px;transition:.2s}
+        #tecnomathBottomNav a:hover,#tecnomathBottomNav a:focus{color:#00FFFF;background:rgba(0,255,255,.08);text-shadow:0 0 8px #00FFFF}
+        #tecnomathBottomNav .social-active{color:#00FFFF;border:1px solid rgba(0,255,255,.35);text-shadow:0 0 8px #00FFFF}
+        #socialNavBtn{padding:7px 8px}
+      }
+    `;
+    document.head.appendChild(style);
+
+    function createLink(id,text,href,icon){const a=document.createElement('a');a.id=id;a.href=href;a.className='social-nav-link';a.innerHTML=`<span style="font-size:21px;line-height:1">${icon}</span><span>${text}</span>`;return a}
+
+    const userArea=document.querySelector('.user-area');
+    if(userArea && !document.getElementById('socialNavBtn')){
+      const link=document.createElement('a');
+      link.id='socialNavBtn';link.href=socialUrl;link.textContent='🌐 SOCIAL';link.title='TecnoMath Social';link.setAttribute('aria-label','Abrir TecnoMath Social');
+      userArea.insertBefore(link,userArea.firstChild);
+    }
+
+    if(!document.getElementById('tecnomathBottomNav')){
+      const nav=document.createElement('nav');nav.id='tecnomathBottomNav';nav.setAttribute('aria-label','Navegación móvil');
+      const home=createLink('tmBottomHome','INICIO','#','🏠');
+      const games=createLink('tmBottomGames','JUEGOS','#projectsContainer','🎮');
+      const social=createLink('tmBottomSocial','SOCIAL',socialUrl,'🌐');social.classList.add('social-active');
+      const profile=createLink('tmBottomProfile','PERFIL','pages/profile.html','👤');
+      home.addEventListener('click',e=>{e.preventDefault();window.scrollTo({top:0,behavior:'smooth'})});
+      games.addEventListener('click',e=>{e.preventDefault();document.getElementById('projectsContainer')?.scrollIntoView({behavior:'smooth',block:'start'})});
+      nav.append(home,games,social,profile);document.body.appendChild(nav);
+    }
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',setupSocialNavigation,{once:true});
+  else setupSocialNavigation();
 })();
