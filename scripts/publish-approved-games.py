@@ -5,6 +5,7 @@ import os
 import re
 import shutil
 import subprocess
+import urllib.error
 import urllib.request
 import zipfile
 from datetime import datetime, timezone
@@ -19,21 +20,28 @@ SITE_URL = 'https://tecnomath.online'
 if not ACCESS_TOKEN:
     raise RuntimeError('FIREBASE_ACCESS_TOKEN no está disponible. Configura FIREBASE_SERVICE_ACCOUNT en GitHub Actions.')
 
-# Leer la cola completa con el token OAuth2 y filtrar en Python.
-# Evitamos orderBy/equalTo para no depender de índices ni de diferencias
-# de validación de la API REST de Realtime Database.
-queue_url = f'{DB}/publicGameQueue.json?access_token={ACCESS_TOKEN}'
-queue_request = urllib.request.Request(
-    queue_url,
-    headers={
-        'User-Agent': 'TecnoMath-GitHub-Publisher/9.0',
-        'Accept': 'application/json',
-    },
-)
-with urllib.request.urlopen(queue_request, timeout=120) as response:
-    raw_queue = response.read().decode('utf-8') or '{}'
-    raw_queue = json.loads(raw_queue)
 
+def firebase_request(path, method='GET', payload=None, timeout=120):
+    url = f'{DB}/{path}.json'
+    data = None if payload is None else json.dumps(payload, ensure_ascii=False).encode('utf-8')
+    headers = {
+        'User-Agent': 'TecnoMath-GitHub-Publisher/10.0',
+        'Accept': 'application/json',
+        'Authorization': f'Bearer {ACCESS_TOKEN}',
+    }
+    if data is not None:
+        headers['Content-Type'] = 'application/json'
+    request = urllib.request.Request(url, data=data, headers=headers, method=method)
+    try:
+        with urllib.request.urlopen(request, timeout=timeout) as response:
+            return json.loads(response.read().decode('utf-8') or 'null')
+    except urllib.error.HTTPError as error:
+        details = error.read().decode('utf-8', errors='replace')
+        raise RuntimeError(f'Firebase HTTP {error.code} en {method} {path}: {details}') from error
+
+
+# Leer la cola sin filtros REST: después filtramos los aprobados en Python.
+raw_queue = firebase_request('publicGameQueue', method='GET', timeout=120)
 if not raw_queue:
     queue = {}
 elif isinstance(raw_queue, dict):
@@ -52,20 +60,7 @@ def slug(value):
 
 
 def firebase_patch(path, payload):
-    body = json.dumps(payload).encode('utf-8')
-    url = f'{DB}/{path}.json?access_token={ACCESS_TOKEN}'
-    req = urllib.request.Request(
-        url,
-        data=body,
-        headers={
-            'User-Agent': 'TecnoMath-GitHub-Publisher/9.0',
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-        },
-        method='PATCH',
-    )
-    with urllib.request.urlopen(req, timeout=60) as response:
-        return json.loads(response.read().decode('utf-8') or '{}')
+    return firebase_request(path, method='PATCH', payload=payload, timeout=60)
 
 
 def send_email(to, subject, html_body):
