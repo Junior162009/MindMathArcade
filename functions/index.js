@@ -62,8 +62,9 @@ async function sendAuthorStatusEmail(submissionId,before,after){
   }[status];
   if(!notificationKey)return;
 
-  // Solo enviar cuando el estado realmente cambia, evitando repetir correos.
-  if(previousStatus===status && status!=='pending')return;
+  // Solo enviar cuando el estado cambió. El estado pending se notifica
+  // exclusivamente desde notifyGameSubmission al crear la solicitud.
+  if(status==='pending'||previousStatus===status)return;
 
   const sent={...(after.emailNotifications||{})};
   if(sent[notificationKey])return;
@@ -73,17 +74,14 @@ async function sendAuthorStatusEmail(submissionId,before,after){
   let subject='';
   let body='';
 
-  if(status==='pending'){
-    subject='🎮 Hemos recibido tu juego';
-    body=`<h2>🎮 ¡Juego recibido!</h2><p>Hola ${author}, hemos recibido <b>${game}</b> correctamente.</p><p>Tu juego quedó pendiente de revisión. Te avisaremos por correo cada vez que cambie su estado.</p>`;
-  }else if(status==='reviewing'){
+  if(status==='reviewing'){
     subject='🔍 Tu juego está siendo revisado';
     body=`<h2>🔍 Estamos revisando tu juego</h2><p>Hola ${author}, un administrador ya está revisando <b>${game}</b>.</p><p>Te avisaremos cuando haya una nueva actualización.</p>`;
   }else if(status==='approved'){
     subject='✅ ¡Tu juego fue aprobado!';
     body=`<h2>✅ ¡Buenas noticias!</h2><p>Hola ${author}, tu juego <b>${game}</b> fue aprobado por un administrador.</p><p>Ahora pasará automáticamente al proceso de publicación. Te enviaremos otro correo cuando esté disponible para jugar.</p>`;
   }else if(status==='published'){
-    const url=esc(after.publishedUrl||`https://tecnomath.online`);
+    const url=esc(after.publishedUrl||'https://tecnomath.online');
     subject='🎉 ¡Tu juego ya está publicado!';
     body=`<h2>🎉 ¡Tu juego ya está publicado!</h2><p>Hola ${author}, <b>${game}</b> ya está disponible en TecnoMath.</p><p><a href="${url}">🎮 Abrir mi juego</a></p>`;
   }else if(status==='rejected'){
@@ -125,16 +123,16 @@ exports.notifyGameSubmission=onValueCreated({ref:'/gameSubmissions/{submissionId
     });
     if(!response.ok)console.error('Resend:',await response.text());
   }
-  await sendAuthorStatusEmail(event.params.submissionId,{},data);
+  await sendAuthorStatusEmail(event.params.submissionId,'pending',{});
   await db.ref(`gameSubmissions/${event.params.submissionId}`).update({emailStatus:'admins-sent',emailSentAt:admin.database.ServerValue.TIMESTAMP});
 });
 
-// Envía un correo inmediato al autor cada vez que el estado cambia por una
-// acción administrativa o por la publicación automática.
+// Envía un correo inmediato al autor cada vez que un administrador cambia
+// el estado o cuando la publicación automática cambia el estado a published.
 exports.notifyGameStatusChange=onValueWritten({ref:'/gameSubmissions/{submissionId}',secrets:[RESEND_API_KEY,EMAIL_FROM]},async event=>{
+  if(!event.data.after.exists())return;
   const before=event.data.before.val()||{};
   const after=event.data.after.val()||{};
-  if(!event.data.after.exists())return;
   await sendAuthorStatusEmail(event.params.submissionId,before,after);
 });
 
