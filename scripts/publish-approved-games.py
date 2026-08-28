@@ -20,28 +20,42 @@ SITE_URL = 'https://tecnomath.online'
 if not ACCESS_TOKEN:
     raise RuntimeError('FIREBASE_ACCESS_TOKEN no está disponible. Configura FIREBASE_SERVICE_ACCOUNT en GitHub Actions.')
 
+HEADERS = {
+    'User-Agent': 'TecnoMath-GitHub-Publisher/10.0',
+    'Accept': 'application/json',
+    'Authorization': f'Bearer {ACCESS_TOKEN}',
+}
 
-def firebase_request(path, method='GET', payload=None, timeout=120):
-    url = f'{DB}/{path}.json'
-    data = None if payload is None else json.dumps(payload, ensure_ascii=False).encode('utf-8')
-    headers = {
-        'User-Agent': 'TecnoMath-GitHub-Publisher/10.0',
-        'Accept': 'application/json',
-        'Authorization': f'Bearer {ACCESS_TOKEN}',
-    }
-    if data is not None:
-        headers['Content-Type'] = 'application/json'
-    request = urllib.request.Request(url, data=data, headers=headers, method=method)
+
+def firebase_get(path):
+    url = f'{DB}/{path.lstrip("/")}.json'
+    request = urllib.request.Request(url, headers=HEADERS, method='GET')
     try:
-        with urllib.request.urlopen(request, timeout=timeout) as response:
-            return json.loads(response.read().decode('utf-8') or 'null')
+        with urllib.request.urlopen(request, timeout=120) as response:
+            return json.loads(response.read().decode('utf-8') or '{}')
     except urllib.error.HTTPError as error:
-        details = error.read().decode('utf-8', errors='replace')
-        raise RuntimeError(f'Firebase HTTP {error.code} en {method} {path}: {details}') from error
+        body = error.read().decode('utf-8', errors='replace')
+        raise RuntimeError(f'Firebase GET {path}: HTTP {error.code}: {body}') from error
 
 
-# Leer la cola sin filtros REST: después filtramos los aprobados en Python.
-raw_queue = firebase_request('publicGameQueue', method='GET', timeout=120)
+def firebase_patch(path, payload):
+    body = json.dumps(payload).encode('utf-8')
+    url = f'{DB}/{path.lstrip("/")}.json'
+    req = urllib.request.Request(
+        url,
+        data=body,
+        headers={**HEADERS, 'Content-Type': 'application/json'},
+        method='PATCH',
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=60) as response:
+            return json.loads(response.read().decode('utf-8') or '{}')
+    except urllib.error.HTTPError as error:
+        response_body = error.read().decode('utf-8', errors='replace')
+        raise RuntimeError(f'Firebase PATCH {path}: HTTP {error.code}: {response_body}') from error
+
+
+raw_queue = firebase_get('publicGameQueue')
 if not raw_queue:
     queue = {}
 elif isinstance(raw_queue, dict):
@@ -57,10 +71,6 @@ else:
 def slug(value):
     value = re.sub(r'[^a-z0-9]+', '-', str(value or 'juego').lower()).strip('-')
     return value[:60] or 'juego'
-
-
-def firebase_patch(path, payload):
-    return firebase_request(path, method='PATCH', payload=payload, timeout=60)
 
 
 def send_email(to, subject, html_body):
