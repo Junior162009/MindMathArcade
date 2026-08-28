@@ -85,6 +85,7 @@
       }
     `;
     document.head.appendChild(style);
+    style.textContent += '\n      /* SOCIAL SOLO ARRIBA */\n      #tecnomathBottomNav{display:none !important}\n      body{padding-bottom:0 !important}\n    ';
 
     function createLink(id,text,href,icon){const a=document.createElement('a');a.id=id;a.href=href;a.className='social-nav-link';a.innerHTML=`<span style="font-size:21px;line-height:1">${icon}</span><span>${text}</span>`;return a}
 
