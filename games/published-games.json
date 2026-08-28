@@ -53,13 +53,13 @@
     "sourceType": "upload"
   },
   {
-    "name": "Mundo Virtual — Beta",
-    "desc": "Investiga códigos, resuelve desafíos matemáticos y descubre al culpable.",
-    "description": "Aventura educativa inspirada en la idea de Mundo Virtual: cinco mundos, sospechosos, códigos binarios, Math Battle y poderes especiales.",
+    "name": "Math Battle — Beta",
+    "desc": "Dos equipos se enfrentan: responde problemas matemáticos antes que tu rival.",
+    "description": "Batalla matemática educativa con 20 rondas, enemigos por niveles, combo y poderes especiales.",
     "category": "mates",
     "url": "games/jinete11°/index.html",
     "imageUrl": "",
-    "icon": "🕵️",
+    "icon": "⚔️",
     "deviceCompatibility": "both",
     "evento": null,
     "authorName": "Jose",
