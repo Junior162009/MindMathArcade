@@ -49,17 +49,21 @@ exports.notifyGameSubmission=onValueCreated({ref:'/gameSubmissions/{submissionId
   await db.ref(`gameSubmissions/${event.params.submissionId}`).update({emailStatus:'sent',emailSentAt:admin.database.ServerValue.TIMESTAMP});
 });
 
-// Al aprobar un juego, se copia la solicitud a la cola pública y se dispara
-// inmediatamente GitHub Actions. Ya no se usa Firebase Cloud Storage para publicar.
+// Publica tanto aprobaciones nuevas como aprobaciones que ya existían antes
+// de que esta función estuviera desplegada. Esto permite recuperar envíos
+// aprobados que quedaron fuera de publicGameQueue.
 exports.publishApprovedGame=onValueWritten({ref:'/gameSubmissions/{submissionId}',secrets:[GITHUB_TOKEN]},async event=>{
-  const before=event.data.before.val()||{};
   const after=event.data.after.val()||{};
   const submissionId=event.params.submissionId;
 
-  if(before.status==='approved'||after.status!=='approved'||after.publishedAt)return;
+  if(after.status!=='approved'||after.publishedAt||after.publicationTriggeredAt)return;
 
-  const queueData={...after,status:'approved',submissionId};
-  await db.ref(`publicGameQueue/${submissionId}`).set(queueData);
+  const queueRef=db.ref(`publicGameQueue/${submissionId}`);
+  const existingQueue=await queueRef.once('value');
+  if(!existingQueue.exists()){
+    const queueData={...after,status:'approved',submissionId};
+    await queueRef.set(queueData);
+  }
 
   await github(`/repos/${OWNER}/${REPO}/dispatches`,{
     method:'POST',
