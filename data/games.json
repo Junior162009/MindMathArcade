@@ -25,5 +25,19 @@
     "authorEmail": "hack19861983@gmail.com",
     "sourceType": "upload",
     "publishedAt": "2026-08-28T01:56:06.473543+00:00"
+  },
+  {
+    "name": "Math Battle — Beta",
+    "desc": "Dos equipos se enfrentan: responde problemas matemáticos antes que tu rival.",
+    "description": "Batalla matemática educativa con 20 rondas, enemigos por niveles, combo y poderes especiales.",
+    "category": "mates",
+    "url": "games/jinete11°/index.html",
+    "imageUrl": "",
+    "icon": "⚔️",
+    "deviceCompatibility": "both",
+    "evento": null,
+    "authorName": "Jose",
+    "sourceType": "upload",
+    "version": "beta"
   }
 ]
