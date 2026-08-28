@@ -20,57 +20,67 @@ SITE_URL = 'https://tecnomath.online'
 if not ACCESS_TOKEN:
     raise RuntimeError('FIREBASE_ACCESS_TOKEN no está disponible. Configura FIREBASE_SERVICE_ACCOUNT en GitHub Actions.')
 
-HEADERS = {
-    'User-Agent': 'TecnoMath-GitHub-Publisher/10.0',
-    'Accept': 'application/json',
-    'Authorization': f'Bearer {ACCESS_TOKEN}',
-}
 
-
-def firebase_get(path):
-    url = f'{DB}/{path.lstrip("/")}.json'
-    request = urllib.request.Request(url, headers=HEADERS, method='GET')
+def firebase_request(method, path, payload=None):
+    url = f'{DB}/{path}.json'
+    headers = {
+        'Authorization': f'Bearer {ACCESS_TOKEN}',
+        'User-Agent': 'TecnoMath-GitHub-Publisher/10.0',
+        'Accept': 'application/json',
+    }
+    data = None
+    if payload is not None:
+        data = json.dumps(payload, ensure_ascii=False).encode('utf-8')
+        headers['Content-Type'] = 'application/json'
+    request = urllib.request.Request(url, data=data, headers=headers, method=method)
     try:
         with urllib.request.urlopen(request, timeout=120) as response:
-            return json.loads(response.read().decode('utf-8') or '{}')
-    except urllib.error.HTTPError as error:
-        body = error.read().decode('utf-8', errors='replace')
-        raise RuntimeError(f'Firebase GET {path}: HTTP {error.code}: {body}') from error
+            return json.loads(response.read().decode('utf-8') or 'null')
+    except urllib.error.HTTPError as exc:
+        detail = exc.read().decode('utf-8', 'replace')
+        raise RuntimeError(f'Firebase {method} {path}: HTTP {exc.code}: {detail}') from exc
 
 
-def firebase_patch(path, payload):
-    body = json.dumps(payload).encode('utf-8')
-    url = f'{DB}/{path.lstrip("/")}.json'
-    req = urllib.request.Request(
-        url,
-        data=body,
-        headers={**HEADERS, 'Content-Type': 'application/json'},
-        method='PATCH',
-    )
-    try:
-        with urllib.request.urlopen(req, timeout=60) as response:
-            return json.loads(response.read().decode('utf-8') or '{}')
-    except urllib.error.HTTPError as error:
-        response_body = error.read().decode('utf-8', errors='replace')
-        raise RuntimeError(f'Firebase PATCH {path}: HTTP {error.code}: {response_body}') from error
+# Leer la cola aprobada y, como respaldo, las solicitudes aprobadas directamente.
+queue_data = firebase_request('GET', 'publicGameQueue') or {}
+submissions_data = firebase_request('GET', 'gameSubmissions') or {}
 
+if not isinstance(queue_data, dict):
+    queue_data = {}
+if not isinstance(submissions_data, dict):
+    submissions_data = {}
 
-raw_queue = firebase_get('publicGameQueue')
-if not raw_queue:
-    queue = {}
-elif isinstance(raw_queue, dict):
-    queue = {
-        str(key): value
-        for key, value in raw_queue.items()
-        if isinstance(value, dict) and str(value.get('status', '')).lower() == 'approved'
-    }
-else:
-    raise RuntimeError('La respuesta de publicGameQueue no tiene un formato JSON válido.')
+# Recuperación: toda solicitud aprobada que aún no esté publicada entra a la cola.
+for submission_id, game in submissions_data.items():
+    if not isinstance(game, dict):
+        continue
+    if str(game.get('status', '')).lower() != 'approved':
+        continue
+    if game.get('publishedAt'):
+        continue
+    current = queue_data.get(submission_id)
+    if not isinstance(current, dict) or str(current.get('status', '')).lower() != 'approved':
+        repaired = dict(game)
+        repaired['status'] = 'approved'
+        repaired['submissionId'] = str(submission_id)
+        firebase_request('PUT', f'publicGameQueue/{submission_id}', repaired)
+        queue_data[str(submission_id)] = repaired
+        print(f'COLA REPARADA: {game.get("name", "Juego")} ({submission_id})')
+
+queue = {
+    str(key): value
+    for key, value in queue_data.items()
+    if isinstance(value, dict) and str(value.get('status', '')).lower() == 'approved'
+}
 
 
 def slug(value):
     value = re.sub(r'[^a-z0-9]+', '-', str(value or 'juego').lower()).strip('-')
     return value[:60] or 'juego'
+
+
+def firebase_patch(path, payload):
+    return firebase_request('PATCH', path, payload)
 
 
 def send_email(to, subject, html_body):
@@ -241,7 +251,13 @@ if changed:
 
     if subprocess.run(['git', 'diff', '--cached', '--quiet']).returncode != 0:
         subprocess.run(['git', 'commit', '-m', 'feat: publish approved games and notify authors'], check=True)
-        subprocess.run(['git', 'push'], check=True)
+        # Otro workflow puede haber actualizado main durante esta ejecución.
+        # Rebaseamos el commit generado sobre el remoto y lo enviamos sin perder cambios.
+        push_ok = subprocess.run(['git', 'push', '--rebase', 'origin', 'main']).returncode == 0
+        if not push_ok:
+            subprocess.run(['git', 'fetch', 'origin', 'main'], check=True)
+            subprocess.run(['git', 'rebase', 'origin/main'], check=True)
+            subprocess.run(['git', 'push', 'origin', 'HEAD:main'], check=True)
 
     for submission_id, game, entry in published:
         published_url = f'{SITE_URL}/{entry["url"]}'
