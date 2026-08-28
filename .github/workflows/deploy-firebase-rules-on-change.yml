@@ -1,0 +1,32 @@
+name: Desplegar reglas Firebase
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'firebase-database.rules.json'
+      - 'firebase.json'
+      - '.firebaserc'
+      - '.github/workflows/deploy-firebase-rules-on-change.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar repositorio
+        uses: actions/checkout@v4
+
+      - name: Autenticar con Google Cloud
+        uses: google-github-actions/auth@v3
+        with:
+          credentials_json: '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}'
+
+      - name: Instalar Firebase CLI
+        run: npm install --global firebase-tools
+
+      - name: Desplegar reglas de Realtime Database
+        run: firebase deploy --only database --project tecnomath-sync-6058a --non-interactive
