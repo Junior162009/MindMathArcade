@@ -34,6 +34,9 @@ jobs:
         with:
           credentials_json: '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}'
           token_format: access_token
+          access_token_scopes: |
+            https://www.googleapis.com/auth/userinfo.email
+            https://www.googleapis.com/auth/firebase.database
 
       - name: Verificar autenticación de Firebase
         env:
@@ -43,7 +46,8 @@ jobs:
           import os, urllib.request
           db=os.environ['FIREBASE_DB']
           token=os.environ['FIREBASE_ACCESS_TOKEN']
-          req=urllib.request.Request(f'{db}/publicGameQueue.json?shallow=true',headers={'Authorization':f'Bearer {token}','User-Agent':'TecnoMath-GitHub-Publisher'})
+          url=f'{db}/publicGameQueue.json?shallow=true&access_token={token}'
+          req=urllib.request.Request(url,headers={'User-Agent':'TecnoMath-GitHub-Publisher'})
           try:
               with urllib.request.urlopen(req,timeout=30) as r:
                   print('Firebase: autenticación correcta. HTTP',r.status)
