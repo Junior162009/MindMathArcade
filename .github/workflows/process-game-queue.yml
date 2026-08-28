@@ -1,6 +1,8 @@
 name: Publicar juegos aprobados automáticamente
 
 on:
+  repository_dispatch:
+    types: [game-approved]
   workflow_dispatch:
     inputs:
       submission_id:
@@ -11,6 +13,9 @@ on:
     - cron: '*/5 * * * *'
 
 permissions:
+  contents: write
+
+authorization:
   contents: write
 
 concurrency:
