@@ -6,6 +6,8 @@ on:
     paths:
       - 'functions/**'
       - 'firebase.json'
+      - '.firebaserc'
+      - '.github/workflows/deploy-functions-on-change.yml'
   workflow_dispatch:
 
 permissions:
@@ -28,17 +30,13 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: npm
-          cache-dependency-path: functions/package.json
 
       - name: Instalar dependencias de Functions
         working-directory: functions
-        run: npm install
+        run: npm install --omit=dev
 
       - name: Instalar Firebase CLI
         run: npm install --global firebase-tools
 
       - name: Desplegar Firebase Functions
-        env:
-          GOOGLE_APPLICATION_CREDENTIALS: ${{ env.GOOGLE_GHA_CREDS_PATH }}
         run: firebase deploy --only functions --project tecnomath-sync-6058a --non-interactive
