@@ -54,7 +54,6 @@ async function sendAuthorStatusEmail(submissionId,before,after){
   const previousStatus=String(before?.status||'').toLowerCase();
   const status=String(after.status||'').toLowerCase();
   const notificationKey={
-    pending:'received',
     reviewing:'reviewing',
     approved:'approved',
     rejected:'rejected',
@@ -62,9 +61,8 @@ async function sendAuthorStatusEmail(submissionId,before,after){
   }[status];
   if(!notificationKey)return;
 
-  // Solo enviar cuando el estado cambió. El estado pending se notifica
-  // exclusivamente desde notifyGameSubmission al crear la solicitud.
-  if(status==='pending'||previousStatus===status)return;
+  // Solo enviar cuando el estado cambió, evitando duplicados.
+  if(previousStatus===status)return;
 
   const sent={...(after.emailNotifications||{})};
   if(sent[notificationKey])return;
@@ -110,6 +108,7 @@ exports.notifyGameSubmission=onValueCreated({ref:'/gameSubmissions/{submissionId
   const key=RESEND_API_KEY.value();
   if(!key)return;
   const from=EMAIL_FROM.value()||'TecnoMath <onboarding@resend.dev>';
+
   for(const to of ADMINS){
     const response=await fetch('https://api.resend.com/emails',{
       method:'POST',
@@ -123,12 +122,29 @@ exports.notifyGameSubmission=onValueCreated({ref:'/gameSubmissions/{submissionId
     });
     if(!response.ok)console.error('Resend:',await response.text());
   }
-  await sendAuthorStatusEmail(event.params.submissionId,'pending',{});
+
+  // Confirmación inmediata al autor al recibir la solicitud.
+  const authorEmail=String(data.authorEmail||'').trim();
+  if(authorEmail){
+    const author=esc(data.authorName||'Usuario');
+    const game=esc(data.name||'tu juego');
+    const initialSent=await sendEmail(
+      authorEmail,
+      '🎮 Hemos recibido tu juego',
+      `<h2>🎮 ¡Juego recibido!</h2><p>Hola ${author}, hemos recibido <b>${game}</b> correctamente.</p><p>Tu juego quedó pendiente de revisión. Te avisaremos por correo cada vez que cambie su estado.</p>`
+    );
+    if(initialSent){
+      await db.ref(`gameSubmissions/${event.params.submissionId}/emailNotifications/received`).set(true);
+      await db.ref(`gameSubmissions/${event.params.submissionId}/emailNotifications/receivedAt`).set(admin.database.ServerValue.TIMESTAMP);
+      console.log(`EMAIL AUTHOR SENT received: ${authorEmail}`);
+    }
+  }
+
   await db.ref(`gameSubmissions/${event.params.submissionId}`).update({emailStatus:'admins-sent',emailSentAt:admin.database.ServerValue.TIMESTAMP});
 });
 
-// Envía un correo inmediato al autor cada vez que un administrador cambia
-// el estado o cuando la publicación automática cambia el estado a published.
+// Envía un correo inmediato al autor cada vez que el estado cambia por una
+// acción administrativa o por la publicación automática.
 exports.notifyGameStatusChange=onValueWritten({ref:'/gameSubmissions/{submissionId}',secrets:[RESEND_API_KEY,EMAIL_FROM]},async event=>{
   if(!event.data.after.exists())return;
   const before=event.data.before.val()||{};
