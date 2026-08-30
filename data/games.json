@@ -27,5 +27,17 @@
     "authorName": "Jose",
     "sourceType": "upload",
     "version": "beta"
+  },
+  {
+    "name": "Cookie Clicker",
+    "desc": "Haz clic, consigue cookies y mejora tu producción.",
+    "category": "arcade",
+    "url": "games/cookie-clicker/index.html",
+    "imageUrl": "",
+    "icon": "🍪",
+    "deviceCompatibility": "both",
+    "evento": null,
+    "authorName": "TecnoMath",
+    "sourceType": "internal"
   }
 ]
