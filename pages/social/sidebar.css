@@ -1,0 +1,13 @@
+/* TecnoMath Social — lógica visual de la barra lateral */
+@media (max-width:700px){
+  .sidebar{display:flex;position:fixed;left:0;top:0;bottom:0;width:min(310px,86vw);height:100dvh;z-index:120;padding:82px 14px 24px;background:rgba(9,11,27,.98);border-right:1px solid #303650;box-shadow:18px 0 45px rgba(0,0,0,.45);transform:translateX(-105%);transition:transform .25s ease;overflow-y:auto;overscroll-behavior:contain}
+  .sidebar.mobile-open{transform:translateX(0)}
+  .sidebar-backdrop{position:fixed;inset:0;z-index:110;background:rgba(0,0,0,.58);backdrop-filter:blur(2px);opacity:0;pointer-events:none;transition:opacity .25s ease}
+  .sidebar-backdrop.open{opacity:1;pointer-events:auto}
+  body.sidebar-locked{overflow:hidden}
+  .menu-btn-open{color:#b9a4ff!important;border-color:#5b4a91!important;background:#1b1733!important}
+  .sidebar .nav-item{min-height:48px;padding:13px 14px}
+  .sidebar .logout{margin-top:auto}
+}
+@media(min-width:701px){.sidebar-backdrop{display:none!important}}
+@media(prefers-reduced-motion:reduce){.sidebar,.sidebar-backdrop{transition:none!important}}
