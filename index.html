@@ -4,9 +4,27 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Tecnomath · Plataforma de Juegos Educativos</title>
-    <link rel="manifest" href="/manifest.json"><meta name="theme-color" content="#060610"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Tecnomath">
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script><script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-    <script>const firebaseConfig={apiKey:"AIzaSyCfY0VT4fQ5emX4R2LdUXU3FxjBTtY7Gzc",authDomain:"tecnomath-sync-6058a.firebaseapp.com",databaseURL:"https://tecnomath-sync-6058a-default-rtdb.firebaseio.com",projectId:"tecnomath-sync-6058a",storageBucket:"tecnomath-sync-6058a.firebasestorage.app",messagingSenderId:"237823560752",appId:"1:237823560752:web:adc1e5b396b5a0e0d671f5"};firebase.initializeApp(firebaseConfig);const database=firebase.database();console.log('🔥 Firebase inicializado correctamente');</script>
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#060610">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Tecnomath">
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script>
+      const firebaseConfig={apiKey:"AIzaSyCfY0VT4fQ5emX4R2LdUXU3FxjBTtY7Gzc",authDomain:"tecnomath-sync-6058a.firebaseapp.com",databaseURL:"https://tecnomath-sync-6058a-default-rtdb.firebaseio.com",projectId:"tecnomath-sync-6058a",storageBucket:"tecnomath-sync-6058a.firebasestorage.app",messagingSenderId:"237823560752",appId:"1:237823560752:web:adc1e5b396b5a0e0d671f5"};
+      try { if(!firebase.apps.length) firebase.initializeApp(firebaseConfig); window.database=firebase.database(); } catch(e){ console.warn('Firebase:',e); }
+    </script>
     <link rel="icon" id="dynamicFavicon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎮</text></svg>">
     <script src="https://unpkg.com/@ruffle-rs/ruffle"></script>
-    <script src="/js/tecnomath-save-adapters.js?v=1" defer></script>
+    <!-- Este adaptador es opcional: si falla, la pagina sigue cargando. -->
+    <script src="/js/tecnomath-save-adapters.js?v=1" defer onerror="console.warn('Save adapters no disponible');"></script>
+    <script>
+      // La plataforma principal debe continuar aunque un modulo de guardado falle.
+      window.addEventListener('error',function(e){
+        if(e.filename && /tecnomath-save-adapters|tecnomath-progress-v3/i.test(e.filename)){
+          e.preventDefault(); console.warn('[TecnoMath] modulo de progreso aislado:',e.message);
+        }
+      });
+    </script>
