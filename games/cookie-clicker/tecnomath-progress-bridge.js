@@ -1,56 +1,18 @@
 /* TecnoMath ↔ Cookie Clicker bridge.
- * No modifica la partida original de Cookie Clicker ni reemplaza su guardado.
- * Importa una vez el progreso existente del jugador al perfil autenticado y,
- * después, actualiza métricas globales periódicamente.
+ * Importa el guardado EXISTENTE de Cookie Clicker al UID autenticado.
+ * Nunca convierte clics en XP, monedas, aciertos ni partidas educativas.
+ * Nunca reemplaza ni borra el guardado original de Cookie Clicker.
  */
 (function(){
   'use strict';
-  const KEY='tecnomath_cookie_clicker_import_v1';
-  let imported=false;
-  function central(){return window.TecnoMathProgress&&typeof window.TecnoMathProgress.gameResult==='function'?window.TecnoMathProgress:null}
-  function user(){try{return window.TecnomathFirebase&&window.TecnomathFirebase.auth.currentUser}catch(e){return null}}
-  function readSave(){
-    try{
-      // Cookie Clicker guarda el save principal en este localStorage.
-      const raw=localStorage.getItem('CookieClickerGame');
-      if(!raw)return null;
-      return raw;
-    }catch(e){return null}
-  }
-  function parseSave(raw){
-    try{
-      const text=decodeURIComponent(escape(atob(raw)));
-      return text;
-    }catch(e){return raw}
-  }
-  function estimate(text){
-    if(!text)return null;
-    // No se modifica el save. Solo extraemos métricas seguras de la cadena.
-    const cookies=(text.match(/cookies=(\d+(?:\.\d+)?)/i)||[])[1];
-    const total=(text.match(/totalCookies=(\d+(?:\.\d+)?)/i)||[])[1];
-    const buildings=(text.match(/buildings=(\d+)/i)||[])[1];
-    const upgrades=(text.match(/upgrades=(\d+)/i)||[])[1];
-    return {cookies:Number(cookies)||0,totalCookies:Number(total)||0,buildings:Number(buildings)||0,upgrades:Number(upgrades)||0};
-  }
-  async function sync(){
-    const c=central(),u=user();
-    if(!c||!u)return;
-    const raw=readSave();
-    if(!raw)return;
-    const parsed=parseSave(raw),m=estimate(parsed);
-    if(!m)return;
-    const first=!localStorage.getItem(KEY);
-    const existing=localStorage.getItem(KEY);
-    const signature=String(raw.length)+'|'+String(m.totalCookies)+'|'+String(m.buildings)+'|'+String(m.upgrades);
-    if(existing===signature&&!first)return;
-    // Cookie Clicker no es un juego educativo de respuestas: no inventamos
-    // aciertos/errores ni damos XP por clics. Solo registramos que existe una
-    // partida y sus métricas como datos del juego.
-    await c.record({game:'Cookie Clicker',games:1,topic:'Otros',cookieClicker:{cookies:m.cookies,totalCookies:m.totalCookies,buildings:m.buildings,upgrades:m.upgrades},source:'existing-local-save'});
-    localStorage.setItem(KEY,signature);
-  }
-  function wait(){if(central()&&user())sync().catch(()=>{});else setTimeout(wait,1000)}
-  wait();
-  // Sincroniza cambios del save cada 30 segundos sin tocar la lógica original.
-  setInterval(()=>{if(user())sync().catch(()=>{})},30000);
+  let lastSignature='';
+  function services(){return window.TecnomathFirebase&&window.TecnomathFirebase.auth&&window.TecnomathFirebase.database?window.TecnomathFirebase:null}
+  function user(){const s=services();return s&&s.auth.currentUser?s.auth.currentUser:null}
+  function getSave(){try{return localStorage.getItem('CookieClickerGame')||''}catch(e){return ''}}
+  function decode(raw){if(!raw)return '';try{return typeof Base64!=='undefined'&&Base64.decode?Base64.decode(raw):raw}catch(e){}try{return atob(raw)}catch(e){return raw}}
+  function signature(raw){return [raw.length,raw.slice(0,32),raw.slice(-32)].join('|')}
+  function metrics(text){const pick=re=>{const m=text.match(re);return m?Number(m[1])||0:0};return{cookies:pick(/cookies=(\d+(?:\.\d+)?)/i),totalCookies:pick(/totalCookies=(\d+(?:\.\d+)?)/i),buildings:pick(/buildings=(\d+)/i),upgrades:pick(/upgrades=(\d+)/i),achievements:pick(/achievements=(\d+)/i)}}
+  async function migrate(){const s=services(),u=user(),raw=getSave();if(!s||!u||!raw)return;const sig=signature(raw);if(sig===lastSignature)return;const ref=s.database.ref('userProgress/'+u.uid+'/games/cookie-clicker');const old=await ref.once('value'),current=old.val()||{},text=decode(raw),m=metrics(text);await ref.update({gameId:'cookie-clicker',name:'Cookie Clicker',save:raw,saveLength:raw.length,metrics:m,importedFromLocal:true,migratedAt:current.migratedAt||s.serverTimestamp,lastSyncedAt:s.serverTimestamp});lastSignature=sig;window.dispatchEvent(new CustomEvent('tecnomath:cookie-progress-synced',{detail:{uid:u.uid,metrics:m}}))}
+  function wait(){if(services()&&user())migrate().catch(e=>console.warn('[TecnoMath] Cookie Clicker: no se pudo migrar el progreso.',e));else setTimeout(wait,1000)}
+  wait();setInterval(()=>{if(user())migrate().catch(()=>{})},30000);
 })();
