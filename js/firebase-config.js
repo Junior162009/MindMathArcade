@@ -1,80 +1,14 @@
 // Configuración compartida de Firebase para autenticación, perfiles, juegos y sincronización.
 (function () {
-  const firebaseConfig = {
-    apiKey: "AIzaSyCfY0VT4fQ5emX4R2LdUXU3FxjBTtY7Gzc",
-    authDomain: "tecnomath-sync-6058a.firebaseapp.com",
-    databaseURL: "https://tecnomath-sync-6058a-default-rtdb.firebaseio.com",
-    projectId: "tecnomath-sync-6058a",
-    storageBucket: "tecnomath-sync-6058a.firebasestorage.app",
-    messagingSenderId: "237823560752",
-    appId: "1:237823560752:web:adc1e5b396b5a0e0d671f5"
-  };
-
+  const firebaseConfig = { apiKey:"AIzaSyCfY0VT4fQ5emX4R2LdUXU3FxjBTtY7Gzc",authDomain:"tecnomath-sync-6058a.firebaseapp.com",databaseURL:"https://tecnomath-sync-6058a-default-rtdb.firebaseio.com",projectId:"tecnomath-sync-6058a",storageBucket:"tecnomath-sync-6058a.firebasestorage.app",messagingSenderId:"237823560752",appId:"1:237823560752:web:adc1e5b396b5a0e0d671f5" };
   if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-  if (!window.TecnoMathProgress && document.readyState === 'loading') {
-    document.write('<script src="/js/tecnomath-progress.js"><\\/script>');
-  }
-
-  window.TecnomathFirebase = {
-    auth: firebase.auth(),
-    database: firebase.database(),
-    storage: typeof firebase.storage === 'function' ? firebase.storage() : null,
-    serverTimestamp: firebase.database.ServerValue.TIMESTAMP
-  };
-
-  if (!document.querySelector('script[data-tecnomath-admin-guard]')) {
-    const adminGuard = document.createElement('script');
-    adminGuard.src = '/js/admin-guard.js?v=3';
-    adminGuard.async = false;
-    adminGuard.dataset.tecnomathAdminGuard = 'true';
-    document.head.appendChild(adminGuard);
-  }
-
-  if (!document.querySelector('script[data-tecnomath-cloud-sync]')) {
-    const cloudSync = document.createElement('script');
-    const path = location.pathname;
-    cloudSync.src = path.includes('/games/') ? '../../js/cloud-progress-sync.js?v=4' : (path.includes('/pages/') ? '../js/cloud-progress-sync.js?v=4' : 'js/cloud-progress-sync.js?v=4');
-    cloudSync.async = false;
-    cloudSync.dataset.tecnomathCloudSync = 'true';
-    document.head.appendChild(cloudSync);
-  }
-
-  if(location.pathname.includes('/games/')){
-    const bridge=document.createElement('script');
-    bridge.src='/js/tecnomath-game-bridge.js?v=1';
-    bridge.async=true;
-    bridge.dataset.tecnomathGameBridge='true';
-    document.head.appendChild(bridge);
-  }
-
-  function loadGameSubmissionSystem(){
-    if(document.querySelector('script[data-tecnomath-game-submissions]')) return;
-    const script=document.createElement('script');
-    script.src='/js/game-submissions.js?v=5';
-    script.async=true;
-    script.dataset.tecnomathGameSubmissions='true';
-    document.head.appendChild(script);
-  }
+  if (!window.TecnoMathProgress && document.readyState === 'loading') document.write('<script src="/js/tecnomath-progress.js"></scr'+'ipt>');
+  window.TecnomathFirebase={auth:firebase.auth(),database:firebase.database(),storage:typeof firebase.storage==='function'?firebase.storage():null,serverTimestamp:firebase.database.ServerValue.TIMESTAMP};
+  if(!document.querySelector('script[data-tecnomath-admin-guard]')){const s=document.createElement('script');s.src='/js/admin-guard.js?v=3';s.async=false;s.dataset.tecnomathAdminGuard='true';document.head.appendChild(s)}
+  if(!document.querySelector('script[data-tecnomath-cloud-sync]')){const s=document.createElement('script'),path=location.pathname;s.src=path.includes('/games/')?'../../js/cloud-progress-sync.js?v=4':(path.includes('/pages/')?'../js/cloud-progress-sync.js?v=4':'js/cloud-progress-sync.js?v=4');s.async=false;s.dataset.tecnomathCloudSync='true';document.head.appendChild(s)}
+  if(location.pathname.includes('/games/')&&!document.querySelector('script[data-tecnomath-game-bridge]')){const s=document.createElement('script');s.src='/js/tecnomath-game-bridge.js?v=2';s.async=true;s.dataset.tecnomathGameBridge='true';document.head.appendChild(s)}
+  function loadGameSubmissionSystem(){if(document.querySelector('script[data-tecnomath-game-submissions]'))return;const script=document.createElement('script');script.src='/js/game-submissions.js?v=5';script.async=true;script.dataset.tecnomathGameSubmissions='true';document.head.appendChild(script)}
   loadGameSubmissionSystem();
-
-  function setupAdminFairControl(){
-    if(!/\/pages\/admin\/index\.html$/.test(location.pathname)) return;
-    const inject=()=>{
-      const nav=document.querySelector('.admin-tabs');
-      const main=document.querySelector('main');
-      if(!nav||!main) return;
-      if(!document.getElementById('tm-admin-fair')){
-        const btn=document.createElement('button');btn.className='tab';btn.dataset.tab='fair';btn.id='tm-fair-tab';btn.textContent='🎡 Feria';nav.appendChild(btn);
-        const panel=document.createElement('section');panel.className='tab-panel';panel.id='tab-fair';panel.innerHTML=`<section class="panel tm-fair-panel"><div class="panel-head"><div><h2>🎡 Modo Feria</h2><p>Activa Feria o Mega Feria para todos los usuarios. El modo actual se sincroniza con Firebase.</p></div></div><div class="tm-fair-buttons"><button data-fair="feria">🎡 Activar Feria</button><button data-fair="feriaplus">🔥 Activar Mega Feria</button><button data-fair="normal">⛔ Desactivar Feria</button></div><div id="tm-fair-status" class="cloud-status">Consultando estado…</div></section>`;main.appendChild(panel);
-        const style=document.createElement('style');style.textContent=`.tm-fair-panel{overflow:hidden}.tm-fair-buttons{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:18px}.tm-fair-buttons button{min-height:62px;border:1px solid #24243b;background:#101022;color:#fff;border-radius:12px;padding:12px;cursor:pointer;font:inherit}.tm-fair-buttons button:hover{border-color:#00ffff;color:#00ffff}.tm-fair-buttons button.active{border-color:#39ff14;color:#39ff14;box-shadow:0 0 18px rgba(57,255,20,.16)}@media(max-width:700px){.tm-fair-buttons{grid-template-columns:1fr}.tm-fair-buttons button{min-height:52px;font-size:11px}}`;document.head.appendChild(style);
-        nav.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>{nav.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.tab-panel').forEach(x=>x.classList.remove('active'));b.classList.add('active');document.getElementById('tab-'+b.dataset.tab)?.classList.add('active')}));
-        const ref=window.TecnomathFirebase.database.ref('tecnomath/tematicaActiva'),status=document.getElementById('tm-fair-status');
-        const paint=theme=>{status.textContent='Estado actual: '+(theme==='feria'?'🎡 Feria':theme==='feriaplus'?'🔥 Mega Feria':'⛔ Feria desactivada');panel.querySelectorAll('[data-fair]').forEach(x=>x.classList.toggle('active',x.dataset.fair===theme))};ref.on('value',s=>paint(s.val()||'normal'));
-        panel.querySelectorAll('[data-fair]').forEach(x=>x.addEventListener('click',async()=>{try{const theme=x.dataset.fair;await ref.set(theme);const states={normal:theme==='normal',feria:theme==='feria',feriaplus:theme==='feriaplus'};await window.TecnomathFirebase.database.ref('tecnomath/tematicas').update(states);await window.TecnomathFirebase.database.ref('adminLogs').push({action:'change_fair_mode',theme,adminUid:window.TecnomathFirebase.auth.currentUser?.uid||'',adminEmail:window.TecnomathFirebase.auth.currentUser?.email||'',createdAt:window.TecnomathFirebase.serverTimestamp})}catch(e){status.textContent='❌ '+e.message}}));
-      }
-      const addNewThemes=()=>{const box=document.getElementById('themesList');if(!box)return;const extra={cumpleanos:'🥳 Cumpleaños',feria:'🎡 Feria',feriaplus:'🔥 Mega Feria',primavera:'🌸 Primavera',espacio:'🚀 Espacio',ciencia:'🔬 Ciencia'};const activeRef=window.TecnomathFirebase.database.ref('tecnomath/tematicaActiva');activeRef.once('value').then(s=>{const active=s.val()||'normal';Object.entries(extra).forEach(([id,name])=>{if(box.querySelector('[data-extra-theme="'+id+'"]'))return;const row=document.createElement('div');row.className='theme-row';row.dataset.extraTheme=id;row.innerHTML=`<div><strong>${name}</strong><small>${id===active?'ACTIVA':'Inactiva'}</small></div><label class="switch"><input type="checkbox" ${id===active?'checked':''}><span class="slider"></span></label>`;const input=row.querySelector('input');input.addEventListener('change',async()=>{if(!input.checked){input.checked=true;return}try{const all={normal:false,halloween:false,navidad:false,verano:false,mundial:false,regreso:false,cumpleanos:false,feria:false,feriaplus:false,primavera:false,espacio:false,ciencia:false};all[id]=true;await activeRef.set(id);await window.TecnomathFirebase.database.ref('tecnomath/tematicas').set(all);await window.TecnomathFirebase.database.ref('adminLogs').push({action:'change_theme',theme:id,adminUid:window.TecnomathFirebase.auth.currentUser?.uid||'',adminEmail:window.TecnomathFirebase.auth.currentUser?.email||'',createdAt:window.TecnomathFirebase.serverTimestamp})}catch(e){console.error(e)}});box.appendChild(row)})})};const box=document.getElementById('themesList');if(box){new MutationObserver(addNewThemes).observe(box,{childList:true});addNewThemes()}const script=document.createElement('script');script.src='../../js/fair-effects.js?v=2';script.async=true;document.head.appendChild(script);
-    };
-    if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',inject,{once:true});else inject();
-  }
+  function setupAdminFairControl(){if(!/\/pages\/admin\/index\.html$/.test(location.pathname))return;const inject=()=>{const nav=document.querySelector('.admin-tabs'),main=document.querySelector('main');if(!nav||!main)return;if(!document.getElementById('tm-admin-fair')){const btn=document.createElement('button');btn.className='tab';btn.dataset.tab='fair';btn.id='tm-fair-tab';btn.textContent='🎡 Feria';nav.appendChild(btn);const panel=document.createElement('section');panel.className='tab-panel';panel.id='tab-fair';panel.innerHTML=`<section class="panel tm-fair-panel"><div class="panel-head"><div><h2>🎡 Modo Feria</h2><p>Activa Feria o Mega Feria para todos los usuarios. El modo actual se sincroniza con Firebase.</p></div></div><div class="tm-fair-buttons"><button data-fair="feria">🎡 Activar Feria</button><button data-fair="feriaplus">🔥 Activar Mega Feria</button><button data-fair="normal">⛔ Desactivar Feria</button></div><div id="tm-fair-status" class="cloud-status">Consultando estado…</div></section>`;main.appendChild(panel);const style=document.createElement('style');style.textContent=`.tm-fair-panel{overflow:hidden}.tm-fair-buttons{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:18px}.tm-fair-buttons button{min-height:62px;border:1px solid #24243b;background:#101022;color:#fff;border-radius:12px;padding:12px;cursor:pointer;font:inherit}.tm-fair-buttons button:hover{border-color:#00ffff;color:#00ffff}.tm-fair-buttons button.active{border-color:#39ff14;color:#39ff14;box-shadow:0 0 18px rgba(57,255,20,.16)}@media(max-width:700px){.tm-fair-buttons{grid-template-columns:1fr}.tm-fair-buttons button{min-height:52px;font-size:11px}}`;document.head.appendChild(style);nav.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>{nav.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.tab-panel').forEach(x=>x.classList.remove('active'));b.classList.add('active');document.getElementById('tab-'+b.dataset.tab)?.classList.add('active')}));const ref=window.TecnomathFirebase.database.ref('tecnomath/tematicaActiva'),status=document.getElementById('tm-fair-status');const paint=theme=>{status.textContent='Estado actual: '+(theme==='feria'?'🎡 Feria':theme==='feriaplus'?'🔥 Mega Feria':'⛔ Feria desactivada');panel.querySelectorAll('[data-fair]').forEach(x=>x.classList.toggle('active',x.dataset.fair===theme))};ref.on('value',s=>paint(s.val()||'normal'));panel.querySelectorAll('[data-fair]').forEach(x=>x.addEventListener('click',async()=>{try{const theme=x.dataset.fair;await ref.set(theme);const states={normal:theme==='normal',feria:theme==='feria',feriaplus:theme==='feriaplus'};await window.TecnomathFirebase.database.ref('tecnomath/tematicas').update(states);await window.TecnomathFirebase.database.ref('adminLogs').push({action:'change_fair_mode',theme,adminUid:window.TecnomathFirebase.auth.currentUser?.uid||'',adminEmail:window.TecnomathFirebase.auth.currentUser?.email||'',createdAt:window.TecnomathFirebase.serverTimestamp})}catch(e){status.textContent='❌ '+e.message}}))}const addNewThemes=()=>{const box=document.getElementById('themesList');if(!box)return;const extra={cumpleanos:'🥳 Cumpleaños',feria:'🎡 Feria',feriaplus:'🔥 Mega Feria',primavera:'🌸 Primavera',espacio:'🚀 Espacio',ciencia:'🔬 Ciencia'},activeRef=window.TecnomathFirebase.database.ref('tecnomath/tematicaActiva');activeRef.once('value').then(s=>{const active=s.val()||'normal';Object.entries(extra).forEach(([id,name])=>{if(box.querySelector('[data-extra-theme="'+id+'"]'))return;const row=document.createElement('div');row.className='theme-row';row.dataset.extraTheme=id;row.innerHTML=`<div><strong>${name}</strong><small>${id===active?'ACTIVA':'Inactiva'}</small></div><label class="switch"><input type="checkbox" ${id===active?'checked':''}><span class="slider"></span></label>`;const input=row.querySelector('input');input.addEventListener('change',async()=>{if(!input.checked){input.checked=true;return}try{const all={normal:false,halloween:false,navidad:false,verano:false,mundial:false,regreso:false,cumpleanos:false,feria:false,feriaplus:false,primavera:false,espacio:false,ciencia:false};all[id]=true;await activeRef.set(id);await window.TecnomathFirebase.database.ref('tecnomath/tematicas').set(all);await window.TecnomathFirebase.database.ref('adminLogs').push({action:'change_theme',theme:id,adminUid:window.TecnomathFirebase.auth.currentUser?.uid||'',adminEmail:window.TecnomathFirebase.auth.currentUser?.email||'',createdAt:window.TecnomathFirebase.serverTimestamp})}catch(e){console.error(e)}});box.appendChild(row)})})};const box=document.getElementById('themesList');if(box){new MutationObserver(addNewThemes).observe(box,{childList:true});addNewThemes()}const script=document.createElement('script');script.src='../../js/fair-effects.js?v=2';script.async=true;document.head.appendChild(script)};if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',inject,{once:true});else inject()}
   setupAdminFairControl();
 })();
