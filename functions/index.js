@@ -1,4 +1,5 @@
 const {onValueCreated,onValueWritten}=require('firebase-functions/v2/database');
+const {onCall,HttpsError}=require('firebase-functions/v2/https');
 const {defineSecret}=require('firebase-functions/params');
 const admin=require('firebase-admin');
 
@@ -46,6 +47,53 @@ async function sendEmail(to,subject,htmlBody){
   }
   return true;
 }
+
+// Sincroniza de forma segura el claim del usuario que realiza la llamada.
+// La fuente de verdad sigue siendo /users/{uid}/role en Realtime Database.
+exports.syncAdminClaim=onCall(async request=>{
+  if(!request.auth)throw new HttpsError('unauthenticated','Debes iniciar sesión.');
+  const uid=request.auth.uid;
+  try{
+    const snapshot=await db.ref(`users/${uid}`).once('value');
+    const profile=snapshot.val()||{};
+    const isAdmin=String(profile.role||'').toLowerCase()==='admin';
+    const userRecord=await admin.auth().getUser(uid);
+    const claims={...(userRecord.customClaims||{})};
+
+    if(isAdmin)claims.admin=true;
+    else delete claims.admin;
+
+    await admin.auth().setCustomUserClaims(uid,claims);
+    return{admin:isAdmin};
+  }catch(error){
+    console.error(`ERROR SYNC ADMIN CLAIM ${uid}:`,error);
+    throw new HttpsError('internal','No se pudo sincronizar el permiso de administrador.');
+  }
+});
+
+// Sincroniza automáticamente el claim cuando cambia el rol en RTDB.
+// La función solo escribe en Firebase Authentication, por lo que no genera
+// un bucle de escritura sobre /users/{uid}.
+exports.syncAdminClaimOnUserChange=onValueWritten({ref:'/users/{uid}'},async event=>{
+  const before=event.data.before.val()||{};
+  const after=event.data.after.val()||{};
+  const beforeRole=String(before.role||'').toLowerCase();
+  const afterRole=String(after.role||'').toLowerCase();
+
+  if(beforeRole===afterRole)return;
+
+  const uid=event.params.uid;
+  try{
+    const userRecord=await admin.auth().getUser(uid);
+    const claims={...(userRecord.customClaims||{})};
+    if(afterRole==='admin')claims.admin=true;
+    else delete claims.admin;
+    await admin.auth().setCustomUserClaims(uid,claims);
+    console.log(`ADMIN CLAIM SYNC ${uid}: ${afterRole==='admin'?'enabled':'disabled'}`);
+  }catch(error){
+    console.error(`ERROR ADMIN CLAIM SYNC ${uid}:`,error);
+  }
+});
 
 async function sendAuthorStatusEmail(submissionId,before,after){
   const email=String(after.authorEmail||'').trim();

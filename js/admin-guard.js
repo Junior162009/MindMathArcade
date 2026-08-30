@@ -16,6 +16,8 @@
     'jandresvf23@gmail.com': 'Jaider'
   };
 
+  let adminClaimRefreshPromise = null;
+
   function firebaseReady() {
     if (!window.TecnomathFirebase) throw new Error('Firebase no está inicializado.');
     return window.TecnomathFirebase;
@@ -23,6 +25,45 @@
 
   function normalizedEmail(user) { return String(user && user.email || '').trim().toLowerCase(); }
   function isApprovedEmail(user) { return ADMIN_EMAILS.includes(normalizedEmail(user)); }
+
+  async function refreshAdminClaim(user) {
+    if (!user || adminClaimRefreshPromise) return adminClaimRefreshPromise;
+    adminClaimRefreshPromise = (async () => {
+      try {
+        // El callable valida el rol directamente en RTDB antes de tocar el claim.
+        if (typeof firebase.functions !== 'function') {
+          await new Promise((resolve, reject) => {
+            const existing = document.querySelector('script[data-tecnomath-functions-client]');
+            if (existing) {
+              existing.addEventListener('load', resolve, { once: true });
+              existing.addEventListener('error', reject, { once: true });
+              return;
+            }
+            const script = document.createElement('script');
+            script.src = 'https://www.gstatic.com/firebasejs/9.23.0/firebase-functions-compat.js';
+            script.async = true;
+            script.dataset.tecnomathFunctionsClient = 'true';
+            script.onload = resolve;
+            script.onerror = reject;
+            document.head.appendChild(script);
+          });
+        }
+
+        if (typeof firebase.functions === 'function') {
+          await firebase.functions().httpsCallable('syncAdminClaim')({});
+        }
+
+        // Los custom claims nuevos solo llegan al ID token después de refrescarlo.
+        await user.getIdToken(true);
+      } catch (error) {
+        console.warn('TecnoMath: no se pudo sincronizar/refrescar el claim admin:', error);
+        try { await user.getIdToken(true); } catch (refreshError) {
+          console.warn('TecnoMath: no se pudo refrescar el token:', refreshError);
+        }
+      }
+    })();
+    return adminClaimRefreshPromise;
+  }
 
   async function getAdminProfile(userArg) {
     const cloud = firebaseReady(), user = userArg || cloud.auth.currentUser;
@@ -38,17 +79,23 @@
     return role==='admin'||profile.isAdmin===true?Object.assign({},profile,{uid:user.uid,role:'admin',isAdmin:true}):null;
   }
 
+  async function prepareAdminProfile(user, profile) {
+    if (!profile) return null;
+    await refreshAdminClaim(user);
+    return profile;
+  }
+
   async function initializeAdminRecognition() {
     const cloud = firebaseReady();
-    return new Promise(resolve=>{const unsubscribe=cloud.auth.onAuthStateChanged(async user=>{unsubscribe();if(!user)return resolve(null);try{const profile=await getAdminProfile(user);if(profile){window.TecnomathCurrentAdmin=profile;window.TecnomathIsAdmin=true;document.documentElement.classList.add('is-admin');if(document.body)document.body.classList.add('is-admin');window.dispatchEvent(new CustomEvent('tecnomath:admin-ready',{detail:profile}));}resolve(profile);}catch(error){console.error('TecnoMath: error reconociendo administrador:',error);resolve(null);}});});
+    return new Promise(resolve=>{const unsubscribe=cloud.auth.onAuthStateChanged(async user=>{unsubscribe();if(!user)return resolve(null);try{const profile=await getAdminProfile(user);if(profile){await prepareAdminProfile(user,profile);window.TecnomathCurrentAdmin=profile;window.TecnomathIsAdmin=true;document.documentElement.classList.add('is-admin');if(document.body)document.body.classList.add('is-admin');window.dispatchEvent(new CustomEvent('tecnomath:admin-ready',{detail:profile}));}resolve(profile);}catch(error){console.error('TecnoMath: error reconociendo administrador:',error);resolve(null);}});});
   }
 
   async function requireAdmin(options) {
     options=options||{};const cloud=firebaseReady(),redirect=options.redirect||'../auth.html';
-    return new Promise((resolve,reject)=>{const unsubscribe=cloud.auth.onAuthStateChanged(async user=>{unsubscribe();try{if(!user){window.location.replace(redirect);return}const profile=await getAdminProfile(user);if(!profile){alert('Acceso denegado: necesitas permisos de administrador.');window.location.replace(redirect);return}window.TecnomathCurrentAdmin=profile;window.TecnomathIsAdmin=true;resolve(profile);}catch(error){console.error('TecnoMath admin guard:',error);reject(error);}});});
+    return new Promise((resolve,reject)=>{const unsubscribe=cloud.auth.onAuthStateChanged(async user=>{unsubscribe();try{if(!user){window.location.replace(redirect);return}const profile=await getAdminProfile(user);if(!profile){alert('Acceso denegado: necesitas permisos de administrador.');window.location.replace(redirect);return}await prepareAdminProfile(user,profile);window.TecnomathCurrentAdmin=profile;window.TecnomathIsAdmin=true;resolve(profile);}catch(error){console.error('TecnoMath admin guard:',error);reject(error);}});});
   }
 
-  window.TecnomathAdminGuard={ADMIN_EMAILS,ADMIN_NAMES,isApprovedEmail,getAdminProfile,initializeAdminRecognition,requireAdmin};
+  window.TecnomathAdminGuard={ADMIN_EMAILS,ADMIN_NAMES,isApprovedEmail,getAdminProfile,initializeAdminRecognition,requireAdmin,refreshAdminClaim};
 
   function startRecognition(){try{if(window.TecnomathFirebase)initializeAdminRecognition();else window.addEventListener('tecnomath:firebase-ready',initializeAdminRecognition,{once:true});}catch(error){console.error('TecnoMath admin initialization:',error);}}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',startRecognition,{once:true});else startRecognition();
