@@ -10,7 +10,7 @@
   const clone=o=>JSON.parse(JSON.stringify(o));
   function levelFor(xp){return Math.floor(Math.sqrt(Math.max(0,Number(xp)||0)/100))+1;}
   function today(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
-  function normalize(d){d.dummy=undefined;delete d.dummy;d.xp=Math.max(0,Number(d.xp)||0);d.coins=Math.max(0,Number(d.coins)||0);d.level=levelFor(d.xp);d.streak=Math.max(0,Number(d.streak)||0);d.games=Math.max(0,Number(d.games)||0);d.correct=Math.max(0,Number(d.correct)||0);d.wrong=Math.max(0,Number(d.wrong)||0);d.topics=d.topics&&typeof d.topics==='object'?d.topics:{};d.achievements=Array.isArray(d.achievements)?[...new Set(d.achievements)]:[];return d;}
+  function normalize(d){d.xp=Math.max(0,Number(d.xp)||0);d.coins=Math.max(0,Number(d.coins)||0);d.level=levelFor(d.xp);d.streak=Math.max(0,Number(d.streak)||0);d.games=Math.max(0,Number(d.games)||0);d.correct=Math.max(0,Number(d.correct)||0);d.wrong=Math.max(0,Number(d.wrong)||0);d.topics=d.topics&&typeof d.topics==='object'?d.topics:{};d.achievements=Array.isArray(d.achievements)?[...new Set(d.achievements)]:[];return d;}
   function read(){try{return normalize({...clone(DEFAULTS),...JSON.parse(localStorage.getItem(KEY)||'{}')});}catch(_){return clone(DEFAULTS);}}
   function save(d){d=normalize(d);try{localStorage.setItem(KEY,JSON.stringify(d));}catch(_){}try{window.dispatchEvent(new CustomEvent('tecnomath:progress',{detail:d}));}catch(_){}return d;}
   function achievements(d){const total=d.correct+d.wrong,acc=total?Math.round(d.correct/total*100):0;[['first_win',d.correct>=1],['century',d.correct>=100],['streak3',d.streak>=3],['master',d.level>=10],['precision',acc>=90&&d.correct>=20],['gamer',d.games>=10]].forEach(([id,ok])=>{if(ok&&!d.achievements.includes(id))d.achievements.push(id);});}
@@ -38,10 +38,11 @@
   function bindAuth(){const s=services();if(!s)return;s.auth.onAuthStateChanged(async user=>{authUser=user||null;if(!authUser){window.dispatchEvent(new CustomEvent('tecnomath:cloud-status',{detail:{state:'signed-out'}}));return;}await restore();await sync();});}
   async function init(){await ensureFirebase();bindAuth();}
 
-  function legacyStart(id){window.TecnomathCurrentGame=String(id||'unknown');return read();}
+  function legacyStart(id){window.TecnoMathCurrentGame=String(id||'unknown');return read();}
   function legacySave(id,data){const safe=String(id||'game').replace(/[^a-z0-9_-]/gi,'-').toLowerCase();try{localStorage.setItem('tecnomath_game_'+safe,JSON.stringify(data||{}));}catch(_){}try{window.dispatchEvent(new CustomEvent('tecnomath:game-snapshot',{detail:{gameId:safe,data:data||{}}}));}catch(_){}return true;}
   function legacyLoad(id){const safe=String(id||'game').replace(/[^a-z0-9_-]/gi,'-').toLowerCase();try{return JSON.parse(localStorage.getItem('tecnomath_game_'+safe)||'null');}catch(_){return null;}}
+  function apiSave(arg1,arg2){return typeof arg1==='string'&&arg2!==undefined?legacySave(arg1,arg2):save(arg1);}
 
-  window.TecnoMathProgress={read,save,record,gameResult,trackPlay,installAutoTracking,sync,restore,levelFor,start:legacyStart,save:legacySave,saveSnapshot:function(id,key,fields){try{const value=JSON.parse(localStorage.getItem(key)||'{}'),snapshot=fields?fields.reduce((r,k)=>{if(Object.prototype.hasOwnProperty.call(value,k))r[k]=value[k];return r},{}):value;return legacySave(id,{snapshot});}catch(_){return false;}},load:legacyLoad,reset(){const d=clone(DEFAULTS);save(d);return d;}};
+  window.TecnoMathProgress={read,save:apiSave,record,gameResult,trackPlay,installAutoTracking,sync,restore,levelFor,start:legacyStart,saveSnapshot:function(id,key,fields){try{const value=JSON.parse(localStorage.getItem(key)||'{}'),snapshot=fields?fields.reduce((r,k)=>{if(Object.prototype.hasOwnProperty.call(value,k))r[k]=value[k];return r},{}):value;return legacySave(id,{snapshot});}catch(_){return false;}},load:legacyLoad,reset(){const d=clone(DEFAULTS);save(d);return d;}};
   init().catch(e=>console.warn('TecnoMath: fallo al iniciar progreso central.',e));
 })();
