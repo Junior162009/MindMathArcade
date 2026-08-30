@@ -6,6 +6,7 @@
   <meta name="theme-color" content="#0d1026">
   <title>TecnoMath Social</title>
   <link rel="stylesheet" href="social.css">
+  <link rel="stylesheet" href="sidebar.css">
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
@@ -14,7 +15,7 @@
 <body>
   <div class="app-shell">
     <header class="topbar">
-      <button class="icon-btn" id="menuBtn" aria-label="Menú">☰</button>
+      <button class="icon-btn" id="menuBtn" aria-label="Abrir menú" aria-controls="sidebar" aria-expanded="false">☰</button>
       <a class="brand" href="../../index.html"><span>🧠</span><b>TecnoMath</b><em>Social</em></a>
       <div class="top-actions">
         <button class="icon-btn" id="searchBtn" aria-label="Buscar">⌕</button>
@@ -70,5 +71,6 @@
   <div class="modal hidden" id="profileModal"><div class="modal-box"><button class="modal-close" data-close>×</button><h2>✏️ Editar perfil</h2><label>Nombre visible<input id="displayNameInput" maxlength="40" placeholder="Tu nombre"></label><label>Emoji de avatar<input id="avatarInput" maxlength="4" placeholder="🧠"></label><button class="primary wide" id="saveProfile">Guardar cambios</button></div></div>
   <div class="toast" id="toast"></div>
   <script src="social.js"></script>
+  <script src="sidebar.js"></script>
 </body>
 </html>
