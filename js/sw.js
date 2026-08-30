@@ -1,7 +1,7 @@
 importScripts('https://storage.googleapis.com/workbox-cdn/releases/5.1.2/workbox-sw.js');
 
-// v10: sincroniza la temática global de TecnoMath en las páginas HTML.
-const CACHE_NAME = 'tecnomath-offline-v10';
+// v11: limpia cualquier versión anterior del caché para evitar que componentes eliminados vuelvan a aparecer.
+const CACHE_NAME = 'tecnomath-offline-v11';
 const OFFLINE_FALLBACK_PAGE = '/index.html';
 const PRECACHE_ASSETS = [
   '/', '/index.html', '/js/shared.js', '/js/firebase-config.js', '/js/admin-guard.js', '/js/theme-sync.js',
@@ -28,7 +28,7 @@ async function injectThemeScript(response) {
   try {
     const html = await response.text();
     if (html.includes('/js/theme-sync.js')) return new Response(html, {status:response.status, statusText:response.statusText, headers:response.headers});
-    const injected = html.replace(/<\/body>/i, '<script src="/js/theme-sync.js?v=10"></script></body>');
+    const injected = html.replace(/<\/body>/i, '<script src="/js/theme-sync.js?v=11"></script></body>');
     const headers = new Headers(response.headers);
     headers.set('content-type', 'text/html; charset=utf-8');
     return new Response(injected, {status:response.status, statusText:response.statusText, headers});
