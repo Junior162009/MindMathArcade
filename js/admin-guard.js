@@ -36,7 +36,9 @@
       try {
         const tokenResult = await user.getIdTokenResult();
         const shouldBeAdmin = expectedAdmin === true;
-        const hasCorrectClaim = tokenResult.claims && tokenResult.claims.admin === shouldBeAdmin;
+        const hasCorrectClaim = shouldBeAdmin
+          ? tokenResult.claims && tokenResult.claims.admin === true
+          : !(tokenResult.claims && tokenResult.claims.admin === true);
 
         // Evita llamadas y refrescos innecesarios cuando el token ya está correcto.
         if (hasCorrectClaim) return tokenResult;
@@ -103,12 +105,12 @@
 
   async function initializeAdminRecognition() {
     const cloud = firebaseReady();
-    return new Promise(resolve=>{const unsubscribe=cloud.auth.onAuthStateChanged(async user=>{unsubscribe();if(!user)return resolve(null);try{const profile=await getAdminProfile(user);if(profile){await prepareAdminProfile(user,profile);window.TecnomathCurrentAdmin=profile;window.TecnomathIsAdmin=true;document.documentElement.classList.add('is-admin');if(document.body)document.body.classList.add('is-admin');window.dispatchEvent(new CustomEvent('tecnomath:admin-ready',{detail:profile}));}resolve(profile);}catch(error){console.error('TecnoMath: error reconociendo administrador:',error);resolve(null);}});});
+    return new Promise(resolve=>{const unsubscribe=cloud.auth.onAuthStateChanged(async user=>{unsubscribe();if(!user)return resolve(null);try{const profile=await getAdminProfile(user);if(profile){await prepareAdminProfile(user,profile);window.TecnomathCurrentAdmin=profile;window.TecnomathIsAdmin=true;document.documentElement.classList.add('is-admin');if(document.body)document.body.classList.add('is-admin');window.dispatchEvent(new CustomEvent('tecnomath:admin-ready',{detail:profile}));}else{await refreshAdminClaim(user,false);}resolve(profile);}catch(error){console.error('TecnoMath: error reconociendo administrador:',error);resolve(null);}});});
   }
 
   async function requireAdmin(options) {
     options=options||{};const cloud=firebaseReady(),redirect=options.redirect||'../auth.html';
-    return new Promise((resolve,reject)=>{const unsubscribe=cloud.auth.onAuthStateChanged(async user=>{unsubscribe();try{if(!user){window.location.replace(redirect);return}const profile=await getAdminProfile(user);if(!profile){alert('Acceso denegado: necesitas permisos de administrador.');window.location.replace(redirect);return}await prepareAdminProfile(user,profile);window.TecnomathCurrentAdmin=profile;window.TecnomathIsAdmin=true;resolve(profile);}catch(error){console.error('TecnoMath admin guard:',error);reject(error);}});});
+    return new Promise((resolve,reject)=>{const unsubscribe=cloud.auth.onAuthStateChanged(async user=>{unsubscribe();try{if(!user){window.location.replace(redirect);return}const profile=await getAdminProfile(user);if(!profile){await refreshAdminClaim(user,false);alert('Acceso denegado: necesitas permisos de administrador.');window.location.replace(redirect);return}await prepareAdminProfile(user,profile);window.TecnomathCurrentAdmin=profile;window.TecnomathIsAdmin=true;resolve(profile);}catch(error){console.error('TecnoMath admin guard:',error);reject(error);}});});
   }
 
   window.TecnomathAdminGuard={ADMIN_EMAILS,ADMIN_NAMES,isApprovedEmail,getAdminProfile,initializeAdminRecognition,requireAdmin,refreshAdminClaim};
