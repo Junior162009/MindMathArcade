@@ -5,6 +5,7 @@ const admin=require('firebase-admin');
 
 admin.initializeApp();
 const db=admin.database();
+const firestore=admin.firestore();
 const RESEND_API_KEY=defineSecret('RESEND_API_KEY');
 const GITHUB_TOKEN=defineSecret('GITHUB_TOKEN');
 const EMAIL_FROM=defineSecret('EMAIL_FROM');
@@ -13,224 +14,51 @@ const ADMINS=['delahozbarcelojunior@gmail.com','nicolenatera26@gmail.com','mateo
 const OWNER='Junior162009';
 const REPO='MindMathArcade';
 
-const esc=value=>String(value??'').replace(/[&<>'"]/g,char=>({
-  '&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'
-}[char]));
+const esc=value=>String(value??'').replace(/[&<>'"]/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[char]));
 
-async function github(path,options={}){
-  const response=await fetch(`https://api.github.com${path}`,{
-    ...options,
-    headers:{
-      accept:'application/vnd.github+json',
-      authorization:`Bearer ${GITHUB_TOKEN.value()}`,
-      'X-GitHub-Api-Version':'2022-11-28',
-      ...(options.headers||{})
-    }
-  });
-  if(!response.ok)throw new Error(`GitHub ${response.status}: ${await response.text()}`);
-  if(response.status===204)return null;
-  return response.json();
-}
+async function github(path,options={}){const response=await fetch(`https://api.github.com${path}`,{...options,headers:{accept:'application/vnd.github+json',authorization:`Bearer ${GITHUB_TOKEN.value()}`,'X-GitHub-Api-Version':'2022-11-28',...(options.headers||{})}});if(!response.ok)throw new Error(`GitHub ${response.status}: ${await response.text()}`);if(response.status===204)return null;return response.json();}
+async function sendEmail(to,subject,htmlBody){const key=RESEND_API_KEY.value();if(!key||!to)return false;const from=EMAIL_FROM.value()||'TecnoMath <notificaciones@tecnomath.online>';const response=await fetch('https://api.resend.com/emails',{method:'POST',headers:{Authorization:`Bearer ${key}`,'Content-Type':'application/json'},body:JSON.stringify({from,to:[to],subject,html:htmlBody})});if(!response.ok){console.error('Resend:',await response.text());return false;}return true;}
 
-async function sendEmail(to,subject,htmlBody){
-  const key=RESEND_API_KEY.value();
-  if(!key||!to)return false;
-  const from=EMAIL_FROM.value()||'TecnoMath <notificaciones@tecnomath.online>';
-  const response=await fetch('https://api.resend.com/emails',{
-    method:'POST',
-    headers:{Authorization:`Bearer ${key}`,'Content-Type':'application/json'},
-    body:JSON.stringify({from,to:[to],subject,html:htmlBody})
-  });
-  if(!response.ok){
-    console.error('Resend:',await response.text());
-    return false;
-  }
-  return true;
-}
+async function syncAdminClaimForUid(uid){const snapshot=await db.ref(`users/${uid}`).once('value');const profile=snapshot.val()||{};const isAdmin=String(profile.role||'').toLowerCase()==='admin';const userRecord=await admin.auth().getUser(uid);const currentClaims={...(userRecord.customClaims||{})};if(currentClaims.admin!==isAdmin){if(isAdmin)currentClaims.admin=true;else delete currentClaims.admin;await admin.auth().setCustomUserClaims(uid,currentClaims);console.log(`ADMIN CLAIM SYNC ${uid}: ${isAdmin?'enabled':'disabled'}`);}return isAdmin;}
+exports.syncAdminClaim=onCall(async request=>{if(!request.auth)throw new HttpsError('unauthenticated','Debes iniciar sesión.');try{return{admin:await syncAdminClaimForUid(request.auth.uid)};}catch(error){console.error(`ERROR SYNC ADMIN CLAIM ${request.auth.uid}:`,error);throw new HttpsError('internal','No se pudo sincronizar el permiso de administrador.');}});
+exports.syncAdminClaimOnUserChange=onValueWritten({ref:'/users/{uid}'},async event=>{const before=event.data.before.val()||{};const after=event.data.after.val()||{};if(String(before.role||'').toLowerCase()===String(after.role||'').toLowerCase())return;try{await syncAdminClaimForUid(event.params.uid);}catch(error){console.error(`ERROR ADMIN CLAIM SYNC ${event.params.uid}:`,error);}});
 
-// Sincroniza el claim sin tocar otros claims existentes.
-// Realtime Database (/users/{uid}/role) sigue siendo la fuente de verdad.
-async function syncAdminClaimForUid(uid){
-  const snapshot=await db.ref(`users/${uid}`).once('value');
-  const profile=snapshot.val()||{};
-  const isAdmin=String(profile.role||'').toLowerCase()==='admin';
-  const userRecord=await admin.auth().getUser(uid);
-  const currentClaims={...(userRecord.customClaims||{})};
-  const hasCorrectAdminClaim=currentClaims.admin===isAdmin;
+function requireAdmin(request){if(!request.auth)throw new HttpsError('unauthenticated','Debes iniciar sesión.');if(request.auth.token?.admin!==true)throw new HttpsError('permission-denied','Se requiere permiso de administrador.');}
+function tournamentState(data){if(['finished','cancelled'].includes(data.status))return data.status;const now=Date.now(),start=data.startAt?.toMillis?.()||0,end=data.endAt?.toMillis?.()||Infinity;return now<start?'upcoming':now>end?'finished':'active';}
+function parsePrize(value){if(value&&typeof value==='object')return{xp:Math.max(0,Number(value.xp)||0),coins:Math.max(0,Number(value.coins)||0)};const text=String(value||'').toLowerCase(),xm=text.match(/([\d.,]+)\s*(?:xp|experiencia)/i),cm=text.match(/([\d.,]+)\s*(?:monedas?|coins?)/i),num=s=>Number(String(s||'').replace(/\./g,'').replace(',','.'))||0;return{xp:Math.max(0,Math.floor(num(xm?.[1]))),coins:Math.max(0,Math.floor(num(cm?.[1])))}};
 
-  if(!hasCorrectAdminClaim){
-    if(isAdmin)currentClaims.admin=true;
-    else delete currentClaims.admin;
-    await admin.auth().setCustomUserClaims(uid,currentClaims);
-    console.log(`ADMIN CLAIM SYNC ${uid}: ${isAdmin?'enabled':'disabled'}`);
-  }
-
-  return isAdmin;
-}
-
-// Sincronización manual segura para el usuario autenticado.
-// Nunca acepta un UID externo: solo puede sincronizar su propio estado RTDB.
-exports.syncAdminClaim=onCall(async request=>{
+// Todas las escrituras sensibles de scores/rankings pasan por servidor.
+exports.recordCompetitionScore=onCall(async request=>{
   if(!request.auth)throw new HttpsError('unauthenticated','Debes iniciar sesión.');
-  const uid=request.auth.uid;
-  try{
-    const isAdmin=await syncAdminClaimForUid(uid);
-    return{admin:isAdmin};
-  }catch(error){
-    console.error(`ERROR SYNC ADMIN CLAIM ${uid}:`,error);
-    throw new HttpsError('internal','No se pudo sincronizar el permiso de administrador.');
-  }
+  const uid=request.auth.uid,gameId=String(request.data?.gameId||'').trim(),score=Math.max(0,Math.floor(Number(request.data?.score)||0)),extra=request.data?.extra&&typeof request.data.extra==='object'?request.data.extra:{};
+  if(!gameId||gameId.length>100)throw new HttpsError('invalid-argument','Juego inválido.');
+  if(!Number.isFinite(score)||score<0)throw new HttpsError('invalid-argument','Puntuación inválida.');
+  const userRecord=await admin.auth().getUser(uid),profile={uid,name:userRecord.displayName||userRecord.email?.split('@')[0]||'Jugador',photo:userRecord.photoURL||''};
+  const globalRef=firestore.doc(`leaderboards/global/players/${uid}`),gameRef=firestore.doc(`leaderboards/games/${gameId}/${uid}`),globalSnap=await globalRef.get(),gameSnap=await gameRef.get();
+  const oldGlobal=globalSnap.exists?globalSnap.data():{},oldGame=gameSnap.exists?gameSnap.data():{},gameBest=Math.max(Number(oldGlobal.gameScores?.[gameId])||0,score),batch=firestore.batch();
+  batch.set(globalRef,{...profile,score:(Number(oldGlobal.score)||0)+score,games:(Number(oldGlobal.games)||0)+1,gameScores:{...(oldGlobal.gameScores||{}),[gameId]:gameBest},updatedAt:admin.firestore.FieldValue.serverTimestamp()},{merge:true});
+  batch.set(gameRef,{...profile,score:Math.max(Number(oldGame.score)||0,score),updatedAt:admin.firestore.FieldValue.serverTimestamp()},{merge:true});
+  const tournamentSnap=await firestore.collection('tournaments').where('status','in',['active','upcoming']).get(),tournamentIds=[];
+  for(const doc of tournamentSnap.docs){const t=doc.data();if(tournamentState(t)!=='active'||(t.gameId&&t.gameId!==gameId))continue;const participant=await doc.ref.collection('participants').doc(uid).get();if(!participant.exists)continue;const scoreRef=doc.ref.collection('scores').doc(uid),scoreSnap=await scoreRef.get(),old=scoreSnap.exists?scoreSnap.data():{},best=Math.max(Number(old.score)||0,score);batch.set(scoreRef,{...profile,score:best,gameId,plays:(Number(old.plays)||0)+1,updatedAt:admin.firestore.FieldValue.serverTimestamp(),extra},{merge:true});tournamentIds.push(doc.id);}
+  await batch.commit();return{ok:true,tournaments:tournamentIds,score};
 });
 
-// Sincroniza automáticamente el claim cuando cambia el perfil en RTDB.
-// Solo escribe en Firebase Authentication, por lo que no genera un bucle sobre /users.
-exports.syncAdminClaimOnUserChange=onValueWritten({ref:'/users/{uid}'},async event=>{
-  const before=event.data.before.val()||{};
-  const after=event.data.after.val()||{};
-  const beforeRole=String(before.role||'').toLowerCase();
-  const afterRole=String(after.role||'').toLowerCase();
-
-  if(beforeRole===afterRole)return;
-
-  const uid=event.params.uid;
-  try{
-    await syncAdminClaimForUid(uid);
-  }catch(error){
-    console.error(`ERROR ADMIN CLAIM SYNC ${uid}:`,error);
-  }
+// Finaliza, crea ranking completo y entrega premios XP/monedas de forma idempotente.
+exports.finalizeTournament=onCall(async request=>{
+  requireAdmin(request);const tournamentId=String(request.data?.tournamentId||'').trim();if(!tournamentId)throw new HttpsError('invalid-argument','Torneo inválido.');
+  const ref=firestore.collection('tournaments').doc(tournamentId),snap=await ref.get();if(!snap.exists)throw new HttpsError('not-found','Torneo no encontrado.');const tournament=snap.data();
+  if(tournament.status==='cancelled')throw new HttpsError('failed-precondition','El torneo está cancelado.');
+  if(tournament.status==='finished')return{ok:true,alreadyFinished:true,winners:tournament.winners||[],ranking:tournament.finalRanking||[]};
+  const scoreSnap=await ref.collection('scores').orderBy('score','desc').get(),ranking=scoreSnap.docs.map((doc,index)=>({rank:index+1,...doc.data(),uid:doc.id})),winners=ranking.slice(0,3),prizes=[tournament.prizes?.first||tournament.prize||'',tournament.prizes?.second||'',tournament.prizes?.third||''].map(parsePrize);
+  const locked=await firestore.runTransaction(async tx=>{const current=await tx.get(ref),data=current.data()||{};if(data.status==='finished')return false;tx.update(ref,{status:'finalizing',finalizingAt:admin.firestore.FieldValue.serverTimestamp(),updatedAt:admin.firestore.FieldValue.serverTimestamp()});return true;});
+  if(!locked){const latest=(await ref.get()).data()||{};return{ok:true,alreadyFinished:true,winners:latest.winners||[],ranking:latest.finalRanking||[]};}
+  const rewards=[];
+  for(let i=0;i<winners.length;i++){const winner=winners[i],prize=prizes[i]||{xp:0,coins:0};if(!winner.uid||(!prize.xp&&!prize.coins))continue;const progressRef=db.ref(`userProgress/${winner.uid}/global`),rewardKey=`${tournamentId}_${winner.uid}_${i+1}`;await progressRef.transaction(current=>{const data=current&&typeof current==='object'?{...current}:{xp:0,coins:0,level:1,games:0,correct:0,wrong:0,topics:{},achievements:[]},rewardsMap={...(data.tournamentRewards||{})};if(rewardsMap[rewardKey])return data;data.xp=Math.max(0,Number(data.xp)||0)+prize.xp;data.coins=Math.max(0,Number(data.coins)||0)+prize.coins;data.level=Math.floor(Math.sqrt(data.xp/100))+1;rewardsMap[rewardKey]={tournamentId,rank:i+1,xp:prize.xp,coins:prize.coins,awardedAt:admin.database.ServerValue.TIMESTAMP};data.tournamentRewards=rewardsMap;data.updatedAt=admin.database.ServerValue.TIMESTAMP;return data;});await db.ref(`notifications/${winner.uid}`).push({type:'tournament_reward',title:'🏆 Premio de torneo',message:`Terminaste #${i+1} en ${tournament.name||'el torneo'} y recibiste ${prize.xp} XP y ${prize.coins} monedas.`,tournamentId,rank:i+1,xp:prize.xp,coins:prize.coins,createdAt:admin.database.ServerValue.TIMESTAMP,read:false});rewards.push({uid:winner.uid,rank:i+1,...prize});}
+  await ref.update({status:'finished',finishedAt:admin.firestore.FieldValue.serverTimestamp(),winners,finalRanking:ranking,rewards,updatedAt:admin.firestore.FieldValue.serverTimestamp()});return{ok:true,winners,ranking,rewards};
 });
 
-async function sendAuthorStatusEmail(submissionId,before,after){
-  const email=String(after.authorEmail||'').trim();
-  if(!email)return;
+async function sendAuthorStatusEmail(submissionId,before,after){const email=String(after.authorEmail||'').trim();if(!email)return;const previousStatus=String(before?.status||'').toLowerCase(),status=String(after.status||'').toLowerCase(),notificationKey={reviewing:'reviewing',approved:'approved',rejected:'rejected',published:'published'}[status];if(!notificationKey||previousStatus===status)return;const sent={...(after.emailNotifications||{})};if(sent[notificationKey])return;const author=esc(after.authorName||'Usuario'),game=esc(after.name||'tu juego');let subject='',body='';if(status==='reviewing'){subject='🔍 Tu juego está siendo revisado';body=`<h2>🔍 Estamos revisando tu juego</h2><p>Hola ${author}, un administrador ya está revisando <b>${game}</b>.</p><p>Te avisaremos cuando haya una nueva actualización.</p>`;}else if(status==='approved'){subject='✅ ¡Tu juego fue aprobado!';body=`<h2>✅ ¡Buenas noticias!</h2><p>Hola ${author}, tu juego <b>${game}</b> fue aprobado por un administrador.</p><p>Ahora pasará automáticamente al proceso de publicación. Te enviaremos otro correo cuando esté disponible para jugar.</p>`;}else if(status==='published'){const url=esc(after.publishedUrl||'https://tecnomath.online');subject='🎉 ¡Tu juego ya está publicado!';body=`<h2>🎉 ¡Tu juego ya está publicado!</h2><p>Hola ${author}, <b>${game}</b> ya está disponible en TecnoMath.</p><p><a href="${url}">🎮 Abrir mi juego</a></p>`;}else if(status==='rejected'){const reason=esc(after.rejectionReason||after.reviewReason||'No cumple los requisitos de publicación actualmente.');subject='❌ Actualización sobre tu juego';body=`<h2>❌ Tu juego no fue aprobado</h2><p>Hola ${author}, después de revisar <b>${game}</b>, no fue aprobado por el momento.</p><p><b>Motivo:</b> ${reason}</p><p>Puedes realizar las correcciones necesarias y volver a enviarlo.</p>`;}if(!subject||!body)return;try{const sentSuccessfully=await sendEmail(email,subject,body);if(sentSuccessfully){await db.ref(`gameSubmissions/${submissionId}/emailNotifications/${notificationKey}`).set(true);await db.ref(`gameSubmissions/${submissionId}/emailNotifications/${notificationKey}At`).set(admin.database.ServerValue.TIMESTAMP);console.log(`EMAIL AUTHOR SENT ${notificationKey}: ${email}`);}}catch(error){console.error(`ERROR AUTHOR EMAIL ${submissionId}:`,error);}}
 
-  const previousStatus=String(before?.status||'').toLowerCase();
-  const status=String(after.status||'').toLowerCase();
-  const notificationKey={
-    reviewing:'reviewing',
-    approved:'approved',
-    rejected:'rejected',
-    published:'published'
-  }[status];
-  if(!notificationKey)return;
-
-  // Solo enviar cuando el estado cambió, evitando duplicados.
-  if(previousStatus===status)return;
-
-  const sent={...(after.emailNotifications||{})};
-  if(sent[notificationKey])return;
-
-  const author=esc(after.authorName||'Usuario');
-  const game=esc(after.name||'tu juego');
-  let subject='';
-  let body='';
-
-  if(status==='reviewing'){
-    subject='🔍 Tu juego está siendo revisado';
-    body=`<h2>🔍 Estamos revisando tu juego</h2><p>Hola ${author}, un administrador ya está revisando <b>${game}</b>.</p><p>Te avisaremos cuando haya una nueva actualización.</p>`;
-  }else if(status==='approved'){
-    subject='✅ ¡Tu juego fue aprobado!';
-    body=`<h2>✅ ¡Buenas noticias!</h2><p>Hola ${author}, tu juego <b>${game}</b> fue aprobado por un administrador.</p><p>Ahora pasará automáticamente al proceso de publicación. Te enviaremos otro correo cuando esté disponible para jugar.</p>`;
-  }else if(status==='published'){
-    const url=esc(after.publishedUrl||'https://tecnomath.online');
-    subject='🎉 ¡Tu juego ya está publicado!';
-    body=`<h2>🎉 ¡Tu juego ya está publicado!</h2><p>Hola ${author}, <b>${game}</b> ya está disponible en TecnoMath.</p><p><a href="${url}">🎮 Abrir mi juego</a></p>`;
-  }else if(status==='rejected'){
-    const reason=esc(after.rejectionReason||after.reviewReason||'No cumple los requisitos de publicación actualmente.');
-    subject='❌ Actualización sobre tu juego';
-    body=`<h2>❌ Tu juego no fue aprobado</h2><p>Hola ${author}, después de revisar <b>${game}</b>, no fue aprobado por el momento.</p><p><b>Motivo:</b> ${reason}</p><p>Puedes realizar las correcciones necesarias y volver a enviarlo.</p>`;
-  }
-
-  if(!subject||!body)return;
-
-  try{
-    const sentSuccessfully=await sendEmail(email,subject,body);
-    if(sentSuccessfully){
-      await db.ref(`gameSubmissions/${submissionId}/emailNotifications/${notificationKey}`).set(true);
-      await db.ref(`gameSubmissions/${submissionId}/emailNotifications/${notificationKey}At`).set(admin.database.ServerValue.TIMESTAMP);
-      console.log(`EMAIL AUTHOR SENT ${notificationKey}: ${email}`);
-    }
-  }catch(error){
-    console.error(`ERROR AUTHOR EMAIL ${submissionId}:`,error);
-  }
-}
-
-exports.notifyGameSubmission=onValueCreated({ref:'/gameSubmissions/{submissionId}',secrets:[RESEND_API_KEY,EMAIL_FROM]},async event=>{
-  const data=event.data.val();
-  if(!data)return;
-  const key=RESEND_API_KEY.value();
-  if(!key)return;
-  const from=EMAIL_FROM.value()||'TecnoMath <onboarding@resend.dev>';
-
-  for(const to of ADMINS){
-    const response=await fetch('https://api.resend.com/emails',{
-      method:'POST',
-      headers:{Authorization:`Bearer ${key}`,'Content-Type':'application/json'},
-      body:JSON.stringify({
-        from,
-        to:[to],
-        subject:`🎮 Nuevo juego pendiente: ${data.name||'Sin nombre'}`,
-        html:`<h2>🎮 Nuevo juego enviado a TecnoMath</h2><p><b>Juego:</b> ${esc(data.name||'')}</p><p><b>Autor:</b> ${esc(data.authorName||'')}</p><p><b>Correo:</b> ${esc(data.authorEmail||'')}</p><p><b>Categoría:</b> ${esc(data.category||'otros')}</p><p>${esc(data.description||'')}</p><p>Entra al panel de administración para revisar y aprobar la solicitud.</p>`
-      })
-    });
-    if(!response.ok)console.error('Resend:',await response.text());
-  }
-
-  // Confirmación inmediata al autor al recibir la solicitud.
-  const authorEmail=String(data.authorEmail||'').trim();
-  if(authorEmail){
-    const author=esc(data.authorName||'Usuario');
-    const game=esc(data.name||'tu juego');
-    const initialSent=await sendEmail(
-      authorEmail,
-      '🎮 Hemos recibido tu juego',
-      `<h2>🎮 ¡Juego recibido!</h2><p>Hola ${author}, hemos recibido <b>${game}</b> correctamente.</p><p>Tu juego quedó pendiente de revisión. Te avisaremos por correo cada vez que cambie su estado.</p>`
-    );
-    if(initialSent){
-      await db.ref(`gameSubmissions/${event.params.submissionId}/emailNotifications/received`).set(true);
-      await db.ref(`gameSubmissions/${event.params.submissionId}/emailNotifications/receivedAt`).set(admin.database.ServerValue.TIMESTAMP);
-      console.log(`EMAIL AUTHOR SENT received: ${authorEmail}`);
-    }
-  }
-
-  await db.ref(`gameSubmissions/${event.params.submissionId}`).update({emailStatus:'admins-sent',emailSentAt:admin.database.ServerValue.TIMESTAMP});
-});
-
-// Envía un correo inmediato al autor cada vez que el estado cambia por una
-// acción administrativa o por la publicación automática.
-exports.notifyGameStatusChange=onValueWritten({ref:'/gameSubmissions/{submissionId}',secrets:[RESEND_API_KEY,EMAIL_FROM]},async event=>{
-  if(!event.data.after.exists())return;
-  const before=event.data.before.val()||{};
-  const after=event.data.after.val()||{};
-  await sendAuthorStatusEmail(event.params.submissionId,before,after);
-});
-
-// Publica tanto aprobaciones nuevas como aprobaciones que ya existían antes
-// de que esta función estuviera desplegada.
-exports.publishApprovedGame=onValueWritten({ref:'/gameSubmissions/{submissionId}',secrets:[GITHUB_TOKEN]},async event=>{
-  const after=event.data.after.val()||{};
-  const submissionId=event.params.submissionId;
-
-  if(after.status!=='approved'||after.publishedAt||after.publicationTriggeredAt)return;
-
-  const queueRef=db.ref(`publicGameQueue/${submissionId}`);
-  const existingQueue=await queueRef.once('value');
-  if(!existingQueue.exists()){
-    const queueData={...after,status:'approved',submissionId};
-    await queueRef.set(queueData);
-  }
-
-  await github(`/repos/${OWNER}/${REPO}/dispatches`,{
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({
-      event_type:'game-approved',
-      client_payload:{submissionId}
-    })
-  });
-
-  await db.ref(`gameSubmissions/${submissionId}`).update({
-    publicationTrigger:'github-actions',
-    publicationTriggeredAt:admin.database.ServerValue.TIMESTAMP
-  });
-});
+exports.notifyGameSubmission=onValueCreated({ref:'/gameSubmissions/{submissionId}',secrets:[RESEND_API_KEY,EMAIL_FROM]},async event=>{const data=event.data.val();if(!data)return;const key=RESEND_API_KEY.value();if(!key)return;const from=EMAIL_FROM.value()||'TecnoMath <onboarding@resend.dev>';for(const to of ADMINS){const response=await fetch('https://api.resend.com/emails',{method:'POST',headers:{Authorization:`Bearer ${key}`,'Content-Type':'application/json'},body:JSON.stringify({from,to:[to],subject:`🎮 Nuevo juego pendiente: ${data.name||'Sin nombre'}`,html:`<h2>🎮 Nuevo juego enviado a TecnoMath</h2><p><b>Juego:</b> ${esc(data.name||'')}</p><p><b>Autor:</b> ${esc(data.authorName||'')}</p><p><b>Correo:</b> ${esc(data.authorEmail||'')}</p><p><b>Categoría:</b> ${esc(data.category||'otros')}</p><p>${esc(data.description||'')}</p><p>Entra al panel de administración para revisar y aprobar la solicitud.</p>`})});if(!response.ok)console.error('Resend:',await response.text());}const authorEmail=String(data.authorEmail||'').trim();if(authorEmail){const author=esc(data.authorName||'Usuario'),game=esc(data.name||'tu juego'),initialSent=await sendEmail(authorEmail,'🎮 Hemos recibido tu juego',`<h2>🎮 ¡Juego recibido!</h2><p>Hola ${author}, hemos recibido <b>${game}</b> correctamente.</p><p>Tu juego quedó pendiente de revisión. Te avisaremos por correo cada vez que cambie su estado.</p>`);if(initialSent){await db.ref(`gameSubmissions/${event.params.submissionId}/emailNotifications/received`).set(true);await db.ref(`gameSubmissions/${event.params.submissionId}/emailNotifications/receivedAt`).set(admin.database.ServerValue.TIMESTAMP);console.log(`EMAIL AUTHOR SENT received: ${authorEmail}`);}}await db.ref(`gameSubmissions/${event.params.submissionId}`).update({emailStatus:'admins-sent',emailSentAt:admin.database.ServerValue.TIMESTAMP});});
+exports.notifyGameStatusChange=onValueWritten({ref:'/gameSubmissions/{submissionId}',secrets:[RESEND_API_KEY,EMAIL_FROM]},async event=>{if(!event.data.after.exists())return;await sendAuthorStatusEmail(event.params.submissionId,event.data.before.val()||{},event.data.after.val()||{});});
+exports.publishApprovedGame=onValueWritten({ref:'/gameSubmissions/{submissionId}',secrets:[GITHUB_TOKEN]},async event=>{const after=event.data.after.val()||{},submissionId=event.params.submissionId;if(after.status!=='approved'||after.publishedAt||after.publicationTriggeredAt)return;const queueRef=db.ref(`publicGameQueue/${submissionId}`),existingQueue=await queueRef.once('value');if(!existingQueue.exists())await queueRef.set({...after,status:'approved',submissionId});await github(`/repos/${OWNER}/${REPO}/dispatches`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({event_type:'game-approved',client_payload:{submissionId}})});await db.ref(`gameSubmissions/${submissionId}`).update({publicationTrigger:'github-actions',publicationTriggeredAt:admin.database.ServerValue.TIMESTAMP});});
