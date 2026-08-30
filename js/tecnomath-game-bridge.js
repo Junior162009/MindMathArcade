@@ -10,26 +10,24 @@
   function start(){
     const results=document.getElementById('results');
     const game=document.getElementById('game');
-    if(!results||!game){setTimeout(start,250);return;}
-    let missionStarted=false;
-    let submitted=false;
-    let lastFeed='';
     const feed=document.getElementById('feed');
+    if(!results||!game||!feed){setTimeout(start,250);return;}
+    let missionStarted=false,submitted=false,wasGameOn=false,lastFeed='';
+    let state={correct:0,wrong:0};
     const observer=new MutationObserver(()=>{
-      if(feed){
-        const text=feed.textContent||'';
-        if(text!==lastFeed && /Correcto|Incorrecto/i.test(text)) lastFeed=text;
+      const gameOn=game.classList.contains('on');
+      if(gameOn&&!wasGameOn){missionStarted=true;submitted=false;state={correct:0,wrong:0};lastFeed='';}
+      wasGameOn=gameOn;
+      const text=feed.textContent||'';
+      if(text!==lastFeed){
+        if(/¡Correcto!/i.test(text)) state.correct++;
+        else if(/❌\s*Incorrecto|Incorrecto/i.test(text)) state.wrong++;
+        lastFeed=text;
       }
-      if(game.classList.contains('on')){missionStarted=true;submitted=false;}
       if(results.classList.contains('on')&&missionStarted&&!submitted){
         const root=central();
         if(!root)return;
-        const correctText=(lastFeed.match(/Correcto/gi)||[]).length;
-        // El juego conserva sus contadores en el DOM/local state; el puente
-        // acumula respuestas mediante los botones para obtener el resultado real.
-        const state=window.__tmQuizzerBridgeState||{correct:0,wrong:0,xp:0};
-        const scoreEl=document.getElementById('score');
-        const score=Math.max(0,Number(scoreEl&&scoreEl.textContent)||0);
+        const score=Math.max(0,Number(document.getElementById('score')?.textContent)||0);
         const topic=(document.getElementById('subname')?.textContent||'Quizzer').toLowerCase();
         if(state.correct+state.wrong>0){
           root.gameResult('Quizzer',{correct:state.correct,wrong:state.wrong,games:1,xp:score*2,coins:Math.max(0,Math.floor(score/5)),topic});
@@ -38,16 +36,6 @@
       }
     });
     observer.observe(document.body,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:['class']});
-
-    document.addEventListener('click',e=>{
-      const btn=e.target.closest&&e.target.closest('.answer');
-      if(!btn)return;
-      setTimeout(()=>{
-        const s=window.__tmQuizzerBridgeState||(window.__tmQuizzerBridgeState={correct:0,wrong:0,xp:0});
-        if(btn.classList.contains('ok'))s.correct++;
-        else if(btn.classList.contains('bad'))s.wrong++;
-      },0);
-    },true);
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
 })();
