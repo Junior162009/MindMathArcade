@@ -34,7 +34,8 @@
 
     menuBtn.setAttribute('aria-controls','sidebar');
     menuBtn.setAttribute('aria-expanded','false');
-    menuBtn.addEventListener('click',event=>{event.preventDefault();event.stopPropagation();toggle();});
+    // Captura antes del handler antiguo de social.js para evitar doble toggle.
+    menuBtn.addEventListener('click',event=>{event.preventDefault();event.stopImmediatePropagation();toggle();},true);
     backdrop.addEventListener('click',close);
 
     sidebar.querySelectorAll('.nav-item').forEach(link=>{
@@ -65,7 +66,6 @@
       if(!isMobile()) close();
     },{passive:true});
 
-    // Si el usuario abre un enlace interno desde otra parte, la barra se cierra.
     document.addEventListener('click',event=>{
       if(!sidebar.classList.contains('mobile-open')) return;
       const target=event.target.closest?.('a[href^="#"]');
