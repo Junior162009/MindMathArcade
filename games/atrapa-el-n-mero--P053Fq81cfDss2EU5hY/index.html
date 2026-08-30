@@ -6,436 +6,56 @@
     <title>Atrapa el Número 🎯</title>
 
     <style>
-        * {
-            box-sizing: border-box;
-        }
-
-        body {
-            margin: 0;
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 15px;
-            background:
-                radial-gradient(circle at top, #202060, #080817 60%);
-            color: white;
-            font-family: Arial, sans-serif;
-        }
-
-        .game {
-            width: 100%;
-            max-width: 700px;
-            background: #11112a;
-            border: 2px solid #00e5ff;
-            border-radius: 20px;
-            padding: 20px;
-            text-align: center;
-            box-shadow: 0 0 30px rgba(0, 229, 255, .25);
-        }
-
-        h1 {
-            margin: 5px 0 8px;
-            color: #00e5ff;
-            font-size: clamp(25px, 7vw, 42px);
-            text-shadow: 0 0 15px #00e5ff;
-        }
-
-        .description {
-            color: #bbb;
-            line-height: 1.5;
-        }
-
-        .info {
-            display: flex;
-            gap: 10px;
-            margin: 20px 0;
-        }
-
-        .box {
-            flex: 1;
-            padding: 12px;
-            background: #080817;
-            border: 1px solid #292950;
-            border-radius: 12px;
-            font-weight: bold;
-        }
-
-        .box span {
-            display: block;
-            margin-top: 7px;
-            font-size: 22px;
-            color: #39ff14;
-        }
-
-        .target-title {
-            color: #aaa;
-            margin-bottom: 5px;
-        }
-
-        #target {
-            font-size: clamp(50px, 15vw, 80px);
-            font-weight: bold;
-            color: #ffe600;
-            text-shadow: 0 0 20px #ffe600;
-            margin: 5px 0 15px;
-        }
-
-        #message {
-            min-height: 28px;
-            color: #ccc;
-            font-weight: bold;
-        }
-
-        .board {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 10px;
-            margin: 20px 0;
-        }
-
-        .number {
-            min-height: 75px;
-            border: 2px solid #39396b;
-            border-radius: 12px;
-            background: #24244a;
-            color: white;
-            font-size: 28px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: .15s;
-        }
-
-        .number:hover {
-            transform: scale(1.04);
-            border-color: #00e5ff;
-            box-shadow: 0 0 12px rgba(0, 229, 255, .4);
-        }
-
-        .number:active {
-            transform: scale(.94);
-        }
-
-        .correct {
-            background: #39ff14 !important;
-            color: #000 !important;
-        }
-
-        .wrong {
-            background: #ff315c !important;
-        }
-
-        #start {
-            width: 100%;
-            padding: 15px;
-            border: 0;
-            border-radius: 12px;
-            background: #39ff14;
-            color: #061006;
-            font-size: 18px;
-            font-weight: bold;
-            cursor: pointer;
-            box-shadow: 0 5px 0 #168d0b;
-        }
-
-        #start:active {
-            transform: translateY(3px);
-            box-shadow: 0 2px 0 #168d0b;
-        }
-
-        .instructions {
-            margin-top: 18px;
-            padding: 12px;
-            background: #080817;
-            border-radius: 10px;
-            color: #888;
-            font-size: 13px;
-        }
-
-        @media (max-width: 500px) {
-            .board {
-                grid-template-columns: repeat(3, 1fr);
-            }
-
-            .number {
-                min-height: 65px;
-                font-size: 24px;
-            }
-
-            .info {
-                gap: 5px;
-            }
-
-            .box {
-                padding: 9px 5px;
-                font-size: 12px;
-            }
-        }
+        * { box-sizing: border-box; }
+        body { margin:0; min-height:100vh; display:flex; justify-content:center; align-items:center; padding:15px; background:radial-gradient(circle at top,#202060,#080817 60%); color:white; font-family:Arial,sans-serif; }
+        .game { width:100%; max-width:700px; background:#11112a; border:2px solid #00e5ff; border-radius:20px; padding:20px; text-align:center; box-shadow:0 0 30px rgba(0,229,255,.25); }
+        h1 { margin:5px 0 8px; color:#00e5ff; font-size:clamp(25px,7vw,42px); text-shadow:0 0 15px #00e5ff; }
+        .description { color:#bbb; line-height:1.5; }
+        .info { display:flex; gap:10px; margin:20px 0; }
+        .box { flex:1; padding:12px; background:#080817; border:1px solid #292950; border-radius:12px; font-weight:bold; }
+        .box span { display:block; margin-top:7px; font-size:22px; color:#39ff14; }
+        .target-title { color:#aaa; margin-bottom:5px; }
+        #target { font-size:clamp(50px,15vw,80px); font-weight:bold; color:#ffe600; text-shadow:0 0 20px #ffe600; margin:5px 0 15px; }
+        #message { min-height:28px; color:#ccc; font-weight:bold; }
+        .board { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin:20px 0; }
+        .number { min-height:75px; border:2px solid #39396b; border-radius:12px; background:#24244a; color:white; font-size:28px; font-weight:bold; cursor:pointer; transition:.15s; }
+        .number:hover { transform:scale(1.04); border-color:#00e5ff; box-shadow:0 0 12px rgba(0,229,255,.4); }
+        .number:active { transform:scale(.94); }
+        .correct { background:#39ff14!important; color:#000!important; }
+        .wrong { background:#ff315c!important; }
+        #start { width:100%; padding:15px; border:0; border-radius:12px; background:#39ff14; color:#061006; font-size:18px; font-weight:bold; cursor:pointer; box-shadow:0 5px 0 #168d0b; }
+        #start:active { transform:translateY(3px); box-shadow:0 2px 0 #168d0b; }
+        .instructions { margin-top:18px; padding:12px; background:#080817; border-radius:10px; color:#888; font-size:13px; }
+        @media(max-width:500px){.board{grid-template-columns:repeat(3,1fr)}.number{min-height:65px;font-size:24px}.info{gap:5px}.box{padding:9px 5px;font-size:12px}}
     </style>
 </head>
-
 <body>
-
 <div class="game">
-
     <h1>🎯 Atrapa el Número</h1>
-
-    <p class="description">
-        Encuentra y toca el número objetivo antes de que se acabe el tiempo.
-    </p>
-
+    <p class="description">Encuentra y toca el número objetivo antes de que se acabe el tiempo.</p>
     <div class="info">
-
-        <div class="box">
-            ⭐ Puntos
-            <span id="score">0</span>
-        </div>
-
-        <div class="box">
-            🏆 Récord
-            <span id="best">0</span>
-        </div>
-
-        <div class="box">
-            ⏱️ Tiempo
-            <span id="time">10</span>
-        </div>
-
+        <div class="box">⭐ Puntos<span id="score">0</span></div>
+        <div class="box">🏆 Récord<span id="best">0</span></div>
+        <div class="box">⏱️ Tiempo<span id="time">10</span></div>
     </div>
-
-    <div class="target-title">
-        ENCUENTRA ESTE NÚMERO:
-    </div>
-
+    <div class="target-title">ENCUENTRA ESTE NÚMERO:</div>
     <div id="target">?</div>
-
-    <div id="message">
-        Pulsa "Empezar" para jugar.
-    </div>
-
+    <div id="message">Pulsa "Empezar" para jugar.</div>
     <div id="board" class="board"></div>
-
-    <button id="start">
-        ▶️ Empezar
-    </button>
-
-    <div class="instructions">
-        💡 <b>Cómo jugar:</b><br>
-        Busca el número amarillo y tócalo.
-        Cada acierto suma 1 punto.
-        Cada error resta 1 punto.
-    </div>
-
+    <button id="start">▶️ Empezar</button>
+    <div class="instructions">💡 <b>Cómo jugar:</b><br>Busca el número amarillo y tócalo. Cada acierto suma 1 punto. Cada error resta 1 punto.</div>
 </div>
-
+<script src="/js/tecnomath-progress.js?v=3"></script>
 <script>
-
-    const board = document.getElementById("board");
-    const targetElement = document.getElementById("target");
-    const scoreElement = document.getElementById("score");
-    const bestElement = document.getElementById("best");
-    const timeElement = document.getElementById("time");
-    const messageElement = document.getElementById("message");
-    const startButton = document.getElementById("start");
-
-    let score = 0;
-    let time = 10;
-    let target = 0;
-    let playing = false;
-    let timer = null;
-
-    let best = Number(
-        localStorage.getItem("atrapaNumeroBest") || 0
-    );
-
-    bestElement.textContent = best;
-
-
-    function randomNumber() {
-
-        return Math.floor(Math.random() * 30) + 1;
-
-    }
-
-
-    function createRound() {
-
-        target = randomNumber();
-
-        targetElement.textContent = target;
-
-        board.innerHTML = "";
-
-        const numbers = [target];
-
-        while (numbers.length < 12) {
-
-            const number = randomNumber();
-
-            if (!numbers.includes(number)) {
-
-                numbers.push(number);
-
-            }
-
-        }
-
-        numbers.sort(() => Math.random() - 0.5);
-
-
-        numbers.forEach(number => {
-
-            const button = document.createElement("button");
-
-            button.className = "number";
-
-            button.textContent = number;
-
-            button.addEventListener("click", () => {
-
-                selectNumber(number, button);
-
-            });
-
-            board.appendChild(button);
-
-        });
-
-    }
-
-
-    function selectNumber(number, button) {
-
-        if (!playing) return;
-
-
-        if (number === target) {
-
-            score++;
-
-            scoreElement.textContent = score;
-
-            button.classList.add("correct");
-
-            messageElement.textContent =
-                "🎉 ¡Correcto!";
-
-            setTimeout(() => {
-
-                if (playing) {
-
-                    createRound();
-
-                }
-
-            }, 150);
-
-        } else {
-
-            score = Math.max(0, score - 1);
-
-            scoreElement.textContent = score;
-
-            button.classList.add("wrong");
-
-            messageElement.textContent =
-                "❌ ¡Ese no es!";
-
-        }
-
-    }
-
-
-    function startGame() {
-
-        clearInterval(timer);
-
-        score = 0;
-
-        time = 10;
-
-        playing = true;
-
-        scoreElement.textContent = score;
-
-        timeElement.textContent = time;
-
-        targetElement.textContent = "?";
-
-        messageElement.textContent =
-            "🔎 ¡Encuentra el número!";
-
-        startButton.textContent =
-            "⏱️ Jugando...";
-
-        createRound();
-
-
-        timer = setInterval(() => {
-
-            time--;
-
-            timeElement.textContent = time;
-
-            if (time <= 0) {
-
-                finishGame();
-
-            }
-
-        }, 1000);
-
-    }
-
-
-    function finishGame() {
-
-        playing = false;
-
-        clearInterval(timer);
-
-        board.innerHTML = "";
-
-        targetElement.textContent = "🏁";
-
-        startButton.textContent =
-            "🔄 Jugar otra vez";
-
-
-        if (score > best) {
-
-            best = score;
-
-            localStorage.setItem(
-                "atrapaNumeroBest",
-                best
-            );
-
-            bestElement.textContent = best;
-
-            messageElement.textContent =
-                "🏆 ¡NUEVO RÉCORD! " +
-                score +
-                " puntos";
-
-        } else {
-
-            messageElement.textContent =
-                "🎮 Partida terminada: " +
-                score +
-                " puntos.";
-
-        }
-
-    }
-
-
-    startButton.addEventListener(
-        "click",
-        startGame
-    );
-
+    const board=document.getElementById("board"),targetElement=document.getElementById("target"),scoreElement=document.getElementById("score"),bestElement=document.getElementById("best"),timeElement=document.getElementById("time"),messageElement=document.getElementById("message"),startButton=document.getElementById("start");
+    let score=0,time=10,target=0,playing=false,timer=null,correct=0,wrong=0;
+    let best=Number(localStorage.getItem("atrapaNumeroBest")||0);bestElement.textContent=best;
+    function randomNumber(){return Math.floor(Math.random()*30)+1;}
+    function createRound(){target=randomNumber();targetElement.textContent=target;board.innerHTML="";const numbers=[target];while(numbers.length<12){const number=randomNumber();if(!numbers.includes(number))numbers.push(number);}numbers.sort(()=>Math.random()-.5);numbers.forEach(number=>{const button=document.createElement("button");button.className="number";button.textContent=number;button.addEventListener("click",()=>selectNumber(number,button));board.appendChild(button);});}
+    function selectNumber(number,button){if(!playing)return;if(number===target){score++;correct++;scoreElement.textContent=score;button.classList.add("correct");messageElement.textContent="🎉 ¡Correcto!";setTimeout(()=>{if(playing)createRound();},150);}else{wrong++;score=Math.max(0,score-1);scoreElement.textContent=score;button.classList.add("wrong");messageElement.textContent="❌ ¡Ese no es!";}}
+    function startGame(){clearInterval(timer);score=0;correct=0;wrong=0;time=10;playing=true;scoreElement.textContent=score;timeElement.textContent=time;targetElement.textContent="?";messageElement.textContent="🔎 ¡Encuentra el número!";startButton.textContent="⏱️ Jugando...";createRound();timer=setInterval(()=>{time--;timeElement.textContent=time;if(time<=0)finishGame();},1000);}
+    function finishGame(){if(!playing)return;playing=false;clearInterval(timer);board.innerHTML="";targetElement.textContent="🏁";startButton.textContent="🔄 Jugar otra vez";if(score>best){best=score;localStorage.setItem("atrapaNumeroBest",best);bestElement.textContent=best;messageElement.textContent="🏆 ¡NUEVO RÉCORD! "+score+" puntos";}else{messageElement.textContent="🎮 Partida terminada: "+score+" puntos.";}if(window.TecnoMathProgress){TecnoMathProgress.gameResult("Atrapa el Número",{correct,wrong,xp:correct*25,coins:correct*5,topic:"Números"});}}
+    startButton.addEventListener("click",startGame);
 </script>
-
 </body>
 </html>
