@@ -1,1 +1,26 @@
-<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><meta name="theme-color" content="#080b18"><title>⚔️ Math Battle — BETA</title><link rel="stylesheet" href="style.css"></head><body><div id="app"><header><div class="logo">⚔️ MATH BATTLE <small>BETA</small></div><div class="stats"><span>❤️ <b id="lives">3</b></span><span>🏆 <b id="score">0</b></span><span>🔥 <b id="combo">0</b></span><span>⏱️ <b id="time">60</b></span></div></header><main><section id="menu" class="screen"><div class="bolt">⚡</div><h1>MATH BATTLE</h1><h2>DUELA CONTRA EL RIVAL</h2><p>Responde antes que tu oponente. Cada acierto golpea al rival y aumenta tu combo. Cada error le da la ventaja.</p><div class="rules"><b>⚔️ 20 RONDAS</b><b>💥 GOLPES Y COMBOS</b><b>🔥 PODERES ESPECIALES</b></div><button id="start">⚔️ ENTRAR A LA ARENA</button><small>PC: teclas 1–4 · Móvil: toca la respuesta</small></section><section id="battle" class="hidden"><div class="topline"><span id="round">RONDA 1/20</span><span id="streak">🔥 COMBO 0</span></div><div class="fighters"><div class="fighter"><div class="name">🧑‍🎓 TÚ</div><div class="bar"><i id="playerHP"></i></div><div class="hptext" id="playerHPText">100 HP</div></div><div class="vs">VS</div><div class="fighter enemy"><div class="name" id="enemyName">👾 BOT</div><div class="bar"><i id="enemyHP"></i></div><div class="hptext" id="enemyHPText">100 HP</div></div></div><div class="questionCard"><div class="category" id="category">⚡ CÁLCULO</div><div id="question">¿Cuánto es 25²?</div><div class="timerbar"><i id="questionBar"></i></div></div><div id="answers" class="answers"></div><div class="powers"><button data-power="double">⚡<small>CRÍTICO</small></button><button data-power="shield">🛡️<small>ESCUDO</small></button><button data-power="steal">🔄<small>ROBO</small></button><button data-power="time">⏱️<small>TIEMPO</small></button></div><div id="battleLog">¡Que comience la batalla!</div></section><section id="result" class="screen hidden"><div class="bolt" id="resultIcon">🏆</div><h1 id="resultTitle">¡VICTORIA!</h1><p id="resultText"></p><div id="resultStats"></div><button id="again">⚔️ REVANCHA</button></section></main></div><script src="game.js"></script></body></html>
+<!doctype html>
+<html lang="es"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><meta name="theme-color" content="#080b18">
+<title>⚔️ Math Battle — BETA 2</title><link rel="stylesheet" href="style.css">
+</head><body><div id="app">
+<header><div class="logo">⚔️ MATH BATTLE <small>BETA 2</small></div><div class="stats"><span>❤️ <b id="lives">3</b></span><span>🏆 <b id="score">0</b></span><span>🔥 <b id="combo">0</b></span><span>⏱️ <b id="time">60</b></span></div></header>
+<main>
+<section id="menu" class="screen"><div class="bolt">⚔️</div><h1>MATH BATTLE</h1><h2>LA NUEVA ARENA</h2><p>Responde antes que tu rival. Cada acierto lanza un ataque animado contra el enemigo. Los errores activan su contraataque.</p><div class="rules"><b>⚔️ BATALLAS ANIMADAS</b><b>💥 GOLPES Y COMBOS</b><b>🔥 PODERES ESPECIALES</b></div><button id="start">⚔️ ENTRAR A LA ARENA</button><small>PC: teclas 1–4 · Móvil: toca la respuesta</small></section>
+<section id="battle" class="hidden">
+<div class="topline"><span id="round">RONDA 1/20</span><span id="streak">🔥 COMBO 0</span></div>
+<div class="battleStage" id="battleStage">
+  <div class="arenaGlow"></div><div class="torches"><span>🔥</span><span>🔥</span></div>
+  <div class="teamPanel playerPanel"><div class="portrait">🧙‍♂️</div><div><b>TU EQUIPO</b><div class="bar"><i id="playerHP"></i></div><small id="playerHPText">100 HP</small></div></div>
+  <div class="teamPanel enemyPanel"><div><b id="enemyName">☠️ MATH DEMON</b><div class="bar"><i id="enemyHP"></i></div><small id="enemyHPText">100 HP</small></div><div class="portrait" id="enemyPortrait">👹</div></div>
+  <div class="battlefield">
+    <div class="fighterSprite playerSprite" id="playerSprite"><span class="weapon">⚔️</span><span class="character">🧙‍♂️</span></div>
+    <div class="impact" id="impact">💥</div><div class="damage" id="damage"></div>
+    <div class="fighterSprite enemySprite" id="enemySprite"><span class="character" id="enemyCharacter">👹</span><span class="weapon">🗡️</span></div>
+  </div>
+</div>
+<div class="questionCard"><div class="category" id="category">⚡ CÁLCULO</div><div id="question">¿Cuánto es 25²?</div><div class="timerbar"><i id="questionBar"></i></div></div>
+<div id="answers" class="answers"></div>
+<div class="powers"><button data-power="double">⚡<small>CRÍTICO</small></button><button data-power="shield">🛡️<small>ESCUDO</small></button><button data-power="steal">🔄<small>ROBO</small></button><button data-power="time">⏱️<small>TIEMPO</small></button></div><div id="battleLog" class="log">¡Que comience la batalla!</div>
+</section>
+<section id="result" class="screen hidden"><div class="bolt" id="resultIcon">🏆</div><h1 id="resultTitle">¡VICTORIA!</h1><p id="resultText"></p><div id="resultStats"></div><button id="again">⚔️ REVANCHA</button></section>
+</main></div><script src="game.js"></script></body></html>
