@@ -57,8 +57,17 @@
   loadEventEffects();
   function loadGameSubmissionSystem(){if(document.querySelector('script[data-tecnomath-game-submissions]'))return;const s=document.createElement('script');s.src=(location.pathname.includes('/pages/')?'../':'')+'js/game-submissions.js?v=2';s.async=true;s.dataset.tecnomathGameSubmissions='true';document.head.appendChild(s)}
   function loadPublishedGames(){if(document.querySelector('script[data-tecnomath-published-games]'))return;const s=document.createElement('script');s.src=(location.pathname.includes('/pages/')?'../':'')+'js/published-games.js?v=1';s.async=true;s.dataset.tecnomathPublishedGames='true';document.head.appendChild(s)}
-  loadGameSubmissionSystem();
-  loadPublishedGames();
+  loadGameSubmissionSystem();loadPublishedGames();
+
+  // 📈 MI PROGRESO — acceso visible desde el index principal.
+  function setupProgressNavigation(){
+    const isMainIndex=/(^|\/)index\.html?$/.test(location.pathname)||location.pathname.endsWith('/');
+    if(!isMainIndex||document.getElementById('progressNavBtn'))return;
+    const style=document.createElement('style');style.id='tecnomath-progress-nav-styles';style.textContent=`#progressNavBtn{display:inline-flex;align-items:center;justify-content:center;gap:5px;font-family:'Press Start 2P',cursive;font-size:clamp(4px,1.5vw,6px);color:#39FF14;background:transparent;border:1px solid #39FF14;padding:6px 9px;border-radius:6px;text-decoration:none;line-height:1.2;transition:transform .2s,background .2s,box-shadow .2s}#progressNavBtn:hover{background:rgba(57,255,20,.1);box-shadow:0 0 12px #39FF14;transform:translateY(-1px)}@media(max-width:768px){#progressNavBtn{padding:7px 8px}}`;document.head.appendChild(style);
+    const userArea=document.querySelector('.user-area');
+    if(userArea){const link=document.createElement('a');link.id='progressNavBtn';link.href='pages/progreso/index.html';link.textContent='📈 MI PROGRESO';link.title='Mi Progreso';link.setAttribute('aria-label','Abrir Mi Progreso');userArea.insertBefore(link,userArea.firstChild);}
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',setupProgressNavigation,{once:true});else setupProgressNavigation();
 
   // ============================================================
   // 🌐 TECNOMATH SOCIAL — NAVEGACIÓN DESDE EL INDEX PRINCIPAL
