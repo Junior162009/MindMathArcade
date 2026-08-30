@@ -123,8 +123,11 @@ button{
     background:#0c0c20;
     border:1px solid #393956;
     border-radius:16px;
-    padding:20px;
+    padding:22px 26px;
     min-width:0;
+
+    /* Hace el recuadro más ancho */
+    grid-column:span 2;
 }
 
 .date-box .title{
@@ -138,10 +141,8 @@ button{
 */
 .date-fields{
     display:grid;
-    grid-template-columns:
-        minmax(0,1.3fr)
-        minmax(180px,.7fr);
-    column-gap:75px;
+    grid-template-columns:minmax(0,1.5fr) minmax(190px,.7fr);
+    column-gap:55px;
     row-gap:18px;
     align-items:end;
     padding:0 8px;
