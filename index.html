@@ -1,30 +1,44 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Tecnomath · Plataforma de Juegos Educativos</title>
-    <link rel="manifest" href="/manifest.json">
-    <meta name="theme-color" content="#060610">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Tecnomath">
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-    <script>
-      const firebaseConfig={apiKey:"AIzaSyCfY0VT4fQ5emX4R2LdUXU3FxjBTtY7Gzc",authDomain:"tecnomath-sync-6058a.firebaseapp.com",databaseURL:"https://tecnomath-sync-6058a-default-rtdb.firebaseio.com",projectId:"tecnomath-sync-6058a",storageBucket:"tecnomath-sync-6058a.firebasestorage.app",messagingSenderId:"237823560752",appId:"1:237823560752:web:adc1e5b396b5a0e0d671f5"};
-      try { if(!firebase.apps.length) firebase.initializeApp(firebaseConfig); window.database=firebase.database(); } catch(e){ console.warn('Firebase:',e); }
-    </script>
-    <link rel="icon" id="dynamicFavicon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎮</text></svg>">
-    <script src="https://unpkg.com/@ruffle-rs/ruffle"></script>
-    <!-- Este adaptador es opcional: si falla, la pagina sigue cargando. -->
-    <script src="/js/tecnomath-save-adapters.js?v=1" defer onerror="console.warn('Save adapters no disponible');"></script>
-    <script>
-      // La plataforma principal debe continuar aunque un modulo de guardado falle.
-      window.addEventListener('error',function(e){
-        if(e.filename && /tecnomath-save-adapters|tecnomath-progress-v3/i.test(e.filename)){
-          e.preventDefault(); console.warn('[TecnoMath] modulo de progreso aislado:',e.message);
-        }
-      });
-    </script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#070b18">
+<meta name="description" content="TecnoMath · Plataforma de juegos educativos">
+<title>TecnoMath · Juegos Educativos</title>
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='80'>🎮</text></svg>">
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script>
+(function(){
+  const config={apiKey:'AIzaSyCfY0VT4fQ5emX4R2LdUXU3FxjBTtY7Gzc',authDomain:'tecnomath-sync-6058a.firebaseapp.com',databaseURL:'https://tecnomath-sync-6058a-default-rtdb.firebaseio.com',projectId:'tecnomath-sync-6058a',storageBucket:'tecnomath-sync-6058a.firebasestorage.app',messagingSenderId:'237823560752',appId:'1:237823560752:web:adc1e5b396b5a0e0d671f5'};
+  try{if(!firebase.apps.length)firebase.initializeApp(config);window.database=firebase.database();window.tecnomathAuth=firebase.auth();}catch(e){console.warn('[TecnoMath] Firebase no disponible:',e)}
+})();
+</script>
+<script src="/js/tecnomath-progress-v3.js?v=5" defer onerror="console.warn('[TecnoMath] Progress V3 no disponible')"></script>
+<style>
+:root{--bg:#070b18;--panel:#0d1326;--panel2:#111a33;--cyan:#00eaff;--pink:#ff3bd4;--green:#39ff88;--yellow:#ffe15a;--text:#f5f7ff;--muted:#8e9ab8;--border:#233052}*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:radial-gradient(circle at 15% 0%,#17234b 0,transparent 35%),radial-gradient(circle at 90% 20%,#32123e 0,transparent 32%),var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}body{overflow-x:hidden}a{text-decoration:none;color:inherit}button{font:inherit}.top{position:sticky;top:0;z-index:20;background:rgba(7,11,24,.86);backdrop-filter:blur(16px);border-bottom:1px solid var(--border)}.nav{max-width:1180px;margin:auto;padding:13px 18px;display:flex;align-items:center;gap:14px}.brand{font-weight:900;font-size:20px;letter-spacing:.5px;color:var(--cyan);text-shadow:0 0 18px #00eaff66}.brand span{color:var(--pink)}.navlinks{margin-left:auto;display:flex;align-items:center;gap:8px;flex-wrap:wrap}.navlinks a,.navlinks button{border:1px solid var(--border);background:#0e1630;color:#dce5ff;border-radius:10px;padding:9px 12px;cursor:pointer}.navlinks a:hover,.navlinks button:hover{border-color:var(--cyan);color:var(--cyan)}.user{font-size:12px;color:var(--green);max-width:170px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.hero{max-width:1180px;margin:0 auto;padding:56px 18px 32px}.heroGrid{display:grid;grid-template-columns:1.35fr .65fr;gap:20px;align-items:stretch}.heroCard,.statCard{background:linear-gradient(145deg,rgba(18,28,58,.94),rgba(9,14,29,.94));border:1px solid var(--border);border-radius:22px;box-shadow:0 20px 60px #0005}.heroCard{padding:34px}.eyebrow{color:var(--pink);font-size:12px;font-weight:800;letter-spacing:1.4px;text-transform:uppercase}.hero h1{font-size:clamp(34px,6vw,64px);line-height:1;margin:10px 0 15px}.hero h1 b{color:var(--cyan)}.hero p{color:var(--muted);line-height:1.7;max-width:700px}.cta{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px}.primary,.secondary{padding:12px 17px;border-radius:12px;font-weight:800;cursor:pointer}.primary{background:linear-gradient(90deg,var(--cyan),#6a8cff);color:#06101c;border:0}.secondary{background:#101a35;color:#fff;border:1px solid var(--border)}.stats{display:grid;grid-template-columns:1fr 1fr;gap:12px}.statCard{padding:22px;display:flex;flex-direction:column;justify-content:center}.statLabel{color:var(--muted);font-size:12px}.statValue{font-size:30px;font-weight:900;margin-top:6px;color:var(--yellow)}.section{max-width:1180px;margin:0 auto;padding:18px}.sectionHead{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:12px 0 16px}.sectionHead h2{margin:0;font-size:22px}.filters{display:flex;gap:8px;flex-wrap:wrap}.filter{border:1px solid var(--border);background:#0d1429;color:#aab5d1;border-radius:999px;padding:8px 12px;cursor:pointer}.filter.active{border-color:var(--cyan);color:var(--cyan);background:#00eaff12}.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px}.game{display:flex;flex-direction:column;min-height:210px;padding:18px;background:linear-gradient(160deg,#111a33,#0b1122);border:1px solid var(--border);border-radius:18px;transition:.2s}.game:hover{transform:translateY(-3px);border-color:#00eaff88;box-shadow:0 14px 35px #0005}.icon{font-size:38px}.game h3{margin:10px 0 7px;font-size:17px}.game p{color:var(--muted);font-size:13px;line-height:1.5;margin:0}.tag{display:inline-flex;width:max-content;margin-top:12px;padding:5px 8px;border-radius:7px;background:#ffffff0b;color:#9fb0d4;font-size:10px}.play{margin-top:auto;padding-top:16px}.play a{display:block;text-align:center;background:linear-gradient(90deg,#172b54,#12203e);border:1px solid #2d4675;padding:10px;border-radius:10px;font-weight:800}.empty{padding:30px;text-align:center;color:var(--muted);border:1px dashed var(--border);border-radius:16px}.footer{max-width:1180px;margin:30px auto;padding:25px 18px 50px;color:#687694;font-size:12px;text-align:center}@media(max-width:760px){.nav{padding:11px 12px}.navlinks{gap:5px}.navlinks a,.navlinks button{padding:8px;font-size:11px}.hero{padding-top:28px}.heroGrid{grid-template-columns:1fr}.heroCard{padding:25px}.stats{grid-template-columns:1fr 1fr}.grid{grid-template-columns:1fr 1fr}.game{min-height:205px}}@media(max-width:480px){.brand{font-size:17px}.user{display:none}.grid{grid-template-columns:1fr}.hero h1{font-size:38px}}
+</style>
+</head>
+<body>
+<header class="top"><nav class="nav"><a class="brand" href="/">Tecno<span>Math</span></a><div class="navlinks"><span id="user" class="user"></span><a href="/pages/social/">👥 Social</a><a href="/pages/progreso/">📈 Progreso</a><a href="/pages/profile.html">👤 Perfil</a><a href="/pages/upload-game.html">➕ Subir juego</a><a id="auth" href="/pages/auth.html">Iniciar sesión</a></div></nav></header>
+<main>
+<section class="hero"><div class="heroGrid"><div class="heroCard"><div class="eyebrow">Plataforma educativa · TecnoMath</div><h1>Juega. <b>Aprende.</b><br>Sube de nivel.</h1><p>Una plataforma central para descubrir juegos educativos, guardar tu progreso y competir con la comunidad. Todo conectado con tu cuenta de TecnoMath.</p><div class="cta"><a class="primary" href="#juegos">🎮 Ver juegos</a><a class="secondary" href="/pages/social/">🌐 Ir a Social</a></div></div><div class="stats"><div class="statCard"><span class="statLabel">Nivel</span><span id="level" class="statValue">1</span></div><div class="statCard"><span class="statLabel">XP</span><span id="xp" class="statValue">0</span></div><div class="statCard"><span class="statLabel">Monedas</span><span id="coins" class="statValue">0</span></div><div class="statCard"><span class="statLabel">Racha</span><span id="streak" class="statValue">0</span></div></div></div></section>
+<section id="juegos" class="section"><div class="sectionHead"><h2>🎮 Juegos</h2><div id="filters" class="filters"></div></div><div id="games" class="grid"><div class="empty">Cargando juegos…</div></div></section>
+</main><footer class="footer">TecnoMath · MindMath Arcade · Sistema central de progreso activo</footer>
+<script>
+(function(){'use strict';
+const $=id=>document.getElementById(id);let games=[];
+function esc(v){return String(v??'').replace(/[&<>\"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[c]))}
+function render(list){const root=$('games');if(!list.length){root.innerHTML='<div class="empty">No hay juegos en esta categoría.</div>';return}root.innerHTML=list.map((g,i)=>{const cat=g.category||'otros';return `<article class="game"><div class="icon">${esc(g.icon||'🎮')}</div><h3>${esc(g.name||'Juego')}</h3><p>${esc(g.desc||g.description||'Juego educativo de TecnoMath.')}</p><span class="tag">${esc(cat)}${g.version?' · '+esc(g.version):''}</span><div class="play"><a href="/${String(g.url||'').replace(/^\//,'')}">Jugar ahora →</a></div></article>`}).join('')}
+function renderFilters(){const cats=['todos',...new Set(games.map(g=>g.category||'otros'))];$('filters').innerHTML=cats.map((c,i)=>`<button class="filter ${i===0?'active':''}" data-cat="${esc(c)}">${c==='todos'?'Todos':esc(c)}</button>`).join('');$('filters').addEventListener('click',e=>{const b=e.target.closest('.filter');if(!b)return;document.querySelectorAll('.filter').forEach(x=>x.classList.remove('active'));b.classList.add('active');render(b.dataset.cat==='todos'?games:games.filter(g=>(g.category||'otros')===b.dataset.cat))})}
+async function load(){try{const r=await fetch('/data/games.json?v='+Date.now(),{cache:'no-store'});if(!r.ok)throw Error('games.json '+r.status);games=await r.json();if(!Array.isArray(games))throw Error('Formato inválido');renderFilters();render(games)}catch(e){console.error(e);$('games').innerHTML='<div class="empty">No se pudieron cargar los juegos. La plataforma sigue funcionando; revisa data/games.json.</div>'}}
+function updateProgress(){try{const p=window.TecnoMathProgress?.read?.();if(!p)return;$('level').textContent=Number(p.level)||1;$('xp').textContent=Number(p.xp)||0;$('coins').textContent=Number(p.coins)||0;$('streak').textContent=Number(p.streak)||0}catch(e){}}
+function updateAuth(){try{const a=window.tecnomathAuth;if(!a)return; a.onAuthStateChanged(u=>{if(u){$('user').textContent=u.displayName||u.email||'Usuario';$('auth').textContent='Cerrar sesión';$('auth').onclick=e=>{e.preventDefault();a.signOut().then(()=>location.reload())}}else{$('user').textContent='';$('auth').textContent='Iniciar sesión';$('auth').href='/pages/auth.html'}})}catch(e){console.warn(e)}}
+load();updateProgress();updateAuth();setTimeout(updateProgress,1200);setInterval(updateProgress,5000);
+})();
+</script>
+</body>
+</html>
