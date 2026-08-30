@@ -11,9 +11,6 @@
   };
 
   if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-
-  // El progreso central debe existir antes de game-progress.js para que
-  // todos los juegos compartan la misma cuenta y la misma API.
   if (!window.TecnoMathProgress && document.readyState === 'loading') {
     document.write('<script src="/js/tecnomath-progress.js"><\\/script>');
   }
@@ -42,6 +39,14 @@
     document.head.appendChild(cloudSync);
   }
 
+  if(location.pathname.includes('/games/')){
+    const bridge=document.createElement('script');
+    bridge.src='/js/tecnomath-game-bridge.js?v=1';
+    bridge.async=true;
+    bridge.dataset.tecnomathGameBridge='true';
+    document.head.appendChild(bridge);
+  }
+
   function loadGameSubmissionSystem(){
     if(document.querySelector('script[data-tecnomath-game-submissions]')) return;
     const script=document.createElement('script');
@@ -58,7 +63,6 @@
       const nav=document.querySelector('.admin-tabs');
       const main=document.querySelector('main');
       if(!nav||!main) return;
-
       if(!document.getElementById('tm-admin-fair')){
         const btn=document.createElement('button');btn.className='tab';btn.dataset.tab='fair';btn.id='tm-fair-tab';btn.textContent='🎡 Feria';nav.appendChild(btn);
         const panel=document.createElement('section');panel.className='tab-panel';panel.id='tab-fair';panel.innerHTML=`<section class="panel tm-fair-panel"><div class="panel-head"><div><h2>🎡 Modo Feria</h2><p>Activa Feria o Mega Feria para todos los usuarios. El modo actual se sincroniza con Firebase.</p></div></div><div class="tm-fair-buttons"><button data-fair="feria">🎡 Activar Feria</button><button data-fair="feriaplus">🔥 Activar Mega Feria</button><button data-fair="normal">⛔ Desactivar Feria</button></div><div id="tm-fair-status" class="cloud-status">Consultando estado…</div></section>`;main.appendChild(panel);
