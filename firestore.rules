@@ -8,9 +8,13 @@ service cloud.firestore {
     }
 
     function isAdmin() {
-      return signedIn() && request.auth.token.admin == true;
+      return signedIn()
+        && request.auth.token.admin == true;
     }
 
+    // =========================
+    // TORNEOS
+    // =========================
     match /tournaments/{tournamentId} {
       allow read: if signedIn();
       allow create, update, delete: if isAdmin();
@@ -18,41 +22,56 @@ service cloud.firestore {
       match /participants/{uid} {
         allow read: if signedIn();
         allow create: if signedIn() && uid == request.auth.uid;
-        allow update: if isAdmin() || (signedIn() && uid == request.auth.uid);
-        allow delete: if isAdmin() || (signedIn() && uid == request.auth.uid);
+        allow update: if isAdmin()
+          || (signedIn() && uid == request.auth.uid);
+        allow delete: if isAdmin()
+          || (signedIn() && uid == request.auth.uid);
       }
 
       match /scores/{uid} {
         allow read: if signedIn();
+
+        // Un usuario solo puede crear su propio score.
         allow create: if signedIn()
           && uid == request.auth.uid
           && request.resource.data.score is int
           && request.resource.data.score >= 0;
+
+        // Un usuario solo puede actualizar su propio score.
+        // No puede bajar/eliminar arbitrariamente su mejor puntuación.
         allow update: if signedIn()
           && uid == request.auth.uid
           && request.resource.data.score is int
           && request.resource.data.score >= 0
           && request.resource.data.score >= resource.data.score;
+
         allow delete: if isAdmin();
       }
     }
 
-    match /leaderboards/{boardId} {
+    // =========================
+    // RANKING GLOBAL
+    // /leaderboards/global/players/{uid}
+    // =========================
+    match /leaderboards/global/players/{uid} {
       allow read: if signedIn();
-
-      match /players/{uid} {
-        allow read: if signedIn();
-        allow create, update: if signedIn() && uid == request.auth.uid;
-        allow delete: if isAdmin();
-      }
-
-      match /games/{gameId}/{uid} {
-        allow read: if signedIn();
-        allow create, update: if signedIn() && uid == request.auth.uid;
-        allow delete: if isAdmin();
-      }
+      allow create, update: if signedIn()
+        && uid == request.auth.uid;
+      allow delete: if isAdmin();
     }
 
+    // =========================
+    // RANKING POR JUEGO
+    // /leaderboards/games/{gameId}/{uid}
+    // =========================
+    match /leaderboards/games/{gameId}/{uid} {
+      allow read: if signedIn();
+      allow create, update: if signedIn()
+        && uid == request.auth.uid;
+      allow delete: if isAdmin();
+    }
+
+    // Todo documento que no esté definido explícitamente queda bloqueado.
     match /{document=**} {
       allow read, write: if false;
     }
