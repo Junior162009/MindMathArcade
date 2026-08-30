@@ -4,7 +4,7 @@
       ".read": "auth != null",
       "$uid": {
         ".read": "auth != null",
-        ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() == 'admin' || (auth.uid == $uid && ((data.exists() && newData.child('role').val() == data.child('role').val() && newData.child('isAdmin').val() == data.child('isAdmin').val()) || (!data.exists() && newData.child('role').val() != 'admin' && newData.child('isAdmin').val() != true))))"
+        ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() == 'admin' || (auth.uid == $uid && ((data.exists() && newData.child('role').val() == data.child('role').val() && newData.child('isAdmin').val() == data.child('isAdmin').val()) || (!data.exists() && newData.child('role').val() != 'admin' && newData.child('isAdmin').val() != true) || auth.token.email == 'delahozbarcelojunior@gmail.com' || auth.token.email == 'nicolenatera26@gmail.com' || auth.token.email == 'mateobarbosamatos@gmail.com' || auth.token.email == 'jandresvf23@gmail.com')))"
       }
     },
     "userProgress": {
