@@ -28,7 +28,7 @@
   {
     "name": "Math Battle — Beta",
     "desc": "Dos equipos se enfrentan: responde problemas matemáticos antes que tu rival.",
-    "description": "Batalla matemática educativa con 20 rondas, enemigos por niveles, combo y poderes especiales.",
+    "description": "Batalla matemática educativa con 30 niveles, 3 jefes y poderes especiales.",
     "category": "mates",
     "url": "games/jinete11°/index.html",
     "imageUrl": "",
@@ -38,5 +38,15 @@
     "authorName": "Jose",
     "sourceType": "upload",
     "version": "beta"
-  }
+  },
+  {"name":"Math Runner","desc":"Corre y responde para superar obstáculos.","description":"Arcade rápido de sumas y reflejos.","category":"arcade","url":"games/math-runner/index.html","imageUrl":"","icon":"🏃","deviceCompatibility":"both","evento":null,"authorName":"TecnoMath","sourceType":"upload"},
+  {"name":"Space Math","desc":"Multiplica para impulsar tu nave espacial.","description":"Desafío arcade de multiplicaciones.","category":"arcade","url":"games/space-math/index.html","imageUrl":"","icon":"🚀","deviceCompatibility":"both","evento":null,"authorName":"TecnoMath","sourceType":"upload"},
+  {"name":"Zombie Math","desc":"Derrota zombis resolviendo operaciones.","description":"Supervivencia matemática arcade.","category":"arcade","url":"games/zombie-math/index.html","imageUrl":"","icon":"🧟","deviceCompatibility":"both","evento":null,"authorName":"TecnoMath","sourceType":"upload"},
+  {"name":"Candy Numbers","desc":"Encuentra el dulce con el resultado correcto.","description":"Juego casual de números y multiplicación.","category":"arcade","url":"games/candy-numbers/index.html","imageUrl":"","icon":"🍬","deviceCompatibility":"both","evento":null,"authorName":"TecnoMath","sourceType":"upload"},
+  {"name":"Math Bird","desc":"Vuela acertando operaciones matemáticas.","description":"Arcade inspirado en juegos de reflejos.","category":"arcade","url":"games/math-bird/index.html","imageUrl":"","icon":"🐦","deviceCompatibility":"both","evento":null,"authorName":"TecnoMath","sourceType":"upload"},
+  {"name":"Math Racer","desc":"Acelera resolviendo multiplicaciones.","description":"Carrera arcade educativa.","category":"arcade","url":"games/math-racer/index.html","imageUrl":"","icon":"🏎️","deviceCompatibility":"both","evento":null,"authorName":"TecnoMath","sourceType":"upload"},
+  {"name":"Number Ninja","desc":"Corta el resultado correcto.","description":"Acción matemática con reflejos.","category":"arcade","url":"games/number-ninja/index.html","imageUrl":"","icon":"🥷","deviceCompatibility":"both","evento":null,"authorName":"TecnoMath","sourceType":"upload"},
+  {"name":"Puzzle Pop","desc":"Resuelve desafíos y completa puzzles.","description":"Puzzle matemático casual.","category":"arcade","url":"games/puzzle-pop/index.html","imageUrl":"","icon":"🧩","deviceCompatibility":"both","evento":null,"authorName":"TecnoMath","sourceType":"upload"},
+  {"name":"Math Defense","desc":"Defiende el castillo con tus respuestas.","description":"Defensa arcade basada en matemáticas.","category":"arcade","url":"games/math-defense/index.html","imageUrl":"","icon":"🏰","deviceCompatibility":"both","evento":null,"authorName":"TecnoMath","sourceType":"upload"},
+  {"name":"Treasure Math","desc":"Resuelve pistas y encuentra tesoros.","description":"Aventura arcade matemática.","category":"arcade","url":"games/treasure-math/index.html","imageUrl":"","icon":"💎","deviceCompatibility":"both","evento":null,"authorName":"TecnoMath","sourceType":"upload"}
 ]
