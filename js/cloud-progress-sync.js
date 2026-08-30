@@ -6,7 +6,7 @@
   var ROOT='userProgress';
   var LEGACY='localState';
   var META_KEY='__tecnomath_cloud_sync_meta__';
-  var EXCLUDED={'tecnomath_session':1,'tecnomath_users':1,'firebaseui::rememberedAccounts':1};
+  var EXCLUDED={'tecnomath_session':1,'tecnomath_users':1,'tecnomath_progress_v2':1,'tecnomath_progress_meta_v3':1,'firebaseui::rememberedAccounts':1};
   var uid=null,ready=false,syncing=false,restoring=false,timer=null;
   var gameId=getGameId(),lastSignature='',lastWrite=0;
 
@@ -44,7 +44,6 @@
     restoring=true;status('syncing','Cargando progreso…');
     try{
       var cloud=(await r.once('value')).val();
-      // Compatibilidad con la estructura antigua userProgress/{uid}/localState.
       if(!cloud||!cloud.state){var legacy=(await root().child(LEGACY).once('value')).val()||{};if(Object.keys(legacy).length)cloud={state:legacy,meta:{version:1,legacy:true}};}
       var state=cloud&&cloud.state?cloud.state:{},keys=Object.keys(state);
       for(var i=0;i<keys.length;i++){var e=keys[i],k=dec(e),item=state[e];if(!k||!allowed(k)||!item||!Object.prototype.hasOwnProperty.call(item,'value'))continue;try{localStorage.setItem(k,String(item.value));}catch(_){} }
