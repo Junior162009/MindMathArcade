@@ -28,24 +28,11 @@ service cloud.firestore {
           || (signedIn() && uid == request.auth.uid);
       }
 
+      // Scores are written only by the trusted Cloud Function.
+      // Players can read their rankings, but cannot forge or edit scores.
       match /scores/{uid} {
         allow read: if signedIn();
-
-        // Un usuario solo puede crear su propio score.
-        allow create: if signedIn()
-          && uid == request.auth.uid
-          && request.resource.data.score is int
-          && request.resource.data.score >= 0;
-
-        // Un usuario solo puede actualizar su propio score.
-        // No puede bajar/eliminar arbitrariamente su mejor puntuación.
-        allow update: if signedIn()
-          && uid == request.auth.uid
-          && request.resource.data.score is int
-          && request.resource.data.score >= 0
-          && request.resource.data.score >= resource.data.score;
-
-        allow delete: if isAdmin();
+        allow write: if isAdmin();
       }
     }
 
@@ -53,25 +40,22 @@ service cloud.firestore {
     // RANKING GLOBAL
     // /leaderboards/global/players/{uid}
     // =========================
+    // Written only by recordCompetitionScore in Cloud Functions.
     match /leaderboards/global/players/{uid} {
       allow read: if signedIn();
-      allow create, update: if signedIn()
-        && uid == request.auth.uid;
-      allow delete: if isAdmin();
+      allow write: if isAdmin();
     }
 
     // =========================
     // RANKING POR JUEGO
     // /leaderboards/games/{gameId}/{uid}
     // =========================
+    // Written only by recordCompetitionScore in Cloud Functions.
     match /leaderboards/games/{gameId}/{uid} {
       allow read: if signedIn();
-      allow create, update: if signedIn()
-        && uid == request.auth.uid;
-      allow delete: if isAdmin();
+      allow write: if isAdmin();
     }
 
-    // Todo documento que no esté definido explícitamente queda bloqueado.
     match /{document=**} {
       allow read, write: if false;
     }
