@@ -1,118 +1,18 @@
 (function(w,d){
   'use strict';
   if(w.TecnoMathSidebar)return;
-
   const MOBILE_MAX=760;
   const isSocial=/\/pages\/social(?:\/|$)/.test(location.pathname);
   let sidebar=null, overlay=null, toggleButton=null, resizeTimer=null;
-
   function navMarkup(){
-    if(isSocial){
-      return '<a class="tm-brand" href="/"><span class="tm-brand-icon">🧠</span><span class="tm-brand-text">TECNOMATH<br><small>SOCIAL</small></span></a>'+
-      '<a class="tm-nav active" href="#inicio"><span class="tm-nav-icon">🏠</span><span class="tm-nav-label">Inicio</span></a>'+
-      '<a class="tm-nav" href="#tm-explorar"><span class="tm-nav-icon">🔎</span><span class="tm-nav-label">Explorar</span></a>'+
-      '<a class="tm-nav" href="#tm-amigos-panel"><span class="tm-nav-icon">👥</span><span class="tm-nav-label">Amigos</span></a>'+
-      '<a class="tm-nav" href="#ranking"><span class="tm-nav-icon">🏆</span><span class="tm-nav-label">Ranking</span></a>'+
-      '<a class="tm-nav" href="#tm-amigos-panel"><span class="tm-nav-icon">🎖️</span><span class="tm-nav-label">Logros</span></a>'+
-      '<a class="tm-nav" href="#tm-mensajes-panel"><span class="tm-nav-icon">💬</span><span class="tm-nav-label">Mensajes</span></a>'+
-      '<a class="tm-nav" href="/"><span class="tm-nav-icon">🎮</span><span class="tm-nav-label">Juegos</span></a>'+
-      '<a class="tm-nav" href="/pages/competir/"><span class="tm-nav-icon">⚔️</span><span class="tm-nav-label">Torneos</span></a>'+
-      '<a class="tm-nav" href="/pages/progreso/index.html"><span class="tm-nav-icon">📈</span><span class="tm-nav-label">Mi progreso</span></a>'+
-      '<a class="tm-nav" href="/pages/upload-game.html"><span class="tm-nav-icon">⬆️</span><span class="tm-nav-label">Subir juego</span></a>'+
-      '<button class="tm-nav tm-nav-button" type="button" data-tm-social-action="settings"><span class="tm-nav-icon">⚙️</span><span class="tm-nav-label">Configuración</span></button>'+
-      '<button class="tm-nav tm-nav-button" type="button" id="logoutBtn"><span class="tm-nav-icon">🚪</span><span class="tm-nav-label">Cerrar sesión</span></button>';
-    }
-    return '<a class="tm-brand" href="/"><span class="tm-brand-icon">🎮</span><span class="tm-brand-text">TECNOMATH<br><small>ARCADE</small></span></a>'+
-      '<a class="tm-nav active" href="/"><span class="tm-nav-icon">🏠</span><span class="tm-nav-label">Inicio</span></a>'+
-      '<a class="tm-nav" href="/#juegos"><span class="tm-nav-icon">🎮</span><span class="tm-nav-label">Juegos</span></a>'+
-      '<a class="tm-nav" href="/pages/competir/"><span class="tm-nav-icon">🏆</span><span class="tm-nav-label">Ranking global</span></a>'+
-      '<a class="tm-nav" href="/pages/competir/"><span class="tm-nav-icon">⚔️</span><span class="tm-nav-label">Torneos</span></a>'+
-      '<a class="tm-nav" href="/pages/social/index.html"><span class="tm-nav-icon">👥</span><span class="tm-nav-label">Comunidad / Social</span></a>'+
-      '<a class="tm-nav" href="/pages/progreso/index.html"><span class="tm-nav-icon">📈</span><span class="tm-nav-label">Mi progreso</span></a>'+
-      '<a class="tm-nav" href="/pages/upload-game.html"><span class="tm-nav-icon">⬆️</span><span class="tm-nav-label">Subir juego</span></a>'+
-      '<a class="tm-nav" href="/pages/tienda/"><span class="tm-nav-icon">🛒</span><span class="tm-nav-label">Tienda</span></a>'+
-      '<a class="tm-nav" href="/pages/tienda/"><span class="tm-nav-icon">👑</span><span class="tm-nav-label">Premium</span></a>';
+    if(isSocial){return '<a class="tm-brand" href="/"><span class="tm-brand-icon">🧠</span><span class="tm-brand-text">TECNOMATH<br><small>SOCIAL</small></span></a><a class="tm-nav active" href="#inicio"><span class="tm-nav-icon">🏠</span><span class="tm-nav-label">Inicio</span></a><a class="tm-nav" href="#tm-explorar"><span class="tm-nav-icon">🔎</span><span class="tm-nav-label">Explorar</span></a><a class="tm-nav" href="#tm-amigos-panel"><span class="tm-nav-icon">👥</span><span class="tm-nav-label">Amigos</span></a><a class="tm-nav" href="#ranking"><span class="tm-nav-icon">🏆</span><span class="tm-nav-label">Ranking</span></a><a class="tm-nav" href="#tm-amigos-panel"><span class="tm-nav-icon">🎖️</span><span class="tm-nav-label">Logros</span></a><a class="tm-nav" href="#tm-mensajes-panel"><span class="tm-nav-icon">💬</span><span class="tm-nav-label">Mensajes</span></a><a class="tm-nav" href="/"><span class="tm-nav-icon">🎮</span><span class="tm-nav-label">Juegos</span></a><a class="tm-nav" href="/pages/competir/"><span class="tm-nav-icon">⚔️</span><span class="tm-nav-label">Torneos</span></a><a class="tm-nav" href="/pages/progreso/index.html"><span class="tm-nav-icon">📈</span><span class="tm-nav-label">Mi progreso</span></a><a class="tm-nav" href="/pages/upload-game.html"><span class="tm-nav-icon">⬆️</span><span class="tm-nav-label">Subir juego</span></a><button class="tm-nav tm-nav-button" type="button" data-tm-social-action="settings"><span class="tm-nav-icon">⚙️</span><span class="tm-nav-label">Configuración</span></button><button class="tm-nav tm-nav-button" type="button" id="logoutBtn"><span class="tm-nav-icon">🚪</span><span class="tm-nav-label">Cerrar sesión</span></button>';}
+    return '<a class="tm-brand" href="/"><span class="tm-brand-icon">🎮</span><span class="tm-brand-text">TECNOMATH<br><small>ARCADE</small></span></a><a class="tm-nav active" href="/"><span class="tm-nav-icon">🏠</span><span class="tm-nav-label">Inicio</span></a><a class="tm-nav" href="/#juegos"><span class="tm-nav-icon">🎮</span><span class="tm-nav-label">Juegos</span></a><a class="tm-nav" href="/pages/competir/"><span class="tm-nav-icon">🏆</span><span class="tm-nav-label">Ranking global</span></a><a class="tm-nav" href="/pages/competir/"><span class="tm-nav-icon">⚔️</span><span class="tm-nav-label">Torneos</span></a><a class="tm-nav" href="/pages/social/index.html"><span class="tm-nav-icon">👥</span><span class="tm-nav-label">Comunidad / Social</span></a><a class="tm-nav" href="/pages/progreso/index.html"><span class="tm-nav-icon">📈</span><span class="tm-nav-label">Mi progreso</span></a><a class="tm-nav" href="/pages/upload-game.html"><span class="tm-nav-icon">⬆️</span><span class="tm-nav-label">Subir juego</span></a><a class="tm-nav" href="/pages/tienda/"><span class="tm-nav-icon">🛒</span><span class="tm-nav-label">Tienda</span></a><a class="tm-nav" href="/pages/tienda/"><span class="tm-nav-icon">👑</span><span class="tm-nav-label">Premium</span></a>';
   }
-
-  function close(){
-    if(!sidebar)return;
-    sidebar.classList.remove('tm-mobile-open');
-    if(overlay)overlay.classList.remove('tm-mobile-open');
-    if(toggleButton){toggleButton.classList.remove('tm-mobile-open');toggleButton.textContent='☰';toggleButton.setAttribute('aria-expanded','false');}
-    d.body.classList.remove('tm-sidebar-ready','tm-sidebar-collapsed');
-  }
-
-  function open(){
-    if(!sidebar||innerWidth>MOBILE_MAX)return;
-    sidebar.classList.add('tm-mobile-open');
-    if(overlay)overlay.classList.add('tm-mobile-open');
-    if(toggleButton){toggleButton.classList.add('tm-mobile-open');toggleButton.textContent='✕';toggleButton.setAttribute('aria-expanded','true');}
-  }
-
-  function toggle(){
-    if(innerWidth>MOBILE_MAX){close();return;}
-    sidebar.classList.contains('tm-mobile-open')?close():open();
-  }
-
-  function ensureToggle(){
-    if(innerWidth>MOBILE_MAX){close();return;}
-    toggleButton=d.getElementById('menuBtn')||d.getElementById('tm-sidebar-toggle');
-    if(!toggleButton){
-      toggleButton=d.createElement('button');
-      toggleButton.id='tm-sidebar-toggle';
-      toggleButton.className='tm-sidebar-toggle';
-      toggleButton.type='button';
-      toggleButton.textContent='☰';
-      toggleButton.setAttribute('aria-label','Abrir menú');
-      d.body.appendChild(toggleButton);
-    }else{
-      toggleButton.classList.add('tm-sidebar-toggle');
-      toggleButton.type='button';
-      toggleButton.setAttribute('aria-controls','tm-sidebar');
-      toggleButton.setAttribute('aria-expanded','false');
-    }
-    toggleButton.onclick=toggle;
-  }
-
-  function init(){
-    sidebar=d.getElementById('tm-sidebar');
-    if(!sidebar){
-      sidebar=d.createElement('aside');
-      sidebar.id='tm-sidebar';
-      sidebar.setAttribute('aria-label','Navegación TecnoMath');
-      sidebar.innerHTML=navMarkup();
-      d.body.prepend(sidebar);
-    }
-
-    overlay=d.querySelector('.tm-sidebar-overlay');
-    if(!overlay){
-      overlay=d.createElement('div');
-      overlay.className='tm-sidebar-overlay';
-      overlay.setAttribute('aria-hidden','true');
-      d.body.appendChild(overlay);
-    }
-
-    ensureToggle();
-    overlay.onclick=close;
-    d.addEventListener('keydown',e=>{if(e.key==='Escape')close();});
-    d.addEventListener('click',e=>{
-      const link=e.target.closest('#tm-sidebar a');
-      if(link&&innerWidth<=MOBILE_MAX)close();
-      const settings=e.target.closest('[data-tm-social-action="settings"]');
-      if(settings){
-        const target=d.getElementById('settingsBtn');
-        if(target&&target!==settings)target.click();
-      }
-    });
-    w.addEventListener('resize',()=>{
-      clearTimeout(resizeTimer);
-      resizeTimer=setTimeout(ensureToggle,80);
-    });
-    close();
-  }
-
-  if(d.readyState==='loading')d.addEventListener('DOMContentLoaded',init,{once:true});
-  else init();
-
+  function close(){if(!sidebar)return;sidebar.classList.remove('tm-mobile-open');overlay?.classList.remove('tm-mobile-open');if(toggleButton){toggleButton.classList.remove('tm-mobile-open');toggleButton.textContent='☰';toggleButton.setAttribute('aria-expanded','false');}d.body.classList.remove('tm-sidebar-ready','tm-sidebar-collapsed');}
+  function open(){if(!sidebar||innerWidth>MOBILE_MAX)return;sidebar.classList.add('tm-mobile-open');overlay?.classList.add('tm-mobile-open');if(toggleButton){toggleButton.classList.add('tm-mobile-open');toggleButton.textContent='✕';toggleButton.setAttribute('aria-expanded','true');}}
+  function toggle(e){if(e){e.preventDefault();e.stopImmediatePropagation();}if(innerWidth>MOBILE_MAX){close();return;}sidebar?.classList.contains('tm-mobile-open')?close():open();}
+  function bindToggle(){if(innerWidth>MOBILE_MAX){close();return;}const candidate=d.getElementById('menuBtn')||d.getElementById('tm-sidebar-toggle');if(!candidate){candidate=d.createElement('button');candidate.id='tm-sidebar-toggle';candidate.className='tm-sidebar-toggle';candidate.type='button';candidate.textContent='☰';candidate.setAttribute('aria-label','Abrir menú');d.body.appendChild(candidate);}if(toggleButton!==candidate){toggleButton?.removeEventListener('click',toggle,true);toggleButton=candidate;toggleButton.classList.add('tm-sidebar-toggle');toggleButton.type='button';toggleButton.setAttribute('aria-controls','tm-sidebar');toggleButton.setAttribute('aria-expanded','false');toggleButton.addEventListener('click',toggle,true);}}
+  function init(){sidebar=d.getElementById('tm-sidebar');if(!sidebar){sidebar=d.createElement('aside');sidebar.id='tm-sidebar';sidebar.setAttribute('aria-label','Navegación TecnoMath');sidebar.innerHTML=navMarkup();d.body.prepend(sidebar);}overlay=d.querySelector('.tm-sidebar-overlay');if(!overlay){overlay=d.createElement('div');overlay.className='tm-sidebar-overlay';overlay.setAttribute('aria-hidden','true');d.body.appendChild(overlay);}overlay.addEventListener('click',close);d.addEventListener('keydown',e=>{if(e.key==='Escape')close();});d.addEventListener('click',e=>{const link=e.target.closest('#tm-sidebar a');if(link&&innerWidth<=MOBILE_MAX)close();const settings=e.target.closest('[data-tm-social-action="settings"]');if(settings){const target=d.getElementById('settingsBtn');if(target&&target!==settings)target.click();}});w.addEventListener('resize',()=>{clearTimeout(resizeTimer);resizeTimer=setTimeout(bindToggle,80);});bindToggle();close();}
+  if(d.readyState==='loading')d.addEventListener('DOMContentLoaded',init,{once:true});else init();
   w.TecnoMathSidebar={open,close,toggle};
 })(window,document);
