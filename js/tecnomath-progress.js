@@ -10,12 +10,12 @@
   const clone=o=>JSON.parse(JSON.stringify(o));
   function levelFor(xp){return Math.floor(Math.sqrt(Math.max(0,Number(xp)||0)/100))+1;}
   function today(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
-  function normalize(d){d.xp=Math.max(0,Number(d.xp)||0);d.coins=Math.max(0,Number(d.coins)||0);d.level=levelFor(d.xp);d.streak=Math.max(0,Number(d.streak)||0);d.games=Math.max(0,Number(d.games)||0);d.correct=Math.max(0,Number(d.correct)||0);d.wrong=Math.max(0,Number(d.wrong)||0);d.topics=d.topics&&typeof d.topics==='object'?d.topics:{};d.achievements=Array.isArray(d.achievements)?[...new Set(d.achievements)]:[];return d;}
+  function normalize(d){d.dummy=undefined;delete d.dummy;d.xp=Math.max(0,Number(d.xp)||0);d.coins=Math.max(0,Number(d.coins)||0);d.level=levelFor(d.xp);d.streak=Math.max(0,Number(d.streak)||0);d.games=Math.max(0,Number(d.games)||0);d.correct=Math.max(0,Number(d.correct)||0);d.wrong=Math.max(0,Number(d.wrong)||0);d.topics=d.topics&&typeof d.topics==='object'?d.topics:{};d.achievements=Array.isArray(d.achievements)?[...new Set(d.achievements)]:[];return d;}
   function read(){try{return normalize({...clone(DEFAULTS),...JSON.parse(localStorage.getItem(KEY)||'{}')});}catch(_){return clone(DEFAULTS);}}
   function save(d){d=normalize(d);try{localStorage.setItem(KEY,JSON.stringify(d));}catch(_){}try{window.dispatchEvent(new CustomEvent('tecnomath:progress',{detail:d}));}catch(_){}return d;}
   function achievements(d){const total=d.correct+d.wrong,acc=total?Math.round(d.correct/total*100):0;[['first_win',d.correct>=1],['century',d.correct>=100],['streak3',d.streak>=3],['master',d.level>=10],['precision',acc>=90&&d.correct>=20],['gamer',d.games>=10]].forEach(([id,ok])=>{if(ok&&!d.achievements.includes(id))d.achievements.push(id);});}
   function deltaFrom(r){const correct=Math.max(0,Number(r.correct||0)),wrong=Math.max(0,Number(r.wrong||0)),games=Math.max(0,Number(r.games||0));return{xp:Math.max(0,Number(r.xp??correct*25)),coins:Math.max(0,Number(r.coins??correct*5)),games,correct,wrong,topic:r.topic?String(r.topic):null};}
-  function applyDelta(d,x){d=normalize({...d,topics:{...(d.topics||{})},achievements:[...(d.achievements||[])]});if(x.games||x.correct||x.wrong){const t=today();if(d.lastDay!==t){d.streak=d.lastDay?d.streak+1:1;d.lastDay=t;}}d.xp+=x.xp;d.coins+=x.coins;d.games+=x.games;d.correct+=x.correct;d.wrong+=x.wrong;if(x.topic){const t=d.topics[x.topic]||{correct:0,wrong:0,games:0};t.correct=(Number(t.correct)||0)+x.correct;t.wrong=(Number(t.wrong)||0)+x.wrong;t.games=(Number(t.games)||0)+x.games;d.topics[x.topic]=t;}d.level=levelFor(d.xp);achievements(d);return d;}
+  function applyDelta(d,x){d=normalize({...d,topics:{...(d.topics||{})},achievements:[...(d.achievements||[])]});if(x.correct||x.wrong){const t=today();if(d.lastDay!==t){d.streak=d.lastDay?d.streak+1:1;d.lastDay=t;}}d.xp+=x.xp;d.coins+=x.coins;d.games+=x.games;d.correct+=x.correct;d.wrong+=x.wrong;if(x.topic){const t=d.topics[x.topic]||{correct:0,wrong:0,games:0};t.correct=(Number(t.correct)||0)+x.correct;t.wrong=(Number(t.wrong)||0)+x.wrong;t.games=(Number(t.games)||0)+x.games;d.topics[x.topic]=t;}d.level=levelFor(d.xp);achievements(d);return d;}
 
   function meta(){try{const m=JSON.parse(localStorage.getItem(META_KEY)||'{}');return{clientId:m.clientId||('tm-'+Math.random().toString(36).slice(2)+Date.now().toString(36)),seq:Number(m.seq)||0,pending:Array.isArray(m.pending)?m.pending:[]};}catch(_){return{clientId:'tm-'+Math.random().toString(36).slice(2),seq:0,pending:[]};}}
   function saveMeta(m){try{localStorage.setItem(META_KEY,JSON.stringify(m));}catch(_){} }
@@ -23,7 +23,6 @@
 
   function record(r={}){const x=deltaFrom(r),d=applyDelta(read(),x);save(d);if(x.games||x.correct||x.wrong||x.xp||x.coins)queue(x);scheduleSync();return d;}
   function gameResult(game,stats={}){return record({...stats,games:stats.games??1,topic:stats.topic||game});}
-  // Compatibility only. Opening a game NEVER grants XP, coins or a match.
   function trackPlay(){return read();}
   function installAutoTracking(){}
 
@@ -39,6 +38,10 @@
   function bindAuth(){const s=services();if(!s)return;s.auth.onAuthStateChanged(async user=>{authUser=user||null;if(!authUser){window.dispatchEvent(new CustomEvent('tecnomath:cloud-status',{detail:{state:'signed-out'}}));return;}await restore();await sync();});}
   async function init(){await ensureFirebase();bindAuth();}
 
-  window.TecnoMathProgress={read,save,record,gameResult,trackPlay,installAutoTracking,sync,restore,levelFor,reset(){const d=clone(DEFAULTS);save(d);return d;}};
+  function legacyStart(id){window.TecnomathCurrentGame=String(id||'unknown');return read();}
+  function legacySave(id,data){const safe=String(id||'game').replace(/[^a-z0-9_-]/gi,'-').toLowerCase();try{localStorage.setItem('tecnomath_game_'+safe,JSON.stringify(data||{}));}catch(_){}try{window.dispatchEvent(new CustomEvent('tecnomath:game-snapshot',{detail:{gameId:safe,data:data||{}}}));}catch(_){}return true;}
+  function legacyLoad(id){const safe=String(id||'game').replace(/[^a-z0-9_-]/gi,'-').toLowerCase();try{return JSON.parse(localStorage.getItem('tecnomath_game_'+safe)||'null');}catch(_){return null;}}
+
+  window.TecnoMathProgress={read,save,record,gameResult,trackPlay,installAutoTracking,sync,restore,levelFor,start:legacyStart,save:legacySave,saveSnapshot:function(id,key,fields){try{const value=JSON.parse(localStorage.getItem(key)||'{}'),snapshot=fields?fields.reduce((r,k)=>{if(Object.prototype.hasOwnProperty.call(value,k))r[k]=value[k];return r},{}):value;return legacySave(id,{snapshot});}catch(_){return false;}},load:legacyLoad,reset(){const d=clone(DEFAULTS);save(d);return d;}};
   init().catch(e=>console.warn('TecnoMath: fallo al iniciar progreso central.',e));
 })();
