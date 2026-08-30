@@ -11,6 +11,13 @@
   };
 
   if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+
+  // El progreso central debe existir antes de game-progress.js para que
+  // todos los juegos compartan la misma cuenta y la misma API.
+  if (!window.TecnoMathProgress && document.readyState === 'loading') {
+    document.write('<script src="/js/tecnomath-progress.js"><\\/script>');
+  }
+
   window.TecnomathFirebase = {
     auth: firebase.auth(),
     database: firebase.database(),
