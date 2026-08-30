@@ -12,7 +12,7 @@
   async function write(id,data,mode){const ref=gameRef(id);if(!ref)return false;const ts=firebase.database.ServerValue.TIMESTAMP;if(mode==='start'){await ref.transaction(c=>({...c||{},gameId:gameKey(id),sessions:((c&&c.sessions)||0)+1,firstPlayedAt:(c&&c.firstPlayedAt)||ts,lastPlayedAt:ts,updatedAt:ts}));const t=totalsRef();if(t)await t.transaction(c=>({...c||{},totalSessions:((c&&c.totalSessions)||0)+1,gamesStarted:Math.max(((c&&c.gamesStarted)||0),0),lastGame:gameKey(id),lastPlayedAt:ts,updatedAt:ts}));return true}await ref.update({...data,gameId:gameKey(id),lastPlayedAt:ts,updatedAt:ts});return true}
   async function addPlayTime(seconds){const t=totalsRef();if(!t||!Number.isFinite(seconds)||seconds<=0)return false;const safe=Math.min(Math.round(seconds),86400);await t.transaction(c=>({...c||{},totalSeconds:((c&&c.totalSeconds)||0)+safe,totalMinutes:Math.floor((((c&&c.totalSeconds)||0)+safe)/60),updatedAt:firebase.database.ServerValue.TIMESTAMP}));return true}
   async function flush(){while(pending.length&&getUser()){const task=pending.shift();try{await write(task.gameId,task.data,task.mode)}catch(e){console.warn('No se pudo sincronizar el progreso de Tecnomath.',e)}}}
-  function enqueue(id,data,mode){if(!getUser()){pending.push({gameId:id,data,mode});return Promise.resolve(false)}return write(id,data,mode).catch(e=>{console.warn('No se pudo sincronizar el progreso de Tecnomath.',e);return false})}
+  function enqueue(id,data,mode){if(!getUser()){pending.push({gameId:id,data,mode});return Promise.resolve(false)}return write(gameKey(id||currentGameId),data,mode).catch(e=>{console.warn('No se pudo sincronizar el progreso de Tecnomath.',e);return false})}
   async function getEvents(){const s=getServices(),base={...DEFAULT_EVENTS};if(!s)return base;try{const snap=await s.database.ref('tecnomath/eventos').once('value'),remote=snap.val()||{};Object.keys(remote).forEach(k=>{base[k]={...(base[k]||{id:k}),...remote[k],id:k}})}catch(e){console.warn('No se pudieron cargar los eventos remotos.',e)}return base}
   async function unlockEvent(eventId,code){const u=getUser();if(!u)return{ok:false,reason:'login_required'};const events=await getEvents(),event=events[String(eventId).toLowerCase()];if(!event||event.active===false)return{ok:false,reason:'inactive'};if(String(code||'').trim().toUpperCase()!==String(event.code||'').trim().toUpperCase())return{ok:false,reason:'invalid_code'};await getServices().database.ref('userProgress/'+u.uid+'/events/'+gameKey(event.id)).set({unlocked:true,name:event.name||event.id,unlockedAt:firebase.database.ServerValue.TIMESTAMP});return{ok:true,event}}
   async function isEventUnlocked(eventId){const s=getServices(),u=getUser();if(!s||!u)return false;const snap=await s.database.ref('userProgress/'+u.uid+'/events/'+gameKey(eventId)).once('value');return!!(snap.val()&&snap.val().unlocked)}
@@ -22,14 +22,27 @@
   function initGlobalTheme(){applyGlobalTheme('normal');const start=()=>watchGlobalTheme();if(window.firebase&&firebase.database)start();else setTimeout(start,250)}
   window.TecnomathTheme={apply:applyGlobalTheme,watch:watchGlobalTheme,themes:THEME_DATA};
   const gameApi={start(id){currentGameId=gameKey(id);startedAt=Date.now();return enqueue(currentGameId,{},'start')},save(id,data){return enqueue(gameKey(id||currentGameId),data||{},'save')},saveSnapshot(id,key,fields){try{const value=JSON.parse(localStorage.getItem(key)||'{}'),snapshot=fields?fields.reduce((r,k)=>{if(Object.prototype.hasOwnProperty.call(value,k))r[k]=value[k];return r},{}):value;return this.save(id,{snapshot})}catch(e){return Promise.resolve(false)}},load(id){const ref=gameRef(gameKey(id||currentGameId));if(!ref)return Promise.resolve(null);return ref.once('value').then(s=>s.val())},savePlayTime(seconds){return addPlayTime(seconds)},events:{list:getEvents,unlock:unlockEvent,isUnlocked:isEventUnlocked}};
-  // No reemplazar el sistema central: los juegos antiguos conservan su API
-  // y el progreso global conserva read/record/gameResult/sync/restore/levelFor.
   if(!window.TecnoMathProgress) window.TecnomathProgress=gameApi; else window.TecnomathGameProgress=gameApi;
   const services=getServices();if(services)services.auth.onAuthStateChanged(()=>flush());
   window.addEventListener('pagehide',()=>{if(currentGameId){const seconds=Math.max(1,Math.round((Date.now()-startedAt)/1000));enqueue(currentGameId,{secondsPlayed:seconds},'save');addPlayTime(seconds).catch(()=>{})}});
 
   function cargarSoporteBanderQuiz(tag){if(!tag||tag.dataset.tecnomathGame!=='banderquiz')return;if(document.querySelector('script[data-banderquiz-display]'))return;const s=document.createElement('script');s.src='../../js/banderquiz-display.js';s.dataset.banderquizDisplay='true';s.async=false;document.head.appendChild(s)}
+
+  // Los tres juegos de Ezequiel comparten la misma pista y el mismo estado de música.
+  // Se carga desde aquí porque los tres ya incluyen game-progress.js.
+  function cargarMusicaEzequiel(tag){
+    if(!tag) return;
+    const gameId=String(tag.dataset.tecnomathGame||'').toLowerCase();
+    if(['quizzer-selector','quizzer','banderquiz'].indexOf(gameId)===-1)return;
+    if(document.querySelector('script[data-tecnomath-ezequiel-music]'))return;
+    const s=document.createElement('script');
+    s.src='/games/esequiel11%C2%B0/audio/music.js';
+    s.dataset.tecnomathEzequielMusic='true';
+    s.async=false;
+    document.head.appendChild(s);
+  }
+
   const scriptTag=document.currentScript;
-  if(scriptTag&&scriptTag.dataset.tecnomathGame){if(window.TecnomathProgress&&window.TecnomathProgress.start)window.TecnomathProgress.start(scriptTag.dataset.tecnomathGame);cargarSoporteBanderQuiz(scriptTag)}
+  if(scriptTag&&scriptTag.dataset.tecnomathGame){if(window.TecnomathProgress&&window.TecnomathProgress.start)window.TecnomathProgress.start(scriptTag.dataset.tecnomathGame);cargarSoporteBanderQuiz(scriptTag);cargarMusicaEzequiel(scriptTag)}
   initGlobalTheme();
 })();
