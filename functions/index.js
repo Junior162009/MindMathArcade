@@ -48,22 +48,33 @@ async function sendEmail(to,subject,htmlBody){
   return true;
 }
 
-// Sincroniza de forma segura el claim del usuario que realiza la llamada.
-// La fuente de verdad sigue siendo /users/{uid}/role en Realtime Database.
+// Sincroniza el claim sin tocar otros claims existentes.
+// Realtime Database (/users/{uid}/role) sigue siendo la fuente de verdad.
+async function syncAdminClaimForUid(uid){
+  const snapshot=await db.ref(`users/${uid}`).once('value');
+  const profile=snapshot.val()||{};
+  const isAdmin=String(profile.role||'').toLowerCase()==='admin';
+  const userRecord=await admin.auth().getUser(uid);
+  const currentClaims={...(userRecord.customClaims||{})};
+  const hasCorrectAdminClaim=currentClaims.admin===isAdmin;
+
+  if(!hasCorrectAdminClaim){
+    if(isAdmin)currentClaims.admin=true;
+    else delete currentClaims.admin;
+    await admin.auth().setCustomUserClaims(uid,currentClaims);
+    console.log(`ADMIN CLAIM SYNC ${uid}: ${isAdmin?'enabled':'disabled'}`);
+  }
+
+  return isAdmin;
+}
+
+// Sincronización manual segura para el usuario autenticado.
+// Nunca acepta un UID externo: solo puede sincronizar su propio estado RTDB.
 exports.syncAdminClaim=onCall(async request=>{
   if(!request.auth)throw new HttpsError('unauthenticated','Debes iniciar sesión.');
   const uid=request.auth.uid;
   try{
-    const snapshot=await db.ref(`users/${uid}`).once('value');
-    const profile=snapshot.val()||{};
-    const isAdmin=String(profile.role||'').toLowerCase()==='admin';
-    const userRecord=await admin.auth().getUser(uid);
-    const claims={...(userRecord.customClaims||{})};
-
-    if(isAdmin)claims.admin=true;
-    else delete claims.admin;
-
-    await admin.auth().setCustomUserClaims(uid,claims);
+    const isAdmin=await syncAdminClaimForUid(uid);
     return{admin:isAdmin};
   }catch(error){
     console.error(`ERROR SYNC ADMIN CLAIM ${uid}:`,error);
@@ -71,9 +82,8 @@ exports.syncAdminClaim=onCall(async request=>{
   }
 });
 
-// Sincroniza automáticamente el claim cuando cambia el rol en RTDB.
-// La función solo escribe en Firebase Authentication, por lo que no genera
-// un bucle de escritura sobre /users/{uid}.
+// Sincroniza automáticamente el claim cuando cambia el perfil en RTDB.
+// Solo escribe en Firebase Authentication, por lo que no genera un bucle sobre /users.
 exports.syncAdminClaimOnUserChange=onValueWritten({ref:'/users/{uid}'},async event=>{
   const before=event.data.before.val()||{};
   const after=event.data.after.val()||{};
@@ -84,12 +94,7 @@ exports.syncAdminClaimOnUserChange=onValueWritten({ref:'/users/{uid}'},async eve
 
   const uid=event.params.uid;
   try{
-    const userRecord=await admin.auth().getUser(uid);
-    const claims={...(userRecord.customClaims||{})};
-    if(afterRole==='admin')claims.admin=true;
-    else delete claims.admin;
-    await admin.auth().setCustomUserClaims(uid,claims);
-    console.log(`ADMIN CLAIM SYNC ${uid}: ${afterRole==='admin'?'enabled':'disabled'}`);
+    await syncAdminClaimForUid(uid);
   }catch(error){
     console.error(`ERROR ADMIN CLAIM SYNC ${uid}:`,error);
   }
