@@ -2,14 +2,13 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
+
     function signedIn() {
       return request.auth != null;
     }
 
     function isAdmin() {
-      return signedIn()
-        && exists(/databases/$(database)/documents/users/$(request.auth.uid))
-        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+      return signedIn() && request.auth.token.admin == true;
     }
 
     match /tournaments/{tournamentId} {
@@ -19,16 +18,18 @@ service cloud.firestore {
       match /participants/{uid} {
         allow read: if signedIn();
         allow create: if signedIn() && uid == request.auth.uid;
+        allow update: if signedIn() && uid == request.auth.uid;
         allow delete: if signedIn() && uid == request.auth.uid;
-        allow update: if isAdmin() || (signedIn() && uid == request.auth.uid);
       }
 
       match /scores/{uid} {
         allow read: if signedIn();
-        allow create: if signedIn() && uid == request.auth.uid
+        allow create: if signedIn()
+          && uid == request.auth.uid
           && request.resource.data.score is int
           && request.resource.data.score >= 0;
-        allow update: if signedIn() && uid == request.auth.uid
+        allow update: if signedIn()
+          && uid == request.auth.uid
           && request.resource.data.score is int
           && request.resource.data.score >= 0
           && request.resource.data.score >= resource.data.score;
@@ -50,6 +51,10 @@ service cloud.firestore {
         allow create, update: if signedIn() && uid == request.auth.uid;
         allow delete: if isAdmin();
       }
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
     }
   }
 }
