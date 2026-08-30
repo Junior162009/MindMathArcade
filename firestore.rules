@@ -18,8 +18,8 @@ service cloud.firestore {
       match /participants/{uid} {
         allow read: if signedIn();
         allow create: if signedIn() && uid == request.auth.uid;
-        allow update: if signedIn() && uid == request.auth.uid;
-        allow delete: if signedIn() && uid == request.auth.uid;
+        allow update: if isAdmin() || (signedIn() && uid == request.auth.uid);
+        allow delete: if isAdmin() || (signedIn() && uid == request.auth.uid);
       }
 
       match /scores/{uid} {
