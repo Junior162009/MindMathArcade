@@ -1,0 +1,13 @@
+/* TecnoMath Progress V3: cola offline + eventos idempotentes + IndexedDB */
+(function(){'use strict';
+const DB='TecnoMathProgressDB',VER=1,STORE='events',META='tecnomath_progress_v3_meta';
+function open(){return new Promise((res,rej)=>{if(!window.indexedDB)return rej(new Error('IndexedDB unavailable'));let r=indexedDB.open(DB,VER);r.onupgradeneeded=()=>{let s=r.result.createObjectStore(STORE,{keyPath:'id'});s.createIndex('pending','pending')};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)})}
+async function put(e){let db=await open();return new Promise((res,rej)=>{let t=db.transaction(STORE,'readwrite');t.objectStore(STORE).put(e);t.oncomplete=res;t.onerror=()=>rej(t.error)})}
+async function pending(){let db=await open();return new Promise((res,rej)=>{let t=db.transaction(STORE,'readonly'),a=[];let q=t.objectStore(STORE).openCursor();q.onsuccess=()=>{let c=q.result;if(c){if(c.value.pending)a.push(c.value);c.continue()}else res(a)};q.onerror=()=>rej(q.error)})}
+async function done(id){let db=await open();return new Promise((res,rej)=>{let t=db.transaction(STORE,'readwrite'),s=t.objectStore(STORE);let q=s.get(id);q.onsuccess=()=>{if(q.result){q.result.pending=false;q.result.syncedAt=Date.now();s.put(q.result)} };t.oncomplete=res;t.onerror=()=>rej(t.error)})}
+function uid(){return window.TecnomathFirebase?.auth?.currentUser?.uid||null}function id(){return (crypto.randomUUID?crypto.randomUUID():Date.now().toString(36)+'-'+Math.random().toString(36).slice(2))}
+async function queue(type,payload){let e={id:id(),type,payload,createdAt:Date.now(),pending:true,uid:uid()};await put(e);sync().catch(()=>{});return e}
+async function sync(){let u=uid();if(!u||!navigator.onLine)return false;let root=window.TecnomathFirebase?.database?.ref;if(!root)return false;let events=await pending();for(const e of events){if(e.uid&&e.uid!==u)continue;let ref=root('userProgress/'+u+'/events/'+e.id);let snap=await ref.once('value');if(!snap.exists()){await ref.set({...e,pending:undefined,serverAt:window.TecnomathFirebase.serverTimestamp});if(e.type==='snapshot'&&e.payload)await root('userProgress/'+u+'/v3').update(e.payload)}await done(e.id)}return true}
+function snapshot(data){try{localStorage.setItem(META,JSON.stringify({updatedAt:Date.now(),data}))}catch(e){}return queue('snapshot',data)}
+window.TecnoMathProgressV3={queue,snapshot,sync,pending};addEventListener('online',()=>sync().catch(()=>{}));setInterval(()=>sync().catch(()=>{}),30000);setTimeout(()=>sync().catch(()=>{}),1500);
+})();
