@@ -56,7 +56,7 @@
   function loadEventEffects(){if(window.TecnoMathEventEffects)return;const s=document.createElement('script');s.src=(location.pathname.includes('/pages/')?'../../':'')+'js/fair-effects.js?v=1';s.async=true;document.head.appendChild(s)}
   loadEventEffects();
   function loadGameSubmissionSystem(){if(document.querySelector('script[data-tecnomath-game-submissions]'))return;const s=document.createElement('script');s.src=(location.pathname.includes('/pages/')?'../':'')+'js/game-submissions.js?v=2';s.async=true;s.dataset.tecnomathGameSubmissions='true';document.head.appendChild(s)}
-  function loadPublishedGames(){if(document.querySelector('script[data-tecnomath-published-games]'))return;const s=document.createElement('script');s.src=(location.pathname.includes('/pages/')?'../':'')+'js/published-games.js?v=1';s.async=true;s.dataset.tecnomathPublishedGames='true';document.head.appendChild(s)}
+  function loadPublishedGames(){if(document.querySelector('script[data-tecnomath-published-games]'))return;const s=document.createElement('script');s.src=(location.pathname.includes('/pages/')?'../':'')+'js/published-games.js?v=2';s.async=true;s.dataset.tecnomathPublishedGames='true';document.head.appendChild(s)}
   loadGameSubmissionSystem();loadPublishedGames();
 
   // 📈 MI PROGRESO — acceso visible desde el index principal.
