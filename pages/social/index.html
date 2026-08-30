@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#0d1026">
   <title>TecnoMath Social</title>
   <link rel="stylesheet" href="social.css">
-  <link rel="stylesheet" href="sidebar.css">
+  <link rel="stylesheet" href="../../css/tecnomath-sidebar.css">
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
@@ -15,7 +15,7 @@
 <body>
   <div class="app-shell">
     <header class="topbar">
-      <button class="icon-btn" id="menuBtn" aria-label="Abrir menú" aria-controls="sidebar" aria-expanded="false">☰</button>
+      <button class="icon-btn" id="menuBtn" aria-label="Abrir menú" aria-controls="tm-sidebar" aria-expanded="false">☰</button>
       <a class="brand" href="../../index.html"><span>🧠</span><b>TecnoMath</b><em>Social</em></a>
       <div class="top-actions">
         <button class="icon-btn" id="searchBtn" aria-label="Buscar">⌕</button>
@@ -27,23 +27,6 @@
     <div class="mobile-search" id="mobileSearch"><input id="searchInput" placeholder="Buscar estudiantes, publicaciones..." autocomplete="off"><button id="closeSearch">×</button></div>
 
     <div class="layout">
-      <aside class="sidebar" id="sidebar">
-        <nav>
-          <a class="nav-item active" href="#inicio">🏠 <span>Inicio</span></a>
-          <a class="nav-item" href="#tm-explorar">🔎 <span>Explorar</span></a>
-          <a class="nav-item" href="#tm-amigos-panel">👥 <span>Amigos</span></a>
-          <a class="nav-item" href="#ranking">🏆 <span>Ranking</span></a>
-          <a class="nav-item" href="#tm-amigos-panel">🎖️ <span>Logros</span></a>
-          <a class="nav-item" href="#tm-mensajes-panel">💬 <span>Mensajes</span></a>
-        </nav>
-        <div class="sidebar-card">
-          <strong>🎮 Juega y comparte</strong>
-          <p>Publica tus récords y reta a tus amigos.</p>
-          <a href="../../index.html">Ver juegos →</a>
-        </div>
-        <button class="logout" id="logoutBtn">↪ Cerrar sesión</button>
-      </aside>
-
       <main class="feed" id="inicio">
         <section class="welcome-card">
           <div class="welcome-copy"><span class="eyebrow">COMUNIDAD EDUCATIVA</span><h1>¡Hola, <span id="helloName">jugador</span>! 👋</h1><p>Aprende, compite y comparte tus avances.</p></div>
@@ -71,6 +54,6 @@
   <div class="modal hidden" id="profileModal"><div class="modal-box"><button class="modal-close" data-close>×</button><h2>✏️ Editar perfil</h2><label>Nombre visible<input id="displayNameInput" maxlength="40" placeholder="Tu nombre"></label><label>Emoji de avatar<input id="avatarInput" maxlength="4" placeholder="🧠"></label><button class="primary wide" id="saveProfile">Guardar cambios</button></div></div>
   <div class="toast" id="toast"></div>
   <script src="social.js"></script>
-  <script src="sidebar.js"></script>
+  <script src="../../js/tecnomath-sidebar.js"></script>
 </body>
 </html>
