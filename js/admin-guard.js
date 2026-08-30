@@ -17,6 +17,7 @@
   };
 
   let adminClaimRefreshPromise = null;
+  let adminClaimRefreshUid = null;
 
   function firebaseReady() {
     if (!window.TecnomathFirebase) throw new Error('Firebase no está inicializado.');
@@ -26,10 +27,20 @@
   function normalizedEmail(user) { return String(user && user.email || '').trim().toLowerCase(); }
   function isApprovedEmail(user) { return ADMIN_EMAILS.includes(normalizedEmail(user)); }
 
-  async function refreshAdminClaim(user) {
-    if (!user || adminClaimRefreshPromise) return adminClaimRefreshPromise;
+  async function refreshAdminClaim(user, expectedAdmin) {
+    if (!user) return null;
+    if (adminClaimRefreshPromise && adminClaimRefreshUid === user.uid) return adminClaimRefreshPromise;
+
+    adminClaimRefreshUid = user.uid;
     adminClaimRefreshPromise = (async () => {
       try {
+        const tokenResult = await user.getIdTokenResult();
+        const shouldBeAdmin = expectedAdmin === true;
+        const hasCorrectClaim = tokenResult.claims && tokenResult.claims.admin === shouldBeAdmin;
+
+        // Evita llamadas y refrescos innecesarios cuando el token ya está correcto.
+        if (hasCorrectClaim) return tokenResult;
+
         // El callable valida el rol directamente en RTDB antes de tocar el claim.
         if (typeof firebase.functions !== 'function') {
           await new Promise((resolve, reject) => {
@@ -51,17 +62,22 @@
 
         if (typeof firebase.functions === 'function') {
           await firebase.functions().httpsCallable('syncAdminClaim')({});
+          // Los custom claims nuevos solo llegan al ID token después de refrescarlo.
+          return await user.getIdTokenResult(true);
         }
 
-        // Los custom claims nuevos solo llegan al ID token después de refrescarlo.
-        await user.getIdToken(true);
+        return tokenResult;
       } catch (error) {
         console.warn('TecnoMath: no se pudo sincronizar/refrescar el claim admin:', error);
-        try { await user.getIdToken(true); } catch (refreshError) {
-          console.warn('TecnoMath: no se pudo refrescar el token:', refreshError);
+        return null;
+      } finally {
+        if (adminClaimRefreshUid === user.uid) {
+          adminClaimRefreshPromise = null;
+          adminClaimRefreshUid = null;
         }
       }
     })();
+
     return adminClaimRefreshPromise;
   }
 
@@ -81,7 +97,7 @@
 
   async function prepareAdminProfile(user, profile) {
     if (!profile) return null;
-    await refreshAdminClaim(user);
+    await refreshAdminClaim(user, String(profile.role || '').toLowerCase() === 'admin' || profile.isAdmin === true);
     return profile;
   }
 
