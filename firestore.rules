@@ -7,9 +7,8 @@ service cloud.firestore {
       return request.auth != null;
     }
 
-    // Administradores reconocidos por el custom claim o por la lista
-    // oficial de correos que ya utiliza TecnoMath. El fallback por correo
-    // permite que el panel siga funcionando mientras el claim se propaga.
+    // Admin principal: custom claim. Fallback compatible con las cuentas
+    // administrativas oficiales mientras el claim se propaga.
     function isAdmin() {
       return signedIn() && (
         request.auth.token.admin == true
@@ -20,9 +19,6 @@ service cloud.firestore {
       );
     }
 
-    // =========================
-    // TORNEOS
-    // =========================
     match /tournaments/{tournamentId} {
       allow read: if signedIn();
       allow create, update, delete: if isAdmin();
@@ -30,35 +26,30 @@ service cloud.firestore {
       match /participants/{uid} {
         allow read: if signedIn();
         allow create: if signedIn() && uid == request.auth.uid;
-        allow update: if isAdmin()
-          || (signedIn() && uid == request.auth.uid);
-        allow delete: if isAdmin()
-          || (signedIn() && uid == request.auth.uid);
+        allow update: if signedIn() && (uid == request.auth.uid || isAdmin());
+        allow delete: if signedIn() && (uid == request.auth.uid || isAdmin());
       }
 
-      // Las puntuaciones normales las escribe la Cloud Function confiable.
-      // El admin puede operar sobre ellas para mantenimiento/pruebas.
       match /scores/{uid} {
         allow read: if signedIn();
-        allow create, update: if isAdmin();
+        allow create: if signedIn() && uid == request.auth.uid;
+        allow update: if signedIn() && uid == request.auth.uid;
         allow delete: if isAdmin();
       }
     }
 
-    // =========================
-    // RANKING GLOBAL
-    // =========================
-    match /leaderboards/global/players/{uid} {
+    match /leaderboards/{boardId} {
       allow read: if signedIn();
-      allow write: if isAdmin();
-    }
-
-    // =========================
-    // RANKING POR JUEGO
-    // =========================
-    match /leaderboards/games/{gameId}/{uid} {
-      allow read: if signedIn();
-      allow write: if isAdmin();
+      match /players/{uid} {
+        allow read: if signedIn();
+        allow create, update: if signedIn() && uid == request.auth.uid;
+        allow delete: if isAdmin();
+      }
+      match /games/{gameId}/{uid} {
+        allow read: if signedIn();
+        allow create, update: if signedIn() && uid == request.auth.uid;
+        allow delete: if isAdmin();
+      }
     }
 
     match /{document=**} {
