@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>🤖 Bots de prueba | TecnoMath</title>
+<link rel="stylesheet" href="../../css/admin.css">
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script src="../../js/firebase-config.js"></script>
+<script src="../../js/admin-guard.js"></script>
+<style>
+body{background:#090914;color:#fff;font-family:Arial,sans-serif;margin:0;padding:20px}.wrap{max-width:1000px;margin:auto}.box{background:#111126;border:1px solid #292943;border-radius:18px;padding:24px;margin:20px 0}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}label{display:grid;gap:8px;font-weight:bold}select,input{width:100%;box-sizing:border-box;padding:12px;border-radius:10px;border:1px solid #393956;background:#090914;color:#fff;min-height:44px}button{padding:12px 18px;border:0;border-radius:10px;font-weight:bold;cursor:pointer;min-height:44px}.primary{background:#39ff14;color:#001}.secondary{background:#303b67;color:#fff}.danger{background:#ff416c;color:#fff}.muted{color:#9fa3bd}.status{padding:14px;border-radius:10px;background:#17243b;margin-top:14px;white-space:pre-wrap}.bot{padding:12px;border:1px solid #292943;border-radius:10px;background:#0c0c20}.actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:18px}
+</style>
+</head>
+<body>
+<main class="wrap">
+<h1>🤖 Tester de torneos</h1>
+<p class="muted">Herramienta exclusiva para administradores. Los bots son datos sintéticos y no crean cuentas reales de Firebase Authentication.</p>
+<div id="access" class="status">Comprobando permisos de administrador…</div>
+<section id="panel" class="box" hidden>
+<div class="grid">
+<label>Torneo
+<select id="tournament"><option value="">Cargando torneos…</option></select></label>
+<label>Cantidad de bots
+<select id="botCount"><option value="3">3</option><option value="5" selected>5</option><option value="10">10</option><option value="20">20</option></select></label>
+</div>
+<div class="actions">
+<button id="create" class="primary">🤖 Crear bots e inscribir</button>
+<button id="scores" class="secondary">🏆 Simular puntuaciones</button>
+<button id="cleanup" class="danger">🧹 Eliminar bots de prueba</button>
+</div>
+<div id="status" class="status">Selecciona un torneo.</div>
+<div id="bots" class="grid" style="margin-top:16px"></div>
+</section>
+</main>
+<script>
+(function(){
+'use strict';
+const fb=window.firebase;
+if(!fb||!fb.auth||!fb.firestore){return;}
+const auth=fb.auth(),db=fb.firestore();
+const access=document.getElementById('access'),panel=document.getElementById('panel'),status=document.getElementById('status'),select=document.getElementById('tournament'),botsBox=document.getElementById('bots');
+const BOT_PREFIX='TEST_BOT_';
+const botNames=['MateBot','RayoBot','EinsteinBot','TurboBot','NinjaBot','PixelBot','CerebroBot','MaxBot','SigmaBot','OmegaBot','DeltaBot','ProBot','FlashBot','AtlasBot','NovaBot','VectorBot','LogicBot','MathBot','RocketBot','TitanBot'];
+function setStatus(text,ok=false){status.textContent=text;status.style.background=ok?'#12351b':'#17243b';}
+async function isAdmin(){const user=auth.currentUser;if(!user)return false;try{const token=await user.getIdTokenResult(true);return token.claims&&token.claims.admin===true;}catch(e){console.error(e);return false;}}
+function botId(i){return BOT_PREFIX+String(i+1).padStart(2,'0');}
+function renderBots(count){botsBox.innerHTML='';for(let i=0;i<count;i++){const d=document.createElement('div');d.className='bot';d.innerHTML='<b>🤖 '+botId(i)+'</b><br><span class="muted">'+botNames[i%botNames.length]+'</span>';botsBox.appendChild(d);}}
+async function loadTournaments(){select.innerHTML='<option value="">Cargando…</option>';const snap=await db.collection('tournaments').orderBy('startAt','desc').limit(50).get();select.innerHTML='<option value="">Selecciona un torneo</option>';snap.forEach(doc=>{const t=doc.data()||{},o=document.createElement('option');o.value=doc.id;o.textContent=(t.name||doc.id)+' · '+(t.status||'sin estado');select.appendChild(o);});}
+async function createBots(){const id=select.value;if(!id){setStatus('Selecciona un torneo.');return;}if(!(await isAdmin())){setStatus('⛔ Permiso de administrador requerido.');return;}const count=Number(document.getElementById('botCount').value)||5;const ref=db.collection('tournaments').doc(id);const snap=await ref.get();if(!snap.exists)throw Error('Torneo no encontrado.');const t=snap.data()||{};const max=Number(t.maxPlayers||0);const current=Number(t.participantCount||0);if(max>0&&current+count>max)throw Error('No hay suficientes cupos para '+count+' bots.');const batch=db.batch();const now=fb.firestore.Timestamp.now();for(let i=0;i<count;i++){const uid=botId(i),p=ref.collection('participants').doc(uid);batch.set(p,{uid,name:botNames[i%botNames.length],photo:'',isTestBot:true,bot:true,joinedAt:now,status:'registered',createdBy:'admin-test-bots'},{merge:true});}batch.set(ref,{participantCount:current+count,updatedAt:fb.firestore.FieldValue.serverTimestamp()},{merge:true});await batch.commit();renderBots(count);setStatus('✅ '+count+' bots creados e inscritos. Ahora puedes simular sus puntuaciones.',true);}
+async function simulateScores(){const id=select.value;if(!id){setStatus('Selecciona un torneo.');return;}if(!(await isAdmin())){setStatus('⛔ Permiso de administrador requerido.');return;}const count=Number(document.getElementById('botCount').value)||5;const ref=db.collection('tournaments').doc(id),batch=db.batch();for(let i=0;i<count;i++){const uid=botId(i),scoreRef=ref.collection('scores').doc(uid);const score=1200-(i*83)+Math.floor(Math.random()*45);batch.set(scoreRef,{uid,name:botNames[i%botNames.length],photo:'',score,gameId:String((ref.id||'tournament-test').slice(0,100)),plays:1,isTestBot:true,bot:true,updatedAt:fb.firestore.FieldValue.serverTimestamp(),extra:{testRun:true,source:'admin-tournament-bots'}},{merge:true});}await batch.commit();renderBots(count);setStatus('🏆 Puntuaciones simuladas para '+count+' bots. El ranking del torneo ya puede mostrar resultados de prueba.',true);}
+async function cleanup(){const id=select.value;if(!id){setStatus('Selecciona un torneo.');return;}if(!(await isAdmin())){setStatus('⛔ Permiso de administrador requerido.');return;}if(!confirm('¿Eliminar los bots de prueba de este torneo?'))return;const ref=db.collection('tournaments').doc(id),[parts,scores]=await Promise.all([ref.collection('participants').where('isTestBot','==',true).get(),ref.collection('scores').where('isTestBot','==',true).get()]);const batch=db.batch();parts.forEach(d=>batch.delete(d.ref));scores.forEach(d=>batch.delete(d.ref));const snap=await ref.get(),t=snap.data()||{};batch.set(ref,{participantCount:Math.max(0,Number(t.participantCount||0)-parts.size),updatedAt:fb.firestore.FieldValue.serverTimestamp()},{merge:true});await batch.commit();botsBox.innerHTML='';setStatus('🧹 Eliminados '+parts.size+' bots y '+scores.size+' puntuaciones de prueba.',true);}
+async function boot(){try{await new Promise(resolve=>{if(auth.currentUser)return resolve();auth.onAuthStateChanged(()=>resolve());});if(!auth.currentUser){access.textContent='⛔ Debes iniciar sesión como administrador.';return;}const admin=await isAdmin();if(!admin){access.textContent='⛔ Acceso denegado. Esta herramienta requiere el custom claim admin=true.';return;}access.textContent='🟢 Administrador verificado.';panel.hidden=false;await loadTournaments();}catch(e){console.error(e);access.textContent='❌ No se pudo comprobar el acceso: '+(e.message||e);}}
+document.getElementById('create').onclick=()=>createBots().catch(e=>{console.error(e);setStatus('❌ '+(e.message||e));});
+document.getElementById('scores').onclick=()=>simulateScores().catch(e=>{console.error(e);setStatus('❌ '+(e.message||e));});
+document.getElementById('cleanup').onclick=()=>cleanup().catch(e=>{console.error(e);setStatus('❌ '+(e.message||e));});
+boot();
+})();
+</script>
+</body>
+</html>
