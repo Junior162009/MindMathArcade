@@ -1,7 +1,7 @@
 {
   "name": "mindmatharcade-functions",
   "private": true,
-  "engines": { "node": "20" },
+  "engines": { "node": "22" },
   "main": "index.js",
   "dependencies": {
     "firebase-admin": "^13.4.0",
