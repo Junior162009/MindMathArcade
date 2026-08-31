@@ -1,12 +1,19 @@
+```text
 rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
 
+    // ============================================================
+    // FUNCIONES GENERALES
+    // ============================================================
+
     function signedIn() {
       return request.auth != null;
     }
 
+    // Administradores oficiales de TecnoMath.
+    // Se mantiene el soporte por custom claim y por correo.
     function isAdmin() {
       return signedIn() && (
         request.auth.token.admin == true
@@ -17,73 +24,249 @@ service cloud.firestore {
       );
     }
 
-    // El acceso especial del tester se limita estrictamente a documentos
-    // identificados como bots. No concede permisos adicionales sobre usuarios.
+    // Comprueba que el ID utilizado para una operación
+    // corresponde a un bot del Tester de Torneos.
     function isBotId(uid) {
-      return uid.matches('bot_[A-Za-z0-9_-]+');
+      return uid.matches('bot_.*');
     }
 
-    function isBotData() {
-      return request.resource.data.isBot == true
-        && request.resource.data.botId is string
-        && isBotId(request.resource.data.botId);
+    // Comprueba que el documento nuevo es realmente un bot.
+    function isBotDocument() {
+      return request.resource.data.isBot == true;
     }
 
-    function existingBotData() {
-      return resource.data.isBot == true
-        && resource.data.botId is string
-        && isBotId(resource.data.botId);
-    }
+    // ============================================================
+    // TORNEOS
+    // ============================================================
 
     match /tournaments/{tournamentId} {
+
+      // Usuarios autenticados pueden consultar torneos.
       allow read: if signedIn();
+
+      // Solo administradores pueden crear/modificar/eliminar torneos.
       allow create, update, delete: if isAdmin();
 
+
+      // ==========================================================
+      // PARTICIPANTES
+      // ==========================================================
+
       match /participants/{uid} {
+
+        // Usuarios autenticados pueden consultar participantes.
         allow read: if signedIn();
 
-        // Usuario normal: solamente su propio documento.
-        allow create: if signedIn() && uid == request.auth.uid
-          || (isAdmin() && isBotId(uid) && isBotData());
 
-        allow update: if signedIn() && uid == request.auth.uid
-          || (isAdmin() && isBotId(uid) && existingBotData() && isBotData());
+        // --------------------------------------------------------
+        // CREAR PARTICIPANTE
+        // --------------------------------------------------------
+        //
+        // Usuario normal:
+        // Solo puede inscribirse él mismo.
+        //
+        // Administrador:
+        // Puede crear un bot, pero el ID debe comenzar por bot_
+        // y el documento debe tener isBot == true.
+        //
+        allow create: if signedIn() && (
 
-        allow delete: if signedIn() && uid == request.auth.uid
-          || (isAdmin() && isBotId(uid) && existingBotData());
+          // Usuario real
+          (
+            uid == request.auth.uid
+            && request.resource.data.isBot != true
+          )
+
+          ||
+
+          // Bot del Tester
+          (
+            isAdmin()
+            && isBotId(uid)
+            && isBotDocument()
+          )
+        );
+
+
+        // --------------------------------------------------------
+        // ACTUALIZAR PARTICIPANTE
+        // --------------------------------------------------------
+        //
+        // Usuario normal:
+        // Solo puede actualizar su propio registro.
+        //
+        // Administrador:
+        // Solo puede actualizar bots mediante el mecanismo del
+        // Tester.
+        //
+        allow update: if signedIn() && (
+
+          // Usuario real
+          (
+            uid == request.auth.uid
+            && resource.data.isBot != true
+            && request.resource.data.isBot != true
+          )
+
+          ||
+
+          // Bot
+          (
+            isAdmin()
+            && isBotId(uid)
+            && resource.data.isBot == true
+            && request.resource.data.isBot == true
+          )
+        );
+
+
+        // --------------------------------------------------------
+        // ELIMINAR PARTICIPANTE
+        // --------------------------------------------------------
+        //
+        // Usuario normal:
+        // Puede salir de su propio torneo.
+        //
+        // Administrador:
+        // Solo puede eliminar bots.
+        //
+        allow delete: if signedIn() && (
+
+          // Usuario real
+          (
+            uid == request.auth.uid
+            && resource.data.isBot != true
+          )
+
+          ||
+
+          // Bot
+          (
+            isAdmin()
+            && isBotId(uid)
+            && resource.data.isBot == true
+          )
+        );
       }
+
+
+      // ==========================================================
+      // SCORES
+      // ==========================================================
 
       match /scores/{uid} {
+
+        // Usuarios autenticados pueden consultar puntuaciones.
         allow read: if signedIn();
 
-        // Usuario normal: solamente su propio score.
-        // Tester: solamente scores sintéticos de bots.
-        allow create: if signedIn() && uid == request.auth.uid
-          || (isAdmin() && isBotId(uid) && isBotData());
 
-        allow update: if signedIn() && uid == request.auth.uid
-          || (isAdmin() && isBotId(uid) && existingBotData() && isBotData());
+        // --------------------------------------------------------
+        // CREAR SCORE
+        // --------------------------------------------------------
+        //
+        // Usuario normal:
+        // Solo puede crear su propio score.
+        //
+        // Administrador:
+        // Puede crear score de un bot.
+        //
+        allow create: if signedIn() && (
 
-        allow delete: if isAdmin() && isBotId(uid) && existingBotData();
+          // Usuario real
+          (
+            uid == request.auth.uid
+            && request.resource.data.isBot != true
+          )
+
+          ||
+
+          // Bot
+          (
+            isAdmin()
+            && isBotId(uid)
+            && request.resource.data.isBot == true
+          )
+        );
+
+
+        // --------------------------------------------------------
+        // ACTUALIZAR SCORE
+        // --------------------------------------------------------
+        allow update: if signedIn() && (
+
+          // Usuario real
+          (
+            uid == request.auth.uid
+            && resource.data.isBot != true
+            && request.resource.data.isBot != true
+          )
+
+          ||
+
+          // Bot
+          (
+            isAdmin()
+            && isBotId(uid)
+            && resource.data.isBot == true
+            && request.resource.data.isBot == true
+          )
+        );
+
+
+        // --------------------------------------------------------
+        // ELIMINAR SCORE
+        // --------------------------------------------------------
+        //
+        // Solo administradores pueden eliminar scores de bots.
+        //
+        allow delete: if isAdmin()
+          && isBotId(uid)
+          && resource.data.isBot == true;
       }
     }
+
+
+    // ============================================================
+    // LEADERBOARDS
+    // ============================================================
 
     match /leaderboards/{boardId} {
+
       allow read: if signedIn();
+
+
       match /players/{uid} {
+
         allow read: if signedIn();
-        allow create, update: if signedIn() && uid == request.auth.uid;
+
+        // Usuario administra únicamente su propio ranking.
+        allow create, update: if signedIn()
+          && uid == request.auth.uid;
+
         allow delete: if isAdmin();
       }
+
+
       match /games/{gameId}/{uid} {
+
         allow read: if signedIn();
-        allow create, update: if signedIn() && uid == request.auth.uid;
+
+        // Usuario administra únicamente su propio resultado.
+        allow create, update: if signedIn()
+          && uid == request.auth.uid;
+
         allow delete: if isAdmin();
       }
     }
+
+
+    // ============================================================
+    // BLOQUEO POR DEFECTO
+    // ============================================================
 
     match /{document=**} {
       allow read, write: if false;
     }
   }
 }
+```
