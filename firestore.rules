@@ -7,9 +7,17 @@ service cloud.firestore {
       return request.auth != null;
     }
 
+    // Administradores reconocidos por el custom claim o por la lista
+    // oficial de correos que ya utiliza TecnoMath. El fallback por correo
+    // permite que el panel siga funcionando mientras el claim se propaga.
     function isAdmin() {
-      return signedIn()
-        && request.auth.token.admin == true;
+      return signedIn() && (
+        request.auth.token.admin == true
+        || request.auth.token.email == 'delahozbarcelojunior@gmail.com'
+        || request.auth.token.email == 'nicolenatera26@gmail.com'
+        || request.auth.token.email == 'mateobarbosamatos@gmail.com'
+        || request.auth.token.email == 'jandresvf23@gmail.com'
+      );
     }
 
     // =========================
@@ -28,19 +36,18 @@ service cloud.firestore {
           || (signedIn() && uid == request.auth.uid);
       }
 
-      // Scores are written only by the trusted Cloud Function.
-      // Players can read their rankings, but cannot forge or edit scores.
+      // Las puntuaciones normales las escribe la Cloud Function confiable.
+      // El admin puede operar sobre ellas para mantenimiento/pruebas.
       match /scores/{uid} {
         allow read: if signedIn();
-        allow write: if isAdmin();
+        allow create, update: if isAdmin();
+        allow delete: if isAdmin();
       }
     }
 
     // =========================
     // RANKING GLOBAL
-    // /leaderboards/global/players/{uid}
     // =========================
-    // Written only by recordCompetitionScore in Cloud Functions.
     match /leaderboards/global/players/{uid} {
       allow read: if signedIn();
       allow write: if isAdmin();
@@ -48,9 +55,7 @@ service cloud.firestore {
 
     // =========================
     // RANKING POR JUEGO
-    // /leaderboards/games/{gameId}/{uid}
     // =========================
-    // Written only by recordCompetitionScore in Cloud Functions.
     match /leaderboards/games/{gameId}/{uid} {
       allow read: if signedIn();
       allow write: if isAdmin();
