@@ -1,8 +1,6 @@
 const {onCall, HttpsError} = require('firebase-functions/v2/https');
 const admin = require('firebase-admin');
 
-require('./index');
-
 if (!admin.apps.length) admin.initializeApp();
 const db = admin.firestore();
 const rtdb = admin.database();
@@ -20,10 +18,8 @@ const MAX_BOTS = 50;
 async function isAdmin(request) {
   if (!request.auth) return false;
   if (request.auth.token?.admin === true) return true;
-
   const email = String(request.auth.token?.email || '').trim().toLowerCase();
   if (ADMIN_EMAILS.has(email)) return true;
-
   try {
     const snap = await rtdb.ref(`users/${request.auth.uid}`).once('value');
     const profile = snap.val() || {};
@@ -35,18 +31,13 @@ async function isAdmin(request) {
 }
 
 async function requireTournamentAdmin(request) {
-  if (!request.auth) {
-    throw new HttpsError('unauthenticated', 'Debes iniciar sesión.');
-  }
-  if (!(await isAdmin(request))) {
-    throw new HttpsError('permission-denied', 'Solo los administradores pueden usar el tester de torneos.');
-  }
+  if (!request.auth) throw new HttpsError('unauthenticated', 'Debes iniciar sesión.');
+  if (!(await isAdmin(request))) throw new HttpsError('permission-denied', 'Solo los administradores pueden usar el tester de torneos.');
 }
 
 function cleanCount(value) {
   const n = Number(value);
-  if (!Number.isFinite(n)) return 5;
-  return Math.min(MAX_BOTS, Math.max(1, Math.floor(n)));
+  return Number.isFinite(n) ? Math.min(MAX_BOTS, Math.max(1, Math.floor(n))) : 5;
 }
 
 function botId(index) {
@@ -55,17 +46,20 @@ function botId(index) {
 
 function botProfile(id, index) {
   const names = ['Bot Relámpago','Bot Matemático','Bot Cerebro','Bot Pro','Bot Campeón','Bot Ninja','Bot Turbo','Bot Genio','Bot Estratega','Bot Élite'];
-  return {
-    uid: id,
-    name: `${names[index % names.length]} ${index + 1}`,
-    photo: '',
-    isBot: true,
-    bot: true
-  };
+  return { uid:id, name:`${names[index % names.length]} ${index + 1}`, photo:'', isBot:true, bot:true, status:'registered', source:'tournament-tester' };
 }
 
 function randomScore(index) {
   return 300 + (index * 137) % 700 + Math.floor(Math.random() * 500);
+}
+
+async function syncParticipantCount(tournamentRef) {
+  const snap = await tournamentRef.collection('participants').get();
+  await tournamentRef.set({
+    participantCount: snap.size,
+    updatedAt: admin.firestore.FieldValue.serverTimestamp()
+  }, {merge:true});
+  return snap.size;
 }
 
 exports.createTournamentBots = onCall(async request => {
@@ -78,21 +72,38 @@ exports.createTournamentBots = onCall(async request => {
   const tournamentSnap = await tournamentRef.get();
   if (!tournamentSnap.exists) throw new HttpsError('not-found', 'El torneo seleccionado no existe.');
 
+  const tournament = tournamentSnap.data() || {};
+  const maxPlayers = Number(tournament.maxPlayers || 0);
+  const existingParticipants = await tournamentRef.collection('participants').get();
+  const existingBotIds = new Set(
+    existingParticipants.docs.filter(d => d.data()?.isBot === true).map(d => d.id)
+  );
+  const available = maxPlayers > 0 ? Math.max(0, maxPlayers - existingParticipants.size) : count;
+  const target = Math.min(count, available);
+
+  if (target <= 0) {
+    await syncParticipantCount(tournamentRef);
+    throw new HttpsError('failed-precondition', maxPlayers > 0 ? 'No hay cupos disponibles para más bots.' : 'No se pudieron crear bots.');
+  }
+
   const batch = db.batch();
   const created = [];
-  for (let i = 0; i < count; i++) {
-    const id = botId(i);
-    const participantRef = tournamentRef.collection('participants').doc(id);
-    batch.set(participantRef, {
-      ...botProfile(id, i),
-      joinedAt: admin.firestore.FieldValue.serverTimestamp(),
-      source: 'tournament-tester'
-    }, {merge: true});
+  let nextIndex = 0;
+  while (created.length < target) {
+    const id = botId(nextIndex++);
+    if (existingBotIds.has(id)) continue;
+    const ref = tournamentRef.collection('participants').doc(id);
+    batch.set(ref, {
+      ...botProfile(id, Number(id.slice(-3)) - 1),
+      joinedAt: admin.firestore.FieldValue.serverTimestamp()
+    }, {merge:true});
     created.push(id);
   }
   await batch.commit();
-  await tournamentRef.set({tester:{lastAction:'create-bots',lastActionAt:admin.firestore.FieldValue.serverTimestamp(),lastActionBy:request.auth.uid}},{merge:true});
-  return {ok:true,created:created.length,bots:created};
+
+  const participantCount = await syncParticipantCount(tournamentRef);
+  await tournamentRef.set({tester:{lastAction:'create-bots',lastActionAt:admin.firestore.FieldValue.serverTimestamp(),lastActionBy:request.auth.uid}}, {merge:true});
+  return {ok:true,created:created.length,bots:created,participantCount};
 });
 
 exports.simulateTournamentBotScores = onCall(async request => {
@@ -113,19 +124,18 @@ exports.simulateTournamentBotScores = onCall(async request => {
   selected.forEach((doc,index) => {
     const participant = doc.data() || {};
     batch.set(tournamentRef.collection('scores').doc(doc.id), {
-      uid: doc.id,
-      name: participant.name || `Bot ${index + 1}`,
-      photo: '',
-      score: randomScore(index),
-      gameId: tournamentSnap.data()?.gameId || 'tournament-test',
-      plays: 1,
-      isBot: true,
-      bot: true,
-      updatedAt: admin.firestore.FieldValue.serverTimestamp()
+      uid:doc.id,
+      name:participant.name || `Bot ${index + 1}`,
+      photo:'',
+      score:randomScore(index),
+      gameId:tournamentSnap.data()?.gameId || 'tournament-test',
+      plays:1,
+      isBot:true,
+      bot:true,
+      updatedAt:admin.firestore.FieldValue.serverTimestamp()
     }, {merge:true});
   });
   await batch.commit();
-  await tournamentRef.set({tester:{lastAction:'simulate-scores',lastActionAt:admin.firestore.FieldValue.serverTimestamp(),lastActionBy:request.auth.uid}},{merge:true});
   return {ok:true,updated:selected.length};
 });
 
@@ -139,26 +149,17 @@ exports.cleanupTournamentBots = onCall(async request => {
     tournamentRef.collection('participants').where('isBot','==',true).get(),
     tournamentRef.collection('scores').where('isBot','==',true).get()
   ]);
-
   const refs = [...participantsSnap.docs.map(d=>d.ref),...scoresSnap.docs.map(d=>d.ref)];
-  let deleted = 0;
   for (let i=0;i<refs.length;i+=450) {
-    const batch = db.batch();
+    const batch=db.batch();
     refs.slice(i,i+450).forEach(ref=>batch.delete(ref));
     await batch.commit();
-    deleted += Math.min(450, refs.length-i);
   }
-
-  await tournamentRef.set({tester:{lastAction:'cleanup-bots',lastActionAt:admin.firestore.FieldValue.serverTimestamp(),lastActionBy:request.auth.uid}},{merge:true});
-  return {ok:true,deleted,participants:participantsSnap.size,scores:scoresSnap.size};
+  const participantCount = await syncParticipantCount(tournamentRef);
+  return {ok:true,deleted:refs.length,participants:participantsSnap.size,scores:scoresSnap.size,participantCount};
 });
 
 exports.checkTournamentTesterAdmin = onCall(async request => {
   if (!request.auth) throw new HttpsError('unauthenticated','Debes iniciar sesión.');
-  return {
-    ok:true,
-    admin:await isAdmin(request),
-    uid:request.auth.uid,
-    email:request.auth.token?.email || null
-  };
+  return {ok:true,admin:await isAdmin(request),uid:request.auth.uid,email:request.auth.token?.email || null};
 });
