@@ -1,31 +1,1726 @@
-const {onValueCreated,onValueWritten}=require('firebase-functions/v2/database');
-const {onCall,HttpsError}=require('firebase-functions/v2/https');
-const {defineSecret}=require('firebase-functions/params');
-const admin=require('firebase-admin');
-const {onDocumentUpdated}=require('firebase-functions/v2/firestore');
+const {onValueCreated, onValueWritten} = require('firebase-functions/v2/database');
+const {onCall, HttpsError} = require('firebase-functions/v2/https');
+const {defineSecret} = require('firebase-functions/params');
+const admin = require('firebase-admin');
+const {onDocumentUpdated} = require('firebase-functions/v2/firestore');
+
 admin.initializeApp();
-const db=admin.database();
-const firestore=admin.firestore();
-const RESEND_API_KEY=defineSecret('RESEND_API_KEY');
-const GITHUB_TOKEN=defineSecret('GITHUB_TOKEN');
-const EMAIL_FROM=defineSecret('EMAIL_FROM');
-const ADMINS=['delahozbarcelojunior@gmail.com','nicolenatera26@gmail.com','mateobarbosamatos@gmail.com','jandresvf23@gmail.com'];
-const OWNER='Junior162009';
-const REPO='MindMathArcade';
-const esc=value=>String(value??'').replace(/[&<>'"]/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[char]));
-async function github(path,options={}){const response=await fetch(`https://api.github.com${path}`,{...options,headers:{accept:'application/vnd.github+json',authorization:`Bearer ${GITHUB_TOKEN.value()}`,'X-GitHub-Api-Version':'2022-11-28',...(options.headers||{})}});if(!response.ok)throw new Error(`GitHub ${response.status}: ${await response.text()}`);if(response.status===204)return null;return response.json();}
-async function sendEmail(to,subject,htmlBody){const key=RESEND_API_KEY.value();if(!key||!to)return false;const from=EMAIL_FROM.value()||'TecnoMath <notificaciones@tecnomath.online>';const response=await fetch('https://api.resend.com/emails',{method:'POST',headers:{Authorization:`Bearer ${key}`,'Content-Type':'application/json'},body:JSON.stringify({from,to:[to],subject,html:htmlBody})});if(!response.ok){console.error('Resend:',await response.text());return false;}return true;}
-async function syncAdminClaimForUid(uid){const snapshot=await db.ref(`users/${uid}`).once('value');const profile=snapshot.val()||{};const isAdmin=String(profile.role||'').toLowerCase()==='admin';const userRecord=await admin.auth().getUser(uid);const currentClaims={...(userRecord.customClaims||{})};if(currentClaims.admin!==isAdmin){if(isAdmin)currentClaims.admin=true;else delete currentClaims.admin;await admin.auth().setCustomUserClaims(uid,currentClaims);console.log(`ADMIN CLAIM SYNC ${uid}: ${isAdmin?'enabled':'disabled'}`);}return isAdmin;}
-exports.syncAdminClaim=onCall(async request=>{if(!request.auth)throw new HttpsError('unauthenticated','Debes iniciar sesión.');try{return{admin:await syncAdminClaimForUid(request.auth.uid)};}catch(error){console.error(`ERROR SYNC ADMIN CLAIM ${request.auth.uid}:`,error);throw new HttpsError('internal','No se pudo sincronizar el permiso de administrador.');}});
-exports.syncAdminClaimOnUserChange=onValueWritten({ref:'/users/{uid}'},async event=>{const before=event.data.before.val()||{};const after=event.data.after.val()||{};if(String(before.role||'').toLowerCase()===String(after.role||'').toLowerCase())return;try{await syncAdminClaimForUid(event.params.uid);}catch(error){console.error(`ERROR ADMIN CLAIM SYNC ${event.params.uid}:`,error);}});
-function requireAdmin(request){if(!request.auth)throw new HttpsError('unauthenticated','Debes iniciar sesión.');if(request.auth.token?.admin!==true)throw new HttpsError('permission-denied','Se requiere permiso de administrador.');}
-function tournamentState(data){if(['finished','cancelled'].includes(data.status))return data.status;const now=Date.now(),start=data.startAt?.toMillis?.()||0,end=data.endAt?.toMillis?.()||Infinity;return now<start?'upcoming':now>end?'finished':'active';}
-function parsePrize(value){if(value&&typeof value==='object')return{xp:Math.max(0,Number(value.xp)||0),coins:Math.max(0,Number(value.coins)||0)};const text=String(value||'').toLowerCase(),xm=text.match(/([\d.,]+)\s*(?:xp|experiencia)/i),cm=text.match(/([\d.,]+)\s*(?:monedas?|coins?)/i),num=s=>Number(String(s||'').replace(/\./g,'').replace(',','.'))||0;return{xp:Math.max(0,Math.floor(num(xm?.[1]))),coins:Math.max(0,Math.floor(num(cm?.[1])))}};
-async function awardTournamentPrizes(tournamentId,tournament,ranking){const winners=ranking.slice(0,3),prizes=[tournament.prizes?.first||tournament.prize||'',tournament.prizes?.second||'',tournament.prizes?.third||''].map(parsePrize),rewards=[];for(let i=0;i<winners.length;i++){const winner=winners[i],prize=prizes[i]||{xp:0,coins:0};if(!winner.uid||(!prize.xp&&!prize.coins))continue;const progressRef=db.ref(`userProgress/${winner.uid}/global`),rewardKey=`${tournamentId}_${winner.uid}_${i+1}`;let awarded=false;await progressRef.transaction(current=>{const data=current&&typeof current==='object'?{...current}:{xp:0,coins:0,level:1,games:0,correct:0,wrong:0,topics:{},achievements:[]},rewardsMap={...(data.tournamentRewards||{})};if(rewardsMap[rewardKey])return data;data.xp=Math.max(0,Number(data.xp)||0)+prize.xp;data.coins=Math.max(0,Number(data.coins)||0)+prize.coins;data.level=Math.floor(Math.sqrt(data.xp/100))+1;rewardsMap[rewardKey]={tournamentId,rank:i+1,xp:prize.xp,coins:prize.coins,awardedAt:admin.database.ServerValue.TIMESTAMP};data.tournamentRewards=rewardsMap;data.updatedAt=admin.database.ServerValue.TIMESTAMP;awarded=true;return data;});if(awarded)await db.ref(`notifications/${winner.uid}`).push({type:'tournament_reward',title:'🏆 Premio de torneo',message:`Terminaste #${i+1} en ${tournament.name||'el torneo'} y recibiste ${prize.xp} XP y ${prize.coins} monedas.`,tournamentId,rank:i+1,xp:prize.xp,coins:prize.coins,createdAt:admin.database.ServerValue.TIMESTAMP,read:false});rewards.push({uid:winner.uid,rank:i+1,...prize,awarded});}return rewards;}
-exports.recordCompetitionScore=onCall(async request=>{if(!request.auth)throw new HttpsError('unauthenticated','Debes iniciar sesión.');const uid=request.auth.uid,gameId=String(request.data?.gameId||'').trim(),score=Math.max(0,Math.floor(Number(request.data?.score)||0)),extra=request.data?.extra&&typeof request.data.extra==='object'?request.data.extra:{};if(!gameId||gameId.length>100)throw new HttpsError('invalid-argument','Juego inválido.');if(!Number.isFinite(score)||score<0)throw new HttpsError('invalid-argument','Puntuación inválida.');const userRecord=await admin.auth().getUser(uid),profile={uid,name:userRecord.displayName||userRecord.email?.split('@')[0]||'Jugador',photo:userRecord.photoURL||''},globalRef=firestore.doc(`leaderboards/global/players/${uid}`),gameRef=firestore.doc(`leaderboards/games/${gameId}/${uid}`),globalSnap=await globalRef.get(),gameSnap=await gameRef.get(),oldGlobal=globalSnap.exists?globalSnap.data():{},oldGame=gameSnap.exists?gameSnap.data():{},gameBest=Math.max(Number(oldGlobal.gameScores?.[gameId])||0,score),batch=firestore.batch();batch.set(globalRef,{...profile,score:(Number(oldGlobal.score)||0)+score,games:(Number(oldGlobal.games)||0)+1,gameScores:{...(oldGlobal.gameScores||{}),[gameId]:gameBest},updatedAt:admin.firestore.FieldValue.serverTimestamp()},{merge:true});batch.set(gameRef,{...profile,score:Math.max(Number(oldGame.score)||0,score),updatedAt:admin.firestore.FieldValue.serverTimestamp()},{merge:true});const tournamentSnap=await firestore.collection('tournaments').where('status','in',['active','upcoming']).get(),tournamentIds=[];for(const doc of tournamentSnap.docs){const t=doc.data();if(tournamentState(t)!=='active'||(t.gameId&&t.gameId!==gameId))continue;const participant=await doc.ref.collection('participants').doc(uid).get();if(!participant.exists)continue;const scoreRef=doc.ref.collection('scores').doc(uid),scoreSnap=await scoreRef.get(),old=scoreSnap.exists?scoreSnap.data():{},best=Math.max(Number(old.score)||0,score);batch.set(scoreRef,{...profile,score:best,gameId,plays:(Number(old.plays)||0)+1,updatedAt:admin.firestore.FieldValue.serverTimestamp(),extra},{merge:true});tournamentIds.push(doc.id);}await batch.commit();return{ok:true,tournaments:tournamentIds,score};});
-exports.finalizeTournament=onCall(async request=>{requireAdmin(request);const tournamentId=String(request.data?.tournamentId||'').trim();if(!tournamentId)throw new HttpsError('invalid-argument','Torneo inválido.');const ref=firestore.collection('tournaments').doc(tournamentId),snap=await ref.get();if(!snap.exists)throw new HttpsError('not-found','Torneo no encontrado.');const tournament=snap.data();if(tournament.status==='cancelled')throw new HttpsError('failed-precondition','El torneo está cancelado.');if(tournament.status==='finished')return{ok:true,alreadyFinished:true,winners:tournament.winners||[],ranking:tournament.finalRanking||[]};const scoreSnap=await ref.collection('scores').orderBy('score','desc').get(),ranking=scoreSnap.docs.map((doc,index)=>({rank:index+1,...doc.data(),uid:doc.id}));const locked=await firestore.runTransaction(async tx=>{const current=await tx.get(ref),data=current.data()||{};if(data.status==='finished')return false;tx.update(ref,{status:'finalizing',finalizingAt:admin.firestore.FieldValue.serverTimestamp(),updatedAt:admin.firestore.FieldValue.serverTimestamp()});return true;});if(!locked){const latest=(await ref.get()).data()||{};return{ok:true,alreadyFinished:true,winners:latest.winners||[],ranking:latest.finalRanking||[]};}const rewards=await awardTournamentPrizes(tournamentId,tournament,ranking),winners=ranking.slice(0,3);await ref.update({status:'finished',finishedAt:admin.firestore.FieldValue.serverTimestamp(),winners,finalRanking:ranking,rewards,prizesAwardedAt:admin.firestore.FieldValue.serverTimestamp(),updatedAt:admin.firestore.FieldValue.serverTimestamp()});return{ok:true,winners,ranking,rewards};});
-exports.finalizeTournamentOnStatusChange=onDocumentUpdated('tournaments/{tournamentId}',async event=>{const before=event.data.before.data()||{},after=event.data.after.data()||{};if(before.status==='finished'||after.status!=='finished'||after.prizesAwardedAt)return;try{const ref=firestore.collection('tournaments').doc(event.params.tournamentId),scores=await ref.collection('scores').orderBy('score','desc').get(),ranking=scores.docs.map((doc,index)=>({rank:index+1,...doc.data(),uid:doc.id})),rewards=await awardTournamentPrizes(event.params.tournamentId,after,ranking);await ref.update({winners:ranking.slice(0,3),finalRanking:ranking,rewards,prizesAwardedAt:admin.firestore.FieldValue.serverTimestamp(),updatedAt:admin.firestore.FieldValue.serverTimestamp()});}catch(error){console.error(`ERROR TOURNAMENT FINALIZATION ${event.params.tournamentId}:`,error);}});
-async function sendAuthorStatusEmail(submissionId,before,after){const email=String(after.authorEmail||'').trim();if(!email)return;const previousStatus=String(before?.status||'').toLowerCase(),status=String(after.status||'').toLowerCase(),notificationKey={reviewing:'reviewing',approved:'approved',rejected:'rejected',published:'published'}[status];if(!notificationKey||previousStatus===status)return;const sent={...(after.emailNotifications||{})};if(sent[notificationKey])return;const author=esc(after.authorName||'Usuario'),game=esc(after.name||'tu juego');let subject='',body='';if(status==='reviewing'){subject='🔍 Tu juego está siendo revisado';body=`<h2>🔍 Estamos revisando tu juego</h2><p>Hola ${author}, un administrador ya está revisando <b>${game}</b>.</p><p>Te avisaremos cuando haya una nueva actualización.</p>`;}else if(status==='approved'){subject='✅ ¡Tu juego fue aprobado!';body=`<h2>✅ ¡Buenas noticias!</h2><p>Hola ${author}, tu juego <b>${game}</b> fue aprobado por un administrador.</p><p>Ahora pasará automáticamente al proceso de publicación. Te enviaremos otro correo cuando esté disponible para jugar.</p>`;}else if(status==='published'){const url=esc(after.publishedUrl||'https://tecnomath.online');subject='🎉 ¡Tu juego ya está publicado!';body=`<h2>🎉 ¡Tu juego ya está publicado!</h2><p>Hola ${author}, <b>${game}</b> ya está disponible en TecnoMath.</p><p><a href="${url}">🎮 Abrir mi juego</a></p>`;}else if(status==='rejected'){const reason=esc(after.rejectionReason||after.reviewReason||'No cumple los requisitos de publicación actualmente.');subject='❌ Actualización sobre tu juego';body=`<h2>❌ Tu juego no fue aprobado</h2><p>Hola ${author}, después de revisar <b>${game}</b>, no fue aprobado por el momento.</p><p><b>Motivo:</b> ${reason}</p><p>Puedes realizar las correcciones necesarias y volver a enviarlo.</p>`;}if(!subject||!body)return;try{const sentSuccessfully=await sendEmail(email,subject,body);if(sentSuccessfully){await db.ref(`gameSubmissions/${submissionId}/emailNotifications/${notificationKey}`).set(true);await db.ref(`gameSubmissions/${submissionId}/emailNotifications/${notificationKey}At`).set(admin.database.ServerValue.TIMESTAMP);console.log(`EMAIL AUTHOR SENT ${notificationKey}: ${email}`);}}catch(error){console.error(`ERROR AUTHOR EMAIL ${submissionId}:`,error);}}
-exports.notifyGameSubmission=onValueCreated({ref:'/gameSubmissions/{submissionId}',secrets:[RESEND_API_KEY,EMAIL_FROM]},async event=>{const data=event.data.val();if(!data)return;const key=RESEND_API_KEY.value();if(!key)return;const from=EMAIL_FROM.value()||'TecnoMath <onboarding@resend.dev>';for(const to of ADMINS){const response=await fetch('https://api.resend.com/emails',{method:'POST',headers:{Authorization:`Bearer ${key}`,'Content-Type':'application/json'},body:JSON.stringify({from,to:[to],subject:`🎮 Nuevo juego pendiente: ${data.name||'Sin nombre'}`,html:`<h2>🎮 Nuevo juego enviado a TecnoMath</h2><p><b>Juego:</b> ${esc(data.name||'')}</p><p><b>Autor:</b> ${esc(data.authorName||'')}</p><p><b>Correo:</b> ${esc(data.authorEmail||'')}</p><p><b>Categoría:</b> ${esc(data.category||'otros')}</p><p>${esc(data.description||'')}</p><p>Entra al panel de administración para revisar y aprobar la solicitud.</p>`})});if(!response.ok)console.error('Resend:',await response.text());}const authorEmail=String(data.authorEmail||'').trim();if(authorEmail){const author=esc(data.authorName||'Usuario'),game=esc(data.name||'tu juego'),initialSent=await sendEmail(authorEmail,'🎮 Hemos recibido tu juego',`<h2>🎮 ¡Juego recibido!</h2><p>Hola ${author}, hemos recibido <b>${game}</b> correctamente.</p><p>Tu juego quedó pendiente de revisión. Te avisaremos por correo cada vez que cambie su estado.</p>`);if(initialSent){await db.ref(`gameSubmissions/${event.params.submissionId}/emailNotifications/received`).set(true);await db.ref(`gameSubmissions/${event.params.submissionId}/emailNotifications/receivedAt`).set(admin.database.ServerValue.TIMESTAMP);console.log(`EMAIL AUTHOR SENT received: ${authorEmail}`);}}await db.ref(`gameSubmissions/${event.params.submissionId}`).update({emailStatus:'admins-sent',emailSentAt:admin.database.ServerValue.TIMESTAMP});});
-exports.notifyGameStatusChange=onValueWritten({ref:'/gameSubmissions/{submissionId}',secrets:[RESEND_API_KEY,EMAIL_FROM]},async event=>{if(!event.data.after.exists())return;await sendAuthorStatusEmail(event.params.submissionId,event.data.before.val()||{},event.data.after.val()||{});});
-exports.publishApprovedGame=onValueWritten({ref:'/gameSubmissions/{submissionId}',secrets:[GITHUB_TOKEN]},async event=>{const after=event.data.after.val()||{},submissionId=event.params.submissionId;if(after.status!=='approved'||after.publishedAt||after.publicationTriggeredAt)return;const queueRef=db.ref(`publicGameQueue/${submissionId}`),existingQueue=await queueRef.once('value');if(!existingQueue.exists())await queueRef.set({...after,status:'approved',submissionId});await github(`/repos/${OWNER}/${REPO}/dispatches`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({event_type:'game-approved',client_payload:{submissionId}})});await db.ref(`gameSubmissions/${submissionId}`).update({publicationTrigger:'github-actions',publicationTriggeredAt:admin.database.ServerValue.TIMESTAMP});});
+
+const db = admin.database();
+const firestore = admin.firestore();
+
+const RESEND_API_KEY = defineSecret('RESEND_API_KEY');
+const GITHUB_TOKEN = defineSecret('GITHUB_TOKEN');
+const EMAIL_FROM = defineSecret('EMAIL_FROM');
+
+const ADMINS = [
+  'delahozbarcelojunior@gmail.com',
+  'nicolenatera26@gmail.com',
+  'mateobarbosamatos@gmail.com',
+  'jandresvf23@gmail.com'
+];
+
+const OWNER = 'Junior162009';
+const REPO = 'MindMathArcade';
+
+const BOT_PREFIX = 'TM_BOT_';
+
+const esc = value =>
+  String(value ?? '').replace(
+    /[&<>'"]/g,
+    char => ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      "'": '&#39;',
+      '"': '&quot;'
+    }[char])
+  );
+
+async function github(path, options = {}) {
+  const response = await fetch(`https://api.github.com${path}`, {
+    ...options,
+    headers: {
+      accept: 'application/vnd.github+json',
+      authorization: `Bearer ${GITHUB_TOKEN.value()}`,
+      'X-GitHub-Api-Version': '2022-11-28',
+      ...(options.headers || {})
+    }
+  });
+
+  if (!response.ok) {
+    throw new Error(
+      `GitHub ${response.status}: ${await response.text()}`
+    );
+  }
+
+  if (response.status === 204) return null;
+
+  return response.json();
+}
+
+async function sendEmail(to, subject, htmlBody) {
+  const key = RESEND_API_KEY.value();
+
+  if (!key || !to) return false;
+
+  const from =
+    EMAIL_FROM.value() ||
+    'TecnoMath <notificaciones@tecnomath.online>';
+
+  const response = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${key}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      from,
+      to: [to],
+      subject,
+      html: htmlBody
+    })
+  });
+
+  if (!response.ok) {
+    console.error('Resend:', await response.text());
+    return false;
+  }
+
+  return true;
+}
+
+
+/* =========================================================
+   SINCRONIZACIÓN ADMIN CLAIM
+   ========================================================= */
+
+async function syncAdminClaimForUid(uid) {
+  const snapshot = await db.ref(`users/${uid}`).once('value');
+  const profile = snapshot.val() || {};
+
+  const isAdmin =
+    String(profile.role || '').toLowerCase() === 'admin';
+
+  const userRecord = await admin.auth().getUser(uid);
+
+  const currentClaims = {
+    ...(userRecord.customClaims || {})
+  };
+
+  if (currentClaims.admin !== isAdmin) {
+    if (isAdmin) {
+      currentClaims.admin = true;
+    } else {
+      delete currentClaims.admin;
+    }
+
+    await admin.auth().setCustomUserClaims(uid, currentClaims);
+
+    console.log(
+      `ADMIN CLAIM SYNC ${uid}: ${
+        isAdmin ? 'enabled' : 'disabled'
+      }`
+    );
+  }
+
+  return isAdmin;
+}
+
+exports.syncAdminClaim = onCall(async request => {
+  if (!request.auth) {
+    throw new HttpsError(
+      'unauthenticated',
+      'Debes iniciar sesión.'
+    );
+  }
+
+  try {
+    return {
+      admin: await syncAdminClaimForUid(request.auth.uid)
+    };
+  } catch (error) {
+    console.error(
+      `ERROR SYNC ADMIN CLAIM ${request.auth.uid}:`,
+      error
+    );
+
+    throw new HttpsError(
+      'internal',
+      'No se pudo sincronizar el permiso de administrador.'
+    );
+  }
+});
+
+exports.syncAdminClaimOnUserChange = onValueWritten(
+  {
+    ref: '/users/{uid}'
+  },
+  async event => {
+    const before = event.data.before.val() || {};
+    const after = event.data.after.val() || {};
+
+    const beforeRole = String(
+      before.role || ''
+    ).toLowerCase();
+
+    const afterRole = String(
+      after.role || ''
+    ).toLowerCase();
+
+    if (beforeRole === afterRole) return;
+
+    try {
+      await syncAdminClaimForUid(event.params.uid);
+    } catch (error) {
+      console.error(
+        `ERROR ADMIN CLAIM SYNC ${event.params.uid}:`,
+        error
+      );
+    }
+  }
+);
+
+
+/* =========================================================
+   SEGURIDAD ADMIN
+   ========================================================= */
+
+function requireAdmin(request) {
+  if (!request.auth) {
+    throw new HttpsError(
+      'unauthenticated',
+      'Debes iniciar sesión.'
+    );
+  }
+
+  const email = String(
+    request.auth.token?.email || ''
+  ).toLowerCase();
+
+  const hasAdminClaim =
+    request.auth.token?.admin === true;
+
+  const isKnownAdmin =
+    ADMINS.includes(email);
+
+  if (!hasAdminClaim && !isKnownAdmin) {
+    throw new HttpsError(
+      'permission-denied',
+      'Se requiere permiso de administrador.'
+    );
+  }
+}
+
+
+/* =========================================================
+   UTILIDADES DE TORNEOS
+   ========================================================= */
+
+function tournamentState(data) {
+  if (
+    ['finished', 'cancelled'].includes(
+      data.status
+    )
+  ) {
+    return data.status;
+  }
+
+  const now = Date.now();
+
+  const start =
+    data.startAt?.toMillis?.() || 0;
+
+  const end =
+    data.endAt?.toMillis?.() || Infinity;
+
+  return now < start
+    ? 'upcoming'
+    : now > end
+      ? 'finished'
+      : 'active';
+}
+
+function parsePrize(value) {
+  if (
+    value &&
+    typeof value === 'object'
+  ) {
+    return {
+      xp: Math.max(
+        0,
+        Number(value.xp) || 0
+      ),
+      coins: Math.max(
+        0,
+        Number(value.coins) || 0
+      )
+    };
+  }
+
+  const text =
+    String(value || '').toLowerCase();
+
+  const xm = text.match(
+    /([\d.,]+)\s*(?:xp|experiencia)/i
+  );
+
+  const cm = text.match(
+    /([\d.,]+)\s*(?:monedas?|coins?)/i
+  );
+
+  const num = s =>
+    Number(
+      String(s || '')
+        .replace(/\./g, '')
+        .replace(',', '.')
+    ) || 0;
+
+  return {
+    xp: Math.max(
+      0,
+      Math.floor(num(xm?.[1]))
+    ),
+    coins: Math.max(
+      0,
+      Math.floor(num(cm?.[1]))
+    )
+  };
+}
+
+
+/* =========================================================
+   PREMIOS DE TORNEOS
+   ========================================================= */
+
+async function awardTournamentPrizes(
+  tournamentId,
+  tournament,
+  ranking
+) {
+  const winners = ranking.slice(0, 3);
+
+  const prizes = [
+    tournament.prizes?.first ||
+      tournament.prize ||
+      '',
+    tournament.prizes?.second || '',
+    tournament.prizes?.third || ''
+  ].map(parsePrize);
+
+  const rewards = [];
+
+  for (
+    let i = 0;
+    i < winners.length;
+    i++
+  ) {
+    const winner = winners[i];
+
+    const prize =
+      prizes[i] || {
+        xp: 0,
+        coins: 0
+      };
+
+    if (
+      !winner.uid ||
+      (!prize.xp && !prize.coins)
+    ) {
+      continue;
+    }
+
+    const progressRef = db.ref(
+      `userProgress/${winner.uid}/global`
+    );
+
+    const rewardKey =
+      `${tournamentId}_${winner.uid}_${i + 1}`;
+
+    let awarded = false;
+
+    await progressRef.transaction(
+      current => {
+        const data =
+          current &&
+          typeof current === 'object'
+            ? {...current}
+            : {
+                xp: 0,
+                coins: 0,
+                level: 1,
+                games: 0,
+                correct: 0,
+                wrong: 0,
+                topics: {},
+                achievements: []
+              };
+
+        const rewardsMap = {
+          ...(data.tournamentRewards || {})
+        };
+
+        if (rewardsMap[rewardKey]) {
+          return data;
+        }
+
+        data.xp =
+          Math.max(
+            0,
+            Number(data.xp) || 0
+          ) + prize.xp;
+
+        data.coins =
+          Math.max(
+            0,
+            Number(data.coins) || 0
+          ) + prize.coins;
+
+        data.level =
+          Math.floor(
+            Math.sqrt(data.xp / 100)
+          ) + 1;
+
+        rewardsMap[rewardKey] = {
+          tournamentId,
+          rank: i + 1,
+          xp: prize.xp,
+          coins: prize.coins,
+          awardedAt:
+            admin.database.ServerValue.TIMESTAMP
+        };
+
+        data.tournamentRewards =
+          rewardsMap;
+
+        data.updatedAt =
+          admin.database.ServerValue.TIMESTAMP;
+
+        awarded = true;
+
+        return data;
+      }
+    );
+
+    if (awarded) {
+      await db
+        .ref(`notifications/${winner.uid}`)
+        .push({
+          type: 'tournament_reward',
+          title: '🏆 Premio de torneo',
+          message:
+            `Terminaste #${i + 1} en ${
+              tournament.name ||
+              'el torneo'
+            } y recibiste ${
+              prize.xp
+            } XP y ${
+              prize.coins
+            } monedas.`,
+          tournamentId,
+          rank: i + 1,
+          xp: prize.xp,
+          coins: prize.coins,
+          createdAt:
+            admin.database.ServerValue.TIMESTAMP,
+          read: false
+        });
+    }
+
+    rewards.push({
+      uid: winner.uid,
+      rank: i + 1,
+      ...prize,
+      awarded
+    });
+  }
+
+  return rewards;
+}
+
+
+/* =========================================================
+   REGISTRAR SCORE NORMAL
+   ========================================================= */
+
+exports.recordCompetitionScore = onCall(
+  async request => {
+    if (!request.auth) {
+      throw new HttpsError(
+        'unauthenticated',
+        'Debes iniciar sesión.'
+      );
+    }
+
+    const uid = request.auth.uid;
+
+    const gameId = String(
+      request.data?.gameId || ''
+    ).trim();
+
+    const score = Math.max(
+      0,
+      Math.floor(
+        Number(request.data?.score) || 0
+      )
+    );
+
+    const extra =
+      request.data?.extra &&
+      typeof request.data.extra === 'object'
+        ? request.data.extra
+        : {};
+
+    if (
+      !gameId ||
+      gameId.length > 100
+    ) {
+      throw new HttpsError(
+        'invalid-argument',
+        'Juego inválido.'
+      );
+    }
+
+    if (
+      !Number.isFinite(score) ||
+      score < 0
+    ) {
+      throw new HttpsError(
+        'invalid-argument',
+        'Puntuación inválida.'
+      );
+    }
+
+    const userRecord =
+      await admin.auth().getUser(uid);
+
+    const profile = {
+      uid,
+      name:
+        userRecord.displayName ||
+        userRecord.email?.split('@')[0] ||
+        'Jugador',
+      photo:
+        userRecord.photoURL || ''
+    };
+
+    const globalRef =
+      firestore.doc(
+        `leaderboards/global/players/${uid}`
+      );
+
+    const gameRef =
+      firestore.doc(
+        `leaderboards/games/${gameId}/${uid}`
+      );
+
+    const globalSnap =
+      await globalRef.get();
+
+    const gameSnap =
+      await gameRef.get();
+
+    const oldGlobal =
+      globalSnap.exists
+        ? globalSnap.data()
+        : {};
+
+    const oldGame =
+      gameSnap.exists
+        ? gameSnap.data()
+        : {};
+
+    const gameBest =
+      Math.max(
+        Number(
+          oldGlobal.gameScores?.[gameId]
+        ) || 0,
+        score
+      );
+
+    const batch =
+      firestore.batch();
+
+    batch.set(
+      globalRef,
+      {
+        ...profile,
+        score:
+          (Number(oldGlobal.score) || 0) +
+          score,
+        games:
+          (Number(oldGlobal.games) || 0) +
+          1,
+        gameScores: {
+          ...(oldGlobal.gameScores || {}),
+          [gameId]: gameBest
+        },
+        updatedAt:
+          admin.firestore.FieldValue
+            .serverTimestamp()
+      },
+      {merge: true}
+    );
+
+    batch.set(
+      gameRef,
+      {
+        ...profile,
+        score: Math.max(
+          Number(oldGame.score) || 0,
+          score
+        ),
+        updatedAt:
+          admin.firestore.FieldValue
+            .serverTimestamp()
+      },
+      {merge: true}
+    );
+
+    const tournamentSnap =
+      await firestore
+        .collection('tournaments')
+        .where(
+          'status',
+          'in',
+          ['active', 'upcoming']
+        )
+        .get();
+
+    const tournamentIds = [];
+
+    for (
+      const doc of tournamentSnap.docs
+    ) {
+      const t = doc.data();
+
+      if (
+        tournamentState(t) !== 'active' ||
+        (t.gameId &&
+          t.gameId !== gameId)
+      ) {
+        continue;
+      }
+
+      const participant =
+        await doc.ref
+          .collection('participants')
+          .doc(uid)
+          .get();
+
+      if (!participant.exists) {
+        continue;
+      }
+
+      const scoreRef =
+        doc.ref
+          .collection('scores')
+          .doc(uid);
+
+      const scoreSnap =
+        await scoreRef.get();
+
+      const old =
+        scoreSnap.exists
+          ? scoreSnap.data()
+          : {};
+
+      const best =
+        Math.max(
+          Number(old.score) || 0,
+          score
+        );
+
+      batch.set(
+        scoreRef,
+        {
+          ...profile,
+          score: best,
+          gameId,
+          plays:
+            (Number(old.plays) || 0) + 1,
+          updatedAt:
+            admin.firestore.FieldValue
+              .serverTimestamp(),
+          extra
+        },
+        {merge: true}
+      );
+
+      tournamentIds.push(
+        doc.id
+      );
+    }
+
+    await batch.commit();
+
+    return {
+      ok: true,
+      tournaments: tournamentIds,
+      score
+    };
+  }
+);
+
+
+/* =========================================================
+   FINALIZAR TORNEO
+   ========================================================= */
+
+exports.finalizeTournament = onCall(
+  async request => {
+    requireAdmin(request);
+
+    const tournamentId = String(
+      request.data?.tournamentId || ''
+    ).trim();
+
+    if (!tournamentId) {
+      throw new HttpsError(
+        'invalid-argument',
+        'Torneo inválido.'
+      );
+    }
+
+    const ref =
+      firestore
+        .collection('tournaments')
+        .doc(tournamentId);
+
+    const snap =
+      await ref.get();
+
+    if (!snap.exists) {
+      throw new HttpsError(
+        'not-found',
+        'Torneo no encontrado.'
+      );
+    }
+
+    const tournament =
+      snap.data();
+
+    if (
+      tournament.status ===
+      'cancelled'
+    ) {
+      throw new HttpsError(
+        'failed-precondition',
+        'El torneo está cancelado.'
+      );
+    }
+
+    if (
+      tournament.status ===
+      'finished'
+    ) {
+      return {
+        ok: true,
+        alreadyFinished: true,
+        winners:
+          tournament.winners || [],
+        ranking:
+          tournament.finalRanking || []
+      };
+    }
+
+    const scoreSnap =
+      await ref
+        .collection('scores')
+        .orderBy('score', 'desc')
+        .get();
+
+    const ranking =
+      scoreSnap.docs.map(
+        (doc, index) => ({
+          rank: index + 1,
+          ...doc.data(),
+          uid: doc.id
+        })
+      );
+
+    const locked =
+      await firestore.runTransaction(
+        async tx => {
+          const current =
+            await tx.get(ref);
+
+          const data =
+            current.data() || {};
+
+          if (
+            data.status ===
+            'finished'
+          ) {
+            return false;
+          }
+
+          tx.update(
+            ref,
+            {
+              status: 'finalizing',
+              finalizingAt:
+                admin.firestore.FieldValue
+                  .serverTimestamp(),
+              updatedAt:
+                admin.firestore.FieldValue
+                  .serverTimestamp()
+            }
+          );
+
+          return true;
+        }
+      );
+
+    if (!locked) {
+      const latest =
+        (await ref.get()).data() ||
+        {};
+
+      return {
+        ok: true,
+        alreadyFinished: true,
+        winners:
+          latest.winners || [],
+        ranking:
+          latest.finalRanking || []
+      };
+    }
+
+    const rewards =
+      await awardTournamentPrizes(
+        tournamentId,
+        tournament,
+        ranking
+      );
+
+    const winners =
+      ranking.slice(0, 3);
+
+    await ref.update({
+      status: 'finished',
+      finishedAt:
+        admin.firestore.FieldValue
+          .serverTimestamp(),
+      winners,
+      finalRanking: ranking,
+      rewards,
+      prizesAwardedAt:
+        admin.firestore.FieldValue
+          .serverTimestamp(),
+      updatedAt:
+        admin.firestore.FieldValue
+          .serverTimestamp()
+    });
+
+    return {
+      ok: true,
+      winners,
+      ranking,
+      rewards
+    };
+  }
+);
+
+
+/* =========================================================
+   FINALIZACIÓN AUTOMÁTICA
+   ========================================================= */
+
+exports.finalizeTournamentOnStatusChange =
+  onDocumentUpdated(
+    'tournaments/{tournamentId}',
+    async event => {
+      const before =
+        event.data.before.data() || {};
+
+      const after =
+        event.data.after.data() || {};
+
+      if (
+        before.status === 'finished' ||
+        after.status !== 'finished' ||
+        after.prizesAwardedAt
+      ) {
+        return;
+      }
+
+      try {
+        const ref =
+          firestore
+            .collection('tournaments')
+            .doc(
+              event.params.tournamentId
+            );
+
+        const scores =
+          await ref
+            .collection('scores')
+            .orderBy('score', 'desc')
+            .get();
+
+        const ranking =
+          scores.docs.map(
+            (doc, index) => ({
+              rank: index + 1,
+              ...doc.data(),
+              uid: doc.id
+            })
+          );
+
+        const rewards =
+          await awardTournamentPrizes(
+            event.params.tournamentId,
+            after,
+            ranking
+          );
+
+        await ref.update({
+          winners:
+            ranking.slice(0, 3),
+          finalRanking: ranking,
+          rewards,
+          prizesAwardedAt:
+            admin.firestore.FieldValue
+              .serverTimestamp(),
+          updatedAt:
+            admin.firestore.FieldValue
+              .serverTimestamp()
+        });
+      } catch (error) {
+        console.error(
+          `ERROR TOURNAMENT FINALIZATION ${event.params.tournamentId}:`,
+          error
+        );
+      }
+    }
+  );
+
+
+/* =========================================================
+   🤖 TESTER DE TORNEOS
+   ========================================================= */
+
+/**
+ * Crea bots sintéticos y los inscribe
+ * en un torneo.
+ *
+ * Los bots NO son usuarios de Firebase Auth.
+ *
+ * Solo un administrador puede ejecutar
+ * esta función.
+ */
+exports.createTournamentBots = onCall(
+  async request => {
+    requireAdmin(request);
+
+    const tournamentId =
+      String(
+        request.data?.tournamentId || ''
+      ).trim();
+
+    const requestedCount =
+      Number(
+        request.data?.count
+      );
+
+    const count = Math.min(
+      50,
+      Math.max(
+        1,
+        Number.isFinite(
+          requestedCount
+        )
+          ? Math.floor(
+              requestedCount
+            )
+          : 10
+      )
+    );
+
+    if (!tournamentId) {
+      throw new HttpsError(
+        'invalid-argument',
+        'Debes seleccionar un torneo.'
+      );
+    }
+
+    const tournamentRef =
+      firestore
+        .collection('tournaments')
+        .doc(tournamentId);
+
+    const tournamentSnap =
+      await tournamentRef.get();
+
+    if (!tournamentSnap.exists) {
+      throw new HttpsError(
+        'not-found',
+        'El torneo no existe.'
+      );
+    }
+
+    const tournament =
+      tournamentSnap.data();
+
+    if (
+      ['finished', 'cancelled']
+        .includes(tournament.status)
+    ) {
+      throw new HttpsError(
+        'failed-precondition',
+        'No puedes agregar bots a un torneo finalizado o cancelado.'
+      );
+    }
+
+    const participantsRef =
+      tournamentRef.collection(
+        'participants'
+      );
+
+    const createdBots = [];
+
+    let batch =
+      firestore.batch();
+
+    let batchOperations = 0;
+
+    for (
+      let i = 1;
+      i <= count;
+      i++
+    ) {
+      const botNumber =
+        String(i).padStart(2, '0');
+
+      const botUid =
+        `${BOT_PREFIX}${botNumber}`;
+
+      const botRef =
+        participantsRef.doc(botUid);
+
+      const botData = {
+        uid: botUid,
+        name: `🤖 Bot ${botNumber}`,
+        displayName: `🤖 Bot ${botNumber}`,
+        email: `${botUid.toLowerCase()}@bot.tecnomath.local`,
+        isBot: true,
+        synthetic: true,
+        tournamentBot: true,
+        joinedAt:
+          admin.firestore.FieldValue
+            .serverTimestamp(),
+        updatedAt:
+          admin.firestore.FieldValue
+            .serverTimestamp()
+      };
+
+      batch.set(
+        botRef,
+        botData,
+        {merge: true}
+      );
+
+      createdBots.push({
+        uid: botUid,
+        name: botData.name
+      });
+
+      batchOperations++;
+
+      if (
+        batchOperations >= 400
+      ) {
+        await batch.commit();
+
+        batch =
+          firestore.batch();
+
+        batchOperations = 0;
+      }
+    }
+
+    if (batchOperations > 0) {
+      await batch.commit();
+    }
+
+    return {
+      ok: true,
+      tournamentId,
+      count: createdBots.length,
+      bots: createdBots
+    };
+  }
+);
+
+
+/**
+ * Genera puntuaciones sintéticas
+ * para los bots del torneo.
+ *
+ * Solo administrador.
+ */
+exports.simulateTournamentBotScores =
+  onCall(async request => {
+    requireAdmin(request);
+
+    const tournamentId =
+      String(
+        request.data?.tournamentId || ''
+      ).trim();
+
+    if (!tournamentId) {
+      throw new HttpsError(
+        'invalid-argument',
+        'Debes seleccionar un torneo.'
+      );
+    }
+
+    const tournamentRef =
+      firestore
+        .collection('tournaments')
+        .doc(tournamentId);
+
+    const tournamentSnap =
+      await tournamentRef.get();
+
+    if (!tournamentSnap.exists) {
+      throw new HttpsError(
+        'not-found',
+        'El torneo no existe.'
+      );
+    }
+
+    const participantsSnap =
+      await tournamentRef
+        .collection('participants')
+        .where(
+          'tournamentBot',
+          '==',
+          true
+        )
+        .get();
+
+    if (
+      participantsSnap.empty
+    ) {
+      throw new HttpsError(
+        'failed-precondition',
+        'No hay bots inscritos en este torneo.'
+      );
+    }
+
+    let batch =
+      firestore.batch();
+
+    let operations = 0;
+
+    const generatedScores = [];
+
+    for (
+      const participantDoc
+      of participantsSnap.docs
+    ) {
+      const bot =
+        participantDoc.data();
+
+      const minScore = 100;
+      const maxScore = 1000;
+
+      const score =
+        Math.floor(
+          Math.random() *
+            (maxScore -
+              minScore +
+              1)
+        ) + minScore;
+
+      const scoreRef =
+        tournamentRef
+          .collection('scores')
+          .doc(
+            participantDoc.id
+          );
+
+      batch.set(
+        scoreRef,
+        {
+          uid:
+            participantDoc.id,
+          name:
+            bot.name ||
+            bot.displayName ||
+            `🤖 ${participantDoc.id}`,
+          displayName:
+            bot.displayName ||
+            bot.name ||
+            `🤖 ${participantDoc.id}`,
+          score,
+          isBot: true,
+          synthetic: true,
+          tournamentBot: true,
+          plays: 1,
+          gameId:
+            tournamentSnap.data()
+              .gameId || null,
+          updatedAt:
+            admin.firestore.FieldValue
+              .serverTimestamp()
+        },
+        {merge: true}
+      );
+
+      generatedScores.push({
+        uid:
+          participantDoc.id,
+        name:
+          bot.name ||
+          bot.displayName ||
+          participantDoc.id,
+        score
+      });
+
+      operations++;
+
+      if (
+        operations >= 400
+      ) {
+        await batch.commit();
+
+        batch =
+          firestore.batch();
+
+        operations = 0;
+      }
+    }
+
+    if (operations > 0) {
+      await batch.commit();
+    }
+
+    generatedScores.sort(
+      (a, b) =>
+        b.score - a.score
+    );
+
+    return {
+      ok: true,
+      tournamentId,
+      count:
+        generatedScores.length,
+      scores:
+        generatedScores
+    };
+  });
+
+
+/**
+ * Elimina exclusivamente los
+ * datos sintéticos de los bots.
+ *
+ * NO toca usuarios reales.
+ */
+exports.cleanupTournamentBots =
+  onCall(async request => {
+    requireAdmin(request);
+
+    const tournamentId =
+      String(
+        request.data?.tournamentId || ''
+      ).trim();
+
+    if (!tournamentId) {
+      throw new HttpsError(
+        'invalid-argument',
+        'Debes seleccionar un torneo.'
+      );
+    }
+
+    const tournamentRef =
+      firestore
+        .collection('tournaments')
+        .doc(tournamentId);
+
+    const tournamentSnap =
+      await tournamentRef.get();
+
+    if (!tournamentSnap.exists) {
+      throw new HttpsError(
+        'not-found',
+        'El torneo no existe.'
+      );
+    }
+
+    const participantsSnap =
+      await tournamentRef
+        .collection('participants')
+        .where(
+          'tournamentBot',
+          '==',
+          true
+        )
+        .get();
+
+    const scoresSnap =
+      await tournamentRef
+        .collection('scores')
+        .where(
+          'tournamentBot',
+          '==',
+          true
+        )
+        .get();
+
+    const refs = [
+      ...participantsSnap.docs.map(
+        doc => doc.ref
+      ),
+      ...scoresSnap.docs.map(
+        doc => doc.ref
+      )
+    ];
+
+    let deleted = 0;
+
+    let batch =
+      firestore.batch();
+
+    let operations = 0;
+
+    for (const ref of refs) {
+      batch.delete(ref);
+
+      deleted++;
+      operations++;
+
+      if (
+        operations >= 400
+      ) {
+        await batch.commit();
+
+        batch =
+          firestore.batch();
+
+        operations = 0;
+      }
+    }
+
+    if (operations > 0) {
+      await batch.commit();
+    }
+
+    return {
+      ok: true,
+      tournamentId,
+      deleted
+    };
+  });
+
+
+/* =========================================================
+   CORREOS DE JUEGOS
+   ========================================================= */
+
+async function sendAuthorStatusEmail(
+  submissionId,
+  before,
+  after
+) {
+  const email =
+    String(
+      after.authorEmail || ''
+    ).trim();
+
+  if (!email) return;
+
+  const previousStatus =
+    String(
+      before?.status || ''
+    ).toLowerCase();
+
+  const status =
+    String(
+      after.status || ''
+    ).toLowerCase();
+
+  const notificationKey = {
+    reviewing: 'reviewing',
+    approved: 'approved',
+    rejected: 'rejected',
+    published: 'published'
+  }[status];
+
+  if (
+    !notificationKey ||
+    previousStatus === status
+  ) {
+    return;
+  }
+
+  const sent = {
+    ...(after.emailNotifications || {})
+  };
+
+  if (
+    sent[notificationKey]
+  ) {
+    return;
+  }
+
+  const author =
+    esc(
+      after.authorName ||
+      'Usuario'
+    );
+
+  const game =
+    esc(
+      after.name ||
+      'tu juego'
+    );
+
+  let subject = '';
+  let body = '';
+
+  if (
+    status === 'reviewing'
+  ) {
+    subject =
+      '🔍 Tu juego está siendo revisado';
+
+    body =
+      `<h2>🔍 Estamos revisando tu juego</h2>
+      <p>Hola ${author}, un administrador ya está revisando <b>${game}</b>.</p>
+      <p>Te avisaremos cuando haya una nueva actualización.</p>`;
+  }
+
+  else if (
+    status === 'approved'
+  ) {
+    subject =
+      '✅ ¡Tu juego fue aprobado!';
+
+    body =
+      `<h2>✅ ¡Buenas noticias!</h2>
+      <p>Hola ${author}, tu juego <b>${game}</b> fue aprobado por un administrador.</p>
+      <p>Ahora pasará automáticamente al proceso de publicación. Te enviaremos otro correo cuando esté disponible para jugar.</p>`;
+  }
+
+  else if (
+    status === 'published'
+  ) {
+    const url =
+      esc(
+        after.publishedUrl ||
+        'https://tecnomath.online'
+      );
+
+    subject =
+      '🎉 ¡Tu juego ya está publicado!';
+
+    body =
+      `<h2>🎉 ¡Tu juego ya está publicado!</h2>
+      <p>Hola ${author}, <b>${game}</b> ya está disponible en TecnoMath.</p>
+      <p><a href="${url}">🎮 Abrir mi juego</a></p>`;
+  }
+
+  else if (
+    status === 'rejected'
+  ) {
+    const reason =
+      esc(
+        after.rejectionReason ||
+        after.reviewReason ||
+        'No cumple los requisitos de publicación actualmente.'
+      );
+
+    subject =
+      '❌ Actualización sobre tu juego';
+
+    body =
+      `<h2>❌ Tu juego no fue aprobado</h2>
+      <p>Hola ${author}, después de revisar <b>${game}</b>, no fue aprobado por el momento.</p>
+      <p><b>Motivo:</b> ${reason}</p>
+      <p>Puedes realizar las correcciones necesarias y volver a enviarlo.</p>`;
+  }
+
+  if (!subject || !body) {
+    return;
+  }
+
+  try {
+    const sentSuccessfully =
+      await sendEmail(
+        email,
+        subject,
+        body
+      );
+
+    if (sentSuccessfully) {
+      await db
+        .ref(
+          `gameSubmissions/${submissionId}/emailNotifications/${notificationKey}`
+        )
+        .set(true);
+
+      await db
+        .ref(
+          `gameSubmissions/${submissionId}/emailNotifications/${notificationKey}At`
+        )
+        .set(
+          admin.database.ServerValue
+            .TIMESTAMP
+        );
+
+      console.log(
+        `EMAIL AUTHOR SENT ${notificationKey}: ${email}`
+      );
+    }
+  } catch (error) {
+    console.error(
+      `ERROR AUTHOR EMAIL ${submissionId}:`,
+      error
+    );
+  }
+}
+
+
+/* =========================================================
+   NUEVO JUEGO → ADMINISTRADORES
+   ========================================================= */
+
+exports.notifyGameSubmission =
+  onValueCreated(
+    {
+      ref: '/gameSubmissions/{submissionId}',
+      secrets: [
+        RESEND_API_KEY,
+        EMAIL_FROM
+      ]
+    },
+    async event => {
+      const data =
+        event.data.val();
+
+      if (!data) return;
+
+      const key =
+        RESEND_API_KEY.value();
+
+      if (!key) return;
+
+      const from =
+        EMAIL_FROM.value() ||
+        'TecnoMath <onboarding@resend.dev>';
+
+      for (
+        const to of ADMINS
+      ) {
+        const response =
+          await fetch(
+            'https://api.resend.com/emails',
+            {
+              method: 'POST',
+              headers: {
+                Authorization:
+                  `Bearer ${key}`,
+                'Content-Type':
+                  'application/json'
+              },
+              body: JSON.stringify({
+                from,
+                to: [to],
+                subject:
+                  `🎮 Nuevo juego pendiente: ${
+                    data.name ||
+                    'Sin nombre'
+                  }`,
+                html:
+                  `<h2>🎮 Nuevo juego enviado a TecnoMath</h2>
+                  <p><b>Juego:</b> ${esc(data.name || '')}</p>
+                  <p><b>Autor:</b> ${esc(data.authorName || '')}</p>
+                  <p><b>Correo:</b> ${esc(data.authorEmail || '')}</p>
+                  <p><b>Categoría:</b> ${esc(data.category || 'otros')}</p>
+                  <p>${esc(data.description || '')}</p>
+                  <p>Entra al panel de administración para revisar y aprobar la solicitud.</p>`
+              })
+            }
+          );
+
+        if (!response.ok) {
+          console.error(
+            'Resend:',
+            await response.text()
+          );
+        }
+      }
+
+      const authorEmail =
+        String(
+          data.authorEmail || ''
+        ).trim();
+
+      if (authorEmail) {
+        const author =
+          esc(
+            data.authorName ||
+            'Usuario'
+          );
+
+        const game =
+          esc(
+            data.name ||
+            'tu juego'
+          );
+
+        const initialSent =
+          await sendEmail(
+            authorEmail,
+            '🎮 Hemos recibido tu juego',
+            `<h2>🎮 ¡Juego recibido!</h2>
+            <p>Hola ${author}, hemos recibido <b>${game}</b> correctamente.</p>
+            <p>Tu juego quedó pendiente de revisión. Te avisaremos por correo cada vez que cambie su estado.</p>`
+          );
+
+        if (initialSent) {
+          await db
+            .ref(
+              `gameSubmissions/${event.params.submissionId}/emailNotifications/received`
+            )
+            .set(true);
+
+          await db
+            .ref(
+              `gameSubmissions/${event.params.submissionId}/emailNotifications/receivedAt`
+            )
+            .set(
+              admin.database.ServerValue
+                .TIMESTAMP
+            );
+
+          console.log(
+            `EMAIL AUTHOR SENT received: ${authorEmail}`
+          );
+        }
+      }
+
+      await db
+        .ref(
+          `gameSubmissions/${event.params.submissionId}`
+        )
+        .update({
+          emailStatus:
+            'admins-sent',
+          emailSentAt:
+            admin.database.ServerValue
+              .TIMESTAMP
+        });
+    }
+  );
+
+
+/* =========================================================
+   CAMBIOS DE ESTADO DE JUEGOS
+   ========================================================= */
+
+exports.notifyGameStatusChange =
+  onValueWritten(
+    {
+      ref: '/gameSubmissions/{submissionId}',
+      secrets: [
+        RESEND_API_KEY,
+        EMAIL_FROM
+      ]
+    },
+    async event => {
+      if (
+        !event.data.after.exists()
+      ) {
+        return;
+      }
+
+      await sendAuthorStatusEmail(
+        event.params.submissionId,
+        event.data.before.val() || {},
+        event.data.after.val() || {}
+      );
+    }
+  );
+
+
+/* =========================================================
+   PUBLICACIÓN AUTOMÁTICA DE JUEGOS
+   ========================================================= */
+
+exports.publishApprovedGame =
+  onValueWritten(
+    {
+      ref: '/gameSubmissions/{submissionId}',
+      secrets: [
+        GITHUB_TOKEN
+      ]
+    },
+    async event => {
+      const after =
+        event.data.after.val() || {};
+
+      const submissionId =
+        event.params.submissionId;
+
+      if (
+        after.status !== 'approved' ||
+        after.publishedAt ||
+        after.publicationTriggeredAt
+      ) {
+        return;
+      }
+
+      const queueRef =
+        db.ref(
+          `publicGameQueue/${submissionId}`
+        );
+
+      const existingQueue =
+        await queueRef.once('value');
+
+      if (
+        !existingQueue.exists()
+      ) {
+        await queueRef.set({
+          ...after,
+          status: 'approved',
+          submissionId
+        });
+      }
+
+      await github(
+        `/repos/${OWNER}/${REPO}/dispatches`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type':
+              'application/json'
+          },
+          body: JSON.stringify({
+            event_type:
+              'game-approved',
+            client_payload: {
+              submissionId
+            }
+          })
+        }
+      );
+
+      await db
+        .ref(
+          `gameSubmissions/${submissionId}`
+        )
+        .update({
+          publicationTrigger:
+            'github-actions',
+          publicationTriggeredAt:
+            admin.database.ServerValue
+              .TIMESTAMP
+        });
+    }
+  );
