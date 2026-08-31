@@ -51,16 +51,10 @@ async function syncAndCheckAdmin(){
  const user=auth.currentUser;
  if(!user)return false;
  try{
-   // Primero usamos el mismo reconocimiento de administradores que usa TecnoMath.
-   // Esto permite que los administradores autorizados por correo/RTDB sean reconocidos
-   // aunque todavía no tengan el custom claim en su token.
    const guard=window.TecnomathAdminGuard;
    if(!guard||typeof guard.getAdminProfile!=='function')return false;
    const profile=await guard.getAdminProfile(user);
    if(!profile)return false;
-
-   // Ahora sincronizamos el custom claim. La Cloud Function vuelve a comprobar
-   // el role=admin en RTDB antes de asignar admin=true.
    const sync=functions.httpsCallable('syncAdminClaim');
    const result=await sync({});
    await user.getIdToken(true);
