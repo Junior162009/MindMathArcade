@@ -1,1 +1,175 @@
-<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>🤖 Tester de torneos | TecnoMath</title><link rel="stylesheet" href="../../css/admin.css"><script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script><script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script><script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script><script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-functions-compat.js"></script><script src="../../js/firebase-config.js"></script><style>body{background:#090914;color:#fff;font-family:Arial;margin:0;padding:20px}.wrap{max-width:900px;margin:auto}#access,#status,section{background:#111126;border:1px solid #393956;border-radius:14px;padding:18px;margin:16px 0}label{display:block;margin:12px 0;font-weight:700}select,button{padding:12px;border-radius:9px;margin:6px;border:1px solid #444}button{font-weight:bold;cursor:pointer}button:disabled{opacity:.55;cursor:not-allowed}select{min-width:240px}</style></head><body><main class="wrap"><a href="./tournaments.html">← Volver a torneos</a><h1>🤖 Tester de torneos</h1><p>Herramienta exclusiva para administradores. Los bots son datos sintéticos y no crean cuentas de Firebase Authentication.</p><div id="access">Comprobando permisos…</div><section id="panel" hidden><label for="tournament">Torneo</label><select id="tournament" aria-label="Selecciona el torneo que quieres probar"></select><label for="botCount">Cantidad de bots</label><select id="botCount" aria-label="Cantidad de bots"><option value="3">3</option><option value="5" selected>5</option><option value="10">10</option><option value="20">20</option><option value="50">50</option></select><p><button id="create">🤖 Crear e inscribir</button><button id="scores">🏆 Simular puntuaciones</button><button id="cleanup">🧹 Limpiar bots</button></p><div id="status" role="status" aria-live="polite"></div></section></main><script>(function(){'use strict';const $=id=>document.getElementById(id),access=$('access'),panel=$('panel'),status=$('status'),select=$('tournament'),buttons=[$('create'),$('scores'),$('cleanup')];let auth,firestore,functions;function waitFirebase(){return new Promise((resolve,reject)=>{let n=0;const timer=setInterval(()=>{n++;if(window.firebase&&firebase.apps&&firebase.apps.length&&firebase.auth&&firebase.firestore&&firebase.functions&&window.TecnomathFirebase){clearInterval(timer);resolve()}else if(n>=120){clearInterval(timer);reject(new Error('Firebase no se pudo inicializar.'))}},50)})}async function waitAuth(){auth=firebase.auth();if(auth.currentUser)return auth.currentUser;return await new Promise(resolve=>{let done=false;const off=auth.onAuthStateChanged(u=>{if(done)return;done=true;off();resolve(u)})})}async function loadGuard(){if(window.TecnomathAdminGuard)return;await new Promise((resolve,reject)=>{const s=document.createElement('script');s.src='/js/admin-guard.js?v=5';s.onload=resolve;s.onerror=()=>reject(new Error('No se pudo cargar el guard de administrador.'));document.head.appendChild(s)})}async function loadTournaments(){const snap=await firestore.collection('tournaments').limit(100).get();select.innerHTML='';const first=document.createElement('option');first.value='';first.textContent='Selecciona un torneo';select.appendChild(first);snap.forEach(d=>{const data=d.data()||{},o=document.createElement('option');o.value=d.id;o.textContent=data.name||d.id;select.appendChild(o)})}function count(){return Number($('botCount').value)||5}function setBusy(v){buttons.forEach(b=>b.disabled=v)}function friendlyError(e){const code=e?.code||'';const msg=e?.message||String(e);if(code.includes('permission-denied'))return '⛔ No tienes permisos de administrador en el servidor.';if(code.includes('unauthenticated'))return '⛔ Tu sesión expiró. Inicia sesión nuevamente.';if(code.includes('failed-precondition'))return '⚠️ '+msg;return '❌ '+msg}async function call(name,data){if(!functions)functions=firebase.app().functions('us-central1');const fn=functions.httpsCallable(name);try{return(await fn(data)).data}catch(e){console.error('Callable '+name,e);throw e}}async function verifyServerAdmin(){const result=await call('checkTournamentTesterAdmin',{});return result&&result.admin===true}async function create(){if(!select.value){status.textContent='Selecciona un torneo.';return}setBusy(true);status.textContent='⏳ Creando e inscribiendo bots…';try{const result=await call('createTournamentBots',{tournamentId:select.value,count:count()});status.textContent='✅ '+(result.created||0)+' bots inscritos correctamente.'}finally{setBusy(false)}}async function scores(){if(!select.value){status.textContent='Selecciona un torneo.';return}setBusy(true);status.textContent='⏳ Simulando puntuaciones…';try{const result=await call('simulateTournamentBotScores',{tournamentId:select.value,count:count()});status.textContent='🏆 '+(result.updated||0)+' puntuaciones simuladas.'}finally{setBusy(false)}}async function cleanup(){if(!select.value){status.textContent='Selecciona un torneo.';return}if(!confirm('¿Eliminar los bots y sus puntuaciones de este torneo?'))return;setBusy(true);status.textContent='⏳ Limpiando bots…';try{const result=await call('cleanupTournamentBots',{tournamentId:select.value});status.textContent='🧹 '+(result.deleted||0)+' datos de bots eliminados.';await loadTournaments()}finally{setBusy(false)}}async function boot(){try{await waitFirebase();const user=await waitAuth();if(!user){access.textContent='⛔ Debes iniciar sesión.';return}firestore=firebase.firestore();functions=firebase.app().functions('us-central1');try{await loadGuard();if(window.TecnomathAdminGuard&&typeof window.TecnomathAdminGuard.getAdminProfile==='function'){const profile=await window.TecnomathAdminGuard.getAdminProfile(user);if(!profile){access.textContent='⛔ Acceso denegado. Tu perfil no está reconocido como administrador.';return}}}catch(e){console.warn('Guard local no disponible:',e)}try{await user.getIdToken(true)}catch(e){console.warn('No se pudo refrescar el token:',e)}const serverAdmin=await verifyServerAdmin();if(!serverAdmin){access.textContent='⛔ El servidor no reconoce esta cuenta como administrador. Revisa users/'+user.uid+'/role = admin.';return}access.textContent='🟢 Administrador reconocido. El tester está disponible.';panel.hidden=false;await loadTournaments()}catch(e){console.error(e);access.textContent=friendlyError(e)}}$('create').onclick=()=>create().catch(e=>status.textContent=friendlyError(e));$('scores').onclick=()=>scores().catch(e=>status.textContent=friendlyError(e));$('cleanup').onclick=()=>cleanup().catch(e=>status.textContent=friendlyError(e));boot()})();</script></body></html>
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>🤖 Tester de torneos | TecnoMath</title>
+<link rel="stylesheet" href="../../css/admin.css">
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="../../js/firebase-config.js"></script>
+<style>
+body{background:#090914;color:#fff;font-family:Arial,sans-serif;margin:0;padding:20px}
+.wrap{max-width:900px;margin:auto}
+.card{background:#111126;border:1px solid #393956;border-radius:14px;padding:18px;margin:16px 0}
+label{display:block;margin:12px 0 6px;font-weight:700}
+select,button{padding:12px;border-radius:9px;margin:6px 6px 6px 0;border:1px solid #444;background:#17172e;color:#fff}
+button{font-weight:bold;cursor:pointer}button:disabled{opacity:.55;cursor:not-allowed}
+select{min-width:240px}.hint{opacity:.8;font-size:.92rem}.ok{color:#7dff9b}.error{color:#ff7777}.warn{color:#ffd166}
+</style>
+</head>
+<body>
+<main class="wrap">
+<a href="./tournaments.html">← Volver a torneos</a>
+<h1>🤖 Tester de torneos</h1>
+<p>Herramienta exclusiva para administradores. Los bots son datos sintéticos y no crean cuentas de Firebase Authentication.</p>
+<div id="access" class="card">Comprobando permisos…</div>
+<section id="panel" class="card" hidden>
+<label for="tournament">Torneo</label>
+<select id="tournament" aria-label="Selecciona el torneo que quieres probar"></select>
+<label for="botCount">Cantidad de bots</label>
+<select id="botCount" aria-label="Cantidad de bots">
+<option value="3">3</option><option value="5" selected>5</option><option value="10">10</option><option value="20">20</option><option value="50">50</option>
+</select>
+<p>
+<button id="create">🤖 Crear e inscribir</button>
+<button id="scores">🏆 Simular puntuaciones</button>
+<button id="cleanup">🧹 Limpiar bots</button>
+</p>
+<p class="hint">Los bots se guardan únicamente como participantes y puntuaciones sintéticas del torneo seleccionado.</p>
+<div id="status" role="status" aria-live="polite"></div>
+</section>
+</main>
+<script>
+(function(){
+'use strict';
+const $=id=>document.getElementById(id);
+const access=$('access'),panel=$('panel'),status=$('status'),select=$('tournament');
+const buttons=[$('create'),$('scores'),$('cleanup')];
+const ADMIN_EMAILS=new Set([
+'delahozbarcelojunior@gmail.com','nicolenatera26@gmail.com','mateobarbosamatos@gmail.com','jandresvf23@gmail.com'
+]);
+let auth,db,firestore,currentUser;
+
+function waitFirebase(){
+ return new Promise((resolve,reject)=>{
+  let n=0;
+  const timer=setInterval(()=>{
+   n++;
+   if(window.firebase&&firebase.apps&&firebase.apps.length&&firebase.auth&&firebase.firestore&&firebase.database){clearInterval(timer);resolve();}
+   else if(n>=120){clearInterval(timer);reject(new Error('Firebase no se pudo inicializar.'));}
+  },50);
+ });
+}
+function waitAuth(){
+ if(auth.currentUser)return Promise.resolve(auth.currentUser);
+ return new Promise(resolve=>{
+  let done=false;
+  const off=auth.onAuthStateChanged(u=>{if(done)return;done=true;off();resolve(u);});
+ });
+}
+function localAdmin(user){
+ const email=String(user?.email||'').toLowerCase();
+ return ADMIN_EMAILS.has(email);
+}
+async function verifyAdmin(user){
+ if(localAdmin(user))return true;
+ const snap=await db.ref('users/'+user.uid+'/role').once('value');
+ return String(snap.val()||'').toLowerCase()==='admin';
+}
+function count(){return Number($('botCount').value)||5;}
+function setBusy(v){buttons.forEach(b=>b.disabled=v);select.disabled=v;}
+function friendlyError(e){
+ const code=String(e?.code||'');
+ const msg=String(e?.message||e||'Error desconocido');
+ if(code.includes('permission-denied'))return '⛔ Firestore rechazó la operación. Verifica que tu cuenta esté entre los administradores autorizados.';
+ if(code.includes('unauthenticated'))return '⛔ Tu sesión expiró. Inicia sesión nuevamente.';
+ return '❌ '+msg;
+}
+function botId(index){return 'bot_'+Date.now().toString(36)+'_'+index+'_'+Math.random().toString(36).slice(2,7);}
+function botData(id,index){
+ const names=['TecnoBot','MathBot','PixelBot','NexoBot','ProfeBot','RayoBot','CerebroBot','SigmaBot','TurboBot','NovaBot'];
+ return {uid:id,name:(names[index%names.length]||'TecnoBot')+' '+String(index+1).padStart(2,'0'),isBot:true,botId:id,createdBy:currentUser.uid,createdAt:firebase.firestore.FieldValue.serverTimestamp()};
+}
+async function loadTournaments(){
+ const snap=await firestore.collection('tournaments').limit(100).get();
+ select.innerHTML='';
+ const first=document.createElement('option');first.value='';first.textContent='Selecciona un torneo';select.appendChild(first);
+ snap.forEach(d=>{const data=d.data()||{},o=document.createElement('option');o.value=d.id;o.textContent=data.name||d.id;select.appendChild(o);});
+}
+function requireTournament(){if(!select.value){status.textContent='⚠️ Selecciona un torneo.';return false;}return true;}
+async function createBots(){
+ if(!requireTournament())return;
+ setBusy(true);status.textContent='⏳ Creando e inscribiendo bots…';
+ try{
+  const tournamentRef=firestore.collection('tournaments').doc(select.value);
+  const tournamentSnap=await tournamentRef.get();
+  if(!tournamentSnap.exists)throw new Error('El torneo seleccionado no existe.');
+  const batch=firestore.batch(),n=count();
+  for(let i=0;i<n;i++){
+   const id=botId(i),data=botData(id,i);
+   batch.set(tournamentRef.collection('participants').doc(id),{...data,score:0,plays:0,updatedAt:firebase.firestore.FieldValue.serverTimestamp()});
+  }
+  await batch.commit();
+  status.textContent='✅ '+n+' bots creados e inscritos correctamente.';
+ }catch(e){console.error(e);status.textContent=friendlyError(e);}finally{setBusy(false);}
+}
+async function simulateScores(){
+ if(!requireTournament())return;
+ setBusy(true);status.textContent='⏳ Simulando puntuaciones…';
+ try{
+  const tournamentRef=firestore.collection('tournaments').doc(select.value);
+  const participants=await tournamentRef.collection('participants').where('isBot','==',true).get();
+  if(participants.empty)throw new Error('No hay bots en este torneo. Primero créalos.');
+  const batch=firestore.batch();let updated=0;
+  participants.docs.forEach((doc,i)=>{
+   const score=100+Math.floor(Math.random()*901);
+   batch.set(tournamentRef.collection('scores').doc(doc.id),{
+    uid:doc.id,name:doc.data().name||doc.id,isBot:true,botId:doc.data().botId||doc.id,
+    score,gameId:tournamentRef.id,plays:1,updatedAt:firebase.firestore.FieldValue.serverTimestamp()
+   },{merge:true});
+   batch.set(doc.ref,{score,plays:1,updatedAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true});
+   updated++;
+  });
+  await batch.commit();
+  status.textContent='🏆 '+updated+' puntuaciones simuladas correctamente.';
+ }catch(e){console.error(e);status.textContent=friendlyError(e);}finally{setBusy(false);}
+}
+async function cleanup(){
+ if(!requireTournament())return;
+ if(!confirm('¿Eliminar únicamente los bots y sus puntuaciones de este torneo? Los usuarios reales no serán modificados.'))return;
+ setBusy(true);status.textContent='⏳ Limpiando bots…';
+ try{
+  const tournamentRef=firestore.collection('tournaments').doc(select.value);
+  const participants=await tournamentRef.collection('participants').where('isBot','==',true).get();
+  const scores=await tournamentRef.collection('scores').where('isBot','==',true).get();
+  const batch=firestore.batch();let deleted=0;
+  participants.docs.forEach(d=>{batch.delete(d.ref);deleted++;});
+  scores.docs.forEach(d=>{batch.delete(d.ref);deleted++;});
+  await batch.commit();
+  status.textContent='🧹 '+deleted+' registros sintéticos eliminados. Usuarios reales intactos.';
+ }catch(e){console.error(e);status.textContent=friendlyError(e);}finally{setBusy(false);}
+}
+async function boot(){
+ try{
+  await waitFirebase();
+  auth=firebase.auth();db=firebase.database();firestore=firebase.firestore();
+  currentUser=await waitAuth();
+  if(!currentUser){access.innerHTML='<span class="error">⛔ Debes iniciar sesión.</span>';return;}
+  const admin=await verifyAdmin(currentUser);
+  if(!admin){access.innerHTML='<span class="error">⛔ Acceso denegado. Esta herramienta es exclusiva para administradores.</span>';return;}
+  access.innerHTML='<span class="ok">🟢 Administrador reconocido. El tester está disponible.</span>';
+  panel.hidden=false;
+  await loadTournaments();
+ }catch(e){console.error(e);access.innerHTML='<span class="error">'+friendlyError(e)+'</span>';}
+}
+$('create').onclick=createBots;
+$('scores').onclick=simulateScores;
+$('cleanup').onclick=cleanup;
+boot();
+})();
+</script>
+</body>
+</html>
