@@ -39,11 +39,7 @@
         const hasCorrectClaim = shouldBeAdmin
           ? tokenResult.claims && tokenResult.claims.admin === true
           : !(tokenResult.claims && tokenResult.claims.admin === true);
-
-        // Evita llamadas y refrescos innecesarios cuando el token ya está correcto.
         if (hasCorrectClaim) return tokenResult;
-
-        // El callable valida el rol directamente en RTDB antes de tocar el claim.
         if (typeof firebase.functions !== 'function') {
           await new Promise((resolve, reject) => {
             const existing = document.querySelector('script[data-tecnomath-functions-client]');
@@ -61,13 +57,10 @@
             document.head.appendChild(script);
           });
         }
-
         if (typeof firebase.functions === 'function') {
           await firebase.functions().httpsCallable('syncAdminClaim')({});
-          // Los custom claims nuevos solo llegan al ID token después de refrescarlo.
           return await user.getIdTokenResult(true);
         }
-
         return tokenResult;
       } catch (error) {
         console.warn('TecnoMath: no se pudo sincronizar/refrescar el claim admin:', error);
@@ -79,7 +72,6 @@
         }
       }
     })();
-
     return adminClaimRefreshPromise;
   }
 
@@ -136,6 +128,20 @@
     const script=document.createElement('script');script.src='../../js/game-submissions.js?v=offline-v1';script.async=false;script.dataset.tecnomathGameSubmissions='true';document.head.appendChild(script);
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',loadGameSubmissionsAdmin,{once:true});else loadGameSubmissionsAdmin();
+
+  function initTournamentQuickAccess(){
+    if(!/\/pages\/admin\/tournaments\.html$/.test(location.pathname))return;
+    if(document.getElementById('tournamentBotQuickAccess'))return;
+    const main=document.querySelector('main');
+    if(!main)return;
+    const box=document.createElement('section');
+    box.id='tournamentBotQuickAccess';
+    box.style.cssText='background:#111126;border:1px solid #393956;border-radius:16px;padding:18px 20px;margin:18px 0;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;';
+    box.innerHTML='<div><strong style="font-size:17px">⚡ Accesos rápidos</strong><div style="color:#9fa3bd;margin-top:6px">Herramientas de administración del sistema de torneos.</div></div><a href="./tournament-bots.html" style="display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 18px;border-radius:10px;background:#39ff14;color:#001;text-decoration:none;font-weight:700">🤖 Tester de torneos</a>';
+    const heading=Array.from(main.querySelectorAll('h1')).find(el=>el.textContent.includes('Centro de torneos'));
+    if(heading&&heading.parentNode)heading.parentNode.insertBefore(box,heading.nextSibling);else main.insertBefore(box,main.firstChild);
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initTournamentQuickAccess,{once:true});else initTournamentQuickAccess();
 
   if(/\/games\/esequiel11%C2%B0\/bandera\.html$/.test(location.pathname)||/\/games\/esequiel11°\/bandera\.html$/.test(location.pathname)){
     const loadBanderQuizDisplay=()=>{if(document.querySelector('script[data-tecnomath-banderquiz-display]'))return;const script=document.createElement('script');script.src='/js/banderquiz-display.js?v=2';script.async=false;script.dataset.tecnomathBanderquizDisplay='true';document.head.appendChild(script)};
