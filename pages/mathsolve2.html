@@ -26,7 +26,9 @@
   --shadow:0 20px 60px rgba(0,0,0,.35);
 }
 
-html{scroll-behavior:smooth}
+html{
+  scroll-behavior:smooth;
+}
 
 body{
   margin:0;
@@ -40,9 +42,14 @@ body{
     linear-gradient(135deg,var(--bg1),var(--bg2),var(--bg3));
 }
 
-button,input{font:inherit}
+button,
+input{
+  font:inherit;
+}
 
-button{cursor:pointer}
+button{
+  cursor:pointer;
+}
 
 .app{
   width:min(1200px,100%);
@@ -71,7 +78,9 @@ header{
   letter-spacing:-1px;
 }
 
-.logo span{color:var(--cyan)}
+.logo span{
+  color:var(--cyan);
+}
 
 header p{
   margin:9px auto 0;
@@ -118,7 +127,9 @@ header p{
   backdrop-filter:blur(18px);
 }
 
-.section{display:none}
+.section{
+  display:none;
+}
 
 .section.active{
   display:block;
@@ -126,8 +137,14 @@ header p{
 }
 
 @keyframes fadeIn{
-  from{opacity:0;transform:translateY(5px)}
-  to{opacity:1;transform:translateY(0)}
+  from{
+    opacity:0;
+    transform:translateY(5px);
+  }
+  to{
+    opacity:1;
+    transform:translateY(0);
+  }
 }
 
 .section-head{
@@ -285,6 +302,10 @@ input::placeholder{
   filter:brightness(1.08);
 }
 
+.btn:active{
+  transform:translateY(0);
+}
+
 .btn.secondary{
   background:#18233d;
   border:1px solid #344566;
@@ -369,13 +390,23 @@ input::placeholder{
 }
 
 @keyframes resultIn{
-  from{opacity:0;transform:translateY(7px)}
-  to{opacity:1;transform:translateY(0)}
+  from{
+    opacity:0;
+    transform:translateY(7px);
+  }
+  to{
+    opacity:1;
+    transform:translateY(0);
+  }
 }
 
 .result-top{
   padding:17px 18px;
-  background:linear-gradient(135deg,rgba(124,92,255,.15),rgba(67,135,255,.08));
+  background:linear-gradient(
+    135deg,
+    rgba(124,92,255,.15),
+    rgba(67,135,255,.08)
+  );
   border-bottom:1px solid var(--border);
 }
 
@@ -484,35 +515,83 @@ input::placeholder{
 .history-list{
   display:flex;
   flex-direction:column;
-  gap:8px;
+  gap:10px;
 }
 
 .history-item{
   display:flex;
   align-items:center;
   justify-content:space-between;
-  gap:12px;
-  padding:12px 14px;
+  gap:14px;
+  padding:14px;
   border:1px solid #23304c;
   background:#080e1d;
-  border-radius:12px;
+  border-radius:14px;
+  transition:.2s ease;
+}
+
+.history-item:hover{
+  border-color:#405a88;
+  transform:translateY(-1px);
 }
 
 .history-main{
   min-width:0;
+  flex:1;
 }
 
 .history-title{
   font-weight:850;
+  margin-bottom:4px;
 }
 
 .history-detail{
   color:var(--muted);
   font-size:13px;
-  margin-top:3px;
   white-space:nowrap;
   overflow:hidden;
   text-overflow:ellipsis;
+}
+
+.history-result{
+  font-weight:900;
+  color:#b3a8ff;
+  white-space:nowrap;
+}
+
+.history-actions{
+  display:flex;
+  align-items:center;
+  gap:7px;
+  flex-wrap:wrap;
+  justify-content:flex-end;
+}
+
+.history-btn{
+  border:1px solid #344566;
+  background:#18233d;
+  color:#fff;
+  border-radius:10px;
+  padding:8px 10px;
+  font-size:12px;
+  font-weight:850;
+  transition:.2s ease;
+}
+
+.history-btn:hover{
+  border-color:var(--cyan);
+  background:#1c3154;
+  transform:translateY(-1px);
+}
+
+.history-btn.repeat{
+  background:linear-gradient(135deg,var(--primary),var(--secondary));
+  border-color:transparent;
+}
+
+.history-btn.steps{
+  background:#122a35;
+  border-color:#245d6d;
 }
 
 .empty-history{
@@ -551,13 +630,228 @@ input::placeholder{
   border:1px solid #385078;
   color:#fff;
   font-weight:800;
-  z-index:20;
+  z-index:100;
   transition:.25s ease;
+  max-width:min(90vw,600px);
+  text-align:center;
 }
 
 .toast.show{
   opacity:1;
   transform:translate(-50%,0);
+}
+
+/* MODAL DE PASOS */
+
+.modal{
+  position:fixed;
+  inset:0;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+  background:rgba(0,0,0,.72);
+  backdrop-filter:blur(8px);
+  z-index:90;
+}
+
+.modal.show{
+  display:flex;
+  animation:modalIn .2s ease;
+}
+
+@keyframes modalIn{
+  from{
+    opacity:0;
+  }
+  to{
+    opacity:1;
+  }
+}
+
+.modal-card{
+  width:min(800px,100%);
+  max-height:min(88vh,850px);
+  overflow:auto;
+  background:#0b1223;
+  border:1px solid #35486d;
+  border-radius:22px;
+  box-shadow:0 30px 90px rgba(0,0,0,.55);
+}
+
+.modal-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:15px;
+  padding:19px 20px;
+  border-bottom:1px solid #263653;
+  position:sticky;
+  top:0;
+  background:rgba(11,18,35,.96);
+  backdrop-filter:blur(15px);
+  z-index:2;
+}
+
+.modal-title{
+  margin:0;
+  font-size:22px;
+  font-weight:950;
+}
+
+.modal-subtitle{
+  margin:5px 0 0;
+  color:var(--muted);
+  font-size:13px;
+}
+
+.modal-close{
+  width:38px;
+  height:38px;
+  border-radius:11px;
+  border:1px solid #344566;
+  background:#18233d;
+  color:#fff;
+  font-size:20px;
+  font-weight:900;
+}
+
+.modal-close:hover{
+  background:#253758;
+}
+
+.modal-body{
+  padding:20px;
+}
+
+.modal-result{
+  padding:14px;
+  background:linear-gradient(
+    135deg,
+    rgba(124,92,255,.14),
+    rgba(67,135,255,.07)
+  );
+  border:1px solid #35486d;
+  border-radius:14px;
+  margin-bottom:15px;
+}
+
+.modal-result-label{
+  color:var(--muted);
+  font-size:11px;
+  text-transform:uppercase;
+  letter-spacing:1px;
+  font-weight:850;
+}
+
+.modal-result-value{
+  margin-top:4px;
+  color:#b3a8ff;
+  font-size:24px;
+  font-weight:950;
+}
+
+.modal-inputs{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+  gap:9px;
+  margin-bottom:18px;
+}
+
+.modal-input{
+  background:#070d1b;
+  border:1px solid #243553;
+  border-radius:11px;
+  padding:10px;
+}
+
+.modal-input-label{
+  color:var(--muted);
+  font-size:11px;
+  margin-bottom:3px;
+}
+
+.modal-input-value{
+  font-weight:850;
+}
+
+.modal-step{
+  padding:14px 0;
+  border-bottom:1px solid #202e49;
+}
+
+.modal-step:last-child{
+  border-bottom:0;
+}
+
+.modal-step-number{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:28px;
+  height:28px;
+  border-radius:8px;
+  background:rgba(0,217,255,.1);
+  color:var(--cyan);
+  font-size:12px;
+  font-weight:900;
+  margin-right:7px;
+}
+
+.modal-step-title{
+  font-weight:900;
+}
+
+.modal-step-math{
+  display:block;
+  margin-top:8px;
+  padding:11px 12px;
+  background:#050914;
+  border:1px solid #1e2b47;
+  border-radius:9px;
+  font-weight:800;
+  overflow-x:auto;
+}
+
+.modal-footer{
+  display:flex;
+  justify-content:flex-end;
+  gap:8px;
+  padding:15px 20px;
+  border-top:1px solid #263653;
+}
+
+/* REPETIR DESTACADO */
+
+.history-item.just-repeated{
+  border-color:var(--cyan);
+  box-shadow:0 0 0 2px rgba(0,217,255,.08);
+}
+
+/* LOADING */
+
+.btn.loading{
+  pointer-events:none;
+  opacity:.7;
+}
+
+.btn.loading::after{
+  content:"";
+  display:inline-block;
+  width:12px;
+  height:12px;
+  margin-left:7px;
+  border:2px solid #ffffff66;
+  border-top-color:#fff;
+  border-radius:50%;
+  animation:spin .7s linear infinite;
+  vertical-align:-2px;
+}
+
+@keyframes spin{
+  to{
+    transform:rotate(360deg);
+  }
 }
 
 @media(max-width:900px){
@@ -567,25 +861,91 @@ input::placeholder{
 }
 
 @media(max-width:700px){
-  body{padding:12px}
-  .card{padding:14px;border-radius:18px}
-  .section-head{flex-direction:column}
-  .grid{grid-template-columns:1fr}
-  .actions{grid-template-columns:1fr}
+  body{
+    padding:12px;
+  }
+
+  .card{
+    padding:14px;
+    border-radius:18px;
+  }
+
+  .section-head{
+    flex-direction:column;
+  }
+
+  .grid{
+    grid-template-columns:1fr;
+  }
+
+  .actions{
+    grid-template-columns:1fr;
+  }
+
   .tabs{
     justify-content:flex-start;
     overflow-x:auto;
     flex-wrap:nowrap;
     padding-bottom:4px;
   }
-  .tab{white-space:nowrap}
-  .panel{padding:14px}
-  .result-actions .btn{flex:1}
-  .history-item{align-items:flex-start}
+
+  .tab{
+    white-space:nowrap;
+  }
+
+  .panel{
+    padding:14px;
+  }
+
+  .result-actions .btn{
+    flex:1;
+  }
+
+  .history-item{
+    flex-direction:column;
+    align-items:stretch;
+  }
+
+  .history-result{
+    order:-1;
+  }
+
+  .history-actions{
+    justify-content:stretch;
+  }
+
+  .history-btn{
+    flex:1;
+  }
+
+  .modal{
+    padding:10px;
+  }
+
+  .modal-card{
+    border-radius:18px;
+    max-height:92vh;
+  }
+
+  .modal-header{
+    padding:15px;
+  }
+
+  .modal-body{
+    padding:15px;
+  }
+
+  .modal-footer{
+    padding:12px 15px;
+  }
 }
 
 @media(prefers-reduced-motion:reduce){
-  *{scroll-behavior:auto!important;animation:none!important;transition:none!important}
+  *{
+    scroll-behavior:auto!important;
+    animation:none!important;
+    transition:none!important;
+  }
 }
 </style>
 </head>
@@ -596,7 +956,11 @@ input::placeholder{
 
 <header>
   <div class="brand">🎓 TECNOMATH · HERRAMIENTA MATEMÁTICA</div>
-  <div class="logo">📐 Math<span>Solve</span></div>
+
+  <div class="logo">
+    📐 Math<span>Solve</span>
+  </div>
+
   <p>
     Calculadora inteligente de triángulos con representación visual,
     procedimiento paso a paso y resultados explicados.
@@ -614,15 +978,25 @@ input::placeholder{
 
 <div class="card">
 
-<!-- COSENO -->
+<!-- ==================== COSENO ==================== -->
+
 <section id="cos" class="section active">
 
   <div class="section-head">
+
     <div class="section-title">
       <h2>📐 Ley del Coseno</h2>
-      <p>Encuentra un lado cuando conoces dos lados y el ángulo comprendido.</p>
+
+      <p>
+        Encuentra un lado cuando conoces dos lados
+        y el ángulo comprendido.
+      </p>
     </div>
-    <div class="mode-badge">TRIGONOMETRÍA</div>
+
+    <div class="mode-badge">
+      TRIGONOMETRÍA
+    </div>
+
   </div>
 
   <div class="workspace">
@@ -639,28 +1013,74 @@ input::placeholder{
       </div>
 
       <div class="grid">
+
         <div class="group">
-          <label>Lado A <em>unidades</em></label>
-          <input id="ca" type="number" step="any" min="0" placeholder="Ej. 5"
-                 oninput="updateTriangle()">
+          <label>
+            Lado A
+            <em>unidades</em>
+          </label>
+
+          <input
+            id="ca"
+            type="number"
+            step="any"
+            min="0"
+            placeholder="Ej. 5"
+            oninput="updateTriangle()"
+          >
         </div>
 
         <div class="group">
-          <label>Lado B <em>unidades</em></label>
-          <input id="cb" type="number" step="any" min="0" placeholder="Ej. 7"
-                 oninput="updateTriangle()">
+          <label>
+            Lado B
+            <em>unidades</em>
+          </label>
+
+          <input
+            id="cb"
+            type="number"
+            step="any"
+            min="0"
+            placeholder="Ej. 7"
+            oninput="updateTriangle()"
+          >
         </div>
 
         <div class="group">
-          <label>Ángulo C <em>grados</em></label>
-          <input id="cc" type="number" step="any" min="0" max="180" placeholder="Ej. 60"
-                 oninput="updateTriangle()">
+          <label>
+            Ángulo C
+            <em>grados</em>
+          </label>
+
+          <input
+            id="cc"
+            type="number"
+            step="any"
+            min="0"
+            max="180"
+            placeholder="Ej. 60"
+            oninput="updateTriangle()"
+          >
         </div>
+
       </div>
 
       <div class="actions">
-        <button class="btn" onclick="coseno()">🧮 CALCULAR PROCEDIMIENTO</button>
-        <button class="btn secondary" onclick="clearSection('cos')">↺ Limpiar</button>
+
+        <button
+          class="btn"
+          onclick="coseno()"
+        >
+          🧮 CALCULAR PROCEDIMIENTO
+        </button>
+
+        <button
+          class="btn secondary"
+          onclick="clearSection('cos')"
+        >
+          ↺ Limpiar
+        </button>
+
       </div>
 
       <div id="rc" class="result"></div>
@@ -675,19 +1095,72 @@ input::placeholder{
       </div>
 
       <div class="triangle-wrap">
-        <svg class="triangle-svg" viewBox="0 0 500 330" aria-label="Triángulo visual">
-          <polygon id="triangleShape"
-                   class="triangle-line"
-                   points="90,270 410,270 290,70"></polygon>
 
-          <text x="77" y="292" class="triangle-label">B</text>
-          <text x="414" y="292" class="triangle-label">C</text>
-          <text x="284" y="57" class="triangle-label">A</text>
+        <svg
+          class="triangle-svg"
+          viewBox="0 0 500 330"
+          aria-label="Triángulo visual"
+        >
 
-          <text x="218" y="301" class="triangle-angle" id="visualC">c</text>
-          <text x="140" y="177" class="triangle-angle" id="visualA">a</text>
-          <text x="339" y="177" class="triangle-angle" id="visualB">b</text>
+          <polygon
+            id="triangleShape"
+            class="triangle-line"
+            points="90,270 410,270 290,70"
+          ></polygon>
+
+          <text
+            x="77"
+            y="292"
+            class="triangle-label"
+          >
+            B
+          </text>
+
+          <text
+            x="414"
+            y="292"
+            class="triangle-label"
+          >
+            C
+          </text>
+
+          <text
+            x="284"
+            y="57"
+            class="triangle-label"
+          >
+            A
+          </text>
+
+          <text
+            x="218"
+            y="301"
+            class="triangle-angle"
+            id="visualC"
+          >
+            c
+          </text>
+
+          <text
+            x="140"
+            y="177"
+            class="triangle-angle"
+            id="visualA"
+          >
+            a
+          </text>
+
+          <text
+            x="339"
+            y="177"
+            class="triangle-angle"
+            id="visualB"
+          >
+            b
+          </text>
+
         </svg>
+
       </div>
 
       <div class="visual-note">
@@ -700,15 +1173,27 @@ input::placeholder{
 
 </section>
 
-<!-- SENO -->
+<!-- ==================== SENO ==================== -->
+
 <section id="seno" class="section">
 
   <div class="section-head">
+
     <div class="section-title">
+
       <h2>📏 Ley del Seno</h2>
-      <p>Usa un lado, su ángulo opuesto y otro ángulo para calcular el lado desconocido.</p>
+
+      <p>
+        Usa un lado, su ángulo opuesto y otro ángulo
+        para calcular el lado desconocido.
+      </p>
+
     </div>
-    <div class="mode-badge">TRIGONOMETRÍA</div>
+
+    <div class="mode-badge">
+      TRIGONOMETRÍA
+    </div>
+
   </div>
 
   <div class="workspace">
@@ -721,33 +1206,94 @@ input::placeholder{
       </div>
 
       <div class="formula">
-        <span class="frac"><span>a</span><span>sen(A)</span></span>
+
+        <span class="frac">
+          <span>a</span>
+          <span>sen(A)</span>
+        </span>
+
         =
-        <span class="frac"><span>b</span><span>sen(B)</span></span>
+
+        <span class="frac">
+          <span>b</span>
+          <span>sen(B)</span>
+        </span>
+
       </div>
 
       <div class="grid">
 
         <div class="group">
-          <label>Lado A <em>unidades</em></label>
-          <input id="sa" type="number" step="any" min="0" placeholder="Ej. 8">
+
+          <label>
+            Lado A
+            <em>unidades</em>
+          </label>
+
+          <input
+            id="sa"
+            type="number"
+            step="any"
+            min="0"
+            placeholder="Ej. 8"
+          >
+
         </div>
 
         <div class="group">
-          <label>Ángulo A <em>grados</em></label>
-          <input id="saa" type="number" step="any" min="0" max="180" placeholder="Ej. 40">
+
+          <label>
+            Ángulo A
+            <em>grados</em>
+          </label>
+
+          <input
+            id="saa"
+            type="number"
+            step="any"
+            min="0"
+            max="180"
+            placeholder="Ej. 40"
+          >
+
         </div>
 
         <div class="group">
-          <label>Ángulo B <em>grados</em></label>
-          <input id="sbb" type="number" step="any" min="0" max="180" placeholder="Ej. 70">
+
+          <label>
+            Ángulo B
+            <em>grados</em>
+          </label>
+
+          <input
+            id="sbb"
+            type="number"
+            step="any"
+            min="0"
+            max="180"
+            placeholder="Ej. 70"
+          >
+
         </div>
 
       </div>
 
       <div class="actions">
-        <button class="btn" onclick="seno()">🧮 CALCULAR PROCEDIMIENTO</button>
-        <button class="btn secondary" onclick="clearSection('seno')">↺ Limpiar</button>
+
+        <button
+          class="btn"
+          onclick="seno()"
+        >
+          🧮 CALCULAR PROCEDIMIENTO
+        </button>
+
+        <button
+          class="btn secondary"
+          onclick="clearSection('seno')"
+        >
+          ↺ Limpiar
+        </button>
+
       </div>
 
       <div id="rs" class="result"></div>
@@ -755,30 +1301,48 @@ input::placeholder{
     </div>
 
     <div class="panel">
+
       <div class="panel-title">
         <strong>Relación fundamental</strong>
         <small>Recuerda</small>
       </div>
 
-      <div class="info" style="margin-top:0">
-        El lado <b>a</b> está frente al ángulo <b>A</b>, y el lado
-        <b>b</b> está frente al ángulo <b>B</b>.
+      <div
+        class="info"
+        style="margin-top:0"
+      >
+        El lado <b>a</b> está frente al ángulo
+        <b>A</b>, y el lado <b>b</b> está frente
+        al ángulo <b>B</b>.
       </div>
+
     </div>
 
   </div>
 
 </section>
 
-<!-- PITÁGORAS -->
+<!-- ==================== PITÁGORAS ==================== -->
+
 <section id="pit" class="section">
 
   <div class="section-head">
+
     <div class="section-title">
+
       <h2>📊 Teorema de Pitágoras</h2>
-      <p>Calcula la hipotenusa conociendo los dos catetos.</p>
+
+      <p>
+        Calcula la hipotenusa conociendo
+        los dos catetos.
+      </p>
+
     </div>
-    <div class="mode-badge">TRIÁNGULO RECTÁNGULO</div>
+
+    <div class="mode-badge">
+      TRIÁNGULO RECTÁNGULO
+    </div>
+
   </div>
 
   <div class="workspace">
@@ -790,20 +1354,59 @@ input::placeholder{
       </div>
 
       <div class="grid">
+
         <div class="group">
-          <label>Cateto A <em>unidades</em></label>
-          <input id="pa" type="number" step="any" min="0" placeholder="Ej. 3">
+
+          <label>
+            Cateto A
+            <em>unidades</em>
+          </label>
+
+          <input
+            id="pa"
+            type="number"
+            step="any"
+            min="0"
+            placeholder="Ej. 3"
+          >
+
         </div>
 
         <div class="group">
-          <label>Cateto B <em>unidades</em></label>
-          <input id="pb" type="number" step="any" min="0" placeholder="Ej. 4">
+
+          <label>
+            Cateto B
+            <em>unidades</em>
+          </label>
+
+          <input
+            id="pb"
+            type="number"
+            step="any"
+            min="0"
+            placeholder="Ej. 4"
+          >
+
         </div>
+
       </div>
 
       <div class="actions">
-        <button class="btn" onclick="pitagoras()">🧮 CALCULAR PROCEDIMIENTO</button>
-        <button class="btn secondary" onclick="clearSection('pit')">↺ Limpiar</button>
+
+        <button
+          class="btn"
+          onclick="pitagoras()"
+        >
+          🧮 CALCULAR PROCEDIMIENTO
+        </button>
+
+        <button
+          class="btn secondary"
+          onclick="clearSection('pit')"
+        >
+          ↺ Limpiar
+        </button>
+
       </div>
 
       <div id="rp" class="result"></div>
@@ -811,64 +1414,142 @@ input::placeholder{
     </div>
 
     <div class="panel">
+
       <div class="panel-title">
         <strong>Concepto</strong>
         <small>90°</small>
       </div>
 
-      <div class="info" style="margin-top:0">
-        En un triángulo rectángulo, <b>c</b> representa la hipotenusa,
+      <div
+        class="info"
+        style="margin-top:0"
+      >
+        En un triángulo rectángulo,
+        <b>c</b> representa la hipotenusa,
         que siempre es el lado más largo.
       </div>
+
     </div>
 
   </div>
 
 </section>
 
-<!-- ÁREA -->
+<!-- ==================== ÁREA ==================== -->
+
 <section id="area" class="section">
 
   <div class="section-head">
+
     <div class="section-title">
+
       <h2>🔺 Área del triángulo</h2>
-      <p>Calcula el área utilizando dos lados y el ángulo comprendido.</p>
+
+      <p>
+        Calcula el área utilizando dos lados
+        y el ángulo comprendido.
+      </p>
+
     </div>
-    <div class="mode-badge">GEOMETRÍA</div>
+
+    <div class="mode-badge">
+      GEOMETRÍA
+    </div>
+
   </div>
 
   <div class="panel">
 
     <div class="formula">
+
       Área =
+
       <span class="frac">
-        <span>a · b · sen(C)</span>
-        <span>2</span>
+
+        <span>
+          a · b · sen(C)
+        </span>
+
+        <span>
+          2
+        </span>
+
       </span>
+
     </div>
 
     <div class="grid">
 
       <div class="group">
-        <label>Lado A <em>unidades</em></label>
-        <input id="aa" type="number" step="any" min="0" placeholder="Ej. 8">
+
+        <label>
+          Lado A
+          <em>unidades</em>
+        </label>
+
+        <input
+          id="aa"
+          type="number"
+          step="any"
+          min="0"
+          placeholder="Ej. 8"
+        >
+
       </div>
 
       <div class="group">
-        <label>Lado B <em>unidades</em></label>
-        <input id="ab" type="number" step="any" min="0" placeholder="Ej. 5">
+
+        <label>
+          Lado B
+          <em>unidades</em>
+        </label>
+
+        <input
+          id="ab"
+          type="number"
+          step="any"
+          min="0"
+          placeholder="Ej. 5"
+        >
+
       </div>
 
       <div class="group">
-        <label>Ángulo C <em>grados</em></label>
-        <input id="ac" type="number" step="any" min="0" max="180" placeholder="Ej. 45">
+
+        <label>
+          Ángulo C
+          <em>grados</em>
+        </label>
+
+        <input
+          id="ac"
+          type="number"
+          step="any"
+          min="0"
+          max="180"
+          placeholder="Ej. 45"
+        >
+
       </div>
 
     </div>
 
     <div class="actions">
-      <button class="btn" onclick="area()">🧮 CALCULAR PROCEDIMIENTO</button>
-      <button class="btn secondary" onclick="clearSection('area')">↺ Limpiar</button>
+
+      <button
+        class="btn"
+        onclick="area()"
+      >
+        🧮 CALCULAR PROCEDIMIENTO
+      </button>
+
+      <button
+        class="btn secondary"
+        onclick="clearSection('area')"
+      >
+        ↺ Limpiar
+      </button>
+
     </div>
 
     <div id="ra" class="result"></div>
@@ -877,15 +1558,26 @@ input::placeholder{
 
 </section>
 
-<!-- PERÍMETRO -->
+<!-- ==================== PERÍMETRO ==================== -->
+
 <section id="per" class="section">
 
   <div class="section-head">
+
     <div class="section-title">
+
       <h2>📐 Perímetro</h2>
-      <p>Suma los tres lados de un triángulo válido.</p>
+
+      <p>
+        Suma los tres lados de un triángulo válido.
+      </p>
+
     </div>
-    <div class="mode-badge">GEOMETRÍA</div>
+
+    <div class="mode-badge">
+      GEOMETRÍA
+    </div>
+
   </div>
 
   <div class="panel">
@@ -897,25 +1589,74 @@ input::placeholder{
     <div class="grid">
 
       <div class="group">
-        <label>Lado A <em>unidades</em></label>
-        <input id="pea" type="number" step="any" min="0" placeholder="Ej. 5">
+
+        <label>
+          Lado A
+          <em>unidades</em>
+        </label>
+
+        <input
+          id="pea"
+          type="number"
+          step="any"
+          min="0"
+          placeholder="Ej. 5"
+        >
+
       </div>
 
       <div class="group">
-        <label>Lado B <em>unidades</em></label>
-        <input id="peb" type="number" step="any" min="0" placeholder="Ej. 6">
+
+        <label>
+          Lado B
+          <em>unidades</em>
+        </label>
+
+        <input
+          id="peb"
+          type="number"
+          step="any"
+          min="0"
+          placeholder="Ej. 6"
+        >
+
       </div>
 
       <div class="group">
-        <label>Lado C <em>unidades</em></label>
-        <input id="pec" type="number" step="any" min="0" placeholder="Ej. 7">
+
+        <label>
+          Lado C
+          <em>unidades</em>
+        </label>
+
+        <input
+          id="pec"
+          type="number"
+          step="any"
+          min="0"
+          placeholder="Ej. 7"
+        >
+
       </div>
 
     </div>
 
     <div class="actions">
-      <button class="btn" onclick="perimetro()">🧮 CALCULAR PROCEDIMIENTO</button>
-      <button class="btn secondary" onclick="clearSection('per')">↺ Limpiar</button>
+
+      <button
+        class="btn"
+        onclick="perimetro()"
+      >
+        🧮 CALCULAR PROCEDIMIENTO
+      </button>
+
+      <button
+        class="btn secondary"
+        onclick="clearSection('per')"
+      >
+        ↺ Limpiar
+      </button>
+
     </div>
 
     <div id="re" class="result"></div>
@@ -924,15 +1665,27 @@ input::placeholder{
 
 </section>
 
-<!-- ÁNGULO -->
+<!-- ==================== ÁNGULO ==================== -->
+
 <section id="ang" class="section">
 
   <div class="section-head">
+
     <div class="section-title">
+
       <h2>🎯 Encontrar ángulo C</h2>
-      <p>Obtén el ángulo opuesto al lado C conociendo los tres lados.</p>
+
+      <p>
+        Obtén el ángulo opuesto al lado C
+        conociendo los tres lados.
+      </p>
+
     </div>
-    <div class="mode-badge">LEY DEL COSENO</div>
+
+    <div class="mode-badge">
+      LEY DEL COSENO
+    </div>
+
   </div>
 
   <div class="workspace">
@@ -940,35 +1693,94 @@ input::placeholder{
     <div class="panel">
 
       <div class="formula">
+
         cos(C) =
+
         <span class="frac">
-          <span>a² + b² − c²</span>
-          <span>2ab</span>
+
+          <span>
+            a² + b² − c²
+          </span>
+
+          <span>
+            2ab
+          </span>
+
         </span>
+
       </div>
 
       <div class="grid">
 
         <div class="group">
-          <label>Lado A <em>unidades</em></label>
-          <input id="anga" type="number" step="any" min="0" placeholder="Ej. 5">
+
+          <label>
+            Lado A
+            <em>unidades</em>
+          </label>
+
+          <input
+            id="anga"
+            type="number"
+            step="any"
+            min="0"
+            placeholder="Ej. 5"
+          >
+
         </div>
 
         <div class="group">
-          <label>Lado B <em>unidades</em></label>
-          <input id="angb" type="number" step="any" min="0" placeholder="Ej. 7">
+
+          <label>
+            Lado B
+            <em>unidades</em>
+          </label>
+
+          <input
+            id="angb"
+            type="number"
+            step="any"
+            min="0"
+            placeholder="Ej. 7"
+          >
+
         </div>
 
         <div class="group">
-          <label>Lado C <em>unidades</em></label>
-          <input id="angc" type="number" step="any" min="0" placeholder="Ej. 8">
+
+          <label>
+            Lado C
+            <em>unidades</em>
+          </label>
+
+          <input
+            id="angc"
+            type="number"
+            step="any"
+            min="0"
+            placeholder="Ej. 8"
+          >
+
         </div>
 
       </div>
 
       <div class="actions">
-        <button class="btn" onclick="angulo()">🧮 CALCULAR PROCEDIMIENTO</button>
-        <button class="btn secondary" onclick="clearSection('ang')">↺ Limpiar</button>
+
+        <button
+          class="btn"
+          onclick="angulo()"
+        >
+          🧮 CALCULAR PROCEDIMIENTO
+        </button>
+
+        <button
+          class="btn secondary"
+          onclick="clearSection('ang')"
+        >
+          ↺ Limpiar
+        </button>
+
       </div>
 
       <div id="rg" class="result"></div>
@@ -976,77 +1788,201 @@ input::placeholder{
     </div>
 
     <div class="panel">
+
       <div class="panel-title">
         <strong>Validación</strong>
         <small>Desigualdad triangular</small>
       </div>
 
-      <div class="info" style="margin-top:0">
-        Para formar un triángulo, la suma de cualesquiera dos lados
+      <div
+        class="info"
+        style="margin-top:0"
+      >
+        Para formar un triángulo,
+        la suma de cualesquiera dos lados
         debe ser mayor que el tercer lado.
       </div>
+
     </div>
 
   </div>
 
 </section>
 
-<!-- HISTORIAL -->
+<!-- ==================== HISTORIAL ==================== -->
+
 <div class="history panel">
 
   <div class="history-header">
-    <strong>🕘 Historial reciente</strong>
-    <button class="btn small secondary" onclick="clearHistory()">Borrar historial</button>
+
+    <strong>
+      🕘 Historial reciente
+    </strong>
+
+    <button
+      class="btn small secondary"
+      onclick="clearHistory()"
+    >
+      Borrar historial
+    </button>
+
   </div>
 
-  <div id="historyList" class="history-list"></div>
+  <div
+    id="historyList"
+    class="history-list"
+  ></div>
 
 </div>
 
 <div class="info">
-  💡 <b>MathSolve</b> convierte automáticamente los grados a radianes
-  para los cálculos trigonométricos y muestra fórmula, sustitución,
-  cálculo y respuesta final.
+
+  💡 <b>MathSolve</b> convierte automáticamente
+  los grados a radianes para los cálculos trigonométricos
+  y muestra fórmula, sustitución, cálculo
+  y respuesta final.
+
 </div>
 
 </div>
 </div>
 
-<div class="watermark">@tecnomath</div>
-<div id="toast" class="toast"></div>
+<!-- ==================== MODAL PASOS ==================== -->
+
+<div
+  id="stepsModal"
+  class="modal"
+  onclick="modalBackgroundClick(event)"
+>
+
+  <div class="modal-card">
+
+    <div class="modal-header">
+
+      <div>
+
+        <h3
+          id="modalTitle"
+          class="modal-title"
+        >
+          Procedimiento
+        </h3>
+
+        <p
+          id="modalSubtitle"
+          class="modal-subtitle"
+        >
+          MathSolve Pro
+        </p>
+
+      </div>
+
+      <button
+        class="modal-close"
+        onclick="closeStepsModal()"
+        aria-label="Cerrar"
+      >
+        ×
+      </button>
+
+    </div>
+
+    <div
+      id="modalBody"
+      class="modal-body"
+    ></div>
+
+    <div class="modal-footer">
+
+      <button
+        class="btn secondary"
+        onclick="closeStepsModal()"
+      >
+        Cerrar
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+<div class="watermark">
+  @tecnomath
+</div>
+
+<div
+  id="toast"
+  class="toast"
+></div>
 
 <script>
+
+/* =========================================================
+   UTILIDADES
+========================================================= */
+
 const $ = id => document.getElementById(id);
 
 const n = id => {
+
   const value = parseFloat($(id)?.value);
-  return Number.isFinite(value) ? value : NaN;
+
+  return Number.isFinite(value)
+    ? value
+    : NaN;
+
 };
 
-const D = deg => deg * Math.PI / 180;
+const D = deg =>
+  deg * Math.PI / 180;
 
 const F = value => {
-  if (!Number.isFinite(value)) return "—";
-  const rounded = Math.round(value * 100) / 100;
+
+  if(!Number.isFinite(value)){
+    return "—";
+  }
+
+  const rounded =
+    Math.round(value * 100) / 100;
+
   return Number.isInteger(rounded)
     ? String(rounded)
-    : rounded.toFixed(2).replace(/\.?0+$/,"");
+    : rounded.toFixed(2)
+        .replace(/\.?0+$/,"");
+
 };
 
 const F4 = value => {
-  if (!Number.isFinite(value)) return "—";
+
+  if(!Number.isFinite(value)){
+    return "—";
+  }
+
   return value.toFixed(4);
+
 };
 
 function ok(values){
-  return values.every(v => Number.isFinite(v) && v > 0);
+
+  return values.every(
+    v => Number.isFinite(v) && v > 0
+  );
+
 }
 
 function validAngle(angle){
-  return Number.isFinite(angle) && angle > 0 && angle < 180;
+
+  return (
+    Number.isFinite(angle) &&
+    angle > 0 &&
+    angle < 180
+  );
+
 }
 
 function validTriangle(a,b,c){
+
   return (
     a > 0 &&
     b > 0 &&
@@ -1055,16 +1991,153 @@ function validTriangle(a,b,c){
     a + c > b &&
     b + c > a
   );
+
 }
 
-function tab(id, button){
-  document.querySelectorAll(".section").forEach(section => {
-    section.classList.remove("active");
-  });
+/* =========================================================
+   CONFIGURACIÓN DEL HISTORIAL
+========================================================= */
 
-  document.querySelectorAll(".tab").forEach(btn => {
-    btn.classList.remove("active");
-  });
+const HISTORY_CONFIG = {
+
+  "Ley del Coseno":{
+    section:"cos",
+    result:"rc",
+    fn:"coseno",
+    inputs:[
+      {
+        id:"ca",
+        label:"Lado A"
+      },
+      {
+        id:"cb",
+        label:"Lado B"
+      },
+      {
+        id:"cc",
+        label:"Ángulo C"
+      }
+    ]
+  },
+
+  "Ley del Seno":{
+    section:"seno",
+    result:"rs",
+    fn:"seno",
+    inputs:[
+      {
+        id:"sa",
+        label:"Lado A"
+      },
+      {
+        id:"saa",
+        label:"Ángulo A"
+      },
+      {
+        id:"sbb",
+        label:"Ángulo B"
+      }
+    ]
+  },
+
+  "Pitágoras":{
+    section:"pit",
+    result:"rp",
+    fn:"pitagoras",
+    inputs:[
+      {
+        id:"pa",
+        label:"Cateto A"
+      },
+      {
+        id:"pb",
+        label:"Cateto B"
+      }
+    ]
+  },
+
+  "Área":{
+    section:"area",
+    result:"ra",
+    fn:"area",
+    inputs:[
+      {
+        id:"aa",
+        label:"Lado A"
+      },
+      {
+        id:"ab",
+        label:"Lado B"
+      },
+      {
+        id:"ac",
+        label:"Ángulo C"
+      }
+    ]
+  },
+
+  "Perímetro":{
+    section:"per",
+    result:"re",
+    fn:"perimetro",
+    inputs:[
+      {
+        id:"pea",
+        label:"Lado A"
+      },
+      {
+        id:"peb",
+        label:"Lado B"
+      },
+      {
+        id:"pec",
+        label:"Lado C"
+      }
+    ]
+  },
+
+  "Ángulo C":{
+    section:"ang",
+    result:"rg",
+    fn:"angulo",
+    inputs:[
+      {
+        id:"anga",
+        label:"Lado A"
+      },
+      {
+        id:"angb",
+        label:"Lado B"
+      },
+      {
+        id:"angc",
+        label:"Lado C"
+      }
+    ]
+  }
+
+};
+
+let repeatingCalculation = false;
+
+
+/* =========================================================
+   TABS
+========================================================= */
+
+function tab(id,button){
+
+  document
+    .querySelectorAll(".section")
+    .forEach(section=>{
+      section.classList.remove("active");
+    });
+
+  document
+    .querySelectorAll(".tab")
+    .forEach(btn=>{
+      btn.classList.remove("active");
+    });
 
   const section = $(id);
 
@@ -1076,64 +2149,148 @@ function tab(id, button){
     button.classList.add("active");
   }
 
-  window.scrollTo({
-    top: document.querySelector(".card").offsetTop - 15,
-    behavior:"smooth"
-  });
+  const card =
+    document.querySelector(".card");
+
+  if(card){
+
+    window.scrollTo({
+      top:card.offsetTop - 15,
+      behavior:"smooth"
+    });
+
+  }
+
 }
 
+
+/* =========================================================
+   SEGURIDAD HTML
+========================================================= */
+
 function escapeHTML(value){
+
   return String(value)
     .replaceAll("&","&amp;")
     .replaceAll("<","&lt;")
     .replaceAll(">","&gt;")
     .replaceAll('"',"&quot;")
     .replaceAll("'","&#039;");
+
 }
 
+
+/* =========================================================
+   RENDER RESULTADO
+========================================================= */
+
 function out(id,title,ans,steps){
+
   const element = $(id);
 
+  if(!element){
+    return;
+  }
+
   element.innerHTML = `
+
     <div class="result-top">
-      <div class="answer-label">Resultado final</div>
-      <div class="answer">${escapeHTML(title)} = ${escapeHTML(ans)}</div>
+
+      <div class="answer-label">
+        Resultado final
+      </div>
+
+      <div class="answer">
+        ${escapeHTML(title)}
+        =
+        ${escapeHTML(ans)}
+      </div>
+
     </div>
 
     <div class="result-actions">
-      <button class="btn small" onclick="copyResult('${id}')">📋 Copiar</button>
-      <button class="btn small secondary" onclick="printResult('${id}')">🖨️ Imprimir</button>
+
+      <button
+        class="btn small"
+        onclick="copyResult('${id}')"
+      >
+        📋 Copiar
+      </button>
+
+      <button
+        class="btn small secondary"
+        onclick="printResult('${id}')"
+      >
+        🖨️ Imprimir
+      </button>
+
     </div>
 
     <div class="steps">
-      ${steps.map((step,i)=>`
-        <div class="step">
-          <span class="step-number">${i+1}</span>
-          <span class="step-title">${escapeHTML(step.title)}</span>
 
-          ${step.math
-            ? `<span class="mathline">${escapeHTML(step.math)}</span>`
+      ${steps.map((step,i)=>`
+
+        <div class="step">
+
+          <span class="step-number">
+            ${i+1}
+          </span>
+
+          <span class="step-title">
+            ${escapeHTML(step.title)}
+          </span>
+
+          ${
+            step.math
+            ? `
+              <span class="mathline">
+                ${escapeHTML(step.math)}
+              </span>
+            `
             : ""
           }
+
         </div>
+
       `).join("")}
+
     </div>
+
   `;
 
   element.classList.add("show");
+
 }
 
+
+/* =========================================================
+   ERROR
+========================================================= */
+
 function bad(id,message){
+
   const element = $(id);
 
+  if(!element){
+    return;
+  }
+
   element.innerHTML = `
+
     <div class="error">
       ⚠️ ${escapeHTML(message)}
     </div>
+
   `;
 
   element.classList.add("show");
+
 }
+
+
+/* =========================================================
+   LEY DEL COSENO
+========================================================= */
 
 function coseno(){
 
@@ -1142,64 +2299,103 @@ function coseno(){
   const C = n("cc");
 
   if(!ok([a,b]) || !validAngle(C)){
+
     return bad(
       "rc",
       "Introduce dos lados positivos y un ángulo C entre 0° y 180°."
     );
+
   }
 
-  const cosine = Math.cos(D(C));
-  const term = 2 * a * b * cosine;
-  const c2 = a*a + b*b - term;
+  const cosine =
+    Math.cos(D(C));
+
+  const term =
+    2 * a * b * cosine;
+
+  const c2 =
+    a*a + b*b - term;
 
   if(c2 <= 0){
+
     return bad(
       "rc",
       "Los datos no producen un triángulo válido."
     );
+
   }
 
-  const c = Math.sqrt(c2);
+  const c =
+    Math.sqrt(c2);
 
-  out("rc","Lado C",F(c)+" unidades",[
+  const steps = [
+
     {
       title:"Fórmula",
       math:"c² = a² + b² − 2ab · cos(C)"
     },
+
     {
       title:"Sustitución",
-      math:`c² = ${F(a)}² + ${F(b)}² − 2(${F(a)})(${F(b)}) · cos(${F(C)}°)`
+      math:
+        `c² = ${F(a)}² + ${F(b)}² − 2(${F(a)})(${F(b)}) · cos(${F(C)}°)`
     },
+
     {
       title:"Calculamos el coseno",
-      math:`cos(${F(C)}°) = ${F4(cosine)}`
+      math:
+        `cos(${F(C)}°) = ${F4(cosine)}`
     },
+
     {
       title:"Calculamos el término trigonométrico",
-      math:`2ab · cos(C) = ${F(term)}`
+      math:
+        `2ab · cos(C) = ${F(term)}`
     },
+
     {
       title:"Despejamos c²",
-      math:`c² = ${F(a*a+b*b)} − ${F(term)} = ${F(c2)}`
+      math:
+        `c² = ${F(a*a+b*b)} − ${F(term)} = ${F(c2)}`
     },
+
     {
       title:"Aplicamos raíz cuadrada",
-      math:`c = √${F(c2)}`
+      math:
+        `c = √${F(c2)}`
     },
+
     {
       title:"Resultado",
-      math:`c = ${F(c)} unidades`
+      math:
+        `c = ${F(c)} unidades`
     }
-  ]);
+
+  ];
+
+  out(
+    "rc",
+    "Lado C",
+    F(c)+" unidades",
+    steps
+  );
 
   saveHistory(
     "Ley del Coseno",
     `a=${F(a)}, b=${F(b)}, C=${F(C)}°`,
-    `c=${F(c)}`
+    `c=${F(c)}`,
+    getInputsForType("Ley del Coseno"),
+    steps
   );
 
   updateTriangle();
+
 }
+
+
+/* =========================================================
+   LEY DEL SENO
+========================================================= */
 
 function seno(){
 
@@ -1213,55 +2409,96 @@ function seno(){
     !validAngle(B) ||
     A+B >= 180
   ){
+
     return bad(
       "rs",
       "Revisa los valores. A y B deben ser ángulos positivos y su suma debe ser menor que 180°."
     );
+
   }
 
-  const sinA = Math.sin(D(A));
-  const sinB = Math.sin(D(B));
+  const sinA =
+    Math.sin(D(A));
+
+  const sinB =
+    Math.sin(D(B));
 
   if(Math.abs(sinA) < 1e-12){
-    return bad("rs","El seno de A no puede ser cero.");
+
+    return bad(
+      "rs",
+      "El seno de A no puede ser cero."
+    );
+
   }
 
-  const b = a * sinB / sinA;
-  const C = 180 - A - B;
+  const b =
+    a * sinB / sinA;
 
-  out("rs","Lado B",F(b)+" unidades",[
+  const C =
+    180 - A - B;
+
+  const steps = [
+
     {
       title:"Fórmula",
-      math:"a / sen(A) = b / sen(B)"
+      math:
+        "a / sen(A) = b / sen(B)"
     },
+
     {
       title:"Despejamos b",
-      math:"b = a · sen(B) / sen(A)"
+      math:
+        "b = a · sen(B) / sen(A)"
     },
+
     {
       title:"Sustitución",
-      math:`b = ${F(a)} · sen(${F(B)}°) / sen(${F(A)}°)`
+      math:
+        `b = ${F(a)} · sen(${F(B)}°) / sen(${F(A)}°)`
     },
+
     {
       title:"Valores trigonométricos",
-      math:`sen(A) = ${F4(sinA)}   ·   sen(B) = ${F4(sinB)}`
+      math:
+        `sen(A) = ${F4(sinA)} · sen(B) = ${F4(sinB)}`
     },
+
     {
       title:"Ángulo restante",
-      math:`C = 180° − ${F(A)}° − ${F(B)}° = ${F(C)}°`
+      math:
+        `C = 180° − ${F(A)}° − ${F(B)}° = ${F(C)}°`
     },
+
     {
       title:"Resultado",
-      math:`b = ${F(b)} unidades`
+      math:
+        `b = ${F(b)} unidades`
     }
-  ]);
+
+  ];
+
+  out(
+    "rs",
+    "Lado B",
+    F(b)+" unidades",
+    steps
+  );
 
   saveHistory(
     "Ley del Seno",
     `a=${F(a)}, A=${F(A)}°, B=${F(B)}°`,
-    `b=${F(b)}`
+    `b=${F(b)}`,
+    getInputsForType("Ley del Seno"),
+    steps
   );
+
 }
+
+
+/* =========================================================
+   PITÁGORAS
+========================================================= */
 
 function pitagoras(){
 
@@ -1269,48 +2506,81 @@ function pitagoras(){
   const b = n("pb");
 
   if(!ok([a,b])){
+
     return bad(
       "rp",
       "Introduce dos catetos positivos."
     );
+
   }
 
-  const q = a*a + b*b;
-  const c = Math.sqrt(q);
+  const q =
+    a*a + b*b;
 
-  out("rp","Hipotenusa",F(c)+" unidades",[
+  const c =
+    Math.sqrt(q);
+
+  const steps = [
+
     {
       title:"Fórmula",
-      math:"c² = a² + b²"
+      math:
+        "c² = a² + b²"
     },
+
     {
       title:"Sustitución",
-      math:`c² = ${F(a)}² + ${F(b)}²`
+      math:
+        `c² = ${F(a)}² + ${F(b)}²`
     },
+
     {
       title:"Elevamos al cuadrado",
-      math:`c² = ${F(a*a)} + ${F(b*b)}`
+      math:
+        `c² = ${F(a*a)} + ${F(b*b)}`
     },
+
     {
       title:"Sumamos",
-      math:`c² = ${F(q)}`
+      math:
+        `c² = ${F(q)}`
     },
+
     {
       title:"Aplicamos raíz cuadrada",
-      math:`c = √${F(q)}`
+      math:
+        `c = √${F(q)}`
     },
+
     {
       title:"Resultado",
-      math:`c = ${F(c)} unidades`
+      math:
+        `c = ${F(c)} unidades`
     }
-  ]);
+
+  ];
+
+  out(
+    "rp",
+    "Hipotenusa",
+    F(c)+" unidades",
+    steps
+  );
 
   saveHistory(
     "Pitágoras",
     `a=${F(a)}, b=${F(b)}`,
-    `c=${F(c)}`
+    `c=${F(c)}`,
+    getInputsForType("Pitágoras"),
+    steps
   );
+
 }
+
+
+/* =========================================================
+   ÁREA
+========================================================= */
 
 function area(){
 
@@ -1319,49 +2589,84 @@ function area(){
   const C = n("ac");
 
   if(!ok([a,b]) || !validAngle(C)){
+
     return bad(
       "ra",
       "Introduce dos lados positivos y un ángulo C entre 0° y 180°."
     );
+
   }
 
-  const sinC = Math.sin(D(C));
-  const product = a*b*sinC;
-  const result = product/2;
+  const sinC =
+    Math.sin(D(C));
 
-  out("ra","Área",F(result)+" unidades²",[
+  const product =
+    a*b*sinC;
+
+  const result =
+    product/2;
+
+  const steps = [
+
     {
       title:"Fórmula",
-      math:"Área = (a · b · sen(C)) / 2"
+      math:
+        "Área = (a · b · sen(C)) / 2"
     },
+
     {
       title:"Sustitución",
-      math:`Área = (${F(a)} · ${F(b)} · sen(${F(C)}°)) / 2`
+      math:
+        `Área = (${F(a)} · ${F(b)} · sen(${F(C)}°)) / 2`
     },
+
     {
       title:"Calculamos el seno",
-      math:`sen(${F(C)}°) = ${F4(sinC)}`
+      math:
+        `sen(${F(C)}°) = ${F4(sinC)}`
     },
+
     {
       title:"Multiplicamos",
-      math:`${F(a)} · ${F(b)} · ${F4(sinC)} = ${F(product)}`
+      math:
+        `${F(a)} · ${F(b)} · ${F4(sinC)} = ${F(product)}`
     },
+
     {
       title:"Dividimos entre 2",
-      math:`Área = ${F(product)} / 2 = ${F(result)}`
+      math:
+        `Área = ${F(product)} / 2 = ${F(result)}`
     },
+
     {
       title:"Resultado",
-      math:`Área = ${F(result)} unidades²`
+      math:
+        `Área = ${F(result)} unidades²`
     }
-  ]);
+
+  ];
+
+  out(
+    "ra",
+    "Área",
+    F(result)+" unidades²",
+    steps
+  );
 
   saveHistory(
     "Área",
     `a=${F(a)}, b=${F(b)}, C=${F(C)}°`,
-    `Área=${F(result)} u²`
+    `Área=${F(result)} u²`,
+    getInputsForType("Área"),
+    steps
   );
+
 }
+
+
+/* =========================================================
+   PERÍMETRO
+========================================================= */
 
 function perimetro(){
 
@@ -1370,39 +2675,66 @@ function perimetro(){
   const c = n("pec");
 
   if(!validTriangle(a,b,c)){
+
     return bad(
       "re",
       "Los lados deben ser positivos y cumplir la desigualdad triangular."
     );
+
   }
 
-  const p = a+b+c;
+  const p =
+    a+b+c;
 
-  out("re","Perímetro",F(p)+" unidades",[
+  const steps = [
+
     {
       title:"Fórmula",
-      math:"P = a + b + c"
+      math:
+        "P = a + b + c"
     },
+
     {
       title:"Sustitución",
-      math:`P = ${F(a)} + ${F(b)} + ${F(c)}`
+      math:
+        `P = ${F(a)} + ${F(b)} + ${F(c)}`
     },
+
     {
       title:"Sumamos los lados",
-      math:`P = ${F(p)}`
+      math:
+        `P = ${F(p)}`
     },
+
     {
       title:"Resultado",
-      math:`P = ${F(p)} unidades`
+      math:
+        `P = ${F(p)} unidades`
     }
-  ]);
+
+  ];
+
+  out(
+    "re",
+    "Perímetro",
+    F(p)+" unidades",
+    steps
+  );
 
   saveHistory(
     "Perímetro",
     `a=${F(a)}, b=${F(b)}, c=${F(c)}`,
-    `P=${F(p)}`
+    `P=${F(p)}`,
+    getInputsForType("Perímetro"),
+    steps
   );
+
 }
+
+
+/* =========================================================
+   ÁNGULO
+========================================================= */
 
 function angulo(){
 
@@ -1411,69 +2743,803 @@ function angulo(){
   const c = n("angc");
 
   if(!validTriangle(a,b,c)){
+
     return bad(
       "rg",
       "Esos lados no forman un triángulo válido."
     );
+
   }
 
   let x =
     (a*a + b*b - c*c) /
     (2*a*b);
 
-  x = Math.max(-1,Math.min(1,x));
+  x =
+    Math.max(
+      -1,
+      Math.min(1,x)
+    );
 
-  const C = Math.acos(x) * 180 / Math.PI;
+  const C =
+    Math.acos(x) *
+    180 /
+    Math.PI;
 
-  out("rg","Ángulo C",F(C)+"°",[
+  const steps = [
+
     {
       title:"Fórmula",
-      math:"cos(C) = (a² + b² − c²) / (2ab)"
+      math:
+        "cos(C) = (a² + b² − c²) / (2ab)"
     },
+
     {
       title:"Sustitución",
-      math:`cos(C) = (${F(a)}² + ${F(b)}² − ${F(c)}²) / (2 · ${F(a)} · ${F(b)})`
+      math:
+        `cos(C) = (${F(a)}² + ${F(b)}² − ${F(c)}²) / (2 · ${F(a)} · ${F(b)})`
     },
+
     {
       title:"Simplificamos",
-      math:`cos(C) = ${F4(x)}`
+      math:
+        `cos(C) = ${F4(x)}`
     },
+
     {
       title:"Aplicamos coseno inverso",
-      math:`C = cos⁻¹(${F4(x)})`
+      math:
+        `C = cos⁻¹(${F4(x)})`
     },
+
     {
       title:"Resultado",
-      math:`C = ${F(C)}°`
+      math:
+        `C = ${F(C)}°`
     }
-  ]);
+
+  ];
+
+  out(
+    "rg",
+    "Ángulo C",
+    F(C)+"°",
+    steps
+  );
 
   saveHistory(
     "Ángulo C",
     `a=${F(a)}, b=${F(b)}, c=${F(c)}`,
-    `C=${F(C)}°`
+    `C=${F(C)}°`,
+    getInputsForType("Ángulo C"),
+    steps
   );
+
 }
+
+
+/* =========================================================
+   OBTENER NÚMEROS DEL CÁLCULO
+========================================================= */
+
+function getInputsForType(type){
+
+  const config =
+    HISTORY_CONFIG[type];
+
+  if(!config){
+    return {};
+  }
+
+  const values = {};
+
+  config.inputs.forEach(input=>{
+
+    const element =
+      $(input.id);
+
+    if(element){
+
+      values[input.id] =
+        element.value;
+
+    }
+
+  });
+
+  return values;
+
+}
+
+
+/* =========================================================
+   GUARDAR HISTORIAL
+========================================================= */
+
+function saveHistory(
+  type,
+  detail,
+  result,
+  inputs={},
+  steps=[]
+){
+
+  /*
+    Cuando repetimos un cálculo automáticamente,
+    NO queremos crear otra entrada idéntica.
+  */
+
+  if(repeatingCalculation){
+    return;
+  }
+
+  const history =
+    JSON.parse(
+      localStorage.getItem(
+        "mathsolve_history"
+      ) || "[]"
+    );
+
+  history.unshift({
+
+    type,
+
+    title:type,
+
+    detail,
+
+    result,
+
+    inputs,
+
+    values:inputs,
+
+    steps,
+
+    date:new Date()
+      .toLocaleString("es-CO")
+
+  });
+
+  localStorage.setItem(
+    "mathsolve_history",
+    JSON.stringify(
+      history.slice(0,10)
+    )
+  );
+
+  renderHistory();
+
+}
+
+
+/* =========================================================
+   RENDER HISTORIAL
+========================================================= */
+
+function renderHistory(){
+
+  const list =
+    $("historyList");
+
+  if(!list){
+    return;
+  }
+
+  const history =
+    JSON.parse(
+      localStorage.getItem(
+        "mathsolve_history"
+      ) || "[]"
+    );
+
+  if(!history.length){
+
+    list.innerHTML = `
+
+      <div class="empty-history">
+
+        Todavía no hay cálculos guardados.
+
+      </div>
+
+    `;
+
+    return;
+  }
+
+  list.innerHTML =
+    history.map(
+      (item,index)=>{
+
+        const hasInputs =
+          item.inputs &&
+          typeof item.inputs === "object" &&
+          Object.keys(item.inputs).length > 0;
+
+        const hasSteps =
+          Array.isArray(item.steps) &&
+          item.steps.length > 0;
+
+        return `
+
+          <div
+            class="history-item"
+            data-history-index="${index}"
+          >
+
+            <div class="history-main">
+
+              <div class="history-title">
+
+                ${escapeHTML(
+                  item.title ||
+                  item.type ||
+                  "Cálculo"
+                )}
+
+              </div>
+
+              <div class="history-detail">
+
+                ${escapeHTML(
+                  item.detail || ""
+                )}
+
+                ${
+                  item.date
+                  ? ` · ${escapeHTML(item.date)}`
+                  : ""
+                }
+
+              </div>
+
+            </div>
+
+            <div class="history-result">
+
+              ${escapeHTML(
+                item.result || "—"
+              )}
+
+            </div>
+
+            <div class="history-actions">
+
+              <button
+                class="history-btn steps"
+                onclick="showHistorySteps(${index})"
+              >
+                📚 Ver pasos
+              </button>
+
+              <button
+                class="history-btn repeat"
+                onclick="repeatHistory(${index})"
+                ${hasInputs ? "" : "disabled"}
+                title="${
+                  hasInputs
+                  ? "Volver a realizar este cálculo"
+                  : "Este cálculo antiguo no tiene los números guardados"
+                }"
+              >
+                ♻️ Repetir
+              </button>
+
+            </div>
+
+          </div>
+
+        `;
+
+      }
+    ).join("");
+
+}
+
+
+/* =========================================================
+   OBTENER HISTORIAL
+========================================================= */
+
+function getHistory(){
+
+  return JSON.parse(
+    localStorage.getItem(
+      "mathsolve_history"
+    ) || "[]"
+  );
+
+}
+
+
+/* =========================================================
+   VER PASOS
+========================================================= */
+
+function showHistorySteps(index){
+
+  const history =
+    getHistory();
+
+  const item =
+    history[index];
+
+  if(!item){
+    showToast(
+      "No se encontró este cálculo."
+    );
+    return;
+  }
+
+  const config =
+    HISTORY_CONFIG[
+      item.type
+    ];
+
+  const steps =
+    Array.isArray(item.steps)
+      ? item.steps
+      : [];
+
+  $("modalTitle").textContent =
+    `📚 ${item.title || item.type || "Procedimiento"}`;
+
+  $("modalSubtitle").textContent =
+    item.date
+      ? `Guardado el ${item.date}`
+      : "MathSolve Pro";
+
+  let inputsHTML = "";
+
+  const storedInputs =
+    item.inputs ||
+    item.values ||
+    {};
+
+  if(
+    config &&
+    Object.keys(storedInputs).length
+  ){
+
+    inputsHTML = `
+
+      <div class="modal-inputs">
+
+        ${
+          config.inputs.map(input=>`
+
+            <div class="modal-input">
+
+              <div class="modal-input-label">
+                ${escapeHTML(input.label)}
+              </div>
+
+              <div class="modal-input-value">
+
+                ${escapeHTML(
+                  storedInputs[input.id] ??
+                  "—"
+                )}
+
+              </div>
+
+            </div>
+
+          `).join("")
+        }
+
+      </div>
+
+    `;
+
+  }
+
+  let stepsHTML = "";
+
+  if(steps.length){
+
+    stepsHTML = steps.map(
+      (step,i)=>`
+
+        <div class="modal-step">
+
+          <span class="modal-step-number">
+            ${i+1}
+          </span>
+
+          <span class="modal-step-title">
+            ${escapeHTML(
+              step.title ||
+              `Paso ${i+1}`
+            )}
+          </span>
+
+          ${
+            step.math
+            ? `
+              <span class="modal-step-math">
+                ${escapeHTML(step.math)}
+              </span>
+            `
+            : ""
+          }
+
+        </div>
+
+      `
+    ).join("");
+
+  }else{
+
+    stepsHTML = `
+
+      <div class="empty-history">
+
+        ⚠️ Este cálculo fue guardado
+        antes de que MathSolve comenzara
+        a guardar los procedimientos completos.
+
+      </div>
+
+    `;
+
+  }
+
+  $("modalBody").innerHTML = `
+
+    <div class="modal-result">
+
+      <div class="modal-result-label">
+        Resultado
+      </div>
+
+      <div class="modal-result-value">
+        ${escapeHTML(
+          item.result || "—"
+        )}
+      </div>
+
+    </div>
+
+    ${
+      inputsHTML
+      ? `
+        <h4 style="margin:0 0 10px">
+          🔢 Números utilizados
+        </h4>
+
+        ${inputsHTML}
+      `
+      : ""
+    }
+
+    <h4 style="margin:5px 0 10px">
+      🧮 Procedimiento
+    </h4>
+
+    ${stepsHTML}
+
+  `;
+
+  $("stepsModal")
+    .classList
+    .add("show");
+
+  document.body.style.overflow =
+    "hidden";
+
+}
+
+
+/* =========================================================
+   CERRAR MODAL
+========================================================= */
+
+function closeStepsModal(){
+
+  $("stepsModal")
+    .classList
+    .remove("show");
+
+  document.body.style.overflow =
+    "";
+
+}
+
+function modalBackgroundClick(event){
+
+  if(
+    event.target ===
+    $("stepsModal")
+  ){
+
+    closeStepsModal();
+
+  }
+
+}
+
+document.addEventListener(
+  "keydown",
+  event=>{
+
+    if(
+      event.key === "Escape" &&
+      $("stepsModal")
+        .classList
+        .contains("show")
+    ){
+
+      closeStepsModal();
+
+    }
+
+  }
+);
+
+
+/* =========================================================
+   REPETIR CÁLCULO
+========================================================= */
+
+function repeatHistory(index){
+
+  const history =
+    getHistory();
+
+  const item =
+    history[index];
+
+  if(!item){
+
+    showToast(
+      "No se encontró este cálculo."
+    );
+
+    return;
+
+  }
+
+  const config =
+    HISTORY_CONFIG[item.type];
+
+  if(!config){
+
+    showToast(
+      "No se reconoce el tipo de cálculo."
+    );
+
+    return;
+
+  }
+
+  const storedInputs =
+    item.inputs ||
+    item.values ||
+    {};
+
+  const inputIds =
+    config.inputs
+      .map(input=>input.id);
+
+  const hasAllInputs =
+    inputIds.every(
+      id =>
+        storedInputs[id] !== undefined &&
+        storedInputs[id] !== null &&
+        storedInputs[id] !== ""
+    );
+
+  if(!hasAllInputs){
+
+    showToast(
+      "⚠️ Este cálculo antiguo no tiene todos los números guardados."
+    );
+
+    return;
+
+  }
+
+  /*
+    1. Cambiar a la pestaña correcta.
+  */
+
+  const tabButton =
+    Array.from(
+      document.querySelectorAll(".tab")
+    ).find(
+      button =>
+        button.getAttribute("onclick") &&
+        button.getAttribute("onclick")
+          .includes(`'${config.section}'`)
+    );
+
+  tab(
+    config.section,
+    tabButton
+  );
+
+  /*
+    2. Cargar todos los números.
+  */
+
+  config.inputs.forEach(input=>{
+
+    const element =
+      $(input.id);
+
+    if(element){
+
+      element.value =
+        storedInputs[input.id];
+
+    }
+
+  });
+
+  /*
+    3. Actualizar visual del triángulo.
+  */
+
+  if(
+    config.section === "cos"
+  ){
+
+    updateTriangle();
+
+  }
+
+  /*
+    4. Evitar duplicar el cálculo
+       en el historial.
+  */
+
+  repeatingCalculation = true;
+
+  const button =
+    document.querySelector(
+      `#${config.section} .actions .btn:not(.secondary)`
+    );
+
+  if(button){
+    button.classList.add("loading");
+  }
+
+  /*
+    5. Ejecutar automáticamente.
+  */
+
+  setTimeout(()=>{
+
+    try{
+
+      if(
+        typeof window[config.fn] ===
+        "function"
+      ){
+
+        window[config.fn]();
+
+      }
+
+      /*
+        Resaltar la entrada utilizada.
+      */
+
+      document
+        .querySelectorAll(
+          ".history-item"
+        )
+        .forEach(
+          el =>
+            el.classList.remove(
+              "just-repeated"
+            )
+        );
+
+      const historyItems =
+        document.querySelectorAll(
+          ".history-item"
+        );
+
+      if(historyItems[index]){
+
+        historyItems[index]
+          .classList
+          .add("just-repeated");
+
+      }
+
+      showToast(
+        "♻️ Cálculo repetido automáticamente."
+      );
+
+      /*
+        Llevar al resultado.
+      */
+
+      setTimeout(()=>{
+
+        const result =
+          $(config.result);
+
+        if(result){
+
+          result.scrollIntoView({
+            behavior:"smooth",
+            block:"center"
+          });
+
+        }
+
+      },150);
+
+    }finally{
+
+      repeatingCalculation = false;
+
+      if(button){
+
+        button.classList.remove(
+          "loading"
+        );
+
+      }
+
+    }
+
+  },120);
+
+}
+
+
+/* =========================================================
+   LIMPIAR SECCIÓN
+========================================================= */
 
 function clearSection(sectionId){
 
-  const section = $(sectionId);
+  const section =
+    $(sectionId);
 
-  section.querySelectorAll("input").forEach(input=>{
-    input.value="";
-  });
+  if(!section){
+    return;
+  }
 
-  const results = section.querySelectorAll(".result");
+  section
+    .querySelectorAll("input")
+    .forEach(input=>{
+      input.value="";
+    });
+
+  const results =
+    section.querySelectorAll(
+      ".result"
+    );
 
   results.forEach(result=>{
+
     result.innerHTML="";
-    result.classList.remove("show");
+
+    result.classList.remove(
+      "show"
+    );
+
   });
 
   if(sectionId === "cos"){
+
     updateTriangle();
+
   }
+
 }
+
+
+/* =========================================================
+   TRIÁNGULO VISUAL
+========================================================= */
 
 function updateTriangle(){
 
@@ -1481,100 +3547,251 @@ function updateTriangle(){
   const b = n("cb");
   const C = n("cc");
 
-  const labelA = $("visualA");
-  const labelB = $("visualB");
-  const labelC = $("visualC");
+  const labelA =
+    $("visualA");
 
-  if(Number.isFinite(a)) labelA.textContent = `a = ${F(a)}`;
-  else labelA.textContent = "a";
+  const labelB =
+    $("visualB");
 
-  if(Number.isFinite(b)) labelB.textContent = `b = ${F(b)}`;
-  else labelB.textContent = "b";
+  const labelC =
+    $("visualC");
 
-  if(Number.isFinite(C)) labelC.textContent = `C = ${F(C)}°`;
-  else labelC.textContent = "C";
+  if(
+    Number.isFinite(a)
+  ){
+
+    labelA.textContent =
+      `a = ${F(a)}`;
+
+  }else{
+
+    labelA.textContent =
+      "a";
+
+  }
+
+  if(
+    Number.isFinite(b)
+  ){
+
+    labelB.textContent =
+      `b = ${F(b)}`;
+
+  }else{
+
+    labelB.textContent =
+      "b";
+
+  }
+
+  if(
+    Number.isFinite(C)
+  ){
+
+    labelC.textContent =
+      `C = ${F(C)}°`;
+
+  }else{
+
+    labelC.textContent =
+      "C";
+
+  }
+
 }
+
+
+/* =========================================================
+   COPIAR RESULTADO
+========================================================= */
 
 function copyResult(id){
 
-  const result = $(id);
+  const result =
+    $(id);
 
-  if(!result || !result.classList.contains("show")){
-    showToast("Primero realiza un cálculo.");
+  if(
+    !result ||
+    !result.classList.contains("show")
+  ){
+
+    showToast(
+      "Primero realiza un cálculo."
+    );
+
     return;
+
   }
 
-  const text = result.innerText.trim();
+  const text =
+    result.innerText.trim();
 
-  navigator.clipboard.writeText(text)
-    .then(()=>{
-      showToast("✅ Resultado copiado.");
-    })
-    .catch(()=>{
-      showToast("No se pudo copiar automáticamente.");
-    });
+  if(
+    navigator.clipboard &&
+    navigator.clipboard.writeText
+  ){
+
+    navigator.clipboard
+      .writeText(text)
+      .then(()=>{
+
+        showToast(
+          "✅ Resultado copiado."
+        );
+
+      })
+      .catch(()=>{
+
+        fallbackCopy(text);
+
+      });
+
+  }else{
+
+    fallbackCopy(text);
+
+  }
+
 }
+
+function fallbackCopy(text){
+
+  const textarea =
+    document.createElement("textarea");
+
+  textarea.value =
+    text;
+
+  textarea.style.position =
+    "fixed";
+
+  textarea.style.opacity =
+    "0";
+
+  document.body.appendChild(
+    textarea
+  );
+
+  textarea.select();
+
+  try{
+
+    document.execCommand(
+      "copy"
+    );
+
+    showToast(
+      "✅ Resultado copiado."
+    );
+
+  }catch(error){
+
+    showToast(
+      "No se pudo copiar automáticamente."
+    );
+
+  }
+
+  textarea.remove();
+
+}
+
+
+/* =========================================================
+   IMPRIMIR
+========================================================= */
 
 function printResult(id){
 
-  const result = $(id);
+  const result =
+    $(id);
 
-  if(!result || !result.classList.contains("show")){
-    showToast("Primero realiza un cálculo.");
+  if(
+    !result ||
+    !result.classList.contains("show")
+  ){
+
+    showToast(
+      "Primero realiza un cálculo."
+    );
+
     return;
+
   }
 
-  const popup = window.open(
-    "",
-    "_blank",
-    "width=850,height=700"
-  );
+  const popup =
+    window.open(
+      "",
+      "_blank",
+      "width=850,height=700"
+    );
 
   if(!popup){
-    showToast("El navegador bloqueó la ventana de impresión.");
+
+    showToast(
+      "El navegador bloqueó la ventana de impresión."
+    );
+
     return;
+
   }
 
   popup.document.write(`
+
     <!doctype html>
+
     <html>
+
     <head>
+
       <meta charset="utf-8">
-      <title>MathSolve — Procedimiento</title>
+
+      <title>
+        MathSolve — Procedimiento
+      </title>
+
       <style>
+
         body{
           font-family:Arial,sans-serif;
           padding:35px;
           color:#111;
           line-height:1.6;
         }
+
         h1{
           margin-bottom:4px;
         }
+
         .brand{
           color:#4e46d8;
           font-weight:800;
         }
+
         .result-top{
           padding:15px;
           background:#f1f2ff;
           border-radius:12px;
         }
+
         .answer-label{
           color:#555;
           font-size:12px;
           text-transform:uppercase;
           font-weight:800;
         }
+
         .answer{
           font-size:28px;
           font-weight:900;
           margin-top:4px;
         }
+
         .step{
           padding:13px 0;
           border-bottom:1px solid #ddd;
         }
+
         .mathline{
           display:block;
           margin-top:7px;
@@ -1583,108 +3800,158 @@ function printResult(id){
           border-radius:8px;
           font-weight:700;
         }
+
         button{
           padding:9px 14px;
           margin-top:20px;
         }
+
         @media print{
-          button{display:none}
+
+          button{
+            display:none;
+          }
+
         }
+
       </style>
+
     </head>
+
     <body>
-      <div class="brand">🎓 TECNOMATH</div>
-      <h1>📐 MathSolve</h1>
-      <p>Procedimiento matemático</p>
+
+      <div class="brand">
+        🎓 TECNOMATH
+      </div>
+
+      <h1>
+        📐 MathSolve
+      </h1>
+
+      <p>
+        Procedimiento matemático
+      </p>
+
       ${result.innerHTML}
-      <button onclick="window.print()">🖨️ Imprimir</button>
+
+      <button
+        onclick="window.print()"
+      >
+        🖨️ Imprimir
+      </button>
+
     </body>
+
     </html>
+
   `);
 
   popup.document.close();
+
 }
 
-function saveHistory(type,detail,result){
 
-  const history =
-    JSON.parse(localStorage.getItem("mathsolve_history") || "[]");
-
-  history.unshift({
-    type,
-    detail,
-    result,
-    date:new Date().toLocaleString("es-CO")
-  });
-
-  localStorage.setItem(
-    "mathsolve_history",
-    JSON.stringify(history.slice(0,10))
-  );
-
-  renderHistory();
-}
-
-function renderHistory(){
-
-  const list = $("historyList");
-
-  const history =
-    JSON.parse(localStorage.getItem("mathsolve_history") || "[]");
-
-  if(!history.length){
-    list.innerHTML = `
-      <div class="empty-history">
-        Todavía no hay cálculos guardados.
-      </div>
-    `;
-    return;
-  }
-
-  list.innerHTML = history.map(item=>`
-    <div class="history-item">
-      <div class="history-main">
-        <div class="history-title">
-          ${escapeHTML(item.type)}
-        </div>
-        <div class="history-detail">
-          ${escapeHTML(item.detail)} · ${escapeHTML(item.date)}
-        </div>
-      </div>
-
-      <div>
-        <strong>${escapeHTML(item.result)}</strong>
-      </div>
-    </div>
-  `).join("");
-}
-
-function clearHistory(){
-
-  localStorage.removeItem("mathsolve_history");
-  renderHistory();
-
-  showToast("🗑️ Historial eliminado.");
-}
+/* =========================================================
+   TOAST
+========================================================= */
 
 let toastTimer;
 
 function showToast(message){
 
-  const toast = $("toast");
+  const toast =
+    $("toast");
 
-  toast.textContent = message;
-  toast.classList.add("show");
+  if(!toast){
+    return;
+  }
 
-  clearTimeout(toastTimer);
+  toast.textContent =
+    message;
 
-  toastTimer = setTimeout(()=>{
-    toast.classList.remove("show");
-  },2200);
+  toast.classList.add(
+    "show"
+  );
+
+  clearTimeout(
+    toastTimer
+  );
+
+  toastTimer =
+    setTimeout(()=>{
+
+      toast.classList.remove(
+        "show"
+      );
+
+    },2500);
+
 }
 
+
+/* =========================================================
+   TECLADO: ENTER PARA CALCULAR
+========================================================= */
+
+document.addEventListener(
+  "keydown",
+  event=>{
+
+    if(
+      event.key !== "Enter"
+    ){
+      return;
+    }
+
+    if(
+      event.target.tagName !==
+      "INPUT"
+    ){
+      return;
+    }
+
+    const section =
+      event.target.closest(
+        ".section"
+      );
+
+    if(!section){
+      return;
+    }
+
+    const config =
+      Object.values(
+        HISTORY_CONFIG
+      ).find(
+        item =>
+          item.section ===
+          section.id
+      );
+
+    if(
+      config &&
+      typeof window[config.fn] ===
+      "function"
+    ){
+
+      event.preventDefault();
+
+      window[config.fn]();
+
+    }
+
+  }
+);
+
+
+/* =========================================================
+   INICIALIZACIÓN
+========================================================= */
+
 updateTriangle();
+
 renderHistory();
+
 </script>
 
 </body>
