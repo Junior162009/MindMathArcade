@@ -9,86 +9,27 @@
     },
     "userProgress": {
       ".read": "auth != null && root.child('users').child(auth.uid).child('role').val() == 'admin'",
-      "$uid": {
-        ".read": "auth != null && (auth.uid == $uid || root.child('users').child(auth.uid).child('role').val() == 'admin')",
-        ".write": "auth != null && auth.uid == $uid"
-      }
+      "$uid": {".read": "auth != null && (auth.uid == $uid || root.child('users').child(auth.uid).child('role').val() == 'admin')",".write": "auth != null && auth.uid == $uid"}
     },
-    "usernames": {
-      ".read": "auth != null",
-      "$username": {
-        ".write": "auth != null"
-      }
-    },
-    "social": {
-      "posts": {
-        ".read": "auth != null",
-        ".write": "auth != null",
-        "$postId": {
-          ".validate": "auth != null && newData.child('uid').val() == auth.uid"
-        }
-      }
-    },
-    "friendRequests": {
-      "$toUid": {
-        ".read": "auth != null && auth.uid == $toUid",
-        "$fromUid": {
-          ".write": "auth != null && (auth.uid == $toUid || auth.uid == $fromUid)"
-        }
-      }
-    },
-    "friendships": {
+    "usernames": {".read": "auth != null","$username": {".write": "auth != null"}},
+    "social": {"posts": {".read": "auth != null",".write": "auth != null","$postId": {".validate": "auth != null && newData.child('uid').val() == auth.uid"}}},
+    "friendRequests": {"$toUid": {".read": "auth != null && auth.uid == $toUid","$fromUid": {".write": "auth != null && (auth.uid == $toUid || auth.uid == $fromUid)"}}},
+    "friendships": {"$uid": {".read": "auth != null && auth.uid == $uid","$friendUid": {".write": "auth != null && (auth.uid == $uid || auth.uid == $friendUid)"}}},
+    "messages": {"$conversationId": {".read": "auth != null",".write": "auth != null"}},
+    "notifications": {"$uid": {".read": "auth != null && auth.uid == $uid",".write": "auth != null && auth.uid == $uid"}},
+    "adminLogs": {".read": "auth != null && root.child('users').child(auth.uid).child('role').val() == 'admin'",".write": "auth != null && root.child('users').child(auth.uid).child('role').val() == 'admin'"},
+    "tecnomath": {"$path": {".read": true,".write": "auth != null && root.child('users').child(auth.uid).child('role').val() == 'admin'"}},
+    "gameSubmissions": {".read": "auth != null","$submissionId": {".write": "auth != null"}},
+    "gameUploadQueue": {".read": "auth != null","$submissionId": {".write": "auth != null"}},
+    "publicGameQueue": {".read": true,"$submissionId": {".write": "auth != null"}},
+    "publishedGames": {".read": true,"$gameId": {".write": "auth != null && root.child('users').child(auth.uid).child('role').val() == 'admin'"}},
+    "mathsolve2History": {
       "$uid": {
         ".read": "auth != null && auth.uid == $uid",
-        "$friendUid": {
-          ".write": "auth != null && (auth.uid == $uid || auth.uid == $friendUid)"
+        ".write": "auth != null && auth.uid == $uid",
+        "$calcId": {
+          ".validate": "newData.hasChildren(['type','title','result','steps','userId','createdAt']) && newData.child('userId').val() == auth.uid"
         }
-      }
-    },
-    "messages": {
-      "$conversationId": {
-        ".read": "auth != null",
-        ".write": "auth != null"
-      }
-    },
-    "notifications": {
-      "$uid": {
-        ".read": "auth != null && auth.uid == $uid",
-        ".write": "auth != null && auth.uid == $uid"
-      }
-    },
-    "adminLogs": {
-      ".read": "auth != null && root.child('users').child(auth.uid).child('role').val() == 'admin'",
-      ".write": "auth != null && root.child('users').child(auth.uid).child('role').val() == 'admin'"
-    },
-    "tecnomath": {
-      "$path": {
-        ".read": true,
-        ".write": "auth != null && root.child('users').child(auth.uid).child('role').val() == 'admin'"
-      }
-    },
-    "gameSubmissions": {
-      ".read": "auth != null",
-      "$submissionId": {
-        ".write": "auth != null"
-      }
-    },
-    "gameUploadQueue": {
-      ".read": "auth != null",
-      "$submissionId": {
-        ".write": "auth != null"
-      }
-    },
-    "publicGameQueue": {
-      ".read": true,
-      "$submissionId": {
-        ".write": "auth != null"
-      }
-    },
-    "publishedGames": {
-      ".read": true,
-      "$gameId": {
-        ".write": "auth != null && root.child('users').child(auth.uid).child('role').val() == 'admin'"
       }
     }
   }
