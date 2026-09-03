@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MathSolve — Triangulador</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:linear-gradient(135deg,#070b18,#172554,#1e1b4b);color:#fff;min-height:100vh;padding:20px}.app{max-width:1050px;margin:auto}header{text-align:center;margin:10px 0 22px}.logo{font-size:42px;font-weight:900}.logo span{color:#00d9ff}header p{color:#aab5d1}.tabs{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-bottom:18px}.tab,.btn{border:0;border-radius:12px;padding:12px 16px;color:#fff;background:#18233d;font-weight:bold;cursor:pointer}.tab.active,.btn{background:linear-gradient(135deg,#7c5cff,#4387ff)}.card{background:#10172bf2;border:1px solid #30405f;border-radius:20px;padding:25px;box-shadow:0 20px 60px #0008}.section{display:none}.section.active{display:block}.formula{background:#050914;border:1px solid #30405f;padding:18px;border-radius:12px;text-align:center;font-size:23px;font-weight:700;margin:18px 0;letter-spacing:.3px}
+.frac{display:inline-flex;flex-direction:column;vertical-align:middle;line-height:1.15;text-align:center;margin:0 5px}
+.frac span:first-child{border-bottom:2px solid #fff;padding:0 7px 4px}
+.frac span:last-child{padding-top:4px}
+.steps .mathline{font-size:20px;background:#050914;border-radius:9px;padding:10px;margin:7px 0;font-weight:700}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.group label{display:block;margin-bottom:6px;font-weight:bold;font-size:13px}.group input{width:100%;padding:12px;border-radius:10px;border:1px solid #405171;background:#080e1d;color:white;font-size:16px}.full{grid-column:1/-1}.action{width:100%;margin-top:18px}.result{display:none;margin-top:20px;background:#080e1d;border:1px solid #30405f;border-radius:14px;padding:18px}.result.show{display:block}.answer{font-size:28px;font-weight:900;color:#a99cff;margin-bottom:12px}.step{padding:10px 0;border-bottom:1px solid #202d49;line-height:1.6}.step b{color:#7eeaff}.error{color:#ffd1d6;background:#3c1119;padding:12px;border-radius:9px}.info{margin-top:18px;color:#aab5d1;line-height:1.5;border-left:4px solid #00d9ff;padding:12px;background:#0b1223}.watermark{position:fixed;right:15px;bottom:12px;color:#ffffff30;font-size:18px;font-weight:900;pointer-events:none}@media(max-width:700px){.grid{grid-template-columns:1fr}.full{grid-column:auto}.logo{font-size:34px}}
+</style>
+</head>
+<body>
+<div class="app">
+<header><div class="logo">📐 Techno<span>Math</span></div><p>Resuelve problemas de triángulos con procedimiento completo</p></header>
+<div class="tabs">
+<button class="tab active" onclick="tab('cos',this)">Ley del Coseno</button>
+<button class="tab" onclick="tab('seno',this)">Ley del Seno</button>
+<button class="tab" onclick="tab('pit',this)">Pitágoras</button>
+<button class="tab" onclick="tab('area',this)">Área</button>
+<button class="tab" onclick="tab('per',this)">Perímetro</button>
+<button class="tab" onclick="tab('ang',this)">Ángulo</button>
+</div>
+<div class="card">
+
+<section id="cos" class="section active"><h2>📐 Ley del Coseno</h2><p>Dos lados y el ángulo comprendido → tercer lado.</p><div class="formula">c² = a² + b² − 2 · a · b · cos(C)</div><div class="grid">
+<div class="group"><label>Lado A</label><input id="ca" type="number" step="any"></div>
+<div class="group"><label>Lado B</label><input id="cb" type="number" step="any"></div>
+<div class="group"><label>Ángulo C (°)</label><input id="cc" type="number" step="any"></div></div><button class="btn action" onclick="coseno()">CALCULAR Y MOSTRAR PASOS</button><div id="rc" class="result"></div></section>
+
+<section id="seno" class="section"><h2>📏 Ley del Seno</h2><p>Un lado, su ángulo opuesto y otro ángulo → lado desconocido.</p><div class="formula">a ÷ sen(A) = b ÷ sen(B)</div><div class="grid">
+<div class="group"><label>Lado A</label><input id="sa" type="number" step="any"></div>
+<div class="group"><label>Ángulo A (°)</label><input id="saa" type="number" step="any"></div>
+<div class="group"><label>Ángulo B (°)</label><input id="sbb" type="number" step="any"></div></div><button class="btn action" onclick="seno()">CALCULAR Y MOSTRAR PASOS</button><div id="rs" class="result"></div></section>
+
+<section id="pit" class="section"><h2>📏 Pitágoras</h2><p>Dos catetos → hipotenusa.</p><div class="formula">c² = a² + b²</div><div class="grid">
+<div class="group"><label>Cateto A</label><input id="pa" type="number" step="any"></div>
+<div class="group"><label>Cateto B</label><input id="pb" type="number" step="any"></div></div><button class="btn action" onclick="pitagoras()">CALCULAR Y MOSTRAR PASOS</button><div id="rp" class="result"></div></section>
+
+<section id="area" class="section"><h2>📊 Área</h2><div class="formula">Área = <span class="frac"><span>a · b · sen(C)</span><span>2</span></span></div><div class="grid">
+<div class="group"><label>Lado A</label><input id="aa" type="number" step="any"></div>
+<div class="group"><label>Lado B</label><input id="ab" type="number" step="any"></div>
+<div class="group"><label>Ángulo C (°)</label><input id="ac" type="number" step="any"></div></div><button class="btn action" onclick="area()">CALCULAR Y MOSTRAR PASOS</button><div id="ra" class="result"></div></section>
+
+<section id="per" class="section"><h2>📐 Perímetro</h2><div class="formula">P = a + b + c</div><div class="grid">
+<div class="group"><label>Lado A</label><input id="pea" type="number" step="any"></div>
+<div class="group"><label>Lado B</label><input id="peb" type="number" step="any"></div>
+<div class="group"><label>Lado C</label><input id="pec" type="number" step="any"></div></div><button class="btn action" onclick="perimetro()">CALCULAR Y MOSTRAR PASOS</button><div id="re" class="result"></div></section>
+
+<section id="ang" class="section"><h2>📐 Encontrar ángulo C</h2><div class="formula">cos(C) = <span class="frac"><span>a² + b² − c²</span><span>2 · a · b</span></span></div><div class="grid">
+<div class="group"><label>Lado A</label><input id="anga" type="number" step="any"></div>
+<div class="group"><label>Lado B</label><input id="angb" type="number" step="any"></div>
+<div class="group"><label>Lado C</label><input id="angc" type="number" step="any"></div></div><button class="btn action" onclick="angulo()">CALCULAR Y MOSTRAR PASOS</button><div id="rg" class="result"></div></section>
+</div>
+<div class="info">💡 La app convierte automáticamente grados a radianes para las funciones trigonométricas y enseña el despeje, sustitución y resultado.</div>
+</div>
+<div class="watermark">@tecnomath</div>
+<script>
+const n=id=>parseFloat(document.getElementById(id).value),D=x=>x*Math.PI/180,F=x=>x.toFixed(2);
+function ok(v){return v.every(x=>Number.isFinite(x)&&x>0)}
+function tab(id,b){document.querySelectorAll('.section').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));document.getElementById(id).classList.add('active');b.classList.add('active')}
+function out(id,title,ans,steps){let e=document.getElementById(id);e.innerHTML='<div class="answer">'+title+': '+ans+'</div>'+steps.map((s,i)=>'<div class="step"><b>Paso '+(i+1)+':</b> '+s+'</div>').join('');e.classList.add('show')}
+function bad(id,t){let e=document.getElementById(id);e.innerHTML='<div class="error">⚠️ '+t+'</div>';e.classList.add('show')}
+function coseno(){let a=n('ca'),b=n('cb'),C=n('cc');if(!ok([a,b,C])||C>=180)return bad('rc','Usa dos lados positivos y un ángulo entre 0° y 180°.');let co=Math.cos(D(C)),t=2*a*b*co,c2=a*a+b*b-t,c=Math.sqrt(Math.max(0,c2));out('rc','Lado C',F(c)+' unidades',['c² = a² + b² − 2 · a · b · cos(C)','c² = '+a+'² + '+b+'² − 2('+a+')('+b+')·cos('+C+'°)','cos('+C+'°) = '+F(co),'2ab·cos(C) = '+F(t),'c² = '+F(c2),'c = √'+F(c2),'c = '+F(c)+' unidades'])}
+function seno(){let a=n('sa'),A=n('saa'),B=n('sbb');if(!ok([a,A,B])||A>=180||B>=180||A+B>=180)return bad('rs','Revisa lados y ángulos. La suma de los ángulos debe ser menor que 180°.');let b=a*Math.sin(D(B))/Math.sin(D(A));out('rs','Lado B',F(b)+' unidades',['a ÷ sen(A) = b ÷ sen(B)','b = a · sen(B) ÷ sen(A)','b = '+a+'·sen('+B+'°)/sen('+A+'°)','sen(A) = '+F(Math.sin(D(A)))+' y sen(B) = '+F(Math.sin(D(B))),'b = '+F(b)+' unidades'])}
+function pitagoras(){let a=n('pa'),b=n('pb');if(!ok([a,b]))return bad('rp','Introduce dos catetos positivos.');let q=a*a+b*b,c=Math.sqrt(q);out('rp','Hipotenusa',F(c)+' unidades',['c² = a² + b²','c² = '+a+'² + '+b+'²','c² = '+F(q),'c = √'+F(q),'c = '+F(c)+' unidades'])}
+function area(){let a=n('aa'),b=n('ab'),C=n('ac');if(!ok([a,b,C])||C>=180)return bad('ra','Introduce valores válidos y un ángulo entre 0° y 180°.');let s=Math.sin(D(C)),x=a*b*s/2;out('ra','Área',F(x)+' unidades²',['Área = (a · b · sen(C)) ÷ 2','Área = ('+a+'·'+b+'·sen('+C+'°))/2','sen('+C+'°) = '+F(s),'Área = '+F(x)+' unidades²'])}
+function perimetro(){let a=n('pea'),b=n('peb'),c=n('pec');if(!ok([a,b,c])||a+b<=c||a+c<=b||b+c<=a)return bad('re','Los lados deben formar un triángulo válido.');let p=a+b+c;out('re','Perímetro',F(p)+' unidades',['P = a + b + c','P = '+a+' + '+b+' + '+c,'P = '+F(p)+' unidades'])}
+function angulo(){let a=n('anga'),b=n('angb'),c=n('angc');if(!ok([a,b,c])||a+b<=c||a+c<=b||b+c<=a)return bad('rg','Esos lados no forman un triángulo válido.');let x=(a*a+b*b-c*c)/(2*a*b);x=Math.max(-1,Math.min(1,x));let C=Math.acos(x)*180/Math.PI;out('rg','Ángulo C',F(C)+'°',['cos(C) = (a² + b² − c²) ÷ (2 · a · b)','cos(C) = ('+a+'² + '+b+'² − '+c+'²)/(2·'+a+'·'+b+')','cos(C) = '+F(x),'C = cos⁻¹('+F(x)+')','C = '+F(C)+'°'])}
+</script>
+</body>
+</html>
