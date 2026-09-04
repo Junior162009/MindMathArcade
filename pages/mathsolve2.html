@@ -23,12 +23,11 @@
   --cyan:#00d9ff;
   --green:#55e6a5;
   --danger:#ff6b81;
+  --warning:#ffbf69;
   --shadow:0 20px 60px rgba(0,0,0,.35);
 }
 
-html{
-  scroll-behavior:smooth;
-}
+html{scroll-behavior:smooth}
 
 body{
   margin:0;
@@ -42,14 +41,8 @@ body{
     linear-gradient(135deg,var(--bg1),var(--bg2),var(--bg3));
 }
 
-button,
-input{
-  font:inherit;
-}
-
-button{
-  cursor:pointer;
-}
+button,input,select{font:inherit}
+button{cursor:pointer}
 
 .app{
   width:min(1200px,100%);
@@ -78,9 +71,7 @@ header{
   letter-spacing:-1px;
 }
 
-.logo span{
-  color:var(--cyan);
-}
+.logo span{color:var(--cyan)}
 
 header p{
   margin:9px auto 0;
@@ -127,9 +118,7 @@ header p{
   backdrop-filter:blur(18px);
 }
 
-.section{
-  display:none;
-}
+.section{display:none}
 
 .section.active{
   display:block;
@@ -137,14 +126,8 @@ header p{
 }
 
 @keyframes fadeIn{
-  from{
-    opacity:0;
-    transform:translateY(5px);
-  }
-  to{
-    opacity:1;
-    transform:translateY(0);
-  }
+  from{opacity:0;transform:translateY(5px)}
+  to{opacity:1;transform:translateY(0)}
 }
 
 .section-head{
@@ -212,34 +195,172 @@ header p{
   padding:17px;
   border-radius:14px;
   text-align:center;
-  font-size:clamp(19px,3vw,25px);
+  font-size:clamp(18px,3vw,25px);
   font-weight:850;
   margin:0 0 18px;
   line-height:1.5;
+  overflow-x:auto;
 }
+
+/* =========================================
+   FRACCIONES MATEMÁTICAS HUMANAS
+========================================= */
 
 .frac{
   display:inline-flex;
   flex-direction:column;
   vertical-align:middle;
-  line-height:1.15;
+  line-height:1.05;
   text-align:center;
-  margin:0 5px;
+  margin:0 6px;
+  min-width:38px;
 }
 
-.frac span:first-child{
-  border-bottom:2px solid #fff;
-  padding:0 7px 4px;
+.frac .top{
+  display:block;
+  padding:0 9px 5px;
+  border-bottom:2px solid currentColor;
+  white-space:nowrap;
 }
 
-.frac span:last-child{
-  padding-top:4px;
+.frac .bottom{
+  display:block;
+  padding:5px 9px 0;
+  white-space:nowrap;
+}
+
+.math-display{
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  gap:5px;
+  flex-wrap:wrap;
+  font-family:"Cambria Math","Times New Roman",serif;
+  font-size:clamp(20px,3vw,28px);
+  font-weight:600;
+  line-height:1.4;
+}
+
+.math-small{
+  font-family:"Cambria Math","Times New Roman",serif;
+}
+
+.limit-symbol{
+  font-family:"Cambria Math","Times New Roman",serif;
+  white-space:nowrap;
+}
+
+.limit-expression{
+  display:inline-flex;
+  align-items:center;
+  gap:5px;
+  flex-wrap:wrap;
+  justify-content:center;
+}
+
+.limit-preview{
+  margin-top:16px;
+  padding:22px 16px;
+  text-align:center;
+  border-radius:14px;
+  background:#050914;
+  border:1px solid var(--border);
+  font-family:"Cambria Math","Times New Roman",serif;
+  font-size:clamp(21px,3vw,30px);
+  font-weight:600;
+  line-height:1.7;
+  overflow-x:auto;
+}
+
+.limit-preview .frac{
+  font-size:.9em;
+}
+
+.limit-label{
+  font-family:"Cambria Math","Times New Roman",serif;
+  font-weight:600;
+}
+
+.limit-arrow{
+  font-size:1.05em;
+  white-space:nowrap;
+}
+
+/* Procedimientos matemáticos */
+.mathline{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-wrap:wrap;
+  gap:6px;
+  margin-top:9px;
+  padding:14px 12px;
+  background:#050914;
+  border:1px solid #1e2b47;
+  border-radius:10px;
+  font-family:"Cambria Math","Times New Roman",serif;
+  font-size:20px;
+  font-weight:600;
+  line-height:1.5;
+  overflow-x:auto;
+  text-align:center;
+}
+
+.mathline.text-math{
+  font-family:Inter,Arial,sans-serif;
+  font-size:16px;
+  font-weight:700;
+}
+
+.mathline .frac{
+  font-size:.95em;
+}
+
+.math-equals{
+  padding:0 3px;
+}
+
+.math-note{
+  display:block;
+  width:100%;
+  margin-top:5px;
+  color:var(--muted);
+  font-family:Inter,Arial,sans-serif;
+  font-size:13px;
+  font-weight:600;
+}
+
+.factor{
+  display:inline-flex;
+  align-items:center;
+  white-space:nowrap;
+}
+
+.cancel{
+  text-decoration:line-through;
+  text-decoration-thickness:2px;
+  text-decoration-color:var(--danger);
+  opacity:.75;
+}
+
+.highlight-math{
+  color:#b3a8ff;
+}
+
+.infinity{
+  color:var(--warning);
+  font-size:1.15em;
+  font-weight:900;
 }
 
 .grid{
   display:grid;
   grid-template-columns:repeat(3,1fr);
   gap:13px;
+}
+
+.grid.two{
+  grid-template-columns:repeat(2,1fr);
 }
 
 .group label{
@@ -258,7 +379,8 @@ header p{
   font-weight:600;
 }
 
-.group input{
+.group input,
+.group select{
   width:100%;
   padding:13px 12px;
   border-radius:12px;
@@ -270,7 +392,8 @@ header p{
   transition:.2s ease;
 }
 
-.group input:focus{
+.group input:focus,
+.group select:focus{
   border-color:var(--cyan);
   box-shadow:0 0 0 3px rgba(0,217,255,.08);
 }
@@ -300,10 +423,6 @@ input::placeholder{
 .btn:hover{
   transform:translateY(-1px);
   filter:brightness(1.08);
-}
-
-.btn:active{
-  transform:translateY(0);
 }
 
 .btn.secondary{
@@ -390,14 +509,8 @@ input::placeholder{
 }
 
 @keyframes resultIn{
-  from{
-    opacity:0;
-    transform:translateY(7px);
-  }
-  to{
-    opacity:1;
-    transform:translateY(0);
-  }
+  from{opacity:0;transform:translateY(7px)}
+  to{opacity:1;transform:translateY(0)}
 }
 
 .result-top{
@@ -423,7 +536,7 @@ input::placeholder{
   font-size:31px;
   font-weight:950;
   color:#b3a8ff;
-  line-height:1.2;
+  line-height:1.3;
 }
 
 .result-actions{
@@ -468,18 +581,6 @@ input::placeholder{
   margin-right:7px;
 }
 
-.mathline{
-  display:block;
-  margin-top:7px;
-  padding:10px 12px;
-  background:#050914;
-  border:1px solid #1e2b47;
-  border-radius:9px;
-  font-size:17px;
-  font-weight:800;
-  overflow-x:auto;
-}
-
 .error{
   margin:18px;
   color:#ffd1d6;
@@ -500,6 +601,95 @@ input::placeholder{
   border-radius:0 12px 12px 0;
 }
 
+.example-box{
+  padding:15px;
+  border:1px dashed #3c5280;
+  border-radius:13px;
+  background:rgba(67,135,255,.05);
+  color:var(--muted);
+  line-height:1.7;
+}
+
+.example-box strong{
+  color:var(--cyan);
+}
+
+.limit-help{
+  margin-top:16px;
+  padding:16px;
+  border-radius:14px;
+  background:rgba(124,92,255,.06);
+  border:1px solid rgba(124,92,255,.2);
+}
+
+.limit-help-title{
+  color:#b3a8ff;
+  font-weight:900;
+  margin-bottom:7px;
+}
+
+.limit-help p{
+  color:var(--muted);
+  margin:5px 0;
+  line-height:1.6;
+}
+
+.lateral-box{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+  margin-top:16px;
+}
+
+.lateral-card{
+  padding:15px;
+  border-radius:14px;
+  border:1px solid var(--border);
+  background:#050914;
+  text-align:center;
+}
+
+.lateral-card .side{
+  color:var(--muted);
+  font-size:13px;
+  font-weight:800;
+  margin-bottom:7px;
+}
+
+.lateral-card .value{
+  font-family:"Cambria Math","Times New Roman",serif;
+  font-size:26px;
+  font-weight:700;
+}
+
+.lateral-left{
+  border-color:rgba(255,191,105,.3);
+}
+
+.lateral-right{
+  border-color:rgba(85,230,165,.3);
+}
+
+.conclusion{
+  margin-top:15px;
+  padding:15px;
+  border-radius:13px;
+  font-weight:800;
+  line-height:1.6;
+}
+
+.conclusion.good{
+  background:rgba(85,230,165,.08);
+  border:1px solid rgba(85,230,165,.25);
+  color:#baf5d8;
+}
+
+.conclusion.bad{
+  background:rgba(255,107,129,.08);
+  border:1px solid rgba(255,107,129,.25);
+  color:#ffd0d7;
+}
+
 .history{
   margin-top:18px;
 }
@@ -515,24 +705,18 @@ input::placeholder{
 .history-list{
   display:flex;
   flex-direction:column;
-  gap:10px;
+  gap:8px;
 }
 
 .history-item{
   display:flex;
   align-items:center;
   justify-content:space-between;
-  gap:14px;
+  gap:12px;
   padding:14px;
   border:1px solid #23304c;
   background:#080e1d;
-  border-radius:14px;
-  transition:.2s ease;
-}
-
-.history-item:hover{
-  border-color:#405a88;
-  transform:translateY(-1px);
+  border-radius:12px;
 }
 
 .history-main{
@@ -542,56 +726,28 @@ input::placeholder{
 
 .history-title{
   font-weight:850;
-  margin-bottom:4px;
 }
 
 .history-detail{
   color:var(--muted);
   font-size:13px;
+  margin-top:3px;
   white-space:nowrap;
   overflow:hidden;
   text-overflow:ellipsis;
 }
 
 .history-result{
-  font-weight:900;
   color:#b3a8ff;
-  white-space:nowrap;
+  font-weight:900;
+  margin-top:5px;
 }
 
 .history-actions{
   display:flex;
-  align-items:center;
-  gap:7px;
   flex-wrap:wrap;
+  gap:7px;
   justify-content:flex-end;
-}
-
-.history-btn{
-  border:1px solid #344566;
-  background:#18233d;
-  color:#fff;
-  border-radius:10px;
-  padding:8px 10px;
-  font-size:12px;
-  font-weight:850;
-  transition:.2s ease;
-}
-
-.history-btn:hover{
-  border-color:var(--cyan);
-  background:#1c3154;
-  transform:translateY(-1px);
-}
-
-.history-btn.repeat{
-  background:linear-gradient(135deg,var(--primary),var(--secondary));
-  border-color:transparent;
-}
-
-.history-btn.steps{
-  background:#122a35;
-  border-color:#245d6d;
 }
 
 .empty-history{
@@ -600,6 +756,58 @@ input::placeholder{
   color:var(--muted);
   border:1px dashed #2b3958;
   border-radius:12px;
+}
+
+.history-modal{
+  position:fixed;
+  inset:0;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+  background:rgba(0,0,0,.65);
+  z-index:100;
+}
+
+.history-modal.show{
+  display:flex;
+}
+
+.modal-box{
+  width:min(850px,100%);
+  max-height:90vh;
+  overflow:auto;
+  background:#0b1223;
+  border:1px solid #344566;
+  border-radius:20px;
+  box-shadow:0 30px 80px rgba(0,0,0,.55);
+}
+
+.modal-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:15px;
+  padding:16px 18px;
+  border-bottom:1px solid var(--border);
+  position:sticky;
+  top:0;
+  background:#0b1223;
+  z-index:2;
+}
+
+.modal-content{
+  padding:18px;
+}
+
+.close-modal{
+  width:40px;
+  height:40px;
+  border-radius:10px;
+  border:1px solid #344566;
+  background:#18233d;
+  color:white;
+  font-size:20px;
 }
 
 .hidden{
@@ -630,228 +838,13 @@ input::placeholder{
   border:1px solid #385078;
   color:#fff;
   font-weight:800;
-  z-index:100;
+  z-index:200;
   transition:.25s ease;
-  max-width:min(90vw,600px);
-  text-align:center;
 }
 
 .toast.show{
   opacity:1;
   transform:translate(-50%,0);
-}
-
-/* MODAL DE PASOS */
-
-.modal{
-  position:fixed;
-  inset:0;
-  display:none;
-  align-items:center;
-  justify-content:center;
-  padding:20px;
-  background:rgba(0,0,0,.72);
-  backdrop-filter:blur(8px);
-  z-index:90;
-}
-
-.modal.show{
-  display:flex;
-  animation:modalIn .2s ease;
-}
-
-@keyframes modalIn{
-  from{
-    opacity:0;
-  }
-  to{
-    opacity:1;
-  }
-}
-
-.modal-card{
-  width:min(800px,100%);
-  max-height:min(88vh,850px);
-  overflow:auto;
-  background:#0b1223;
-  border:1px solid #35486d;
-  border-radius:22px;
-  box-shadow:0 30px 90px rgba(0,0,0,.55);
-}
-
-.modal-header{
-  display:flex;
-  justify-content:space-between;
-  align-items:flex-start;
-  gap:15px;
-  padding:19px 20px;
-  border-bottom:1px solid #263653;
-  position:sticky;
-  top:0;
-  background:rgba(11,18,35,.96);
-  backdrop-filter:blur(15px);
-  z-index:2;
-}
-
-.modal-title{
-  margin:0;
-  font-size:22px;
-  font-weight:950;
-}
-
-.modal-subtitle{
-  margin:5px 0 0;
-  color:var(--muted);
-  font-size:13px;
-}
-
-.modal-close{
-  width:38px;
-  height:38px;
-  border-radius:11px;
-  border:1px solid #344566;
-  background:#18233d;
-  color:#fff;
-  font-size:20px;
-  font-weight:900;
-}
-
-.modal-close:hover{
-  background:#253758;
-}
-
-.modal-body{
-  padding:20px;
-}
-
-.modal-result{
-  padding:14px;
-  background:linear-gradient(
-    135deg,
-    rgba(124,92,255,.14),
-    rgba(67,135,255,.07)
-  );
-  border:1px solid #35486d;
-  border-radius:14px;
-  margin-bottom:15px;
-}
-
-.modal-result-label{
-  color:var(--muted);
-  font-size:11px;
-  text-transform:uppercase;
-  letter-spacing:1px;
-  font-weight:850;
-}
-
-.modal-result-value{
-  margin-top:4px;
-  color:#b3a8ff;
-  font-size:24px;
-  font-weight:950;
-}
-
-.modal-inputs{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
-  gap:9px;
-  margin-bottom:18px;
-}
-
-.modal-input{
-  background:#070d1b;
-  border:1px solid #243553;
-  border-radius:11px;
-  padding:10px;
-}
-
-.modal-input-label{
-  color:var(--muted);
-  font-size:11px;
-  margin-bottom:3px;
-}
-
-.modal-input-value{
-  font-weight:850;
-}
-
-.modal-step{
-  padding:14px 0;
-  border-bottom:1px solid #202e49;
-}
-
-.modal-step:last-child{
-  border-bottom:0;
-}
-
-.modal-step-number{
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  width:28px;
-  height:28px;
-  border-radius:8px;
-  background:rgba(0,217,255,.1);
-  color:var(--cyan);
-  font-size:12px;
-  font-weight:900;
-  margin-right:7px;
-}
-
-.modal-step-title{
-  font-weight:900;
-}
-
-.modal-step-math{
-  display:block;
-  margin-top:8px;
-  padding:11px 12px;
-  background:#050914;
-  border:1px solid #1e2b47;
-  border-radius:9px;
-  font-weight:800;
-  overflow-x:auto;
-}
-
-.modal-footer{
-  display:flex;
-  justify-content:flex-end;
-  gap:8px;
-  padding:15px 20px;
-  border-top:1px solid #263653;
-}
-
-/* REPETIR DESTACADO */
-
-.history-item.just-repeated{
-  border-color:var(--cyan);
-  box-shadow:0 0 0 2px rgba(0,217,255,.08);
-}
-
-/* LOADING */
-
-.btn.loading{
-  pointer-events:none;
-  opacity:.7;
-}
-
-.btn.loading::after{
-  content:"";
-  display:inline-block;
-  width:12px;
-  height:12px;
-  margin-left:7px;
-  border:2px solid #ffffff66;
-  border-top-color:#fff;
-  border-radius:50%;
-  animation:spin .7s linear infinite;
-  vertical-align:-2px;
-}
-
-@keyframes spin{
-  to{
-    transform:rotate(360deg);
-  }
 }
 
 @media(max-width:900px){
@@ -861,9 +854,8 @@ input::placeholder{
 }
 
 @media(max-width:700px){
-  body{
-    padding:12px;
-  }
+
+  body{padding:12px}
 
   .card{
     padding:14px;
@@ -874,7 +866,8 @@ input::placeholder{
     flex-direction:column;
   }
 
-  .grid{
+  .grid,
+  .grid.two{
     grid-template-columns:1fr;
   }
 
@@ -902,41 +895,21 @@ input::placeholder{
   }
 
   .history-item{
+    align-items:flex-start;
     flex-direction:column;
-    align-items:stretch;
-  }
-
-  .history-result{
-    order:-1;
   }
 
   .history-actions{
-    justify-content:stretch;
+    width:100%;
+    justify-content:flex-start;
   }
 
-  .history-btn{
-    flex:1;
+  .lateral-box{
+    grid-template-columns:1fr;
   }
 
-  .modal{
-    padding:10px;
-  }
-
-  .modal-card{
-    border-radius:18px;
-    max-height:92vh;
-  }
-
-  .modal-header{
-    padding:15px;
-  }
-
-  .modal-body{
-    padding:15px;
-  }
-
-  .modal-footer{
-    padding:12px 15px;
+  .mathline{
+    font-size:18px;
   }
 }
 
@@ -962,23 +935,60 @@ input::placeholder{
   </div>
 
   <p>
-    Calculadora inteligente de triángulos con representación visual,
-    procedimiento paso a paso y resultados explicados.
+    Calculadora inteligente de matemáticas con representación visual,
+    procedimientos paso a paso, límites y resultados explicados.
   </p>
 </header>
 
 <div class="tabs">
-  <button class="tab active" onclick="tab('cos',this)">📐 Coseno</button>
-  <button class="tab" onclick="tab('seno',this)">📏 Seno</button>
-  <button class="tab" onclick="tab('pit',this)">📊 Pitágoras</button>
-  <button class="tab" onclick="tab('area',this)">🔺 Área</button>
-  <button class="tab" onclick="tab('per',this)">📐 Perímetro</button>
-  <button class="tab" onclick="tab('ang',this)">🎯 Ángulo</button>
+
+  <button class="tab active"
+    onclick="tab('cos',this)">
+    📐 Coseno
+  </button>
+
+  <button class="tab"
+    onclick="tab('seno',this)">
+    📏 Seno
+  </button>
+
+  <button class="tab"
+    onclick="tab('pit',this)">
+    📊 Pitágoras
+  </button>
+
+  <button class="tab"
+    onclick="tab('area',this)">
+    🔺 Área
+  </button>
+
+  <button class="tab"
+    onclick="tab('per',this)">
+    📐 Perímetro
+  </button>
+
+  <button class="tab"
+    onclick="tab('ang',this)">
+    🎯 Ángulo
+  </button>
+
+  <button class="tab"
+    onclick="tab('limfact',this)">
+    🔢 Límites
+  </button>
+
+  <button class="tab"
+    onclick="tab('limlat',this)">
+    ↔️ Laterales
+  </button>
+
 </div>
 
 <div class="card">
 
-<!-- ==================== COSENO ==================== -->
+<!-- =====================================================
+     COSENO
+===================================================== -->
 
 <section id="cos" class="section active">
 
@@ -1003,11 +1013,6 @@ input::placeholder{
 
     <div class="panel">
 
-      <div class="panel-title">
-        <strong>Fórmula</strong>
-        <small>c² → c</small>
-      </div>
-
       <div class="formula">
         c² = a² + b² − 2ab · cos(C)
       </div>
@@ -1026,8 +1031,7 @@ input::placeholder{
             step="any"
             min="0"
             placeholder="Ej. 5"
-            oninput="updateTriangle()"
-          >
+            oninput="updateTriangle()">
         </div>
 
         <div class="group">
@@ -1042,8 +1046,7 @@ input::placeholder{
             step="any"
             min="0"
             placeholder="Ej. 7"
-            oninput="updateTriangle()"
-          >
+            oninput="updateTriangle()">
         </div>
 
         <div class="group">
@@ -1059,25 +1062,20 @@ input::placeholder{
             min="0"
             max="180"
             placeholder="Ej. 60"
-            oninput="updateTriangle()"
-          >
+            oninput="updateTriangle()">
         </div>
 
       </div>
 
       <div class="actions">
 
-        <button
-          class="btn"
-          onclick="coseno()"
-        >
+        <button class="btn"
+          onclick="coseno()">
           🧮 CALCULAR PROCEDIMIENTO
         </button>
 
-        <button
-          class="btn secondary"
-          onclick="clearSection('cos')"
-        >
+        <button class="btn secondary"
+          onclick="clearSection('cos')">
           ↺ Limpiar
         </button>
 
@@ -1096,39 +1094,32 @@ input::placeholder{
 
       <div class="triangle-wrap">
 
-        <svg
-          class="triangle-svg"
-          viewBox="0 0 500 330"
-          aria-label="Triángulo visual"
-        >
+        <svg class="triangle-svg"
+             viewBox="0 0 500 330">
 
           <polygon
-            id="triangleShape"
             class="triangle-line"
-            points="90,270 410,270 290,70"
-          ></polygon>
+            points="90,270 410,270 290,70">
+          </polygon>
 
           <text
             x="77"
             y="292"
-            class="triangle-label"
-          >
+            class="triangle-label">
             B
           </text>
 
           <text
             x="414"
             y="292"
-            class="triangle-label"
-          >
+            class="triangle-label">
             C
           </text>
 
           <text
             x="284"
             y="57"
-            class="triangle-label"
-          >
+            class="triangle-label">
             A
           </text>
 
@@ -1136,17 +1127,15 @@ input::placeholder{
             x="218"
             y="301"
             class="triangle-angle"
-            id="visualC"
-          >
-            c
+            id="visualC">
+            C
           </text>
 
           <text
             x="140"
             y="177"
             class="triangle-angle"
-            id="visualA"
-          >
+            id="visualA">
             a
           </text>
 
@@ -1154,8 +1143,7 @@ input::placeholder{
             x="339"
             y="177"
             class="triangle-angle"
-            id="visualB"
-          >
+            id="visualB">
             b
           </text>
 
@@ -1164,7 +1152,8 @@ input::placeholder{
       </div>
 
       <div class="visual-note">
-        La figura sirve como guía para identificar lados y vértices.
+        La figura sirve como guía para identificar
+        lados y vértices.
       </div>
 
     </div>
@@ -1173,7 +1162,10 @@ input::placeholder{
 
 </section>
 
-<!-- ==================== SENO ==================== -->
+
+<!-- =====================================================
+     SENO
+===================================================== -->
 
 <section id="seno" class="section">
 
@@ -1184,8 +1176,8 @@ input::placeholder{
       <h2>📏 Ley del Seno</h2>
 
       <p>
-        Usa un lado, su ángulo opuesto y otro ángulo
-        para calcular el lado desconocido.
+        Calcula un lado utilizando su relación
+        con los ángulos opuestos.
       </p>
 
     </div>
@@ -1200,23 +1192,18 @@ input::placeholder{
 
     <div class="panel">
 
-      <div class="panel-title">
-        <strong>Fórmula</strong>
-        <small>a ↔ A · b ↔ B</small>
-      </div>
-
-      <div class="formula">
+      <div class="formula math-display">
 
         <span class="frac">
-          <span>a</span>
-          <span>sen(A)</span>
+          <span class="top">a</span>
+          <span class="bottom">sen(A)</span>
         </span>
 
         =
 
         <span class="frac">
-          <span>b</span>
-          <span>sen(B)</span>
+          <span class="top">b</span>
+          <span class="bottom">sen(B)</span>
         </span>
 
       </div>
@@ -1224,7 +1211,6 @@ input::placeholder{
       <div class="grid">
 
         <div class="group">
-
           <label>
             Lado A
             <em>unidades</em>
@@ -1235,13 +1221,10 @@ input::placeholder{
             type="number"
             step="any"
             min="0"
-            placeholder="Ej. 8"
-          >
-
+            placeholder="Ej. 8">
         </div>
 
         <div class="group">
-
           <label>
             Ángulo A
             <em>grados</em>
@@ -1253,13 +1236,10 @@ input::placeholder{
             step="any"
             min="0"
             max="180"
-            placeholder="Ej. 40"
-          >
-
+            placeholder="Ej. 40">
         </div>
 
         <div class="group">
-
           <label>
             Ángulo B
             <em>grados</em>
@@ -1271,26 +1251,20 @@ input::placeholder{
             step="any"
             min="0"
             max="180"
-            placeholder="Ej. 70"
-          >
-
+            placeholder="Ej. 70">
         </div>
 
       </div>
 
       <div class="actions">
 
-        <button
-          class="btn"
-          onclick="seno()"
-        >
+        <button class="btn"
+          onclick="seno()">
           🧮 CALCULAR PROCEDIMIENTO
         </button>
 
-        <button
-          class="btn secondary"
-          onclick="clearSection('seno')"
-        >
+        <button class="btn secondary"
+          onclick="clearSection('seno')">
           ↺ Limpiar
         </button>
 
@@ -1302,18 +1276,18 @@ input::placeholder{
 
     <div class="panel">
 
-      <div class="panel-title">
-        <strong>Relación fundamental</strong>
-        <small>Recuerda</small>
-      </div>
+      <div class="example-box">
 
-      <div
-        class="info"
-        style="margin-top:0"
-      >
-        El lado <b>a</b> está frente al ángulo
-        <b>A</b>, y el lado <b>b</b> está frente
-        al ángulo <b>B</b>.
+        <strong>💡 Recuerda:</strong>
+        <br>
+
+        Cada lado corresponde al ángulo
+        que está frente a él.
+
+        <br><br>
+
+        El lado <b>a</b> está frente al ángulo A.
+
       </div>
 
     </div>
@@ -1322,7 +1296,10 @@ input::placeholder{
 
 </section>
 
-<!-- ==================== PITÁGORAS ==================== -->
+
+<!-- =====================================================
+     PITÁGORAS
+===================================================== -->
 
 <section id="pit" class="section">
 
@@ -1353,7 +1330,7 @@ input::placeholder{
         c² = a² + b²
       </div>
 
-      <div class="grid">
+      <div class="grid two">
 
         <div class="group">
 
@@ -1367,8 +1344,7 @@ input::placeholder{
             type="number"
             step="any"
             min="0"
-            placeholder="Ej. 3"
-          >
+            placeholder="Ej. 3">
 
         </div>
 
@@ -1384,8 +1360,7 @@ input::placeholder{
             type="number"
             step="any"
             min="0"
-            placeholder="Ej. 4"
-          >
+            placeholder="Ej. 4">
 
         </div>
 
@@ -1393,17 +1368,13 @@ input::placeholder{
 
       <div class="actions">
 
-        <button
-          class="btn"
-          onclick="pitagoras()"
-        >
+        <button class="btn"
+          onclick="pitagoras()">
           🧮 CALCULAR PROCEDIMIENTO
         </button>
 
-        <button
-          class="btn secondary"
-          onclick="clearSection('pit')"
-        >
+        <button class="btn secondary"
+          onclick="clearSection('pit')">
           ↺ Limpiar
         </button>
 
@@ -1415,18 +1386,14 @@ input::placeholder{
 
     <div class="panel">
 
-      <div class="panel-title">
-        <strong>Concepto</strong>
-        <small>90°</small>
-      </div>
+      <div class="example-box">
 
-      <div
-        class="info"
-        style="margin-top:0"
-      >
-        En un triángulo rectángulo,
-        <b>c</b> representa la hipotenusa,
-        que siempre es el lado más largo.
+        <strong>📐 Hipotenusa:</strong>
+        <br>
+
+        Es el lado más largo y siempre está
+        frente al ángulo de 90°.
+
       </div>
 
     </div>
@@ -1435,7 +1402,10 @@ input::placeholder{
 
 </section>
 
-<!-- ==================== ÁREA ==================== -->
+
+<!-- =====================================================
+     ÁREA
+===================================================== -->
 
 <section id="area" class="section">
 
@@ -1460,17 +1430,17 @@ input::placeholder{
 
   <div class="panel">
 
-    <div class="formula">
+    <div class="formula math-display">
 
       Área =
 
       <span class="frac">
 
-        <span>
+        <span class="top">
           a · b · sen(C)
         </span>
 
-        <span>
+        <span class="bottom">
           2
         </span>
 
@@ -1492,8 +1462,7 @@ input::placeholder{
           type="number"
           step="any"
           min="0"
-          placeholder="Ej. 8"
-        >
+          placeholder="Ej. 8">
 
       </div>
 
@@ -1509,8 +1478,7 @@ input::placeholder{
           type="number"
           step="any"
           min="0"
-          placeholder="Ej. 5"
-        >
+          placeholder="Ej. 5">
 
       </div>
 
@@ -1527,8 +1495,7 @@ input::placeholder{
           step="any"
           min="0"
           max="180"
-          placeholder="Ej. 45"
-        >
+          placeholder="Ej. 45">
 
       </div>
 
@@ -1536,17 +1503,13 @@ input::placeholder{
 
     <div class="actions">
 
-      <button
-        class="btn"
-        onclick="area()"
-      >
+      <button class="btn"
+        onclick="area()">
         🧮 CALCULAR PROCEDIMIENTO
       </button>
 
-      <button
-        class="btn secondary"
-        onclick="clearSection('area')"
-      >
+      <button class="btn secondary"
+        onclick="clearSection('area')">
         ↺ Limpiar
       </button>
 
@@ -1558,7 +1521,10 @@ input::placeholder{
 
 </section>
 
-<!-- ==================== PERÍMETRO ==================== -->
+
+<!-- =====================================================
+     PERÍMETRO
+===================================================== -->
 
 <section id="per" class="section">
 
@@ -1600,8 +1566,7 @@ input::placeholder{
           type="number"
           step="any"
           min="0"
-          placeholder="Ej. 5"
-        >
+          placeholder="Ej. 5">
 
       </div>
 
@@ -1617,8 +1582,7 @@ input::placeholder{
           type="number"
           step="any"
           min="0"
-          placeholder="Ej. 6"
-        >
+          placeholder="Ej. 6">
 
       </div>
 
@@ -1634,8 +1598,7 @@ input::placeholder{
           type="number"
           step="any"
           min="0"
-          placeholder="Ej. 7"
-        >
+          placeholder="Ej. 7">
 
       </div>
 
@@ -1643,17 +1606,13 @@ input::placeholder{
 
     <div class="actions">
 
-      <button
-        class="btn"
-        onclick="perimetro()"
-      >
+      <button class="btn"
+        onclick="perimetro()">
         🧮 CALCULAR PROCEDIMIENTO
       </button>
 
-      <button
-        class="btn secondary"
-        onclick="clearSection('per')"
-      >
+      <button class="btn secondary"
+        onclick="clearSection('per')">
         ↺ Limpiar
       </button>
 
@@ -1665,7 +1624,10 @@ input::placeholder{
 
 </section>
 
-<!-- ==================== ÁNGULO ==================== -->
+
+<!-- =====================================================
+     ÁNGULO
+===================================================== -->
 
 <section id="ang" class="section">
 
@@ -1676,8 +1638,8 @@ input::placeholder{
       <h2>🎯 Encontrar ángulo C</h2>
 
       <p>
-        Obtén el ángulo opuesto al lado C
-        conociendo los tres lados.
+        Obtén un ángulo utilizando
+        los tres lados del triángulo.
       </p>
 
     </div>
@@ -1692,17 +1654,17 @@ input::placeholder{
 
     <div class="panel">
 
-      <div class="formula">
+      <div class="formula math-display">
 
         cos(C) =
 
         <span class="frac">
 
-          <span>
+          <span class="top">
             a² + b² − c²
           </span>
 
-          <span>
+          <span class="bottom">
             2ab
           </span>
 
@@ -1714,52 +1676,40 @@ input::placeholder{
 
         <div class="group">
 
-          <label>
-            Lado A
-            <em>unidades</em>
-          </label>
+          <label>Lado A</label>
 
           <input
             id="anga"
             type="number"
             step="any"
             min="0"
-            placeholder="Ej. 5"
-          >
+            placeholder="Ej. 5">
 
         </div>
 
         <div class="group">
 
-          <label>
-            Lado B
-            <em>unidades</em>
-          </label>
+          <label>Lado B</label>
 
           <input
             id="angb"
             type="number"
             step="any"
             min="0"
-            placeholder="Ej. 7"
-          >
+            placeholder="Ej. 7">
 
         </div>
 
         <div class="group">
 
-          <label>
-            Lado C
-            <em>unidades</em>
-          </label>
+          <label>Lado C</label>
 
           <input
             id="angc"
             type="number"
             step="any"
             min="0"
-            placeholder="Ej. 8"
-          >
+            placeholder="Ej. 8">
 
         </div>
 
@@ -1767,17 +1717,13 @@ input::placeholder{
 
       <div class="actions">
 
-        <button
-          class="btn"
-          onclick="angulo()"
-        >
+        <button class="btn"
+          onclick="angulo()">
           🧮 CALCULAR PROCEDIMIENTO
         </button>
 
-        <button
-          class="btn secondary"
-          onclick="clearSection('ang')"
-        >
+        <button class="btn secondary"
+          onclick="clearSection('ang')">
           ↺ Limpiar
         </button>
 
@@ -1789,18 +1735,14 @@ input::placeholder{
 
     <div class="panel">
 
-      <div class="panel-title">
-        <strong>Validación</strong>
-        <small>Desigualdad triangular</small>
-      </div>
+      <div class="example-box">
 
-      <div
-        class="info"
-        style="margin-top:0"
-      >
-        Para formar un triángulo,
-        la suma de cualesquiera dos lados
-        debe ser mayor que el tercer lado.
+        <strong>✔ Validación:</strong>
+        <br>
+
+        La suma de dos lados siempre debe
+        ser mayor que el tercer lado.
+
       </div>
 
     </div>
@@ -1809,103 +1751,497 @@ input::placeholder{
 
 </section>
 
-<!-- ==================== HISTORIAL ==================== -->
+
+<!-- =====================================================
+     LÍMITES POR FACTORIZACIÓN
+===================================================== -->
+
+<section id="limfact" class="section">
+
+  <div class="section-head">
+
+    <div class="section-title">
+
+      <h2>🔢 Límites por factorización</h2>
+
+      <p>
+        Resuelve límites con indeterminación
+        <b>0/0</b> factorizando y simplificando
+        paso a paso.
+      </p>
+
+    </div>
+
+    <div class="mode-badge">
+      CÁLCULO
+    </div>
+
+  </div>
+
+  <div class="workspace">
+
+    <div class="panel">
+
+      <div class="group">
+
+        <label>
+          Tipo de ejercicio
+        </label>
+
+        <select
+          id="limitType"
+          onchange="updateLimitPreview()">
+
+          <option value="difference">
+            Diferencia de cuadrados
+          </option>
+
+          <option value="common">
+            Factor común
+          </option>
+
+          <option value="quadratic">
+            Producto de factores
+          </option>
+
+        </select>
+
+      </div>
+
+
+      <div class="limit-preview"
+           id="limitPreview">
+      </div>
+
+
+      <div class="grid two"
+           style="margin-top:16px">
+
+        <div class="group">
+
+          <label>
+            Valor al que tiende x
+            <em>a</em>
+          </label>
+
+          <input
+            id="limA"
+            type="number"
+            step="any"
+            value="2"
+            oninput="updateLimitPreview()">
+
+        </div>
+
+        <div class="group">
+
+          <label>
+            Segundo valor
+            <em>b</em>
+          </label>
+
+          <input
+            id="limB"
+            type="number"
+            step="any"
+            value="3"
+            oninput="updateLimitPreview()">
+
+        </div>
+
+      </div>
+
+
+      <div class="actions">
+
+        <button class="btn"
+          onclick="limitFactor()">
+          🔢 RESOLVER LÍMITE
+        </button>
+
+        <button class="btn secondary"
+          onclick="clearLimitFactor()">
+          ↺ Limpiar
+        </button>
+
+      </div>
+
+      <div id="rlf" class="result"></div>
+
+    </div>
+
+
+    <div class="panel">
+
+      <div class="panel-title">
+
+        <strong>
+          ¿Cómo funciona?
+        </strong>
+
+        <small>
+          0/0
+        </small>
+
+      </div>
+
+
+      <div class="example-box">
+
+        <strong>1. Sustituimos</strong>
+
+        <br>
+
+        Primero ponemos el valor de
+        <b>x</b> directamente.
+
+        <br><br>
+
+        <strong>2. Detectamos 0/0</strong>
+
+        <br>
+
+        Si aparece una división
+        <b>0/0</b>, tenemos una indeterminación.
+
+        <br><br>
+
+        <strong>3. Factorizamos</strong>
+
+        <br>
+
+        Reescribimos la expresión para
+        encontrar factores comunes.
+
+        <br><br>
+
+        <strong>4. Simplificamos</strong>
+
+        <br>
+
+        Cancelamos el factor que aparece
+        arriba y abajo.
+
+        <br><br>
+
+        <strong>5. Sustituimos nuevamente</strong>
+
+        <br>
+
+        Ahora sí evaluamos el límite.
+
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- =====================================================
+     LÍMITES LATERALES
+===================================================== -->
+
+<section id="limlat" class="section">
+
+  <div class="section-head">
+
+    <div class="section-title">
+
+      <h2>↔️ Límites laterales</h2>
+
+      <p>
+        Analiza qué ocurre cuando x se aproxima
+        a un punto desde la izquierda y desde la derecha.
+      </p>
+
+    </div>
+
+    <div class="mode-badge">
+      CÁLCULO
+    </div>
+
+  </div>
+
+  <div class="workspace">
+
+    <div class="panel">
+
+      <div class="group">
+
+        <label>
+          Tipo de ejercicio
+        </label>
+
+        <select
+          id="lateralType"
+          onchange="updateLateralPreview()">
+
+          <option value="constant">
+            Función constante
+          </option>
+
+          <option value="linear">
+            Función lineal
+          </option>
+
+          <option value="jump">
+            Función con salto
+          </option>
+
+          <option value="absolute">
+            Valor absoluto
+          </option>
+
+        </select>
+
+      </div>
+
+
+      <div class="limit-preview"
+           id="lateralPreview">
+      </div>
+
+
+      <div class="grid two"
+           style="margin-top:16px">
+
+        <div class="group">
+
+          <label>
+            Valor de aproximación
+            <em>a</em>
+          </label>
+
+          <input
+            id="latA"
+            type="number"
+            step="any"
+            value="2"
+            oninput="updateLateralPreview()">
+
+        </div>
+
+        <div class="group">
+
+          <label>
+            Valor / pendiente
+            <em>k</em>
+          </label>
+
+          <input
+            id="latK"
+            type="number"
+            step="any"
+            value="3"
+            oninput="updateLateralPreview()">
+
+        </div>
+
+      </div>
+
+
+      <div class="actions">
+
+        <button class="btn"
+          onclick="lateralLimit()">
+          ↔️ CALCULAR LATERALES
+        </button>
+
+        <button class="btn secondary"
+          onclick="clearLateral()">
+          ↺ Limpiar
+        </button>
+
+      </div>
+
+
+      <div id="rll" class="result"></div>
+
+    </div>
+
+
+    <div class="panel">
+
+      <div class="panel-title">
+
+        <strong>
+          📚 ¿Cómo se analiza?
+        </strong>
+
+        <small>
+          Izquierda / derecha
+        </small>
+
+      </div>
+
+
+      <div class="example-box">
+
+        <strong>
+          Por la izquierda:
+        </strong>
+
+        <br>
+
+        Escribimos:
+
+        <div class="math-display"
+             style="margin:12px 0">
+
+          <span class="limit-symbol">
+            lim
+          </span>
+
+          <span class="math-small">
+            x→a⁻
+          </span>
+
+          f(x)
+
+        </div>
+
+        Esto significa que x se acerca
+        a <b>a</b> usando valores menores.
+
+        <br><br>
+
+        <strong>
+          Por la derecha:
+        </strong>
+
+        <br>
+
+        Escribimos:
+
+        <div class="math-display"
+             style="margin:12px 0">
+
+          <span class="limit-symbol">
+            lim
+          </span>
+
+          <span class="math-small">
+            x→a⁺
+          </span>
+
+          f(x)
+
+        </div>
+
+        Esto significa que x se acerca
+        a <b>a</b> usando valores mayores.
+
+        <br><br>
+
+        <strong>
+          Regla:
+        </strong>
+
+        <br>
+
+        El límite existe si ambos resultados
+        son iguales.
+
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- =====================================================
+     HISTORIAL
+===================================================== -->
 
 <div class="history panel">
 
   <div class="history-header">
 
-    <strong>
-      🕘 Historial reciente
-    </strong>
+    <div>
+
+      <strong>
+        🕘 Historial de cálculos
+      </strong>
+
+      <br>
+
+      <small style="color:var(--muted)">
+        Guarda resultados, procedimientos
+        y valores utilizados.
+      </small>
+
+    </div>
 
     <button
       class="btn small secondary"
-      onclick="clearHistory()"
-    >
-      Borrar historial
+      onclick="clearHistory()">
+
+      🗑 Borrar
+
     </button>
 
   </div>
 
   <div
     id="historyList"
-    class="history-list"
-  ></div>
+    class="history-list">
+  </div>
 
 </div>
+
 
 <div class="info">
 
-  💡 <b>MathSolve</b> convierte automáticamente
-  los grados a radianes para los cálculos trigonométricos
-  y muestra fórmula, sustitución, cálculo
-  y respuesta final.
+  💡 <b>MathSolve</b> muestra la fórmula,
+  sustitución, operaciones y respuesta final.
+
+  En los límites explica la indeterminación,
+  la factorización, la simplificación y
+  los límites laterales.
 
 </div>
 
 </div>
 </div>
 
-<!-- ==================== MODAL PASOS ==================== -->
+
+<!-- =====================================================
+     MODAL HISTORIAL
+===================================================== -->
 
 <div
-  id="stepsModal"
-  class="modal"
-  onclick="modalBackgroundClick(event)"
->
+  id="historyModal"
+  class="history-modal">
 
-  <div class="modal-card">
+  <div class="modal-box">
 
     <div class="modal-header">
 
-      <div>
-
-        <h3
-          id="modalTitle"
-          class="modal-title"
-        >
-          Procedimiento
-        </h3>
-
-        <p
-          id="modalSubtitle"
-          class="modal-subtitle"
-        >
-          MathSolve Pro
-        </p>
-
-      </div>
+      <strong id="modalTitle">
+        🧮 Procedimiento guardado
+      </strong>
 
       <button
-        class="modal-close"
-        onclick="closeStepsModal()"
-        aria-label="Cerrar"
-      >
+        class="close-modal"
+        onclick="closeHistoryModal()">
         ×
       </button>
 
     </div>
 
     <div
-      id="modalBody"
-      class="modal-body"
-    ></div>
-
-    <div class="modal-footer">
-
-      <button
-        class="btn secondary"
-        onclick="closeStepsModal()"
-      >
-        Cerrar
-      </button>
-
+      id="modalContent"
+      class="modal-content">
     </div>
 
   </div>
 
 </div>
+
 
 <div class="watermark">
   @tecnomath
@@ -1913,73 +2249,72 @@ input::placeholder{
 
 <div
   id="toast"
-  class="toast"
-></div>
+  class="toast">
+</div>
+
 
 <script>
 
-/* =========================================================
-   UTILIDADES
-========================================================= */
-
 const $ = id => document.getElementById(id);
+
+const HISTORY_KEY = "mathsolve_history_v2";
 
 const n = id => {
 
-  const value = parseFloat($(id)?.value);
+  const value =
+    parseFloat($(id)?.value);
 
   return Number.isFinite(value)
     ? value
     : NaN;
-
 };
 
-const D = deg =>
-  deg * Math.PI / 180;
+const D =
+  deg => deg * Math.PI / 180;
+
 
 const F = value => {
 
-  if(!Number.isFinite(value)){
+  if(!Number.isFinite(value))
     return "—";
-  }
 
   const rounded =
     Math.round(value * 100) / 100;
 
   return Number.isInteger(rounded)
     ? String(rounded)
-    : rounded.toFixed(2)
+    : rounded
+        .toFixed(2)
         .replace(/\.?0+$/,"");
-
 };
+
 
 const F4 = value => {
 
-  if(!Number.isFinite(value)){
+  if(!Number.isFinite(value))
     return "—";
-  }
 
   return value.toFixed(4);
-
 };
+
 
 function ok(values){
 
   return values.every(
-    v => Number.isFinite(v) && v > 0
+    value =>
+      Number.isFinite(value) &&
+      value > 0
   );
-
 }
+
 
 function validAngle(angle){
 
-  return (
-    Number.isFinite(angle) &&
+  return Number.isFinite(angle) &&
     angle > 0 &&
-    angle < 180
-  );
-
+    angle < 180;
 }
+
 
 function validTriangle(a,b,c){
 
@@ -1987,143 +2322,27 @@ function validTriangle(a,b,c){
     a > 0 &&
     b > 0 &&
     c > 0 &&
-    a + b > c &&
-    a + c > b &&
-    b + c > a
+    a+b > c &&
+    a+c > b &&
+    b+c > a
   );
-
 }
 
-/* =========================================================
-   CONFIGURACIÓN DEL HISTORIAL
-========================================================= */
 
-const HISTORY_CONFIG = {
+function escapeHTML(value){
 
-  "Ley del Coseno":{
-    section:"cos",
-    result:"rc",
-    fn:"coseno",
-    inputs:[
-      {
-        id:"ca",
-        label:"Lado A"
-      },
-      {
-        id:"cb",
-        label:"Lado B"
-      },
-      {
-        id:"cc",
-        label:"Ángulo C"
-      }
-    ]
-  },
-
-  "Ley del Seno":{
-    section:"seno",
-    result:"rs",
-    fn:"seno",
-    inputs:[
-      {
-        id:"sa",
-        label:"Lado A"
-      },
-      {
-        id:"saa",
-        label:"Ángulo A"
-      },
-      {
-        id:"sbb",
-        label:"Ángulo B"
-      }
-    ]
-  },
-
-  "Pitágoras":{
-    section:"pit",
-    result:"rp",
-    fn:"pitagoras",
-    inputs:[
-      {
-        id:"pa",
-        label:"Cateto A"
-      },
-      {
-        id:"pb",
-        label:"Cateto B"
-      }
-    ]
-  },
-
-  "Área":{
-    section:"area",
-    result:"ra",
-    fn:"area",
-    inputs:[
-      {
-        id:"aa",
-        label:"Lado A"
-      },
-      {
-        id:"ab",
-        label:"Lado B"
-      },
-      {
-        id:"ac",
-        label:"Ángulo C"
-      }
-    ]
-  },
-
-  "Perímetro":{
-    section:"per",
-    result:"re",
-    fn:"perimetro",
-    inputs:[
-      {
-        id:"pea",
-        label:"Lado A"
-      },
-      {
-        id:"peb",
-        label:"Lado B"
-      },
-      {
-        id:"pec",
-        label:"Lado C"
-      }
-    ]
-  },
-
-  "Ángulo C":{
-    section:"ang",
-    result:"rg",
-    fn:"angulo",
-    inputs:[
-      {
-        id:"anga",
-        label:"Lado A"
-      },
-      {
-        id:"angb",
-        label:"Lado B"
-      },
-      {
-        id:"angc",
-        label:"Lado C"
-      }
-    ]
-  }
-
-};
-
-let repeatingCalculation = false;
+  return String(value)
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
+}
 
 
-/* =========================================================
-   TABS
-========================================================= */
+/* =====================================================
+   NAVEGACIÓN
+===================================================== */
 
 function tab(id,button){
 
@@ -2139,58 +2358,118 @@ function tab(id,button){
       btn.classList.remove("active");
     });
 
-  const section = $(id);
+  $(id)?.classList.add("active");
 
-  if(section){
-    section.classList.add("active");
-  }
+  button?.classList.add("active");
 
-  if(button){
-    button.classList.add("active");
-  }
-
-  const card =
-    document.querySelector(".card");
-
-  if(card){
-
-    window.scrollTo({
-      top:card.offsetTop - 15,
-      behavior:"smooth"
-    });
-
-  }
-
+  window.scrollTo({
+    top:
+      document.querySelector(".card").offsetTop - 15,
+    behavior:"smooth"
+  });
 }
 
 
-/* =========================================================
-   SEGURIDAD HTML
-========================================================= */
+/* =====================================================
+   HTML MATEMÁTICO
+===================================================== */
 
-function escapeHTML(value){
+function fraction(top,bottom){
 
-  return String(value)
-    .replaceAll("&","&amp;")
-    .replaceAll("<","&lt;")
-    .replaceAll(">","&gt;")
-    .replaceAll('"',"&quot;")
-    .replaceAll("'","&#039;");
-
+  return `
+    <span class="frac">
+      <span class="top">${top}</span>
+      <span class="bottom">${bottom}</span>
+    </span>
+  `;
 }
 
 
-/* =========================================================
-   RENDER RESULTADO
-========================================================= */
+function limitHTML(a,side=""){
+
+  return `
+    <span class="limit-symbol">
+      lim
+    </span>
+
+    <span class="math-small">
+      x→${a}${side}
+    </span>
+  `;
+}
+
+
+function fractionText(top,bottom){
+
+  return `
+    <span class="frac">
+      <span class="top">${top}</span>
+      <span class="bottom">${bottom}</span>
+    </span>
+  `;
+}
+
+
+/* =====================================================
+   RESULTADOS
+===================================================== */
+
+function renderResultHTML(title,ans,steps){
+
+  return `
+
+    <div class="result-top">
+
+      <div class="answer-label">
+        Resultado final
+      </div>
+
+      <div class="answer">
+        ${escapeHTML(title)}
+        = ${escapeHTML(ans)}
+      </div>
+
+    </div>
+
+
+    <div class="steps">
+
+      ${steps.map((step,index)=>`
+
+        <div class="step">
+
+          <span class="step-number">
+            ${index+1}
+          </span>
+
+          <span class="step-title">
+            ${escapeHTML(step.title)}
+          </span>
+
+          ${
+            step.html
+              ? `<div class="mathline">${step.html}</div>`
+              : step.math
+                ? `
+                  <div class="mathline text-math">
+                    ${escapeHTML(step.math)}
+                  </div>
+                `
+                : ""
+          }
+
+        </div>
+
+      `).join("")}
+
+    </div>
+  `;
+}
+
 
 function out(id,title,ans,steps){
 
   const element = $(id);
-
-  if(!element){
-    return;
-  }
 
   element.innerHTML = `
 
@@ -2202,38 +2481,41 @@ function out(id,title,ans,steps){
 
       <div class="answer">
         ${escapeHTML(title)}
-        =
-        ${escapeHTML(ans)}
+        = ${escapeHTML(ans)}
       </div>
 
     </div>
+
 
     <div class="result-actions">
 
       <button
         class="btn small"
-        onclick="copyResult('${id}')"
-      >
+        onclick="copyResult('${id}')">
+
         📋 Copiar
+
       </button>
 
       <button
         class="btn small secondary"
-        onclick="printResult('${id}')"
-      >
+        onclick="printResult('${id}')">
+
         🖨️ Imprimir
+
       </button>
 
     </div>
 
+
     <div class="steps">
 
-      ${steps.map((step,i)=>`
+      ${steps.map((step,index)=>`
 
         <div class="step">
 
           <span class="step-number">
-            ${i+1}
+            ${index+1}
           </span>
 
           <span class="step-title">
@@ -2241,13 +2523,15 @@ function out(id,title,ans,steps){
           </span>
 
           ${
-            step.math
-            ? `
-              <span class="mathline">
-                ${escapeHTML(step.math)}
-              </span>
-            `
-            : ""
+            step.html
+              ? `<div class="mathline">${step.html}</div>`
+              : step.math
+                ? `
+                  <div class="mathline text-math">
+                    ${escapeHTML(step.math)}
+                  </div>
+                `
+                : ""
           }
 
         </div>
@@ -2255,42 +2539,29 @@ function out(id,title,ans,steps){
       `).join("")}
 
     </div>
-
   `;
 
   element.classList.add("show");
-
 }
 
-
-/* =========================================================
-   ERROR
-========================================================= */
 
 function bad(id,message){
 
   const element = $(id);
 
-  if(!element){
-    return;
-  }
-
   element.innerHTML = `
-
     <div class="error">
       ⚠️ ${escapeHTML(message)}
     </div>
-
   `;
 
   element.classList.add("show");
-
 }
 
 
-/* =========================================================
+/* =====================================================
    LEY DEL COSENO
-========================================================= */
+===================================================== */
 
 function coseno(){
 
@@ -2302,19 +2573,18 @@ function coseno(){
 
     return bad(
       "rc",
-      "Introduce dos lados positivos y un ángulo C entre 0° y 180°."
+      "Introduce dos lados positivos y un ángulo entre 0° y 180°."
     );
-
   }
 
   const cosine =
     Math.cos(D(C));
 
   const term =
-    2 * a * b * cosine;
+    2*a*b*cosine;
 
   const c2 =
-    a*a + b*b - term;
+    a*a+b*b-term;
 
   if(c2 <= 0){
 
@@ -2322,7 +2592,6 @@ function coseno(){
       "rc",
       "Los datos no producen un triángulo válido."
     );
-
   }
 
   const c =
@@ -2348,19 +2617,19 @@ function coseno(){
     },
 
     {
-      title:"Calculamos el término trigonométrico",
+      title:"Calculamos el término",
       math:
         `2ab · cos(C) = ${F(term)}`
     },
 
     {
-      title:"Despejamos c²",
+      title:"Despejamos",
       math:
-        `c² = ${F(a*a+b*b)} − ${F(term)} = ${F(c2)}`
+        `c² = ${F(c2)}`
     },
 
     {
-      title:"Aplicamos raíz cuadrada",
+      title:"Raíz cuadrada",
       math:
         `c = √${F(c2)}`
     },
@@ -2380,22 +2649,41 @@ function coseno(){
     steps
   );
 
-  saveHistory(
-    "Ley del Coseno",
-    `a=${F(a)}, b=${F(b)}, C=${F(C)}°`,
-    `c=${F(c)}`,
-    getInputsForType("Ley del Coseno"),
+  saveHistory({
+
+    type:"Ley del Coseno",
+
+    detail:
+      `a=${F(a)}, b=${F(b)}, C=${F(C)}°`,
+
+    result:`c=${F(c)}`,
+
+    section:"cos",
+
+    inputs:{
+      ca:a,
+      cb:b,
+      cc:C
+    },
+
+    calculator:"coseno",
+
+    answerTitle:"Lado C",
+
+    answer:
+      `${F(c)} unidades`,
+
     steps
-  );
+
+  });
 
   updateTriangle();
-
 }
 
 
-/* =========================================================
+/* =====================================================
    LEY DEL SENO
-========================================================= */
+===================================================== */
 
 function seno(){
 
@@ -2412,9 +2700,8 @@ function seno(){
 
     return bad(
       "rs",
-      "Revisa los valores. A y B deben ser ángulos positivos y su suma debe ser menor que 180°."
+      "Revisa los ángulos. Su suma debe ser menor que 180°."
     );
-
   }
 
   const sinA =
@@ -2423,55 +2710,65 @@ function seno(){
   const sinB =
     Math.sin(D(B));
 
-  if(Math.abs(sinA) < 1e-12){
-
-    return bad(
-      "rs",
-      "El seno de A no puede ser cero."
-    );
-
-  }
-
   const b =
-    a * sinB / sinA;
+    a*sinB/sinA;
 
   const C =
-    180 - A - B;
+    180-A-B;
 
   const steps = [
 
     {
       title:"Fórmula",
-      math:
-        "a / sen(A) = b / sen(B)"
+
+      html:`
+        ${fractionText("a","sen(A)")}
+        =
+        ${fractionText("b","sen(B)")}
+      `
     },
 
     {
       title:"Despejamos b",
-      math:
-        "b = a · sen(B) / sen(A)"
+
+      html:`
+        b =
+        ${fractionText(
+          "a · sen(B)",
+          "sen(A)"
+        )}
+      `
     },
 
     {
       title:"Sustitución",
-      math:
-        `b = ${F(a)} · sen(${F(B)}°) / sen(${F(A)}°)`
+
+      html:`
+        b =
+        ${fractionText(
+          `${F(a)} · sen(${F(B)}°)`,
+          `sen(${F(A)}°)`
+        )}
+      `
     },
 
     {
-      title:"Valores trigonométricos",
+      title:"Calculamos los senos",
+
       math:
         `sen(A) = ${F4(sinA)} · sen(B) = ${F4(sinB)}`
     },
 
     {
       title:"Ángulo restante",
+
       math:
         `C = 180° − ${F(A)}° − ${F(B)}° = ${F(C)}°`
     },
 
     {
       title:"Resultado",
+
       math:
         `b = ${F(b)} unidades`
     }
@@ -2485,20 +2782,39 @@ function seno(){
     steps
   );
 
-  saveHistory(
-    "Ley del Seno",
-    `a=${F(a)}, A=${F(A)}°, B=${F(B)}°`,
-    `b=${F(b)}`,
-    getInputsForType("Ley del Seno"),
-    steps
-  );
+  saveHistory({
 
+    type:"Ley del Seno",
+
+    detail:
+      `a=${F(a)}, A=${F(A)}°, B=${F(B)}°`,
+
+    result:`b=${F(b)}`,
+
+    section:"seno",
+
+    inputs:{
+      sa:a,
+      saa:A,
+      sbb:B
+    },
+
+    calculator:"seno",
+
+    answerTitle:"Lado B",
+
+    answer:
+      `${F(b)} unidades`,
+
+    steps
+
+  });
 }
 
 
-/* =========================================================
+/* =====================================================
    PITÁGORAS
-========================================================= */
+===================================================== */
 
 function pitagoras(){
 
@@ -2511,11 +2827,10 @@ function pitagoras(){
       "rp",
       "Introduce dos catetos positivos."
     );
-
   }
 
   const q =
-    a*a + b*b;
+    a*a+b*b;
 
   const c =
     Math.sqrt(q);
@@ -2524,8 +2839,7 @@ function pitagoras(){
 
     {
       title:"Fórmula",
-      math:
-        "c² = a² + b²"
+      math:"c² = a² + b²"
     },
 
     {
@@ -2547,7 +2861,7 @@ function pitagoras(){
     },
 
     {
-      title:"Aplicamos raíz cuadrada",
+      title:"Raíz cuadrada",
       math:
         `c = √${F(q)}`
     },
@@ -2567,20 +2881,38 @@ function pitagoras(){
     steps
   );
 
-  saveHistory(
-    "Pitágoras",
-    `a=${F(a)}, b=${F(b)}`,
-    `c=${F(c)}`,
-    getInputsForType("Pitágoras"),
-    steps
-  );
+  saveHistory({
 
+    type:"Pitágoras",
+
+    detail:
+      `a=${F(a)}, b=${F(b)}`,
+
+    result:`c=${F(c)}`,
+
+    section:"pit",
+
+    inputs:{
+      pa:a,
+      pb:b
+    },
+
+    calculator:"pitagoras",
+
+    answerTitle:"Hipotenusa",
+
+    answer:
+      `${F(c)} unidades`,
+
+    steps
+
+  });
 }
 
 
-/* =========================================================
+/* =====================================================
    ÁREA
-========================================================= */
+===================================================== */
 
 function area(){
 
@@ -2592,9 +2924,8 @@ function area(){
 
     return bad(
       "ra",
-      "Introduce dos lados positivos y un ángulo C entre 0° y 180°."
+      "Introduce dos lados positivos y un ángulo válido."
     );
-
   }
 
   const sinC =
@@ -2610,36 +2941,59 @@ function area(){
 
     {
       title:"Fórmula",
-      math:
-        "Área = (a · b · sen(C)) / 2"
+
+      html:`
+        Área =
+        ${fractionText(
+          "a · b · sen(C)",
+          "2"
+        )}
+      `
     },
 
     {
       title:"Sustitución",
-      math:
-        `Área = (${F(a)} · ${F(b)} · sen(${F(C)}°)) / 2`
+
+      html:`
+        Área =
+        ${fractionText(
+          `${F(a)} · ${F(b)} · sen(${F(C)}°)`,
+          "2"
+        )}
+      `
     },
 
     {
       title:"Calculamos el seno",
+
       math:
         `sen(${F(C)}°) = ${F4(sinC)}`
     },
 
     {
       title:"Multiplicamos",
+
       math:
         `${F(a)} · ${F(b)} · ${F4(sinC)} = ${F(product)}`
     },
 
     {
       title:"Dividimos entre 2",
-      math:
-        `Área = ${F(product)} / 2 = ${F(result)}`
+
+      html:`
+        Área =
+        ${fractionText(
+          F(product),
+          "2"
+        )}
+        =
+        ${F(result)}
+      `
     },
 
     {
       title:"Resultado",
+
       math:
         `Área = ${F(result)} unidades²`
     }
@@ -2653,20 +3007,40 @@ function area(){
     steps
   );
 
-  saveHistory(
-    "Área",
-    `a=${F(a)}, b=${F(b)}, C=${F(C)}°`,
-    `Área=${F(result)} u²`,
-    getInputsForType("Área"),
-    steps
-  );
+  saveHistory({
 
+    type:"Área",
+
+    detail:
+      `a=${F(a)}, b=${F(b)}, C=${F(C)}°`,
+
+    result:
+      `Área=${F(result)} u²`,
+
+    section:"area",
+
+    inputs:{
+      aa:a,
+      ab:b,
+      ac:C
+    },
+
+    calculator:"area",
+
+    answerTitle:"Área",
+
+    answer:
+      `${F(result)} unidades²`,
+
+    steps
+
+  });
 }
 
 
-/* =========================================================
+/* =====================================================
    PERÍMETRO
-========================================================= */
+===================================================== */
 
 function perimetro(){
 
@@ -2678,9 +3052,8 @@ function perimetro(){
 
     return bad(
       "re",
-      "Los lados deben ser positivos y cumplir la desigualdad triangular."
+      "Los lados deben formar un triángulo válido."
     );
-
   }
 
   const p =
@@ -2690,8 +3063,7 @@ function perimetro(){
 
     {
       title:"Fórmula",
-      math:
-        "P = a + b + c"
+      math:"P = a + b + c"
     },
 
     {
@@ -2701,7 +3073,7 @@ function perimetro(){
     },
 
     {
-      title:"Sumamos los lados",
+      title:"Sumamos",
       math:
         `P = ${F(p)}`
     },
@@ -2721,20 +3093,39 @@ function perimetro(){
     steps
   );
 
-  saveHistory(
-    "Perímetro",
-    `a=${F(a)}, b=${F(b)}, c=${F(c)}`,
-    `P=${F(p)}`,
-    getInputsForType("Perímetro"),
-    steps
-  );
+  saveHistory({
 
+    type:"Perímetro",
+
+    detail:
+      `a=${F(a)}, b=${F(b)}, c=${F(c)}`,
+
+    result:`P=${F(p)}`,
+
+    section:"per",
+
+    inputs:{
+      pea:a,
+      peb:b,
+      pec:c
+    },
+
+    calculator:"perimetro",
+
+    answerTitle:"Perímetro",
+
+    answer:
+      `${F(p)} unidades`,
+
+    steps
+
+  });
 }
 
 
-/* =========================================================
+/* =====================================================
    ÁNGULO
-========================================================= */
+===================================================== */
 
 function angulo(){
 
@@ -2748,52 +3139,60 @@ function angulo(){
       "rg",
       "Esos lados no forman un triángulo válido."
     );
-
   }
 
   let x =
-    (a*a + b*b - c*c) /
-    (2*a*b);
+    (a*a+b*b-c*c)/(2*a*b);
 
   x =
-    Math.max(
-      -1,
-      Math.min(1,x)
-    );
+    Math.max(-1,Math.min(1,x));
 
   const C =
-    Math.acos(x) *
-    180 /
-    Math.PI;
+    Math.acos(x)*180/Math.PI;
 
   const steps = [
 
     {
       title:"Fórmula",
-      math:
-        "cos(C) = (a² + b² − c²) / (2ab)"
+
+      html:`
+        cos(C) =
+        ${fractionText(
+          "a² + b² − c²",
+          "2ab"
+        )}
+      `
     },
 
     {
       title:"Sustitución",
-      math:
-        `cos(C) = (${F(a)}² + ${F(b)}² − ${F(c)}²) / (2 · ${F(a)} · ${F(b)})`
+
+      html:`
+        cos(C) =
+        ${fractionText(
+          `${F(a)}² + ${F(b)}² − ${F(c)}²`,
+          `2 · ${F(a)} · ${F(b)}`
+        )}
+      `
     },
 
     {
       title:"Simplificamos",
+
       math:
         `cos(C) = ${F4(x)}`
     },
 
     {
-      title:"Aplicamos coseno inverso",
+      title:"Coseno inverso",
+
       math:
         `C = cos⁻¹(${F4(x)})`
     },
 
     {
       title:"Resultado",
+
       math:
         `C = ${F(C)}°`
     }
@@ -2807,705 +3206,1572 @@ function angulo(){
     steps
   );
 
-  saveHistory(
-    "Ángulo C",
-    `a=${F(a)}, b=${F(b)}, c=${F(c)}`,
-    `C=${F(C)}°`,
-    getInputsForType("Ángulo C"),
+  saveHistory({
+
+    type:"Ángulo C",
+
+    detail:
+      `a=${F(a)}, b=${F(b)}, c=${F(c)}`,
+
+    result:
+      `C=${F(C)}°`,
+
+    section:"ang",
+
+    inputs:{
+      anga:a,
+      angb:b,
+      angc:c
+    },
+
+    calculator:"angulo",
+
+    answerTitle:"Ángulo C",
+
+    answer:
+      `${F(C)}°`,
+
     steps
-  );
-
-}
-
-
-/* =========================================================
-   OBTENER NÚMEROS DEL CÁLCULO
-========================================================= */
-
-function getInputsForType(type){
-
-  const config =
-    HISTORY_CONFIG[type];
-
-  if(!config){
-    return {};
-  }
-
-  const values = {};
-
-  config.inputs.forEach(input=>{
-
-    const element =
-      $(input.id);
-
-    if(element){
-
-      values[input.id] =
-        element.value;
-
-    }
 
   });
-
-  return values;
-
 }
 
 
-/* =========================================================
-   GUARDAR HISTORIAL
-========================================================= */
+/* =====================================================
+   PREVISUALIZACIÓN LÍMITES
+===================================================== */
 
-function saveHistory(
-  type,
-  detail,
-  result,
-  inputs={},
-  steps=[]
-){
+function updateLimitPreview(){
 
-  /*
-    Cuando repetimos un cálculo automáticamente,
-    NO queremos crear otra entrada idéntica.
-  */
+  const type =
+    $("limitType").value;
 
-  if(repeatingCalculation){
-    return;
-  }
+  const a =
+    n("limA");
 
-  const history =
-    JSON.parse(
-      localStorage.getItem(
-        "mathsolve_history"
-      ) || "[]"
-    );
+  const b =
+    n("limB");
 
-  history.unshift({
+  const A =
+    Number.isFinite(a)
+      ? F(a)
+      : "a";
 
-    type,
-
-    title:type,
-
-    detail,
-
-    result,
-
-    inputs,
-
-    values:inputs,
-
-    steps,
-
-    date:new Date()
-      .toLocaleString("es-CO")
-
-  });
-
-  localStorage.setItem(
-    "mathsolve_history",
-    JSON.stringify(
-      history.slice(0,10)
-    )
-  );
-
-  renderHistory();
-
-}
+  const B =
+    Number.isFinite(b)
+      ? F(b)
+      : "b";
 
 
-/* =========================================================
-   RENDER HISTORIAL
-========================================================= */
+  let html = "";
 
-function renderHistory(){
 
-  const list =
-    $("historyList");
+  if(type === "difference"){
 
-  if(!list){
-    return;
-  }
+    html = `
 
-  const history =
-    JSON.parse(
-      localStorage.getItem(
-        "mathsolve_history"
-      ) || "[]"
-    );
+      ${limitHTML(A)}
 
-  if(!history.length){
-
-    list.innerHTML = `
-
-      <div class="empty-history">
-
-        Todavía no hay cálculos guardados.
-
-      </div>
+      <span class="math-small">
+        ${fractionText(
+          `x² − ${A}²`,
+          `x − ${A}`
+        )}
+      </span>
 
     `;
 
-    return;
   }
 
-  list.innerHTML =
-    history.map(
-      (item,index)=>{
 
-        const hasInputs =
-          item.inputs &&
-          typeof item.inputs === "object" &&
-          Object.keys(item.inputs).length > 0;
+  if(type === "common"){
 
-        const hasSteps =
-          Array.isArray(item.steps) &&
-          item.steps.length > 0;
+    html = `
 
-        return `
+      ${limitHTML(A)}
 
-          <div
-            class="history-item"
-            data-history-index="${index}"
-          >
+      <span class="math-small">
+        ${fractionText(
+          `x(x − ${A})`,
+          `x − ${A}`
+        )}
+      </span>
 
-            <div class="history-main">
+    `;
 
-              <div class="history-title">
+  }
 
-                ${escapeHTML(
-                  item.title ||
-                  item.type ||
-                  "Cálculo"
-                )}
 
-              </div>
+  if(type === "quadratic"){
 
-              <div class="history-detail">
+    html = `
 
-                ${escapeHTML(
-                  item.detail || ""
-                )}
+      ${limitHTML(A)}
 
-                ${
-                  item.date
-                  ? ` · ${escapeHTML(item.date)}`
-                  : ""
-                }
+      <span class="math-small">
+        ${fractionText(
+          `(x − ${A})(x − ${B})`,
+          `x − ${A}`
+        )}
+      </span>
 
-              </div>
+    `;
 
-            </div>
+  }
 
-            <div class="history-result">
 
-              ${escapeHTML(
-                item.result || "—"
-              )}
-
-            </div>
-
-            <div class="history-actions">
-
-              <button
-                class="history-btn steps"
-                onclick="showHistorySteps(${index})"
-              >
-                📚 Ver pasos
-              </button>
-
-              <button
-                class="history-btn repeat"
-                onclick="repeatHistory(${index})"
-                ${hasInputs ? "" : "disabled"}
-                title="${
-                  hasInputs
-                  ? "Volver a realizar este cálculo"
-                  : "Este cálculo antiguo no tiene los números guardados"
-                }"
-              >
-                ♻️ Repetir
-              </button>
-
-            </div>
-
-          </div>
-
-        `;
-
-      }
-    ).join("");
-
+  $("limitPreview").innerHTML =
+    html;
 }
 
 
-/* =========================================================
-   OBTENER HISTORIAL
-========================================================= */
+/* =====================================================
+   LÍMITES POR FACTORIZACIÓN
+===================================================== */
 
-function getHistory(){
+function limitFactor(){
 
-  return JSON.parse(
-    localStorage.getItem(
-      "mathsolve_history"
-    ) || "[]"
-  );
+  const type =
+    $("limitType").value;
 
-}
+  const a =
+    n("limA");
+
+  const b =
+    n("limB");
 
 
-/* =========================================================
-   VER PASOS
-========================================================= */
+  if(!Number.isFinite(a)){
 
-function showHistorySteps(index){
-
-  const history =
-    getHistory();
-
-  const item =
-    history[index];
-
-  if(!item){
-    showToast(
-      "No se encontró este cálculo."
+    return bad(
+      "rlf",
+      "Introduce un valor válido para a."
     );
-    return;
   }
 
-  const config =
-    HISTORY_CONFIG[
-      item.type
+
+  /* -------------------------------------
+     DIFERENCIA DE CUADRADOS
+  ------------------------------------- */
+
+  if(type === "difference"){
+
+    const result =
+      2*a;
+
+    const A =
+      F(a);
+
+
+    const steps = [
+
+      {
+        title:"Escribimos el límite",
+
+        html:`
+
+          ${limitHTML(A)}
+
+          ${fractionText(
+            `x² − ${A}²`,
+            `x − ${A}`
+          )}
+
+        `
+      },
+
+
+      {
+        title:"Sustituimos directamente",
+
+        html:`
+
+          ${limitHTML(A)}
+
+          ${fractionText(
+            `${A}² − ${A}²`,
+            `${A} − ${A}`
+          )}
+
+          =
+
+          ${fractionText("0","0")}
+
+        `
+      },
+
+
+      {
+        title:"Aparece una indeterminación",
+
+        html:`
+
+          <span class="highlight-math">
+            ${fractionText("0","0")}
+          </span>
+
+          <span class="math-note">
+            Esto no significa que el límite sea 0.
+            Necesitamos simplificar la expresión.
+          </span>
+
+        `
+      },
+
+
+      {
+        title:"Aplicamos diferencia de cuadrados",
+
+        html:`
+
+          x² − ${A}²
+
+          =
+
+          (x − ${A})(x + ${A})
+
+        `
+      },
+
+
+      {
+        title:"Reemplazamos el numerador",
+
+        html:`
+
+          ${limitHTML(A)}
+
+          ${fractionText(
+            `(x − ${A})(x + ${A})`,
+            `x − ${A}`
+          )}
+
+        `
+      },
+
+
+      {
+        title:"Simplificamos el factor común",
+
+        html:`
+
+          ${limitHTML(A)}
+
+          ${fractionText(
+            `<span class="cancel">(x − ${A})</span>(x + ${A})`,
+            `<span class="cancel">x − ${A}</span>`
+          )}
+
+          =
+
+          ${limitHTML(A)}
+
+          (x + ${A})
+
+        `
+      },
+
+
+      {
+        title:"Ahora sí sustituimos",
+
+        html:`
+
+          ${A} + ${A}
+
+          =
+
+          <span class="highlight-math">
+            ${F(result)}
+          </span>
+
+        `
+      },
+
+
+      {
+        title:"Resultado",
+
+        html:`
+
+          ${limitHTML(A)}
+
+          ${fractionText(
+            `x² − ${A}²`,
+            `x − ${A}`
+          )}
+
+          =
+
+          <span class="highlight-math">
+            ${F(result)}
+          </span>
+
+        `
+      }
+
     ];
 
-  const steps =
-    Array.isArray(item.steps)
-      ? item.steps
-      : [];
 
-  $("modalTitle").textContent =
-    `📚 ${item.title || item.type || "Procedimiento"}`;
+    out(
+      "rlf",
+      "Límite",
+      F(result),
+      steps
+    );
 
-  $("modalSubtitle").textContent =
-    item.date
-      ? `Guardado el ${item.date}`
-      : "MathSolve Pro";
 
-  let inputsHTML = "";
+    saveHistory({
 
-  const storedInputs =
-    item.inputs ||
-    item.values ||
-    {};
+      type:
+        "Límite por factorización · Diferencia de cuadrados",
+
+      detail:
+        `x→${A}`,
+
+      result:
+        `${F(result)}`,
+
+      section:"limfact",
+
+      inputs:{
+        limitType:type,
+        limA:a,
+        limB:b
+      },
+
+      calculator:"limitFactor",
+
+      answerTitle:"Límite",
+
+      answer:
+        F(result),
+
+      steps
+
+    });
+
+    return;
+  }
+
+
+  /* -------------------------------------
+     FACTOR COMÚN
+  ------------------------------------- */
+
+  if(type === "common"){
+
+    const result =
+      a;
+
+    const A =
+      F(a);
+
+
+    const steps = [
+
+      {
+        title:"Escribimos el límite",
+
+        html:`
+
+          ${limitHTML(A)}
+
+          ${fractionText(
+            `x(x − ${A})`,
+            `x − ${A}`
+          )}
+
+        `
+      },
+
+
+      {
+        title:"Sustituimos directamente",
+
+        html:`
+
+          ${limitHTML(A)}
+
+          ${fractionText(
+            `${A}(${A} − ${A})`,
+            `${A} − ${A}`
+          )}
+
+          =
+
+          ${fractionText("0","0")}
+
+        `
+      },
+
+
+      {
+        title:"Tenemos una indeterminación",
+
+        html:`
+
+          <span class="highlight-math">
+            ${fractionText("0","0")}
+          </span>
+
+          <span class="math-note">
+            Debemos simplificar antes de volver a sustituir.
+          </span>
+
+        `
+      },
+
+
+      {
+        title:"Identificamos el factor común",
+
+        html:`
+
+          x(x − ${A})
+
+        `
+      },
+
+
+      {
+        title:"Cancelamos el factor común",
+
+        html:`
+
+          ${limitHTML(A)}
+
+          ${fractionText(
+            `x <span class="cancel">(x − ${A})</span>`,
+            `<span class="cancel">x − ${A}</span>`
+          )}
+
+          =
+
+          ${limitHTML(A)}
+
+          x
+
+        `
+      },
+
+
+      {
+        title:"Sustituimos nuevamente",
+
+        html:`
+
+          x = ${A}
+
+        `
+      },
+
+
+      {
+        title:"Resultado",
+
+        html:`
+
+          ${limitHTML(A)}
+
+          ${fractionText(
+            `x(x − ${A})`,
+            `x − ${A}`
+          )}
+
+          =
+
+          <span class="highlight-math">
+            ${F(result)}
+          </span>
+
+        `
+      }
+
+    ];
+
+
+    out(
+      "rlf",
+      "Límite",
+      F(result),
+      steps
+    );
+
+
+    saveHistory({
+
+      type:
+        "Límite por factorización · Factor común",
+
+      detail:
+        `x→${A}`,
+
+      result:
+        `${F(result)}`,
+
+      section:"limfact",
+
+      inputs:{
+        limitType:type,
+        limA:a,
+        limB:b
+      },
+
+      calculator:"limitFactor",
+
+      answerTitle:"Límite",
+
+      answer:
+        F(result),
+
+      steps
+
+    });
+
+    return;
+  }
+
+
+  /* -------------------------------------
+     PRODUCTO DE FACTORES
+  ------------------------------------- */
+
+  if(type === "quadratic"){
+
+    if(!Number.isFinite(b)){
+
+      return bad(
+        "rlf",
+        "Introduce también un valor válido para b."
+      );
+    }
+
+
+    const result =
+      a-b;
+
+    const A =
+      F(a);
+
+    const B =
+      F(b);
+
+
+    const steps = [
+
+      {
+        title:"Escribimos el límite",
+
+        html:`
+
+          ${limitHTML(A)}
+
+          ${fractionText(
+            `(x − ${A})(x − ${B})`,
+            `x − ${A}`
+          )}
+
+        `
+      },
+
+
+      {
+        title:"Sustituimos directamente",
+
+        html:`
+
+          ${limitHTML(A)}
+
+          ${fractionText(
+            `(${A} − ${A})(${A} − ${B})`,
+            `${A} − ${A}`
+          )}
+
+          =
+
+          ${fractionText("0","0")}
+
+        `
+      },
+
+
+      {
+        title:"Aparece la indeterminación 0/0",
+
+        html:`
+
+          <span class="highlight-math">
+            ${fractionText("0","0")}
+          </span>
+
+          <span class="math-note">
+            Tenemos que simplificar antes de evaluar el límite.
+          </span>
+
+        `
+      },
+
+
+      {
+        title:"Observamos el factor común",
+
+        html:`
+
+          (x − ${A})(x − ${B})
+
+        `
+      },
+
+
+      {
+        title:"Cancelamos",
+
+        html:`
+
+          ${limitHTML(A)}
+
+          ${fractionText(
+            `<span class="cancel">(x − ${A})</span>(x − ${B})`,
+            `<span class="cancel">x − ${A}</span>`
+          )}
+
+          =
+
+          ${limitHTML(A)}
+
+          (x − ${B})
+
+        `
+      },
+
+
+      {
+        title:"Sustituimos x",
+
+        html:`
+
+          ${A} − ${B}
+
+          =
+
+          <span class="highlight-math">
+            ${F(result)}
+          </span>
+
+        `
+      },
+
+
+      {
+        title:"Resultado",
+
+        html:`
+
+          ${limitHTML(A)}
+
+          ${fractionText(
+            `(x − ${A})(x − ${B})`,
+            `x − ${A}`
+          )}
+
+          =
+
+          <span class="highlight-math">
+            ${F(result)}
+          </span>
+
+        `
+      }
+
+    ];
+
+
+    out(
+      "rlf",
+      "Límite",
+      F(result),
+      steps
+    );
+
+
+    saveHistory({
+
+      type:
+        "Límite por factorización · Producto de factores",
+
+      detail:
+        `x→${A}, segundo factor=${B}`,
+
+      result:
+        `${F(result)}`,
+
+      section:"limfact",
+
+      inputs:{
+        limitType:type,
+        limA:a,
+        limB:b
+      },
+
+      calculator:"limitFactor",
+
+      answerTitle:"Límite",
+
+      answer:
+        F(result),
+
+      steps
+
+    });
+
+  }
+
+}
+
+
+/* =====================================================
+   PREVISUALIZACIÓN LATERALES
+===================================================== */
+
+function updateLateralPreview(){
+
+  const type =
+    $("lateralType").value;
+
+  const a =
+    n("latA");
+
+  const k =
+    n("latK");
+
+  const A =
+    Number.isFinite(a)
+      ? F(a)
+      : "a";
+
+  const K =
+    Number.isFinite(k)
+      ? F(k)
+      : "k";
+
+
+  let html = "";
+
+
+  if(type === "constant"){
+
+    html = `
+
+      f(x) = ${K}
+
+      <br>
+
+      <span class="math-small">
+        ${limitHTML(A,"⁻")} f(x)
+      </span>
+
+      &nbsp;&nbsp;
+
+      y
+
+      &nbsp;&nbsp;
+
+      <span class="math-small">
+        ${limitHTML(A,"⁺")} f(x)
+      </span>
+
+    `;
+
+  }
+
+
+  if(type === "linear"){
+
+    html = `
+
+      f(x) = ${K}x
+
+      <br>
+
+      <span class="math-small">
+        ${limitHTML(A,"⁻")} ${K}x
+      </span>
+
+      &nbsp;&nbsp;
+
+      y
+
+      &nbsp;&nbsp;
+
+      <span class="math-small">
+        ${limitHTML(A,"⁺")} ${K}x
+      </span>
+
+    `;
+
+  }
+
+
+  if(type === "jump"){
+
+    html = `
+
+      f(x) =
+
+      <span class="math-small">
+
+        ${K}
+
+        si x &lt; ${A}
+
+        ,
+
+        ${F(k+1)}
+
+        si x ≥ ${A}
+
+      </span>
+
+    `;
+
+  }
+
+
+  if(type === "absolute"){
+
+    html = `
+
+      f(x) =
+
+      |
+
+      ${K}x − ${F(k*a)}
+
+      |
+
+      <br>
+
+      ${limitHTML(A,"⁻")}
+
+      &nbsp;&nbsp;
+
+      y
+
+      &nbsp;&nbsp;
+
+      ${limitHTML(A,"⁺")}
+
+    `;
+
+  }
+
+
+  $("lateralPreview").innerHTML =
+    html;
+}
+
+
+/* =====================================================
+   LÍMITES LATERALES
+===================================================== */
+
+function lateralLimit(){
+
+  const type =
+    $("lateralType").value;
+
+  const a =
+    n("latA");
+
+  const k =
+    n("latK");
+
 
   if(
-    config &&
-    Object.keys(storedInputs).length
+    !Number.isFinite(a) ||
+    !Number.isFinite(k)
   ){
 
-    inputsHTML = `
+    return bad(
+      "rll",
+      "Introduce valores numéricos válidos."
+    );
+  }
 
-      <div class="modal-inputs">
 
-        ${
-          config.inputs.map(input=>`
+  let left;
+  let right;
+  let answer;
+  let exists;
 
-            <div class="modal-input">
+  let steps = [];
 
-              <div class="modal-input-label">
-                ${escapeHTML(input.label)}
-              </div>
 
-              <div class="modal-input-value">
+  /* -------------------------------------
+     CONSTANTE
+  ------------------------------------- */
 
-                ${escapeHTML(
-                  storedInputs[input.id] ??
-                  "—"
-                )}
+  if(type === "constant"){
 
-              </div>
+    left = k;
+    right = k;
 
-            </div>
+    exists = true;
 
-          `).join("")
-        }
+    answer = k;
 
-      </div>
 
-    `;
+    steps = [
+
+      {
+        title:"Escribimos la función",
+
+        html:`
+
+          f(x) = ${F(k)}
+
+        `
+      },
+
+
+      {
+        title:"Nos acercamos por la izquierda",
+
+        html:`
+
+          ${limitHTML(F(a),"⁻")}
+
+          ${F(k)}
+
+          =
+
+          <span class="highlight-math">
+            ${F(k)}
+          </span>
+
+        `
+      },
+
+
+      {
+        title:"Nos acercamos por la derecha",
+
+        html:`
+
+          ${limitHTML(F(a),"⁺")}
+
+          ${F(k)}
+
+          =
+
+          <span class="highlight-math">
+            ${F(k)}
+          </span>
+
+        `
+      },
+
+
+      {
+        title:"Comparamos los dos lados",
+
+        html:`
+
+          ${F(left)}
+
+          =
+
+          ${F(right)}
+
+        `
+      },
+
+
+      {
+        title:"Conclusión",
+
+        html:`
+
+          <span class="highlight-math">
+            El límite existe.
+          </span>
+
+          <span class="math-note">
+            Los dos límites laterales tienen el mismo valor.
+          </span>
+
+        `
+      }
+
+    ];
 
   }
 
-  let stepsHTML = "";
 
-  if(steps.length){
+  /* -------------------------------------
+     FUNCIÓN LINEAL
+  ------------------------------------- */
 
-    stepsHTML = steps.map(
-      (step,i)=>`
+  if(type === "linear"){
 
-        <div class="modal-step">
+    left =
+      k*a;
 
-          <span class="modal-step-number">
-            ${i+1}
+    right =
+      k*a;
+
+    exists = true;
+
+    answer =
+      left;
+
+
+    steps = [
+
+      {
+        title:"Escribimos la función",
+
+        html:`
+
+          f(x) = ${F(k)}x
+
+        `
+      },
+
+
+      {
+        title:"Límite por la izquierda",
+
+        html:`
+
+          ${limitHTML(F(a),"⁻")}
+
+          ${F(k)}x
+
+          =
+
+          ${F(k)} · ${F(a)}
+
+          =
+
+          <span class="highlight-math">
+            ${F(left)}
           </span>
 
-          <span class="modal-step-title">
-            ${escapeHTML(
-              step.title ||
-              `Paso ${i+1}`
-            )}
+        `
+      },
+
+
+      {
+        title:"Límite por la derecha",
+
+        html:`
+
+          ${limitHTML(F(a),"⁺")}
+
+          ${F(k)}x
+
+          =
+
+          ${F(k)} · ${F(a)}
+
+          =
+
+          <span class="highlight-math">
+            ${F(right)}
           </span>
 
-          ${
-            step.math
-            ? `
-              <span class="modal-step-math">
-                ${escapeHTML(step.math)}
-              </span>
-            `
-            : ""
-          }
+        `
+      },
 
-        </div>
 
-      `
-    ).join("");
+      {
+        title:"Comparamos",
 
-  }else{
+        html:`
 
-    stepsHTML = `
+          ${F(left)}
 
-      <div class="empty-history">
+          =
 
-        ⚠️ Este cálculo fue guardado
-        antes de que MathSolve comenzara
-        a guardar los procedimientos completos.
+          ${F(right)}
 
-      </div>
+        `
+      },
 
-    `;
+
+      {
+        title:"Conclusión",
+
+        html:`
+
+          <span class="highlight-math">
+            El límite existe.
+          </span>
+
+          <span class="math-note">
+            Como ambos lados coinciden,
+            el límite general es ${F(answer)}.
+          </span>
+
+        `
+      }
+
+    ];
 
   }
 
-  $("modalBody").innerHTML = `
 
-    <div class="modal-result">
+  /* -------------------------------------
+     FUNCIÓN CON SALTO
+  ------------------------------------- */
 
-      <div class="modal-result-label">
-        Resultado
+  if(type === "jump"){
+
+    left =
+      k;
+
+    right =
+      k+1;
+
+    exists = false;
+
+    answer =
+      "No existe";
+
+
+    steps = [
+
+      {
+        title:"Escribimos la función por tramos",
+
+        html:`
+
+          f(x) =
+
+          <span class="math-small">
+
+            ${F(k)}
+
+            &nbsp; si x &lt; ${F(a)}
+
+            <br>
+
+            ${F(k+1)}
+
+            &nbsp; si x ≥ ${F(a)}
+
+          </span>
+
+        `
+      },
+
+
+      {
+        title:"Nos acercamos por la izquierda",
+
+        html:`
+
+          ${limitHTML(F(a),"⁻")}
+
+          f(x)
+
+          =
+
+          <span class="highlight-math">
+            ${F(left)}
+          </span>
+
+        `
+      },
+
+
+      {
+        title:"Nos acercamos por la derecha",
+
+        html:`
+
+          ${limitHTML(F(a),"⁺")}
+
+          f(x)
+
+          =
+
+          <span class="highlight-math">
+            ${F(right)}
+          </span>
+
+        `
+      },
+
+
+      {
+        title:"Comparamos",
+
+        html:`
+
+          ${F(left)}
+
+          ≠
+
+          ${F(right)}
+
+        `
+      },
+
+
+      {
+        title:"Conclusión",
+
+        html:`
+
+          <span style="color:var(--danger)">
+            El límite general NO EXISTE.
+          </span>
+
+          <span class="math-note">
+            Los límites laterales son diferentes.
+          </span>
+
+        `
+      }
+
+    ];
+
+  }
+
+
+  /* -------------------------------------
+     VALOR ABSOLUTO
+  ------------------------------------- */
+
+  if(type === "absolute"){
+
+    left = 0;
+    right = 0;
+
+    exists = true;
+
+    answer = 0;
+
+
+    steps = [
+
+      {
+        title:"Escribimos la función",
+
+        html:`
+
+          f(x) =
+
+          |
+
+          ${F(k)}x − ${F(k*a)}
+
+          |
+
+        `
+      },
+
+
+      {
+        title:"Sacamos factor común",
+
+        html:`
+
+          f(x) =
+
+          |
+
+          ${F(k)}(x − ${F(a)})
+
+          |
+
+        `
+      },
+
+
+      {
+        title:"Por la izquierda",
+
+        html:`
+
+          ${limitHTML(F(a),"⁻")}
+
+          |
+
+          ${F(k)}(x − ${F(a)})
+
+          |
+
+          =
+
+          <span class="highlight-math">
+            0
+          </span>
+
+        `
+      },
+
+
+      {
+        title:"Por la derecha",
+
+        html:`
+
+          ${limitHTML(F(a),"⁺")}
+
+          |
+
+          ${F(k)}(x − ${F(a)})
+
+          |
+
+          =
+
+          <span class="highlight-math">
+            0
+          </span>
+
+        `
+      },
+
+
+      {
+        title:"Comparamos",
+
+        html:`
+
+          0 = 0
+
+        `
+      },
+
+
+      {
+        title:"Conclusión",
+
+        html:`
+
+          <span class="highlight-math">
+            El límite existe y vale 0.
+          </span>
+
+        `
+      }
+
+    ];
+
+  }
+
+
+  /* =====================================
+     RESULTADO LATERAL VISUAL
+  ===================================== */
+
+  const resultText =
+    exists
+      ? F(answer)
+      : "No existe";
+
+
+  const element =
+    $("rll");
+
+
+  element.innerHTML = `
+
+    <div class="result-top">
+
+      <div class="answer-label">
+        Resultado final
       </div>
 
-      <div class="modal-result-value">
-        ${escapeHTML(
-          item.result || "—"
-        )}
+      <div class="answer">
+        Límite = ${escapeHTML(resultText)}
       </div>
 
     </div>
 
-    ${
-      inputsHTML
-      ? `
-        <h4 style="margin:0 0 10px">
-          🔢 Números utilizados
-        </h4>
 
-        ${inputsHTML}
-      `
-      : ""
-    }
+    <div class="result-actions">
 
-    <h4 style="margin:5px 0 10px">
-      🧮 Procedimiento
-    </h4>
+      <button
+        class="btn small"
+        onclick="copyResult('rll')">
 
-    ${stepsHTML}
+        📋 Copiar
+
+      </button>
+
+      <button
+        class="btn small secondary"
+        onclick="printResult('rll')">
+
+        🖨️ Imprimir
+
+      </button>
+
+    </div>
+
+
+    <div class="lateral-box">
+
+      <div class="lateral-card lateral-left">
+
+        <div class="side">
+          ← LÍMITE POR LA IZQUIERDA
+        </div>
+
+        <div class="value">
+          ${escapeHTML(
+            Number.isFinite(left)
+              ? F(left)
+              : String(left)
+          )}
+        </div>
+
+      </div>
+
+
+      <div class="lateral-card lateral-right">
+
+        <div class="side">
+          LÍMITE POR LA DERECHA →
+        </div>
+
+        <div class="value">
+          ${escapeHTML(
+            Number.isFinite(right)
+              ? F(right)
+              : String(right)
+          )}
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <div class="steps">
+
+      ${steps.map((step,index)=>`
+
+        <div class="step">
+
+          <span class="step-number">
+            ${index+1}
+          </span>
+
+          <span class="step-title">
+            ${escapeHTML(step.title)}
+          </span>
+
+          ${
+            step.html
+              ? `<div class="mathline">${step.html}</div>`
+              : ""
+          }
+
+        </div>
+
+      `).join("")}
+
+    </div>
+
+
+    <div class="conclusion ${
+      exists
+        ? "good"
+        : "bad"
+    }">
+
+      ${
+        exists
+          ? `
+            ✅ Los límites laterales
+            son iguales.
+
+            <br>
+
+            Por lo tanto:
+
+            <strong>
+              el límite existe y vale ${F(answer)}.
+            </strong>
+          `
+          : `
+            ❌ Los límites laterales
+            son diferentes.
+
+            <br>
+
+            Por lo tanto:
+
+            <strong>
+              el límite general no existe.
+            </strong>
+          `
+      }
+
+    </div>
 
   `;
 
-  $("stepsModal")
-    .classList
-    .add("show");
 
-  document.body.style.overflow =
-    "hidden";
-
-}
+  element.classList.add("show");
 
 
-/* =========================================================
-   CERRAR MODAL
-========================================================= */
+  saveHistory({
 
-function closeStepsModal(){
+    type:
+      `Límite lateral · ${
+        $("lateralType")
+          .selectedOptions[0]
+          .text
+      }`,
 
-  $("stepsModal")
-    .classList
-    .remove("show");
+    detail:
+      `x→${F(a)} · izquierda=${F(left)} · derecha=${F(right)}`,
 
-  document.body.style.overflow =
-    "";
+    result:
+      exists
+        ? `${F(answer)}`
+        : "No existe",
 
-}
+    section:"limlat",
 
-function modalBackgroundClick(event){
+    inputs:{
+      lateralType:type,
+      latA:a,
+      latK:k
+    },
 
-  if(
-    event.target ===
-    $("stepsModal")
-  ){
+    calculator:"lateralLimit",
 
-    closeStepsModal();
+    answerTitle:"Límite",
 
-  }
+    answer:
+      exists
+        ? F(answer)
+        : "No existe",
 
-}
-
-document.addEventListener(
-  "keydown",
-  event=>{
-
-    if(
-      event.key === "Escape" &&
-      $("stepsModal")
-        .classList
-        .contains("show")
-    ){
-
-      closeStepsModal();
-
-    }
-
-  }
-);
-
-
-/* =========================================================
-   REPETIR CÁLCULO
-========================================================= */
-
-function repeatHistory(index){
-
-  const history =
-    getHistory();
-
-  const item =
-    history[index];
-
-  if(!item){
-
-    showToast(
-      "No se encontró este cálculo."
-    );
-
-    return;
-
-  }
-
-  const config =
-    HISTORY_CONFIG[item.type];
-
-  if(!config){
-
-    showToast(
-      "No se reconoce el tipo de cálculo."
-    );
-
-    return;
-
-  }
-
-  const storedInputs =
-    item.inputs ||
-    item.values ||
-    {};
-
-  const inputIds =
-    config.inputs
-      .map(input=>input.id);
-
-  const hasAllInputs =
-    inputIds.every(
-      id =>
-        storedInputs[id] !== undefined &&
-        storedInputs[id] !== null &&
-        storedInputs[id] !== ""
-    );
-
-  if(!hasAllInputs){
-
-    showToast(
-      "⚠️ Este cálculo antiguo no tiene todos los números guardados."
-    );
-
-    return;
-
-  }
-
-  /*
-    1. Cambiar a la pestaña correcta.
-  */
-
-  const tabButton =
-    Array.from(
-      document.querySelectorAll(".tab")
-    ).find(
-      button =>
-        button.getAttribute("onclick") &&
-        button.getAttribute("onclick")
-          .includes(`'${config.section}'`)
-    );
-
-  tab(
-    config.section,
-    tabButton
-  );
-
-  /*
-    2. Cargar todos los números.
-  */
-
-  config.inputs.forEach(input=>{
-
-    const element =
-      $(input.id);
-
-    if(element){
-
-      element.value =
-        storedInputs[input.id];
-
-    }
+    steps
 
   });
 
-  /*
-    3. Actualizar visual del triángulo.
-  */
-
-  if(
-    config.section === "cos"
-  ){
-
-    updateTriangle();
-
-  }
-
-  /*
-    4. Evitar duplicar el cálculo
-       en el historial.
-  */
-
-  repeatingCalculation = true;
-
-  const button =
-    document.querySelector(
-      `#${config.section} .actions .btn:not(.secondary)`
-    );
-
-  if(button){
-    button.classList.add("loading");
-  }
-
-  /*
-    5. Ejecutar automáticamente.
-  */
-
-  setTimeout(()=>{
-
-    try{
-
-      if(
-        typeof window[config.fn] ===
-        "function"
-      ){
-
-        window[config.fn]();
-
-      }
-
-      /*
-        Resaltar la entrada utilizada.
-      */
-
-      document
-        .querySelectorAll(
-          ".history-item"
-        )
-        .forEach(
-          el =>
-            el.classList.remove(
-              "just-repeated"
-            )
-        );
-
-      const historyItems =
-        document.querySelectorAll(
-          ".history-item"
-        );
-
-      if(historyItems[index]){
-
-        historyItems[index]
-          .classList
-          .add("just-repeated");
-
-      }
-
-      showToast(
-        "♻️ Cálculo repetido automáticamente."
-      );
-
-      /*
-        Llevar al resultado.
-      */
-
-      setTimeout(()=>{
-
-        const result =
-          $(config.result);
-
-        if(result){
-
-          result.scrollIntoView({
-            behavior:"smooth",
-            block:"center"
-          });
-
-        }
-
-      },150);
-
-    }finally{
-
-      repeatingCalculation = false;
-
-      if(button){
-
-        button.classList.remove(
-          "loading"
-        );
-
-      }
-
-    }
-
-  },120);
-
 }
 
 
-/* =========================================================
-   LIMPIAR SECCIÓN
-========================================================= */
+/* =====================================================
+   LIMPIAR
+===================================================== */
 
 function clearSection(sectionId){
 
   const section =
     $(sectionId);
-
-  if(!section){
-    return;
-  }
 
   section
     .querySelectorAll("input")
@@ -3513,97 +4779,81 @@ function clearSection(sectionId){
       input.value="";
     });
 
-  const results =
-    section.querySelectorAll(
-      ".result"
-    );
-
-  results.forEach(result=>{
-
-    result.innerHTML="";
-
-    result.classList.remove(
-      "show"
-    );
-
-  });
+  section
+    .querySelectorAll(".result")
+    .forEach(result=>{
+      result.innerHTML="";
+      result.classList.remove("show");
+    });
 
   if(sectionId === "cos"){
-
     updateTriangle();
-
   }
-
 }
 
 
-/* =========================================================
-   TRIÁNGULO VISUAL
-========================================================= */
+function clearLimitFactor(){
+
+  $("limA").value = 2;
+  $("limB").value = 3;
+
+  $("rlf").innerHTML = "";
+  $("rlf").classList.remove("show");
+
+  updateLimitPreview();
+}
+
+
+function clearLateral(){
+
+  $("latA").value = 2;
+  $("latK").value = 3;
+
+  $("rll").innerHTML = "";
+  $("rll").classList.remove("show");
+
+  updateLateralPreview();
+}
+
+
+/* =====================================================
+   TRIÁNGULO
+===================================================== */
 
 function updateTriangle(){
 
-  const a = n("ca");
-  const b = n("cb");
-  const C = n("cc");
+  const a =
+    n("ca");
 
-  const labelA =
-    $("visualA");
+  const b =
+    n("cb");
 
-  const labelB =
-    $("visualB");
+  const C =
+    n("cc");
 
-  const labelC =
-    $("visualC");
 
-  if(
+  $("visualA").textContent =
     Number.isFinite(a)
-  ){
+      ? `a = ${F(a)}`
+      : "a";
 
-    labelA.textContent =
-      `a = ${F(a)}`;
 
-  }else{
-
-    labelA.textContent =
-      "a";
-
-  }
-
-  if(
+  $("visualB").textContent =
     Number.isFinite(b)
-  ){
+      ? `b = ${F(b)}`
+      : "b";
 
-    labelB.textContent =
-      `b = ${F(b)}`;
 
-  }else{
-
-    labelB.textContent =
-      "b";
-
-  }
-
-  if(
+  $("visualC").textContent =
     Number.isFinite(C)
-  ){
-
-    labelC.textContent =
-      `C = ${F(C)}°`;
-
-  }else{
-
-    labelC.textContent =
-      "C";
-
-  }
-
+      ? `C = ${F(C)}°`
+      : "C";
 }
 
 
-/* =========================================================
-   COPIAR RESULTADO
-========================================================= */
+/* =====================================================
+   COPIAR
+===================================================== */
 
 function copyResult(id){
 
@@ -3620,86 +4870,31 @@ function copyResult(id){
     );
 
     return;
-
   }
 
-  const text =
-    result.innerText.trim();
 
-  if(
-    navigator.clipboard &&
-    navigator.clipboard.writeText
-  ){
+  navigator.clipboard
+    .writeText(result.innerText.trim())
+    .then(()=>{
 
-    navigator.clipboard
-      .writeText(text)
-      .then(()=>{
+      showToast(
+        "✅ Resultado copiado."
+      );
 
-        showToast(
-          "✅ Resultado copiado."
-        );
+    })
+    .catch(()=>{
 
-      })
-      .catch(()=>{
+      showToast(
+        "No se pudo copiar."
+      );
 
-        fallbackCopy(text);
-
-      });
-
-  }else{
-
-    fallbackCopy(text);
-
-  }
-
-}
-
-function fallbackCopy(text){
-
-  const textarea =
-    document.createElement("textarea");
-
-  textarea.value =
-    text;
-
-  textarea.style.position =
-    "fixed";
-
-  textarea.style.opacity =
-    "0";
-
-  document.body.appendChild(
-    textarea
-  );
-
-  textarea.select();
-
-  try{
-
-    document.execCommand(
-      "copy"
-    );
-
-    showToast(
-      "✅ Resultado copiado."
-    );
-
-  }catch(error){
-
-    showToast(
-      "No se pudo copiar automáticamente."
-    );
-
-  }
-
-  textarea.remove();
-
+    });
 }
 
 
-/* =========================================================
+/* =====================================================
    IMPRIMIR
-========================================================= */
+===================================================== */
 
 function printResult(id){
 
@@ -3716,8 +4911,8 @@ function printResult(id){
     );
 
     return;
-
   }
+
 
   const popup =
     window.open(
@@ -3726,15 +4921,16 @@ function printResult(id){
       "width=850,height=700"
     );
 
+
   if(!popup){
 
     showToast(
-      "El navegador bloqueó la ventana de impresión."
+      "El navegador bloqueó la impresión."
     );
 
     return;
-
   }
+
 
   popup.document.write(`
 
@@ -3759,32 +4955,15 @@ function printResult(id){
           line-height:1.6;
         }
 
-        h1{
-          margin-bottom:4px;
-        }
-
-        .brand{
-          color:#4e46d8;
-          font-weight:800;
-        }
-
         .result-top{
           padding:15px;
           background:#f1f2ff;
           border-radius:12px;
         }
 
-        .answer-label{
-          color:#555;
-          font-size:12px;
-          text-transform:uppercase;
-          font-weight:800;
-        }
-
         .answer{
           font-size:28px;
           font-weight:900;
-          margin-top:4px;
         }
 
         .step{
@@ -3793,25 +4972,43 @@ function printResult(id){
         }
 
         .mathline{
-          display:block;
+          display:flex;
+          justify-content:center;
+          align-items:center;
+          flex-wrap:wrap;
+          gap:5px;
           margin-top:7px;
-          padding:9px;
+          padding:10px;
           background:#f6f6f6;
           border-radius:8px;
+          font-family:"Cambria Math","Times New Roman",serif;
+          font-size:20px;
           font-weight:700;
+          text-align:center;
         }
 
-        button{
-          padding:9px 14px;
-          margin-top:20px;
+        .frac{
+          display:inline-flex;
+          flex-direction:column;
+          vertical-align:middle;
+          text-align:center;
+          line-height:1.05;
+          margin:0 5px;
+        }
+
+        .frac .top{
+          border-bottom:2px solid #111;
+          padding:0 7px 4px;
+        }
+
+        .frac .bottom{
+          padding-top:4px;
         }
 
         @media print{
-
           button{
-            display:none;
+            display:none
           }
-
         }
 
       </style>
@@ -3820,23 +5017,17 @@ function printResult(id){
 
     <body>
 
-      <div class="brand">
-        🎓 TECNOMATH
-      </div>
-
       <h1>
         📐 MathSolve
       </h1>
 
       <p>
-        Procedimiento matemático
+        🎓 TecnoMath · Procedimiento matemático
       </p>
 
       ${result.innerHTML}
 
-      <button
-        onclick="window.print()"
-      >
+      <button onclick="window.print()">
         🖨️ Imprimir
       </button>
 
@@ -3847,35 +5038,343 @@ function printResult(id){
   `);
 
   popup.document.close();
-
 }
 
 
-/* =========================================================
+/* =====================================================
+   HISTORIAL
+===================================================== */
+
+function getHistory(){
+
+  try{
+
+    return JSON.parse(
+      localStorage.getItem(
+        HISTORY_KEY
+      ) || "[]"
+    );
+
+  }catch{
+
+    return [];
+
+  }
+}
+
+
+function saveHistory(data){
+
+  const history =
+    getHistory();
+
+
+  history.unshift({
+
+    id:
+      Date.now() +
+      "_" +
+      Math.random()
+        .toString(36)
+        .slice(2,7),
+
+    ...data,
+
+    date:
+      new Date()
+        .toLocaleString("es-CO")
+
+  });
+
+
+  localStorage.setItem(
+    HISTORY_KEY,
+    JSON.stringify(
+      history.slice(0,30)
+    )
+  );
+
+
+  renderHistory();
+}
+
+
+function renderHistory(){
+
+  const list =
+    $("historyList");
+
+  const history =
+    getHistory();
+
+
+  if(!history.length){
+
+    list.innerHTML = `
+
+      <div class="empty-history">
+
+        🧮 Todavía no hay cálculos guardados.
+
+        <br>
+
+        Realiza un ejercicio y aquí podrás
+        ver sus pasos nuevamente.
+
+      </div>
+
+    `;
+
+    return;
+  }
+
+
+  list.innerHTML =
+    history.map(item=>`
+
+      <div class="history-item">
+
+        <div class="history-main">
+
+          <div class="history-title">
+            ${escapeHTML(item.type)}
+          </div>
+
+          <div class="history-detail">
+
+            ${escapeHTML(item.detail)}
+
+            ·
+
+            ${escapeHTML(item.date)}
+
+          </div>
+
+          <div class="history-result">
+
+            Resultado:
+            ${escapeHTML(item.result)}
+
+          </div>
+
+        </div>
+
+
+        <div class="history-actions">
+
+          <button
+            class="btn small secondary"
+            onclick="viewHistory('${item.id}')">
+
+            👁 Ver pasos
+
+          </button>
+
+
+          <button
+            class="btn small"
+            onclick="loadHistory('${item.id}')">
+
+            ↻ Cargar
+
+          </button>
+
+        </div>
+
+      </div>
+
+    `)
+    .join("");
+}
+
+
+function getHistoryItem(id){
+
+  return getHistory().find(
+    item =>
+      item.id === id
+  );
+}
+
+
+function viewHistory(id){
+
+  const item =
+    getHistoryItem(id);
+
+  if(!item)
+    return;
+
+
+  $("modalTitle").textContent =
+    "🧮 " + item.type;
+
+
+  $("modalContent").innerHTML = `
+
+    <p style="color:#aab5d1">
+      ${escapeHTML(item.detail)}
+    </p>
+
+    ${renderResultHTML(
+      item.answerTitle,
+      item.answer,
+      item.steps || []
+    )}
+
+  `;
+
+
+  $("historyModal")
+    .classList.add("show");
+}
+
+
+function closeHistoryModal(){
+
+  $("historyModal")
+    .classList.remove("show");
+}
+
+
+function loadHistory(id){
+
+  const item =
+    getHistoryItem(id);
+
+  if(!item)
+    return;
+
+
+  const sectionId =
+    item.section;
+
+
+  const button =
+    [...document.querySelectorAll(".tab")]
+      .find(btn=>{
+
+        const onclick =
+          btn.getAttribute("onclick") || "";
+
+        return onclick.includes(
+          `'${sectionId}'`
+        );
+
+      });
+
+
+  tab(
+    sectionId,
+    button
+  );
+
+
+  if(item.inputs){
+
+    Object.entries(item.inputs)
+      .forEach(([inputId,value])=>{
+
+        const element =
+          $(inputId);
+
+        if(element){
+
+          element.value =
+            value;
+
+        }
+
+      });
+
+  }
+
+
+  if(sectionId === "cos"){
+    updateTriangle();
+  }
+
+
+  if(sectionId === "limfact"){
+    updateLimitPreview();
+  }
+
+
+  if(sectionId === "limlat"){
+    updateLateralPreview();
+  }
+
+
+  const calculator =
+    window[item.calculator];
+
+
+  if(typeof calculator === "function"){
+
+    setTimeout(()=>{
+
+      calculator();
+
+    },150);
+
+  }
+
+
+  closeHistoryModal();
+
+
+  showToast(
+    "↻ Ejercicio cargado y recalculado."
+  );
+}
+
+
+function clearHistory(){
+
+  if(!confirm(
+    "¿Seguro que quieres eliminar todo el historial?"
+  )){
+
+    return;
+  }
+
+
+  localStorage.removeItem(
+    HISTORY_KEY
+  );
+
+
+  renderHistory();
+
+
+  showToast(
+    "🗑 Historial eliminado."
+  );
+}
+
+
+/* =====================================================
    TOAST
-========================================================= */
+===================================================== */
 
 let toastTimer;
+
 
 function showToast(message){
 
   const toast =
     $("toast");
 
-  if(!toast){
-    return;
-  }
-
   toast.textContent =
     message;
 
-  toast.classList.add(
-    "show"
-  );
+  toast.classList.add("show");
+
 
   clearTimeout(
     toastTimer
   );
+
 
   toastTimer =
     setTimeout(()=>{
@@ -3884,59 +5383,39 @@ function showToast(message){
         "show"
       );
 
-    },2500);
-
+    },2200);
 }
 
 
-/* =========================================================
-   TECLADO: ENTER PARA CALCULAR
-========================================================= */
+/* =====================================================
+   INICIO
+===================================================== */
+
+$("historyModal")
+  .addEventListener(
+    "click",
+    event=>{
+
+      if(
+        event.target ===
+        $("historyModal")
+      ){
+
+        closeHistoryModal();
+
+      }
+
+    }
+  );
+
 
 document.addEventListener(
   "keydown",
   event=>{
 
-    if(
-      event.key !== "Enter"
-    ){
-      return;
-    }
+    if(event.key === "Escape"){
 
-    if(
-      event.target.tagName !==
-      "INPUT"
-    ){
-      return;
-    }
-
-    const section =
-      event.target.closest(
-        ".section"
-      );
-
-    if(!section){
-      return;
-    }
-
-    const config =
-      Object.values(
-        HISTORY_CONFIG
-      ).find(
-        item =>
-          item.section ===
-          section.id
-      );
-
-    if(
-      config &&
-      typeof window[config.fn] ===
-      "function"
-    ){
-
-      event.preventDefault();
-
-      window[config.fn]();
+      closeHistoryModal();
 
     }
 
@@ -3944,11 +5423,11 @@ document.addEventListener(
 );
 
 
-/* =========================================================
-   INICIALIZACIÓN
-========================================================= */
-
 updateTriangle();
+
+updateLimitPreview();
+
+updateLateralPreview();
 
 renderHistory();
 
