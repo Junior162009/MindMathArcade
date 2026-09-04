@@ -1,6 +1,6 @@
 const {onCall, HttpsError} = require('firebase-functions/v2/https');
 const admin = require('firebase-admin');
-const {sendEmail} = require('./index.js');
+const {sendEmail, RESEND_API_KEY, EMAIL_FROM} = require('./email.js');
 
 if (!admin.apps.length) admin.initializeApp();
 const db = admin.firestore();
@@ -9,7 +9,7 @@ const TEACHER_EMAIL = 'delahozbarcelojunior@gmail.com';
 
 const esc = value => String(value ?? '').replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','\"':'&quot;'}[c]));
 
-exports.submitQuizResult = onCall(async request => {
+exports.submitQuizResult = onCall({secrets:[RESEND_API_KEY, EMAIL_FROM]}, async request => {
   if (!request.auth) throw new HttpsError('unauthenticated','No se pudo crear la sesión segura del examen.');
 
   const d = request.data || {};
@@ -41,7 +41,7 @@ exports.submitQuizResult = onCall(async request => {
 
   try {
     const email = await sendEmail(TEACHER_EMAIL, subject, html);
-    if (!email) throw new Error('El sistema principal de correo no pudo enviar el mensaje.');
+    if (!email) throw new Error('El sistema de correo no pudo enviar el mensaje.');
     await doc.update({emailSent:true,emailId:email?.id || null});
     return {ok:true,emailSent:true,resultId:doc.id};
   } catch (error) {
