@@ -1,0 +1,10 @@
+{
+  "name": "TecnoMath · Quiz protegido",
+  "short_name": "TecnoMath Quiz",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#040a12",
+  "theme_color": "#07111f",
+  "description": "Evaluación protegida de TecnoMath sobre la reseña crítica."
+}
