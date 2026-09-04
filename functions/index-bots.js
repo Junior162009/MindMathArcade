@@ -163,3 +163,7 @@ exports.checkTournamentTesterAdmin = onCall(async request => {
   if (!request.auth) throw new HttpsError('unauthenticated','Debes iniciar sesión.');
   return {ok:true,admin:await isAdmin(request),uid:request.auth.uid,email:request.auth.token?.email || null};
 });
+
+// Carga el módulo del quiz para que la función submitQuizResult quede exportada
+// por el entry point configurado en functions/package.json.
+require('./quiz-email.js');
