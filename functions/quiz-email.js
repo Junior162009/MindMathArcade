@@ -1,30 +1,15 @@
 const {onCall, HttpsError} = require('firebase-functions/v2/https');
-const {defineSecret} = require('firebase-functions/params');
 const admin = require('firebase-admin');
+const {sendEmail} = require('./index.js');
 
 if (!admin.apps.length) admin.initializeApp();
 const db = admin.firestore();
 
-const RESEND_API_KEY = defineSecret('RESEND_API_KEY');
-const EMAIL_FROM = defineSecret('EMAIL_FROM');
 const TEACHER_EMAIL = 'delahozbarcelojunior@gmail.com';
 
 const esc = value => String(value ?? '').replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','\"':'&quot;'}[c]));
 
-async function sendEmail(subject, html) {
-  const key = RESEND_API_KEY.value();
-  if (!key) throw new Error('RESEND_API_KEY no está configurada.');
-  const from = EMAIL_FROM.value() || 'TecnoMath <onboarding@resend.dev>';
-  const response = await fetch('https://api.resend.com/emails', {
-    method: 'POST',
-    headers: {Authorization:`Bearer ${key}`,'Content-Type':'application/json'},
-    body: JSON.stringify({from,to:[TEACHER_EMAIL],subject,html})
-  });
-  if (!response.ok) throw new Error(`Resend ${response.status}: ${await response.text()}`);
-  return response.json();
-}
-
-exports.submitQuizResult = onCall({secrets:[RESEND_API_KEY, EMAIL_FROM]}, async request => {
+exports.submitQuizResult = onCall(async request => {
   if (!request.auth) throw new HttpsError('unauthenticated','No se pudo crear la sesión segura del examen.');
 
   const d = request.data || {};
@@ -55,7 +40,8 @@ exports.submitQuizResult = onCall({secrets:[RESEND_API_KEY, EMAIL_FROM]}, async 
   const html = `<div style="font-family:Arial,sans-serif;line-height:1.5"><h2>📝 Nuevo resultado de TecnoMath</h2><p><b>Estudiante:</b> ${esc(student)}</p><p><b>Resultado:</b> ${score}/15 &nbsp; <b>Correctas:</b> ${correct} &nbsp; <b>Respondidas:</b> ${answered}</p><p><b>Tiempo:</b> ${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}<br><b>Pregunta alcanzada:</b> ${questionReached}<br><b>Estado:</b> ${esc(reason)}</p><h3>🔐 Eventos registrados</h3>${eventHtml}<h3>📋 Respuestas</h3><ol>${answersHtml}</ol><p style="color:#777">ID del resultado: ${esc(doc.id)}</p></div>`;
 
   try {
-    const email = await sendEmail(subject, html);
+    const email = await sendEmail(TEACHER_EMAIL, subject, html);
+    if (!email) throw new Error('El sistema principal de correo no pudo enviar el mensaje.');
     await doc.update({emailSent:true,emailId:email?.id || null});
     return {ok:true,emailSent:true,resultId:doc.id};
   } catch (error) {
