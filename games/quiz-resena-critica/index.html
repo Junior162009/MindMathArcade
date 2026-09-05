@@ -52,7 +52,7 @@ const BASE=[
 ];
 const $=id=>document.getElementById(id);
 const isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent)||(/Macintosh/.test(navigator.userAgent)&&navigator.maxTouchPoints>1);
-let selected=[],answers=[],current=0,student='',startedAt=0,timerId=null,events=[],finished=false;
+let selected=[],answers=[],current=0,student='',startedAt=0,timerId=null,events=[],finished=false,finishing=false,blurTimer=null;
 function shuffle(a){for(let j=a.length-1;j>0;j--){const k=Math.floor(Math.random()*(j+1));[a[j],a[k]]=[a[k],a[j]]}return a}
 function normalize(s){return s.trim().replace(/\s+/g,' ').toLowerCase()}
 function fmt(sec){sec=Math.max(0,Math.floor(sec));return String(Math.floor(sec/60)).padStart(2,'0')+':'+String(sec%60).padStart(2,'0')}
@@ -60,22 +60,55 @@ function security(msg){$('securityState').innerHTML='Estado: <b>'+msg+'</b>'}
 function addEvent(msg){events.push(new Date().toLocaleTimeString('es-CO')+' — '+msg)}
 function makeQuestions(){return BASE.map((x,n)=>{const opts=x[1].map((text,i)=>({text,correct:i===x[2]}));shuffle(opts);return{id:n+1,pregunta:x[0],opciones:opts.map(o=>o.text),correcta:opts.findIndex(o=>o.correct)}})}
 const BANK=makeQuestions();
-async function userExists(name){try{const u=SUPABASE_URL+'/rest/v1/'+TABLE+'?select=id&student=eq.'+encodeURIComponent(normalize(name))+'&limit=1';const r=await fetch(u,{headers:{apikey:SUPABASE_KEY,Authorization:'Bearer '+SUPABASE_KEY}});if(!r.ok)return false;const d=await r.json();return Array.isArray(d)&&d.length>0}catch(e){return false}}
-async function startQuiz(){if(finished)return;student=$('name').value.trim();if(student.length<2){$('name').focus();return}security('verificando usuario…');const exists=await userExists(student);if(exists){alert('Este usuario ya tiene un resultado registrado. Solo se permite un intento.');security('usuario ya registrado');return}selected=shuffle(BANK.slice()).slice(0,15);answers=Array(15).fill(null);current=0;events=[];startedAt=Date.now();finished=false;addEvent('Inicio de evaluación');security('evaluación activa');$('start').classList.add('hidden');$('quiz').classList.remove('hidden');if(!isIOS&&document.documentElement.requestFullscreen)document.documentElement.requestFullscreen().catch(()=>{});timerId=setInterval(()=>{$('timer').textContent=fmt((Date.now()-startedAt)/1000)},1000);render()}
+async function requestJson(url,options={},timeout=8000){const c=new AbortController();const timer=setTimeout(()=>c.abort(),timeout);try{return await fetch(url,{...options,signal:c.signal})}finally{clearTimeout(timer)}}
+async function userExists(name){try{const u=SUPABASE_URL+'/rest/v1/'+TABLE+'?select=id&student=eq.'+encodeURIComponent(normalize(name))+'&limit=1';const r=await requestJson(u,{headers:{apikey:SUPABASE_KEY,Authorization:'Bearer '+SUPABASE_KEY}},6000);if(!r.ok)return false;const d=await r.json();return Array.isArray(d)&&d.length>0}catch(e){return false}}
+async function startQuiz(){if(finished||finishing)return;student=$('name').value.trim();if(student.length<2){$('name').focus();return}const btn=$('startBtn');btn.disabled=true;security('verificando usuario…');const exists=await userExists(student);if(exists){alert('Este usuario ya tiene un resultado registrado. Solo se permite un intento.');security('usuario ya registrado');btn.disabled=false;return}selected=shuffle(BANK.slice()).slice(0,15);answers=Array(15).fill(null);current=0;events=[];startedAt=Date.now();finished=false;finishing=false;addEvent('Inicio de evaluación');security('evaluación activa');$('start').classList.add('hidden');$('quiz').classList.remove('hidden');if(!isIOS&&document.documentElement.requestFullscreen){document.documentElement.requestFullscreen().catch(()=>{})}timerId=setInterval(()=>{$('timer').textContent=fmt((Date.now()-startedAt)/1000)},1000);render()}
 function render(){const q=selected[current];$('counter').textContent=(current+1)+' / 15';$('bar').style.width=((current+1)/15*100)+'%';$('qnum').textContent='Pregunta '+(current+1);$('qt').textContent=q.pregunta;$('answers').innerHTML='';q.opciones.forEach((text,n)=>{const b=document.createElement('button');b.type='button';b.className='answer'+(answers[current]===n?' sel':'');b.textContent=String.fromCharCode(65+n)+'. '+text;b.onclick=()=>{if(finished)return;answers[current]=n;document.querySelectorAll('.answer').forEach(x=>x.classList.remove('sel'));b.classList.add('sel');$('next').disabled=false};$('answers').appendChild(b)});$('next').textContent=current===14?'Finalizar':'Siguiente';$('next').disabled=answers[current]===null}
 $('next').onclick=()=>{if(answers[current]===null)return;if(current===14)finish('Evaluación completada');else{current++;render()}};
-async function saveResult(reason){const correct=selected.reduce((n,q,j)=>n+(answers[j]===q.correcta?1:0),0);const payload={student:normalize(student),score:correct,correct,answered:answers.filter(x=>x!==null).length,total:15,seconds:Math.round((Date.now()-startedAt)/1000),questionReached:current+1,reason,answers,events};const r=await fetch(SUPABASE_URL+'/rest/v1/'+TABLE,{method:'POST',headers:{apikey:SUPABASE_KEY,Authorization:'Bearer '+SUPABASE_KEY,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify(payload)});if(!r.ok){const t=await r.text();if(r.status===409||/duplicate|unique/i.test(t))throw new Error('Este usuario ya tiene un resultado registrado.');throw new Error('No se pudo guardar el resultado.')}return payload}
-async function sendEmail(payload){try{const r=await fetch(EMAIL_FUNCTION,{method:'POST',headers:{apikey:SUPABASE_KEY,Authorization:'Bearer '+SUPABASE_KEY,'Content-Type':'application/json'},body:JSON.stringify(payload)});return r.ok}catch(e){return false}}
-async function finish(reason){if(finished)return;finished=true;clearInterval(timerId);addEvent(reason);security('evaluación finalizada');document.removeEventListener('visibilitychange',visibilityGuard);window.removeEventListener('blur',focusGuard);document.removeEventListener('fullscreenchange',fullscreenGuard);if(document.fullscreenElement)document.exitFullscreen().catch(()=>{});$('quiz').classList.add('hidden');$('result').classList.remove('hidden');$('rname').textContent='Usuario: '+student;$('reason').textContent=reason;$('mail').textContent='Guardando resultado…';try{const p=await saveResult(reason);const c=p.correct;$('correct').textContent=c;$('answered').textContent=p.answered;$('percent').textContent=Math.round(c/15*100)+'%';$('score').textContent=c+'/15';$('grade').textContent='Nota: '+(c/3).toFixed(1)+' / 5.0';const sent=await sendEmail(p);$('mail').textContent=sent?'Resultado guardado y correo enviado.':'Resultado guardado. El correo no pudo enviarse en este momento.';$('mail').className='mail '+(sent?'ok':'err')}catch(e){$('status').textContent='ERROR DE GUARDADO';$('mail').textContent=e.message;$('mail').className='mail err'}}
-function securityFinish(reason){if(!finished&&startedAt)finish(reason)}
+async function saveResult(reason){
+ const correct=selected.reduce((n,q,j)=>n+(answers[j]===q.correcta?1:0),0);
+ const base={student:normalize(student),score:correct,correct,answered:answers.filter(x=>x!==null).length,total:15,seconds:Math.round((Date.now()-startedAt)/1000),reason};
+ const extra={...base,questionReached:current+1,answers,events};
+ let r=await requestJson(SUPABASE_URL+'/rest/v1/'+TABLE,{method:'POST',headers:{apikey:SUPABASE_KEY,Authorization:'Bearer '+SUPABASE_KEY,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify(extra)},10000);
+ if(r.ok)return extra;
+ let detail='';try{detail=await r.text()}catch(e){}
+ if(r.status===409||/duplicate|unique/i.test(detail))throw new Error('Este usuario ya tiene un resultado registrado.');
+ // Fallback: algunas versiones de la tabla pueden no tener todavía las columnas de seguimiento.
+ r=await requestJson(SUPABASE_URL+'/rest/v1/'+TABLE,{method:'POST',headers:{apikey:SUPABASE_KEY,Authorization:'Bearer '+SUPABASE_KEY,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify(base)},10000);
+ if(r.ok)return extra;
+ let detail2='';try{detail2=await r.text()}catch(e){}
+ if(r.status===409||/duplicate|unique/i.test(detail2))throw new Error('Este usuario ya tiene un resultado registrado.');
+ throw new Error('Supabase no permitió guardar el resultado. Revisa las políticas RLS o las columnas de quiz_resena_resultados.');
+}
+async function sendEmail(payload){
+ try{
+  const r=await requestJson(EMAIL_FUNCTION,{method:'POST',headers:{apikey:SUPABASE_KEY,Authorization:'Bearer '+SUPABASE_KEY,'Content-Type':'application/json'},body:JSON.stringify({...payload,email:true})},12000);
+  if(r.ok)return true;
+  const txt=await r.text().catch(()=> '');
+  console.error('send-quiz-email:',r.status,txt);
+  return false;
+ }catch(e){console.error('send-quiz-email:',e);return false}
+}
+async function finish(reason){
+ if(finished||finishing)return;finishing=true;clearInterval(timerId);addEvent(reason);security('evaluación finalizada');document.removeEventListener('visibilitychange',visibilityGuard);window.removeEventListener('blur',focusGuard);document.removeEventListener('fullscreenchange',fullscreenGuard);if(document.fullscreenElement)document.exitFullscreen().catch(()=>{});$('quiz').classList.add('hidden');$('result').classList.remove('hidden');$('rname').textContent='Usuario: '+student;$('reason').textContent=reason;$('mail').textContent='Guardando resultado…';
+ try{
+  const p=await saveResult(reason);const c=p.correct;$('correct').textContent=c;$('answered').textContent=p.answered;$('percent').textContent=Math.round(c/15*100)+'%';$('score').textContent=c+'/15';$('grade').textContent='Nota: '+(c/3).toFixed(1)+' / 5.0';$('time').textContent=fmt(p.seconds);
+  $('mail').textContent='Resultado guardado. Enviando correo…';
+  const sent=await sendEmail(p);
+  $('mail').textContent=sent?'Resultado guardado y correo enviado correctamente.':'Resultado guardado, pero el correo no pudo enviarse. El resultado no se perdió.';
+  $('mail').className='mail '+(sent?'ok':'err');
+  $('status').textContent=sent?'FINALIZADA':'GUARDADA';
+ }catch(e){$('status').textContent='ERROR DE GUARDADO';$('mail').textContent=e.message;$('mail').className='mail err';console.error(e)}
+ finishing=false;finished=true;
+}
+function securityFinish(reason){if(!finished&&!finishing&&startedAt)finish(reason)}
 function visibilityGuard(){if(document.visibilityState==='hidden')securityFinish('Interrupción: se salió de la pestaña o aplicación')}
-function focusGuard(){if(startedAt&&!finished)securityFinish('Interrupción: se perdió el foco del examen')}
-function fullscreenGuard(){if(startedAt&&!finished&&!isIOS&&!document.fullscreenElement)securityFinish('Interrupción: se salió de pantalla completa')}
+function focusGuard(){if(!startedAt||finished||finishing)return;clearTimeout(blurTimer);blurTimer=setTimeout(()=>{if(!document.hidden)securityFinish('Interrupción: se perdió el foco del examen')},600)}
+function fullscreenGuard(){if(startedAt&&!finished&&!finishing&&!isIOS&&!document.fullscreenElement){security('pantalla completa no disponible; evaluación continúa')} }
 $('name').addEventListener('input',()=>{$('startBtn').disabled=$('name').value.trim().length<2});
 $('startBtn').addEventListener('click',startQuiz);
 if(isIOS)$('iosBox').classList.remove('hidden');
-document.addEventListener('visibilitychange',visibilityGuard);window.addEventListener('blur',focusGuard);document.addEventListener('fullscreenchange',fullscreenGuard);window.addEventListener('beforeunload',e=>{if(!finished&&startedAt){e.preventDefault();e.returnValue=''}});document.addEventListener('contextmenu',e=>e.preventDefault());document.addEventListener('copy',e=>e.preventDefault());
-security('esperando inicio');
+document.addEventListener('visibilitychange',visibilityGuard);window.addEventListener('blur',focusGuard);document.addEventListener('fullscreenchange',fullscreenGuard);
 </script>
 </body>
 </html>
