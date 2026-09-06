@@ -31,7 +31,8 @@
   {
     "name": "Cookie Clicker",
     "desc": "Haz clic, consigue cookies y mejora tu producción.",
-    "category": "arcade",
+    "description": "Actividad interactiva de lógica, conteo y gestión de recursos.",
+    "category": "edu",
     "url": "games/cookie-clicker/index.html",
     "imageUrl": "",
     "icon": "🍪",
@@ -44,7 +45,7 @@
     "name": "Quiz: Reseña Crítica",
     "desc": "Evaluación de 15 preguntas sobre la reseña crítica con control de intento y finalización automática.",
     "description": "Quiz educativo de 15 preguntas. Requiere nombre completo, guarda el progreso y finaliza automáticamente si el estudiante abandona la plataforma.",
-    "category": "quiz",
+    "category": "edu",
     "url": "games/quiz-resena-critica/index.html",
     "imageUrl": "",
     "icon": "📝",
