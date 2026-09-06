@@ -11,31 +11,59 @@
     regreso: { emoji:'🎒', colors:{bg:'#10100a',card:'#1c1c0e',border:'#5d5a24',text:'#fff',cyan:'#5fd7ff',pink:'#ff72b6',green:'#75ff75',yellow:'#ffe600',gold:'#ffcc33'} }
   };
 
-  function apply(id) {
-    id = String(id || 'normal').toLowerCase();
-    const theme = THEMES[id] || THEMES.normal;
+  const THEME_KEY = 'tecnomath:tema-activo';
+  let listenerAttached = false;
+
+  function validTheme(id) {
+    id = String(id || '').trim().toLowerCase();
+    return Object.prototype.hasOwnProperty.call(THEMES, id) ? id : null;
+  }
+
+  function apply(id, persist = true) {
+    id = validTheme(id) || 'normal';
+    const theme = THEMES[id];
     const root = document.documentElement;
     const map = {bg:'--theme-bg',card:'--theme-card',border:'--theme-border',text:'--theme-text',cyan:'--neon-cyan',pink:'--neon-pink',green:'--neon-green',yellow:'--neon-yellow',gold:'--gold'};
     Object.keys(theme.colors).forEach(k => root.style.setProperty(map[k], theme.colors[k]));
     root.dataset.tecnomathTheme = id;
     if (document.body) document.body.dataset.tecnomathTheme = id;
-    document.title = `${theme.emoji} TecnoMath · Plataforma de Juegos Educativos`;
+    if (persist) {
+      try { localStorage.setItem(THEME_KEY, id); } catch (_) {}
+    }
+    document.title = `${theme.emoji} TecnoMath · Plataforma Educativa Interactiva`;
     window.dispatchEvent(new CustomEvent('tecnomath:themechange', {detail:{id, theme}}));
   }
 
+  function getCachedTheme() {
+    try { return validTheme(localStorage.getItem(THEME_KEY)); } catch (_) { return null; }
+  }
+
   function start() {
-    apply('normal');
+    // Primero conserva la última temática conocida para evitar que la página
+    // vuelva visualmente a una temática antigua mientras Firebase responde.
+    apply(getCachedTheme() || 'normal', false);
+
     if (!window.firebase || !firebase.database) {
       setTimeout(start, 300);
       return;
     }
+
+    if (listenerAttached) return;
+    listenerAttached = true;
+
     try {
-      firebase.database().ref('tecnomath/tematicaActiva').on('value', snap => apply(snap.val() || 'normal'), err => {
+      firebase.database().ref('tecnomath/tematicaActiva').on('value', snap => {
+        const remoteTheme = validTheme(snap.val());
+        // Si Firebase aún no tiene una temática válida, no resucitar Halloween
+        // ni otra temática anterior: usar la última válida o Normal.
+        apply(remoteTheme || getCachedTheme() || 'normal');
+      }, err => {
         console.warn('TecnoMath: no se pudo leer la temática global.', err);
-        apply('normal');
+        apply(getCachedTheme() || 'normal');
       });
     } catch (err) {
       console.warn('TecnoMath: error iniciando temática global.', err);
+      apply(getCachedTheme() || 'normal');
     }
   }
 
