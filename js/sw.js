@@ -1,10 +1,10 @@
 importScripts('https://storage.googleapis.com/workbox-cdn/releases/5.1.2/workbox-sw.js');
 
-// v11: limpia cualquier versión anterior del caché para evitar que componentes eliminados vuelvan a aparecer.
-const CACHE_NAME = 'tecnomath-offline-v11';
+// v12: fuerza la actualización del sistema de sincronización de temáticas.
+const CACHE_NAME = 'tecnomath-offline-v12';
 const OFFLINE_FALLBACK_PAGE = '/index.html';
 const PRECACHE_ASSETS = [
-  '/', '/index.html', '/js/shared.js', '/js/firebase-config.js', '/js/admin-guard.js', '/js/theme-sync.js',
+  '/', '/index.html', '/js/shared.js', '/js/firebase-config.js', '/js/admin-guard.js', '/js/theme-sync.js?v=12',
   '/manifest.json', '/pages/auth.html', '/pages/admin/index.html', '/css/admin.css',
   '/pages/game.html', '/pages/eco-collector.html', '/pages/animalandia.html',
   '/pages/ods-2048.html', '/pages/coral-guardian.html', '/pages/eco-barrio.html',
@@ -28,7 +28,7 @@ async function injectThemeScript(response) {
   try {
     const html = await response.text();
     if (html.includes('/js/theme-sync.js')) return new Response(html, {status:response.status, statusText:response.statusText, headers:response.headers});
-    const injected = html.replace(/<\/body>/i, '<script src="/js/theme-sync.js?v=11"></script></body>');
+    const injected = html.replace(/<\/body>/i, '<script src="/js/theme-sync.js?v=12"></script></body>');
     const headers = new Headers(response.headers);
     headers.set('content-type', 'text/html; charset=utf-8');
     return new Response(injected, {status:response.status, statusText:response.statusText, headers});
