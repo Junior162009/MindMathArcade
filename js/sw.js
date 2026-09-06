@@ -1,10 +1,11 @@
 importScripts('https://storage.googleapis.com/workbox-cdn/releases/5.1.2/workbox-sw.js');
 
-// v12: fuerza la actualización del sistema de sincronización de temáticas.
-const CACHE_NAME = 'tecnomath-offline-v12';
+// v13: separa los eventos heredados de la temática global.
+const CACHE_NAME = 'tecnomath-offline-v13';
 const OFFLINE_FALLBACK_PAGE = '/index.html';
 const PRECACHE_ASSETS = [
-  '/', '/index.html', '/js/shared.js', '/js/firebase-config.js', '/js/admin-guard.js', '/js/theme-sync.js?v=12',
+  '/', '/index.html', '/js/shared.js', '/js/firebase-config.js', '/js/admin-guard.js',
+  '/js/theme-sync.js?v=13', '/js/event-theme-guard.js?v=13',
   '/manifest.json', '/pages/auth.html', '/pages/admin/index.html', '/css/admin.css',
   '/pages/game.html', '/pages/eco-collector.html', '/pages/animalandia.html',
   '/pages/ods-2048.html', '/pages/coral-guardian.html', '/pages/eco-barrio.html',
@@ -21,14 +22,19 @@ self.addEventListener('activate', event => {
 });
 if (workbox.navigationPreload && workbox.navigationPreload.isSupported()) workbox.navigationPreload.enable();
 
-async function injectThemeScript(response) {
+async function injectThemeScripts(response) {
   if (!response || !response.ok) return response;
   const type = response.headers.get('content-type') || '';
   if (!type.includes('text/html')) return response;
   try {
     const html = await response.text();
-    if (html.includes('/js/theme-sync.js')) return new Response(html, {status:response.status, statusText:response.statusText, headers:response.headers});
-    const injected = html.replace(/<\/body>/i, '<script src="/js/theme-sync.js?v=12"></script></body>');
+    let injected = html;
+    if (!injected.includes('/js/theme-sync.js')) {
+      injected = injected.replace(/<\/body>/i, '<script src="/js/theme-sync.js?v=13"></script></body>');
+    }
+    if (!injected.includes('/js/event-theme-guard.js')) {
+      injected = injected.replace(/<\/body>/i, '<script src="/js/event-theme-guard.js?v=13"></script></body>');
+    }
     const headers = new Headers(response.headers);
     headers.set('content-type', 'text/html; charset=utf-8');
     return new Response(injected, {status:response.status, statusText:response.statusText, headers});
@@ -42,7 +48,7 @@ self.addEventListener('fetch', event => {
   event.respondWith((async () => {
     try {
       const networkResponse = await fetch(event.request);
-      const response = await injectThemeScript(networkResponse);
+      const response = await injectThemeScripts(networkResponse);
       if (response && response.status === 200) {
         const cache = await caches.open(CACHE_NAME);
         await cache.put(event.request, response.clone());
@@ -50,10 +56,10 @@ self.addEventListener('fetch', event => {
       return response;
     } catch (_) {
       let cached = await caches.match(event.request);
-      if (cached) return injectThemeScript(cached);
+      if (cached) return injectThemeScripts(cached);
       if (event.request.mode === 'navigate') {
         cached = await caches.match(OFFLINE_FALLBACK_PAGE);
-        if (cached) return injectThemeScript(cached);
+        if (cached) return injectThemeScripts(cached);
       }
       return new Response('Sin conexión', { status: 503 });
     }
