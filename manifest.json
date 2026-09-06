@@ -1,26 +1,25 @@
 {
-  "name": "Tecnomath - Portal de Juegos Educativos ODS",
-  "short_name": "Tecnomath",
-  "description": "Portal de minijuegos educativos sobre los ODS. Matemáticas, ciencias, ecología y mucho más.",
+  "name": "TecnoMath - Plataforma Educativa Interactiva",
+  "short_name": "TecnoMath",
+  "description": "Plataforma educativa interactiva para estudiantes y docentes con recursos, actividades y experiencias de aprendizaje digitales en matemáticas, ciencias, ecología y otras áreas.",
   "id": "https://tecnomath.online/",
   "start_url": "/index.html",
   "scope": "/",
-  "lang": "es-ES",
+  "lang": "es-CO",
   "dir": "ltr",
   "display": "fullscreen",
   "display_override": ["fullscreen", "standalone"],
   "orientation": "any",
   "background_color": "#060610",
   "theme_color": "#060610",
-  "categories": ["education", "games", "kids"],
-  "iarc_rating_id": "",
+  "categories": ["education"],
   "screenshots": [
     {
       "src": "img/screenshot-1.png",
       "sizes": "1080x1920",
       "type": "image/png",
       "form_factor": "narrow",
-      "label": "Pantalla principal del portal Tecnomath"
+      "label": "Pantalla principal de la plataforma educativa TecnoMath"
     }
   ],
   "icons": [
@@ -35,23 +34,23 @@
   ],
   "shortcuts": [
     {
-      "name": "MindMath Arcade",
-      "short_name": "MindMath",
-      "description": "Juego de matemáticas retro",
+      "name": "MindMath - Práctica de matemáticas",
+      "short_name": "Matemáticas",
+      "description": "Actividad educativa interactiva para practicar matemáticas",
       "url": "/game.html",
       "icons": [{ "src": "img/mindmath.png", "sizes": "96x96", "type": "image/png" }]
     },
     {
-      "name": "Eco Recolector",
-      "short_name": "Eco",
-      "description": "Atrapa agua y reciclables",
+      "name": "Eco Recolector - Educación ambiental",
+      "short_name": "Educación ambiental",
+      "description": "Actividad educativa interactiva sobre reciclaje y cuidado del medio ambiente",
       "url": "/eco-collector.html",
       "icons": [{ "src": "img/ecorecolector.png", "sizes": "96x96", "type": "image/png" }]
     },
     {
-      "name": "Animalandia",
+      "name": "Animalandia - Aprendizaje sobre animales",
       "short_name": "Animales",
-      "description": "Alimenta a los animales",
+      "description": "Actividad educativa interactiva para aprender sobre animales",
       "url": "/animalandia.html",
       "icons": [{ "src": "img/animalandia.png", "sizes": "96x96", "type": "image/png" }]
     }
