@@ -1,12 +1,13 @@
 importScripts('https://storage.googleapis.com/workbox-cdn/releases/5.1.2/workbox-sw.js');
 
-// v13: separa los eventos heredados de la temática global.
-const CACHE_NAME = 'tecnomath-offline-v13';
+// v14: incluye la temática Amor & Amistad y su CSS en el caché offline.
+const CACHE_NAME = 'tecnomath-offline-v14';
 const OFFLINE_FALLBACK_PAGE = '/index.html';
 const PRECACHE_ASSETS = [
   '/', '/index.html', '/js/shared.js', '/js/firebase-config.js', '/js/admin-guard.js',
-  '/js/theme-sync.js?v=13', '/js/event-theme-guard.js?v=13',
-  '/manifest.json', '/pages/auth.html', '/pages/admin/index.html', '/css/admin.css',
+  '/js/theme-sync.js?v=14', '/js/event-theme-guard.js?v=14',
+  '/css/amor-amistad.css?v=2', '/css/admin.css',
+  '/manifest.json', '/pages/auth.html', '/pages/admin/index.html',
   '/pages/game.html', '/pages/eco-collector.html', '/pages/animalandia.html',
   '/pages/ods-2048.html', '/pages/coral-guardian.html', '/pages/eco-barrio.html',
   '/pages/emoji-math.html', '/img/icon-192.png', '/img/icon-512.png'
@@ -30,10 +31,10 @@ async function injectThemeScripts(response) {
     const html = await response.text();
     let injected = html;
     if (!injected.includes('/js/theme-sync.js')) {
-      injected = injected.replace(/<\/body>/i, '<script src="/js/theme-sync.js?v=13"></script></body>');
+      injected = injected.replace(/<\/body>/i, '<script src="/js/theme-sync.js?v=14"></script></body>');
     }
     if (!injected.includes('/js/event-theme-guard.js')) {
-      injected = injected.replace(/<\/body>/i, '<script src="/js/event-theme-guard.js?v=13"></script></body>');
+      injected = injected.replace(/<\/body>/i, '<script src="/js/event-theme-guard.js?v=14"></script></body>');
     }
     const headers = new Headers(response.headers);
     headers.set('content-type', 'text/html; charset=utf-8');
