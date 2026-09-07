@@ -102,7 +102,7 @@
 
   async function requireAdmin(options) {
     options=options||{};const cloud=firebaseReady(),redirect=options.redirect||'../auth.html';
-    return new Promise((resolve,reject)=>{const unsubscribe=cloud.auth.onAuthStateChanged(async user=>{unsubscribe();try{if(!user){window.location.replace(redirect);return}const profile=await getAdminProfile(user);if(!profile){await refreshAdminClaim(user,false);alert('Acceso denegado: necesitas permisos de administrador.');window.location.replace(redirect);return}await prepareAdminProfile(user,profile);window.TecnomathCurrentAdmin=profile;window.TecnomathIsAdmin=true;resolve(profile);}catch(error){console.error('TecnoMath admin guard:',error);reject(error);}});});
+    return new Promise((resolve,reject)=>{const unsubscribe=cloud.auth.onAuthStateChanged(async user=>{unsubscribe();try{if(!user){window.location.replace(redirect);return}const profile=await getAdminProfile(user);if(!profile){await refreshAdminClaim(user,false);alert('Acceso denegado: necesitas permisos de administrador.');window.location.replace(redirect);return}await prepareAdminProfile(user,profile);window.TecnomathCurrentAdmin=profile;window.TecnomathIsAdmin=true;resolve(profile);}catch(error){console.error('Tecnomath admin guard:',error);reject(error);}});});
   }
 
   window.TecnomathAdminGuard={ADMIN_EMAILS,ADMIN_NAMES,isApprovedEmail,getAdminProfile,initializeAdminRecognition,requireAdmin,refreshAdminClaim};
@@ -147,37 +147,47 @@
     if(!/\/pages\/admin\/index\.html$/.test(location.pathname))return;
     const inject=()=>{
       const list=document.getElementById('themesList');
-      if(!list||document.getElementById('theme-love-friendship'))return;
-      const row=document.createElement('div');
-      row.id='theme-love-friendship';
-      row.className='theme-row';
-      row.innerHTML='<div><strong>💖 Amor & Amistad</strong><small>Especial de septiembre · corazones, amistad y celebración</small></div><button type="button" class="theme-btn" id="activateLoveFriendship">💖 Activar</button>';
-      list.appendChild(row);
-      const button=row.querySelector('#activateLoveFriendship');
-      button.addEventListener('click',async()=>{
+      if(!list)return;
+      let row=document.getElementById('theme-love-friendship');
+      if(!row){
+        row=document.createElement('div');
+        row.id='theme-love-friendship';
+        row.className='theme-row';
+        row.innerHTML='<div><strong>💖 Amor & Amistad</strong><small>Especial de septiembre · corazones, amistad y celebración</small></div><label><input type="radio" name="activeTheme" value="amoramistad"> Activar</label>';
+        list.appendChild(row);
+      }
+      const radio=row.querySelector('input[value="amoramistad"]');
+      if(!radio||radio.dataset.bound==='true')return;
+      radio.dataset.bound='true';
+      const sync=()=>{
+        cloudThemeState().then(active=>{
+          radio.checked=active==='amoramistad';
+          const small=row.querySelector('small');
+          if(small)small.textContent=active==='amoramistad'?'ACTIVA':'Especial de septiembre · corazones, amistad y celebración';
+        }).catch(()=>{});
+      };
+      radio.addEventListener('change',async()=>{
+        if(!radio.checked)return;
         try{
-          button.disabled=true;
-          button.textContent='Activando…';
+          radio.disabled=true;
           const cloud=firebaseReady();
           await cloud.database.ref('tecnomath/tematicaActiva').set('amoramistad');
-          try{await cloud.database.ref('tecnomath/tematicas/amoramistad').set({name:'💖 Amor & Amistad',description:'Especial de septiembre',active:true,updatedAt:firebase.database.ServerValue.TIMESTAMP});}catch(_){ }
-          if(typeof window.logAction==='function')await window.logAction('theme_activate','','amoramistad');
-          button.textContent='✓ Activa';
-          button.style.background='#ff72b6';
-          button.style.color='#fff';
+          await cloud.database.ref('tecnomath/tematicas/amoramistad').set({name:'💖 Amor & Amistad',description:'Especial de septiembre',active:true,updatedAt:firebase.database.ServerValue.TIMESTAMP});
+          if(typeof window.logAction==='function')await window.logAction('change_theme','tecnomath/tematicas','Temática activa: amoramistad');
           const status=document.getElementById('themeStatus');
-          if(status)status.textContent='💖 Temática Amor & Amistad activada correctamente.';
+          if(status)status.textContent='Temática activa: 💖 Amor & Amistad';
+          sync();
         }catch(error){
-          console.error(error);
-          button.disabled=false;
-          button.textContent='💖 Activar';
+          console.error('TecnoMath: error activando Amor & Amistad:',error);
+          radio.checked=false;
           const status=document.getElementById('themeStatus');
           if(status)status.textContent='No se pudo activar la temática: '+(error.message||error);
-        }
+        }finally{radio.disabled=false;}
       });
+      sync();
     };
-    if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',inject,{once:true});
-    else inject();
+    const cloudThemeState=async()=>{const cloud=firebaseReady();const s=await cloud.database.ref('tecnomath/tematicaActiva').once('value');return s.val()||'normal';};
+    if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',inject,{once:true});else inject();
     const observer=new MutationObserver(inject);
     const startObserver=()=>{const target=document.getElementById('themesList');if(target)observer.observe(target,{childList:true});};
     setTimeout(startObserver,500);
