@@ -15,12 +15,12 @@
     primavera: { emoji:'🌸', colors:{bg:'#100b14',card:'#1e1220',border:'#6f3d68',text:'#fff5fb',cyan:'#66eaff',pink:'#ff72b6',green:'#7dff9b',yellow:'#ffe66d',gold:'#ffd166'} },
     espacio: { emoji:'🚀', colors:{bg:'#050611',card:'#0b1022',border:'#273b72',text:'#f3f6ff',cyan:'#55eaff',pink:'#a76bff',green:'#65ffbf',yellow:'#ffe66d',gold:'#ffd166'} },
     ciencia: { emoji:'🔬', colors:{bg:'#06100e',card:'#0c1c18',border:'#245b4d',text:'#effff9',cyan:'#4deaff',pink:'#ff65c7',green:'#63ff9a',yellow:'#eaff66',gold:'#ffd166'} },
-    amoramistad: { emoji:'💖', colors:{bg:'#180a16',card:'#29101f',border:'#8a315e',text:'#fff5fb',cyan:'#ff8ed4',pink:'#ff4f9a',green:'#8fffd1',yellow:'#ffe68a',gold:'#ffd166'} }
+    amoramistad: { emoji:'💖', colors:{bg:'#fff0f7',card:'#ffffff',border:'#ffb4d5',text:'#3b1730',cyan:'#c026d3',pink:'#ff4f9a',green:'#16a085',yellow:'#d97706',gold:'#d4a017'} }
   };
 
   const THEME_KEY = 'tecnomath:tema-activo';
   const LOVE_CSS_ID = 'tecnomath-amor-amistad-css';
-  const LOVE_CSS_HREF = '/css/amor-amistad.css?v=1';
+  const LOVE_CSS_HREF = '/css/amor-amistad.css?v=3';
   let listenerAttached = false;
 
   function validTheme(id) {
@@ -37,10 +37,34 @@
         link.rel = 'stylesheet';
         link.href = LOVE_CSS_HREF;
         document.head.appendChild(link);
+      } else if (existing.getAttribute('href') !== LOVE_CSS_HREF) {
+        existing.setAttribute('href', LOVE_CSS_HREF);
       }
-    } else if (existing) {
-      existing.remove();
+    } else if (existing) existing.remove();
+  }
+
+  function createLoveDecor() {
+    if (document.getElementById('aa-global-hearts')) return;
+    const layer = document.createElement('div');
+    layer.id = 'aa-global-hearts';
+    layer.className = 'aa-floating-hearts';
+    for (let i = 0; i < 18; i++) {
+      const heart = document.createElement('span');
+      heart.className = 'aa-floating-heart';
+      heart.textContent = i % 4 === 0 ? '💗' : (i % 4 === 1 ? '💖' : (i % 4 === 2 ? '💕' : '♥'));
+      heart.style.setProperty('--aa-left', `${Math.round(Math.random() * 100)}%`);
+      heart.style.setProperty('--aa-size', `${14 + Math.round(Math.random() * 20)}px`);
+      heart.style.setProperty('--aa-duration', `${7 + Math.round(Math.random() * 6)}s`);
+      heart.style.setProperty('--aa-delay', `${-(Math.random() * 10).toFixed(2)}s`);
+      heart.style.setProperty('--aa-drift', `${-45 + Math.round(Math.random() * 90)}px`);
+      layer.appendChild(heart);
     }
+    document.body.appendChild(layer);
+  }
+
+  function removeLoveDecor() {
+    const layer = document.getElementById('aa-global-hearts');
+    if (layer) layer.remove();
   }
 
   function apply(id, persist = true) {
@@ -55,48 +79,28 @@
       document.body.dataset.tecnomathTheme = id;
       document.body.dataset.theme = id;
       document.body.classList.toggle('tema-amor-amistad', id === 'amoramistad');
+      if (id === 'amoramistad') createLoveDecor(); else removeLoveDecor();
     }
     syncLoveCss(id);
-    if (persist) {
-      try { localStorage.setItem(THEME_KEY, id); } catch (_) {}
-    }
+    if (persist) { try { localStorage.setItem(THEME_KEY, id); } catch (_) {} }
     document.title = `${theme.emoji} TecnoMath · Plataforma Educativa Interactiva`;
     window.dispatchEvent(new CustomEvent('tecnomath:themechange', {detail:{id, theme}}));
   }
 
-  function getCachedTheme() {
-    try { return validTheme(localStorage.getItem(THEME_KEY)); } catch (_) { return null; }
-  }
+  function getCachedTheme() { try { return validTheme(localStorage.getItem(THEME_KEY)); } catch (_) { return null; } }
 
   function start() {
     apply(getCachedTheme() || 'normal', false);
-
-    if (!window.firebase || !firebase.database) {
-      setTimeout(start, 300);
-      return;
-    }
-
+    if (!window.firebase || !firebase.database) { setTimeout(start, 300); return; }
     if (listenerAttached) return;
     listenerAttached = true;
-
     try {
       firebase.database().ref('tecnomath/tematicaActiva').on('value', snap => {
         const remoteTheme = validTheme(snap.val());
-        if (remoteTheme) {
-          apply(remoteTheme);
-        } else {
-          apply(getCachedTheme() || 'normal');
-        }
-      }, err => {
-        console.warn('TecnoMath: no se pudo leer la temática global.', err);
-        apply(getCachedTheme() || 'normal');
-      });
-    } catch (err) {
-      console.warn('TecnoMath: error iniciando temática global.', err);
-      apply(getCachedTheme() || 'normal');
-    }
+        if (remoteTheme) apply(remoteTheme); else apply(getCachedTheme() || 'normal');
+      }, err => { console.warn('TecnoMath: no se pudo leer la temática global.', err); apply(getCachedTheme() || 'normal'); });
+    } catch (err) { console.warn('TecnoMath: error iniciando temática global.', err); apply(getCachedTheme() || 'normal'); }
   }
 
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start, {once:true});
-  else start();
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start, {once:true}); else start();
 })();
