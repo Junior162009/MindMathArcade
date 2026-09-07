@@ -14,7 +14,8 @@
     feriaplus: { emoji:'🔥', colors:{bg:'#160604',card:'#280b08',border:'#8b2919',text:'#fff2e8',cyan:'#4deaff',pink:'#ff3b30',green:'#8cff4d',yellow:'#ffd000',gold:'#ff9d00'} },
     primavera: { emoji:'🌸', colors:{bg:'#100b14',card:'#1e1220',border:'#6f3d68',text:'#fff5fb',cyan:'#66eaff',pink:'#ff72b6',green:'#7dff9b',yellow:'#ffe66d',gold:'#ffd166'} },
     espacio: { emoji:'🚀', colors:{bg:'#050611',card:'#0b1022',border:'#273b72',text:'#f3f6ff',cyan:'#55eaff',pink:'#a76bff',green:'#65ffbf',yellow:'#ffe66d',gold:'#ffd166'} },
-    ciencia: { emoji:'🔬', colors:{bg:'#06100e',card:'#0c1c18',border:'#245b4d',text:'#effff9',cyan:'#4deaff',pink:'#ff65c7',green:'#63ff9a',yellow:'#eaff66',gold:'#ffd166'} }
+    ciencia: { emoji:'🔬', colors:{bg:'#06100e',card:'#0c1c18',border:'#245b4d',text:'#effff9',cyan:'#4deaff',pink:'#ff65c7',green:'#63ff9a',yellow:'#eaff66',gold:'#ffd166'} },
+    amoramistad: { emoji:'💖', colors:{bg:'#180a16',card:'#29101f',border:'#8a315e',text:'#fff5fb',cyan:'#ff8ed4',pink:'#ff4f9a',green:'#8fffd1',yellow:'#ffe68a',gold:'#ffd166'} }
   };
 
   const THEME_KEY = 'tecnomath:tema-activo';
@@ -56,9 +57,6 @@
     listenerAttached = true;
 
     try {
-      // La temática global es la única fuente de verdad para la apariencia.
-      // El nodo tecnomath/evento puede tener un evento Halloween activo sin
-      // cambiar la temática visual de la página.
       firebase.database().ref('tecnomath/tematicaActiva').on('value', snap => {
         const remoteTheme = validTheme(snap.val());
         if (remoteTheme) {
