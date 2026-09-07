@@ -1,0 +1,267 @@
+:root {
+  --aa-pink: #ff4f9a;
+  --aa-pink-soft: #ff8fbd;
+  --aa-purple: #8b5cf6;
+  --aa-purple-dark: #5b21b6;
+  --aa-gold: #ffd166;
+  --aa-rose: #fb7185;
+  --aa-white: #fff;
+  --aa-glass: rgba(255,255,255,.16);
+  --aa-shadow: 0 12px 35px rgba(91,33,182,.22);
+}
+
+/* =========================================================
+   TECNOMATH — AMOR & AMISTAD
+   Tema visual independiente. Se activa con .tema-amor-amistad
+   o con body[data-theme="amoramistad"].
+   ========================================================= */
+
+body.tema-amor-amistad,
+body[data-theme="amoramistad"] {
+  --primary-color: var(--aa-pink);
+  --secondary-color: var(--aa-purple);
+  --accent-color: var(--aa-gold);
+  background:
+    radial-gradient(circle at 15% 20%, rgba(255,143,189,.32), transparent 28%),
+    radial-gradient(circle at 85% 15%, rgba(139,92,246,.25), transparent 30%),
+    linear-gradient(135deg, #fff0f7 0%, #f8efff 48%, #fff7df 100%);
+  background-attachment: fixed;
+}
+
+body.tema-amor-amistad::before,
+body[data-theme="amoramistad"]::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: -1;
+  background-image:
+    radial-gradient(circle, rgba(255,255,255,.7) 1px, transparent 1.5px),
+    radial-gradient(circle, rgba(255,79,154,.12) 1px, transparent 1.5px);
+  background-size: 34px 34px, 57px 57px;
+  animation: aa-bg-drift 18s linear infinite;
+}
+
+/* Tarjetas */
+.tema-amor-amistad .card,
+.tema-amor-amistad .game-card,
+.tema-amor-amistad .panel,
+.tema-amor-amistad .container-card,
+[data-theme="amoramistad"] .card,
+[data-theme="amoramistad"] .game-card,
+[data-theme="amoramistad"] .panel,
+[data-theme="amoramistad"] .container-card {
+  background: linear-gradient(145deg, rgba(255,255,255,.94), rgba(255,242,249,.88));
+  border: 1px solid rgba(255,79,154,.22);
+  box-shadow: var(--aa-shadow);
+  border-radius: 22px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease;
+}
+
+.tema-amor-amistad .card:hover,
+.tema-amor-amistad .game-card:hover,
+[data-theme="amoramistad"] .card:hover,
+[data-theme="amoramistad"] .game-card:hover {
+  transform: translateY(-5px);
+  border-color: rgba(255,79,154,.5);
+  box-shadow: 0 18px 45px rgba(255,79,154,.25);
+}
+
+/* Botones */
+.tema-amor-amistad button,
+.tema-amor-amistad .btn,
+[data-theme="amoramistad"] button,
+[data-theme="amoramistad"] .btn {
+  background: linear-gradient(135deg, var(--aa-pink), var(--aa-purple));
+  color: var(--aa-white);
+  border: 0;
+  border-radius: 999px;
+  box-shadow: 0 8px 22px rgba(255,79,154,.28);
+  font-weight: 700;
+  transition: transform .2s ease, box-shadow .2s ease, filter .2s ease;
+}
+
+.tema-amor-amistad button:hover,
+.tema-amor-amistad .btn:hover,
+[data-theme="amoramistad"] button:hover,
+[data-theme="amoramistad"] .btn:hover {
+  transform: translateY(-2px) scale(1.02);
+  filter: brightness(1.06);
+  box-shadow: 0 12px 28px rgba(139,92,246,.32);
+}
+
+.tema-amor-amistad button:active,
+.tema-amor-amistad .btn:active,
+[data-theme="amoramistad"] button:active,
+[data-theme="amoramistad"] .btn:active {
+  transform: scale(.97);
+}
+
+/* Títulos y enlaces */
+.tema-amor-amistad h1,
+.tema-amor-amistad h2,
+.tema-amor-amistad h3,
+[data-theme="amoramistad"] h1,
+[data-theme="amoramistad"] h2,
+[data-theme="amoramistad"] h3 {
+  background: linear-gradient(90deg, var(--aa-pink), var(--aa-purple));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.tema-amor-amistad a,
+[data-theme="amoramistad"] a {
+  color: var(--aa-purple-dark);
+}
+
+/* Corazones flotantes */
+.aa-floating-hearts {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 999;
+}
+
+.aa-floating-heart {
+  position: absolute;
+  bottom: -70px;
+  left: var(--aa-left, 50%);
+  font-size: var(--aa-size, 22px);
+  opacity: 0;
+  filter: drop-shadow(0 4px 8px rgba(255,79,154,.25));
+  animation: aa-float-heart var(--aa-duration, 8s) linear infinite;
+  animation-delay: var(--aa-delay, 0s);
+}
+
+.aa-floating-heart:nth-child(3n) { color: var(--aa-pink); }
+.aa-floating-heart:nth-child(3n+1) { color: var(--aa-rose); }
+.aa-floating-heart:nth-child(3n+2) { color: var(--aa-purple); }
+
+/* Brillos */
+.aa-sparkle {
+  position: relative;
+}
+
+.aa-sparkle::after {
+  content: "✦";
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  color: var(--aa-gold);
+  font-size: 18px;
+  animation: aa-sparkle 1.6s ease-in-out infinite;
+  text-shadow: 0 0 12px rgba(255,209,102,.8);
+}
+
+.aa-glow {
+  animation: aa-glow 2.2s ease-in-out infinite;
+}
+
+/* Banner */
+.aa-love-banner {
+  position: relative;
+  overflow: hidden;
+  padding: 22px 26px;
+  border-radius: 24px;
+  color: white;
+  background: linear-gradient(120deg, #ff4f9a, #8b5cf6, #ff4f9a);
+  background-size: 220% 220%;
+  box-shadow: 0 15px 40px rgba(139,92,246,.28);
+  animation: aa-gradient 7s ease infinite;
+}
+
+.aa-love-banner::before,
+.aa-love-banner::after {
+  position: absolute;
+  font-size: 70px;
+  opacity: .14;
+  pointer-events: none;
+}
+
+.aa-love-banner::before { content: "♥"; left: 3%; top: -20px; transform: rotate(-15deg); }
+.aa-love-banner::after { content: "♥"; right: 4%; bottom: -35px; transform: rotate(18deg); }
+
+/* Etiquetas */
+.aa-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 13px;
+  border-radius: 999px;
+  background: rgba(255,79,154,.12);
+  color: var(--aa-purple-dark);
+  border: 1px solid rgba(255,79,154,.22);
+  font-weight: 700;
+}
+
+/* Inputs */
+.tema-amor-amistad input,
+.tema-amor-amistad select,
+.tema-amor-amistad textarea,
+[data-theme="amoramistad"] input,
+[data-theme="amoramistad"] select,
+[data-theme="amoramistad"] textarea {
+  border: 2px solid rgba(255,79,154,.18);
+  border-radius: 14px;
+  transition: border-color .2s ease, box-shadow .2s ease;
+}
+
+.tema-amor-amistad input:focus,
+.tema-amor-amistad select:focus,
+.tema-amor-amistad textarea:focus,
+[data-theme="amoramistad"] input:focus,
+[data-theme="amoramistad"] select:focus,
+[data-theme="amoramistad"] textarea:focus {
+  outline: none;
+  border-color: var(--aa-pink);
+  box-shadow: 0 0 0 4px rgba(255,79,154,.12);
+}
+
+/* Animaciones */
+@keyframes aa-float-heart {
+  0% { transform: translate3d(0, 0, 0) rotate(0deg) scale(.7); opacity: 0; }
+  10% { opacity: .9; }
+  50% { transform: translate3d(var(--aa-drift, 30px), -50vh, 0) rotate(12deg) scale(1); opacity: .75; }
+  100% { transform: translate3d(calc(var(--aa-drift, 30px) * -1), -115vh, 0) rotate(-15deg) scale(1.15); opacity: 0; }
+}
+
+@keyframes aa-sparkle {
+  0%, 100% { transform: scale(.7) rotate(0deg); opacity: .35; }
+  50% { transform: scale(1.35) rotate(25deg); opacity: 1; }
+}
+
+@keyframes aa-glow {
+  0%, 100% { filter: drop-shadow(0 0 2px rgba(255,79,154,.2)); }
+  50% { filter: drop-shadow(0 0 14px rgba(255,79,154,.7)); }
+}
+
+@keyframes aa-gradient {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+@keyframes aa-bg-drift {
+  from { transform: translate3d(0,0,0); }
+  to { transform: translate3d(34px,34px,0); }
+}
+
+/* Respeto por usuarios que reducen movimiento */
+@media (prefers-reduced-motion: reduce) {
+  .aa-floating-heart,
+  .aa-sparkle::after,
+  .aa-glow,
+  .aa-love-banner,
+  body.tema-amor-amistad::before,
+  body[data-theme="amoramistad"]::before {
+    animation: none !important;
+  }
+}
+
+@media (max-width: 600px) {
+  .aa-love-banner { padding: 18px; border-radius: 18px; }
+  .aa-floating-heart { font-size: calc(var(--aa-size, 22px) * .8); }
+}
