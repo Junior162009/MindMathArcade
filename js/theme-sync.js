@@ -19,11 +19,28 @@
   };
 
   const THEME_KEY = 'tecnomath:tema-activo';
+  const LOVE_CSS_ID = 'tecnomath-amor-amistad-css';
+  const LOVE_CSS_HREF = '/css/amor-amistad.css?v=1';
   let listenerAttached = false;
 
   function validTheme(id) {
     id = String(id || '').trim().toLowerCase();
     return Object.prototype.hasOwnProperty.call(THEMES, id) ? id : null;
+  }
+
+  function syncLoveCss(id) {
+    const existing = document.getElementById(LOVE_CSS_ID);
+    if (id === 'amoramistad') {
+      if (!existing) {
+        const link = document.createElement('link');
+        link.id = LOVE_CSS_ID;
+        link.rel = 'stylesheet';
+        link.href = LOVE_CSS_HREF;
+        document.head.appendChild(link);
+      }
+    } else if (existing) {
+      existing.remove();
+    }
   }
 
   function apply(id, persist = true) {
@@ -33,7 +50,13 @@
     const map = {bg:'--theme-bg',card:'--theme-card',border:'--theme-border',text:'--theme-text',cyan:'--neon-cyan',pink:'--neon-pink',green:'--neon-green',yellow:'--neon-yellow',gold:'--gold'};
     Object.keys(theme.colors).forEach(k => root.style.setProperty(map[k], theme.colors[k]));
     root.dataset.tecnomathTheme = id;
-    if (document.body) document.body.dataset.tecnomathTheme = id;
+    root.dataset.theme = id;
+    if (document.body) {
+      document.body.dataset.tecnomathTheme = id;
+      document.body.dataset.theme = id;
+      document.body.classList.toggle('tema-amor-amistad', id === 'amoramistad');
+    }
+    syncLoveCss(id);
     if (persist) {
       try { localStorage.setItem(THEME_KEY, id); } catch (_) {}
     }
