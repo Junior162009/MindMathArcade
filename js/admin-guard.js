@@ -143,6 +143,47 @@
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initTournamentQuickAccess,{once:true});else initTournamentQuickAccess();
 
+  function initLoveFriendshipThemeAdmin(){
+    if(!/\/pages\/admin\/index\.html$/.test(location.pathname))return;
+    const inject=()=>{
+      const list=document.getElementById('themesList');
+      if(!list||document.getElementById('theme-love-friendship'))return;
+      const row=document.createElement('div');
+      row.id='theme-love-friendship';
+      row.className='theme-row';
+      row.innerHTML='<div><strong>💖 Amor & Amistad</strong><small>Especial de septiembre · corazones, amistad y celebración</small></div><button type="button" class="theme-btn" id="activateLoveFriendship">💖 Activar</button>';
+      list.appendChild(row);
+      const button=row.querySelector('#activateLoveFriendship');
+      button.addEventListener('click',async()=>{
+        try{
+          button.disabled=true;
+          button.textContent='Activando…';
+          const cloud=firebaseReady();
+          await cloud.database.ref('tecnomath/tematicaActiva').set('amoramistad');
+          try{await cloud.database.ref('tecnomath/tematicas/amoramistad').set({name:'💖 Amor & Amistad',description:'Especial de septiembre',active:true,updatedAt:firebase.database.ServerValue.TIMESTAMP});}catch(_){ }
+          if(typeof window.logAction==='function')await window.logAction('theme_activate','','amoramistad');
+          button.textContent='✓ Activa';
+          button.style.background='#ff72b6';
+          button.style.color='#fff';
+          const status=document.getElementById('themeStatus');
+          if(status)status.textContent='💖 Temática Amor & Amistad activada correctamente.';
+        }catch(error){
+          console.error(error);
+          button.disabled=false;
+          button.textContent='💖 Activar';
+          const status=document.getElementById('themeStatus');
+          if(status)status.textContent='No se pudo activar la temática: '+(error.message||error);
+        }
+      });
+    };
+    if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',inject,{once:true});
+    else inject();
+    const observer=new MutationObserver(inject);
+    const startObserver=()=>{const target=document.getElementById('themesList');if(target)observer.observe(target,{childList:true});};
+    setTimeout(startObserver,500);
+  }
+  initLoveFriendshipThemeAdmin();
+
   if(/\/games\/esequiel11%C2%B0\/bandera\.html$/.test(location.pathname)||/\/games\/esequiel11°\/bandera\.html$/.test(location.pathname)){
     const loadBanderQuizDisplay=()=>{if(document.querySelector('script[data-tecnomath-banderquiz-display]'))return;const script=document.createElement('script');script.src='/js/banderquiz-display.js?v=2';script.async=false;script.dataset.tecnomathBanderquizDisplay='true';document.head.appendChild(script)};
     if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',loadBanderQuizDisplay,{once:true});else loadBanderQuizDisplay();
