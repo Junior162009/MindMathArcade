@@ -8,7 +8,7 @@
 *{box-sizing:border-box;margin:0;padding:0;user-select:none}
 html,body{width:100%;height:100%;overflow:hidden;background:#10131a;font-family:Arial,sans-serif;touch-action:none}
 #gameArea{height:62%;background:#5c94fc;position:absolute;top:0;left:0;right:0;overflow:hidden}
-#game{width:100%;height:100%;display:block}
+#game{width:100%;height:100%;display:block;image-rendering:auto}
 #hud{position:absolute;top:8px;left:50%;transform:translateX(-50%);width:95%;padding:7px 8px;background:#14141ddd;border:2px solid #f8b800;border-radius:12px;color:#fff;display:flex;justify-content:space-around;align-items:center;font-weight:bold;font-size:clamp(10px,2.6vw,17px);z-index:5}
 .btn{position:absolute;z-index:10;border:3px solid #777;background:linear-gradient(#444,#202020);color:#fff;font-weight:bold;box-shadow:inset 0 2px #888,0 5px #090909}
 .arrow{width:68px;height:68px;border-radius:18px;font-size:31px;top:81%}
@@ -25,9 +25,13 @@ html,body{width:100%;height:100%;overflow:hidden;background:#10131a;font-family:
 </style>
 </head>
 <body>
-<div id="gameArea"><canvas id="game"></canvas><div id="hud">❤️ <b id="vidas">3</b> 🪙 <b id="monedas">0</b> ⭐ <b id="puntos">0</b> ⏱ <b id="tiempo">300</b> 🌎 <b id="nivel">1</b>/8</div></div>
-<button class="btn arrow" id="left">◀</button><button class="btn arrow" id="right">▶</button><button class="btn" id="pause">Ⅱ</button><button class="btn" id="jump">A</button>
-<div id="startScreen" class="screen"><h1>🏰 Reino Pixelado</h1><p>Corre, salta, derrota enemigos, recoge monedas y responde preguntas de matemáticas.</p><div id="levelBadge">8 niveles • PNG pixel-art • dificultad progresiva</div><br><button id="start">Iniciar Aventura</button></div>
+<div id="gameArea">
+<canvas id="game"></canvas>
+<div id="hud">❤️ <b id="vidas">3</b> 🪙 <b id="monedas">0</b> ⭐ <b id="puntos">0</b> ⏱ <b id="tiempo">300</b> 🌎 <b id="nivel">1</b>/8</div>
+</div>
+<button class="btn arrow" id="left">◀</button><button class="btn arrow" id="right">▶</button>
+<button class="btn" id="pause">Ⅱ</button><button class="btn" id="jump">A</button>
+<div id="startScreen" class="screen"><h1>🏰 Reino Pixelado</h1><p>Corre, salta, derrota enemigos, recoge monedas y responde preguntas de matemáticas.</p><div id="levelBadge">8 niveles • imágenes PNG • dificultad progresiva</div><br><button id="start">Iniciar Aventura</button></div>
 <div id="pauseScreen" class="screen hidden"><h2>⏸ Pausa</h2><button id="resume">Continuar</button></div>
 <div id="gameOverScreen" class="screen hidden"><h2>💀 Fin del juego</h2><p>Puntuación: <b id="finalScore">0</b></p><button id="restart">Reintentar</button></div>
 <div id="winScreen" class="screen hidden"><h2>🏆 ¡Nivel superado!</h2><p>Nivel <b id="winLevel">1</b> completado.</p><p>Puntuación: <b id="winScore">0</b></p><button id="next">Siguiente nivel</button></div>
@@ -36,15 +40,16 @@ html,body{width:100%;height:100%;overflow:hidden;background:#10131a;font-family:
 <script>
 (()=>{
 const c=document.getElementById('game'),x=c.getContext('2d'),A=document.getElementById('gameArea'),$=i=>document.getElementById(i);
+// PNGs: se cargan desde la misma carpeta que index.html.
 const img={player:new Image(),enemy:new Image(),enemy2:new Image(),block:new Image(),flag:new Image()};
-// PNG que debes colocar dentro de games/jolberth11°/img/
-img.player.src='img/player.png';
-img.enemy.src='img/enemy.png';
-img.enemy2.src='img/enemy2.png';
-img.block.src='img/block.png';
-img.flag.src='img/flag.png';
+img.player.src='./player.png';
+img.enemy.src='./enemy.png';
+img.enemy2.src='./enemy2.png';
+img.block.src='./block.png';
+img.flag.src='./flags.png';
+Object.values(img).forEach(im=>im.onerror=()=>im.dataset.error='1');
 let W,H,G,cam=0,run=false,pause=false,lvl=1,lives=3,coins=0,score=0,time=300,timer,q=false,sessionCorrect=0,sessionWrong=0,sessionRecorded=false;
-const WORLD=7000,k={l:0,r:0,j:0},P={x:100,y:0,w:36,h:50,vy:0,ground:false,cp:100,inv:0};
+const WORLD=7000,k={l:0,r:0,j:0},P={x:100,y:0,w:52,h:62,vy:0,ground:false,cp:100,inv:0};
 let blocks=[],cs=[],es=[],pits=[],goalX=6800;
 const LEVELS=[
 {name:'Pradera',speed:2.0,spacing:185,pitEvery:5,enemyEvery:850,theme:'#5c94fc',ground:'#3aa53a'},
@@ -58,14 +63,19 @@ const LEVELS=[
 const questions=[['¿Cuánto es 7 + 5?',['10','12','13','14'],1],['¿Cuánto es 9 × 3?',['18','21','27','30'],2],['¿Cuánto es 20 ÷ 4?',['4','5','6','8'],1],['¿Cuánto es 15 − 7?',['6','7','8','9'],2],['¿Cuánto es 6 × 6?',['30','32','36','42'],2],['¿Cuánto es 45 ÷ 5?',['7','8','9','10'],2],['¿Cuánto es 18 + 17?',['33','34','35','36'],2],['¿Cuánto es 50 − 23?',['25','27','28','30'],1],['¿Cuánto es 8 × 7?',['48','54','56','64'],2],['¿Cuánto es 72 ÷ 8?',['7','8','9','10'],2]];
 function size(){W=c.width=A.clientWidth;H=c.height=A.clientHeight;G=H-82;P.y=G-P.h}
 function col(a,b){return a.x<b.x+b.w&&a.x+a.w>b.x&&a.y<b.y+b.h&&a.y+a.h>b.y}
-function build(){const cfg=LEVELS[lvl-1];blocks=[];cs=[];es=[];pits=[];for(let i=0,z=700;z<6200;i++,z+=cfg.spacing*2.8){if(i%cfg.pitEvery===cfg.pitEvery-1)pits.push([z,z+90+lvl*10])}for(let z=360,i=0;z<6200;z+=cfg.spacing,i++){const h=70+((i+lvl)%4)*42;const yBase=G-h;if(!pits.some(p=>z>p[0]-50&&z<p[1]+50)){blocks.push({x:z,b:h,w:42,h:42,t:i%4===1,u:0});if(i%5===0)blocks.push({x:z+44,b:h+42,w:42,h:42,t:0,u:0});cs.push({x:z+8,y:yBase-48,w:22,h:22,t:0})}}blocks.forEach(b=>b.y=G-b.b);for(let z=620,i=0;z<6500;z+=cfg.enemyEvery,i++){if(!pits.some(p=>z>p[0]-80&&z<p[1]+80))es.push({x:z,y:G-42,w:42,h:42,v:cfg.speed*(i%2?1:-1),m:z-100,M:z+170,dead:0,type:(i+lvl)%2})}goalX=6650;P.cp=100}
+function build(){const cfg=LEVELS[lvl-1];blocks=[];cs=[];es=[];pits=[];for(let i=0,z=700;z<6200;i++,z+=cfg.spacing*2.8){if(i%cfg.pitEvery===cfg.pitEvery-1)pits.push([z,z+90+lvl*10])}for(let z=360,i=0;z<6200;z+=cfg.spacing,i++){const h=70+((i+lvl)%4)*42;const yBase=G-h;if(!pits.some(p=>z>p[0]-50&&z<p[1]+50)){blocks.push({x:z,b:h,w:48,h:48,t:i%4===1,u:0});if(i%5===0)blocks.push({x:z+50,b:h+42,w:48,h:48,t:0,u:0});cs.push({x:z+8,y:yBase-48,w:22,h:22,t:0})}}blocks.forEach(b=>b.y=G-b.b);for(let z=620,i=0;z<6500;z+=cfg.enemyEvery,i++){if(!pits.some(p=>z>p[0]-80&&z<p[1]+80))es.push({x:z,y:G-48,w:48,h:48,v:cfg.speed*(i%2?1:-1),m:z-100,M:z+170,dead:0,type:(i+lvl)%2})}goalX=6650;P.cp=100}
 function hud(){$('vidas').textContent=lives;$('monedas').textContent=coins;$('puntos').textContent=score;$('tiempo').textContent=time;$('nivel').textContent=lvl}
 function ask(){if(q)return;q=1;run=0;const z=questions[Math.floor(Math.random()*questions.length)];$('questionBox').textContent=z[0];$('answers').innerHTML='';$('msg').textContent='';z[1].forEach((a,i)=>{let b=document.createElement('button');b.textContent=a;b.onclick=()=>answer(i===z[2]);$('answers').appendChild(b)});$('questionScreen').classList.remove('hidden')}
 function answer(ok){$('answers').querySelectorAll('button').forEach(b=>b.disabled=true);if(ok){sessionCorrect++;score+=30;$('msg').textContent='✅ Correcto. +30 puntos';setTimeout(closeQ,650)}else{sessionWrong++;lives--;$('msg').textContent='❌ Incorrecto. Pierdes un corazón.';setTimeout(()=>{closeQ();if(lives<=0)over()},800)}hud()}
 function closeQ(){$('questionScreen').classList.add('hidden');q=0;if(lives>0){P.x=Math.max(100,P.cp);P.y=G-P.h;P.vy=0;P.inv=90;run=1}}
-function move(){const d=k.r?5:k.l?-5:0;P.x=Math.max(0,Math.min(WORLD-P.w,P.x+d));if(k.j&&P.ground){P.vy=-15;P.ground=0;k.j=0}P.vy+=.72;P.y+=P.vy;P.ground=0;blocks.forEach(b=>{if(col(P,b)){if(P.vy>0){P.y=b.y-P.h;P.vy=0;P.ground=1}else if(P.vy<0){P.y=b.y+b.h;P.vy=0;if(b.t&&!b.u){b.u=1;coins++;score+=15}}}});if(!pits.some(p=>P.x+18>p[0]&&P.x+18<p[1])&&P.y+P.h>=G){P.y=G-P.h;P.vy=0;P.ground=1}if(P.y>H+80)ask();[850,2100,3400,4700,5900].forEach(z=>{if(P.x>z)P.cp=z})}
+function move(){const d=k.r?5:k.l?-5:0;P.x=Math.max(0,Math.min(WORLD-P.w,P.x+d));if(k.j&&P.ground){P.vy=-15;P.ground=0;k.j=0}P.vy+=.72;P.y+=P.vy;P.ground=0;blocks.forEach(b=>{if(col(P,b)){if(P.vy>0){P.y=b.y-P.h;P.vy=0;P.ground=1}else if(P.vy<0){P.y=b.y+b.h;P.vy=0;if(b.t&&!b.u){b.u=1;coins++;score+=15}}}});if(!pits.some(p=>P.x+P.w/2>p[0]&&P.x+P.w/2<p[1])&&P.y+P.h>=G){P.y=G-P.h;P.vy=0;P.ground=1}if(P.y>H+80)ask();[850,2100,3400,4700,5900].forEach(z=>{if(P.x>z)P.cp=z})}
 function update(){es.forEach(e=>{if(e.dead)return;e.x+=e.v;if(e.x<e.m||e.x>e.M)e.v*=-1;if(P.inv)P.inv--;if(!P.inv&&col(P,e)){if(P.vy>0&&P.y+P.h-e.y<25){e.dead=1;P.vy=-8;score+=20}else ask()}});cs.forEach(m=>{if(!m.t&&col(P,m)){m.t=1;coins++;score+=10}});cam=Math.max(0,Math.min(WORLD-W,P.x-W/2));if(P.x>goalX)win()}
-function draw(){const cfg=LEVELS[lvl-1];x.fillStyle=cfg.theme;x.fillRect(0,0,W,H);x.fillStyle='#ffffff18';for(let z=100;z<7000;z+=500){let s=z-cam*.25;x.beginPath();x.arc(s,85+(z%120),28,0,7);x.arc(s+35,90+(z%120),22,0,7);x.fill()}let st=0;x.fillStyle=cfg.ground;pits.forEach(p=>{x.fillRect(st-cam,G,p[0]-st,H-G);st=p[1]});x.fillRect(st-cam,G,WORLD-st,H-G);x.fillStyle='#0002';x.fillRect(-cam,G,WORLD,12);blocks.forEach(b=>{if(img.block.complete)x.drawImage(img.block,b.x-cam,b.y,b.w,b.h);if(b.t&&!b.u){x.fillStyle='#fff';x.font='24px Arial';x.fillText('?',b.x-cam+13,b.y+29)}});cs.forEach(m=>{if(!m.t){x.fillStyle='#ffd23f';x.beginPath();x.arc(m.x-cam+11,m.y+11,11,0,7);x.fill();x.strokeStyle='#9b6500';x.stroke()}});es.forEach(e=>{if(!e.dead){let im=e.type?img.enemy2:img.enemy;if(im.complete)x.drawImage(im,e.x-cam,e.y,e.w,e.h)}});if(img.flag.complete)x.drawImage(img.flag,goalX-cam,G-72,58,58);if(!P.inv||Math.floor(P.inv/5)%2){if(img.player.complete)x.drawImage(img.player,P.x-cam,P.y,P.w,P.h)}}
+function draw(){const cfg=LEVELS[lvl-1];x.fillStyle=cfg.theme;x.fillRect(0,0,W,H);x.fillStyle='#ffffff18';for(let z=100;z<7000;z+=500){let s=z-cam*.25;x.beginPath();x.arc(s,85+(z%120),28,0,7);x.arc(s+35,90+(z%120),22,0,7);x.fill()}let st=0;x.fillStyle=cfg.ground;pits.forEach(p=>{x.fillRect(st-cam,G,p[0]-st,H-G);st=p[1]});x.fillRect(st-cam,G,WORLD-st,H-G);x.fillStyle='#0002';x.fillRect(-cam,G,WORLD,12);
+blocks.forEach(b=>{if(img.block.complete&&!img.block.dataset.error)x.drawImage(img.block,b.x-cam,b.y,b.w,b.h);else{x.fillStyle='#8b5a2b';x.fillRect(b.x-cam,b.y,b.w,b.h);x.strokeStyle='#5d381b';x.strokeRect(b.x-cam,b.y,b.w,b.h)}if(b.t&&!b.u){x.fillStyle='#fff';x.font='24px Arial';x.fillText('?',b.x-cam+15,b.y+32)}});
+cs.forEach(m=>{if(!m.t){x.fillStyle='#ffd23f';x.beginPath();x.arc(m.x-cam+11,m.y+11,11,0,7);x.fill();x.strokeStyle='#9b6500';x.stroke()}});
+es.forEach(e=>{if(!e.dead){let im=e.type?img.enemy2:img.enemy;if(im.complete&&!im.dataset.error)x.drawImage(im,e.x-cam,e.y,e.w,e.h);else{x.fillStyle=e.type?'#7d3cff':'#d33';x.fillRect(e.x-cam,e.y,e.w,e.h)}}});
+if(img.flag.complete&&!img.flag.dataset.error)x.drawImage(img.flag,goalX-cam,G-72,58,58);else{x.fillStyle='#eee';x.fillRect(goalX-cam+25,G-72,6,72);x.fillStyle='#e33';x.fillRect(goalX-cam+31,G-70,35,25)}
+if(!P.inv||Math.floor(P.inv/5)%2){if(img.player.complete&&!img.player.dataset.error)x.drawImage(img.player,P.x-cam,P.y,P.w,P.h);else{x.fillStyle='#e44';x.fillRect(P.x-cam,P.y,P.w,P.h)}}}
 function recordResult(){if(sessionRecorded)return;sessionRecorded=true;if(window.TecnoMathProgress&&sessionCorrect+sessionWrong>0)window.TecnoMathProgress.gameResult('Reino Pixelado',{correct:sessionCorrect,wrong:sessionWrong,games:1,xp:sessionCorrect*25,coins:sessionCorrect*5,topic:'Matemáticas - Reino Pixelado'})}
 function loop(){if(run&&!pause&&!q){move();if(!q)update()}draw();requestAnimationFrame(loop)}
 function start(){lvl=1;lives=3;coins=0;score=0;time=300;sessionCorrect=0;sessionWrong=0;sessionRecorded=false;build();run=1;pause=0;$('startScreen').classList.add('hidden');$('gameOverScreen').classList.add('hidden');clearInterval(timer);timer=setInterval(()=>{if(run&&!pause&&!q&&--time<=0)over();hud()},1000);hud()}
@@ -75,10 +85,9 @@ function next(){if(lvl>=8){recordResult();$('winScreen').classList.add('hidden')
 function pz(){if(!run||q)return;pause=!pause;$('pauseScreen').classList.toggle('hidden',!pause)}
 [['left','l'],['right','r'],['jump','j']].forEach(([id,key])=>{let b=$(id);b.onpointerdown=e=>{e.preventDefault();k[key]=1};b.onpointerup=b.onpointercancel=()=>k[key]=0});
 $('pause').onclick=pz;$('start').onclick=start;$('resume').onclick=pz;$('restart').onclick=()=>{$('gameOverScreen').classList.add('hidden');start()};$('next').onclick=next;
-addEventListener('keydown',e=>{if(e.code==='ArrowLeft')k.l=1;if(e.code==='ArrowRight')k.r=1;if(e.code==='Space'||e.code==='ArrowUp')k.j=1;if(e.code==='KeyP')pz()});
+addEventListener('keydown',e=>{if(e.code==='ArrowLeft')k.l=1;if(e.code==='ArrowRight')k.r=1;if(e.code==='Space'||e.code==='ArrowUp')k.j=1;if(e.code==='Escape')pz()});
 addEventListener('keyup',e=>{if(e.code==='ArrowLeft')k.l=0;if(e.code==='ArrowRight')k.r=0;if(e.code==='Space'||e.code==='ArrowUp')k.j=0});
-addEventListener('resize',()=>{size();build()});
-size();build();hud();loop();
+addEventListener('resize',()=>{size();build()});size();hud();loop();
 })();
 </script>
 </body>
