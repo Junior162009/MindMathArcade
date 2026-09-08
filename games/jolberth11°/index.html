@@ -25,23 +25,24 @@ html,body{width:100%;height:100%;overflow:hidden;background:#10131a;font-family:
 </style>
 </head>
 <body>
-<div id="gameArea">
-<canvas id="game"></canvas>
-<div id="hud">❤️ <b id="vidas">3</b> 🪙 <b id="monedas">0</b> ⭐ <b id="puntos">0</b> ⏱ <b id="tiempo">300</b> 🌎 <b id="nivel">1</b>/8</div>
-</div>
-<button class="btn arrow" id="left">◀</button><button class="btn arrow" id="right">▶</button>
-<button class="btn" id="pause">Ⅱ</button><button class="btn" id="jump">A</button>
-<div id="startScreen" class="screen"><h1>🏰 Reino Pixelado</h1><p>Corre, salta, derrota enemigos, recoge monedas y responde preguntas de matemáticas.</p><div id="levelBadge">8 niveles • imágenes pixel-art • dificultad progresiva</div><br><button id="start">Iniciar Aventura</button></div>
+<div id="gameArea"><canvas id="game"></canvas><div id="hud">❤️ <b id="vidas">3</b> 🪙 <b id="monedas">0</b> ⭐ <b id="puntos">0</b> ⏱ <b id="tiempo">300</b> 🌎 <b id="nivel">1</b>/8</div></div>
+<button class="btn arrow" id="left">◀</button><button class="btn arrow" id="right">▶</button><button class="btn" id="pause">Ⅱ</button><button class="btn" id="jump">A</button>
+<div id="startScreen" class="screen"><h1>🏰 Reino Pixelado</h1><p>Corre, salta, derrota enemigos, recoge monedas y responde preguntas de matemáticas.</p><div id="levelBadge">8 niveles • PNG pixel-art • dificultad progresiva</div><br><button id="start">Iniciar Aventura</button></div>
 <div id="pauseScreen" class="screen hidden"><h2>⏸ Pausa</h2><button id="resume">Continuar</button></div>
 <div id="gameOverScreen" class="screen hidden"><h2>💀 Fin del juego</h2><p>Puntuación: <b id="finalScore">0</b></p><button id="restart">Reintentar</button></div>
 <div id="winScreen" class="screen hidden"><h2>🏆 ¡Nivel superado!</h2><p>Nivel <b id="winLevel">1</b> completado.</p><p>Puntuación: <b id="winScore">0</b></p><button id="next">Siguiente nivel</button></div>
 <div id="questionScreen" class="screen hidden"><h2>🧠 ¡Pregunta!</h2><p>Responde bien para conservar el corazón.</p><div id="questionBox"></div><div id="answers"></div><p id="msg"></p></div>
 <script src="/js/tecnomath-progress.js?v=4"></script>
 <script>
-(()=> {
+(()=>{
 const c=document.getElementById('game'),x=c.getContext('2d'),A=document.getElementById('gameArea'),$=i=>document.getElementById(i);
 const img={player:new Image(),enemy:new Image(),enemy2:new Image(),block:new Image(),flag:new Image()};
-img.player.src='player.svg';img.enemy.src='enemy.svg';img.enemy2.src='enemy2.svg';img.block.src='block.svg';img.flag.src='flag.svg';
+// PNG que debes colocar dentro de games/jolberth11°/img/
+img.player.src='img/player.png';
+img.enemy.src='img/enemy.png';
+img.enemy2.src='img/enemy2.png';
+img.block.src='img/block.png';
+img.flag.src='img/flag.png';
 let W,H,G,cam=0,run=false,pause=false,lvl=1,lives=3,coins=0,score=0,time=300,timer,q=false,sessionCorrect=0,sessionWrong=0,sessionRecorded=false;
 const WORLD=7000,k={l:0,r:0,j:0},P={x:100,y:0,w:36,h:50,vy:0,ground:false,cp:100,inv:0};
 let blocks=[],cs=[],es=[],pits=[],goalX=6800;
@@ -74,7 +75,10 @@ function next(){if(lvl>=8){recordResult();$('winScreen').classList.add('hidden')
 function pz(){if(!run||q)return;pause=!pause;$('pauseScreen').classList.toggle('hidden',!pause)}
 [['left','l'],['right','r'],['jump','j']].forEach(([id,key])=>{let b=$(id);b.onpointerdown=e=>{e.preventDefault();k[key]=1};b.onpointerup=b.onpointercancel=()=>k[key]=0});
 $('pause').onclick=pz;$('start').onclick=start;$('resume').onclick=pz;$('restart').onclick=()=>{$('gameOverScreen').classList.add('hidden');start()};$('next').onclick=next;
-addEventListener('keydown',e=>{if(e.code==='ArrowLeft')k.l=1;if(e.code==='ArrowRight')k.r=1;if(e.code==='Space'||e.code==='KeyA')k.j=1;if(e.code==='Escape')pz()});addEventListener('keyup',e=>{if(e.code==='ArrowLeft')k.l=0;if(e.code==='ArrowRight')k.r=0;if(e.code==='Space'||e.code==='KeyA')k.j=0});addEventListener('resize',()=>{size();build()});size();build();hud();loop();
+addEventListener('keydown',e=>{if(e.code==='ArrowLeft')k.l=1;if(e.code==='ArrowRight')k.r=1;if(e.code==='Space'||e.code==='ArrowUp')k.j=1;if(e.code==='KeyP')pz()});
+addEventListener('keyup',e=>{if(e.code==='ArrowLeft')k.l=0;if(e.code==='ArrowRight')k.r=0;if(e.code==='Space'||e.code==='ArrowUp')k.j=0});
+addEventListener('resize',()=>{size();build()});
+size();build();hud();loop();
 })();
 </script>
 </body>
