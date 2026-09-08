@@ -22,16 +22,29 @@ html,body{width:100%;height:100%;overflow:hidden;background:#10131a;font-family:
 #answers{display:grid;grid-template-columns:1fr 1fr;gap:9px}
 #answers button{padding:12px;border:2px solid #f8b800;border-radius:9px;background:#263241;color:#fff;font-size:17px}
 #levelBadge{font-size:13px;color:#ffe58a;margin-top:5px}
+#cinematic{position:fixed;inset:0;z-index:100;background:radial-gradient(circle at 50% 42%,#25364f 0,#080b12 70%);display:flex;align-items:center;justify-content:center;overflow:hidden;transition:opacity .45s ease}
+#cinematic.fade{opacity:0;pointer-events:none}
+.cine-box{width:min(900px,92vw);height:min(620px,86vh);position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;overflow:hidden;border:3px solid #f8b800;border-radius:24px;background:linear-gradient(180deg,#17263b,#080b12);box-shadow:0 0 60px #000c}
+.cine-title{font-size:clamp(30px,7vw,72px);font-weight:900;letter-spacing:2px;color:#fff;text-shadow:4px 4px #000,0 0 18px #f8b800;animation:cineTitle .7s ease-out both}
+.cine-sub{font-size:clamp(18px,3vw,30px);color:#ffe58a;font-weight:800;margin-top:8px;animation:cineTitle .7s .15s ease-out both}
+.cine-stage{position:relative;width:90%;height:280px;margin:8px auto}
+.cine-player{position:absolute;width:110px;height:135px;object-fit:contain;left:10%;bottom:28px;animation:walkIn 1.6s ease-out both}
+.cine-pizza{position:absolute;right:13%;bottom:55px;font-size:clamp(70px,12vw,120px);filter:drop-shadow(0 8px 5px #0008);animation:pizzaFloat 1s ease-in-out infinite alternate}
+.cine-road{position:absolute;left:0;right:0;bottom:20px;height:35px;background:repeating-linear-gradient(90deg,#5a6570 0 70px,#3e4852 70px 105px);border-top:4px solid #8c969e}
+.cine-arrow{position:absolute;left:38%;right:32%;bottom:90px;font-size:55px;color:#f8b800;font-weight:900;animation:arrowPulse .7s infinite alternate}
+.cine-caption{font-size:clamp(17px,2.7vw,26px);font-weight:800;color:#fff;padding:0 20px;animation:cineTitle .7s .3s ease-out both}
+#skipCine{position:absolute;right:18px;top:18px;z-index:2;background:#ffffff18;border:2px solid #ffffff55;color:#fff;border-radius:10px;padding:8px 13px;font-weight:700}
+@keyframes cineTitle{from{opacity:0;transform:translateY(20px) scale(.92)}to{opacity:1;transform:none}}
+@keyframes walkIn{from{transform:translateX(-180px);opacity:0}to{transform:translateX(0);opacity:1}}
+@keyframes pizzaFloat{from{transform:translateY(5px) rotate(-4deg)}to{transform:translateY(-10px) rotate(4deg)}}
+@keyframes arrowPulse{from{transform:translateX(-8px);opacity:.55}to{transform:translateX(10px);opacity:1}}
 </style>
 </head>
 <body>
-<div id="gameArea">
-<canvas id="game"></canvas>
-<div id="hud">❤️ <b id="vidas">3</b> 🪙 <b id="monedas">0</b> ⭐ <b id="puntos">0</b> ⏱ <b id="tiempo">300</b> 🌎 <b id="nivel">1</b>/8</div>
-</div>
-<button class="btn arrow" id="left">◀</button><button class="btn arrow" id="right">▶</button>
-<button class="btn" id="pause">Ⅱ</button><button class="btn" id="jump">A</button>
-<div id="startScreen" class="screen"><h1>🏰 Reino Pixelado</h1><p>Corre, salta, derrota enemigos, recoge monedas y responde preguntas de matemáticas.</p><div id="levelBadge">8 niveles • imágenes PNG • dificultad progresiva</div><br><button id="start">Iniciar Aventura</button></div>
+<div id="cinematic"><div class="cine-box"><button id="skipCine">Saltar ▶</button><div class="cine-title">🍕 ENTREGA LA PIZZA</div><div class="cine-sub">Una nueva misión comienza...</div><div class="cine-stage"><div class="cine-road"></div><img id="cinePlayer" class="cine-player" src="./player.png" alt="Jugador"><div class="cine-arrow">➜</div><div class="cine-pizza">🍕</div></div><div class="cine-caption">Corre, supera los obstáculos y llega hasta la meta para entregar el pedido.</div></div></div>
+<div id="gameArea"><canvas id="game"></canvas><div id="hud">❤️ <b id="vidas">3</b> 🪙 <b id="monedas">0</b> ⭐ <b id="puntos">0</b> ⏱ <b id="tiempo">300</b> 🌎 <b id="nivel">1</b>/8</div></div>
+<button class="btn arrow" id="left">◀</button><button class="btn arrow" id="right">▶</button><button class="btn" id="pause">Ⅱ</button><button class="btn" id="jump">A</button>
+<div id="startScreen" class="screen"><h1>🏰 Reino Pixelado</h1><p>Corre, salta, derrota enemigos, recoge monedas y responde preguntas de matemáticas.</p><div id="levelBadge">8 niveles • PNG pixel-art • dificultad progresiva</div><br><button id="start">Iniciar Aventura</button></div>
 <div id="pauseScreen" class="screen hidden"><h2>⏸ Pausa</h2><button id="resume">Continuar</button></div>
 <div id="gameOverScreen" class="screen hidden"><h2>💀 Fin del juego</h2><p>Puntuación: <b id="finalScore">0</b></p><button id="restart">Reintentar</button></div>
 <div id="winScreen" class="screen hidden"><h2>🏆 ¡Nivel superado!</h2><p>Nivel <b id="winLevel">1</b> completado.</p><p>Puntuación: <b id="winScore">0</b></p><button id="next">Siguiente nivel</button></div>
@@ -40,26 +53,13 @@ html,body{width:100%;height:100%;overflow:hidden;background:#10131a;font-family:
 <script>
 (()=>{
 const c=document.getElementById('game'),x=c.getContext('2d'),A=document.getElementById('gameArea'),$=i=>document.getElementById(i);
-// PNGs: se cargan desde la misma carpeta que index.html.
 const img={player:new Image(),enemy:new Image(),enemy2:new Image(),block:new Image(),flag:new Image()};
-img.player.src='./player.png';
-img.enemy.src='./enemy.png';
-img.enemy2.src='./enemy2.png';
-img.block.src='./block.png';
-img.flag.src='./flags.png';
+img.player.src='img/player.png';img.enemy.src='img/enemy.png';img.enemy2.src='img/enemy2.png';img.block.src='img/block.png';img.flag.src='img/flag.png';
 Object.values(img).forEach(im=>im.onerror=()=>im.dataset.error='1');
 let W,H,G,cam=0,run=false,pause=false,lvl=1,lives=3,coins=0,score=0,time=300,timer,q=false,sessionCorrect=0,sessionWrong=0,sessionRecorded=false;
 const WORLD=7000,k={l:0,r:0,j:0},P={x:100,y:0,w:52,h:62,vy:0,ground:false,cp:100,inv:0};
 let blocks=[],cs=[],es=[],pits=[],goalX=6800;
-const LEVELS=[
-{name:'Pradera',speed:2.0,spacing:185,pitEvery:5,enemyEvery:850,theme:'#5c94fc',ground:'#3aa53a'},
-{name:'Bosque',speed:2.3,spacing:175,pitEvery:4,enemyEvery:760,theme:'#4d9f67',ground:'#237a3b'},
-{name:'Desierto',speed:2.6,spacing:165,pitEvery:4,enemyEvery:700,theme:'#f0b35b',ground:'#a86c28'},
-{name:'Cavernas',speed:2.9,spacing:155,pitEvery:3,enemyEvery:650,theme:'#46356b',ground:'#57412f'},
-{name:'Volcán',speed:3.2,spacing:145,pitEvery:3,enemyEvery:590,theme:'#d85c42',ground:'#6d3022'},
-{name:'Noche',speed:3.5,spacing:135,pitEvery:3,enemyEvery:540,theme:'#20264f',ground:'#293b2a'},
-{name:'Castillo',speed:3.8,spacing:125,pitEvery:2,enemyEvery:500,theme:'#6877a8',ground:'#4b5563'},
-{name:'Jefe final',speed:4.2,spacing:115,pitEvery:2,enemyEvery:440,theme:'#311b3f',ground:'#3b2431'}];
+const LEVELS=[{name:'Pradera',speed:2.0,spacing:185,pitEvery:5,enemyEvery:850,theme:'#5c94fc',ground:'#3aa53a'},{name:'Bosque',speed:2.3,spacing:175,pitEvery:4,enemyEvery:760,theme:'#4d9f67',ground:'#237a3b'},{name:'Desierto',speed:2.6,spacing:165,pitEvery:4,enemyEvery:700,theme:'#f0b35b',ground:'#a86c28'},{name:'Cavernas',speed:2.9,spacing:155,pitEvery:3,enemyEvery:650,theme:'#46356b',ground:'#57412f'},{name:'Volcán',speed:3.2,spacing:145,pitEvery:3,enemyEvery:590,theme:'#d85c42',ground:'#6d3022'},{name:'Noche',speed:3.5,spacing:135,pitEvery:3,enemyEvery:540,theme:'#20264f',ground:'#293b2a'},{name:'Castillo',speed:3.8,spacing:125,pitEvery:2,enemyEvery:500,theme:'#6877a8',ground:'#4b5563'},{name:'Jefe final',speed:4.2,spacing:115,pitEvery:2,enemyEvery:440,theme:'#311b3f',ground:'#3b2431'}];
 const questions=[['¿Cuánto es 7 + 5?',['10','12','13','14'],1],['¿Cuánto es 9 × 3?',['18','21','27','30'],2],['¿Cuánto es 20 ÷ 4?',['4','5','6','8'],1],['¿Cuánto es 15 − 7?',['6','7','8','9'],2],['¿Cuánto es 6 × 6?',['30','32','36','42'],2],['¿Cuánto es 45 ÷ 5?',['7','8','9','10'],2],['¿Cuánto es 18 + 17?',['33','34','35','36'],2],['¿Cuánto es 50 − 23?',['25','27','28','30'],1],['¿Cuánto es 8 × 7?',['48','54','56','64'],2],['¿Cuánto es 72 ÷ 8?',['7','8','9','10'],2]];
 function size(){W=c.width=A.clientWidth;H=c.height=A.clientHeight;G=H-82;P.y=G-P.h}
 function col(a,b){return a.x<b.x+b.w&&a.x+a.w>b.x&&a.y<b.y+b.h&&a.y+a.h>b.y}
@@ -70,12 +70,7 @@ function answer(ok){$('answers').querySelectorAll('button').forEach(b=>b.disable
 function closeQ(){$('questionScreen').classList.add('hidden');q=0;if(lives>0){P.x=Math.max(100,P.cp);P.y=G-P.h;P.vy=0;P.inv=90;run=1}}
 function move(){const d=k.r?5:k.l?-5:0;P.x=Math.max(0,Math.min(WORLD-P.w,P.x+d));if(k.j&&P.ground){P.vy=-15;P.ground=0;k.j=0}P.vy+=.72;P.y+=P.vy;P.ground=0;blocks.forEach(b=>{if(col(P,b)){if(P.vy>0){P.y=b.y-P.h;P.vy=0;P.ground=1}else if(P.vy<0){P.y=b.y+b.h;P.vy=0;if(b.t&&!b.u){b.u=1;coins++;score+=15}}}});if(!pits.some(p=>P.x+P.w/2>p[0]&&P.x+P.w/2<p[1])&&P.y+P.h>=G){P.y=G-P.h;P.vy=0;P.ground=1}if(P.y>H+80)ask();[850,2100,3400,4700,5900].forEach(z=>{if(P.x>z)P.cp=z})}
 function update(){es.forEach(e=>{if(e.dead)return;e.x+=e.v;if(e.x<e.m||e.x>e.M)e.v*=-1;if(P.inv)P.inv--;if(!P.inv&&col(P,e)){if(P.vy>0&&P.y+P.h-e.y<25){e.dead=1;P.vy=-8;score+=20}else ask()}});cs.forEach(m=>{if(!m.t&&col(P,m)){m.t=1;coins++;score+=10}});cam=Math.max(0,Math.min(WORLD-W,P.x-W/2));if(P.x>goalX)win()}
-function draw(){const cfg=LEVELS[lvl-1];x.fillStyle=cfg.theme;x.fillRect(0,0,W,H);x.fillStyle='#ffffff18';for(let z=100;z<7000;z+=500){let s=z-cam*.25;x.beginPath();x.arc(s,85+(z%120),28,0,7);x.arc(s+35,90+(z%120),22,0,7);x.fill()}let st=0;x.fillStyle=cfg.ground;pits.forEach(p=>{x.fillRect(st-cam,G,p[0]-st,H-G);st=p[1]});x.fillRect(st-cam,G,WORLD-st,H-G);x.fillStyle='#0002';x.fillRect(-cam,G,WORLD,12);
-blocks.forEach(b=>{if(img.block.complete&&!img.block.dataset.error)x.drawImage(img.block,b.x-cam,b.y,b.w,b.h);else{x.fillStyle='#8b5a2b';x.fillRect(b.x-cam,b.y,b.w,b.h);x.strokeStyle='#5d381b';x.strokeRect(b.x-cam,b.y,b.w,b.h)}if(b.t&&!b.u){x.fillStyle='#fff';x.font='24px Arial';x.fillText('?',b.x-cam+15,b.y+32)}});
-cs.forEach(m=>{if(!m.t){x.fillStyle='#ffd23f';x.beginPath();x.arc(m.x-cam+11,m.y+11,11,0,7);x.fill();x.strokeStyle='#9b6500';x.stroke()}});
-es.forEach(e=>{if(!e.dead){let im=e.type?img.enemy2:img.enemy;if(im.complete&&!im.dataset.error)x.drawImage(im,e.x-cam,e.y,e.w,e.h);else{x.fillStyle=e.type?'#7d3cff':'#d33';x.fillRect(e.x-cam,e.y,e.w,e.h)}}});
-if(img.flag.complete&&!img.flag.dataset.error)x.drawImage(img.flag,goalX-cam,G-72,58,58);else{x.fillStyle='#eee';x.fillRect(goalX-cam+25,G-72,6,72);x.fillStyle='#e33';x.fillRect(goalX-cam+31,G-70,35,25)}
-if(!P.inv||Math.floor(P.inv/5)%2){if(img.player.complete&&!img.player.dataset.error)x.drawImage(img.player,P.x-cam,P.y,P.w,P.h);else{x.fillStyle='#e44';x.fillRect(P.x-cam,P.y,P.w,P.h)}}}
+function draw(){const cfg=LEVELS[lvl-1];x.fillStyle=cfg.theme;x.fillRect(0,0,W,H);x.fillStyle='#ffffff18';for(let z=100;z<7000;z+=500){let s=z-cam*.25;x.beginPath();x.arc(s,85+(z%120),28,0,7);x.arc(s+35,90+(z%120),22,0,7);x.fill()}let st=0;x.fillStyle=cfg.ground;pits.forEach(p=>{x.fillRect(st-cam,G,p[0]-st,H-G);st=p[1]});x.fillRect(st-cam,G,WORLD-st,H-G);x.fillStyle='#0002';x.fillRect(-cam,G,WORLD,12);blocks.forEach(b=>{if(img.block.complete&&!img.block.dataset.error)x.drawImage(img.block,b.x-cam,b.y,b.w,b.h);else{x.fillStyle='#8b5a2b';x.fillRect(b.x-cam,b.y,b.w,b.h);x.strokeStyle='#5d381b';x.strokeRect(b.x-cam,b.y,b.w,b.h)}if(b.t&&!b.u){x.fillStyle='#fff';x.font='24px Arial';x.fillText('?',b.x-cam+15,b.y+32)}});cs.forEach(m=>{if(!m.t){x.fillStyle='#ffd23f';x.beginPath();x.arc(m.x-cam+11,m.y+11,11,0,7);x.fill();x.strokeStyle='#9b6500';x.stroke()}});es.forEach(e=>{if(!e.dead){let im=e.type?img.enemy2:img.enemy;if(im.complete&&!im.dataset.error)x.drawImage(im,e.x-cam,e.y,e.w,e.h);else{x.fillStyle=e.type?'#7d3cff':'#d33';x.fillRect(e.x-cam,e.y,e.w,e.h)}}});if(img.flag.complete&&!img.flag.dataset.error)x.drawImage(img.flag,goalX-cam,G-72,58,58);else{x.fillStyle='#eee';x.fillRect(goalX-cam+25,G-72,6,72);x.fillStyle='#e33';x.fillRect(goalX-cam+31,G-70,35,25)}if(!P.inv||Math.floor(P.inv/5)%2){if(img.player.complete&&!img.player.dataset.error)x.drawImage(img.player,P.x-cam,P.y,P.w,P.h);else{x.fillStyle='#e44';x.fillRect(P.x-cam,P.y,P.w,P.h)}}}
 function recordResult(){if(sessionRecorded)return;sessionRecorded=true;if(window.TecnoMathProgress&&sessionCorrect+sessionWrong>0)window.TecnoMathProgress.gameResult('Reino Pixelado',{correct:sessionCorrect,wrong:sessionWrong,games:1,xp:sessionCorrect*25,coins:sessionCorrect*5,topic:'Matemáticas - Reino Pixelado'})}
 function loop(){if(run&&!pause&&!q){move();if(!q)update()}draw();requestAnimationFrame(loop)}
 function start(){lvl=1;lives=3;coins=0;score=0;time=300;sessionCorrect=0;sessionWrong=0;sessionRecorded=false;build();run=1;pause=0;$('startScreen').classList.add('hidden');$('gameOverScreen').classList.add('hidden');clearInterval(timer);timer=setInterval(()=>{if(run&&!pause&&!q&&--time<=0)over();hud()},1000);hud()}
@@ -83,6 +78,8 @@ function over(){if(!run)return;run=0;clearInterval(timer);recordResult();$('fina
 function win(){if(!run)return;run=0;clearInterval(timer);$('winLevel').textContent=lvl;$('winScore').textContent=score;if(lvl===8){recordResult();$('next').textContent='Volver a empezar'}else $('next').textContent='Siguiente nivel';$('winScreen').classList.remove('hidden')}
 function next(){if(lvl>=8){recordResult();$('winScreen').classList.add('hidden');start();return}lvl++;lives=3;time=Math.max(180,300-(lvl-1)*15);build();$('winScreen').classList.add('hidden');run=1;hud()}
 function pz(){if(!run||q)return;pause=!pause;$('pauseScreen').classList.toggle('hidden',!pause)}
+function endCinematic(){const cine=$('cinematic');cine.classList.add('fade');setTimeout(()=>cine.remove(),500)}
+$('skipCine').onclick=endCinematic;setTimeout(endCinematic,4200);
 [['left','l'],['right','r'],['jump','j']].forEach(([id,key])=>{let b=$(id);b.onpointerdown=e=>{e.preventDefault();k[key]=1};b.onpointerup=b.onpointercancel=()=>k[key]=0});
 $('pause').onclick=pz;$('start').onclick=start;$('resume').onclick=pz;$('restart').onclick=()=>{$('gameOverScreen').classList.add('hidden');start()};$('next').onclick=next;
 addEventListener('keydown',e=>{if(e.code==='ArrowLeft')k.l=1;if(e.code==='ArrowRight')k.r=1;if(e.code==='Space'||e.code==='ArrowUp')k.j=1;if(e.code==='Escape')pz()});
