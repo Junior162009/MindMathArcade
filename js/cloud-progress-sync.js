@@ -26,6 +26,21 @@
   function status(state,message){window.TecnomathCloudSyncStatus=state;window.TecnomathCloudSyncMessage=message||'';try{window.dispatchEvent(new CustomEvent('tecnomath:cloud-status',{detail:{state:state,message:message||'',gameId:gameId}}));}catch(_){} }
   function saveMeta(){try{localStorage.setItem(META_KEY,JSON.stringify({version:2,gameId:gameId,lastCloudWrite:lastWrite}));}catch(_){} }
 
+  function migrateWorldMapLocal(){
+    if(gameId!=='laura10°')return;
+    var current=localStorage.getItem('banderquiz_mundo_beta_v3');
+    var old=localStorage.getItem('banderquiz_mundo_beta_v2');
+    if(!current&&old){
+      try{
+        var parsed=JSON.parse(old);
+        if(parsed&&typeof parsed==='object'){
+          localStorage.setItem('banderquiz_mundo_beta_v3',JSON.stringify(parsed));
+          status('ready','Progreso local anterior recuperado');
+        }
+      }catch(_){ }
+    }
+  }
+
   async function push(force,state){
     var r=game();if(!r||syncing||restoring||!ready)return false;
     state=state||local();var s=sig(state);if(!force&&s===lastSignature)return true;
@@ -47,8 +62,9 @@
       if(!cloud||!cloud.state){var legacy=(await root().child(LEGACY).once('value')).val()||{};if(Object.keys(legacy).length)cloud={state:legacy,meta:{version:1,legacy:true}};}
       var state=cloud&&cloud.state?cloud.state:{},keys=Object.keys(state);
       for(var i=0;i<keys.length;i++){var e=keys[i],k=dec(e),item=state[e];if(!k||!allowed(k)||!item||!Object.prototype.hasOwnProperty.call(item,'value'))continue;try{localStorage.setItem(k,String(item.value));}catch(_){} }
+      migrateWorldMapLocal();
       lastSignature=sig(local());ready=true;status(keys.length?'saved':'ready',keys.length?'Progreso restaurado':'Listo para guardar');
-    }catch(e){console.warn('TecnoMath: no se pudo restaurar el progreso desde Firebase.',e);ready=true;status('offline','Sin conexión; usando guardado local');}
+    }catch(e){console.warn('TecnoMath: no se pudo restaurar el progreso desde Firebase.',e);migrateWorldMapLocal();ready=true;status('offline','Sin conexión; usando guardado local');}
     finally{restoring=false;}
   }
 
