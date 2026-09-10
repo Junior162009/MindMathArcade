@@ -1,0 +1,98 @@
+name: Apply quiz device ID
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/apply-quiz-device-id.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch-quiz:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Patch quiz HTML
+        shell: python
+        run: |
+          from pathlib import Path
+
+          path = Path('games/quiz-resena-critica/index.html')
+          text = path.read_text(encoding='utf-8')
+          marker = 'TECNOMATH_DEVICE_ID_V1'
+          if marker in text:
+              print('Device ID patch already present.')
+              raise SystemExit(0)
+
+          css = '.device-badge{position:fixed;top:12px;right:12px;z-index:9999;display:flex;align-items:center;gap:7px;padding:8px 11px;border:1px solid #45d6a555;border-radius:999px;background:#07111fe8;color:#d9fff4;font:800 12px/1 system-ui,sans-serif;box-shadow:0 8px 24px #0007;backdrop-filter:blur(10px);max-width:calc(100vw - 24px)}.device-badge b{color:#45d6a5;letter-spacing:.04em}.device-badge.blocked{border-color:#ff6b7a66;color:#ffd5da}.device-badge.blocked b{color:#ff9aa5}@media(max-width:620px){.device-badge{top:8px;right:8px;font-size:10px;padding:7px 9px}.brand{padding-top:42px}}'
+          text = text.replace('</style>', css + '</style>', 1)
+
+          badge = '<div id="deviceBadge" class="device-badge" aria-live="polite">📱 ID: <b id="deviceIdText">generando…</b></div>'
+          text = text.replace('<main class="wrap">', badge + '<main class="wrap">', 1)
+
+          js = r'''/* TECNOMATH_DEVICE_ID_V1 */
+          const DEVICE_KEY='tecnomath_quiz_device_id_v1';
+          const DEVICE_EF=U+'/functions/v1/quiz-device';
+          let deviceId='';
+          function makeDeviceId(){
+            const raw=(crypto.randomUUID?crypto.randomUUID():Date.now().toString(36)+Math.random().toString(36).slice(2)+Math.random().toString(36).slice(2)).replace(/-/g,'').toUpperCase();
+            return 'MM-'+raw.slice(0,4)+'-'+raw.slice(4,8)+'-'+raw.slice(8,12)+'-'+raw.slice(12,16);
+          }
+          function getDeviceId(){
+            try{
+              let id=localStorage.getItem(DEVICE_KEY);
+              if(!id||!/^[A-Z0-9-]{12,80}$/.test(id)){id=makeDeviceId();localStorage.setItem(DEVICE_KEY,id)}
+              return id;
+            }catch(e){
+              let id=sessionStorage.getItem(DEVICE_KEY);
+              if(!id){id=makeDeviceId();sessionStorage.setItem(DEVICE_KEY,id)}
+              return id;
+            }
+          }
+          function showDevice(status='recognized'){
+            $('deviceIdText').textContent=deviceId;
+            $('deviceBadge').className='device-badge'+(status==='blocked'?' blocked':'');
+          }
+          async function verifyDevice(student){
+            const r=await req(DEVICE_EF,{method:'POST',headers:{apikey:K,Authorization:'Bearer '+K,'Content-Type':'application/json'},body:JSON.stringify({student:norm(student),device_id:deviceId})},15000);
+            let d={};try{d=await r.json()}catch(e){}
+            if(!r.ok||!d.authorized){showDevice('blocked');throw Error(d.error||'Este dispositivo no está autorizado para este estudiante.');}
+            showDevice(d.status||'recognized');
+            return d;
+          }
+          deviceId=getDeviceId();
+          showDevice('recognized');
+          '''
+          text = text.replace("const ios=/iPad|iPhone|iPod/.test(navigator.userAgent)||/Macintosh/.test(navigator.userAgent)&&navigator.maxTouchPoints>1;", js + "\nconst ios=/iPad|iPhone|iPod/.test(navigator.userAgent)||/Macintosh/.test(navigator.userAgent)&&navigator.maxTouchPoints>1;", 1)
+
+          old_start = "async function start(){let s=$('name').selectedOptions[0];if(!s||!s.value)return;name=s.textContent.trim();$('startBtn').disabled=true;$('securityState').innerHTML='Estado: <b>verificando usuario…</b>';if(await exists(name)){alert('Este usuario ya tiene un resultado registrado. Solo se permite un intento.');$('startBtn').disabled=false;return}"
+          new_start = "async function start(){let s=$('name').selectedOptions[0];if(!s||!s.value)return;name=s.textContent.trim();$('startBtn').disabled=true;$('securityState').innerHTML='Estado: <b>verificando dispositivo…</b>';try{await verifyDevice(name)}catch(e){alert(e.message);$('startBtn').disabled=false;$('securityState').innerHTML='Estado: <b>dispositivo no autorizado</b>';return}"
+          if old_start not in text:
+              raise SystemExit('No se encontró el bloque de inicio esperado.')
+          text = text.replace(old_start,new_start,1)
+
+          old_payload = "payload={student:norm(name),score:correct,correct,answered,total:15,seconds:Math.round((Date.now()-started)/1000),question_reached:cur+1,reason,answers:A.map"
+          new_payload = "payload={student:norm(name),device_id:deviceId,score:correct,correct,answered,total:15,seconds:Math.round((Date.now()-started)/1000),question_reached:cur+1,reason,answers:A.map"
+          if old_payload not in text:
+              raise SystemExit('No se encontró el payload esperado.')
+          text = text.replace(old_payload,new_payload,1)
+
+          path.write_text(text,encoding='utf-8')
+          print('Patched', path)
+
+      - name: Commit patch
+        shell: bash
+        run: |
+          if git diff --quiet -- games/quiz-resena-critica/index.html; then
+            echo 'No changes to commit.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add games/quiz-resena-critica/index.html
+          git commit -m 'feat: bind quiz to browser device ID'
+          git push
