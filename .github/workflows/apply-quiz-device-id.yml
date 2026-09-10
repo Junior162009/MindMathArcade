@@ -16,102 +16,32 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Patch quiz HTML
+      - name: Restore student list and keep device protection
         shell: python
         run: |
           from pathlib import Path
-
-          path = Path('games/quiz-resena-critica/index.html')
-          text = path.read_text(encoding='utf-8')
-          marker = 'TECNOMATH_DEVICE_ID_V2'
-          if marker in text:
-              print('Device ID patch already present.')
-              raise SystemExit(0)
-
-          css = '.device-badge{position:fixed;top:12px;right:12px;z-index:9999;display:flex;align-items:center;gap:7px;padding:8px 11px;border:1px solid #45d6a555;border-radius:999px;background:#07111fe8;color:#d9fff4;font:800 12px/1 system-ui,sans-serif;box-shadow:0 8px 24px #0007;backdrop-filter:blur(10px);max-width:calc(100vw - 24px)}.device-badge b{color:#45d6a5;letter-spacing:.04em}.device-badge.blocked{border-color:#ff6b7a66;color:#ffd5da}.device-badge.blocked b{color:#ff9aa5}@media(max-width:620px){.device-badge{top:8px;right:8px;font-size:10px;padding:7px 9px}.brand{padding-top:42px}}'
-          text = text.replace('</style>', css + '</style>', 1)
-
-          # Remove the predefined student list and replace it with manual first-name + last-name entry.
-          start = '<select id="name">'
-          end = '</select>'
-          if start in text and end in text:
-              a = text.index(start)
-              b = text.index(end, a) + len(end)
-              replacement = '<input id="name" type="text" autocomplete="name" autocapitalize="words" spellcheck="false" placeholder="Escribe tu primer nombre y apellido" maxlength="80">'
-              text = text[:a] + replacement + text[b:]
-              text = text.replace('<label for="name">Selecciona tu nombre</label>', '<label for="name">Escribe tu primer nombre y apellido</label>', 1)
-          else:
-              raise SystemExit('No se encontró el selector de estudiante.')
-
-          badge = '<div id="deviceBadge" class="device-badge" aria-live="polite">📱 ID: <b id="deviceIdText">generando…</b></div>'
-          text = text.replace('<main class="wrap">', badge + '<main class="wrap">', 1)
-
-          js = r'''/* TECNOMATH_DEVICE_ID_V2 */
-          const DEVICE_KEY='tecnomath_quiz_device_id_v2';
-          const DEVICE_EF=U+'/functions/v1/quiz-device';
-          let deviceId='';
-          function makeDeviceId(){
-            const raw=(crypto.randomUUID?crypto.randomUUID():Date.now().toString(36)+Math.random().toString(36).slice(2)+Math.random().toString(36).slice(2)).replace(/-/g,'').toUpperCase();
-            return 'MM-'+raw.slice(0,4)+'-'+raw.slice(4,8)+'-'+raw.slice(8,12)+'-'+raw.slice(12,16);
-          }
-          function getDeviceId(){
-            try{
-              let id=localStorage.getItem(DEVICE_KEY);
-              if(!id||!/^[A-Z0-9-]{12,80}$/.test(id)){id=makeDeviceId();localStorage.setItem(DEVICE_KEY,id)}
-              return id;
-            }catch(e){
-              let id=sessionStorage.getItem(DEVICE_KEY);
-              if(!id){id=makeDeviceId();sessionStorage.setItem(DEVICE_KEY,id)}
-              return id;
-            }
-          }
-          function showDevice(status='recognized'){
-            $('deviceIdText').textContent=deviceId;
-            $('deviceBadge').className='device-badge'+(status==='blocked'?' blocked':'');
-          }
-          async function verifyDevice(student){
-            const r=await req(DEVICE_EF,{method:'POST',headers:{apikey:K,Authorization:'Bearer '+K,'Content-Type':'application/json'},body:JSON.stringify({student:norm(student),device_id:deviceId})},15000);
-            let d={};try{d=await r.json()}catch(e){}
-            if(!r.ok||!d.authorized){showDevice('blocked');throw Error(d.error||'Este dispositivo no está autorizado para este estudiante.');}
-            showDevice(d.status||'recognized');
-            return d;
-          }
-          deviceId=getDeviceId();
-          showDevice('recognized');
-          '''
-          text = text.replace("const ios=/iPad|iPhone|iPod/.test(navigator.userAgent)||/Macintosh/.test(navigator.userAgent)&&navigator.maxTouchPoints>1;", js + "\nconst ios=/iPad|iPhone|iPod/.test(navigator.userAgent)||/Macintosh/.test(navigator.userAgent)&&navigator.maxTouchPoints>1;", 1)
-
-          old_start = "async function start(){let s=$('name').selectedOptions[0];if(!s||!s.value)return;name=s.textContent.trim();$('startBtn').disabled=true;$('securityState').innerHTML='Estado: <b>verificando usuario…</b>';if(await exists(name)){alert('Este usuario ya tiene un resultado registrado. Solo se permite un intento.');$('startBtn').disabled=false;return}"
-          new_start = "async function start(){let s=$('name');if(!s||!s.value.trim())return;name=s.value.trim();$('startBtn').disabled=true;$('securityState').innerHTML='Estado: <b>verificando dispositivo…</b>';try{await verifyDevice(name)}catch(e){alert(e.message);$('startBtn').disabled=false;$('securityState').innerHTML='Estado: <b>dispositivo no autorizado</b>';return}"
-          if old_start not in text:
-              raise SystemExit('No se encontró el bloque de inicio esperado.')
-          text = text.replace(old_start,new_start,1)
-
-          old_payload = "payload={student:norm(name),score:correct,correct,answered,total:15,seconds:Math.round((Date.now()-started)/1000),question_reached:cur+1,reason,answers:A.map"
-          new_payload = "payload={student:norm(name),device_id:deviceId,score:correct,correct,answered,total:15,seconds:Math.round((Date.now()-started)/1000),question_reached:cur+1,reason,answers:A.map"
-          if old_payload not in text:
-              raise SystemExit('No se encontró el payload esperado.')
-          text = text.replace(old_payload,new_payload,1)
-
-          # The original onchange handler was for <select>. Replace it with input validation.
-          old_change = "$('name').onchange=()=>{$('startBtn').disabled=!$('name').value};"
-          new_change = "$('name').oninput=()=>{$('startBtn').disabled=!$('name').value.trim()};"
-          if old_change not in text:
-              raise SystemExit('No se encontró el manejador del nombre esperado.')
-          text = text.replace(old_change,new_change,1)
-
+          path=Path('games/quiz-resena-critica/index.html')
+          text=path.read_text(encoding='utf-8')
+          students=[
+          ('emmanuel arrieta','Emmanuel Arrieta'),('andris atencio','Andris Atencio'),('mateo barbosa','Mateo Barbosa'),('fabiana barrios','Fabiana Barrios'),('gabriel bonilla','Gabriel Bonilla'),('yeider camacho','Yeider Camacho'),('daniela contreras','Daniela Contreras'),('jose de la hoz','Jose De La Hoz'),('dylan guerrero','Dylan Guerrero'),('sheila jaramillo','Sheila Jaramillo'),('jolberth jaramillo','Jolberth Jaramillo'),('carlos jimenez','Carlos Jimenez'),('jhoangel jinete','Jhoangel Jinete'),('jose lopez','Jose Lopez'),('numar lopez','Numar Lopez'),('yendri marchena','Yendri Marchena'),('litzy marsiglia','Litzy Marsiglia'),('tahimi mayorga','Tahimi Mayorga'),('nicole natera','Nicole Natera'),('luisa pacheco','Luisa Pacheco'),('frederick peña','Frederick Peña'),('nataly peña','Nataly Peña'),('yeicoil pozo','Yeicoil Pozo'),('laurys primera','Laurys Primera'),('danny rico','Danny Rico'),('joselyn rios','Joselyn Rios'),('edglimar roca','Edglimar Roca'),('esequiel silva','Esequiel Silva'),('andy tocarruncho','Andy Tocarruncho'),('jaider velez','Jaider Velez'),('sharon yepes','Sharon Yepes'),('oscar yepes','Oscar Yepes'),('yulisa yepes','Yulisa Yepes'),('john yepes','John Yepes')]
+          options='<option value="">— Selecciona un estudiante —</option>'+''.join(f'<option value="{v}">{label}</option>' for v,label in students)
+          import re
+          text=re.sub(r'<label for="name">[^<]*</label><input id="name"[^>]*>', '<label for="name">Selecciona tu nombre</label><select id="name">'+options+'</select>', text, count=1)
+          text=text.replace("async function start(){let s=$('name');if(!s||!s.value.trim())return;name=s.value.trim();$('startBtn').disabled=true;", "async function start(){let s=$('name').selectedOptions[0];if(!s||!s.value)return;name=s.textContent.trim();$('startBtn').disabled=true;",1)
+          text=text.replace("$('name').oninput=()=>{$('startBtn').disabled=!$('name').value.trim()};", "$('name').onchange=()=>{$('startBtn').disabled=!$('name').value};",1)
+          # Ensure the device protection is present; if not, fail rather than silently deploying an unprotected quiz.
+          if 'TECNOMATH_DEVICE_ID_V2' not in text or 'device_id:deviceId' not in text or 'verifyDevice' not in text:
+              raise SystemExit('Falta la protección por ID de dispositivo; no se publica un HTML sin ella.')
+          text=text.replace('TECNOMATH_DEVICE_ID_V2','TECNOMATH_DEVICE_ID_V3',1)
           path.write_text(text,encoding='utf-8')
-          print('Patched', path)
+          print('Student list restored; device protection preserved.')
 
-      - name: Commit patch
+      - name: Commit
         shell: bash
         run: |
-          if git diff --quiet -- games/quiz-resena-critica/index.html; then
-            echo 'No changes to commit.'
-            exit 0
-          fi
+          if git diff --quiet -- games/quiz-resena-critica/index.html; then exit 0; fi
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add games/quiz-resena-critica/index.html
-          git commit -m 'feat: remove predefined quiz users and bind device ID'
+          git commit -m 'fix: restore quiz student list and keep device ID protection'
           git push
