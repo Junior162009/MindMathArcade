@@ -1,11 +1,11 @@
 // Configuración compartida de Firebase para autenticación, perfiles, juegos y sincronización.
 (function () {
-  const firebaseConfig = { apiKey:"AIzaSyCfY0VT4fQ5emX4R2LdUXU3FxjBTtY7Gzc",authDomain:"tecnomath-sync-6058a.firebaseapp.com",databaseURL:"https://tecnomath-sync-6058a-default-rtdb.firebaseio.com",projectId:"tecnomath-sync-6058a",storageBucket:"tecnomath-sync-6058a.firebasestorage.app",messagingSenderId:"237823560752",appId:"1:237823560752:web:adc1e5b396b5a0e0d671f5" };
+  const firebaseConfig = { apiKey:"AIzaSyCf4V0YT4fQ5emX4R2LdUXU3FxjBTtY7Gzc",authDomain:"tecnomath-sync-6058a.firebaseapp.com",databaseURL:"https://tecnomath-sync-6058a-default-rtdb.firebaseio.com",projectId:"tecnomath-sync-6058a",storageBucket:"tecnomath-sync-6058a.firebasestorage.app",messagingSenderId:"237823560752",appId:"1:237823560752:web:adc1e5b396b5a0e0d671f5" };
   if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
   if (!window.TecnoMathProgress && document.readyState === 'loading') document.write('<script src="/js/tecnomath-progress.js"></scr'+'ipt>');
   window.TecnomathFirebase={auth:firebase.auth(),database:firebase.database(),storage:typeof firebase.storage==='function'?firebase.storage():null,serverTimestamp:firebase.database.ServerValue.TIMESTAMP};
   if(!document.querySelector('script[data-tecnomath-admin-guard]')){const s=document.createElement('script');s.src='/js/admin-guard.js?v=3';s.async=false;s.dataset.tecnomathAdminGuard='true';document.head.appendChild(s)}
-  if(!document.querySelector('script[data-tecnomath-cloud-sync]')){const s=document.createElement('script'),path=location.pathname;s.src=path.includes('/games/')?'../../js/cloud-progress-sync.js?v=4':(path.includes('/pages/')?'../js/cloud-progress-sync.js?v=4':'js/cloud-progress-sync.js?v=4');s.async=false;s.dataset.tecnomathCloudSync='true';document.head.appendChild(s)}
+  if(!document.querySelector('script[data-tecnomath-cloud-sync]')){const s=document.createElement('script');s.src='/js/cloud-progress-sync.js?v=5';s.async=false;s.dataset.tecnomathCloudSync='true';document.head.appendChild(s)}
   if(location.pathname.includes('/games/')&&!document.querySelector('script[data-tecnomath-game-bridge]')){const s=document.createElement('script');s.src='/js/tecnomath-game-bridge.js?v=2';s.async=true;s.dataset.tecnomathGameBridge='true';document.head.appendChild(s)}
   function loadGameSubmissionSystem(){if(document.querySelector('script[data-tecnomath-game-submissions]'))return;const script=document.createElement('script');script.src='/js/game-submissions.js?v=5';script.async=true;script.dataset.tecnomathGameSubmissions='true';document.head.appendChild(script)}
   loadGameSubmissionSystem();
