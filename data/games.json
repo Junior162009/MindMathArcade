@@ -54,5 +54,19 @@
     "authorName": "TecnoMath",
     "sourceType": "internal",
     "version": "1.0"
+  },
+  {
+    "name": "TecnoMath Aula",
+    "desc": "Plataforma educativa del colegio: exámenes, talleres, tareas, materias y recursos.",
+    "description": "Aula escolar integrada con Supabase y diseñada para celular y computador.",
+    "category": "edu",
+    "url": "aula/index.html",
+    "imageUrl": "",
+    "icon": "🎓",
+    "deviceCompatibility": "both",
+    "evento": null,
+    "authorName": "TecnoMath",
+    "sourceType": "internal",
+    "version": "1.0"
   }
 ]
