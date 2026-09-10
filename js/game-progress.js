@@ -28,6 +28,16 @@
 
   function cargarSoporteBanderQuiz(tag){if(!tag||tag.dataset.tecnomathGame!=='banderquiz')return;if(document.querySelector('script[data-banderquiz-display]'))return;const s=document.createElement('script');s.src='../../js/banderquiz-display.js';s.dataset.banderquizDisplay='true';s.async=false;document.head.appendChild(s)}
 
+  function cargarAccesoMundoBanderQuiz(tag){
+    if(!tag||tag.dataset.tecnomathGame!=='banderquiz')return;
+    if(document.querySelector('script[data-banderquiz-world-shortcut]'))return;
+    const s=document.createElement('script');
+    s.src=new URL('../../js/banderquiz-world-shortcut.js',document.baseURI).href;
+    s.dataset.banderquizWorldShortcut='true';
+    s.async=false;
+    document.head.appendChild(s);
+  }
+
   // Los tres juegos de Ezequiel comparten la misma pista y el mismo estado de música.
   // Se carga desde aquí porque los tres ya incluyen game-progress.js.
   function cargarMusicaEzequiel(tag){
@@ -43,6 +53,6 @@
   }
 
   const scriptTag=document.currentScript;
-  if(scriptTag&&scriptTag.dataset.tecnomathGame){if(window.TecnomathProgress&&window.TecnomathProgress.start)window.TecnomathProgress.start(scriptTag.dataset.tecnomathGame);cargarSoporteBanderQuiz(scriptTag);cargarMusicaEzequiel(scriptTag)}
+  if(scriptTag&&scriptTag.dataset.tecnomathGame){if(window.TecnomathProgress&&window.TecnomathProgress.start)window.TecnomathProgress.start(scriptTag.dataset.tecnomathGame);cargarSoporteBanderQuiz(scriptTag);cargarAccesoMundoBanderQuiz(scriptTag);cargarMusicaEzequiel(scriptTag)}
   initGlobalTheme();
 })();
