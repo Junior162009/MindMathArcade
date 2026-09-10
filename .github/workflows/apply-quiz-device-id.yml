@@ -23,7 +23,7 @@ jobs:
 
           path = Path('games/quiz-resena-critica/index.html')
           text = path.read_text(encoding='utf-8')
-          marker = 'TECNOMATH_DEVICE_ID_V1'
+          marker = 'TECNOMATH_DEVICE_ID_V2'
           if marker in text:
               print('Device ID patch already present.')
               raise SystemExit(0)
@@ -31,11 +31,23 @@ jobs:
           css = '.device-badge{position:fixed;top:12px;right:12px;z-index:9999;display:flex;align-items:center;gap:7px;padding:8px 11px;border:1px solid #45d6a555;border-radius:999px;background:#07111fe8;color:#d9fff4;font:800 12px/1 system-ui,sans-serif;box-shadow:0 8px 24px #0007;backdrop-filter:blur(10px);max-width:calc(100vw - 24px)}.device-badge b{color:#45d6a5;letter-spacing:.04em}.device-badge.blocked{border-color:#ff6b7a66;color:#ffd5da}.device-badge.blocked b{color:#ff9aa5}@media(max-width:620px){.device-badge{top:8px;right:8px;font-size:10px;padding:7px 9px}.brand{padding-top:42px}}'
           text = text.replace('</style>', css + '</style>', 1)
 
+          # Remove the predefined student list and replace it with manual first-name + last-name entry.
+          start = '<select id="name">'
+          end = '</select>'
+          if start in text and end in text:
+              a = text.index(start)
+              b = text.index(end, a) + len(end)
+              replacement = '<input id="name" type="text" autocomplete="name" autocapitalize="words" spellcheck="false" placeholder="Escribe tu primer nombre y apellido" maxlength="80">'
+              text = text[:a] + replacement + text[b:]
+              text = text.replace('<label for="name">Selecciona tu nombre</label>', '<label for="name">Escribe tu primer nombre y apellido</label>', 1)
+          else:
+              raise SystemExit('No se encontró el selector de estudiante.')
+
           badge = '<div id="deviceBadge" class="device-badge" aria-live="polite">📱 ID: <b id="deviceIdText">generando…</b></div>'
           text = text.replace('<main class="wrap">', badge + '<main class="wrap">', 1)
 
-          js = r'''/* TECNOMATH_DEVICE_ID_V1 */
-          const DEVICE_KEY='tecnomath_quiz_device_id_v1';
+          js = r'''/* TECNOMATH_DEVICE_ID_V2 */
+          const DEVICE_KEY='tecnomath_quiz_device_id_v2';
           const DEVICE_EF=U+'/functions/v1/quiz-device';
           let deviceId='';
           function makeDeviceId(){
@@ -70,7 +82,7 @@ jobs:
           text = text.replace("const ios=/iPad|iPhone|iPod/.test(navigator.userAgent)||/Macintosh/.test(navigator.userAgent)&&navigator.maxTouchPoints>1;", js + "\nconst ios=/iPad|iPhone|iPod/.test(navigator.userAgent)||/Macintosh/.test(navigator.userAgent)&&navigator.maxTouchPoints>1;", 1)
 
           old_start = "async function start(){let s=$('name').selectedOptions[0];if(!s||!s.value)return;name=s.textContent.trim();$('startBtn').disabled=true;$('securityState').innerHTML='Estado: <b>verificando usuario…</b>';if(await exists(name)){alert('Este usuario ya tiene un resultado registrado. Solo se permite un intento.');$('startBtn').disabled=false;return}"
-          new_start = "async function start(){let s=$('name').selectedOptions[0];if(!s||!s.value)return;name=s.textContent.trim();$('startBtn').disabled=true;$('securityState').innerHTML='Estado: <b>verificando dispositivo…</b>';try{await verifyDevice(name)}catch(e){alert(e.message);$('startBtn').disabled=false;$('securityState').innerHTML='Estado: <b>dispositivo no autorizado</b>';return}"
+          new_start = "async function start(){let s=$('name');if(!s||!s.value.trim())return;name=s.value.trim();$('startBtn').disabled=true;$('securityState').innerHTML='Estado: <b>verificando dispositivo…</b>';try{await verifyDevice(name)}catch(e){alert(e.message);$('startBtn').disabled=false;$('securityState').innerHTML='Estado: <b>dispositivo no autorizado</b>';return}"
           if old_start not in text:
               raise SystemExit('No se encontró el bloque de inicio esperado.')
           text = text.replace(old_start,new_start,1)
@@ -80,6 +92,13 @@ jobs:
           if old_payload not in text:
               raise SystemExit('No se encontró el payload esperado.')
           text = text.replace(old_payload,new_payload,1)
+
+          # The original onchange handler was for <select>. Replace it with input validation.
+          old_change = "$('name').onchange=()=>{$('startBtn').disabled=!$('name').value};"
+          new_change = "$('name').oninput=()=>{$('startBtn').disabled=!$('name').value.trim()};"
+          if old_change not in text:
+              raise SystemExit('No se encontró el manejador del nombre esperado.')
+          text = text.replace(old_change,new_change,1)
 
           path.write_text(text,encoding='utf-8')
           print('Patched', path)
@@ -94,5 +113,5 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add games/quiz-resena-critica/index.html
-          git commit -m 'feat: bind quiz to browser device ID'
+          git commit -m 'feat: remove predefined quiz users and bind device ID'
           git push
