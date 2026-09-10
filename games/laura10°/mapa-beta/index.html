@@ -15,12 +15,14 @@
 <div class="modal" id="modal"><section class="card"><div class="eyebrow">País seleccionado</div><div class="flag" id="flag"><span class="flag-emoji">🏳️</span></div><div class="country-name" id="countryName">País</div><input class="input" id="answer" autocomplete="off" placeholder="Escribe el nombre del país"><div class="actions"><button class="cancel" id="cancel">Cancelar</button><button class="check" id="check">Comprobar ✓</button></div><div class="message" id="message"></div></section></div>
 <script src="https://cdn.jsdelivr.net/npm/d3@7"></script><script src="https://cdn.jsdelivr.net/npm/topojson-client@3"></script>
 <script>
-const TOTAL=195,STORAGE='banderquiz_mundo_beta_v1';
-const flag={"Colombia":"🇨🇴","Brasil":"🇧🇷","Argentina":"🇦🇷","Chile":"🇨🇱","Perú":"🇵🇪","México":"🇲🇽","Estados Unidos":"🇺🇸","Canadá":"🇨🇦","España":"🇪🇸","Francia":"🇫🇷","Italia":"🇮🇹","Alemania":"🇩🇪","Reino Unido":"🇬🇧","Portugal":"🇵🇹","Japón":"🇯🇵","China":"🇨🇳","India":"🇮🇳","Australia":"🇦🇺","Egipto":"🇪🇬","Sudáfrica":"🇿🇦","Nigeria":"🇳🇬","Marruecos":"🇲🇦","Corea del Sur":"🇰🇷","Turquía":"🇹🇷","Grecia":"🇬🇷","Noruega":"🇳🇴","Suecia":"🇸🇪","Finlandia":"🇫🇮","Polonia":"🇵🇱","Ucrania":"🇺🇦"};
-const aliases={"brasil":"Brasil","brazil":"Brasil","peru":"Perú","perú":"Perú","mexico":"México","méxico":"México","estados unidos":"Estados Unidos","usa":"Estados Unidos","eeuu":"Estados Unidos","espana":"España","españa":"España","japon":"Japón","japón":"Japón","reino unido":"Reino Unido","inglaterra":"Reino Unido","sudafrica":"Sudáfrica","sudáfrica":"Sudáfrica","turquia":"Turquía","turquía":"Turquía","corea del sur":"Corea del Sur"};
-const norm=s=>s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,' ').trim();
-function twemojiUrl(emoji){const codepoints=[...emoji].map(ch=>ch.codePointAt(0).toString(16)).join('-');return `https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/${codepoints}.svg`}
-function showExternalFlag(name){const emoji=flag[name];const box=document.getElementById('flag');box.replaceChildren();if(!emoji){box.innerHTML='<span class="flag-fallback">🏳️</span>';return}const img=document.createElement('img');img.alt=`Bandera de ${name}`;img.width=112;img.height=84;img.decoding='async';img.loading='eager';img.referrerPolicy='no-referrer';img.src=twemojiUrl(emoji);img.onerror=()=>{box.innerHTML=`<span class="flag-fallback">${emoji}</span>`};box.appendChild(img)}
+const TOTAL=195,STORAGE='banderquiz_mundo_beta_v2';
+const FLAG_URL='https://cdn.jsdelivr.net/npm/country-flag-emoji-json@2.0.0/dist/index.json';
+const aliases={"united states of america":"United States","united states":"United States","usa":"United States","us":"United States","south korea":"South Korea","north korea":"North Korea","russia":"Russia","czech republic":"Czechia","turkey":"Turkey","swaziland":"Eswatini","cape verde":"Cape Verde","ivory coast":"Côte d'Ivoire","cote d'ivoire":"Côte d'Ivoire","democratic republic of the congo":"Congo - Kinshasa","republic of the congo":"Congo - Brazzaville","laos":"Laos","vatican city":"Vatican City","palestine":"Palestine"};
+const norm=s=>String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[’']/g,"'").replace(/\s+/g,' ').trim();
+let flagByName={};
+function buildFlagIndex(list){flagByName={};for(const item of list||[]){if(!item?.name||!item?.image)continue;flagByName[norm(item.name)]=item;}}
+function flagForCountry(name){const n=norm(name);return flagByName[n]||flagByName[norm(aliases[n]||'')];}
+function showExternalFlag(name){const entry=flagForCountry(name);const box=document.getElementById('flag');box.replaceChildren();if(!entry){box.innerHTML='<span class="flag-fallback">🏳️</span>';return}const img=document.createElement('img');img.alt=`Bandera de ${name}`;img.width=112;img.height=84;img.decoding='async';img.loading='eager';img.referrerPolicy='no-referrer';img.src=entry.image;img.onerror=()=>{box.innerHTML=`<span class="flag-fallback">${entry.emoji||'🏳️'}</span>`};box.appendChild(img)}
 let state=JSON.parse(localStorage.getItem(STORAGE)||'{"done":[],"score":0,"streak":0}');let selected=null;
 const app=d3.select('#map'),svg=d3.select(document.createElementNS('http://www.w3.org/2000/svg','svg')).attr('viewBox','0 0 1000 600');app.node().appendChild(svg.node());const g=svg.append('g');
 const projection=d3.geoEqualEarth().fitSize([1000,600],{type:'Sphere'});const path=d3.geoPath(projection);g.append('path').datum({type:'Sphere'}).attr('d',path).attr('fill','#111936').attr('stroke','#3a4569');
@@ -31,5 +33,15 @@ function openCountry(name,node){if(state.done.includes(name))return;selected={na
 function close(){document.getElementById('modal').classList.remove('show');selected=null}
 function check(){if(!selected)return;const typed=norm(document.getElementById('answer').value);const expected=norm(selected.name);const alias=aliases[typed]||document.getElementById('answer').value.trim();if(norm(alias)===expected){if(!state.done.includes(selected.name)){state.done.push(selected.name);state.score+=100+state.streak*10;state.streak++;selected.node.classed('done',true)}document.getElementById('countryName').textContent=selected.name;document.getElementById('message').textContent='✓ ¡País conquistado! + puntos';document.getElementById('message').className='message ok';save();setTimeout(close,650)}else{state.streak=0;state.score=Math.max(0,state.score-20);document.getElementById('message').textContent='✗ No es correcto. Inténtalo otra vez';document.getElementById('message').className='message bad';save()}}
 document.getElementById('check').onclick=check;document.getElementById('cancel').onclick=close;document.getElementById('back').onclick=()=>location.href='../index.html';document.getElementById('answer').addEventListener('keydown',e=>{if(e.key==='Enter')check();if(e.key==='Escape')close()});document.getElementById('modal').addEventListener('click',e=>{if(e.target.id==='modal')close()});
-fetch('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json').then(r=>r.json()).then(world=>{const countries=topojson.feature(world,world.objects.countries);g.selectAll('.country').data(countries.features).join('path').attr('class','country').attr('d',path).on('click',(e,d)=>{const name=d.properties?.name;if(name)openCountry(name,d3.select(e.currentTarget))});g.selectAll('.country').classed('done',d=>state.done.includes(d.properties?.name));update();window.addEventListener('resize',()=>svg.call(zoom.transform,d3.zoomIdentity));}).catch(()=>{document.getElementById('progressText').textContent='No se pudo cargar el mapa. Revisa tu conexión.'});
+Promise.all([
+ fetch('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json').then(r=>{if(!r.ok)throw new Error('map');return r.json()}),
+ fetch(FLAG_URL).then(r=>{if(!r.ok)throw new Error('flags');return r.json()})
+]).then(([world,flags])=>{
+ buildFlagIndex(flags);
+ const countries=topojson.feature(world,world.objects.countries);
+ g.selectAll('.country').data(countries.features).join('path').attr('class','country').attr('d',path).on('click',(e,d)=>{const name=d.properties?.name;if(name)openCountry(name,d3.select(e.currentTarget))});
+ g.selectAll('.country').classed('done',d=>state.done.includes(d.properties?.name));
+ update();
+ window.addEventListener('resize',()=>svg.call(zoom.transform,d3.zoomIdentity));
+}).catch(()=>{document.getElementById('progressText').textContent='No se pudo cargar el mapa o las banderas. Revisa tu conexión.'});
 </script></body></html>
