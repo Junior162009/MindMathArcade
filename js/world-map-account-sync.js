@@ -1,24 +1,51 @@
-// TecnoMath World Map Account Sync
+// TecnoMath World Map Account Sync — sistema centralizado de cuenta + progreso
 (function(){
 'use strict';
 if(window.TecnoMathWorldAccountSync)return;
 var GAME='laura10°',KEY='banderquiz_mundo_beta_v3',OLD_KEY='banderquiz_mundo_beta_v2';
-var auth=null,db=null,user=null,booted=false;
+var MAIN_ORIGIN='https://tecnomath.online';
+var auth=null,db=null,user=null,booted=false,lastUid='';
 function isMap(){return location.pathname.indexOf('/games/laura10°/')!==-1;}
 function cfg(){return window.TecnomathFirebase||{};}
 function norm(s){return String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim();}
+function redirectToMain(){
+  if(location.origin===MAIN_ORIGIN)return false;
+  var target=MAIN_ORIGIN+location.pathname+location.search+location.hash;
+  location.replace(target);
+  return true;
+}
 function localState(){try{var a=JSON.parse(localStorage.getItem(KEY)||'null');if(!a&&localStorage.getItem(OLD_KEY))a=JSON.parse(localStorage.getItem(OLD_KEY));return a&&Array.isArray(a.done)?a:{done:[],score:0,streak:0};}catch(_){return{done:[],score:0,streak:0};}}
 function setLocal(s){try{localStorage.setItem(KEY,JSON.stringify(s));}catch(_){} }
 function merge(a,b){a=a&&Array.isArray(a.done)?a:{done:[]};b=b&&Array.isArray(b.done)?b:{done:[]};var seen={},done=[];a.done.concat(b.done).forEach(function(x){var k=norm(x);if(k&&!seen[k]){seen[k]=1;done.push(x);}});return{done:done,score:Math.max(Number(a.score)||0,Number(b.score)||0),streak:Math.max(Number(a.streak)||0,Number(b.streak)||0)};}
 function userPath(){return user&&db?db.ref('userProgress/'+user.uid+'/games/'+GAME):null;}
-async function readCloud(){var r=userPath();if(!r)return null;try{var snap=await r.once('value'),v=snap.val();if(v&&v.progress&&Array.isArray(v.progress.done))return v.progress;return null;}catch(e){console.warn(e);return null;}}
+async function readCloud(){var r=userPath();if(!r)return null;try{var snap=await r.once('value'),v=snap.val();if(v&&v.progress&&Array.isArray(v.progress.done))return v.progress;return null;}catch(e){console.warn('[TecnoMath World] lectura cloud:',e);return null;}}
 async function writeCloud(state){var r=userPath();if(!r)return false;await r.update({progress:state,updatedAt:firebase.database.ServerValue.TIMESTAMP,gameId:GAME});return true;}
 async function restore(){if(!user||!db)return false;var merged=merge(localState(),await readCloud()||{done:[]});setLocal(merged);window.dispatchEvent(new CustomEvent('tecnomath:world-account-restored',{detail:{uid:user.uid,count:merged.done.length}}));return true;}
 async function save(){if(!user||!db)return false;var state=localState();await writeCloud(state);window.dispatchEvent(new CustomEvent('tecnomath:world-saved',{detail:{uid:user.uid,count:state.done.length}}));return true;}
-function loginUrl(){return '/pages/auth.html?return='+encodeURIComponent(location.pathname+location.search+location.hash);}
-function paint(){var box=document.getElementById('tm-world-account');if(!box)return;if(user){box.textContent='👤 '+(user.displayName||user.email||'Cuenta TecnoMath')+' · ☁️ cuenta conectada';}else{box.textContent='🔐 Inicia sesión en TecnoMath';var b=document.createElement('button');b.textContent='Abrir cuenta';b.onclick=function(){location.href=loginUrl();};box.appendChild(b);}}
-function ui(){if(document.getElementById('tm-world-account'))return;var st=document.createElement('style');st.textContent='#tm-world-account{position:fixed;left:14px;top:14px;z-index:10000;background:rgba(8,12,28,.97);color:#fff;border:1px solid rgba(255,255,255,.16);border-radius:14px;padding:9px 12px;font:800 12px system-ui;box-shadow:0 10px 30px #0006}#tm-world-account button{margin-left:7px;border:0;border-radius:9px;padding:5px 8px;font-weight:900;cursor:pointer}';document.head.appendChild(st);var box=document.createElement('div');box.id='tm-world-account';box.textContent='☁️ Esperando cuenta…';document.body.appendChild(box);window.addEventListener('tecnomath:world-auth',paint);window.addEventListener('tecnomath:world-account-restored',function(){paint();});window.addEventListener('tecnomath:world-saved',function(){paint();});var hook=function(){var btn=document.getElementById('tm-world-save');if(!btn||btn.dataset.accountHook)return;btn.dataset.accountHook='1';btn.onclick=async function(){if(!user){location.href=loginUrl();return;}btn.disabled=true;btn.textContent='⏳ Guardando…';try{await save();btn.textContent='✓ Guardado en tu cuenta';}catch(e){console.warn(e);btn.textContent='⚠️ Reintentar';}setTimeout(function(){btn.disabled=false;btn.textContent='☁️ Guardar'},1500);};};hook();new MutationObserver(hook).observe(document.body,{childList:true,subtree:true});}
-async function onUser(u){user=u||null;paint();window.dispatchEvent(new CustomEvent('tecnomath:world-auth'));if(!user)return;try{await restore();await save();paint();}catch(e){console.warn('World account sync',e);}}
-function init(){if(!isMap()||booted)return;booted=true;var c=cfg();auth=c.auth;db=c.database;if(!auth||!db){booted=false;setTimeout(init,500);return;}try{auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);}catch(_){}ui();auth.onAuthStateChanged(onUser);if(auth.currentUser)onUser(auth.currentUser);setTimeout(function(){if(auth.currentUser)onUser(auth.currentUser);},1000);setTimeout(function(){if(auth.currentUser)onUser(auth.currentUser);},3000);window.addEventListener('online',function(){if(user)restore().then(save).catch(function(){})});window.addEventListener('beforeunload',function(){if(user)save().catch(function(){})});window.TecnoMathWorldAccountSync={save:save,restore:restore,getUser:function(){return user;}};}
+function loginUrl(){return MAIN_ORIGIN+'/pages/auth.html?return='+encodeURIComponent(location.pathname+location.search+location.hash);}
+function paint(){var box=document.getElementById('tm-world-account');if(!box)return;if(user){box.textContent='👤 '+(user.displayName||user.email||'Cuenta TecnoMath')+' · ☁️ cuenta conectada';box.dataset.uid=user.uid;}else{box.textContent='🔐 Inicia sesión en TecnoMath';var b=document.createElement('button');b.textContent='Abrir cuenta';b.onclick=function(){location.href=loginUrl();};box.appendChild(b);}}
+function ui(){
+  if(document.getElementById('tm-world-account'))return;
+  var st=document.createElement('style');
+  st.textContent='#tm-world-account{position:fixed;left:14px;top:14px;z-index:10000;background:rgba(8,12,28,.97);color:#fff;border:1px solid rgba(255,255,255,.16);border-radius:14px;padding:9px 12px;font:800 12px system-ui;box-shadow:0 10px 30px #0006}#tm-world-account button{margin-left:7px;border:0;border-radius:9px;padding:5px 8px;font-weight:900;cursor:pointer}';
+  document.head.appendChild(st);
+  var box=document.createElement('div');box.id='tm-world-account';box.textContent='☁️ Esperando cuenta…';document.body.appendChild(box);
+  window.addEventListener('tecnomath:world-auth',paint);window.addEventListener('tecnomath:world-account-restored',paint);window.addEventListener('tecnomath:world-saved',paint);
+  var hook=function(){var btn=document.getElementById('tm-world-save');if(!btn||btn.dataset.accountHook)return;btn.dataset.accountHook='1';btn.onclick=async function(){if(!user){location.href=loginUrl();return;}btn.disabled=true;btn.textContent='⏳ Guardando…';try{await save();btn.textContent='✓ Guardado en tu cuenta';}catch(e){console.warn('[TecnoMath World] guardado:',e);btn.textContent='⚠️ Reintentar';}setTimeout(function(){btn.disabled=false;btn.textContent='☁️ Guardar'},1500);};};
+  hook();new MutationObserver(hook).observe(document.body,{childList:true,subtree:true});
+}
+async function onUser(u){var next=u||null;if(next&&user&&next.uid===user.uid&&lastUid===next.uid){paint();return;}user=next;lastUid=user?user.uid:'';paint();window.dispatchEvent(new CustomEvent('tecnomath:world-auth'));if(!user)return;try{await restore();await save();paint();}catch(e){console.warn('[TecnoMath World] sincronización:',e);}}
+function init(){
+  if(!isMap()||booted)return;
+  if(redirectToMain())return;
+  booted=true;var c=cfg();auth=c.auth;db=c.database;
+  if(!auth||!db){booted=false;setTimeout(init,500);return;}
+  try{auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);}catch(e){console.warn('[TecnoMath World] persistence:',e);}
+  ui();auth.onAuthStateChanged(onUser);if(auth.currentUser)onUser(auth.currentUser);
+  setTimeout(function(){if(auth.currentUser)onUser(auth.currentUser);},1000);setTimeout(function(){if(auth.currentUser)onUser(auth.currentUser);},3000);
+  window.addEventListener('online',function(){if(user)restore().then(save).catch(function(e){console.warn(e);});});
+  window.addEventListener('beforeunload',function(){if(user)save().catch(function(){});});
+  window.TecnoMathWorldAccountSync={save:save,restore:restore,getUser:function(){return user;},getGameId:function(){return GAME;}};
+}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();
