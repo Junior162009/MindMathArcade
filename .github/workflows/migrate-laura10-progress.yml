@@ -1,0 +1,71 @@
+name: Migrar progreso de Laura10° a Supabase
+
+on:
+  push:
+    paths:
+      - '.github/workflows/migrate-laura10-progress.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Migrar scripts de progreso
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path('games/laura10°/index.html')
+          text = path.read_text(encoding='utf-8')
+
+          old = '''    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+              <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+              <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+              <script src="../../js/firebase-config.js"></script>
+              <script src="../../js/game-progress.js" data-tecnomath-game="banderquiz"></script>'''
+
+          old2 = '''    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+    <script src="../../js/firebase-config.js"></script>
+    <script src="../../js/game-progress.js" data-tecnomath-game="banderquiz"></script>'''
+
+          new = '''    <script src="/js/tecnomath-auth.js"></script>
+    <script src="/js/tecnomath-progress.js?v=20260911-9"></script>'''
+
+          if old2 in text:
+              text = text.replace(old2, new, 1)
+          elif old in text:
+              text = text.replace(old, new, 1)
+          else:
+              raise SystemExit('No se encontró el bloque Firebase esperado en games/laura10°/index.html')
+
+          path.write_text(text, encoding='utf-8')
+          print('Laura10° migrado a Supabase')
+          PY
+
+      - name: Verificar migración
+        run: |
+          grep -n 'tecnomath-auth.js\|tecnomath-progress.js' 'games/laura10°/index.html'
+          if grep -q 'firebase-app-compat\|firebase-auth-compat\|firebase-database-compat\|firebase-config.js\|game-progress.js' 'games/laura10°/index.html'; then
+            echo 'ERROR: todavía quedan scripts Firebase/progreso antiguo'
+            exit 1
+          fi
+
+      - name: Commit y push
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add 'games/laura10°/index.html'
+          if git diff --cached --quiet; then
+            echo 'Sin cambios que subir.'
+            exit 0
+          fi
+          git commit -m 'fix: migrar Laura10° al progreso Supabase'
+          git push
