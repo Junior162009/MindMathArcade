@@ -18,6 +18,12 @@
   function loadSupabase() {
     return new Promise((resolve, reject) => {
       if (window.supabase?.createClient) return resolve();
+      const existing = document.querySelector('script[data-tecnomath-supabase]');
+      if (existing) {
+        existing.addEventListener('load', resolve, { once: true });
+        existing.addEventListener('error', () => reject(new Error('No se pudo cargar Supabase.')), { once: true });
+        return;
+      }
       const s = document.createElement('script');
       s.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.0/dist/umd/supabase.min.js';
       s.async = false;
@@ -84,7 +90,6 @@
       setSession(existing.username);
       return existing;
     }
-
     const email = emailOf(user);
     const admin = isAdminEmail(email);
     const metadataUsername = user.user_metadata?.username;
@@ -99,7 +104,6 @@
     };
     const { data, error } = await db.from('tecnomath_profiles').insert(payload).select().single();
     if (error) {
-      // Si otro evento creó el perfil al mismo tiempo, recuperarlo en vez de romper el login.
       const recovered = await getProfile(user).catch(() => null);
       if (recovered) { setSession(recovered.username); return recovered; }
       throw error;
@@ -126,7 +130,6 @@
     const { data, error } = await db.auth.signInWithPassword({ email: String(email).trim(), password });
     if (error) throw error;
     const profile = await ensureProfile(data.user);
-    setSession(profile.username);
     window.TecnomathCurrentAdmin = profile?.role === 'admin' || isAdminEmail(data.user.email) ? profile : null;
     return { user: data.user, profile };
   }
@@ -135,7 +138,8 @@
     const clean = cleanUsername(username);
     if (!/^[a-zA-Z0-9._-]{3,20}$/.test(clean)) throw new Error('El usuario debe tener 3 a 20 caracteres: letras, números, punto, guion o guion bajo.');
     const db = await getClient();
-    const { data: existing } = await db.from('tecnomath_profiles').select('id').ilike('username', clean).limit(1);
+    const { data: existing, error: lookupError } = await db.from('tecnomath_profiles').select('id').ilike('username', clean).limit(1);
+    if (lookupError) throw lookupError;
     if (existing?.length) throw new Error('Ese nombre de usuario ya está ocupado.');
     const { data, error } = await db.auth.signUp({
       email: String(email).trim(),
@@ -152,6 +156,7 @@
     const { error } = await db.auth.signOut({ scope: 'local' });
     clearSession();
     window.TecnomathCurrentAdmin = null;
+    window.dispatchEvent(new CustomEvent('tecnomath:authchange', { detail: { user: null, profile: null } }));
     if (error) throw error;
   }
 
@@ -234,6 +239,7 @@
           const profile = await ensureProfile(user);
           window.TecnomathCurrentAdmin = profile?.role === 'admin' || isAdminEmail(user.email) ? profile : null;
           callback(user, profile, event);
+          window.dispatchEvent(new CustomEvent('tecnomath:authchange', { detail: { user, profile, event } }));
         } catch (e) {
           console.error('TecnoMath Supabase profile sync:', e);
           callback(user, null, event);
@@ -253,20 +259,24 @@
 
   window.Tecnomath = Object.assign({}, window.Tecnomath || {}, {
     setSession, logout: signOut,
-    getCurrentUser: getSession,
+    getCurrentUser: async () => {
+      const account = await refreshAccount();
+      return account.profile || account.user || null;
+    },
     getAdminEmails: () => [...ADMIN_EMAILS],
     isAdmin: () => !!window.TecnomathCurrentAdmin,
     setAdmin: () => !!window.TecnomathCurrentAdmin,
-    unsetAdmin: clearSession,
+    unsetAdmin: () => { window.TecnomathCurrentAdmin = null; },
     saveGameProgress, getGameProgress
   });
 
-  function syncPortalFromSupabase() {
-    if (!(location.pathname === '/' || location.pathname.endsWith('/index.html'))) return;
-    authState((user, profile) => {
-      const display = document.getElementById('userDisplay');
-      const authLink = document.getElementById('authLink');
-      const logoutBtn = document.getElementById('logoutBtn');
+  async function syncPortalFromSupabase() {
+    const isMainIndex = location.pathname === '/' || /\/index\.html?$/.test(location.pathname);
+    if (!isMainIndex) return;
+    const display = document.getElementById('userDisplay');
+    const authLink = document.getElementById('authLink');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const apply = (user, profile) => {
       if (!user) {
         if (display) display.textContent = 'Invitado';
         if (logoutBtn) logoutBtn.style.display = 'none';
@@ -278,7 +288,19 @@
       if (display) display.textContent = username;
       if (authLink) { authLink.href = 'pages/profile.html'; authLink.textContent = '👤 PERFIL'; }
       if (logoutBtn) logoutBtn.style.display = 'inline-block';
-    });
+    };
+    try {
+      const account = await refreshAccount();
+      apply(account.user, account.profile);
+    } catch (e) {
+      console.error('TecnoMath portal auth:', e);
+      apply(null, null);
+    }
+    try {
+      await authState((user, profile) => apply(user, profile));
+    } catch (e) {
+      console.warn('TecnoMath auth listener:', e);
+    }
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', syncPortalFromSupabase, { once: true });
