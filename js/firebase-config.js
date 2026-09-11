@@ -10,7 +10,20 @@
     p.getGameId=()=>location.pathname.includes('/games/laura10°/mapa-beta/')?'banderquiz-mundo':originalGameId();
     p.record=function(a,b){return typeof a==='string'?p.save(a,b||{}):p.save(p.getGameId(),a||{})};
     p.gameResult=function(a,b){return typeof a==='string'?p.save(a,b||{}):p.save(p.getGameId(),a||{})};
+    if(location.pathname.includes('/games/laura10°/mapa-beta/')&&p.watch){let first=true;p.watch('banderquiz-mundo',()=>{if(first){first=false;return}if(!window.__tmWorldReloading){window.__tmWorldReloading=true;location.reload()}})}
   }
+  // La página de cuenta conserva un return válido para volver al juego solicitado.
+  try{
+    const ret=new URLSearchParams(location.search).get('return');
+    if(location.pathname.endsWith('/pages/auth.html')&&ret)sessionStorage.setItem('tecnomath_auth_return',ret);
+    if(location.pathname.endsWith('/index.html')){
+      const pending=sessionStorage.getItem('tecnomath_auth_return');
+      if(pending){
+        const go=()=>{if(firebase.auth().currentUser){sessionStorage.removeItem('tecnomath_auth_return');const target=new URL(pending,location.origin);if(target.origin===location.origin)location.replace(target.href)}};
+        firebase.auth().onAuthStateChanged(go);setTimeout(go,1200);
+      }
+    }
+  }catch(_){ }
   if(!document.querySelector('script[data-tecnomath-admin-guard]')){const s=document.createElement('script');s.src='/js/admin-guard.js?v=3';s.async=false;s.dataset.tecnomathAdminGuard='true';document.head.appendChild(s)}
   function loadGameSubmissionSystem(){if(document.querySelector('script[data-tecnomath-game-submissions]'))return;const script=document.createElement('script');script.src='/js/game-submissions.js?v=5';script.async=true;script.dataset.tecnomathGameSubmissions='true';document.head.appendChild(script)}
   loadGameSubmissionSystem();
