@@ -4,9 +4,10 @@
   if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
   if (!window.TecnoMathProgress && document.readyState === 'loading') document.write('<script src="/js/tecnomath-progress.js?v=4"></scr'+'ipt>');
   window.TecnomathFirebase={auth:firebase.auth(),database:firebase.database(),storage:typeof firebase.storage==='function'?firebase.storage():null,serverTimestamp:firebase.database.ServerValue.TIMESTAMP};
-  // Compatibilidad de las llamadas antiguas: siguen escribiendo únicamente a través del sistema central.
   if(window.TecnoMathProgress){
     const p=window.TecnoMathProgress;
+    const originalGameId=p.getGameId;
+    p.getGameId=()=>location.pathname.includes('/games/laura10°/mapa-beta/')?'banderquiz-mundo':originalGameId();
     p.record=function(a,b){return typeof a==='string'?p.save(a,b||{}):p.save(p.getGameId(),a||{})};
     p.gameResult=function(a,b){return typeof a==='string'?p.save(a,b||{}):p.save(p.getGameId(),a||{})};
   }
