@@ -1,18 +1,18 @@
-// Configuración compartida de Firebase para autenticación, perfiles, juegos y sincronización.
+// Configuración compartida de Firebase para autenticación, perfiles, juegos y funciones generales.
 (function () {
   const firebaseConfig = { apiKey:"AIzaSyCf4V0YT4fQ5emX4R2LdUXU3FxjBTtY7Gzc",authDomain:"tecnomath-sync-6058a.firebaseapp.com",databaseURL:"https://tecnomath-sync-6058a-default-rtdb.firebaseio.com",projectId:"tecnomath-sync-6058a",storageBucket:"tecnomath-sync-6058a.firebasestorage.app",messagingSenderId:"237823560752",appId:"1:237823560752:web:adc1e5b396b5a0e0d671f5" };
   if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-  if (!window.TecnoMathProgress && document.readyState === 'loading') document.write('<script src="/js/tecnomath-progress.js?v=4"></scr'+'ipt>');
+  if (!window.TecnoMathProgress && document.readyState === 'loading') document.write('<script src="/js/tecnomath-progress.js?v=5"></scr'+'ipt>');
   window.TecnomathFirebase={auth:firebase.auth(),database:firebase.database(),storage:typeof firebase.storage==='function'?firebase.storage():null,serverTimestamp:firebase.database.ServerValue.TIMESTAMP};
+  // El mapa mundial ya no usa Firebase Realtime Database para progreso.
+  // Firebase queda como proveedor de autenticación y como fuente temporal para la migración automática.
   if(window.TecnoMathProgress){
     const p=window.TecnoMathProgress;
     const originalGameId=p.getGameId;
     p.getGameId=()=>location.pathname.includes('/games/laura10°/mapa-beta/')?'banderquiz-mundo':originalGameId();
     p.record=function(a,b){return typeof a==='string'?p.save(a,b||{}):p.save(p.getGameId(),a||{})};
     p.gameResult=function(a,b){return typeof a==='string'?p.save(a,b||{}):p.save(p.getGameId(),a||{})};
-    if(location.pathname.includes('/games/laura10°/mapa-beta/')&&p.watch){let first=true;p.watch('banderquiz-mundo',()=>{if(first){first=false;return}if(!window.__tmWorldReloading){window.__tmWorldReloading=true;location.reload()}})}
   }
-  // La página de cuenta conserva un return válido para volver al juego solicitado.
   try{
     const ret=new URLSearchParams(location.search).get('return');
     if(location.pathname.endsWith('/pages/auth.html')&&ret)sessionStorage.setItem('tecnomath_auth_return',ret);
