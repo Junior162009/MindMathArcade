@@ -6,7 +6,7 @@
   const PROD_AUTH_URL='https://tecnomath.online/pages/auth.html';
   const PROD_RECOVERY_URL='https://tecnomath.online/pages/auth.html?mode=recovery';
   const ADMIN_EMAILS=['delahozbarcelojunior@gmail.com','nicolenatera26@gmail.com','mateobarbosamatos@gmail.com','jandresvf23@gmail.com'];
-  const ADMIN_NAMES={'delahozbarcelojunior@gmail.com':'Junior','nicolenatera26@gmail.com':'Nicole','mateobarbosamatos@gmail.com':'Mateo','mateobarbosamatos@gmail.com':'Jaider'};
+  const ADMIN_NAMES={'delahozbarcelojunior@gmail.com':'Junior','nicolenatera26@gmail.com':'Nicole','mateobarbosamatos@gmail.com':'Mateo','jandresvf23@gmail.com':'Jaider'};
   const SESSION_KEY='tecnomath_session';
   function loadSupabase(){return new Promise((resolve,reject)=>{if(window.supabase?.createClient)return resolve();const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.0/dist/umd/supabase.min.js';s.async=false;s.dataset.tecnomathSupabase='true';s.onload=resolve;s.onerror=()=>reject(new Error('No se pudo cargar Supabase.'));document.head.appendChild(s)})}
   let clientPromise=null;function getClient(){if(!clientPromise)clientPromise=loadSupabase().then(()=>window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY));return clientPromise}
