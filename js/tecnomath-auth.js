@@ -279,7 +279,11 @@
     const apply = (user, profile) => {
       if (!user) {
         if (display) display.textContent = 'Invitado';
-        if (logoutBtn) logoutBtn.style.display = 'none';
+        if (logoutBtn) {
+          logoutBtn.textContent = '🚪 SALIR';
+          logoutBtn.style.display = 'none';
+          logoutBtn.disabled = false;
+        }
         if (authLink) { authLink.href = 'pages/auth.html'; authLink.textContent = '🔑 ACCEDER'; }
         return;
       }
@@ -287,14 +291,46 @@
       setSession(username);
       if (display) display.textContent = username;
       if (authLink) { authLink.href = 'pages/profile.html'; authLink.textContent = '👤 PERFIL'; }
-      if (logoutBtn) logoutBtn.style.display = 'inline-block';
+      if (logoutBtn) {
+        logoutBtn.textContent = '🚪 SALIR';
+        logoutBtn.style.display = 'inline-block';
+        logoutBtn.disabled = false;
+      }
     };
+
+    if (logoutBtn && !logoutBtn.dataset.tecnomathLogoutBound) {
+      logoutBtn.dataset.tecnomathLogoutBound = 'true';
+      logoutBtn.addEventListener('click', async (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        if (logoutBtn.disabled) return;
+        logoutBtn.disabled = true;
+        logoutBtn.textContent = '🚪 SALIENDO…';
+        try {
+          await signOut();
+          apply(null, null);
+        } catch (e) {
+          console.error('TecnoMath logout:', e);
+          logoutBtn.disabled = false;
+          logoutBtn.textContent = '🚪 SALIR';
+          alert('No se pudo cerrar sesión. Inténtalo de nuevo.');
+        }
+      });
+    }
+
     try {
       const account = await refreshAccount();
       apply(account.user, account.profile);
     } catch (e) {
       console.error('TecnoMath portal auth:', e);
-      apply(null, null);
+      const session = getSession();
+      if (session?.username) {
+        if (display) display.textContent = cleanUsername(session.username);
+        if (authLink) { authLink.href = 'pages/profile.html'; authLink.textContent = '👤 PERFIL'; }
+        if (logoutBtn) { logoutBtn.textContent = '🚪 SALIR'; logoutBtn.style.display = 'inline-block'; logoutBtn.disabled = false; }
+      } else {
+        apply(null, null);
+      }
     }
     try {
       await authState((user, profile) => apply(user, profile));
