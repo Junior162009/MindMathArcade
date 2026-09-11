@@ -1,0 +1,125 @@
+name: Migrate portal events to Supabase
+
+on:
+  push:
+    paths:
+      - '.github/workflows/migrate-index-events-supabase.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  migrate:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Migrate index.html
+        shell: python
+        run: |
+          from pathlib import Path
+          import re
+
+          p = Path('index.html')
+          s = p.read_text(encoding='utf-8')
+
+          if '<!-- TECNOMATH_SUPABASE_EVENTS_V1 -->' in s:
+              print('Already migrated')
+              raise SystemExit(0)
+
+          # Remove Firebase SDK/config from the portal.
+          s = re.sub(r'\s*<!-- ========== FIREBASE SDK ========== -->.*?</script>\s*<!-- ========== CONFIGURACIÓN DE FIREBASE ========== -->.*?</script>\s*', '\n', s, flags=re.S)
+
+          # Load the single official Supabase auth/settings/theme stack.
+          marker = '''    <!-- TECNOMATH_SUPABASE_EVENTS_V1 -->\n    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>\n    <script src="js/tecnomath-auth.js?v=20260911-3"></script>\n    <script src="js/tecnomath-settings.js?v=20260911-1"></script>\n    <script src="js/theme-sync.js?v=20260911-1"></script>\n'''
+          s = s.replace('    <!-- Favicon dinámico -->', marker + '\n    <!-- Favicon dinámico -->', 1)
+
+          old_sync = re.compile(r'        function syncEventToFirebase\(eventName\) \{.*?\n        \}\n\n        function listenFirebaseEvents\(\) \{.*?\n        \}\n', re.S)
+          new_sync = r'''        async function syncEventToFirebase(eventName) {
+            try {
+                const nombre = String(eventName || 'stop').trim().toLowerCase();
+                await window.TecnomathSettings.setEvent({
+                    nombre,
+                    activo: nombre !== 'stop',
+                    timestamp: new Date().toISOString()
+                });
+                pendingGlobalEvent = null;
+                console.log('✅ Evento guardado en Supabase:', nombre);
+            } catch (err) {
+                pendingGlobalEvent = null;
+                console.warn('⚠️ Error al guardar evento en Supabase:', err);
+                alert('No se pudo publicar el evento. Comprueba tu sesión de administrador.');
+            }
+        }
+
+        async function listenFirebaseEvents() {
+            if (syncInitialized) return;
+            const settings = window.TecnomathSettings;
+            if (!settings) return;
+
+            const applyEvent = (data) => {
+                if (!data) return;
+                const active = data.activo === true && data.nombre && data.nombre !== 'stop';
+                if (!active) {
+                    if (fairMode) deactivateFairMode(false);
+                    else {
+                        activeEvent = null;
+                        loadThemeCSS(null);
+                        updateFavicon('🎮');
+                        deactivateVisualEffects();
+                        const title = document.getElementById('mainTitle');
+                        if (title) title.textContent = 'TECNOMATH';
+                        renderProjects(currentActiveFilter);
+                    }
+                    return;
+                }
+                const eventName = String(data.nombre).trim().toLowerCase();
+                if (!eventName || eventName === activeEvent) return;
+                switch (eventName) {
+                    case 'feria':
+                        if (!fairMode) activateFairMode(false);
+                        break;
+                    case 'feriaplus':
+                        if (!fairMode || activeEvent !== 'feriaplus') activateMegaFair(false);
+                        break;
+                    default: {
+                        const config = getEventConfig(eventName);
+                        if (config) activatePermanentTheme(config.title, config.notification, config.confettiColors, config.emojis, eventName, false);
+                        break;
+                    }
+                }
+            };
+
+            try {
+                applyEvent(await settings.getEvent());
+                settings.subscribeEvents(applyEvent);
+                syncInitialized = true;
+                console.log('📡 Escuchando eventos globales desde Supabase Realtime.');
+            } catch (error) {
+                console.warn('No se pudieron cargar los eventos globales desde Supabase:', error);
+            }
+        }
+'''
+          s, n = old_sync.subn(new_sync, s, count=1)
+          if n != 1:
+              raise SystemExit('No se encontró el bloque de sincronización de eventos')
+
+          s = s.replace("if (!user || !Tecnomath.isAdmin() || !firebase.auth().currentUser) {", "if (!user || !Tecnomath.isAdmin()) {", 1)
+          s = s.replace("            try {\n                await firebase.auth().signOut();\n            } catch (error) {\n                console.warn('No se pudo cerrar la sesión de Firebase.', error);\n            } finally {\n                Tecnomath.logout();\n                updateUserBar();\n            }", "            try {\n                await Tecnomath.logout();\n            } finally {\n                updateUserBar();\n            }", 1)
+
+          s = s.replace("console.log('🔥 Firebase sincronización activa.');", "console.log('☁️ Supabase es la fuente oficial de eventos y temáticas.');")
+          s = s.replace("console.log('📡 Publica eventos globales con el código de administrador.');", "console.log('📡 Publica eventos globales mediante Supabase Realtime.');")
+
+          p.write_text(s, encoding='utf-8')
+          print('index.html migrated')
+
+      - name: Commit migration and remove one-time workflow
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html
+          git rm .github/workflows/migrate-index-events-supabase.yml
+          git commit -m "migrate portal events and themes to Supabase" || exit 0
+          git push
