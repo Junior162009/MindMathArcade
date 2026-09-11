@@ -9,7 +9,11 @@
   const ADMIN_NAMES={'delahozbarcelojunior@gmail.com':'Junior','nicolenatera26@gmail.com':'Nicole','mateobarbosamatos@gmail.com':'Mateo','jandresvf23@gmail.com':'Jaider'};
   const SESSION_KEY='tecnomath_session';
   function loadSupabase(){return new Promise((resolve,reject)=>{if(window.supabase?.createClient)return resolve();const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.0/dist/umd/supabase.min.js';s.async=false;s.dataset.tecnomathSupabase='true';s.onload=resolve;s.onerror=()=>reject(new Error('No se pudo cargar Supabase.'));document.head.appendChild(s)})}
-  let clientPromise=null;function getClient(){if(!clientPromise)clientPromise=loadSupabase().then(()=>window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY));return clientPromise}
+  let clientPromise=null;
+  function getClient(){
+    if(!clientPromise)clientPromise=loadSupabase().then(()=>window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false,flowType:'pkce'}}));
+    return clientPromise
+  }
   const emailOf=u=>String(u?.email||'').trim().toLowerCase();
   const isAdminEmail=e=>ADMIN_EMAILS.includes(String(e||'').trim().toLowerCase());
   function adminUsername(u){const e=emailOf(u);return ADMIN_NAMES[e]||e.split('@')[0].replace(/[^a-z0-9._-]/g,'')||'Admin'}
@@ -24,7 +28,7 @@
   async function updateEmail(email){const db=await getClient();const {error}=await db.auth.updateUser({email:String(email).trim()});if(error)throw error}
   function setSession(username){if(username)localStorage.setItem(SESSION_KEY,JSON.stringify({username:String(username).trim()}))}function clearSession(){localStorage.removeItem(SESSION_KEY)}function getSession(){try{return JSON.parse(localStorage.getItem(SESSION_KEY)||'null')}catch(_){clearSession();return null}}
   async function isAdmin(){const u=await currentUser();if(!u)return false;const p=await getProfile(u).catch(()=>null);return isAdminEmail(u.email)||p?.role==='admin'}
-  async function authState(callback){const db=await getClient();const {data}=db.auth.onAuthStateChange(async(_event,session)=>{const u=session?.user||null;if(!u){clearSession();callback(null,null);return}try{const p=await ensureProfile(u);window.TecnomathCurrentAdmin=p?.role==='admin'?p:null;callback(u,p)}catch(e){console.error('TecnoMath Supabase profile sync:',e);callback(u,null)}});return data.subscription}
+  async function authState(callback){const db=await getClient();const {data}=db.auth.onAuthStateChange((event,session)=>{const u=session?.user||null;if(!u){clearSession();callback(null,null);return}setTimeout(async()=>{try{const p=await ensureProfile(u);window.TecnomathCurrentAdmin=p?.role==='admin'?p:null;callback(u,p)}catch(e){console.error('TecnoMath Supabase profile sync:',e);callback(u,null)}},0)});return data.subscription}
   window.TecnomathAuth={SUPABASE_URL,PROD_AUTH_URL,PROD_RECOVERY_URL,ADMIN_EMAILS,ADMIN_NAMES,getClient,currentUser,getProfile,ensureProfile,signIn,signUp,signOut,sendRecovery,updatePassword,updateEmail,isAdmin,authState,setSession,clearSession,getSession,isAdminEmail,adminUsername};
   window.Tecnomath=Object.assign({},window.Tecnomath||{},{setSession,logout:signOut,getCurrentUser:getSession,getAdminEmails:()=>[...ADMIN_EMAILS],isAdmin:()=>!!window.TecnomathCurrentAdmin,setAdmin:()=>!!window.TecnomathCurrentAdmin,unsetAdmin:clearSession});
   function syncPortalFromSupabase(){
