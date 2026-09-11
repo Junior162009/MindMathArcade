@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+<defs>
+  <radialGradient id="g" cx="35%" cy="25%"><stop offset="0" stop-color="#65e6ff"/><stop offset=".55" stop-color="#198cff"/><stop offset="1" stop-color="#10205f"/></radialGradient>
+  <linearGradient id="c" x1="0" x2="1"><stop stop-color="#ffe66d"/><stop offset="1" stop-color="#f5a800"/></linearGradient>
+  <filter id="s"><feDropShadow dx="0" dy="12" stdDeviation="12" flood-opacity=".4"/></filter>
+</defs>
+<circle cx="256" cy="256" r="205" fill="#0b1230" stroke="url(#c)" stroke-width="18" filter="url(#s)"/>
+<circle cx="256" cy="270" r="150" fill="url(#g)"/>
+<path d="M126 245c48-34 90-48 130-42 43 6 78-5 130-44-7 38-18 66-39 91 18 29 24 54 25 83-51-29-93-36-131-24-42 13-76 6-115-16z" fill="#39d98a" opacity=".9"/>
+<path d="M162 171l30 15-12 30 33 14-17 29-38-14-25-33zM329 174l48 12-19 31-42-8zM305 329l50-13 20 31-46 28-39-16z" fill="#8fffae" opacity=".85"/>
+<path d="M170 103h172l-23 38H193z" fill="url(#c)" stroke="#fff1a8" stroke-width="7"/>
+<path d="M205 95l18-52 34 35 34-35 18 52" fill="none" stroke="url(#c)" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M256 42v-24" stroke="#fff1a8" stroke-width="9" stroke-linecap="round"/>
+<circle cx="256" cy="18" r="8" fill="#fff1a8"/>
+<path d="M90 350c43 66 99 99 166 99s123-33 166-99" fill="none" stroke="#fff" stroke-opacity=".35" stroke-width="8" stroke-linecap="round"/>
+<text x="256" y="405" text-anchor="middle" font-family="Arial,Segoe UI,sans-serif" font-size="34" font-weight="900" fill="#fff" stroke="#0b1230" stroke-width="7" paint-order="stroke">CONQUISTA</text>
+<text x="256" y="442" text-anchor="middle" font-family="Arial,Segoe UI,sans-serif" font-size="30" font-weight="900" fill="#ffe66d" stroke="#0b1230" stroke-width="6" paint-order="stroke">EL MUNDO</text>
+</svg>
