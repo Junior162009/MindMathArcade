@@ -3,6 +3,21 @@
    ========================================================= */
 (function () {
     "use strict";
+
+    // El portal principal debe cargar SIEMPRE el sistema oficial de
+    // autenticación Supabase. Sin este cargador, index.html muestra
+    // "Invitado" aunque exista una sesión válida.
+    function cargarAutenticacion() {
+        if (window.TecnomathAuth) return;
+        if (document.querySelector('script[data-tecnomath-auth]')) return;
+        const script = document.createElement('script');
+        script.src = '/js/tecnomath-auth.js?v=20260911-5';
+        script.dataset.tecnomathAuth = 'true';
+        script.async = false;
+        document.head.appendChild(script);
+    }
+    cargarAutenticacion();
+
     const CATALOG_URL = "data/games.json";
     let loaded = false;
 
