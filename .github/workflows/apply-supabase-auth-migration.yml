@@ -1,0 +1,31 @@
+name: Apply Supabase Auth Migration
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - 'pages/auth.html'
+      - 'js/admin-guard.js'
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - name: Apply migrated auth files
+        run: |
+          cp pages/auth-supabase.html pages/auth.html
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add pages/auth.html
+          if git diff --cached --quiet; then
+            echo 'No auth file changes.'
+          else
+            git commit -m 'feat(auth): activate Supabase login page'
+            git push
+          fi
