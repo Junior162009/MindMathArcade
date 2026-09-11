@@ -2,7 +2,7 @@
 (function () {
   'use strict';
   const SUPABASE_URL='https://xdszveoxdrdnwwzzvkav.supabase.co';
-  const SUPABASE_KEY='sb_publishable_xwUE0aN1g0rb7aOLyXPAsA_kOAX9bOA';
+  const SUPABASE_KEY='sb_publishable_xwUE0a1N0g0rb7aOLyXPAsA_kOAX9bOA';
   const PROD_AUTH_URL='https://tecnomath.online/pages/auth.html';
   const PROD_RECOVERY_URL='https://tecnomath.online/pages/auth.html?mode=recovery';
   const ADMIN_EMAILS=['delahozbarcelojunior@gmail.com','nicolenatera26@gmail.com','mateobarbosamatos@gmail.com','jandresvf23@gmail.com'];
@@ -14,7 +14,7 @@
   const isAdminEmail=e=>ADMIN_EMAILS.includes(String(e||'').trim().toLowerCase());
   function adminUsername(u){const e=emailOf(u);return ADMIN_NAMES[e]||e.split('@')[0].replace(/[^a-z0-9._-]/g,'')||'Admin'}
   async function getProfile(user){if(!user)return null;const db=await getClient();const {data,error}=await db.from('tecnomath_profiles').select('*').eq('id',user.id).maybeSingle();if(error)throw error;return data}
-  async function ensureProfile(user,username,extra={}){if(!user)return null;const db=await getClient();const existing=await getProfile(user);if(existing){setSession(existing.username);return existing}const email=emailOf(user);const admin=isAdminEmail(email);const fallback=admin?adminUsername(user):(username||user.user_metadata?.username||email.split('@')[0]);const payload={id:user.id,username:String(fallback).trim(),display_name:extra.display_name||fallback,phone:extra.phone||user.phone||null};const {data,error}=await db.from('tecnomath_profiles').insert(payload).select().single();if(error)throw error;return data}
+  async function ensureProfile(user,username,extra={}){if(!user)return null;const db=await getClient();const existing=await getProfile(user);if(existing){setSession(existing.username);return existing}const email=emailOf(user);const admin=isAdminEmail(email);const fallback=admin?adminUsername(user):(username||user.user_metadata?.username||email.split('@')[0]);const payload={id:user.id,username:String(fallback).trim(),display_name:extra.display_name||fallback,phone:extra.phone||user.phone||null};const {data,error}=await db.from('tecnomath_profiles').insert(payload).select().single();if(error)throw error;setSession(data.username);return data}
   async function currentUser(){const db=await getClient();const {data,error}=await db.auth.getUser();return error?null:data.user||null}
   async function signIn(email,password){const db=await getClient();const {data,error}=await db.auth.signInWithPassword({email:String(email).trim(),password});if(error)throw error;const profile=await ensureProfile(data.user);setSession(profile.username);window.TecnomathCurrentAdmin=profile.role==='admin'?profile:null;return{user:data.user,profile}}
   async function signUp(email,password,username,phone){const db=await getClient();const {data,error}=await db.auth.signUp({email:String(email).trim(),password,options:{emailRedirectTo:PROD_AUTH_URL,data:{username:String(username).trim(),phone:phone||null}}});if(error)throw error;if(data.user&&data.session)await ensureProfile(data.user,username,{phone});return data}
