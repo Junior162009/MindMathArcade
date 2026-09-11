@@ -34,8 +34,9 @@
 <script>
 (async()=>{
 const $=id=>document.getElementById(id),msg=t=>$('msg').textContent=t;
-const home=()=>location.href='../index.html';
-$('googleLogin').onclick=async()=>{try{msg('Conectando con Google…');const db=await TecnomathAuth.getClient();const redirectTo=new URL('./auth.html',location.href).href;const {error}=await db.auth.signInWithOAuth({provider:'google',options:{redirectTo}});if(error)throw error}catch(e){console.error(e);msg(e.message||'No se pudo iniciar sesión con Google.')}};
+const PROD_AUTH_URL='https://tecnomath.online/pages/auth.html';
+const home=()=>location.href='https://tecnomath.online/index.html';
+$('googleLogin').onclick=async()=>{try{msg('Conectando con Google…');const db=await TecnomathAuth.getClient();const {error}=await db.auth.signInWithOAuth({provider:'google',options:{redirectTo:PROD_AUTH_URL}});if(error)throw error}catch(e){console.error(e);msg(e.message||'No se pudo iniciar sesión con Google.')}};
 $('create').onclick=()=>{$('login').hidden=true;$('register').hidden=false};
 $('back').onclick=()=>{$('register').hidden=true;$('login').hidden=false};
 $('enter').onclick=async()=>{try{const r=await TecnomathAuth.signIn($('email').value,$('password').value);msg('Bienvenido '+r.profile.username);setTimeout(home,500)}catch(e){msg(e.message)}};
