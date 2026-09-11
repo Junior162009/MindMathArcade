@@ -1,0 +1,148 @@
+name: Migrate shared API to Supabase
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  migrate-shared:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Migrate shared API
+        shell: python
+        run: |
+          from pathlib import Path
+          import re
+
+          p = Path('js/shared.js')
+          s = p.read_text(encoding='utf-8')
+
+          marker = '/* TECNOMATH_SUPABASE_SHARED_API_V1 */'
+          if marker in s:
+              print('Supabase shared API already installed')
+              raise SystemExit(0)
+
+          start = s.find('  window.Tecnomath={')
+          end = s.find('\n  };', start)
+          if start < 0 or end < 0:
+              raise SystemExit('No se encontró la API principal window.Tecnomath')
+          end += len('\n  };')
+
+          api = r'''  window.Tecnomath={
+            /* TECNOMATH_SUPABASE_SHARED_API_V1 */
+            login(username,password){
+              return window.TecnomathAuth?.signIn(username,password).then(r=>({success:true,username:r.profile?.username||username})).catch(e=>({success:false,message:e?.message||'Usuario o contraseña incorrectos'}));
+            },
+            register(username,password,phone){
+              const email=String(username||'').trim();
+              return Promise.reject(new Error('El registro oficial usa correo electrónico. Abre ACCEDER para crear tu cuenta.'));
+            },
+            logout(){return window.TecnomathAuth?.signOut();},
+            setSession(username){if(window.TecnomathAuth)window.TecnomathAuth.setSession(username);},
+            getCurrentUser(){return window.TecnomathAuth?.getSession?.()||null;},
+            isAdmin(){return !!window.TecnomathCurrentAdmin;},
+            setAdmin(){return !!window.TecnomathCurrentAdmin;},
+            unsetAdmin(){window.TecnomathCurrentAdmin=null;},
+            getAdminEmails(){return window.TecnomathAuth?[...window.TecnomathAuth.ADMIN_EMAILS]:[];},
+            getCoins(){
+              if(this.isAdmin())return Infinity;
+              const u=this.getCurrentUser(); if(!u)return 0;
+              const key='tecnomath_supabase_coins_'+u.username;
+              const n=Number(localStorage.getItem(key)||0);
+              this._refreshProfileCache(); return Number.isFinite(n)?n:0;
+            },
+            _refreshProfileCache(){
+              if(this._profileRefresh)return this._profileRefresh;
+              this._profileRefresh=window.TecnomathAuth?.currentUser().then(async u=>{
+                if(!u)return;
+                const p=await window.TecnomathAuth.getProfile(u);
+                if(!p)return;
+                localStorage.setItem('tecnomath_supabase_coins_'+p.username,String(Number(p.coins||0)));
+                localStorage.setItem('tecnomath_supabase_xp_'+p.username,String(Number(p.xp||0)));
+              }).catch(()=>{}).finally(()=>{this._profileRefresh=null});
+              return this._profileRefresh;
+            },
+            addCoins(n){
+              if(this.isAdmin())return true;
+              const delta=Math.floor(Number(n)||0); if(!delta)return true;
+              const u=this.getCurrentUser(); if(!u||!window.TecnomathAuth)return false;
+              window.TecnomathAuth.getClient().then(db=>db.rpc('tecnomath_change_coins',{delta})).then(({data})=>{
+                if(data!=null)localStorage.setItem('tecnomath_supabase_coins_'+u.username,String(Number(data)||0));
+              }).catch(e=>console.warn('TecnoMath Supabase coins:',e));
+              localStorage.setItem('tecnomath_supabase_coins_'+u.username,String(this.getCoins()+delta));
+              return true;
+            },
+            spendCoins(n){
+              if(this.isAdmin())return true;
+              const amount=Math.floor(Number(n)||0); if(amount<=0)return true;
+              if(this.getCoins()<amount)return false;
+              return this.addCoins(-amount);
+            },
+            getGameCoins(id){
+              const p=this.getProgress(id); return Number(p.gameCoins||0);
+            },
+            setGameCoins(id,n){
+              const p=this.getProgress(id); p.gameCoins=Math.max(0,Math.floor(Number(n)||0)); this.setProgress(id,p);
+            },
+            exchangeGlobalToLocal(id,n){
+              if(this.isAdmin())return true;
+              const amount=Math.floor(Number(n)||0); const local=Math.floor(amount*.9);
+              if(this.getCoins()<amount)return false;
+              if(!this.spendCoins(amount))return false;
+              this.setGameCoins(id,this.getGameCoins(id)+local); return true;
+            },
+            exchangeLocalToGlobal(id,n){
+              if(this.isAdmin())return true;
+              const amount=Math.floor(Number(n)||0); if(this.getGameCoins(id)<amount)return false;
+              this.setGameCoins(id,this.getGameCoins(id)-amount); this.addCoins(Math.floor(amount*.9)); return true;
+            },
+            getProgress(id){
+              const u=this.getCurrentUser(); if(!u)return {};
+              const key='tecnomath_supabase_progress_'+u.username+'_'+id;
+              try{return JSON.parse(localStorage.getItem(key)||'{}')}catch(_){return {}}
+            },
+            setProgress(id,data){
+              const u=this.getCurrentUser(); if(!u||!window.TecnomathAuth)return false;
+              const value=(data&&typeof data==='object')?data:{};
+              localStorage.setItem('tecnomath_supabase_progress_'+u.username+'_'+id,JSON.stringify(value));
+              window.TecnomathAuth.currentUser().then(async user=>{
+                if(!user)return;
+                const db=await window.TecnomathAuth.getClient();
+                const {error}=await db.from('tecnomath_game_progress').upsert({user_id:user.id,game_id:String(id),progress:value,updated_at:new Date().toISOString()},{onConflict:'user_id,game_id'});
+                if(error)console.warn('TecnoMath Supabase progress:',error);
+              }).catch(e=>console.warn('TecnoMath Supabase progress:',e));
+              return true;
+            },
+            updateHighScore(id,score){
+              const p=this.getProgress(id); if(!p.highScore||score>p.highScore){p.highScore=score;this.setProgress(id,p)}
+            }
+          };'''
+
+          s = s[:start] + api + s[end:]
+
+          # Firebase admin bridge is disabled: Supabase Auth is authoritative.
+          s = re.sub(r'  function setupAdminBridge\(\)\{.*?\n  \}\n  setupAdminBridge\(\);',
+                      "  function setupAdminBridge(){ return; }\n  setupAdminBridge();", s, count=1, flags=re.S)
+
+          p.write_text(s, encoding='utf-8')
+          print('Supabase shared API installed')
+
+      - name: Commit migration
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add js/shared.js
+          if git diff --cached --quiet; then
+            echo "No changes"
+            exit 0
+          fi
+          git commit -m "feat(migration): move shared account economy to Supabase"
+          git push
