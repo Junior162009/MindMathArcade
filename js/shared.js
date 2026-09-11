@@ -15,22 +15,94 @@
   function adminUsername(user){const e=String(user?.email||'').trim().toLowerCase();return ADMIN_NAMES[e]||e.split('@')[0].replace(/[^a-z0-9._-]/g,'')||'Admin'}
   async function ensureFirebaseProfile(user){if(!user||!isAdminEmail(user.email)||!window.firebase?.database)return null;const ref=firebase.database().ref('users/'+user.uid);const snap=await ref.once('value');const current=snap.val()||{};const data={...current,username:current.username||adminUsername(user),email:user.email,role:'admin',isAdmin:true,provider:user.providerData?.[0]?.providerId||'firebase',updatedAt:firebase.database.ServerValue.TIMESTAMP};await ref.update(data);localStorage.setItem(SESSION_KEY,JSON.stringify({username:data.username}));return data}
   window.Tecnomath={
-    login(username,password){username=(username||'').trim();password=(password||'').trim();if(!username||!password)return{success:false,message:'Usuario y contraseña requeridos'};const u=findUser(username);if(!u||u.password!==password)return{success:false,message:'Usuario o contraseña incorrectos'};localStorage.setItem(SESSION_KEY,JSON.stringify({username:u.username}));return{success:true,username:u.username}},
-    register(username,password){username=(username||'').trim();password=(password||'').trim();if(username.length<3)return{success:false,message:'El usuario debe tener al menos 3 caracteres'};if(password.length<4)return{success:false,message:'La contraseña debe tener al menos 4 caracteres'};if(findUser(username))return{success:false,message:'Ese usuario ya existe. Usa ENTRAR.'};const u=createUser(username,password);if(!u)return{success:false,message:'No se pudo crear el usuario'};localStorage.setItem(SESSION_KEY,JSON.stringify({username:u.username}));return{success:true,username:u.username}},
-    logout(){localStorage.removeItem(SESSION_KEY)},setSession(username){if(username)localStorage.setItem(SESSION_KEY,JSON.stringify({username:String(username).trim()}))},
-    getCurrentUser(){const s=localStorage.getItem(SESSION_KEY);if(!s)return null;try{const d=JSON.parse(s);return d.username?{username:d.username}:null}catch(_){localStorage.removeItem(SESSION_KEY);return null}},
-    isAdmin,setAdmin(){return isAdmin()},unsetAdmin(){},getAdminEmails(){return [...ADMIN_EMAILS]},ensureFirebaseProfile,
-    getCoins(){if(isAdmin())return Infinity;const u=this.getCurrentUser();if(!u)return 0;const c=localStorage.getItem(COINS_PREFIX+u.username);return c?parseInt(c,10):0},
-    addCoins(n){if(isAdmin())return true;const u=this.getCurrentUser();if(!u)return false;localStorage.setItem(COINS_PREFIX+u.username,this.getCoins()+n);return true},
-    spendCoins(n){if(isAdmin())return true;const u=this.getCurrentUser();if(!u)return false;const c=this.getCoins();if(c<n)return false;localStorage.setItem(COINS_PREFIX+u.username,c-n);return true},
-    getGameCoins(id){if(isAdmin())return Infinity;const u=this.getCurrentUser();if(!u)return 0;const d=localStorage.getItem(GAME_COINS_PREFIX+u.username+'_'+id);return d?parseInt(d,10):0},
-    setGameCoins(id,n){if(isAdmin())return;const u=this.getCurrentUser();if(u)localStorage.setItem(GAME_COINS_PREFIX+u.username+'_'+id,n)},
-    exchangeGlobalToLocal(id,n){if(isAdmin())return true;const local=Math.floor(n*.9);if(this.getCoins()<n||!this.spendCoins(n))return false;this.setGameCoins(id,this.getGameCoins(id)+local);return true},
-    exchangeLocalToGlobal(id,n){if(isAdmin())return true;const global=Math.floor(n*.9);if(this.getGameCoins(id)<n)return false;this.setGameCoins(id,this.getGameCoins(id)-n);this.addCoins(global);return true},
-    getProgress(id){const u=this.getCurrentUser();if(!u)return{};const d=localStorage.getItem(PROGRESS_PREFIX+u.username+'_'+id);if(!d)return{};try{return JSON.parse(d)}catch(_){return{}}},
-    setProgress(id,data){const u=this.getCurrentUser();if(u)localStorage.setItem(PROGRESS_PREFIX+u.username+'_'+id,JSON.stringify(data))},
-    updateHighScore(id,score){const p=this.getProgress(id);if(!p.highScore||score>p.highScore){p.highScore=score;this.setProgress(id,p)}}
-  };
+  /* TECNOMATH_SUPABASE_SHARED_API_V1 */
+  login(username,password){
+    return window.TecnomathAuth?.signIn(username,password).then(r=>({success:true,username:r.profile?.username||username})).catch(e=>({success:false,message:e?.message||'Usuario o contraseña incorrectos'}));
+  },
+  register(username,password,phone){
+    const email=String(username||'').trim();
+    return Promise.reject(new Error('El registro oficial usa correo electrónico. Abre ACCEDER para crear tu cuenta.'));
+  },
+  logout(){return window.TecnomathAuth?.signOut();},
+  setSession(username){if(window.TecnomathAuth)window.TecnomathAuth.setSession(username);},
+  getCurrentUser(){return window.TecnomathAuth?.getSession?.()||null;},
+  isAdmin(){return !!window.TecnomathCurrentAdmin;},
+  setAdmin(){return !!window.TecnomathCurrentAdmin;},
+  unsetAdmin(){window.TecnomathCurrentAdmin=null;},
+  getAdminEmails(){return window.TecnomathAuth?[...window.TecnomathAuth.ADMIN_EMAILS]:[];},
+  getCoins(){
+    if(this.isAdmin())return Infinity;
+    const u=this.getCurrentUser(); if(!u)return 0;
+    const key='tecnomath_supabase_coins_'+u.username;
+    const n=Number(localStorage.getItem(key)||0);
+    this._refreshProfileCache(); return Number.isFinite(n)?n:0;
+  },
+  _refreshProfileCache(){
+    if(this._profileRefresh)return this._profileRefresh;
+    this._profileRefresh=window.TecnomathAuth?.currentUser().then(async u=>{
+      if(!u)return;
+      const p=await window.TecnomathAuth.getProfile(u);
+      if(!p)return;
+      localStorage.setItem('tecnomath_supabase_coins_'+p.username,String(Number(p.coins||0)));
+      localStorage.setItem('tecnomath_supabase_xp_'+p.username,String(Number(p.xp||0)));
+    }).catch(()=>{}).finally(()=>{this._profileRefresh=null});
+    return this._profileRefresh;
+  },
+  addCoins(n){
+    if(this.isAdmin())return true;
+    const delta=Math.floor(Number(n)||0); if(!delta)return true;
+    const u=this.getCurrentUser(); if(!u||!window.TecnomathAuth)return false;
+    window.TecnomathAuth.getClient().then(db=>db.rpc('tecnomath_change_coins',{delta})).then(({data})=>{
+      if(data!=null)localStorage.setItem('tecnomath_supabase_coins_'+u.username,String(Number(data)||0));
+    }).catch(e=>console.warn('TecnoMath Supabase coins:',e));
+    localStorage.setItem('tecnomath_supabase_coins_'+u.username,String(this.getCoins()+delta));
+    return true;
+  },
+  spendCoins(n){
+    if(this.isAdmin())return true;
+    const amount=Math.floor(Number(n)||0); if(amount<=0)return true;
+    if(this.getCoins()<amount)return false;
+    return this.addCoins(-amount);
+  },
+  getGameCoins(id){
+    const p=this.getProgress(id); return Number(p.gameCoins||0);
+  },
+  setGameCoins(id,n){
+    const p=this.getProgress(id); p.gameCoins=Math.max(0,Math.floor(Number(n)||0)); this.setProgress(id,p);
+  },
+  exchangeGlobalToLocal(id,n){
+    if(this.isAdmin())return true;
+    const amount=Math.floor(Number(n)||0); const local=Math.floor(amount*.9);
+    if(this.getCoins()<amount)return false;
+    if(!this.spendCoins(amount))return false;
+    this.setGameCoins(id,this.getGameCoins(id)+local); return true;
+  },
+  exchangeLocalToGlobal(id,n){
+    if(this.isAdmin())return true;
+    const amount=Math.floor(Number(n)||0); if(this.getGameCoins(id)<amount)return false;
+    this.setGameCoins(id,this.getGameCoins(id)-amount); this.addCoins(Math.floor(amount*.9)); return true;
+  },
+  getProgress(id){
+    const u=this.getCurrentUser(); if(!u)return {};
+    const key='tecnomath_supabase_progress_'+u.username+'_'+id;
+    try{return JSON.parse(localStorage.getItem(key)||'{}')}catch(_){return {}}
+  },
+  setProgress(id,data){
+    const u=this.getCurrentUser(); if(!u||!window.TecnomathAuth)return false;
+    const value=(data&&typeof data==='object')?data:{};
+    localStorage.setItem('tecnomath_supabase_progress_'+u.username+'_'+id,JSON.stringify(value));
+    window.TecnomathAuth.currentUser().then(async user=>{
+      if(!user)return;
+      const db=await window.TecnomathAuth.getClient();
+      const {error}=await db.from('tecnomath_game_progress').upsert({user_id:user.id,game_id:String(id),progress:value,updated_at:new Date().toISOString()},{onConflict:'user_id,game_id'});
+      if(error)console.warn('TecnoMath Supabase progress:',error);
+    }).catch(e=>console.warn('TecnoMath Supabase progress:',e));
+    return true;
+  },
+  updateHighScore(id,score){
+    const p=this.getProgress(id); if(!p.highScore||score>p.highScore){p.highScore=score;this.setProgress(id,p)}
+  }
+};
   function dashboardUrl(){return /\/pages\//.test(location.pathname)?new URL('admin/index.html',location.href).href:new URL('pages/admin/index.html',location.href).href}
   function setupAdminBridge(){if(!window.firebase?.auth||!window.firebase?.database)return;let readyAdmin=false;firebase.auth().onAuthStateChanged(async user=>{readyAdmin=!!user&&isAdminEmail(user.email);if(!user)return;if(readyAdmin){try{await ensureFirebaseProfile(user)}catch(error){console.error('TecnoMath: error sincronizando admin',error)}const button=document.querySelector('#admin-cloud');if(button){button.style.display='block';button.innerHTML='👑';button.title='Panel de Control';button.setAttribute('aria-label','Abrir Panel de Control')}}});document.addEventListener('click',event=>{const button=event.target.closest?.('#admin-cloud'),user=firebase.auth().currentUser;if(!button||!user||(!readyAdmin&&!isAdminEmail(user.email)))return;event.preventDefault();event.stopPropagation();event.stopImmediatePropagation();location.assign(dashboardUrl())},true)}
   setupAdminBridge();
