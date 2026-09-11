@@ -1,0 +1,92 @@
+name: Fix Supabase portal session bridge
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch-shared-auth:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Patch shared auth bridge
+        shell: python
+        run: |
+          from pathlib import Path
+          p = Path('js/shared.js')
+          s = p.read_text(encoding='utf-8')
+          marker = '/* TECNOMATH_SUPABASE_PORTAL_BRIDGE_V1 */'
+          if marker in s:
+              print('Bridge already installed')
+              raise SystemExit(0)
+
+          bridge = r'''
+
+  /* TECNOMATH_SUPABASE_PORTAL_BRIDGE_V1 */
+  // El portal principal todavía usa la API histórica Tecnomath/Firebase para pintar
+  // el encabezado. La autenticación oficial ahora vive en Supabase, así que cargamos
+  // la capa oficial después de shared.js y sincronizamos la identidad visible.
+  function setupSupabasePortalBridge(){
+    const isMainIndex=/(^|\\/)index\\.html?$/.test(location.pathname)||location.pathname.endsWith('/');
+    if(!isMainIndex)return;
+    const load=()=>{
+      if(window.TecnomathAuth)return sync();
+      if(document.querySelector('script[data-tecnomath-auth-bridge]'))return;
+      const s=document.createElement('script');
+      s.src='/js/tecnomath-auth.js?v=portal-session-1';
+      s.async=true;
+      s.dataset.tecnomathAuthBridge='true';
+      s.onload=sync;
+      s.onerror=()=>console.warn('TecnoMath: no se pudo cargar la capa Supabase Auth.');
+      document.head.appendChild(s);
+    };
+    const sync=()=>{
+      if(!window.TecnomathAuth)return;
+      window.TecnomathAuth.authState(async(user,profile)=>{
+        const display=document.getElementById('userDisplay');
+        const authLink=document.getElementById('authLink');
+        const logoutBtn=document.getElementById('logoutBtn');
+        if(!user){
+          window.TecnomathCurrentAdmin=null;
+          if(display)display.textContent='Invitado';
+          if(logoutBtn)logoutBtn.style.display='none';
+          if(authLink){authLink.style.display='inline-block';authLink.href='pages/auth.html';authLink.textContent='🔑 ACCEDER';}
+          return;
+        }
+        const username=String(profile?.username||user.user_metadata?.username||user.email?.split('@')[0]||'Usuario').trim();
+        window.Tecnomath.setSession(username);
+        if(profile?.role==='admin')window.TecnomathCurrentAdmin=profile;else window.TecnomathCurrentAdmin=null;
+        if(display)display.textContent=username+' · 💰 '+(window.Tecnomath.getCoins?.()??0);
+        if(authLink){authLink.style.display='inline-block';authLink.href='pages/profile.html';authLink.textContent='👤 PERFIL';}
+        if(logoutBtn)logoutBtn.style.display='inline-block';
+      });
+    };
+    if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',load,{once:true});else load();
+  }
+  setupSupabasePortalBridge();
+'''
+          if not s.rstrip().endswith('})();'):
+              raise SystemExit('shared.js no termina con el cierre esperado')
+          idx = s.rfind('})();')
+          s = s[:idx] + bridge + '\n' + s[idx:]
+          p.write_text(s, encoding='utf-8')
+          print('Bridge installed')
+
+      - name: Commit bridge
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add js/shared.js
+          if git diff --cached --quiet; then
+            echo "No changes"
+            exit 0
+          fi
+          git commit -m "fix(auth): bridge Supabase session to TecnoMath portal"
+          git push
