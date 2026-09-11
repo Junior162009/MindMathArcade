@@ -4,6 +4,12 @@
   if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
   if (!window.TecnoMathProgress && document.readyState === 'loading') document.write('<script src="/js/tecnomath-progress.js?v=4"></scr'+'ipt>');
   window.TecnomathFirebase={auth:firebase.auth(),database:firebase.database(),storage:typeof firebase.storage==='function'?firebase.storage():null,serverTimestamp:firebase.database.ServerValue.TIMESTAMP};
+  // Compatibilidad de las llamadas antiguas: siguen escribiendo únicamente a través del sistema central.
+  if(window.TecnoMathProgress){
+    const p=window.TecnoMathProgress;
+    p.record=function(a,b){return typeof a==='string'?p.save(a,b||{}):p.save(p.getGameId(),a||{})};
+    p.gameResult=function(a,b){return typeof a==='string'?p.save(a,b||{}):p.save(p.getGameId(),a||{})};
+  }
   if(!document.querySelector('script[data-tecnomath-admin-guard]')){const s=document.createElement('script');s.src='/js/admin-guard.js?v=3';s.async=false;s.dataset.tecnomathAdminGuard='true';document.head.appendChild(s)}
   function loadGameSubmissionSystem(){if(document.querySelector('script[data-tecnomath-game-submissions]'))return;const script=document.createElement('script');script.src='/js/game-submissions.js?v=5';script.async=true;script.dataset.tecnomathGameSubmissions='true';document.head.appendChild(script)}
   loadGameSubmissionSystem();
