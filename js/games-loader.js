@@ -11,12 +11,52 @@
         if (window.TecnomathAuth) return;
         if (document.querySelector('script[data-tecnomath-auth]')) return;
         const script = document.createElement('script');
-        script.src = '/js/tecnomath-auth.js?v=20260911-5';
+        script.src = '/js/tecnomath-auth.js?v=20260911-6';
         script.dataset.tecnomathAuth = 'true';
         script.async = false;
         document.head.appendChild(script);
     }
     cargarAutenticacion();
+
+    // 👑 Admin: el sistema anterior lo mostraba mediante Firebase.
+    // Ahora la fuente oficial es Supabase Auth + tecnomath_profiles.
+    function sincronizarCoronaAdmin() {
+        const cloud = document.getElementById('admin-cloud');
+        if (!cloud || !window.TecnomathAuth) return;
+
+        const mostrar = (user, profile) => {
+            const admin = !!user && (
+                window.TecnomathAuth.isAdminEmail?.(user.email) ||
+                profile?.role === 'admin'
+            );
+            cloud.style.display = admin ? 'block' : 'none';
+            window.TecnomathCurrentAdmin = admin ? (profile || { username: window.TecnomathAuth.adminUsername?.(user) || 'Admin', role: 'admin' }) : null;
+        };
+
+        window.TecnomathAuth.refreshAccount()
+            .then(({ user, profile }) => mostrar(user, profile))
+            .catch(() => {
+                const session = window.TecnomathAuth.getSession?.();
+                if (!session?.username) cloud.style.display = 'none';
+            });
+
+        window.TecnomathAuth.authState((user, profile) => mostrar(user, profile))
+            .catch(() => {});
+    }
+
+    function esperarAuthYAdmin() {
+        let intentos = 0;
+        const timer = setInterval(() => {
+            intentos++;
+            if (window.TecnomathAuth && document.getElementById('admin-cloud')) {
+                clearInterval(timer);
+                sincronizarCoronaAdmin();
+            } else if (intentos >= 100) {
+                clearInterval(timer);
+            }
+        }, 100);
+    }
+    esperarAuthYAdmin();
 
     const CATALOG_URL = "data/games.json";
     let loaded = false;
