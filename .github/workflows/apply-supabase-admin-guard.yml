@@ -1,0 +1,30 @@
+name: Apply Supabase Admin Guard
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - 'js/admin-guard.js'
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - name: Apply admin guard
+        run: |
+          cp js/admin-guard-supabase.js js/admin-guard.js
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add js/admin-guard.js
+          if git diff --cached --quiet; then
+            echo 'No admin guard changes.'
+          else
+            git commit -m 'feat(admin): use Supabase admin guard'
+            git push
+          fi
