@@ -10,29 +10,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Tecnomath">
-
-    <!-- ========== FIREBASE SDK ========== -->
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-
-    <!-- ========== CONFIGURACIÓN DE FIREBASE ========== -->
-    <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyCfY0VT4fQ5emX4R2LdUXU3FxjBTtY7Gzc",
-            authDomain: "tecnomath-sync-6058a.firebaseapp.com",
-            databaseURL: "https://tecnomath-sync-6058a-default-rtdb.firebaseio.com",
-            projectId: "tecnomath-sync-6058a",
-            storageBucket: "tecnomath-sync-6058a.firebasestorage.app",
-            messagingSenderId: "237823560752",
-            appId: "1:237823560752:web:adc1e5b396b5a0e0d671f5"
-        };
-        firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
-        console.log('🔥 Firebase inicializado correctamente');
-    </script>
-
-    <!-- Favicon dinámico -->
+<!-- Favicon dinámico -->
     <link rel="icon" id="dynamicFavicon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎮</text></svg>">
 
     <!-- Ruffle para Flash -->
@@ -1366,125 +1344,44 @@
         let syncInitialized = false;
         let pendingGlobalEvent = null;
 
-        function syncEventToFirebase(eventName) {
-            if (!firebase || !firebase.database) return;
-            pendingGlobalEvent = eventName;
-            const dbRef = firebase.database().ref('tecnomath/evento');
-            dbRef.set({
-                nombre: eventName,
-                activo: eventName !== 'stop',
-                timestamp: firebase.database.ServerValue.TIMESTAMP
-            }).then(() => {
-                pendingGlobalEvent = null;
-                console.log('✅ Evento sincronizado en Firebase:', eventName);
-            }).catch(err => {
-                pendingGlobalEvent = null;
-                console.warn('⚠️ Error al sincronizar en Firebase:', err);
-                alert('No se pudo publicar el evento. Inicia sesión y vuelve a intentarlo.');
-            });
+        async function syncEventToFirebase(eventName) {
+            try {
+                const nombre=String(eventName||'stop').trim().toLowerCase();
+                await window.TecnomathSettings.setEvent({nombre,activo:nombre!=='stop',timestamp:new Date().toISOString()});
+                pendingGlobalEvent=null;
+                console.log('☁️ Evento guardado en Supabase:',nombre);
+            } catch(err) {
+                pendingGlobalEvent=null;
+                console.warn('Error al guardar evento en Supabase:',err);
+                alert('No se pudo publicar el evento. Comprueba tu sesión de administrador.');
+            }
         }
 
-        function listenFirebaseEvents() {
-            if (syncInitialized) return;
-            const dbRef = firebase.database().ref('tecnomath/evento');
-            dbRef.on('value', (snapshot) => {
-                const data = snapshot.val();
-                if (!data) return;
-
-                // Mientras se publica un nuevo evento, ignoramos el estado
-                // anterior que Firebase pueda entregar antes de la escritura.
-                if (pendingGlobalEvent && data.nombre !== pendingGlobalEvent) return;
-                if (data.nombre === pendingGlobalEvent) pendingGlobalEvent = null;
-
-                // Los registros antiguos no tenían la marca "activo". Se tratan
-                // como apagados para que un Halloween viejo no se reactive solo.
-                if (data.activo !== true || data.nombre === 'stop') {
-                    if (fairMode) deactivateFairMode(false);
-                    else {
-                        activeEvent = null;
-                        loadThemeCSS(null);
-                        updateFavicon('🎮');
-                        deactivateVisualEffects();
-                        document.getElementById('mainTitle').textContent = 'TECNOMATH';
-                        renderProjects(currentActiveFilter);
-                    }
+        async function listenFirebaseEvents() {
+            if(syncInitialized) return;
+            const settings=window.TecnomathSettings;
+            if(!settings) return;
+            const applyEvent=(data)=>{
+                if(!data) return;
+                const active=data.activo===true && data.nombre && data.nombre!=='stop';
+                if(!active){
+                    if(fairMode) deactivateFairMode(false);
+                    else { activeEvent=null; loadThemeCSS(null); updateFavicon('🎮'); deactivateVisualEffects(); const title=document.getElementById('mainTitle'); if(title) title.textContent='TECNOMATH'; renderProjects(currentActiveFilter); }
                     return;
                 }
-
-                if (!data.nombre) return;
-                const eventName = data.nombre;
-                console.log('📡 Evento recibido desde Firebase:', eventName);
-                if (eventName === activeEvent) return;
-
-                switch (eventName) {
-                    case 'feria':
-                        if (!fairMode) activateFairMode(false);
-                        break;
-                    case 'feriaplus':
-                        if (!fairMode || activeEvent !== 'feriaplus') activateMegaFair(false);
-                        break;
-                    case 'halloween':
-                        if (activeEvent !== 'halloween') activatePermanentTheme(
-                            '🎃 TECNOMATH HALLOWEEN 🎃',
-                            '🎃 ¡MODO HALLOWEEN ACTIVADO! 🦇',
-                            ['#FF6600', '#FFA500', '#800080', '#000000', '#FF4500'],
-                            ['🎃', '🧛', '🦇', '🧙', '🕷️', '🕸️', '👻', '💀'],
-                            'halloween', false
-                        );
-                        break;
-                    case 'navidad':
-                        if (activeEvent !== 'navidad') activatePermanentTheme(
-                            '🎄 TECNOMATH NAVIDAD 🎄',
-                            '🎄 ¡FELIZ NAVIDAD! 🎅',
-                            ['#FF0000', '#FFFFFF', '#00FF00', '#FFD700', '#008000'],
-                            ['🎄', '🎅', '🧝', '🎁', '⛄', '🦌', '🌟', '🔔'],
-                            'navidad', false
-                        );
-                        break;
-                    case 'cumpleanos':
-                        if (activeEvent !== 'cumpleanos') activatePermanentTheme(
-                            '🥳 TECNOMATH CUMPLEAÑOS 🥳',
-                            '🎂 ¡FELIZ CUMPLEAÑOS! 🎉',
-                            ['#FF1493', '#FFD700', '#00BFFF', '#FF4500', '#32CD32'],
-                            ['🎂', '🎈', '🎉', '🥳', '🎁', '🎊', '🎵', '🕺'],
-                            'cumpleanos', false
-                        );
-                        break;
-                    case 'mundial':
-                        if (activeEvent !== 'mundial') activatePermanentTheme(
-                            '🏆 TECNOMATH MUNDIAL 🏆',
-                            '⚽ ¡MODO MUNDIAL ACTIVADO! 🌍',
-                            ['#FFD700', '#009A3E', '#FFFFFF', '#008000', '#FF4500'],
-                            ['⚽', '🏆', '🌍', '🇦🇷', '🇧🇷', '🇫🇷', '🇪🇸', '🇩🇪', '🥅'],
-                            'mundial', false
-                        );
-                        break;
-                    case 'primavera':
-                    case 'espacio':
-                    case 'ciencia': {
-                        const config = getEventConfig(eventName);
-                        if (config && activeEvent !== eventName) activatePermanentTheme(config.title, config.notification, config.confettiColors, config.emojis, eventName, false);
-                        break;
-                    }
-                    case 'stop':
-                        if (fairMode) deactivateFairMode(false);
-                        else {
-                            activeEvent = null;
-                            loadThemeCSS(null);
-                            updateFavicon('🎮');
-                            deactivateVisualEffects();
-                            document.getElementById('mainTitle').textContent = 'TECNOMATH';
-                            renderProjects(currentActiveFilter);
-                        }
-                        break;
-                    default:
-                        break;
-                }
-            }, (error) => {
-                console.warn('No se pudieron cargar los eventos globales:', error.code);
-            });
-            syncInitialized = true;
-            console.log('📡 Escuchando cambios en Firebase...');
+                const eventName=String(data.nombre).trim().toLowerCase();
+                if(!eventName || eventName===activeEvent) return;
+                if(eventName==='feria'){ if(!fairMode) activateFairMode(false); return; }
+                if(eventName==='feriaplus'){ if(!fairMode || activeEvent!=='feriaplus') activateMegaFair(false); return; }
+                const config=getEventConfig(eventName);
+                if(config) activatePermanentTheme(config.title,config.notification,config.confettiColors,config.emojis,eventName,false);
+            };
+            try {
+                applyEvent(await settings.getEvent());
+                settings.subscribeEvents(applyEvent);
+                syncInitialized=true;
+                console.log('📡 Eventos globales conectados a Supabase Realtime.');
+            } catch(error) { console.warn('No se pudieron cargar eventos globales desde Supabase:',error); }
         }
 
         // ============================================================
@@ -2181,7 +2078,7 @@
 
             // Debe existir una sesión de Tecnomath, permisos de administrador
             // y una sesión activa de Firebase para publicar globalmente.
-            if (!user || !Tecnomath.isAdmin() || !firebase.auth().currentUser) {
+            if (!user || !Tecnomath.isAdmin()) {
                 alert('⚠️ Inicia sesión como administrador para publicar un evento para todos los dispositivos.');
                 return;
             }
@@ -2349,11 +2246,8 @@
             this.disabled = true;
             this.textContent = 'SALIENDO…';
             try {
-                await firebase.auth().signOut();
-            } catch (error) {
-                console.warn('No se pudo cerrar la sesión de Firebase.', error);
+                await Tecnomath.logout();
             } finally {
-                Tecnomath.logout();
                 updateUserBar();
             }
         });
@@ -2417,8 +2311,8 @@
 
         console.log('🎮 Sistema de juegos cargado correctamente.');
         console.log('📌 Códigos disponibles: feria2026, feriaoff, halloween, navidad, cumpleanos, feriaplus, mundial, stop');
-        console.log('🔥 Firebase sincronización activa.');
-        console.log('📡 Publica eventos globales con el código de administrador.');
+        console.log('☁️ Supabase es la fuente oficial de eventos y temáticas.');
+        console.log('📡 Publica eventos globales mediante Supabase Realtime.');
         console.log('📱 Código QR con logo de Tecnomath generado en el footer.');
         console.log('🏗️ Juegos de Tower Building incluidos.');
         console.log('🎨 Escenas temáticas de eventos activas: fondos y efectos adaptados a cada celebración.');
