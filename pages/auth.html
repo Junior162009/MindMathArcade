@@ -1,1 +1,48 @@
-<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Tecnomath · Acceso Supabase</title><style>body{font-family:Arial,sans-serif;background:#080812;color:#fff;min-height:100vh;display:grid;place-items:center;margin:0}.card{width:min(420px,92vw);background:#111124;border:1px solid #00ffff;border-radius:18px;padding:28px;box-shadow:0 0 30px #00ffff22}h1{text-align:center;color:#00ffff}input,button{width:100%;padding:13px;margin:6px 0;border-radius:9px;box-sizing:border-box}input{background:#080812;color:#fff;border:1px solid #444}button{border:0;background:#ff00aa;color:#fff;font-weight:bold;cursor:pointer}button.secondary{background:transparent;border:1px solid #00ffff;color:#00ffff}.msg{min-height:30px;color:#ff77cc;text-align:center;margin-top:10px}</style></head><body><main class="card"><h1>🧮 Tecnomath</h1><p>Acceso migrado a Supabase</p><div id="login"><input id="email" type="email" placeholder="Correo"><input id="password" type="password" placeholder="Contraseña"><button id="enter">Entrar</button><button class="secondary" id="create">Crear cuenta</button><button class="secondary" id="recover">Recuperar contraseña</button></div><div id="register" hidden><input id="username" placeholder="Usuario"><input id="rEmail" type="email" placeholder="Correo"><input id="rPassword" type="password" placeholder="Contraseña"><button id="signup">Crear cuenta</button><button class="secondary" id="back">Volver</button></div><div class="msg" id="msg"></div></main><script src="../js/tecnomath-auth.js"></script><script>(async()=>{const $=id=>document.getElementById(id),msg=t=>$('msg').textContent=t;const home=()=>location.href='../index.html';$('create').onclick=()=>{$('login').hidden=true;$('register').hidden=false};$('back').onclick=()=>{$('register').hidden=true;$('login').hidden=false};$('enter').onclick=async()=>{try{const r=await TecnomathAuth.signIn($('email').value,$('password').value);msg('Bienvenido '+r.profile.username);setTimeout(home,500)}catch(e){msg(e.message)}};$('signup').onclick=async()=>{try{const r=await TecnomathAuth.signUp($('rEmail').value,$('rPassword').value,$('username').value);msg(r.session?'Cuenta creada':'Revisa tu correo para confirmar');if(r.session)setTimeout(home,500)}catch(e){msg(e.message)}};$('recover').onclick=async()=>{try{await TecnomathAuth.sendRecovery($('email').value);msg('Revisa tu correo para recuperar el acceso')}catch(e){msg(e.message)}};})();</script></body></html>
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tecnomath · Acceso</title>
+<style>
+*{box-sizing:border-box}body{font-family:Arial,sans-serif;background:#080812;color:#fff;min-height:100vh;display:grid;place-items:center;margin:0;padding:20px}.card{width:min(430px,94vw);background:#111124;border:1px solid #00ffff;border-radius:18px;padding:28px;box-shadow:0 0 30px #00ffff22}h1{text-align:center;color:#00ffff;margin-top:0}.subtitle{text-align:center;color:#bbb}.divider{display:flex;align-items:center;gap:10px;color:#777;margin:16px 0}.divider:before,.divider:after{content:"";height:1px;background:#333;flex:1}input,button{width:100%;padding:13px;margin:6px 0;border-radius:9px;font-size:15px}input{background:#080812;color:#fff;border:1px solid #444}button{border:0;background:#ff00aa;color:#fff;font-weight:bold;cursor:pointer}.google{background:#fff;color:#202124;border:1px solid #dadce0;display:flex;align-items:center;justify-content:center;gap:10px;font-weight:600}.google:hover{background:#f8f9fa}.google-icon{width:20px;height:20px;display:block}.secondary{background:transparent;border:1px solid #00ffff;color:#00ffff}.msg{min-height:30px;color:#ff77cc;text-align:center;margin-top:10px;line-height:1.4}
+</style>
+</head>
+<body>
+<main class="card">
+<h1>🧮 Tecnomath</h1>
+<p class="subtitle">Inicia sesión en tu cuenta</p>
+<div id="login">
+<button class="google" id="googleLogin" type="button"><svg class="google-icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="#4285F4" d="M21.35 12.23c0-.79-.07-1.55-.22-2.27H12v4.3h5.24a4.48 4.48 0 0 1-1.94 2.94v2.45h3.14c1.84-1.69 2.91-4.18 2.91-7.42z"/><path fill="#34A853" d="M12 21.5c2.63 0 4.84-.87 6.45-2.35l-3.14-2.45c-.87.58-1.98.92-3.31.92-2.54 0-4.69-1.72-5.46-4.03H3.3v2.53A9.74 9.74 0 0 0 12 21.5z"/><path fill="#FBBC05" d="M6.54 13.59A5.86 5.86 0 0 1 6.23 12c0-.55.1-1.09.31-1.59V7.88H3.3A9.75 9.75 0 0 0 2.25 12c0 1.57.38 3.05 1.05 4.12l3.24-2.53z"/><path fill="#EA4335" d="M12 6.38c1.43 0 2.72.49 3.73 1.46l2.8-2.8C16.84 3.38 14.63 2.5 12 2.5a9.74 9.74 0 0 0-8.7 5.38l3.24 2.53C7.31 8.1 9.46 6.38 12 6.38z"/></svg><span>Continuar con Google</span></button>
+<div class="divider">o continúa con correo</div>
+<input id="email" type="email" placeholder="Correo" autocomplete="email">
+<input id="password" type="password" placeholder="Contraseña" autocomplete="current-password">
+<button id="enter" type="button">Entrar</button>
+<button class="secondary" id="create" type="button">Crear cuenta</button>
+<button class="secondary" id="recover" type="button">Recuperar contraseña</button>
+</div>
+<div id="register" hidden>
+<input id="username" placeholder="Usuario" autocomplete="username">
+<input id="rEmail" type="email" placeholder="Correo" autocomplete="email">
+<input id="rPassword" type="password" placeholder="Contraseña" autocomplete="new-password">
+<button id="signup" type="button">Crear cuenta</button>
+<button class="secondary" id="back" type="button">Volver</button>
+</div>
+<div class="msg" id="msg" role="status"></div>
+</main>
+<script src="../js/tecnomath-auth.js"></script>
+<script>
+(async()=>{
+const $=id=>document.getElementById(id),msg=t=>$('msg').textContent=t;
+const home=()=>location.href='../index.html';
+$('googleLogin').onclick=async()=>{try{msg('Conectando con Google…');const db=await TecnomathAuth.getClient();const redirectTo=new URL('./auth.html',location.href).href;const {error}=await db.auth.signInWithOAuth({provider:'google',options:{redirectTo}});if(error)throw error}catch(e){console.error(e);msg(e.message||'No se pudo iniciar sesión con Google.')}};
+$('create').onclick=()=>{$('login').hidden=true;$('register').hidden=false};
+$('back').onclick=()=>{$('register').hidden=true;$('login').hidden=false};
+$('enter').onclick=async()=>{try{const r=await TecnomathAuth.signIn($('email').value,$('password').value);msg('Bienvenido '+r.profile.username);setTimeout(home,500)}catch(e){msg(e.message)}};
+$('signup').onclick=async()=>{try{const r=await TecnomathAuth.signUp($('rEmail').value,$('rPassword').value,$('username').value);msg(r.session?'Cuenta creada':'Revisa tu correo para confirmar');if(r.session)setTimeout(home,500)}catch(e){msg(e.message)}};
+$('recover').onclick=async()=>{try{await TecnomathAuth.sendRecovery($('email').value);msg('Revisa tu correo para recuperar el acceso')}catch(e){msg(e.message)}};
+const db=await TecnomathAuth.getClient();const {data:{session}}=await db.auth.getSession();if(session){try{await TecnomathAuth.ensureProfile(session.user);home()}catch(e){console.error(e)}}
+})();
+</script>
+</body>
+</html>
