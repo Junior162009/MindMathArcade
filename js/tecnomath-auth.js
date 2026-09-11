@@ -2,7 +2,7 @@
 (function () {
   'use strict';
   const SUPABASE_URL='https://xdszveoxdrdnwwzzvkav.supabase.co';
-  const SUPABASE_KEY='sb_publishable_xwUE0a1N0g0rb7aOLyXPAsA_kOAX9bOA';
+  const SUPABASE_KEY='sb_publishable_xwUE0aN1g0rb7aOLyXPAsA_kOAX9bOA';
   const PROD_AUTH_URL='https://tecnomath.online/pages/auth.html';
   const PROD_RECOVERY_URL='https://tecnomath.online/pages/auth.html?mode=recovery';
   const ADMIN_EMAILS=['delahozbarcelojunior@gmail.com','nicolenatera26@gmail.com','mateobarbosamatos@gmail.com','jandresvf23@gmail.com'];
