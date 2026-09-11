@@ -5,39 +5,89 @@
     "use strict";
 
     // El portal principal debe cargar SIEMPRE el sistema oficial de
-    // autenticación Supabase. Sin este cargador, index.html muestra
-    // "Invitado" aunque exista una sesión válida.
+    // autenticación Supabase.
     function cargarAutenticacion() {
         if (window.TecnomathAuth) return;
         if (document.querySelector('script[data-tecnomath-auth]')) return;
         const script = document.createElement('script');
-        script.src = '/js/tecnomath-auth.js?v=20260911-6';
+        script.src = '/js/tecnomath-auth.js?v=20260911-7';
         script.dataset.tecnomathAuth = 'true';
         script.async = false;
         document.head.appendChild(script);
     }
     cargarAutenticacion();
 
-    // 👑 Admin: el sistema anterior lo mostraba mediante Firebase.
-    // Ahora la fuente oficial es Supabase Auth + tecnomath_profiles.
+    // 👑 Admin: sustituye la nube antigua por el acceso al NUEVO panel.
     function sincronizarCoronaAdmin() {
-        const cloud = document.getElementById('admin-cloud');
-        if (!cloud || !window.TecnomathAuth) return;
+        const oldCloud = document.getElementById('admin-cloud');
+        if (oldCloud) {
+            oldCloud.style.display = 'none';
+            oldCloud.setAttribute('aria-hidden', 'true');
+        }
+
+        let crown = document.getElementById('admin-crown');
+        if (!crown) {
+            crown = document.createElement('a');
+            crown.id = 'admin-crown';
+            crown.href = '/pages/admin/index.html';
+            crown.title = 'Abrir panel de administración';
+            crown.setAttribute('aria-label', 'Abrir panel de administración');
+            crown.textContent = '👑';
+            Object.assign(crown.style, {
+                display: 'none',
+                position: 'fixed',
+                bottom: '20px',
+                right: '20px',
+                zIndex: '1001',
+                width: '58px',
+                height: '58px',
+                borderRadius: '50%',
+                alignItems: 'center',
+                justifyContent: 'center',
+                textDecoration: 'none',
+                fontSize: '32px',
+                lineHeight: '58px',
+                textAlign: 'center',
+                cursor: 'pointer',
+                background: 'linear-gradient(145deg,#ffe600,#ff9d00)',
+                border: '2px solid #fff0a8',
+                boxShadow: '0 0 14px #ffe600, 0 0 30px rgba(255,230,0,.55)',
+                transition: 'transform .2s ease, box-shadow .2s ease'
+            });
+            crown.addEventListener('mouseenter', () => {
+                crown.style.transform = 'scale(1.1)';
+                crown.style.boxShadow = '0 0 20px #ffe600, 0 0 42px rgba(255,230,0,.75)';
+            });
+            crown.addEventListener('mouseleave', () => {
+                crown.style.transform = 'scale(1)';
+                crown.style.boxShadow = '0 0 14px #ffe600, 0 0 30px rgba(255,230,0,.55)';
+            });
+            document.body.appendChild(crown);
+        }
 
         const mostrar = (user, profile) => {
             const admin = !!user && (
                 window.TecnomathAuth.isAdminEmail?.(user.email) ||
                 profile?.role === 'admin'
             );
-            cloud.style.display = admin ? 'block' : 'none';
-            window.TecnomathCurrentAdmin = admin ? (profile || { username: window.TecnomathAuth.adminUsername?.(user) || 'Admin', role: 'admin' }) : null;
+            crown.style.display = admin ? 'flex' : 'none';
+            window.TecnomathCurrentAdmin = admin ? (profile || {
+                username: window.TecnomathAuth.adminUsername?.(user) || 'Admin',
+                role: 'admin'
+            }) : null;
         };
 
         window.TecnomathAuth.refreshAccount()
             .then(({ user, profile }) => mostrar(user, profile))
-            .catch(() => {
-                const session = window.TecnomathAuth.getSession?.();
-                if (!session?.username) cloud.style.display = 'none';
+            .catch(async () => {
+                // Si falla la lectura del perfil por RLS, el correo de admin
+                // sigue siendo suficiente para mostrar el acceso al panel.
+                try {
+                    const user = await window.TecnomathAuth.currentUser();
+                    mostrar(user, null);
+                } catch (_) {
+                    crown.style.display = 'none';
+                }
             });
 
         window.TecnomathAuth.authState((user, profile) => mostrar(user, profile))
@@ -48,7 +98,7 @@
         let intentos = 0;
         const timer = setInterval(() => {
             intentos++;
-            if (window.TecnomathAuth && document.getElementById('admin-cloud')) {
+            if (window.TecnomathAuth && document.body) {
                 clearInterval(timer);
                 sincronizarCoronaAdmin();
             } else if (intentos >= 100) {
