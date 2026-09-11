@@ -3,6 +3,8 @@
   'use strict';
   const SUPABASE_URL='https://xdszveoxdrdnwwzzvkav.supabase.co';
   const SUPABASE_KEY='sb_publishable_xwUE0aN1g0rb7aOLyXPAsA_kOAX9bOA';
+  const PROD_AUTH_URL='https://tecnomath.online/pages/auth.html';
+  const PROD_RECOVERY_URL='https://tecnomath.online/pages/auth.html?mode=recovery';
   const ADMIN_EMAILS=['delahozbarcelojunior@gmail.com','nicolenatera26@gmail.com','mateobarbosamatos@gmail.com','jandresvf23@gmail.com'];
   const ADMIN_NAMES={'delahozbarcelojunior@gmail.com':'Junior','nicolenatera26@gmail.com':'Nicole','mateobarbosamatos@gmail.com':'Mateo','jandresvf23@gmail.com':'Jaider'};
   const SESSION_KEY='tecnomath_session';
@@ -15,14 +17,14 @@
   async function ensureProfile(user,username,extra={}){if(!user)return null;const db=await getClient();const existing=await getProfile(user);if(existing){setSession(existing.username);return existing}const email=emailOf(user);const admin=isAdminEmail(email);const fallback=admin?adminUsername(user):(username||user.user_metadata?.username||email.split('@')[0]);const payload={id:user.id,username:String(fallback).trim(),display_name:extra.display_name||fallback,phone:extra.phone||user.phone||null};const {data,error}=await db.from('tecnomath_profiles').insert(payload).select().single();if(error)throw error;return data}
   async function currentUser(){const db=await getClient();const {data,error}=await db.auth.getUser();return error?null:data.user||null}
   async function signIn(email,password){const db=await getClient();const {data,error}=await db.auth.signInWithPassword({email:String(email).trim(),password});if(error)throw error;const profile=await ensureProfile(data.user);setSession(profile.username);window.TecnomathCurrentAdmin=profile.role==='admin'?profile:null;return{user:data.user,profile}}
-  async function signUp(email,password,username,phone){const db=await getClient();const redirectTo=new URL('./auth.html',location.href).href;const {data,error}=await db.auth.signUp({email:String(email).trim(),password,options:{emailRedirectTo:redirectTo,data:{username:String(username).trim(),phone:phone||null}}});if(error)throw error;if(data.user&&data.session)await ensureProfile(data.user,username,{phone});return data}
+  async function signUp(email,password,username,phone){const db=await getClient();const {data,error}=await db.auth.signUp({email:String(email).trim(),password,options:{emailRedirectTo:PROD_AUTH_URL,data:{username:String(username).trim(),phone:phone||null}}});if(error)throw error;if(data.user&&data.session)await ensureProfile(data.user,username,{phone});return data}
   async function signOut(){const db=await getClient();await db.auth.signOut();clearSession();window.TecnomathCurrentAdmin=null}
-  async function sendRecovery(email){const db=await getClient();const redirectTo=new URL('./auth.html?mode=recovery',location.href).href;const {error}=await db.auth.resetPasswordForEmail(String(email).trim(),{redirectTo});if(error)throw error}
+  async function sendRecovery(email){const db=await getClient();const {error}=await db.auth.resetPasswordForEmail(String(email).trim(),{redirectTo:PROD_RECOVERY_URL});if(error)throw error}
   async function updatePassword(password){const db=await getClient();const {error}=await db.auth.updateUser({password});if(error)throw error}
   async function updateEmail(email){const db=await getClient();const {error}=await db.auth.updateUser({email:String(email).trim()});if(error)throw error}
   function setSession(username){if(username)localStorage.setItem(SESSION_KEY,JSON.stringify({username:String(username).trim()}))}function clearSession(){localStorage.removeItem(SESSION_KEY)}function getSession(){try{return JSON.parse(localStorage.getItem(SESSION_KEY)||'null')}catch(_){clearSession();return null}}
   async function isAdmin(){const u=await currentUser();if(!u)return false;const p=await getProfile(u).catch(()=>null);return isAdminEmail(u.email)||p?.role==='admin'}
   async function authState(callback){const db=await getClient();const {data}=db.auth.onAuthStateChange(async(_event,session)=>{const u=session?.user||null;if(!u){clearSession();callback(null,null);return}try{const p=await ensureProfile(u);window.TecnomathCurrentAdmin=p?.role==='admin'?p:null;callback(u,p)}catch(e){console.error(e);callback(u,null)}});return data.subscription}
-  window.TecnomathAuth={SUPABASE_URL,ADMIN_EMAILS,ADMIN_NAMES,getClient,currentUser,getProfile,ensureProfile,signIn,signUp,signOut,sendRecovery,updatePassword,updateEmail,isAdmin,authState,setSession,clearSession,getSession,isAdminEmail,adminUsername};
+  window.TecnomathAuth={SUPABASE_URL,PROD_AUTH_URL,PROD_RECOVERY_URL,ADMIN_EMAILS,ADMIN_NAMES,getClient,currentUser,getProfile,ensureProfile,signIn,signUp,signOut,sendRecovery,updatePassword,updateEmail,isAdmin,authState,setSession,clearSession,getSession,isAdminEmail,adminUsername};
   window.Tecnomath=Object.assign({},window.Tecnomath||{},{setSession,logout:signOut,getCurrentUser:getSession,getAdminEmails:()=>[...ADMIN_EMAILS],isAdmin:()=>!!window.TecnomathCurrentAdmin,setAdmin:()=>!!window.TecnomathCurrentAdmin,unsetAdmin:clearSession});
 })();
