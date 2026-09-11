@@ -5,165 +5,61 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Tecnomath · Iniciar sesión</title>
 <style>
-body{font-family:Arial,sans-serif;background:#080812;color:#fff;min-height:100vh;display:grid;place-items:center;margin:0}
-.card{width:min(420px,92vw);background:#111124;border:1px solid #00ffff;border-radius:18px;padding:28px;box-shadow:0 0 30px #00ffff22}
-h1{text-align:center;color:#00ffff}
-input,button{width:100%;padding:13px;margin:6px 0;border-radius:9px;box-sizing:border-box}
-input{background:#080812;color:#fff;border:1px solid #444}
-button{border:0;background:#ff00aa;color:#fff;font-weight:bold;cursor:pointer}
-.google{background:#fff;color:#202124;border:1px solid #dadce0;display:flex;align-items:center;justify-content:center;gap:10px}
-.google:hover{background:#f7f7f7}.google svg{width:20px;height:20px}
-.secondary{background:transparent;border:1px solid #00ffff;color:#00ffff}
-.divider{display:flex;align-items:center;gap:10px;color:#777;margin:12px 0}
-.divider:before,.divider:after{content:'';height:1px;background:#333;flex:1}
-.msg{min-height:30px;color:#ff77cc;text-align:center;margin-top:10px}
-.small{font-size:12px;color:#aaa;text-align:center}
+body{font-family:Arial,sans-serif;background:#080812;color:#fff;min-height:100vh;display:grid;place-items:center;margin:0}.card{width:min(420px,92vw);background:#111124;border:1px solid #00ffff;border-radius:18px;padding:28px;box-shadow:0 0 30px #00ffff22}h1{text-align:center;color:#00ffff}input,button{width:100%;padding:13px;margin:6px 0;border-radius:9px;box-sizing:border-box}input{background:#080812;color:#fff;border:1px solid #444}button{border:0;background:#ff00aa;color:#fff;font-weight:bold;cursor:pointer}.google{background:#fff;color:#202124;border:1px solid #dadce0;display:flex;align-items:center;justify-content:center;gap:10px}.google:hover{background:#f7f7f7}.google svg{width:20px;height:20px}.secondary{background:transparent;border:1px solid #00ffff;color:#00ffff}.divider{display:flex;align-items:center;gap:10px;color:#777;margin:12px 0}.divider:before,.divider:after{content:'';height:1px;background:#333;flex:1}.msg{min-height:30px;color:#ff77cc;text-align:center;margin-top:10px}.small{font-size:12px;color:#aaa;text-align:center}
 </style>
 </head>
 <body>
 <main class="card">
 <h1>🧮 Tecnomath</h1>
 <p>Inicia sesión en tu cuenta</p>
-
 <div id="login">
-<button id="googleLogin" class="google" type="button">
-<svg viewBox="0 0 24 24" aria-hidden="true">
-<path fill="#4285F4" d="M21.35 12.23c0-.79-.07-1.55-.23-2.23H12v4.22h5.23a4.47 4.47 0 0 1-1.94 2.93v2.39h3.14c1.84-1.69 2.92-4.18 2.92-7.31z"/>
-<path fill="#34A853" d="M12 21.99c2.63 0 4.84-.87 6.45-2.45l-3.14-2.39c-.87.58-1.98.92-3.31.92-2.55 0-4.71-1.72-5.48-4.03H3.27v2.46A9.74 9.74 0 0 0 12 21.99z"/>
-<path fill="#FBBC05" d="M6.52 14.04a5.86 5.86 0 0 1 0-3.73V7.85H3.27a9.99 9.99 0 0 0 0 8.65l3.25-2.46C5.69 11.99 5.69 12.01 6.52 14.04z"/>
-<path fill="#EA4335" d="M12 6.28c1.43 0 2.72.49 3.74 1.45l2.8-2.8C16.83 3.3 14.63 2.4 12 2.4a9.74 9.74 0 0 0-8.73 5.45l3.25 2.46C7.81 8 9.97 6.28 12 6.28z"/>
-</svg>
-Continuar con Google
-</button>
+<button id="googleLogin" class="google" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#4285F4" d="M21.35 12.23c0-.79-.07-1.55-.23-2.23H12v4.22h5.23a4.47 4.47 0 0 1-1.94 2.93v2.39h3.14c1.84-1.69 2.92-4.18 2.92-7.31z"/><path fill="#34A853" d="M12 21.99c2.63 0 4.84-.87 6.45-2.45l-3.14-2.39c-.87.58-1.98.92-3.31.92-2.55 0-4.71-1.72-5.48-4.03H3.27v2.46A9.74 9.74 0 0 0 12 21.99z"/><path fill="#FBBC05" d="M6.52 14.04a5.86 5.86 0 0 1 0-3.73V7.85H3.27a9.99 9.99 0 0 0 0 8.65l3.25-2.46C5.69 11.99 5.69 12.01 6.52 14.04z"/><path fill="#EA4335" d="M12 6.28c1.43 0 2.72.49 3.74 1.45l2.8-2.8C16.83 3.3 14.63 2.4 12 2.4a9.74 9.74 0 0 0-8.73 5.45l3.25 2.46C7.81 8 9.97 6.28 12 6.28z"/></svg>Continuar con Google</button>
 <div class="divider">o</div>
-<input id="email" type="email" placeholder="Correo" autocomplete="email">
-<input id="password" type="password" placeholder="Contraseña" autocomplete="current-password">
-<button id="enter" type="button">Entrar</button>
-<button class="secondary" id="create" type="button">Crear cuenta</button>
-<button class="secondary" id="recover" type="button">Recuperar contraseña</button>
+<input id="email" type="email" placeholder="Correo" autocomplete="email"><input id="password" type="password" placeholder="Contraseña" autocomplete="current-password">
+<button id="enter" type="button">Entrar</button><button class="secondary" id="create" type="button">Crear cuenta</button><button class="secondary" id="recover" type="button">Recuperar contraseña</button>
 </div>
-
-<div id="register" hidden>
-<input id="username" placeholder="Usuario" autocomplete="username">
-<input id="rEmail" type="email" placeholder="Correo" autocomplete="email">
-<input id="rPassword" type="password" placeholder="Contraseña" autocomplete="new-password">
-<button id="signup" type="button">Crear cuenta</button>
-<button class="secondary" id="back" type="button">Volver</button>
-</div>
-
-<div class="msg" id="msg" aria-live="polite"></div>
-<p class="small">Google te permitirá elegir la cuenta que quieres usar.</p>
+<div id="register" hidden><input id="username" placeholder="Usuario" autocomplete="username"><input id="rEmail" type="email" placeholder="Correo" autocomplete="email"><input id="rPassword" type="password" placeholder="Contraseña" autocomplete="new-password"><button id="signup" type="button">Crear cuenta</button><button class="secondary" id="back" type="button">Volver</button></div>
+<div class="msg" id="msg" aria-live="polite"></div><p class="small">Google te permitirá elegir la cuenta que quieres usar.</p>
 </main>
-
 <script src="../js/tecnomath-auth.js"></script>
 <script>
 'use strict';
-
 (async function(){
-  const $=id=>document.getElementById(id);
-  const msg=text=>$('msg').textContent=text||'';
-  const PROD_AUTH_URL='https://tecnomath.online/pages/auth.html';
-  const home=()=>location.replace('https://tecnomath.online/index.html');
-
-  // IMPORTANTE: entrar normalmente a auth.html nunca navega ni cierra la página.
-  // Solo tratamos la URL como callback si realmente contiene parámetros de OAuth.
-  const url=new URL(window.location.href);
-  const hasOAuthCode=url.searchParams.has('code');
-  const hasOAuthError=url.searchParams.has('error')||url.hash.includes('error=');
-  const hasOAuthToken=url.hash.includes('access_token=')||url.hash.includes('refresh_token=');
-  const isOAuthCallback=hasOAuthCode||hasOAuthError||hasOAuthToken;
-
-  // Google solamente se inicia después de pulsar el botón.
-  $('googleLogin').addEventListener('click',async()=>{
-    try{
-      msg('Abriendo Google…');
-      const db=await TecnomathAuth.getClient();
-      const {error}=await db.auth.signInWithOAuth({
-        provider:'google',
-        options:{
-          redirectTo:PROD_AUTH_URL,
-          queryParams:{prompt:'select_account'}
-        }
-      });
-      if(error)throw error;
-    }catch(e){
-      console.error(e);
-      msg(e.message||'No se pudo iniciar sesión con Google.');
-    }
-  });
-
-  $('create').onclick=()=>{$('login').hidden=true;$('register').hidden=false;msg('');};
-  $('back').onclick=()=>{$('register').hidden=true;$('login').hidden=false;msg('');};
-
-  $('enter').onclick=async()=>{
-    try{
-      const r=await TecnomathAuth.signIn($('email').value,$('password').value);
-      msg('Bienvenido '+r.profile.username);
-      setTimeout(home,500);
-    }catch(e){
-      console.error(e);
-      msg(e.message||'No se pudo iniciar sesión.');
-    }
-  };
-
-  $('signup').onclick=async()=>{
-    try{
-      const r=await TecnomathAuth.signUp($('rEmail').value,$('rPassword').value,$('username').value);
-      msg(r.session?'Cuenta creada':'Revisa tu correo para confirmar');
-      if(r.session)setTimeout(home,500);
-    }catch(e){
-      console.error(e);
-      msg(e.message||'No se pudo crear la cuenta.');
-    }
-  };
-
-  $('recover').onclick=async()=>{
-    try{
-      await TecnomathAuth.sendRecovery($('email').value);
-      msg('Revisa tu correo para recuperar el acceso');
-    }catch(e){
-      console.error(e);
-      msg(e.message||'No se pudo enviar el correo de recuperación.');
-    }
-  };
-
-  // El cliente Supabase detecta automáticamente los callbacks OAuth al crearse.
-  // No usamos getSession() para redirigir durante la carga normal y nunca hacemos
-  // location.replace/assign/href ni window.close() desde la inicialización.
-  try{
-    const db=await TecnomathAuth.getClient();
-
-    db.auth.onAuthStateChange((event,session)=>{
-      if(!isOAuthCallback)return;
-      if(session?.user){
-        msg('Inicio de sesión con Google completado.');
-        // Limpiar code/tokens/error de la barra de direcciones sin navegar.
-        history.replaceState({},document.title,PROD_AUTH_URL);
-        // Crear/recuperar el perfil fuera del callback inmediato de Auth para evitar
-        // operaciones anidadas dentro del lock interno de Supabase Auth.
-        setTimeout(async()=>{
-          try{
-            const profile=await TecnomathAuth.ensureProfile(session.user);
-            if(profile?.role==='admin')window.TecnomathCurrentAdmin=profile;
-          }catch(e){console.error('No se pudo sincronizar el perfil:',e);}
-        },0);
-      }else if(event==='SIGNED_OUT'){
-        msg('La sesión de Google no está activa.');
-      }
-    });
-
-    if(isOAuthCallback){
-      const oauthError=url.searchParams.get('error')||new URLSearchParams(url.hash.substring(1)).get('error');
-      const oauthErrorDescription=url.searchParams.get('error_description')||new URLSearchParams(url.hash.substring(1)).get('error_description');
-      if(oauthError){
-        msg(oauthErrorDescription?decodeURIComponent(oauthErrorDescription):'No se pudo completar el inicio de sesión con Google.');
-      }
-    }
-  }catch(e){
-    console.error('No se pudo inicializar Supabase Auth:',e);
-    // El formulario permanece visible aunque Supabase tarde o falle al cargar.
-    msg('El servicio de autenticación no está disponible temporalmente.');
+ const $=id=>document.getElementById(id), msg=t=>$('msg').textContent=t||'';
+ const AUTH_URL='https://tecnomath.online/pages/auth.html', HOME_URL='https://tecnomath.online/index.html';
+ const url=new URL(location.href), code=url.searchParams.get('code'), oauthError=url.searchParams.get('error')||new URLSearchParams(location.hash.slice(1)).get('error');
+ const oauthErrorDescription=url.searchParams.get('error_description')||new URLSearchParams(location.hash.slice(1)).get('error_description');
+ const hasOAuthCallback=!!(code||oauthError||location.hash.includes('access_token=')||location.hash.includes('refresh_token='));
+ const goHome=()=>location.replace(HOME_URL);
+ $('googleLogin').onclick=async()=>{try{msg('Abriendo Google…');const db=await TecnomathAuth.getClient();const {error}=await db.auth.signInWithOAuth({provider:'google',options:{redirectTo:AUTH_URL,queryParams:{prompt:'select_account'}}});if(error)throw error}catch(e){console.error(e);msg(e.message||'No se pudo iniciar sesión con Google.')}};
+ $('create').onclick=()=>{$('login').hidden=true;$('register').hidden=false;msg('')}; $('back').onclick=()=>{$('register').hidden=true;$('login').hidden=false;msg('')};
+ $('enter').onclick=async()=>{try{const r=await TecnomathAuth.signIn($('email').value,$('password').value);msg('Bienvenido '+r.profile.username);setTimeout(goHome,400)}catch(e){console.error(e);msg(e.message||'No se pudo iniciar sesión.')}};
+ $('signup').onclick=async()=>{try{const r=await TecnomathAuth.signUp($('rEmail').value,$('rPassword').value,$('username').value);msg(r.session?'Cuenta creada':'Revisa tu correo para confirmar');if(r.session)setTimeout(goHome,400)}catch(e){console.error(e);msg(e.message||'No se pudo crear la cuenta.')}};
+ $('recover').onclick=async()=>{try{await TecnomathAuth.sendRecovery($('email').value);msg('Revisa tu correo para recuperar el acceso')}catch(e){console.error(e);msg(e.message||'No se pudo enviar el correo de recuperación.')}};
+ try{
+  const db=await TecnomathAuth.getClient();
+  if(oauthError){msg(oauthErrorDescription?decodeURIComponent(oauthErrorDescription):'Google no pudo completar el inicio de sesión.');return;}
+  if(code){
+   msg('Confirmando sesión de Google…');
+   const {data,error}=await db.auth.exchangeCodeForSession(code);
+   if(error)throw error;
+   if(!data.session?.user)throw new Error('Google no devolvió una sesión válida.');
+   const profile=await TecnomathAuth.ensureProfile(data.session.user);
+   if(profile?.role==='admin')window.TecnomathCurrentAdmin=profile;
+   history.replaceState({},document.title,AUTH_URL);
+   msg('Sesión de Google activa. Entrando…');
+   setTimeout(goHome,500);
+   return;
   }
+  if(location.hash.includes('access_token=')||location.hash.includes('refresh_token=')){
+   const {data}=await db.auth.getSession();
+   if(data.session?.user){const profile=await TecnomathAuth.ensureProfile(data.session.user);if(profile?.role==='admin')window.TecnomathCurrentAdmin=profile;history.replaceState({},document.title,AUTH_URL);msg('Sesión de Google activa. Entrando…');setTimeout(goHome,500);return;}
+  }
+  if(!hasOAuthCallback){
+   const {data}=await db.auth.getSession();
+   if(data.session?.user){const profile=await TecnomathAuth.ensureProfile(data.session.user);msg('Sesión activa como '+(profile?.username||data.session.user.email||'Usuario')+'. Entrando…');setTimeout(goHome,400);}
+  }
+ }catch(e){console.error('Supabase OAuth:',e);msg(e.message||'No se pudo activar la sesión de Google.');}
 })();
 </script>
 </body>
