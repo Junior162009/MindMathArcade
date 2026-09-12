@@ -2,10 +2,13 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#0b1020">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="format-detection" content="telephone=no">
+<link rel="icon" type="image/svg+xml" href="icon.svg">
 <title>🍕 Entrega la Pizza — MindMath Arcade</title>
 <style>
   :root{
@@ -13,18 +16,21 @@
     --red:#ff4d4d;
     --green:#3ddc84;
     --panel:#141d33;
-    --console-bg:#e8e6e0;
-    --console-edge:#c8c6be;
-    --console-screen:#2a2a2a;
   }
   *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-  html,body{
+  html{
+    margin:0; padding:0; width:100%; height:100%;
+    overflow:hidden; overscroll-behavior:none;
+    touch-action: manipulation;
+  }
+  body{
     margin:0; padding:0; width:100%; height:100%;
     overflow:hidden; overscroll-behavior:none;
     background:#080d1a;
     font-family:"Trebuchet MS","Segoe UI",system-ui,-apple-system,sans-serif;
     color:#fff;
     user-select:none; -webkit-user-select:none;
+    -webkit-touch-callout:none;
     touch-action:none;
   }
   #stage{
@@ -40,7 +46,7 @@
     touch-action:none;
   }
 
-  /* ============ HUD ============ */
+  /* ============ HUD (PC) ============ */
   #hud{
     position:fixed; top:0; left:0; right:0;
     display:flex; justify-content:space-between; align-items:flex-start;
@@ -85,70 +91,67 @@
   }
   #hint.hide{ opacity:0; }
 
+  #touch{ display:none !important; }
+
   /* ============================================================
-     MODO CONSOLA RETRO (móvil)
+     MODO CONSOLA RETRO — PANTALLA COMPLETA
      ============================================================ */
   #retroConsole{
     display:none;
     position:fixed; inset:0;
-    padding:8px;
+    width:100%; height:100%;
     flex-direction:column;
-    align-items:center;
-    justify-content:center;
-    background:linear-gradient(180deg,#0e1322,#05070f);
+    background:#0e1322;
     z-index:5;
-    gap:6px;
+    overflow:hidden;
   }
   #retroConsole.show{ display:flex; }
 
   .console-body{
-    width:min(100%, 460px);
-    max-height:100%;
+    width:100%;
+    height:100%;
     background:linear-gradient(180deg,#f1efe9 0%, #d9d6cd 100%);
-    border-radius:22px;
-    padding:14px 12px 12px;
-    box-shadow:
-      inset 0 2px 0 rgba(255,255,255,.85),
-      inset 0 -3px 0 rgba(0,0,0,.18),
-      0 14px 40px rgba(0,0,0,.7);
-    display:flex; flex-direction:column; gap:10px;
-    border:2px solid #b8b5aa;
+    padding:env(safe-area-inset-top, 6px) 8px env(safe-area-inset-bottom, 6px);
+    display:flex; flex-direction:column; gap:6px;
+    overflow:hidden;
   }
 
-  /* --- Bisel superior con la "pantalla" --- */
   .console-screen-frame{
     position:relative;
+    flex:1 1 auto;
+    min-height:0;
     background:linear-gradient(180deg,#3a3a3a,#1c1c1c);
     border-radius:14px;
-    padding:16px 18px 18px;
+    padding:14px;
     box-shadow:
       inset 0 3px 8px rgba(0,0,0,.85),
       inset 0 -1px 0 rgba(255,255,255,.05),
       0 2px 0 rgba(255,255,255,.5);
+    display:flex; flex-direction:column;
   }
   .console-screen-frame::before{
     content:'';
-    position:absolute; inset:8px 12px 22px;
+    position:absolute; inset:8px;
     border-radius:8px;
-    background:radial-gradient(ellipse at 50% 40%, rgba(120,180,255,.12), transparent 70%);
+    background:radial-gradient(ellipse at 50% 40%, rgba(120,180,255,.10), transparent 70%);
     pointer-events:none;
   }
   .console-bezel-label{
-    position:absolute; top:4px; left:22px;
-    font-size:9px; letter-spacing:3px; color:#666;
-    font-weight:bold;
+    position:absolute; top:2px; left:18px;
+    font-size:8px; letter-spacing:3px; color:#666;
+    font-weight:bold; pointer-events:none;
   }
   .console-brand{
-    position:absolute; bottom:4px; right:22px;
-    font-size:8.5px; letter-spacing:2px; color:#555;
-    font-weight:bold; opacity:.85;
+    position:absolute; bottom:2px; right:18px;
+    font-size:7.5px; letter-spacing:2px; color:#555;
+    font-weight:bold; opacity:.85; pointer-events:none;
   }
 
   #screenSlot{
     position:relative;
+    flex:1 1 auto;
+    min-height:0;
     width:100%;
-    aspect-ratio: 16 / 10;
-    max-height:32vh;
     border-radius:6px;
     overflow:hidden;
     background:#000;
@@ -164,21 +167,16 @@
     background:#7fc7ff;
   }
 
-  /* --- Controles inferiores --- */
   .console-controls{
+    flex:0 0 auto;
     display:flex;
     justify-content:space-between;
     align-items:center;
-    padding:6px 10px 2px;
+    padding:8px 12px 10px;
     gap:8px;
   }
 
-  /* D-Pad */
-  .dpad{
-    position:relative;
-    width:118px; height:118px;
-    flex-shrink:0;
-  }
+  .dpad{ position:relative; width:130px; height:130px; flex-shrink:0; }
   .dpad .pad-btn{
     position:absolute;
     background:linear-gradient(180deg,#2a2a2a,#151515);
@@ -189,7 +187,7 @@
       0 3px 0 #000,
       0 5px 10px rgba(0,0,0,.4);
     display:flex; align-items:center; justify-content:center;
-    color:#ddd; font-size:16px; font-weight:bold;
+    color:#ddd; font-size:18px; font-weight:bold;
     cursor:pointer;
     transition:transform .05s, box-shadow .05s;
     touch-action:none;
@@ -203,42 +201,28 @@
       0 2px 4px rgba(0,0,0,.4);
     background:linear-gradient(180deg,#4a4a4a,#222);
   }
-  .dpad .up{
-    left:39px; top:0; width:40px; height:40px;
-    border-radius:6px 6px 2px 2px;
-  }
-  .dpad .down{
-    left:39px; bottom:0; width:40px; height:40px;
-    border-radius:2px 2px 6px 6px;
-  }
-  .dpad .left{
-    top:39px; left:0; width:40px; height:40px;
-    border-radius:6px 2px 2px 6px;
-  }
-  .dpad .right{
-    top:39px; right:0; width:40px; height:40px;
-    border-radius:2px 6px 6px 2px;
-  }
+  .dpad .up{ left:43px; top:0; width:44px; height:44px; border-radius:6px 6px 2px 2px; }
+  .dpad .down{ left:43px; bottom:0; width:44px; height:44px; border-radius:2px 2px 6px 6px; }
+  .dpad .left{ top:43px; left:0; width:44px; height:44px; border-radius:6px 2px 2px 6px; }
+  .dpad .right{ top:43px; right:0; width:44px; height:44px; border-radius:2px 6px 6px 2px; }
   .dpad .center{
-    position:absolute; top:39px; left:39px;
-    width:40px; height:40px;
+    position:absolute; top:43px; left:43px;
+    width:44px; height:44px;
     background:linear-gradient(180deg,#1a1a1a,#000);
     border-radius:2px;
     box-shadow:inset 0 1px 3px rgba(0,0,0,.9);
   }
 
-  /* Grupo central: START / SELECT */
   .middle-btns{
     display:flex; flex-direction:column;
-    align-items:center; gap:5px;
-    flex-shrink:0;
+    align-items:center; gap:6px; flex-shrink:0;
   }
   .pill{
-    min-width:66px;
-    padding:6px 12px;
+    min-width:74px;
+    padding:7px 14px;
     background:linear-gradient(180deg,#3a3a3a,#181818);
     color:#c8c8c8;
-    font-size:9.5px; font-weight:bold;
+    font-size:10px; font-weight:bold;
     letter-spacing:2px;
     text-align:center;
     border-radius:14px;
@@ -257,18 +241,13 @@
   }
   .pill.select{ color:#ffcc33; }
 
-  /* Botones A / B */
-  .ab-group{
-    position:relative;
-    width:120px; height:110px;
-    flex-shrink:0;
-  }
+  .ab-group{ position:relative; width:140px; height:130px; flex-shrink:0; }
   .ab-btn{
     position:absolute;
-    width:52px; height:52px;
+    width:58px; height:58px;
     border-radius:50%;
     display:flex; align-items:center; justify-content:center;
-    font-size:20px; font-weight:bold;
+    font-size:22px; font-weight:bold;
     color:#fff;
     border:2px solid rgba(0,0,0,.4);
     cursor:pointer;
@@ -282,47 +261,37 @@
     background:linear-gradient(180deg,#57e08c,#229c52);
     box-shadow:0 4px 0 #105c30, 0 6px 12px rgba(0,0,0,.45);
   }
-  .ab-btn.a:active, .ab-btn.a.pressed{
-    box-shadow:0 1px 0 #105c30, 0 2px 5px rgba(0,0,0,.45);
-  }
+  .ab-btn.a:active, .ab-btn.a.pressed{ box-shadow:0 1px 0 #105c30, 0 2px 5px rgba(0,0,0,.45); }
   .ab-btn.b{
     left:0; bottom:0;
     background:linear-gradient(180deg,#ff7a7a,#c42b2b);
     box-shadow:0 4px 0 #7a1414, 0 6px 12px rgba(0,0,0,.45);
   }
-  .ab-btn.b:active, .ab-btn.b.pressed{
-    box-shadow:0 1px 0 #7a1414, 0 2px 5px rgba(0,0,0,.45);
-  }
-  .ab-label{
-    position:absolute;
-    font-size:8px; letter-spacing:1.5px;
-    color:#666; font-weight:bold;
-  }
+  .ab-btn.b:active, .ab-btn.b.pressed{ box-shadow:0 1px 0 #7a1414, 0 2px 5px rgba(0,0,0,.45); }
 
-  /* Ocultar el modo antiguo en retro */
   body.retro #hud{ display:none; }
   body.retro #turboWrap{ display:none; }
   body.retro #touch{ display:none !important; }
   body.retro #stage{ display:none; }
   body.retro #hint{ display:none; }
 
-  /* HUD compacto dentro del marco retro */
   #retroHud{
     position:absolute; top:0; left:0; right:0;
     display:none;
     justify-content:space-between;
-    padding:4px 8px;
-    font-size:11px; font-weight:bold;
+    padding:6px 10px;
+    font-size:12px; font-weight:bold;
     color:#fff;
     text-shadow:0 1px 3px rgba(0,0,0,.9);
     pointer-events:none;
     z-index:3;
-    background:linear-gradient(180deg,rgba(0,0,0,.55),transparent);
+    background:linear-gradient(180deg,rgba(0,0,0,.6),transparent);
     border-radius:6px 6px 0 0;
   }
   body.retro #retroHud{ display:flex; }
-  #retroHud .rh-left{ display:flex; gap:8px; align-items:center; }
-  #retroHud .rh-right{ display:flex; gap:8px; align-items:center; }
+  #retroHud .rh-left{ display:flex; gap:10px; align-items:center; }
+  #retroHud .rh-right{ display:flex; gap:10px; align-items:center; }
+
   #retroTurbo{
     position:absolute; bottom:6px; left:8px; right:8px;
     height:6px;
@@ -340,14 +309,14 @@
   #retroTurbo.on{ box-shadow:0 0 12px rgba(255,200,50,.85); }
 
   @media (max-width:380px){
-    .console-body{ padding:10px 8px 8px; }
-    .dpad{ width:104px; height:104px; }
+    .dpad{ width:110px; height:110px; }
     .dpad .up,.dpad .down,.dpad .left,.dpad .right,
-    .dpad .center{ width:35px; height:35px; }
-    .dpad .up,.dpad .down{ left:34.5px; }
-    .dpad .left,.dpad .right,.dpad .center{ top:34.5px; }
-    .ab-btn{ width:46px; height:46px; font-size:17px; }
-    .ab-group{ width:104px; height:96px; }
+    .dpad .center{ width:37px; height:37px; }
+    .dpad .up,.dpad .down{ left:36.5px; }
+    .dpad .left,.dpad .right,.dpad .center{ top:36.5px; }
+    .ab-btn{ width:50px; height:50px; font-size:18px; }
+    .ab-group{ width:120px; height:110px; }
+    .pill{ min-width:64px; font-size:9px; padding:6px 10px; }
   }
 
   /* ============ Overlays ============ */
@@ -404,6 +373,53 @@
   }
   .btn.green:active{ box-shadow:0 1px 0 #12653a; }
 
+  /* ============ Selector de dispositivo ============ */
+  .device-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:12px;
+    margin:18px 0 6px;
+  }
+  .device-btn{
+    background:linear-gradient(180deg,#243254,#141f38);
+    border:2px solid rgba(255,255,255,.18);
+    border-radius:18px;
+    padding:18px 8px 14px;
+    cursor:pointer;
+    color:#fff;
+    font-family:inherit;
+    transition:transform .08s, border-color .15s, box-shadow .15s;
+    display:flex; flex-direction:column; align-items:center; gap:8px;
+    box-shadow:0 5px 0 #0a1020, 0 10px 22px rgba(0,0,0,.4);
+  }
+  .device-btn:hover{
+    border-color:rgba(255,204,51,.55);
+    box-shadow:0 5px 0 #0a1020, 0 10px 22px rgba(0,0,0,.5), 0 0 26px rgba(255,204,51,.22);
+  }
+  .device-btn:active{
+    transform:translateY(4px);
+    box-shadow:0 1px 0 #0a1020;
+  }
+  .device-btn .emoji{ font-size:44px; line-height:1; }
+  .device-btn .label{
+    font-size:15px; font-weight:bold; letter-spacing:1px;
+  }
+  .device-btn .desc{
+    font-size:11px; color:#9fb4d4; letter-spacing:.5px;
+  }
+  .device-btn.selected{
+    border-color:var(--gold);
+    box-shadow:0 5px 0 #0a1020, 0 0 30px rgba(255,204,51,.35);
+    background:linear-gradient(180deg,#3a4f7a,#1c2a4a);
+  }
+
+  @media (max-width:420px){
+    .device-btn{ padding:14px 6px 10px; }
+    .device-btn .emoji{ font-size:36px; }
+    .device-btn .label{ font-size:13px; }
+    .device-btn .desc{ font-size:10px; }
+  }
+
   .stat-row{
     display:flex; justify-content:space-between;
     padding:9px 4px; font-size:15px;
@@ -422,9 +438,7 @@
     color:#fff; letter-spacing:2px;
     text-shadow:0 3px 0 rgba(0,0,0,.4), 0 0 30px rgba(255,204,51,.4);
   }
-  .q-options{
-    display:grid; grid-template-columns:1fr 1fr; gap:10px;
-  }
+  .q-options{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
   .q-opt{
     padding:16px 8px; font-size:22px; font-weight:bold; font-family:inherit;
     background:linear-gradient(180deg,#33507f,#22375c);
@@ -449,7 +463,6 @@
     .q-opt{ font-size:19px; padding:14px 6px; }
   }
 </style>
-<script src="/js/tecnomath-progress.js?v=20260911-9"></script>
 </head>
 <body>
 
@@ -478,32 +491,19 @@
 
 <div id="hint">← → moverte · ESPACIO saltar · SHIFT turbo · P pausa</div>
 
-<!-- Controles táctiles antiguos (fallback si el dispositivo táctil NO entra en modo retro) -->
-<div id="touch">
-  <div class="pad left">
-    <div class="tbtn" data-action="left">◀</div>
-    <div class="tbtn" data-action="right">▶</div>
-  </div>
-  <div class="pad right">
-    <div class="tbtn jump" data-action="jump">SALTAR</div>
-    <div class="tbtn turbo" data-action="turbo">⚡</div>
-    <div class="tbtn pause" data-action="pause">⏸</div>
-  </div>
-</div>
+<div id="touch"></div>
 
 <!-- ============================================================
-     LAYOUT CONSOLA RETRO (MÓVIL)
+     LAYOUT CONSOLA RETRO
      ============================================================ -->
 <div id="retroConsole">
   <div class="console-body">
 
-    <!-- Marco superior: pantalla -->
     <div class="console-screen-frame">
       <span class="console-bezel-label">PIXEL·BOY</span>
       <span class="console-brand">MINDMATH</span>
 
       <div id="screenSlot">
-        <!-- HUD compacto flotante dentro del marco -->
         <div id="retroHud">
           <div class="rh-left">
             <span id="rHudLives">❤️❤️❤️</span>
@@ -519,10 +519,7 @@
       </div>
     </div>
 
-    <!-- Controles inferiores tipo consola -->
     <div class="console-controls">
-
-      <!-- D-Pad -->
       <div class="dpad">
         <div class="pad-btn up"    data-action="up">▲</div>
         <div class="pad-btn down"  data-action="down">▼</div>
@@ -530,34 +527,59 @@
         <div class="pad-btn right" data-action="right">▶</div>
         <div class="center"></div>
       </div>
-
-      <!-- START / SELECT -->
       <div class="middle-btns">
         <div class="pill select" data-action="select">SELECT</div>
         <div class="pill" data-action="pause">START</div>
       </div>
-
-      <!-- Botones A / B -->
       <div class="ab-group">
         <div class="ab-btn b" data-action="turbo">B</div>
         <div class="ab-btn a" data-action="jump">A</div>
       </div>
-
     </div>
   </div>
 </div>
 
 <!-- ============================================================
-     OVERLAYS
+     OVERLAY: SELECTOR DE DISPOSITIVO (pantalla inicial)
      ============================================================ -->
-<div class="overlay" id="ovMenu">
+<div class="overlay" id="ovDevice">
   <div class="panel">
     <div class="emoji-row">🍕🛵🏠</div>
     <h1>ENTREGA LA PIZZA</h1>
     <p class="small">MindMath Arcade · TecnoMath</p>
+    <p style="font-size:15px; margin-top:14px; color:#fff;">¿En qué dispositivo estás jugando?</p>
+    <p class="small">Elige cómo quieres controlar el juego</p>
+
+    <div class="device-grid">
+      <button class="device-btn" data-device="pc">
+        <span class="emoji">🖥️</span>
+        <span class="label">PC</span>
+        <span class="desc">Teclado · Pantalla grande</span>
+      </button>
+      <button class="device-btn" data-device="mobile">
+        <span class="emoji">📱</span>
+        <span class="label">MÓVIL</span>
+        <span class="desc">Táctil · Consola retro</span>
+      </button>
+    </div>
+
+    <p class="small" style="margin-top:16px;">Podrás cambiarlo en cualquier momento desde el menú principal.</p>
+  </div>
+</div>
+
+<!-- ============================================================
+     OVERLAY: MENÚ PRINCIPAL
+     ============================================================ -->
+<div class="overlay hidden" id="ovMenu">
+  <div class="panel">
+    <img src="logo.svg" alt="Entrega la Pizza"
+         style="display:block; width:100%; max-width:380px; margin:0 auto 14px; filter:drop-shadow(0 12px 22px rgba(0,0,0,.55));"
+         onerror="this.style.display='none'">
+    <p class="small">MindMath Arcade · TecnoMath</p>
     <p>Recorre la ciudad, esquiva el tráfico y entrega todas las pizzas resolviendo operaciones matemáticas.</p>
     <p class="small" id="controlsHelp">← → moverte &nbsp;·&nbsp; ESPACIO / ↑ saltar<br>SHIFT turbo &nbsp;·&nbsp; P pausa</p>
     <button class="btn" id="btnPlay">▶ JUGAR</button>
+    <button class="btn secondary" id="btnChangeDevice">🔀 CAMBIAR DISPOSITIVO</button>
   </div>
 </div>
 
@@ -720,8 +742,6 @@ function loadAllAssets(){ Object.keys(ASSET_PATHS).forEach(loadAsset); }
 const canvas = document.getElementById('game');
 const ctx    = canvas.getContext('2d');
 
-// El canvas se puede "mover" dentro del marco retro (screenSlot).
-// Guardamos el padre original (#stage) para poder devolverlo en escritorio.
 const stageEl    = document.getElementById('stage');
 const screenSlot = document.getElementById('screenSlot');
 
@@ -735,7 +755,6 @@ const hud = {
   turboWrap: document.getElementById('turboWrap')
 };
 
-// HUD compacto para el marco retro
 const retroHud = {
   lives: document.getElementById('rHudLives'),
   level: document.getElementById('rHudLevel'),
@@ -747,6 +766,7 @@ const retroHud = {
 };
 
 const ov = {
+  device:   document.getElementById('ovDevice'),
   menu:     document.getElementById('ovMenu'),
   pause:    document.getElementById('ovPause'),
   question: document.getElementById('ovQuestion'),
@@ -765,7 +785,7 @@ const retroConsoleEl = document.getElementById('retroConsole');
    4. ESTADO GLOBAL
    ============================================================ */
 const game = {
-  screen: 'menu',
+  screen: 'device',   // device | menu | playing | question | paused | levelcomplete | gameover | victory
   level: 1,
   score: 0,
   coins: 0,
@@ -778,6 +798,33 @@ const game = {
   flash: 0,
   hintTimer: 0
 };
+
+/* ------------------------------------------------------------
+   MODO DE DISPOSITIVO elegido por el jugador
+   'pc' | 'mobile' | null  (null = aún no ha elegido)
+------------------------------------------------------------ */
+const DEVICE_KEY = 'mindmath:entregapizza:device';
+let deviceMode = null;
+
+function loadDeviceMode(){
+  try{
+    const v = localStorage.getItem(DEVICE_KEY);
+    if (v === 'pc' || v === 'mobile') return v;
+  }catch(e){ /* ignore */ }
+  return null;
+}
+function saveDeviceMode(mode){
+  try{ localStorage.setItem(DEVICE_KEY, mode); }catch(e){ /* ignore */ }
+}
+
+/* Auto-detección para preseleccionar el botón sugerido */
+function suggestDevice(){
+  const touch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+  const small = Math.min(window.innerWidth, window.innerHeight) < 820;
+  const mobileUA = /Android|iPhone|iPad|iPod|Mobile|Tablet/i.test(navigator.userAgent);
+  if (mobileUA || (touch && small)) return 'mobile';
+  return 'pc';
+}
 
 const player = {
   x: 60, y: 0, w: CFG.PLAYER_W, h: CFG.PLAYER_H,
@@ -869,9 +916,6 @@ function setAction(action, on){
     case 'pause':
       if (on) togglePause();
       break;
-    case 'select':
-      // SELECT = alternar turbo momentáneo (mantener) ; aquí lo tratamos como tap
-      break;
     default: break;
   }
 }
@@ -890,7 +934,6 @@ function onPointerDown(e){
     return;
   }
   if (action === 'select'){
-    // SELECT alterna turbo: si no está activo lo activa, si está lo desactiva
     input.turbo = !input.turbo;
     el.classList.toggle('pressed', input.turbo);
     activePointers.set(e.pointerId, 'select');
@@ -906,8 +949,7 @@ function onPointerRelease(e){
   const action = activePointers.get(e.pointerId);
   if (!action) return;
   activePointers.delete(e.pointerId);
-
-  if (action === 'select') return; // select ya se manejó en down
+  if (action === 'select') return;
   setAction(action, false);
   document.querySelectorAll('[data-action="'+action+'"]').forEach(b=>{
     b.classList.remove('pressed');
@@ -923,26 +965,30 @@ function initTouchControls(){
   });
   window.addEventListener('pointerup', onPointerRelease);
   window.addEventListener('pointercancel', onPointerRelease);
-  window.addEventListener('pointerleave', (e)=>{
-    // Sólo liberar si el puntero salió de la ventana
-    if (e.clientX <= 0 || e.clientY <= 0 ||
-        e.clientX >= window.innerWidth || e.clientY >= window.innerHeight){
-      onPointerRelease(e);
-    }
-  });
 }
 
 function isTouchDevice(){
-  return ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+  return ('ontouchstart' in window) ||
+         (navigator.maxTouchPoints > 0) ||
+         (navigator.msMaxTouchPoints > 0);
 }
 
-/* Bloqueos anti-gestos */
+/* Anti gestos / anti zoom */
 document.addEventListener('contextmenu', e => e.preventDefault());
+document.addEventListener('dblclick', e => e.preventDefault(), { passive:false });
 document.addEventListener('gesturestart', e => e.preventDefault());
+document.addEventListener('gesturechange', e => e.preventDefault());
+document.addEventListener('gestureend', e => e.preventDefault());
 document.addEventListener('touchmove', e => {
   if (e.cancelable) e.preventDefault();
 }, { passive:false });
-document.addEventListener('dblclick', e => e.preventDefault(), { passive:false });
+
+let lastTouchEnd = 0;
+document.addEventListener('touchend', function(e){
+  const now = Date.now();
+  if (now - lastTouchEnd <= 350) e.preventDefault();
+  lastTouchEnd = now;
+}, { passive:false });
 
 /* ============================================================
    6. GENERACIÓN DEL MUNDO
@@ -988,7 +1034,6 @@ function buildWorld(cfg, levelNum){
   world.deliveries  = [];
   world.cfg         = cfg;
 
-  /* ---- Huecos ---- */
   const gaps = [];
   let guard = 0;
   while (gaps.length < cfg.gaps && guard++ < 400){
@@ -1012,7 +1057,6 @@ function buildWorld(cfg, levelNum){
   }
   world.platforms.push({ x:cur, y:CFG.GROUND_Y, w:len-cur, h:600 });
 
-  /* ---- Entregas ---- */
   const dCount = cfg.deliveries;
   const startX = 720;
   const endX   = len - 520;
@@ -1030,7 +1074,6 @@ function buildWorld(cfg, levelNum){
     world.deliveries.push({ x: len*0.5, y: CFG.GROUND_Y, w:130, h:130, done:false, ok:false, id:0 });
   }
 
-  /* ---- Obstáculos ---- */
   const avoid = world.deliveries.slice();
 
   for (let i=0;i<cfg.cars;i++){
@@ -1058,7 +1101,6 @@ function buildWorld(cfg, levelNum){
     world.obstacles.push({ type:'cone', x:x, y:CFG.GROUND_Y-34, w:w, h:34 });
   }
 
-  /* ---- Monedas ---- */
   for (let i=0;i<cfg.coins;i++){
     const x = 350 + rng()*(len - 700);
     const y = CFG.GROUND_Y - 60 - rng()*80;
@@ -1181,7 +1223,7 @@ function drawParticles(){
 }
 
 /* ============================================================
-   9. HUD (PC + Retro)
+   9. HUD
    ============================================================ */
 const hudCache = { lives:'', level:'', deliv:'', score:'', coins:'' };
 const retroCache = { lives:'', level:'', deliv:'', score:'', coins:'' };
@@ -1195,16 +1237,14 @@ function updateHUD(){
   const sStr = game.score.toLocaleString('es-ES');
   const cStr = '🪙 ' + game.coins;
 
-  // HUD grande
   if (hudCache.lives !== livesStr){ hud.lives.textContent = livesStr; hudCache.lives = livesStr; }
   if (hudCache.level !== lvlStr){ hud.level.textContent = lvlStr; hudCache.level = lvlStr; }
   if (hudCache.deliv !== dStr){ hud.deliv.textContent = dStr; hudCache.deliv = dStr; }
   if (hudCache.score !== sStr){ hud.score.textContent = sStr; hudCache.score = sStr; }
   if (hudCache.coins !== cStr){ hud.coins.textContent = cStr; hudCache.coins = cStr; }
 
-  // HUD retro
   if (retroCache.lives !== livesStr){ retroHud.lives.textContent = livesStr; retroCache.lives = livesStr; }
-  if (retroCache.level !== lvlStr){ retroHud.level.textContent = lvlStr.replace('NIVEL ','N'); retroCache.level = lvlStr; }
+  if (retroCache.level !== lvlStr){ retroHud.level.textContent = 'N' + game.level; retroCache.level = lvlStr; }
   if (retroCache.deliv !== dStr){ retroHud.deliv.textContent = dStr; retroCache.deliv = dStr; }
   if (retroCache.score !== sStr){ retroHud.score.textContent = sStr; retroCache.score = sStr; }
   if (retroCache.coins !== cStr){ retroHud.coins.textContent = cStr; retroCache.coins = cStr; }
@@ -1227,6 +1267,7 @@ function updateTurboBar(){
    10. FLUJO
    ============================================================ */
 function hideAllOverlays(){
+  ov.device.classList.add('hidden');
   ov.menu.classList.add('hidden');
   ov.pause.classList.add('hidden');
   ov.question.classList.add('hidden');
@@ -1272,14 +1313,11 @@ function startLevel(n){
   hideAllOverlays();
 
   if (n === 1){
-    if (document.body.classList.contains('retro')){
-      // En modo retro no mostramos el hint grande
+    if (deviceMode === 'mobile'){
       hintEl.classList.add('hide');
     } else {
       hintEl.classList.remove('hide');
-      hintEl.textContent = isTouchDevice()
-        ? '◀ ▶ moverte · SALTAR saltar · ⚡ turbo'
-        : '← → moverte · ESPACIO saltar · SHIFT turbo · P pausa';
+      hintEl.textContent = '← → moverte · ESPACIO saltar · SHIFT turbo · P pausa';
       game.hintTimer = 6;
     }
   } else {
@@ -1338,7 +1376,7 @@ function levelComplete(){
   reportProgress();
 
   if (game.level >= 8){
-    victory(total);
+    victory();
     return;
   }
 
@@ -1372,7 +1410,7 @@ function victory(){
 }
 
 /* ============================================================
-   11. PREGUNTA DE ENTREGA
+   11. PREGUNTA
    ============================================================ */
 let currentDelivery = null;
 let currentQuestion = null;
@@ -2002,7 +2040,7 @@ function drawPlayer(){
   ctx.fill();
 
   ctx.save();
-  ctx.translate(px + w/2, py + h);   // ✅ anclado al borde inferior
+  ctx.translate(px + w/2, py + h);
   ctx.scale(player.facing, 1);
 
   if (ASSETS.player){
@@ -2157,14 +2195,9 @@ function loop(t){
    ============================================================ */
 let retroMode = false;
 
-function isSmallScreen(){
-  return Math.min(window.innerWidth, window.innerHeight) < 820;
-}
-
+/* ✅ La decisión la toma el JUGADOR, no la detección */
 function shouldUseRetro(){
-  // Modo consola: táctil o pantalla pequeña en vertical
-  if (!isTouchDevice() && !isSmallScreen()) return false;
-  return true;
+  return deviceMode === 'mobile';
 }
 
 function enterRetroMode(){
@@ -2173,7 +2206,6 @@ function enterRetroMode(){
   document.body.classList.add('retro');
   retroConsoleEl.classList.add('show');
 
-  // Mover el canvas al marco retro
   if (canvas.parentNode !== screenSlot){
     screenSlot.appendChild(canvas);
   }
@@ -2193,15 +2225,13 @@ function exitRetroMode(){
 }
 
 function layoutCanvas(){
-  // Calcular tamaño del canvas según el contenedor actual
-  let cw, ch, dpr = Math.min(window.devicePixelRatio || 1, 2);
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  let cw, ch;
 
   if (retroMode){
     const slotRect = screenSlot.getBoundingClientRect();
     cw = Math.max(200, slotRect.width);
     ch = Math.max(140, slotRect.height);
-
-    // El canvas ocupa todo el marco
     canvas.style.width  = '100%';
     canvas.style.height = '100%';
   } else {
@@ -2219,7 +2249,6 @@ function layoutCanvas(){
     }
     cw = Math.max(cw, 260);
     ch = Math.max(ch, 180);
-
     canvas.style.width  = cw + 'px';
     canvas.style.height = ch + 'px';
   }
@@ -2244,13 +2273,15 @@ function resize(){
   if (shouldUseRetro()) enterRetroMode();
   else exitRetroMode();
 
-  // Esperar a que el layout se aplique antes de medir
-  requestAnimationFrame(layoutCanvas);
+  requestAnimationFrame(function(){
+    layoutCanvas();
+    requestAnimationFrame(layoutCanvas);
+  });
 }
 
 window.addEventListener('resize', resize);
 window.addEventListener('orientationchange', function(){
-  setTimeout(resize, 150);
+  setTimeout(resize, 180);
 });
 
 /* ============================================================
@@ -2286,63 +2317,116 @@ function reportProgress(){
 }
 
 /* ============================================================
-   17. BOTONES DE MENÚS
+   17. SELECTOR DE DISPOSITIVO
+   ============================================================ */
+function applyDeviceMode(mode){
+  deviceMode = mode;
+  saveDeviceMode(mode);
+
+  // Marcar botón activo en el selector (siempre visible)
+  document.querySelectorAll('.device-btn').forEach(b=>{
+    b.classList.toggle('selected', b.dataset.device === mode);
+  });
+
+  if (shouldUseRetro()) enterRetroMode();
+  else exitRetroMode();
+
+  requestAnimationFrame(function(){
+    layoutCanvas();
+    requestAnimationFrame(layoutCanvas);
+  });
+}
+
+function showDeviceSelector(){
+  game.screen = 'device';
+  clearInputs();
+
+  // Preseleccionar el sugerido si aún no hay elección guardada
+  if (!deviceMode){
+    const sug = suggestDevice();
+    document.querySelectorAll('.device-btn').forEach(b=>{
+      b.classList.toggle('selected', b.dataset.device === sug);
+    });
+  } else {
+    document.querySelectorAll('.device-btn').forEach(b=>{
+      b.classList.toggle('selected', b.dataset.device === deviceMode);
+    });
+  }
+
+  showOverlay(ov.device);
+}
+
+function bindDeviceSelector(){
+  document.querySelectorAll('.device-btn').forEach(btn=>{
+    btn.addEventListener('click', function(){
+      const mode = btn.dataset.device;
+      if (mode !== 'pc' && mode !== 'mobile') return;
+      applyDeviceMode(mode);
+
+      // Tras elegir, ir al menú principal
+      buildLevel(1);
+      game.screen = 'menu';
+      showOverlay(ov.menu);
+    });
+  });
+}
+
+/* ============================================================
+   18. BOTONES DE MENÚS
    ============================================================ */
 function bindButtons(){
-  document.getElementById('btnPlay').addEventListener('click', function(){
-    startNewGame();
-  });
-  document.getElementById('btnResume').addEventListener('click', function(){
-    resumeGame();
-  });
-  document.getElementById('btnRestart').addEventListener('click', function(){
-    startLevel(game.level);
-  });
+  document.getElementById('btnPlay').addEventListener('click', startNewGame);
+  document.getElementById('btnResume').addEventListener('click', resumeGame);
+  document.getElementById('btnRestart').addEventListener('click', function(){ startLevel(game.level); });
   document.getElementById('btnExit').addEventListener('click', function(){
     game.screen = 'menu';
     clearInputs();
     buildLevel(1);
     showOverlay(ov.menu);
   });
-  document.getElementById('btnRetry').addEventListener('click', function(){
-    startNewGame();
-  });
+  document.getElementById('btnRetry').addEventListener('click', startNewGame);
   document.getElementById('btnMenu').addEventListener('click', function(){
     game.screen = 'menu';
     clearInputs();
     buildLevel(1);
     showOverlay(ov.menu);
   });
-  document.getElementById('btnPlayAgain').addEventListener('click', function(){
-    startNewGame();
-  });
+  document.getElementById('btnPlayAgain').addEventListener('click', startNewGame);
   document.getElementById('btnMenu2').addEventListener('click', function(){
     game.screen = 'menu';
     clearInputs();
     buildLevel(1);
     showOverlay(ov.menu);
   });
+  document.getElementById('btnChangeDevice').addEventListener('click', function(){
+    showDeviceSelector();
+  });
 }
 
 /* ============================================================
-   18. INIT
+   19. INIT
    ============================================================ */
 function init(){
   loadAllAssets();
   initTouchControls();
   bindButtons();
-
-  // Modo consola desde el inicio si corresponde
-  if (shouldUseRetro()) enterRetroMode();
-  else exitRetroMode();
+  bindDeviceSelector();
 
   buildLevel(1);
-  game.screen = 'menu';
-  showOverlay(ov.menu);
 
-  // Primera medida tras aplicar clases
-  requestAnimationFrame(()=>{
+  // Si ya hay elección guardada, entrar directo al menú
+  const saved = loadDeviceMode();
+  if (saved){
+    applyDeviceMode(saved);
+    game.screen = 'menu';
+    showOverlay(ov.menu);
+  } else {
+    showDeviceSelector();
+  }
+
+  requestAnimationFrame(function(){
     layoutCanvas();
+    requestAnimationFrame(layoutCanvas);
     updateHUD();
     updateTurboBar();
   });
