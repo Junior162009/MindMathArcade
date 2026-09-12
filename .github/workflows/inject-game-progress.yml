@@ -31,6 +31,10 @@ jobs:
             echo 'No hay juegos nuevos para conectar.'
             exit 0
           fi
-          git add games/**/index.html
+          # Añadir todos los archivos modificados por el inyector.
+          # El patrón games/**/index.html no cubría correctamente
+          # todos los niveles de carpetas en el runner de GitHub.
+          git add -A -- games
+          git diff --cached --quiet && echo 'No hay cambios para guardar.' && exit 0
           git commit -m 'chore: conectar juegos al progreso automático'
           git push
