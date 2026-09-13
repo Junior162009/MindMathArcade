@@ -21,17 +21,40 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - name: Descargar repositorio
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 1
 
-      - name: Configurar Pages
+      - name: Configurar GitHub Pages
         uses: actions/configure-pages@v5
 
-      - name: Preparar sitio
+      - name: Preparar y verificar sitio
+        shell: bash
         run: |
+          set -euo pipefail
           touch .nojekyll
 
-      - name: Subir artefacto
+          test -f index.html
+
+          echo "Verificando juegos publicados..."
+          game_count=$(find games -type f -name 'index.html' | wc -l)
+          echo "Juegos encontrados: ${game_count}"
+
+          if [ "${game_count}" -lt 1 ]; then
+            echo "ERROR: no se encontró ningún juego en games/"
+            exit 1
+          fi
+
+          test -f games/nova-math-defensa-estelar-61d90774-e32/index.html
+          test -f games/nova-math-defensa-estelar-61d90774-e32/css/style.css
+          test -f games/nova-math-defensa-estelar-61d90774-e32/js/game.js
+
+          echo "NOVA MATH verificado correctamente."
+          echo "Contenido que será publicado:"
+          ls -la games/nova-math-defensa-estelar-61d90774-e32/
+
+      - name: Subir artefacto de Pages
         uses: actions/upload-pages-artifact@v3
         with:
           path: .
