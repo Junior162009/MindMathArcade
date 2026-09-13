@@ -19,10 +19,16 @@
       radial-gradient(1200px 800px at 85% -10%, #3b2359 0%, transparent 60%),
       radial-gradient(900px 700px at -10% 110%, #1a2a5a 0%, transparent 55%),
       #070a16;
-    display:grid;place-items:center;padding:20px;
+    /* ⬇⬇ CAMBIO CLAVE: de grid centrado a bloque normal ⬇⬇ */
+    display:block;
+    padding:20px;
     -webkit-font-smoothing:antialiased;
   }
-  .wrap{width:min(720px,100%)}
+  /* El centrado horizontal ahora lo hace el wrap (margin auto) */
+  .wrap{
+    width:min(720px,100%);
+    margin:0 auto;
+  }
 
   /* ---------- Header ---------- */
   .top{display:flex;align-items:center;gap:8px;margin-bottom:16px}
@@ -129,6 +135,8 @@
     color:#fff;border-radius:14px;padding:14px 16px;
     font-size:1.05rem;font-family:inherit;outline:0;
     transition:border-color .2s,box-shadow .2s;
+    /* Evita que el navegador haga scroll al enfocar en algunos móviles */
+    scroll-margin-top:20px;
   }
   .answer::placeholder{color:#5f6884}
   .answer:focus{border-color:#f5c518;box-shadow:0 0 0 4px #f5c51820}
@@ -207,6 +215,7 @@
   }
 
   @media(max-width:560px){
+    body{padding:14px}
     .card{padding:20px 16px 16px;border-radius:22px}
     .actions{flex-direction:column}
     .top .reset{display:none}
@@ -297,6 +306,30 @@
       );
     } catch (e) { return '🏳️'; }
   };
+
+  /* =========================================================
+     0.bis) SCROLL AL INICIO DE RONDA
+     ---------------------------------------------------------
+     Se llama al empezar cada ronda para asegurar que el jugador
+     ve las pistas primero (arriba) y no el input (abajo).
+     NUNCA usamos scrollIntoView, solo window.scrollTo.
+     ========================================================= */
+  function scrollToRoundTop() {
+    try {
+      window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+    } catch (e) {
+      try { window.scrollTo(0, 0); } catch (e2) {}
+    }
+  }
+
+  // Refuerzo: a veces la carga de la bandera (o la fuente) desplaza el layout
+  // unos ms después; volvemos a subir una sola vez más para compensar.
+  function scrollToRoundTopSoon() {
+    scrollToRoundTop();
+    setTimeout(scrollToRoundTop, 0);
+    setTimeout(scrollToRoundTop, 80);
+    setTimeout(scrollToRoundTop, 240);
+  }
 
   /* =========================================================
      1) PAÍSES (se respeta window.BanderQuizCountries)
@@ -762,9 +795,25 @@
 
     render();
 
+    /* ⬇⬇ CAMBIO CLAVE: cada ronda vuelve arriba ⬇⬇
+       Se hace tras render() y se refuerza unos ms después
+       por si el layout cambia al cargar la bandera. */
+    scrollToRoundTopSoon();
+
+    /* Autofocus solo en PC y sin scroll */
     const isTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
     if (!isTouch) {
-      setTimeout(function () { try { $('answer').focus(); } catch (e) {} }, 60);
+      setTimeout(function () {
+        try {
+          const inp = $('answer');
+          if (inp && typeof inp.focus === 'function') {
+            // preventScroll evita que el navegador baje hasta el input
+            inp.focus({ preventScroll: true });
+          }
+          // Y por si algún navegador ignoró preventScroll, volvemos a subir.
+          scrollToRoundTop();
+        } catch (e) {}
+      }, 60);
     }
   }
 
@@ -776,6 +825,8 @@
     render();
     $('msg').textContent = clue < MAX_CLUES ? 'Se desbloqueó una nueva pista.' : 'Ya tienes todas las pistas.';
     $('msg').className = 'msg';
+    /* Nota: al desbloquear una pista NO hacemos scroll:
+       el jugador ya está mirando la zona de pistas. */
   }
 
   function check() {
@@ -827,6 +878,7 @@
     if (lives <= 0) {
       timer = setTimeout(gameOver, 1300);
     } else {
+      /* La siguiente ronda volverá arriba porque next() llama a scrollToRoundTopSoon() */
       timer = setTimeout(next, 1600);
     }
   }
@@ -890,6 +942,10 @@
     recentCodes.length = 0;
     $('overlay').classList.remove('show');
     update();
+
+    /* ⬇ Al reiniciar también subimos arriba antes de la primera ronda. */
+    scrollToRoundTop();
+
     next();
   }
 
@@ -938,11 +994,20 @@
 
       update();
 
-      // 1º Arranca YA (independiente de red)
+      // Aseguramos que al entrar arrancamos arriba del todo.
+      scrollToRoundTop();
+
+      // 1º Arranca YA (independiente de red) — next() ya hace scrollToRoundTopSoon()
       next();
 
       // 2º Banderas en segundo plano
       loadFlags().catch(function () {});
+
+      // 3º Por si el navegador restaura scroll al volver atrás desde otra página
+      try {
+        if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+      } catch (e) {}
+      window.addEventListener('load', scrollToRoundTop);
     } catch (err) {
       if (window.console && console.error) console.error('[País Misterioso] Error al iniciar:', err);
       const msg = $('msg');
