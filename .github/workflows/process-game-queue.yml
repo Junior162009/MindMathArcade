@@ -12,7 +12,6 @@ env:
   SUPABASE_URL: https://xdszveoxdrdnwwzzvkav.supabase.co
   RESEND_FROM: TecnoMath <notificaciones@tecnomath.online>
 
-authenticated: true
 jobs:
   publish:
     runs-on: ubuntu-latest
