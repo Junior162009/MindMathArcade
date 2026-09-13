@@ -1,14 +1,7 @@
 name: Publicar juegos aprobados automáticamente
 
 on:
-  repository_dispatch:
-    types: [game-approved]
   workflow_dispatch:
-    inputs:
-      submission_id:
-        description: 'ID opcional del envío aprobado'
-        required: false
-        type: string
   schedule:
     - cron: '*/5 * * * *'
 
@@ -16,7 +9,7 @@ permissions:
   contents: write
 
 env:
-  FIREBASE_DB: https://tecnomath-sync-6058a-default-rtdb.firebaseio.com
+  SUPABASE_URL: https://xdszveoxdrdnwwzzvkav.supabase.co
   RESEND_FROM: TecnoMath <notificaciones@tecnomath.online>
 
 jobs:
@@ -28,53 +21,22 @@ jobs:
         with:
           fetch-depth: 1
 
-      - name: Autenticar para leer Firebase Realtime Database
-        id: auth
-        uses: google-github-actions/auth@v3
-        with:
-          credentials_json: '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}'
-          token_format: access_token
-          access_token_scopes: |
-            https://www.googleapis.com/auth/cloud-platform
-            https://www.googleapis.com/auth/userinfo.email
-            https://www.googleapis.com/auth/firebase.database
-
-      - name: Verificar autenticación de Firebase
+      - name: Verificar conexión con Supabase
         env:
-          FIREBASE_ACCESS_TOKEN: ${{ steps.auth.outputs.access_token }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
         run: |
           python - <<'PY'
-          import os, urllib.request, urllib.error
-          db=os.environ['FIREBASE_DB']
-          token=os.environ['FIREBASE_ACCESS_TOKEN']
-          url=f'{db}/publicGameQueue.json?shallow=true'
-          req=urllib.request.Request(url,headers={
-              'Authorization':f'Bearer {token}',
-              'User-Agent':'TecnoMath-GitHub-Publisher',
-              'Accept':'application/json'
-          })
-          try:
-              with urllib.request.urlopen(req,timeout=30) as r:
-                  print('Firebase: autenticación correcta. HTTP',r.status)
-          except urllib.error.HTTPError as e:
-              detail=e.read().decode('utf-8','replace')
-              raise SystemExit(f'Firebase: autenticación fallida HTTP {e.code}: {detail}')
-          except Exception as e:
-              raise SystemExit(f'Firebase: autenticación fallida: {e}')
+          import os, urllib.request
+          url=os.environ['SUPABASE_URL']+'/rest/v1/tecnomath_game_submissions?select=id&limit=1'
+          req=urllib.request.Request(url,headers={'apikey':os.environ['SUPABASE_SERVICE_ROLE_KEY'],'Authorization':'Bearer '+os.environ['SUPABASE_SERVICE_ROLE_KEY']})
+          with urllib.request.urlopen(req,timeout=30) as r: print('Supabase: conexión correcta. HTTP',r.status)
           PY
-
-      - name: Reparar cola de juegos aprobados
-        env:
-          FIREBASE_ACCESS_TOKEN: ${{ steps.auth.outputs.access_token }}
-          FIREBASE_DB: ${{ env.FIREBASE_DB }}
-        run: python scripts/repair-approved-queue.py
 
       - name: Instalar herramientas
         run: sudo apt-get update -qq && sudo apt-get install -y -qq p7zip-full >/dev/null
 
-      - name: Publicar aprobados y enviar correo de publicación
+      - name: Publicar juegos aprobados y notificar autores
         env:
-          FIREBASE_ACCESS_TOKEN: ${{ steps.auth.outputs.access_token }}
-          EVENT_SUBMISSION_ID: ${{ github.event.client_payload.submissionId || inputs.submission_id }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
         run: python scripts/publish-approved-games.py
