@@ -9,38 +9,210 @@
 <script src="/js/tecnomath-progress.js?v=20260911-10"></script>
 <script src="banderquiz-paises.js?v=20260911-11"></script>
 <style>
-*{box-sizing:border-box}
-body{margin:0;min-height:100vh;font-family:Segoe UI,Poppins,system-ui,sans-serif;color:#fff;background:radial-gradient(circle at 70% 15%,#35234f,#080b18 65%);display:grid;place-items:center;padding:18px}
-.wrap{width:min(760px,100%)}
-.top{display:flex;align-items:center;gap:10px;margin-bottom:14px}
-.btn{border:1px solid #ffffff1c;background:#ffffff12;color:#fff;border-radius:12px;padding:9px 13px;font-weight:800;cursor:pointer}
-.brand{font-weight:900;flex:1}
-.card{background:#11172edd;border:1px solid #ffffff18;border-radius:28px;padding:25px;box-shadow:0 25px 70px #0008;text-align:center}
-.logo{width:100px;filter:drop-shadow(0 10px 22px #0008)}
-h1{font-size:clamp(1.8rem,6vw,2.7rem);margin:8px 0 4px}
-.sub{color:#b8bfd4;margin:0 0 18px}
-.mystery-flag{min-height:125px;display:flex;align-items:center;justify-content:center;margin:8px 0 15px}
-.mystery-flag img{width:min(210px,55vw);height:120px;object-fit:contain;filter:drop-shadow(0 12px 22px #0008)}
-.flag-fallback{font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif;font-size:76px;line-height:1}
-.clues{display:grid;gap:9px;margin:18px 0}
-.clue{background:#ffffff09;border:1px solid #ffffff12;border-radius:15px;padding:13px;text-align:left;display:flex;gap:10px;align-items:center}
-.clue strong{color:#f5c518}
-.clue.hidden{opacity:.35}
-.answer{width:100%;border:2px solid #ffffff14;background:#080d20;color:#fff;border-radius:15px;padding:14px;font-size:1.05rem;outline:0}
-.answer:focus{border-color:#f5c518}
-.actions{display:flex;gap:10px;margin-top:11px}
-.actions button{flex:1;border:0;border-radius:14px;padding:13px;font-weight:900;cursor:pointer}
-.check{background:#f5c518;color:#111}
-.skip{background:#28314d;color:#fff}
-.stats{display:flex;justify-content:center;gap:8px;flex-wrap:wrap}
-.stat{background:#ffffff0d;border-radius:99px;padding:7px 12px;font-weight:800}
-.msg{min-height:26px;margin-top:12px;font-weight:900}
-.score{margin-top:13px;color:#b9c0d8}
-.overlay{position:fixed;inset:0;background:#000a;display:none;place-items:center;padding:18px}
-.overlay.show{display:grid}
-.over{width:min(430px,100%);background:#11172e;border:1px solid #ffffff1c;border-radius:25px;padding:28px;text-align:center}
-.over h2{margin:0 0 10px;font-size:2.2rem}
-@media(max-width:560px){.card{padding:18px}.top .reset{display:none}.actions{flex-direction:column}.mystery-flag img{width:180px;height:105px}}
+  *{box-sizing:border-box}
+
+  body{
+    margin:0;min-height:100vh;
+    font-family:'Segoe UI',Poppins,system-ui,sans-serif;
+    color:#fff;
+    background:
+      radial-gradient(1200px 800px at 85% -10%, #3b2359 0%, transparent 60%),
+      radial-gradient(900px 700px at -10% 110%, #1a2a5a 0%, transparent 55%),
+      #070a16;
+    display:grid;place-items:center;padding:20px;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{width:min(720px,100%)}
+
+  /* ---------- Header ---------- */
+  .top{display:flex;align-items:center;gap:8px;margin-bottom:16px}
+  .btn{
+    border:1px solid #ffffff12;background:#ffffff0a;color:#dfe4f2;
+    border-radius:12px;padding:9px 14px;
+    font-weight:700;font-size:.88rem;font-family:inherit;cursor:pointer;
+    transition:background .15s,border-color .15s,color .15s,transform .1s;
+  }
+  .btn:hover{background:#ffffff16;color:#fff;border-color:#ffffff22}
+  .btn:active{transform:scale(.96)}
+  .btn.icon{padding:9px 12px;font-size:1rem;line-height:1}
+  .brand{
+    font-weight:800;flex:1;text-align:center;font-size:1rem;
+    letter-spacing:.3px;color:#eaeefb;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  }
+
+  /* ---------- Card ---------- */
+  .card{
+    position:relative;
+    background:linear-gradient(180deg,#131a32f2,#0d1226f2);
+    border:1px solid #ffffff12;
+    border-radius:28px;
+    padding:28px 26px 22px;
+    box-shadow:0 30px 80px #000a, 0 0 0 1px #ffffff06 inset;
+    text-align:center;
+    transition:box-shadow .3s;
+  }
+  .card.correct{animation:okPulse .8s ease}
+  .card.wrong{animation:koShake .55s ease}
+  @keyframes okPulse{
+    0%,100%{box-shadow:0 30px 80px #000a}
+    40%{box-shadow:0 0 0 6px #22c55e88, 0 30px 80px #000a}
+  }
+  @keyframes koShake{
+    0%,100%{transform:translateX(0)}
+    20%,60%{transform:translateX(-8px)}
+    40%,80%{transform:translateX(8px)}
+  }
+
+  h1{
+    font-size:clamp(1.7rem,5.5vw,2.2rem);
+    margin:2px 0 6px;font-weight:800;letter-spacing:-.5px;
+    background:linear-gradient(180deg,#fff 0%,#b8c0e0 100%);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .sub{color:#8b94ae;margin:0 0 16px;font-size:.92rem}
+
+  /* ---------- Stats ---------- */
+  .stats{display:flex;justify-content:center;gap:6px;flex-wrap:wrap}
+  .stat{
+    background:#ffffff08;border:1px solid #ffffff0c;
+    border-radius:99px;padding:6px 12px;
+    font-weight:700;font-size:.88rem;
+    display:inline-flex;align-items:center;gap:4px;
+  }
+  .stat b{color:#fff}
+
+  .best-info{
+    margin-top:10px;color:#7d859e;
+    font-size:.8rem;font-weight:600;letter-spacing:.2px;
+  }
+  .best-info b{color:#f5c518}
+
+  /* ---------- Pistas ---------- */
+  .clues{display:grid;gap:8px;margin:20px 0 18px}
+  .clue{
+    background:#ffffff06;border:1px solid #ffffff0c;
+    border-radius:14px;padding:12px 14px;
+    text-align:left;display:flex;gap:12px;align-items:flex-start;
+    transition:background .25s,border-color .25s,opacity .25s;
+  }
+  .clue:not(.hidden){background:#ffffff0a;border-color:#ffffff16}
+  .clue.hidden{opacity:.42}
+  .clue-icon{font-size:1.2rem;line-height:1.25;flex:0 0 auto;width:24px;text-align:center}
+  .clue-body{flex:1;min-width:0;line-height:1.45;color:#e6e9f2}
+  .clue-label{
+    color:#f5c518;font-weight:700;display:block;
+    margin-bottom:4px;font-size:.84rem;letter-spacing:.4px;text-transform:uppercase;
+  }
+  .clue-value{font-size:1.02rem;color:#e6e9f2}
+  .clue-lock{color:#7a829b;font-style:italic;font-size:.88rem}
+
+  /* Bandera dentro de la pista */
+  .flag-display{margin-top:6px}
+  .flag-img{
+    display:block;width:130px;max-width:100%;height:78px;
+    object-fit:contain;border-radius:8px;
+    background:#ffffff08;padding:4px;
+    transition:filter .4s,box-shadow .4s;
+  }
+  .flag-emoji{
+    display:inline-block;font-size:58px;line-height:1.1;
+    font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif;
+    transition:filter .4s;
+  }
+  .flag-display.glow-correct{filter:drop-shadow(0 0 22px #22c55ec0)}
+  .flag-display.glow-wrong{filter:drop-shadow(0 0 22px #ef4444c0)}
+
+  /* ---------- Input + acciones ---------- */
+  .answer{
+    width:100%;border:2px solid #ffffff12;background:#0a0f22;
+    color:#fff;border-radius:14px;padding:14px 16px;
+    font-size:1.05rem;font-family:inherit;outline:0;
+    transition:border-color .2s,box-shadow .2s;
+  }
+  .answer::placeholder{color:#5f6884}
+  .answer:focus{border-color:#f5c518;box-shadow:0 0 0 4px #f5c51820}
+
+  .actions{display:flex;gap:10px;margin-top:10px}
+  .actions button{
+    flex:1;border:0;border-radius:14px;padding:14px;
+    font-weight:800;font-size:1rem;font-family:inherit;
+    cursor:pointer;transition:transform .1s,filter .15s;
+  }
+  .actions button:hover{filter:brightness(1.08)}
+  .actions button:active{transform:scale(.98)}
+  .actions button:disabled{opacity:.45;cursor:not-allowed;filter:none}
+
+  .check{
+    background:linear-gradient(180deg,#f7d33a,#e9b800);
+    color:#1a1400;
+    box-shadow:0 4px 14px #f5c51840;
+  }
+  .skip{
+    background:#222b45;color:#d9dff0;border:1px solid #ffffff10;
+  }
+
+  .link-btn{
+    background:transparent;border:0;color:#7d859e;
+    font-weight:700;cursor:pointer;margin-top:10px;
+    font-size:.85rem;font-family:inherit;
+    padding:8px 14px;border-radius:8px;
+    transition:background .15s,color .15s;
+  }
+  .link-btn:hover{color:#fff;background:#ffffff0a}
+
+  /* ---------- Mensaje ---------- */
+  .msg{
+    min-height:24px;margin-top:14px;
+    font-weight:700;font-size:.95rem;color:#c8cfe0;
+    transition:color .25s;
+  }
+  .msg.success{color:#4ade80}
+  .msg.error{color:#f87171}
+  .score{
+    margin-top:6px;color:#7d859e;
+    font-size:.82rem;font-weight:600;letter-spacing:.2px;
+  }
+  .score b{color:#c8cfe0}
+
+  /* ---------- Overlay ---------- */
+  .overlay{
+    position:fixed;inset:0;background:#000c;
+    display:none;place-items:center;padding:20px;z-index:10;
+  }
+  .overlay.show{display:grid;animation:fade .3s ease}
+  @keyframes fade{from{opacity:0}to{opacity:1}}
+  .over{
+    width:min(440px,100%);
+    background:linear-gradient(180deg,#161d38,#0f1428);
+    border:1px solid #ffffff16;border-radius:24px;
+    padding:30px 26px;text-align:center;
+    box-shadow:0 30px 80px #000b;
+    animation:pop .35s ease;
+  }
+  @keyframes pop{from{transform:scale(.92);opacity:0}to{transform:scale(1);opacity:1}}
+  .over h2{margin:0 0 14px;font-size:2rem;letter-spacing:-.5px}
+  .over p{line-height:1.7;margin:12px 0 22px;color:#c8cfe0;font-size:1rem}
+  .over p b{color:#f5c518}
+  .over .actions{display:flex;gap:10px}
+  .over .actions button{
+    flex:1;border:0;border-radius:14px;padding:13px;
+    font-weight:800;font-size:1rem;font-family:inherit;cursor:pointer;
+  }
+  .new-record{
+    display:inline-block;background:linear-gradient(180deg,#f7d33a,#e9b800);
+    color:#1a1400;font-weight:900;
+    padding:5px 12px;border-radius:99px;
+    font-size:.78rem;margin-bottom:10px;letter-spacing:.3px;
+  }
+
+  @media(max-width:560px){
+    .card{padding:20px 16px 16px;border-radius:22px}
+    .actions{flex-direction:column}
+    .top .reset{display:none}
+    .flag-img{width:110px;height:66px}
+    .over{padding:24px 20px}
+  }
 </style>
 </head>
 <body>
@@ -48,13 +220,13 @@ h1{font-size:clamp(1.8rem,6vw,2.7rem);margin:8px 0 4px}
   <div class="top">
     <button class="btn" id="back">← Menú</button>
     <div class="brand">🕵️ País Misterioso</div>
-    <button class="btn reset" id="reset">Reiniciar</button>
+    <button class="btn icon" id="mute" title="Sonido">🔊</button>
+    <button class="btn icon reset" id="reset" title="Reiniciar">🔄</button>
   </div>
 
-  <section class="card">
-    <img src="logo.png" class="logo" alt="BanderQuiz">
+  <section class="card" id="card">
     <h1>¿Qué país es?</h1>
-    <p class="sub">El mismo sistema de países y banderas de BanderQuiz. Descubre el país con las pistas.</p>
+    <p class="sub" id="sub">Adivina el país con las pistas.</p>
 
     <div class="stats">
       <span class="stat">⭐ <b id="score">0</b></span>
@@ -63,18 +235,24 @@ h1{font-size:clamp(1.8rem,6vw,2.7rem);margin:8px 0 4px}
       <span class="stat">🎯 <b id="accuracy">0%</b></span>
     </div>
 
-    <div class="mystery-flag" id="mysteryFlag"><span class="flag-fallback">❓</span></div>
+    <div class="best-info">
+      🏅 Récord: <b id="bestScore">0</b> · 🔥 Mejor racha: <b id="bestStreak">0</b>
+    </div>
+
     <div class="clues" id="clues"></div>
 
-    <input id="answer" class="answer" autocomplete="off" spellcheck="false" enterkeyhint="done" placeholder="Escribe el nombre del país…">
+    <input id="answer" class="answer" autocomplete="off" autocapitalize="characters"
+           spellcheck="false" enterkeyhint="done" placeholder="Escribe el nombre del país…">
 
     <div class="actions">
-      <button class="skip" id="skip">💡 Otra pista</button>
+      <button class="skip" id="skip">💡 Otra pista (-20)</button>
       <button class="check" id="check">Comprobar ✓</button>
     </div>
 
+    <button class="link-btn" id="giveup">🤷 No lo sé, muéstrame la respuesta</button>
+
     <div class="msg" id="msg">Preparando países…</div>
-    <div class="score">Pista usada: <b id="used">1</b>/5 · Puntos de esta ronda: <b id="round">100</b></div>
+    <div class="score">Pista <b id="used">1</b>/5 · <b id="round">100</b> pts</div>
   </section>
 </main>
 
@@ -82,8 +260,10 @@ h1{font-size:clamp(1.8rem,6vw,2.7rem);margin:8px 0 4px}
   <div class="over">
     <h2>🏆 Partida terminada</h2>
     <p id="summary"></p>
-    <button class="check" id="retry">🔄 Jugar otra vez</button>
-    <button class="skip" id="menu">🏠 Menú</button>
+    <div class="actions">
+      <button class="check" id="retry">🔄 Jugar otra vez</button>
+      <button class="skip" id="menu">🏠 Menú</button>
+    </div>
   </div>
 </div>
 
@@ -92,28 +272,35 @@ h1{font-size:clamp(1.8rem,6vw,2.7rem);margin:8px 0 4px}
   'use strict';
 
   /* =========================================================
-     1) UTILIDADES BÁSICAS
+     0) UTILIDADES
      ========================================================= */
-
-  // ANTES: $=id=>document.getElementById(id);  -> ReferenceError en 'use strict'
   const $ = function (id) { return document.getElementById(id); };
 
   const norm = function (s) {
     return String(s == null ? '' : s)
       .toLowerCase()
       .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')   // quita acentos
-      .replace(/[’'`´]/g, '')            // quita apóstrofos
-      .replace(/[^a-z0-9\s]/g, ' ')      // símbolos -> espacio
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[’'`´]/g, '')
+      .replace(/[^a-z0-9\s]/g, ' ')
       .replace(/\s+/g, ' ')
       .trim();
   };
 
-  /* =========================================================
-     2) SISTEMA DE PAÍSES (se respeta window.BanderQuizCountries)
-     ========================================================= */
+  const codeToEmoji = function (cc) {
+    const code = String(cc || '').toUpperCase();
+    if (!/^[A-Z]{2}$/.test(code)) return '🏳️';
+    try {
+      return String.fromCodePoint(
+        0x1F1E6 + code.charCodeAt(0) - 65,
+        0x1F1E6 + code.charCodeAt(1) - 65
+      );
+    } catch (e) { return '🏳️'; }
+  };
 
-  // Lista de emergencia: SOLO se usa si BanderQuiz no aporta países.
+  /* =========================================================
+     1) PAÍSES (se respeta window.BanderQuizCountries)
+     ========================================================= */
   const FALLBACK_COUNTRIES = [
     ['ES','España'],['FR','Francia'],['IT','Italia'],['DE','Alemania'],['PT','Portugal'],
     ['GB','Reino Unido'],['IE','Irlanda'],['NL','Países Bajos'],['BE','Bélgica'],['CH','Suiza'],
@@ -143,42 +330,38 @@ h1{font-size:clamp(1.8rem,6vw,2.7rem);margin:8px 0 4px}
     });
   }
 
-  // Lee el sistema original de BanderQuiz SIN reemplazarlo.
-  function readCountries() {
+  function readCountriesFromWindow() {
     let src = [];
     try {
       if (Array.isArray(window.BanderQuizCountries)) src = window.BanderQuizCountries;
     } catch (e) { src = []; }
-
     return src
       .filter(function (x) {
         return Array.isArray(x) && /^[A-Za-z]{2}$/.test(String(x[0] || '')) && x[1];
       })
-      .map(function (x) {
-        return [String(x[0]).toUpperCase(), String(x[1])];
-      });
+      .map(function (x) { return [String(x[0]).toUpperCase(), String(x[1])]; });
   }
 
-  let countries = readCountries();
+  let countries = readCountriesFromWindow();
 
   if (!countries.length) {
-    // No hay países: usamos emergencia para NO bloquear y, en segundo plano,
-    // intentamos recargar el script original por si falló su carga.
     countries = FALLBACK_COUNTRIES.slice();
     try {
       const s = document.createElement('script');
-      s.src = 'banderquiz-paises.js?v=20260911-11';
+      s.src = 'banderquiz-paises.js?v=' + Date.now();
       s.async = true;
       s.onload = function () {
-        const loaded = readCountries();
+        const loaded = readCountriesFromWindow();
         if (loaded.length) {
           countries = loaded;
           buildNameMap(countries);
+          const sub = $('sub');
+          if (sub) sub.textContent = 'Adivina el país con las pistas · ' + countries.length + ' países disponibles.';
         }
       };
-      s.onerror = function () { /* silencio: seguimos con la lista de emergencia */ };
+      s.onerror = function () {};
       document.head.appendChild(s);
-    } catch (e) { /* silencio */ }
+    } catch (e) {}
   }
 
   buildNameMap(countries);
@@ -190,59 +373,41 @@ h1{font-size:clamp(1.8rem,6vw,2.7rem);margin:8px 0 4px}
         const n = window.BanderQuizCountryName(code);
         if (n && String(n) !== code) return String(n);
       }
-    } catch (e) { /* silencio */ }
+    } catch (e) {}
     return nameByCode.get(code) || code;
   }
 
   /* =========================================================
-     3) ALIAS / RESPUESTAS ACEPTADAS
+     2) ALIAS / RESPUESTAS ACEPTADAS
      ========================================================= */
-
   const ALIAS_GROUPS = [
-    ['Estados Unidos', 'EEUU', 'USA', 'US', 'Estados Unidos de América', 'United States'],
-    ['Países Bajos', 'Paises Bajos', 'Holanda', 'Netherlands'],
-    ['Reino Unido', 'Inglaterra', 'UK', 'Gran Bretaña', 'United Kingdom'],
-    ['Corea del Sur', 'Corea Sur', 'South Korea'],
-    ['Corea del Norte', 'Corea Norte', 'North Korea'],
-    ['Chequia', 'República Checa', 'Republica Checa'],
-    ['Emiratos Árabes Unidos', 'Emiratos Arabes Unidos', 'EAU', 'UAE'],
-    ['Arabia Saudita', 'Arabia Saudí', 'Arabia Saudi'],
-    ['Catar', 'Qatar'],
-    ['Vietnam', 'Viet Nam'],
-    ['Rusia', 'Federación de Rusia'],
-    ['Alemania', 'Germany'],
-    ['España', 'Espana', 'Spain'],
-    ['Francia', 'France'],
-    ['Italia', 'Italy'],
-    ['Japón', 'Japon'],
-    ['México', 'Mexico'],
-    ['Perú', 'Peru'],
-    ['Brasil', 'Brazil'],
-    ['Turquía', 'Turquia'],
-    ['Egipto', 'Egypt'],
-    ['Marruecos', 'Morocco'],
-    ['Grecia', 'Greece'],
-    ['Suiza', 'Switzerland'],
-    ['Suecia', 'Sweden'],
-    ['Noruega', 'Norway'],
-    ['Dinamarca', 'Denmark'],
-    ['Finlandia', 'Finland'],
-    ['Islandia', 'Iceland'],
-    ['Irlanda', 'Ireland'],
-    ['Portugal', 'Portugal'],
-    ['Polonia', 'Poland'],
-    ['Ucrania', 'Ukraine'],
-    ['China', 'China'],
-    ['India', 'India'],
-    ['Australia', 'Australia'],
-    ['Canadá', 'Canada'],
-    ['Argentina', 'Argentina'],
-    ['Chile', 'Chile'],
-    ['Colombia', 'Colombia']
+    ['Estados Unidos','EEUU','USA','Estados Unidos de América','United States'],
+    ['Países Bajos','Paises Bajos','Holanda','Netherlands'],
+    ['Reino Unido','Inglaterra','UK','Gran Bretaña','United Kingdom'],
+    ['Corea del Sur','Corea Sur','South Korea'],
+    ['Corea del Norte','Corea Norte','North Korea'],
+    ['Chequia','República Checa','Republica Checa','Czech Republic'],
+    ['Emiratos Árabes Unidos','Emiratos Arabes Unidos','EAU','UAE'],
+    ['Arabia Saudita','Arabia Saudí','Arabia Saudi'],
+    ['Catar','Qatar'],
+    ['Vietnam','Viet Nam'],
+    ['Rusia','Federación de Rusia','Russia'],
+    ['Alemania','Germany'],['España','Espana','Spain'],['Francia','France'],['Italia','Italy'],
+    ['Japón','Japon'],['México','Mexico'],['Perú','Peru'],['Brasil','Brazil'],['Turquía','Turquia'],
+    ['Egipto','Egypt'],['Marruecos','Morocco'],['Grecia','Greece'],['Suiza','Switzerland'],
+    ['Suecia','Sweden'],['Noruega','Norway'],['Dinamarca','Denmark'],['Finlandia','Finland'],
+    ['Islandia','Iceland'],['Irlanda','Ireland'],['Polonia','Poland'],['Ucrania','Ukraine'],
+    ['Argelia','Algeria'],['Túnez','Tunisia'],['Sudáfrica','South Africa'],['Etiopía','Ethiopia'],
+    ['Canadá','Canada'],['Panamá','Panama'],['Colombia','Colombia'],['Venezuela','Venezuela'],
+    ['Ecuador','Ecuador'],['Bolivia','Bolivia'],['Chile','Chile'],['Argentina','Argentina'],
+    ['Uruguay','Uruguay'],['Paraguay','Paraguay'],['China','China'],['India','India'],
+    ['Tailandia','Thailand'],['Filipinas','Philippines'],['Indonesia','Indonesia'],
+    ['Malasia','Malaysia'],['Singapur','Singapore'],['Australia','Australia'],
+    ['Nueva Zelanda','New Zealand'],['Irán','Iran'],['Irak','Iraq'],['Israel','Israel'],
+    ['Kazajistán','Kazakhstan']
   ];
 
-  const aliasIndex = new Map(); // variante normalizada -> Set de variantes normalizadas
-
+  const aliasIndex = new Map();
   ALIAS_GROUPS.forEach(function (group) {
     const set = new Set(group.map(norm).filter(Boolean));
     set.forEach(function (v) { aliasIndex.set(v, set); });
@@ -258,153 +423,283 @@ h1{font-size:clamp(1.8rem,6vw,2.7rem);margin:8px 0 4px}
   }
 
   /* =========================================================
-     4) BANDERAS (CDN en segundo plano, nunca bloquea el juego)
+     3) CONTINENTES
      ========================================================= */
+  const CONTINENT_BY_CODE = (function () {
+    const m = {};
+    const add = function (codes, name) {
+      codes.split(' ').forEach(function (c) { m[c] = name; });
+    };
+    add('ES FR IT DE PT GB IE NL BE CH AT SE NO DK FI IS PL CZ SK HU RO BG GR HR RS UA RU BY LT LV EE MD AL MK BA ME SI XK MT CY LU LI AD MC SM VA', 'Europa');
+    add('CN JP KR KP IN PK BD TH VN PH ID MY SG MM KH LA MN NP LK KZ UZ TM KG TJ AF IR IQ IL JO LB SY SA AE QA KW BH OM YE TR GE AM AZ', 'Asia');
+    add('MA DZ TN EG LY NG KE ZA ET GH SN CI CM CD AO MZ TZ UG RW SO SD SS ML BF NE TD MR GM GW GN SL LR TG BJ GA CG CF GQ ZW ZM MW NA BW LS SZ MG MU SC CV ST KM DJ ER', 'África');
+    add('US CA MX GT BZ SV HN NI CR PA CU DO HT JM BS BB TT GD LC VC AG KN DM PR', 'América del Norte');
+    add('CO VE EC PE BO CL AR UY PY BR GY SR', 'América del Sur');
+    add('AU NZ FJ PG SB VU NC PF WS TO TV KI NR FM MH PW GU AS CK NU WF', 'Oceanía');
+    return m;
+  })();
 
+  /* =========================================================
+     4) BANDERAS
+     ========================================================= */
   const FLAG_JSON_URL = 'https://cdn.jsdelivr.net/npm/country-flag-emoji-json@2.0.0/dist/by-code.json';
   const FLAG_IMG_BASE = 'https://cdn.jsdelivr.net/npm/country-flag-emoji-json@2.0.0/dist/images/';
 
   let flagByCode = {};
-  let flagsLoaded = false;
 
   function flagUrl(cc) {
     const code = String(cc || '').toUpperCase();
     const entry = flagByCode[code];
     if (entry && typeof entry.image === 'string' && entry.image) return entry.image;
-    // Fallback directo obligatorio
     return FLAG_IMG_BASE + code + '.svg';
   }
 
-  function flagEmoji(cc) {
-    const entry = flagByCode[String(cc || '').toUpperCase()];
-    return (entry && entry.emoji) ? entry.emoji : '🏳️';
-  }
-
-  // Nunca lanza ni rechaza: si falla, se usa la URL directa.
   function loadFlags() {
-    let ctrl = null;
-    let t = null;
-
+    let ctrl = null, t = null;
     try {
       if (typeof AbortController !== 'undefined') {
         ctrl = new AbortController();
         t = setTimeout(function () { try { ctrl.abort(); } catch (e) {} }, 7000);
       }
-
       const opts = ctrl ? { signal: ctrl.signal, cache: 'force-cache' } : { cache: 'force-cache' };
-
       return fetch(FLAG_JSON_URL, opts)
-        .then(function (r) {
-          if (!r.ok) throw new Error('HTTP ' + r.status);
-          return r.json();
-        })
-        .then(function (data) {
-          if (data && typeof data === 'object') {
-            flagByCode = data;
-            flagsLoaded = true;
-          }
-        })
-        .catch(function () {
-          flagByCode = {};
-          flagsLoaded = false;
-        })
-        .then(function () {
-          if (t) clearTimeout(t);
-        });
+        .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+        .then(function (data) { if (data && typeof data === 'object') flagByCode = data; })
+        .catch(function () { flagByCode = {}; })
+        .then(function () { if (t) clearTimeout(t); });
     } catch (e) {
       if (t) clearTimeout(t);
       return Promise.resolve();
     }
   }
 
-  function flagNode(cc) {
+  // Devuelve un <img class="flag-display flag-img"> y, si todo falla, un <span class="flag-display flag-emoji">
+  function flagNode(cc, hideAlt) {
     const img = document.createElement('img');
-    img.alt = 'Bandera de ' + getName(cc);
+    img.className = 'flag-display flag-img';
+    img.alt = hideAlt ? '' : 'Bandera de ' + getName(cc);
     img.decoding = 'async';
     img.loading = 'eager';
     img.src = flagUrl(cc);
 
     img.addEventListener('error', function onErr() {
       img.removeEventListener('error', onErr);
-
-      // Segundo intento: URL directa del SVG
       if (!img.dataset.retried) {
         img.dataset.retried = '1';
         img.src = FLAG_IMG_BASE + String(cc || '').toUpperCase() + '.svg';
         return;
       }
-
-      // Último recurso: emoji / bandera genérica
       const span = document.createElement('span');
-      span.className = 'flag-fallback';
-      span.textContent = flagEmoji(cc);
+      span.className = 'flag-display flag-emoji';
+      span.textContent = codeToEmoji(cc);
       if (img.parentNode) img.parentNode.replaceChild(span, img);
     });
 
     return img;
   }
 
-  function setMysteryFlag(cc) {
-    const box = $('mysteryFlag');
-    if (!box) return;
-    box.innerHTML = '';
-    box.appendChild(flagNode(cc));
+  function glowFlag(type) {
+    const el = document.querySelector('.flag-display');
+    if (!el) return;
+    el.classList.remove('glow-correct', 'glow-wrong');
+    void el.offsetWidth;
+    el.classList.add(type);
   }
 
   /* =========================================================
-     5) ESTADO DEL JUEGO
+     5) SONIDO
      ========================================================= */
+  const SOUND_LS = 'banderquiz-misterioso-sound-v1';
+  let soundOn = true;
+  let audioCtx = null;
+
+  try { if (localStorage.getItem(SOUND_LS) === '0') soundOn = false; } catch (e) {}
+
+  function ensureAudio() {
+    if (!soundOn) return null;
+    try {
+      if (!audioCtx) {
+        const Ctx = window.AudioContext || window.webkitAudioContext;
+        if (!Ctx) return null;
+        audioCtx = new Ctx();
+      }
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      return audioCtx;
+    } catch (e) { return null; }
+  }
+
+  function playTone(freq, duration, type, volume) {
+    const ctx = ensureAudio();
+    if (!ctx) return;
+    try {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = type || 'sine';
+      osc.frequency.value = freq;
+      const v = typeof volume === 'number' ? volume : 0.07;
+      gain.gain.setValueAtTime(0.0001, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(v, ctx.currentTime + 0.015);
+      gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + duration);
+      osc.connect(gain).connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + duration + 0.02);
+    } catch (e) {}
+  }
+
+  const sfxCorrect = function () {
+    playTone(660, 0.12, 'sine', 0.07);
+    setTimeout(function () { playTone(880, 0.16, 'sine', 0.07); }, 100);
+  };
+  const sfxWrong = function () {
+    playTone(220, 0.22, 'sawtooth', 0.06);
+    setTimeout(function () { playTone(160, 0.22, 'sawtooth', 0.06); }, 130);
+  };
+  const sfxHint = function () { playTone(520, 0.08, 'triangle', 0.05); };
+  const sfxGameOver = function () {
+    playTone(440, 0.15, 'sine', 0.07);
+    setTimeout(function () { playTone(330, 0.2, 'sine', 0.07); }, 140);
+    setTimeout(function () { playTone(220, 0.3, 'sine', 0.07); }, 320);
+  };
+
+  function updateMuteBtn() {
+    const b = $('mute');
+    if (!b) return;
+    b.textContent = soundOn ? '🔊' : '🔇';
+    b.title = soundOn ? 'Silenciar' : 'Activar sonido';
+  }
+
+  /* =========================================================
+     6) RÉCORDS
+     ========================================================= */
+  const BEST_LS = 'banderquiz-misterioso-best-v1';
+
+  function loadBest() {
+    try {
+      const raw = localStorage.getItem(BEST_LS);
+      if (raw) {
+        const o = JSON.parse(raw);
+        return {
+          score: Number(o.score) || 0,
+          streak: Number(o.streak) || 0,
+          correct: Number(o.correct) || 0
+        };
+      }
+    } catch (e) {}
+    return { score: 0, streak: 0, correct: 0 };
+  }
+
+  let best = loadBest();
+
+  function updateBestUI() {
+    const a = $('bestScore'), b = $('bestStreak');
+    if (a) a.textContent = best.score;
+    if (b) b.textContent = best.streak;
+  }
+
+  function saveBestIfNeeded() {
+    let changed = false;
+    if (score > best.score) { best.score = score; changed = true; }
+    if (streak > best.streak) { best.streak = streak; changed = true; }
+    if (correct > best.correct) { best.correct = correct; changed = true; }
+    if (changed) {
+      try { localStorage.setItem(BEST_LS, JSON.stringify(best)); } catch (e) {}
+    }
+    updateBestUI();
+  }
+
+  /* =========================================================
+     7) ESTADO
+     ========================================================= */
+  const MAX_CLUES = 5;
+  const ROUND_START = 100;
+  const ROUND_STEP = 20;
+  const ROUND_MIN = 20;
+  const RECENT_LIMIT = 8;
 
   let current = null;
-  let lastCode = '';
-  let score = 0;      // puntos
-  let total = 0;      // rondas respondidas
-  let correct = 0;    // aciertos reales
+  const recentCodes = [];
+  let score = 0;
+  let total = 0;
+  let correct = 0;
   let streak = 0;
   let lives = 3;
   let clue = 1;
-  let round = 100;
+  let round = ROUND_START;
   let locked = false;
   let timer = null;
+  let startingBestScore = 0;
 
   function clearTimer() {
-    if (timer !== null) {
-      clearTimeout(timer);
-      timer = null;
-    }
+    if (timer !== null) { clearTimeout(timer); timer = null; }
   }
 
   /* =========================================================
-     6) RENDER
+     8) PISTAS
      ========================================================= */
-
   function clueData() {
     const cc = current[0];
     const es = getName(cc);
     const words = es.trim().split(/\s+/).filter(Boolean).length;
+    const continent = CONTINENT_BY_CODE[cc] || 'Mundo';
     return [
-      { icon: '🏳️', label: 'Bandera', value: 'Se revelará al completar la ronda' },
+      { icon: '🏳️', label: 'Bandera',      type: 'flag' },
       { icon: '🔤', label: 'Primera letra', value: es.charAt(0).toUpperCase() },
-      { icon: '📏', label: 'Longitud', value: es.replace(/\s/g, '').length + ' letras' },
-      { icon: '🌐', label: 'Bandera externa', value: 'Usa la bandera oficial para orientarte' },
-      { icon: '🧩', label: 'Patrón', value: words + ' palabra' + (words === 1 ? '' : 's') }
+      { icon: '📏', label: 'Longitud',      value: es.replace(/\s/g, '').length + ' letras' },
+      { icon: '🌍', label: 'Continente',    value: continent },
+      { icon: '🧩', label: 'Patrón',        value: words + ' palabra' + (words === 1 ? '' : 's') }
     ];
   }
 
+  /* =========================================================
+     9) RENDER
+     ========================================================= */
   function render() {
     if (!current) return;
     const d = clueData();
+    const cluesEl = $('clues');
+    cluesEl.innerHTML = '';
 
-    $('clues').innerHTML = d.map(function (x, i) {
+    d.forEach(function (x, i) {
       const open = i < clue;
-      return '<div class="clue ' + (open ? '' : 'hidden') + '">' +
-        '<span>' + x.icon + '</span>' +
-        '<div><strong>Pista ' + (i + 1) + ' · ' + x.label + '</strong><br>' +
-        (open ? x.value : '🔒 Pista bloqueada') + '</div></div>';
-    }).join('');
+
+      const div = document.createElement('div');
+      div.className = 'clue' + (open ? '' : ' hidden');
+
+      const icon = document.createElement('span');
+      icon.className = 'clue-icon';
+      icon.textContent = x.icon;
+      div.appendChild(icon);
+
+      const body = document.createElement('div');
+      body.className = 'clue-body';
+
+      const label = document.createElement('span');
+      label.className = 'clue-label';
+      label.textContent = 'Pista ' + (i + 1) + ' · ' + x.label;
+      body.appendChild(label);
+
+      if (!open) {
+        const lock = document.createElement('span');
+        lock.className = 'clue-lock';
+        lock.textContent = '🔒 Bloqueada';
+        body.appendChild(lock);
+      } else if (x.type === 'flag') {
+        // Bandera real INLINE, dentro de la propia pista.
+        body.appendChild(flagNode(current[0], true));
+      } else {
+        const val = document.createElement('span');
+        val.className = 'clue-value';
+        val.textContent = x.value;
+        body.appendChild(val);
+      }
+
+      div.appendChild(body);
+      cluesEl.appendChild(div);
+    });
 
     $('used').textContent = clue;
     $('round').textContent = round;
+    updateHintButton();
   }
 
   function update() {
@@ -414,21 +709,30 @@ h1{font-size:clamp(1.8rem,6vw,2.7rem);margin:8px 0 4px}
     $('accuracy').textContent = (total ? Math.round(correct / total * 100) : 0) + '%';
   }
 
-  /* =========================================================
-     7) FLUJO DEL JUEGO
-     ========================================================= */
+  function updateHintButton() {
+    const btn = $('skip');
+    if (!btn) return;
+    if (!current || locked) { btn.disabled = true; return; }
+    if (clue >= MAX_CLUES) {
+      btn.disabled = true;
+      btn.textContent = '💡 Sin más pistas';
+    } else {
+      btn.disabled = false;
+      btn.textContent = '💡 Otra pista (-20)';
+    }
+  }
 
+  /* =========================================================
+     10) FLUJO
+     ========================================================= */
   function pickCountry() {
     if (!countries.length) return null;
-    if (countries.length === 1) return countries[0];
-
-    let c = null;
-    let tries = 0;
-    do {
-      c = countries[Math.floor(Math.random() * countries.length)];
-      tries++;
-    } while (c && c[0] === lastCode && tries < 25);
-
+    const pool = countries.filter(function (c) { return recentCodes.indexOf(c[0]) === -1; });
+    const source = pool.length ? pool : countries;
+    const c = source[Math.floor(Math.random() * source.length)];
+    recentCodes.push(c[0]);
+    const lim = Math.min(RECENT_LIMIT, Math.max(1, Math.floor(countries.length / 2)));
+    while (recentCodes.length > lim) recentCodes.shift();
     return c;
   }
 
@@ -437,45 +741,62 @@ h1{font-size:clamp(1.8rem,6vw,2.7rem);margin:8px 0 4px}
 
     if (!countries.length) {
       $('msg').textContent = 'No se pudo cargar la base de países de BanderQuiz.';
+      $('msg').className = 'msg error';
       return;
     }
 
     current = pickCountry();
     if (!current) {
       $('msg').textContent = 'No se pudo cargar la base de países de BanderQuiz.';
+      $('msg').className = 'msg error';
       return;
     }
 
-    lastCode = current[0];
     locked = false;
     clue = 1;
-    round = 100;
+    round = ROUND_START;
 
     $('answer').value = '';
-    $('mysteryFlag').innerHTML = '<span class="flag-fallback">❓</span>';
     $('msg').textContent = 'Piensa antes de pedir otra pista.';
+    $('msg').className = 'msg';
 
     render();
+
+    const isTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+    if (!isTouch) {
+      setTimeout(function () { try { $('answer').focus(); } catch (e) {} }, 60);
+    }
   }
 
   function reveal() {
-    if (locked || !current || clue >= 5) return;
+    if (locked || !current || clue >= MAX_CLUES) return;
     clue++;
-    round = Math.max(20, round - 20);
+    round = Math.max(ROUND_MIN, round - ROUND_STEP);
+    sfxHint();
     render();
-    $('msg').textContent = clue < 5 ? 'Se desbloqueó una nueva pista.' : 'Ya tienes todas las pistas.';
+    $('msg').textContent = clue < MAX_CLUES ? 'Se desbloqueó una nueva pista.' : 'Ya tienes todas las pistas.';
+    $('msg').className = 'msg';
   }
 
   function check() {
     if (locked || !current) return;
-
     const val = norm($('answer').value);
     if (!val) {
       $('msg').textContent = 'Escribe un país primero.';
+      $('msg').className = 'msg';
       return;
     }
-
     const good = namesFor(current[0]).has(val);
+    resolve(good, false);
+  }
+
+  function giveUp() {
+    if (locked || !current) return;
+    resolve(false, true);
+  }
+
+  function resolve(good, wasGiveUp) {
+    if (locked || !current) return;
     locked = true;
     total++;
 
@@ -484,30 +805,44 @@ h1{font-size:clamp(1.8rem,6vw,2.7rem);margin:8px 0 4px}
       score += round;
       streak++;
       $('msg').textContent = '✅ ¡Correcto! Era ' + getName(current[0]) + '.';
+      $('msg').className = 'msg success';
+      sfxCorrect();
+      flashCard('correct');
+      glowFlag('glow-correct');
     } else {
       lives--;
       streak = 0;
-      $('msg').textContent = '❌ No era ese. Era ' + getName(current[0]) + '.';
+      $('msg').textContent = (wasGiveUp ? '🤷 La respuesta era ' : '❌ No era ese. Era ') + getName(current[0]) + '.';
+      $('msg').className = 'msg error';
+      sfxWrong();
+      flashCard('wrong');
+      glowFlag('glow-wrong');
     }
 
-    setMysteryFlag(current[0]);
     update();
     sync(false);
-
-    if (lives <= 0) {
-      clearTimer();
-      timer = setTimeout(gameOver, 900);
-      return;
-    }
+    updateHintButton();
 
     clearTimer();
-    timer = setTimeout(next, 1100);
+    if (lives <= 0) {
+      timer = setTimeout(gameOver, 1300);
+    } else {
+      timer = setTimeout(next, 1600);
+    }
+  }
+
+  function flashCard(type) {
+    const card = $('card');
+    if (!card) return;
+    card.classList.remove('correct', 'wrong');
+    void card.offsetWidth;
+    card.classList.add(type);
+    setTimeout(function () { card.classList.remove(type); }, 900);
   }
 
   /* =========================================================
-     8) PROGRESO / GAME OVER / RESET
+     11) PROGRESO / GAME OVER / RESET
      ========================================================= */
-
   function sync(completed) {
     try {
       if (!window.TecnomathProgress || typeof window.TecnomathProgress.save !== 'function') return;
@@ -522,50 +857,69 @@ h1{font-size:clamp(1.8rem,6vw,2.7rem);margin:8px 0 4px}
         lives: lives,
         completed: !!completed
       });
-    } catch (e) { /* nunca debe romper el juego */ }
+    } catch (e) {}
   }
 
   function gameOver() {
     clearTimer();
+    sfxGameOver();
     sync(true);
+
+    const previousBest = startingBestScore;
+    saveBestIfNeeded();
+
     const acc = total ? Math.round(correct / total * 100) : 0;
-    $('summary').innerHTML =
-      'Puntuación: <b>' + score + '</b><br>' +
-      'Aciertos: <b>' + correct + '</b> de <b>' + total + '</b><br>' +
-      'Precisión: <b>' + acc + '%</b>';
+    const isNewRecord = score > previousBest && score > 0;
+
+    let html = '';
+    if (isNewRecord) html += '<span class="new-record">🏅 ¡Nuevo récord!</span><br>';
+    html += 'Puntuación: <b>' + score + '</b><br>';
+    html += 'Aciertos: <b>' + correct + '</b> de <b>' + total + '</b><br>';
+    html += 'Precisión: <b>' + acc + '%</b><br>';
+    html += 'Mejor racha: <b>' + streak + '</b>';
+    $('summary').innerHTML = html;
+
     $('overlay').classList.add('show');
   }
 
   function reset() {
     clearTimer();
-    score = 0;
-    total = 0;
-    correct = 0;
-    streak = 0;
-    lives = 3;
-    locked = false;
-    lastCode = '';
-    current = null;
+    startingBestScore = best.score;
+    score = 0; total = 0; correct = 0; streak = 0; lives = 3;
+    locked = false; current = null;
+    recentCodes.length = 0;
     $('overlay').classList.remove('show');
     update();
     next();
   }
 
   /* =========================================================
-     9) ARRANQUE ROBUSTO
+     12) ARRANQUE
      ========================================================= */
-
   function bindUI() {
-    $('back').onclick = function () { location.href = 'menu.html'; };
-    $('menu').onclick = function () { location.href = 'menu.html'; };
-    $('retry').onclick = reset;
-    $('reset').onclick = reset;
-    $('skip').onclick = reveal;
-    $('check').onclick = check;
+    $('back').onclick   = function () { location.href = 'menu.html'; };
+    $('menu').onclick   = function () { location.href = 'menu.html'; };
+    $('retry').onclick  = reset;
+    $('reset').onclick  = reset;
+    $('skip').onclick   = reveal;
+    $('check').onclick  = check;
+    $('giveup').onclick = giveUp;
+
+    $('mute').onclick = function () {
+      soundOn = !soundOn;
+      try { localStorage.setItem(SOUND_LS, soundOn ? '1' : '0'); } catch (e) {}
+      updateMuteBtn();
+      if (soundOn) sfxHint();
+    };
+
     $('answer').addEventListener('keydown', function (e) {
-      if (e.key === 'Enter') {
+      if (e.key === 'Enter') { e.preventDefault(); check(); }
+    });
+
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') {
         e.preventDefault();
-        check();
+        if (!$('overlay').classList.contains('show')) reveal();
       }
     });
   }
@@ -573,24 +927,31 @@ h1{font-size:clamp(1.8rem,6vw,2.7rem);margin:8px 0 4px}
   function init() {
     try {
       bindUI();
+      updateMuteBtn();
+      updateBestUI();
+      startingBestScore = best.score;
+
+      const sub = $('sub');
+      if (sub && countries.length) {
+        sub.textContent = 'Adivina el país con las pistas · ' + countries.length + ' países disponibles.';
+      }
+
       update();
 
-      // 1º: el juego arranca YA (no depende del CDN ni de fetch)
+      // 1º Arranca YA (independiente de red)
       next();
 
-      // 2º: banderas en segundo plano (si fallan, el juego sigue igual)
-      loadFlags().then(function () {
-        // Si ya se reveló la bandera de la ronda actual, la repintamos con mejor fuente
-        try {
-          if (locked && current) setMysteryFlag(current[0]);
-        } catch (e) { /* silencio */ }
-      });
+      // 2º Banderas en segundo plano
+      loadFlags().catch(function () {});
     } catch (err) {
       if (window.console && console.error) console.error('[País Misterioso] Error al iniciar:', err);
       const msg = $('msg');
-      if (msg) msg.textContent = '⚠️ Error al iniciar el juego. Pulsa “Reiniciar”.';
-      const overlay = $('overlay');
-      if (overlay) overlay.classList.remove('show');
+      if (msg) {
+        msg.textContent = '⚠️ Error al iniciar el juego. Pulsa 🔄.';
+        msg.className = 'msg error';
+      }
+      const ov = $('overlay');
+      if (ov) ov.classList.remove('show');
     }
   }
 
