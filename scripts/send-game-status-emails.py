@@ -1,20 +1,29 @@
 import html,json,os,urllib.error,urllib.request,urllib.parse
 
 SUPABASE_URL=os.environ['SUPABASE_URL'].rstrip('/')
-SUPABASE_KEY=os.environ['SUPABASE_SERVICE_ROLE_KEY']
-RESEND_API_KEY=os.environ.get('RESEND_API_KEY','')
-FROM=os.environ.get('RESEND_FROM','TecnoMath <notificaciones@tecnomath.online>')
+SUPABASE_KEY=os.environ['SUPABASE_SERVICE_ROLE_KEY'].strip()
+RESEND_API_KEY=os.environ.get('RESEND_API_KEY','').strip()
+FROM=os.environ.get('RESEND_FROM','TecnoMath <notificaciones@tecnomath.online>').strip()
 TABLE=f'{SUPABASE_URL}/rest/v1/tecnomath_game_submissions'
 HEAD={'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'Content-Type':'application/json','Accept':'application/json','Prefer':'return=representation'}
 def req(url,method='GET',data=None):
- h=dict(HEAD);body=json.dumps(data,ensure_ascii=False).encode() if data is not None else None
+ h=dict(HEAD);body=json.dumps(data,ensure_ascii=False).encode('utf-8') if data is not None else None
  r=urllib.request.Request(url,data=body,headers=h,method=method)
- with urllib.request.urlopen(r,timeout=60) as x:return json.loads(x.read().decode() or 'null')
+ try:
+  with urllib.request.urlopen(r,timeout=60) as x:return json.loads(x.read().decode('utf-8','replace') or 'null')
+ except urllib.error.HTTPError as e:
+  raise RuntimeError(f'Supabase HTTP {e.code}: {e.read().decode("utf-8","replace")}')
 def send(to,subject,body):
- p={'from':FROM,'to':[to],'subject':subject,'html':body};h={'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'Content-Type':'application/json'}
- r=urllib.request.Request('https://api.resend.com/emails',data=json.dumps(p).encode(),headers={**h,'Authorization':'Bearer '+RESEND_API_KEY},method='POST')
- with urllib.request.urlopen(r,timeout=60) as x:x.read()
-if not RESEND_API_KEY:raise RuntimeError('RESEND_API_KEY no está configurado')
+ if not RESEND_API_KEY:raise RuntimeError('RESEND_API_KEY no está configurado')
+ p={'from':FROM,'to':[to],'subject':subject,'html':body}
+ # Resend solo necesita su propia autenticación; no mezclar aquí la clave de Supabase.
+ h={'Authorization':'Bearer '+RESEND_API_KEY,'Content-Type':'application/json','Accept':'application/json'}
+ r=urllib.request.Request('https://api.resend.com/emails',data=json.dumps(p,ensure_ascii=False).encode('utf-8'),headers=h,method='POST')
+ try:
+  with urllib.request.urlopen(r,timeout=60) as x:x.read()
+ except urllib.error.HTTPError as e:
+  detail=e.read().decode('utf-8','replace')
+  raise RuntimeError(f'Resend HTTP {e.code}: {detail}')
 items=req(TABLE+'?select=*&author_email=not.is.null') or []
 for item in items:
  email=str(item.get('author_email') or '').strip();status=str(item.get('status') or 'pending').lower();sent=item.get('email_notifications') or {};key={'pending':'received','reviewing':'reviewing','approved':'approved','rejected':'rejected','published':'published'}.get(status)
