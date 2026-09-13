@@ -48,7 +48,14 @@ def install_zip(raw,dest):
  shutil.rmtree(work,ignore_errors=True)
 def download_storage(path):
  url=f'{SUPABASE_URL}/storage/v1/object/game-submissions/{urllib.parse.quote(path,safe="/")}'
- return request('GET',url)
+ req=urllib.request.Request(url,headers={'apikey':SUPABASE_KEY,'Authorization':f'Bearer {SUPABASE_KEY}'},method='GET')
+ try:
+  with urllib.request.urlopen(req,timeout=120) as r:
+   raw=r.read()
+   print(f'Storage: ZIP descargado correctamente ({len(raw)} bytes).')
+   return raw
+ except urllib.error.HTTPError as e:
+  raise RuntimeError(f'Supabase Storage HTTP {e.code}: {e.read().decode("utf-8","replace")}')
 def patch_submission(id,payload):return request('PATCH',f'{TABLE}?id=eq.{urllib.parse.quote(id)}',payload)
 def send_email(to,subject,body):
  if not RESEND_API_KEY or not to:return
