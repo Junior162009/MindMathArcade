@@ -4,6 +4,8 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
+    paths:
+      - '.github/workflows/process-game-queue.yml'
   schedule:
     - cron: '*/5 * * * *'
 
@@ -13,8 +15,6 @@ permissions:
 env:
   SUPABASE_URL: https://xdszveoxdrdnwwzzvkav.supabase.co
   RESEND_FROM: TecnoMath <notificaciones@tecnomath.online>
-
-auto_cancel: false
 
 jobs:
   publish:
