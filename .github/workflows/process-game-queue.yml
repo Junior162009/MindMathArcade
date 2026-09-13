@@ -6,6 +6,7 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/process-game-queue.yml'
+      - 'scripts/publish-approved-games.py'
   schedule:
     - cron: '*/5 * * * *'
 
