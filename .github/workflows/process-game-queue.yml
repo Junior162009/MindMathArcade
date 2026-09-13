@@ -2,6 +2,8 @@ name: Publicar juegos aprobados automáticamente
 
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
   schedule:
     - cron: '*/5 * * * *'
 
@@ -11,6 +13,8 @@ permissions:
 env:
   SUPABASE_URL: https://xdszveoxdrdnwwzzvkav.supabase.co
   RESEND_FROM: TecnoMath <notificaciones@tecnomath.online>
+
+auto_cancel: false
 
 jobs:
   publish:
@@ -28,9 +32,12 @@ jobs:
           python - <<'PY'
           import os, urllib.request
           key=os.environ['SUPABASE_SERVICE_ROLE_KEY']
+          if not key:
+              raise SystemExit('Falta el secret SUPABASE_SERVICE_ROLE_KEY')
           url=os.environ['SUPABASE_URL']+'/rest/v1/tecnomath_game_submissions?select=id&limit=1'
           req=urllib.request.Request(url,headers={'apikey':key,'Authorization':'Bearer '+key})
-          with urllib.request.urlopen(req,timeout=30) as r: print('Supabase: conexión correcta. HTTP',r.status)
+          with urllib.request.urlopen(req,timeout=30) as r:
+              print('Supabase: conexión correcta. HTTP',r.status)
           PY
 
       - name: Instalar herramientas
