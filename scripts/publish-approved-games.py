@@ -1,5 +1,5 @@
 # Publisher de juegos aprobados desde Supabase Storage
-# El ZIP se descarga como bytes binarios antes de extraerse.
+# Descarga el ZIP como bytes y usa 7-Zip como respaldo para archivos ZIP con metadatos UTF-8 problemáticos.
 
 import html, json, os, re, shutil, subprocess, tempfile, urllib.error, urllib.request, urllib.parse, zipfile
 from datetime import datetime, timezone
@@ -14,10 +14,10 @@ TABLE=f'{SUPABASE_URL}/rest/v1/tecnomath_game_submissions'
 HEADERS={'apikey':SUPABASE_KEY,'Authorization':f'Bearer {SUPABASE_KEY}','Content-Type':'application/json','Accept':'application/json','Prefer':'return=representation'}
 
 def request(method,url,payload=None,headers=None):
- h=dict(HEADERS);h.update(headers or {});data=json.dumps(payload,ensure_ascii=False).encode() if payload is not None else None
+ h=dict(HEADERS);h.update(headers or {});data=json.dumps(payload,ensure_ascii=False).encode('utf-8') if payload is not None else None
  req=urllib.request.Request(url,data=data,headers=h,method=method)
  try:
-  with urllib.request.urlopen(req,timeout=120) as r:return json.loads(r.read().decode() or 'null')
+  with urllib.request.urlopen(req,timeout=120) as r:return json.loads(r.read().decode('utf-8','replace') or 'null')
  except urllib.error.HTTPError as e:raise RuntimeError(f'Supabase HTTP {e.code}: {e.read().decode("utf-8","replace")}')
 
 def slug(v):return re.sub(r'[^a-z0-9]+','-',str(v or 'juego').lower()).strip('-')[:60] or 'juego'
@@ -30,6 +30,16 @@ def safe_extract(zf,out):
   else:
    target.parent.mkdir(parents=True,exist_ok=True)
    with zf.open(info) as src,target.open('wb') as dst:shutil.copyfileobj(src,dst)
+def safe_7z_extract(zip_path,out):
+ listing=subprocess.run(['7z','l','-slt',str(zip_path)],capture_output=True,text=True,encoding='utf-8',errors='replace',check=False)
+ if listing.returncode!=0:raise RuntimeError('No se pudo leer el ZIP con 7-Zip.')
+ for line in listing.stdout.splitlines():
+  if line.startswith('Path = '):
+   name=line[7:].replace('\\','/')
+   if name.startswith('/') or re.match(r'^[A-Za-z]:',name) or any(p=='..' for p in name.split('/')):
+    raise RuntimeError('El ZIP contiene una ruta insegura.')
+ result=subprocess.run(['7z','x','-y',f'-o{out}',str(zip_path)],capture_output=True,text=True,encoding='utf-8',errors='replace',check=False)
+ if result.returncode!=0:raise RuntimeError('7-Zip no pudo extraer el ZIP: '+result.stderr[-500:])
 def find_index(root):
  for n in ('index.html','index.htm'):
   if (root/n).exists():return root/n
@@ -37,33 +47,35 @@ def find_index(root):
 def install_zip(raw,dest):
  work=Path(tempfile.mkdtemp(prefix='tm-game-'));zip_path=work/'game.zip';zip_path.write_bytes(raw);out=work/'extracted';out.mkdir()
  try:
-  with zipfile.ZipFile(zip_path) as z:safe_extract(z,out)
- except zipfile.BadZipFile:raise RuntimeError('El archivo guardado en Storage no es un ZIP válido.')
- index=find_index(out)
- if not index:raise RuntimeError('El paquete no contiene index.html ni index.htm.')
- root=index.parent
- if dest.exists():shutil.rmtree(dest)
- dest.mkdir(parents=True,exist_ok=True)
- for item in root.iterdir():
-  if not item.name.startswith('.'):
-   target=dest/item.name
-   shutil.copytree(item,target) if item.is_dir() else shutil.copy2(item,target)
- shutil.rmtree(work,ignore_errors=True)
+  try:
+   with zipfile.ZipFile(zip_path) as z:safe_extract(z,out)
+  except (zipfile.BadZipFile,UnicodeDecodeError):
+   shutil.rmtree(out,ignore_errors=True);out.mkdir()
+   safe_7z_extract(zip_path,out)
+  index=find_index(out)
+  if not index:raise RuntimeError('El paquete no contiene index.html ni index.htm.')
+  root=index.parent
+  if dest.exists():shutil.rmtree(dest)
+  dest.mkdir(parents=True,exist_ok=True)
+  for item in root.iterdir():
+   if not item.name.startswith('.'):
+    target=dest/item.name
+    shutil.copytree(item,target) if item.is_dir() else shutil.copy2(item,target)
+ finally:
+  shutil.rmtree(work,ignore_errors=True)
 def download_storage(path):
  url=f'{SUPABASE_URL}/storage/v1/object/game-submissions/{urllib.parse.quote(path,safe="/")}'
  req=urllib.request.Request(url,headers={'apikey':SUPABASE_KEY,'Authorization':f'Bearer {SUPABASE_KEY}'},method='GET')
  try:
   with urllib.request.urlopen(req,timeout=120) as r:
-   raw=r.read()
-   print(f'Storage: ZIP descargado correctamente ({len(raw)} bytes).')
-   return raw
- except urllib.error.HTTPError as e:
-  raise RuntimeError(f'Supabase Storage HTTP {e.code}: {e.read().decode("utf-8","replace")}')
+   raw=r.read();print(f'Storage: ZIP descargado correctamente ({len(raw)} bytes).');return raw
+ except urllib.error.HTTPError as e:raise RuntimeError(f'Supabase Storage HTTP {e.code}: {e.read().decode("utf-8","replace")}')
 def patch_submission(id,payload):return request('PATCH',f'{TABLE}?id=eq.{urllib.parse.quote(id)}',payload)
 def send_email(to,subject,body):
  if not RESEND_API_KEY or not to:return
  payload={'from':RESEND_FROM,'to':[to],'subject':subject,'html':body}
- try:request('POST','https://api.resend.com/emails',payload,{'Authorization':f'Bearer {RESEND_API_KEY}'})
+ try:
+  request('POST','https://api.resend.com/emails',payload,{'Authorization':f'Bearer {RESEND_API_KEY}','Content-Type':'application/json'})
  except Exception as e:print('ADVERTENCIA: correo no enviado:',e)
 
 rows=request('GET',f'{TABLE}?status=eq.approved&select=*') or []
@@ -72,7 +84,7 @@ if not rows:raise SystemExit(0)
 
 games_dir=Path('games');data_dir=Path('data');games_dir.mkdir(exist_ok=True);data_dir.mkdir(exist_ok=True);catalog_file=data_dir/'games.json';public_file=games_dir/'published-games.json'
 try:catalog=json.loads(catalog_file.read_text(encoding='utf-8')) if catalog_file.exists() else []
-except Exception:catalog=[]
+except (UnicodeDecodeError,json.JSONDecodeError):catalog=[]
 if not isinstance(catalog,list):catalog=[]
 published_ids={str(x.get('submissionId')) for x in catalog if isinstance(x,dict) and x.get('submissionId')}
 changed=False
@@ -85,7 +97,7 @@ for g in rows:
    game_url=str(g.get('game_url') or '').strip()
    if not re.match(r'^https?://',game_url,re.I):raise RuntimeError('URL del juego inválida.')
    dest.mkdir(parents=True,exist_ok=True);title=html.escape(name)
-   (dest/'index.html').write_text(f'<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>{title}</title></head><body><script>location.replace({json.dumps(game_url)});</script><noscript><a href={json.dumps(game_url)}>Abrir juego</a></noscript></body></html>',encoding='utf-8')
+   (dest/'index.html').write_text(f'<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>{title}</title></head><body><script>location.replace({json.dumps(game_url,ensure_ascii=False)});</script><noscript><a href={json.dumps(game_url,ensure_ascii=False)}>Abrir juego</a></noscript></body></html>',encoding='utf-8')
   else:
    path=str(g.get('package_path') or '')
    if not path:raise RuntimeError('El envío aprobado no tiene package_path.')
