@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#050a1a">
+<meta name="description" content="NOVA MATH — Defensa Estelar. Arcade matemático orbital.">
+<title>NOVA MATH · Defensa Estelar | MindMathArcade</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div id="app">
+
+  <!-- ============================= HUD ============================= -->
+  <header id="hud">
+    <div class="stat">
+      <span class="label">Nivel</span>
+      <span class="value" id="hud-level">1</span>
+    </div>
+    <div class="stat">
+      <span class="label">Puntos</span>
+      <span class="value" id="hud-score">0</span>
+    </div>
+    <div class="stat">
+      <span class="label">Vidas</span>
+      <span class="value lives" id="hud-lives">♥♥♥</span>
+    </div>
+    <div class="stat">
+      <span class="label">Récord</span>
+      <span class="value" id="hud-best">0</span>
+    </div>
+    <div class="hud-actions">
+      <button class="icon-btn" id="btn-sound" type="button" aria-label="Activar o desactivar sonido" title="Sonido">🔊</button>
+      <button class="icon-btn" id="btn-pause" type="button" aria-label="Pausar partida" title="Pausa (P / Esc)">⏸</button>
+    </div>
+  </header>
+
+  <!-- ========================== PROGRESO =========================== -->
+  <div id="progress">
+    <div class="track" id="progress-track" role="progressbar"
+         aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+      <div class="fill" id="progress-fill"></div>
+    </div>
+    <span class="text" id="progress-text">0 / 4</span>
+  </div>
+
+  <!-- =========================== STAGE ============================= -->
+  <main id="stage">
+    <canvas id="game" aria-label="Zona de juego"></canvas>
+
+    <!-- Banner del problema -->
+    <div id="problem-banner" class="hidden" aria-live="polite">
+      <div id="problem-text">— — —</div>
+      <div id="combo-badge" class="hidden">COMBO ×2</div>
+    </div>
+
+    <!-- Feedback de acierto/error -->
+    <div id="feedback-flash" aria-hidden="true"></div>
+
+    <!-- ---------- Pantalla: Inicio ---------- -->
+    <section class="screen active" id="screen-start">
+      <div class="logo">
+        <h1 class="title">NOVA<span>MATH</span></h1>
+        <p class="subtitle">DEFENSA ESTELAR</p>
+      </div>
+      <p class="lead">
+        El sector está invadido por asteroides numéricos.<br>
+        Dispara al <b>número correcto</b> antes de que caiga.
+      </p>
+      <div class="menu">
+        <button class="btn btn-primary" id="btn-play" type="button">▶ Jugar</button>
+        <button class="btn btn-ghost" id="btn-how" type="button">¿Cómo se juega?</button>
+      </div>
+      <div class="toggles">
+        <button class="chip on" id="chip-sound" type="button">🔊 Sonido</button>
+        <button class="chip on" id="chip-effects" type="button">✨ Efectos</button>
+      </div>
+      <p class="best-line">Récord: <b id="start-best">0</b> · Mejor nivel: <b id="start-level">1</b></p>
+    </section>
+
+    <!-- ---------- Pantalla: Instrucciones ---------- -->
+    <section class="screen" id="screen-how">
+      <h2 class="title small">¿CÓMO SE JUEGA?</h2>
+      <ul class="rules">
+        <li>Arriba verás una operación, por ejemplo <b>7 × 8 = ?</b></li>
+        <li>Los asteroides caen con <b>números dentro</b>. Dispara al que tenga la <b>respuesta correcta</b>.</li>
+        <li>Si aciertas: <b>+puntos</b> y avanzas en la barra de progreso. ¡Encadena aciertos para subir el <b>COMBO</b>!</li>
+        <li>Si disparas al número equivocado o dejas caer el correcto: <b>−1 vida</b>.</li>
+        <li>Completa las rondas de cada nivel. Hay <b>10 niveles</b> en total.</li>
+        <li>Recoge <b>power-ups</b>: 🛡 escudo, 🔥 triple disparo, 💚 vida extra, ⏱ cámara lenta.</li>
+      </ul>
+      <div class="keys">
+        <div class="krow"><span class="kbd">←</span><span class="kbd">→</span> / <span class="kbd">A</span><span class="kbd">D</span> · Mover nave</div>
+        <div class="krow"><span class="kbd">ESPACIO</span> / <span class="kbd">↑</span> · Disparar</div>
+        <div class="krow"><span class="kbd">P</span> / <span class="kbd">ESC</span> · Pausa</div>
+        <div class="krow">📱 En móvil: <b>toca y arrastra</b> por la pantalla — la nave te sigue y dispara sola.</div>
+      </div>
+      <div class="menu">
+        <button class="btn btn-primary" id="btn-how-play" type="button">▶ Jugar</button>
+        <button class="btn btn-ghost" id="btn-how-back" type="button">Volver</button>
+      </div>
+    </section>
+
+    <!-- ---------- Pantalla: Pausa ---------- -->
+    <section class="screen" id="screen-pause">
+      <h2 class="title small">PAUSA</h2>
+      <p class="lead">La partida está detenida.</p>
+      <div class="menu">
+        <button class="btn btn-primary" id="btn-resume" type="button">▶ Reanudar</button>
+        <button class="btn btn-ghost" id="btn-restart" type="button">↻ Reiniciar</button>
+        <button class="btn btn-ghost" id="btn-quit" type="button">⌂ Menú</button>
+      </div>
+    </section>
+
+    <!-- ---------- Pantalla: Nivel completado ---------- -->
+    <section class="screen" id="screen-levelup">
+      <h2 class="title small" id="levelup-title">NIVEL 2</h2>
+      <p class="lead" id="levelup-sub">¡Sector despejado!</p>
+      <div class="bonus">+<span id="levelup-bonus">200</span> BONUS</div>
+    </section>
+
+    <!-- ---------- Pantalla: Final ---------- -->
+    <section class="screen" id="screen-end">
+      <h2 class="title small" id="end-title">GAME OVER</h2>
+      <p class="lead" id="end-sub">La lluvia de asteroides te superó.</p>
+      <div class="results">
+        <div class="rbox">
+          <span class="rlabel">Puntuación</span>
+          <span class="rvalue" id="end-score">0</span>
+        </div>
+        <div class="rbox">
+          <span class="rlabel">Récord</span>
+          <span class="rvalue" id="end-best">0</span>
+        </div>
+        <div class="rbox">
+          <span class="rlabel">Nivel</span>
+          <span class="rvalue" id="end-level">1</span>
+        </div>
+      </div>
+      <p class="record-badge hidden" id="end-record">🏆 ¡NUEVO RÉCORD!</p>
+      <div class="menu">
+        <button class="btn btn-primary" id="btn-again" type="button">↻ Jugar de nuevo</button>
+        <button class="btn btn-ghost" id="btn-menu" type="button">⌂ Menú principal</button>
+      </div>
+    </section>
+
+    <!-- Indicador de escudo -->
+    <div id="shield-indicator" class="hidden" aria-hidden="true">🛡</div>
+  </main>
+</div>
+
+<script src="js/game.js" defer></script>
+</body>
+</html>

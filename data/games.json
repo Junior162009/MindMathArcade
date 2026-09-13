@@ -68,5 +68,20 @@
     "authorName": "TecnoMath",
     "sourceType": "internal",
     "version": "1.0"
+  },
+  {
+    "name": "NOVA MATH — Defensa Estelar:",
+    "desc": "arcade matemático donde disparas al asteroide con la respuesta correcta antes de que caiga. 10 niveles, power-ups y combo.",
+    "url": "games/nova-math-defensa-estelar-61d90774-e32/index.html",
+    "imageUrl": "",
+    "icon": "🎮",
+    "category": "mates",
+    "deviceCompatibility": "both",
+    "evento": null,
+    "submissionId": "61d90774-e328-47e7-a9ec-886fb2d6d364",
+    "authorName": "hack19861983",
+    "authorEmail": "hack19861983@gmail.com",
+    "sourceType": "upload",
+    "publishedAt": "2026-09-13T23:29:21.574989+00:00"
   }
 ]
