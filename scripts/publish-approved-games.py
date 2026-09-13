@@ -1,3 +1,6 @@
+# Publisher de juegos aprobados desde Supabase Storage
+# El ZIP se descarga como bytes binarios antes de extraerse.
+
 import html, json, os, re, shutil, subprocess, tempfile, urllib.error, urllib.request, urllib.parse, zipfile
 from datetime import datetime, timezone
 from pathlib import Path
