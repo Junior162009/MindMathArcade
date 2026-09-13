@@ -4,75 +4,37 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Subir juego · TecnoMath</title>
 <link rel="stylesheet" href="../css/admin.css">
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.0/dist/umd/supabase.min.js"></script>
+<script src="../js/tecnomath-auth.js?v=20260913-games"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-<script src="../js/firebase-config.js"></script>
 <style>
 body{background:#060610;color:#fff;font-family:Arial,sans-serif;margin:0}.upload-wrap{max-width:760px;margin:40px auto;padding:20px}.upload-card{background:#0d0d1a;border:2px solid #00ffff;border-radius:18px;padding:28px;box-shadow:0 0 30px rgba(0,255,255,.12)}h1{color:#00ffff}.intro,.notice{color:#aaa;line-height:1.6}.notice{padding:14px;border:1px solid #30304b;border-radius:12px;background:#101022;margin:18px 0}.notice strong{color:#39ff14}.grid{display:grid;gap:16px}.field label{display:block;color:#39ff14;font-weight:bold;margin-bottom:7px}.field input,.field textarea,.field select{width:100%;padding:12px;border-radius:10px;border:1px solid #292943;background:#090914;color:#fff;box-sizing:border-box}.field textarea{min-height:120px}.choice{display:grid;grid-template-columns:1fr 1fr;gap:10px}.choice label{border:1px solid #292943;border-radius:10px;padding:12px;background:#090914;color:#fff;cursor:pointer}.choice input{width:auto;margin-right:8px}.file-box{border:1px dashed #00ffff;border-radius:12px;padding:16px;background:#090914}.file-box input{border:0;padding:8px 0;background:transparent}.file-list{margin-top:10px;color:#aaa;font-size:13px;max-height:180px;overflow:auto}.file-list div{padding:4px 0}.actions{display:flex;gap:12px;margin-top:20px;flex-wrap:wrap}.btn{border:0;border-radius:10px;padding:12px 18px;cursor:pointer;font-weight:bold;background:#00ffff;color:#001}.btn.secondary{background:#222238;color:#fff}.btn:disabled{opacity:.5;cursor:wait}.status{margin-top:18px;padding:12px;border-radius:10px;background:#111126;display:none;line-height:1.5}.status.show{display:block}.status.ok{border:1px solid #39ff14;color:#39ff14}.status.error{border:1px solid #ff416c;color:#ff8aa2}.user-note{padding:12px;background:#111126;border-radius:10px;margin-bottom:18px}.back{display:inline-block;margin-bottom:20px;color:#00ffff}.limit{color:#ffe600;font-size:12px}@media(max-width:600px){.choice{grid-template-columns:1fr}}
 </style>
 </head>
-<body><main class="upload-wrap"><a class="back" href="../index.html">← Volver</a><section class="upload-card"><h1>🎮 SUBIR MI JUEGO</h1><p class="intro">Envía tu juego para que los administradores lo revisen y lo prueben antes de publicarlo.</p><div class="notice">☁️ <strong>Compatible con Firebase Spark:</strong> no usamos Firebase Storage. El juego se prepara en tu navegador y se envía como un paquete temporal a Realtime Database. <span class="limit">Límite recomendado: 7 MB comprimidos.</span></div><div id="uploadUser" class="user-note">Comprobando sesión…</div><form id="gameUploadForm" class="grid"><div class="field"><label for="gameName">Nombre</label><input id="gameName" maxlength="60" required placeholder="Ej. Atrapa el Número"></div><div class="field"><label for="gameDescription">Descripción</label><textarea id="gameDescription" maxlength="500" required></textarea></div><div class="field"><label for="gameCategory">Categoría</label><select id="gameCategory"><option value="mates">🧮 Matemáticas</option><option value="logica">🧠 Lógica</option><option value="ciencia">🔬 Ciencia</option><option value="ingles">🇬🇧 Inglés</option><option value="sociales">🌎 Sociales</option><option value="arte">🎨 Arte</option><option value="otros">🎮 Otros</option></select></div><div class="field"><label>📌 Forma de publicar</label><div class="choice"><label><input type="radio" name="sourceType" value="upload" checked> 📦 Subir archivos</label><label><input type="radio" name="sourceType" value="url"> 🔗 Usar URL</label></div></div><div class="field" id="uploadSource"><label for="gameFiles">📦 Archivos del juego</label><div class="file-box"><input id="gameFiles" type="file" multiple accept=".html,.htm,.css,.js,.json,.png,.jpg,.jpeg,.gif,.webp,.svg,.ico,.mp3,.wav,.ogg,.mp4,.webm,.woff,.woff2,.ttf,.otf,.wasm,.txt,.xml,.zip,.rar,.7z,.tar,.gz,.bz2,.xz"><div class="hint">Selecciona los archivos del juego o un ZIP/RAR/7Z. Debe existir <b>index.html</b> o <b>index.htm</b>.</div><div id="fileList" class="file-list">Ningún archivo seleccionado.</div></div></div><div class="field" id="urlSource" style="display:none"><label for="gameUrl">🔗 URL del juego</label><input id="gameUrl" type="url" maxlength="1000" placeholder="https://ejemplo.com/mi-juego/"></div><div class="field"><label for="gameImageUrl">🖼️ URL de portada (opcional)</label><input id="gameImageUrl" type="url" maxlength="500" placeholder="https://.../portada.png"><div class="hint">Si no colocas portada, se utilizará 🎮.</div></div><div class="actions"><button class="btn secondary" type="button" onclick="location.href='../index.html'">Cancelar</button><button class="btn" id="submitGame" type="submit">🚀 ENVIAR JUEGO</button></div></form><div id="uploadStatus" class="status"></div></section></main>
+<body><main class="upload-wrap"><a class="back" href="../index.html">← Volver</a><section class="upload-card"><h1>🎮 SUBIR MI JUEGO</h1><p class="intro">Envía tu juego para que los administradores lo revisen y lo prueben antes de publicarlo.</p><div class="notice">☁️ <strong>Sistema oficial: Supabase.</strong> El ZIP se guarda de forma privada en Supabase Storage y la solicitud en PostgreSQL. <span class="limit">Límite: 25 MB por paquete.</span></div><div id="uploadUser" class="user-note">Comprobando sesión…</div><form id="gameUploadForm" class="grid"><div class="field"><label for="gameName">Nombre</label><input id="gameName" maxlength="60" required placeholder="Ej. Atrapa el Número"></div><div class="field"><label for="gameDescription">Descripción</label><textarea id="gameDescription" maxlength="500" required></textarea></div><div class="field"><label for="gameCategory">Categoría</label><select id="gameCategory"><option value="mates">🧮 Matemáticas</option><option value="logica">🧠 Lógica</option><option value="ciencia">🔬 Ciencia</option><option value="ingles">🇬🇧 Inglés</option><option value="sociales">🌎 Sociales</option><option value="arte">🎨 Arte</option><option value="otros">🎮 Otros</option></select></div><div class="field"><label>📌 Forma de publicar</label><div class="choice"><label><input type="radio" name="sourceType" value="upload" checked> 📦 Subir archivos</label><label><input type="radio" name="sourceType" value="url"> 🔗 Usar URL</label></div></div><div class="field" id="uploadSource"><label for="gameFiles">📦 Archivos del juego</label><div class="file-box"><input id="gameFiles" type="file" multiple accept=".html,.htm,.css,.js,.json,.png,.jpg,.jpeg,.gif,.webp,.svg,.ico,.mp3,.wav,.ogg,.mp4,.webm,.woff,.woff2,.ttf,.otf,.wasm,.txt,.xml,.zip"><div class="hint">Selecciona los archivos del juego o un ZIP. Debe existir <b>index.html</b> o <b>index.htm</b>.</div><div id="fileList" class="file-list">Ningún archivo seleccionado.</div></div></div><div class="field" id="urlSource" style="display:none"><label for="gameUrl">🔗 URL del juego</label><input id="gameUrl" type="url" maxlength="1000" placeholder="https://ejemplo.com/mi-juego/"></div><div class="field"><label for="gameImageUrl">🖼️ URL de portada (opcional)</label><input id="gameImageUrl" type="url" maxlength="500" placeholder="https://.../portada.png"><div class="hint">Si no colocas portada, se utilizará 🎮.</div></div><div class="actions"><button class="btn secondary" type="button" onclick="location.href='../index.html'">Cancelar</button><button class="btn" id="submitGame" type="submit">🚀 ENVIAR JUEGO</button></div></form><div id="uploadStatus" class="status"></div></section></main>
 <script>
-document.addEventListener('DOMContentLoaded',()=>{
- const f=document.getElementById('gameUploadForm'),st=document.getElementById('uploadStatus'),ub=document.getElementById('uploadUser'),btn=document.getElementById('submitGame'),fi=document.getElementById('gameFiles'),fl=document.getElementById('fileList'),uploadSource=document.getElementById('uploadSource'),urlSource=document.getElementById('urlSource'),gameUrl=document.getElementById('gameUrl');let u=null,submitted=false;
+document.addEventListener('DOMContentLoaded',async()=>{
+ const f=document.getElementById('gameUploadForm'),st=document.getElementById('uploadStatus'),ub=document.getElementById('uploadUser'),btn=document.getElementById('submitGame'),fi=document.getElementById('gameFiles'),fl=document.getElementById('fileList'),uploadSource=document.getElementById('uploadSource'),urlSource=document.getElementById('urlSource'),gameUrl=document.getElementById('gameUrl');let submitted=false;
  const show=(m,t='ok')=>{st.innerHTML=m;st.className='status show '+t};
  const valid=v=>{try{const x=new URL(v);return x.protocol==='https:'||x.protocol==='http:'}catch(_){return false}};
  const esc=v=>String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
- // La identidad visible y la que se guarda en la propuesta sale del perfil de Firebase.
- // username es la fuente principal: displayName puede pertenecer a otra sesión de Google.
- const identityName=(user,profile={})=>{
-   const username=String(profile?.username||'').trim();
-   if(username)return username;
-   const display=String(user?.displayName||'').trim();
-   if(display)return display;
-   const profileName=String(profile?.name||profile?.displayName||profile?.nombre||'').trim();
-   if(profileName)return profileName;
-   const email=String(user?.email||'').trim();
-   if(email){const local=email.split('@')[0].replace(/[._-]+/g,' ').trim();if(local)return local.replace(/\b\w/g,c=>c.toUpperCase())}
-   return 'Usuario';
- };
+ const auth=window.TecnomathAuth;
+ const account=await auth.refreshAccount().catch(()=>({user:null,profile:null}));
+ if(!account.user){ub.innerHTML='🔒 Debes iniciar sesión. <a href="auth.html">Iniciar sesión</a>';btn.disabled=true;return}
+ const user=account.user,profile=account.profile||{};const username=String(profile.username||user.user_metadata?.username||user.email?.split('@')[0]||'Usuario');
+ ub.innerHTML='👤 <b>'+esc(username)+'</b><br><small>'+esc(user.email||'')+'</small>';btn.disabled=false;
  fi.addEventListener('change',()=>{fl.innerHTML=fi.files.length?[...fi.files].map(x=>'<div>📄 '+esc(x.name)+' · '+(x.size/1024/1024).toFixed(2)+' MB</div>').join(''):'Ningún archivo seleccionado.'});
  document.querySelectorAll('input[name="sourceType"]').forEach(r=>r.addEventListener('change',()=>{const isUrl=r.value==='url'&&r.checked;uploadSource.style.display=isUrl?'none':'block';urlSource.style.display=isUrl?'block':'none';fi.required=!isUrl;gameUrl.required=isUrl;btn.textContent=isUrl?'🚀 ENVIAR URL':'🚀 ENVIAR JUEGO'}));
- const ready=()=>window.TecnomathFirebase?.auth&&window.TecnomathFirebase?.database;
- async function loadUser(user){
-   u=user||null;
-   if(!u){ub.innerHTML='🔒 Debes iniciar sesión. <a href="auth.html">Iniciar sesión</a>';btn.disabled=true;return}
-   let profile={};
-   try{const snap=await window.TecnomathFirebase.database.ref('users/'+u.uid).once('value');profile=snap.val()||{}}catch(e){console.warn('No se pudo leer el perfil:',e)}
-   const username=identityName(u,profile);
-   ub.innerHTML='👤 <b>'+esc(username)+'</b><br><small>'+esc(u.email||'')+'</small>';
-   btn.disabled=false;
- }
- let n=0;const wait=()=>{if(ready())return window.TecnomathFirebase.auth.onAuthStateChanged(loadUser);if(++n>100){ub.textContent='❌ Firebase no terminó de inicializarse.';btn.disabled=true}else setTimeout(wait,100)};wait();
- const blobToBase64=blob=>new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(String(r.result).split(',')[1]||'');r.onerror=reject;r.readAsDataURL(blob)});
- async function makePackage(files){
-   if(files.length===1 && /\.(zip)$/i.test(files[0].name)) return {blob:files[0],name:files[0].name};
-   if(!window.JSZip)throw Error('No se pudo cargar el empaquetador. Recarga la página.');
-   const zip=new JSZip();
-   for(const file of files){const path=(file.webkitRelativePath||file.name).replace(/^\/+/, '');zip.file(path,file)}
-   const blob=await zip.generateAsync({type:'blob',compression:'DEFLATE',compressionOptions:{level:6}});return {blob,name:'game.zip'};
- }
- f.addEventListener('submit',async e=>{e.preventDefault();if(submitted)return;const active=window.TecnomathFirebase?.auth?.currentUser;if(!active)return show('Debes iniciar sesión.','error');u=active;
-   const name=document.getElementById('gameName').value.trim(),description=document.getElementById('gameDescription').value.trim(),category=document.getElementById('gameCategory').value,imageUrl=document.getElementById('gameImageUrl').value.trim(),sourceType=document.querySelector('input[name="sourceType"]:checked').value,externalUrl=gameUrl.value.trim();
+ const blobToZip=async files=>{if(files.length===1&&/\.zip$/i.test(files[0].name))return files[0];if(!window.JSZip)throw Error('No se pudo cargar el empaquetador. Recarga la página.');const zip=new JSZip();for(const file of files){const path=(file.webkitRelativePath||file.name).replace(/^\/+/, '');if(path.split('/').includes('..'))throw Error('Ruta de archivo no válida.');zip.file(path,file)}return await zip.generateAsync({type:'blob',compression:'DEFLATE',compressionOptions:{level:6}})};
+ f.addEventListener('submit',async e=>{e.preventDefault();if(submitted)return;const name=document.getElementById('gameName').value.trim(),description=document.getElementById('gameDescription').value.trim(),category=document.getElementById('gameCategory').value,imageUrl=document.getElementById('gameImageUrl').value.trim(),sourceType=document.querySelector('input[name="sourceType"]:checked').value,externalUrl=gameUrl.value.trim();
    if(!name||!description)return show('Completa el nombre y la descripción.','error');if(imageUrl&&!valid(imageUrl))return show('La URL de portada no es válida.','error');if(sourceType==='url'&&!valid(externalUrl))return show('La URL del juego no es válida.','error');if(sourceType==='upload'&&!fi.files.length)return show('Selecciona al menos un archivo.','error');
-   submitted=true;btn.disabled=true;show('⏳ Preparando juego…','ok');
-   try{
-     const id=window.TecnomathFirebase.database.ref('gameSubmissions').push().key;
-     let packageBase64='',packageName='',fileCount=0,packageSize=0;
-     if(sourceType==='upload'){
-       const pack=await makePackage([...fi.files]);packageName=pack.name;packageSize=pack.blob.size;fileCount=fi.files.length;
-       if(packageSize>7*1024*1024)throw Error('El paquete comprimido supera 7 MB. Reduce el tamaño del juego o usa una URL pública.');
-       show('📦 Preparando paquete… <b>25%</b>','ok');packageBase64=await blobToBase64(pack.blob);show('☁️ Enviando propuesta… <b>75%</b>','ok');
-     }
-     let profile={};try{const snap=await window.TecnomathFirebase.database.ref('users/'+active.uid).once('value');profile=snap.val()||{}}catch(e){}
-     const username=identityName(active,profile),data={name,description,category,authorName:username,authorEmail:String(active.email||''),authorUid:active.uid,sourceType,gameUrl:sourceType==='url'?externalUrl:'',imageUrl:imageUrl||'',icon:'🎮',fileCount,packageName,packageSize,packageBase64,status:'pending',createdAt:Date.now()};
-     await window.TecnomathFirebase.database.ref('gameSubmissions/'+id).set({...data,gameUrl:data.gameUrl||''});
-     if(sourceType==='upload')await window.TecnomathFirebase.database.ref('gameUploadQueue/'+id).set({...data,submissionId:id});
-     else await window.TecnomathFirebase.database.ref('gameUploadQueue/'+id).set({...data,submissionId:id,packageBase64:''});
-     show('✅ <b>Juego enviado correctamente.</b><br><br>El administrador podrá probarlo antes de aprobarlo.<br><small>Cuenta detectada: '+esc(username)+' · '+esc(active.email||'')+'</small>','ok');f.reset();fl.textContent='Ningún archivo seleccionado.';btn.textContent='✅ ENVIADO';
-   }catch(err){submitted=false;btn.disabled=false;show('❌ No se pudo enviar el juego.<br><small>'+esc(String(err.message||err))+'</small>','error')}
+   submitted=true;btn.disabled=true;show('⏳ Preparando envío…','ok');
+   let uploadedPath=null;
+   try{const db=await auth.getClient();const id=crypto.randomUUID();let packageSize=0,fileCount=0,packageName='';
+     if(sourceType==='upload'){const blob=await blobToZip([...fi.files]);packageSize=blob.size;fileCount=fi.files.length;packageName=fi.files.length===1?fi.files[0].name:'game.zip';if(packageSize>25*1024*1024)throw Error('El paquete supera 25 MB. Reduce el tamaño del juego.');uploadedPath=user.id+'/'+id+'/game.zip';show('☁️ Subiendo paquete a Supabase… <b>50%</b>','ok');const {error}=await db.storage.from('game-submissions').upload(uploadedPath,blob,{contentType:'application/zip',upsert:false});if(error)throw error}
+     show('📝 Guardando solicitud… <b>90%</b>','ok');const payload={id,user_id:user.id,name,description,category,icon:'🎮',image_url:imageUrl||null,source_type:sourceType,game_url:sourceType==='url'?externalUrl:null,package_path:uploadedPath,status:'pending',author_name:username,author_email:String(user.email||'')};if(sourceType==='upload'){payload.package_path=uploadedPath}const {error}=await db.from('tecnomath_game_submissions').insert(payload);if(error)throw error;
+     show('✅ <b>Juego enviado correctamente.</b><br><br>El administrador podrá descargarlo, probarlo y aprobarlo desde el panel.<br><small>Cuenta: '+esc(username)+'</small>','ok');f.reset();fl.textContent='Ningún archivo seleccionado.';btn.textContent='✅ ENVIADO';
+   }catch(err){if(uploadedPath){try{await (await auth.getClient()).storage.from('game-submissions').remove([uploadedPath])}catch(_){}}submitted=false;btn.disabled=false;show('❌ No se pudo enviar el juego.<br><small>'+esc(String(err.message||err))+'</small>','error')}
  });
 });
 </script></body></html>
