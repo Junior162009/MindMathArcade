@@ -13,6 +13,6 @@ jobs:
       - name: Información
         run: |
           echo "Este workflow histórico está desactivado."
-          echo "NO publica juegos y NO utiliza Firebase Storage ni GitHub Issues."
+          echo "NO publica juegos y NO utiliza Firebase."
           echo "La publicación vigente usa .github/workflows/process-game-queue.yml."
-          echo "Flujo actual: gameSubmissions -> publicGameQueue -> Firebase Function -> game-approved -> GitHub Actions -> games/."
+          echo "Flujo actual: Supabase Storage -> tecnomath_game_submissions -> aprobación -> GitHub Actions -> games/."
