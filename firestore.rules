@@ -12,41 +12,6 @@ service cloud.firestore {
         || request.auth.token.email == 'jandresvf23@gmail.com'
       );
     }
-    function isBotId(uid) { return uid.matches('bot_.*'); }
-
-    match /tournaments/{tournamentId} {
-      allow read: if signedIn();
-      allow create, update, delete: if isAdmin();
-
-      match /participants/{uid} {
-        allow read: if signedIn();
-        allow create: if signedIn() && (
-          (uid == request.auth.uid && request.resource.data.isBot != true) ||
-          (isAdmin() && isBotId(uid) && request.resource.data.isBot == true)
-        );
-        allow update: if signedIn() && (
-          (uid == request.auth.uid && resource.data.isBot != true && request.resource.data.isBot != true) ||
-          (isAdmin() && isBotId(uid) && resource.data.isBot == true && request.resource.data.isBot == true)
-        );
-        allow delete: if signedIn() && (
-          (uid == request.auth.uid && resource.data.isBot != true) ||
-          (isAdmin() && isBotId(uid) && resource.data.isBot == true)
-        );
-      }
-
-      match /scores/{uid} {
-        allow read: if signedIn();
-        allow create: if signedIn() && (
-          (uid == request.auth.uid && request.resource.data.isBot != true) ||
-          (isAdmin() && isBotId(uid) && request.resource.data.isBot == true)
-        );
-        allow update: if signedIn() && (
-          (uid == request.auth.uid && resource.data.isBot != true && request.resource.data.isBot != true) ||
-          (isAdmin() && isBotId(uid) && resource.data.isBot == true && request.resource.data.isBot == true)
-        );
-        allow delete: if isAdmin() && isBotId(uid) && resource.data.isBot == true;
-      }
-    }
 
     match /leaderboards/{boardId} {
       allow read: if signedIn();
