@@ -1,0 +1,31 @@
+name: Corregir formato UI TecnoMath
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    if: ${{ !contains(github.event.head_commit.message, '[tm-ui-fix]') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Corregir saltos de línea insertados
+        shell: python
+        run: |
+          from pathlib import Path
+          p = Path('index.html')
+          s = p.read_text(encoding='utf-8')
+          s = s.replace('\\n', '\n')
+          p.write_text(s, encoding='utf-8')
+      - name: Commit y retirar workflow temporal
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html .github/workflows/fix-tm-ui-newlines.yml
+          git rm .github/workflows/fix-tm-ui-newlines.yml
+          git commit -m 'Corregir formato de UI TecnoMath [tm-ui-fix]'
+          git push
