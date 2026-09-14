@@ -1,0 +1,75 @@
+name: Migrar catálogo del index a games.json
+
+on:
+  push:
+    paths:
+      - '.github/workflows/migrate-index-catalog.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Migrar catálogo hardcodeado
+        shell: python
+        run: |
+          from pathlib import Path
+          import re
+
+          path = Path('index.html')
+          text = path.read_text(encoding='utf-8')
+
+          pattern = re.compile(
+              r'(?s)        // ============================================================\n'
+              r'        // 🟢 LISTA DE JUEGOS\n'
+              r'        // ============================================================\n'
+              r'        const juegosRecomendados = \[.*?\n        \];'
+          )
+
+          replacement = '''        // ============================================================
+        // 🟢 CATÁLOGO DE JUEGOS
+        // ============================================================
+        // El catálogo vive en data/games.json.
+        // Se mantiene esta variable vacía temporalmente para compatibilidad
+        // con el código existente de filtros/recomendaciones.
+        const juegosRecomendados = [];'''
+
+          new_text, count = pattern.subn(replacement, text, count=1)
+          if count != 1:
+              raise SystemExit('No se encontró exactamente el bloque juegosRecomendados en index.html')
+
+          path.write_text(new_text, encoding='utf-8')
+          print('Migración aplicada: catálogo hardcodeado eliminado de index.html')
+
+      - name: Verificar que el catálogo ya no esté hardcodeado
+        run: |
+          if grep -q 'name: "MindMath Arcade"' index.html; then
+            echo '❌ Todavía hay juegos hardcodeados en index.html'
+            exit 1
+          fi
+          if ! grep -q 'const juegosRecomendados = \[\];' index.html; then
+            echo '❌ Falta la compatibilidad de juegosRecomendados'
+            exit 1
+          fi
+          test -f data/games.json
+          echo '✅ index.html ya no contiene la lista de juegos'
+          echo '✅ data/games.json existe'
+
+      - name: Commit de migración y eliminar workflow temporal
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git rm .github/workflows/migrate-index-catalog.yml
+          git add index.html
+          if git diff --cached --quiet; then
+            echo 'No hay cambios para guardar.'
+            exit 0
+          fi
+          git commit -m 'migrar catálogo del index a games.json'
+          git push
