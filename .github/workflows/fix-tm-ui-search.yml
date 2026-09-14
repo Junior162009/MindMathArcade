@@ -1,0 +1,50 @@
+name: Fix duplicate homepage search
+on:
+  push:
+    paths:
+      - '.github/workflows/fix-tm-ui-search.yml'
+permissions:
+  contents: write
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Remove duplicate search and repair newlines
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          p = Path('index.html')
+          s = p.read_text(encoding='utf-8')
+          # Repair the literal escaped newlines introduced by the previous UI patch.
+          s = s.replace('\\n', '\n')
+          # Remove only the NEW TecnoMath UI search control; keep the original search bar.
+          s = re.sub(r'\s*<label class="tm-ui-search"[\s\S]*?</label>', '', s, count=1)
+          # Remove the JS handler that targeted the removed duplicate search input.
+          s = re.sub(r'\s*const searchInput = document\.getElementById\([\'\"]tmUiSearch[\'\"]\);[\s\S]*?\n\s*\}\);', '', s, count=1)
+          p.write_text(s, encoding='utf-8')
+          PY
+          grep -q 'class="project-card"' index.html
+          if grep -q 'id="tmUiSearch"' index.html; then
+            echo 'ERROR: duplicate search input still present'
+            exit 1
+          fi
+      - name: Commit changes
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html
+          if git diff --cached --quiet; then
+            echo 'No changes needed'
+          else
+            git commit -m 'fix: remove duplicate homepage search bar'
+            git push
+          fi
+      - name: Remove temporary workflow
+        if: always()
+        run: |
+          rm -f .github/workflows/fix-tm-ui-search.yml
+          git add .github/workflows/fix-tm-ui-search.yml
+          git diff --cached --quiet || git commit -m 'chore: remove temporary UI fix workflow'
+          git push || true
