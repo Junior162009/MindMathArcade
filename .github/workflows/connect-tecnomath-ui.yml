@@ -1,0 +1,65 @@
+name: Conectar nuevo diseño TecnoMath
+
+on:
+  push:
+    paths:
+      - 'assets/css/tecnomath-ui-v2.css'
+      - 'js/tecnomath-ui-v2.js'
+      - '.github/workflows/connect-tecnomath-ui.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  connect-ui:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Conectar capa visual sin tocar el catálogo
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('index.html')
+          s = p.read_text(encoding='utf-8')
+          css = '    <link rel="stylesheet" href="assets/css/tecnomath-ui-v2.css">'
+          js = '    <script src="js/tecnomath-ui-v2.js" defer></script>'
+          if css not in s:
+              marker = '    <style>'
+              if marker not in s:
+                  raise SystemExit('No se encontró el bloque <style> de index.html')
+              s = s.replace(marker, css + '\n' + marker, 1)
+          if js not in s:
+              marker = '</body>'
+              if marker not in s:
+                  raise SystemExit('No se encontró </body> en index.html')
+              s = s.replace(marker, js + '\n' + marker, 1)
+          required = ['id="projectsContainer"', 'id="sponsorsArea"', 'id="qrcode"', 'js/games-loader.js', 'class="project-card"']
+          missing = [x for x in required if x not in s]
+          if missing:
+              raise SystemExit('Protección: faltan elementos existentes: ' + ', '.join(missing))
+          p.write_text(s, encoding='utf-8')
+          PY
+
+      - name: Validar y publicar
+        shell: bash
+        run: |
+          grep -q 'tecnomath-ui-v2.css' index.html
+          grep -q 'tecnomath-ui-v2.js' index.html
+          grep -q 'id="projectsContainer"' index.html
+          grep -q 'id="sponsorsArea"' index.html
+          grep -q 'id="qrcode"' index.html
+          grep -q 'js/games-loader.js' index.html
+          grep -q 'class="project-card"' index.html
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          if git diff --quiet -- index.html; then
+            echo 'La capa visual ya estaba conectada.'
+          else
+            git add index.html
+            git commit -m 'feat: conectar nuevo diseño visual TecnoMath [ui-v2]'
+            git push
+          fi
