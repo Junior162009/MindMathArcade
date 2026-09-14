@@ -1,0 +1,1190 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>TECNOBRAINMATH · Minijuegos</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@400;600;700;800&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #0a0e1a;
+            background-image: 
+                radial-gradient(ellipse at 20% 50%, rgba(0, 245, 255, 0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 50%, rgba(255, 0, 229, 0.08) 0%, transparent 50%);
+            font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 1.5rem;
+        }
+
+        @keyframes glowPulse {
+            0%, 100% { box-shadow: 0 0 20px rgba(0, 245, 255, 0.2), 0 0 60px rgba(0, 245, 255, 0.05); }
+            50% { box-shadow: 0 0 40px rgba(0, 245, 255, 0.4), 0 0 80px rgba(0, 245, 255, 0.1); }
+        }
+
+        .minigame-container {
+            max-width: 850px;
+            width: 100%;
+            background: linear-gradient(145deg, rgba(13, 11, 26, 0.95), rgba(20, 15, 40, 0.95));
+            border-radius: 32px;
+            padding: 2.5rem;
+            border: 1px solid rgba(0, 245, 255, 0.15);
+            animation: glowPulse 3s ease-in-out infinite;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 30px 60px rgba(0,0,0,0.6);
+            position: relative;
+        }
+
+        .header-glow {
+            position: absolute;
+            top: -1px;
+            left: 20%;
+            right: 20%;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, #00f5ff, #ff00e5, transparent);
+            border-radius: 50%;
+            filter: blur(2px);
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+            background: rgba(255, 255, 255, 0.04);
+            border-radius: 16px;
+            padding: 0.8rem 1.2rem;
+            margin-bottom: 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .header .title {
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: #00f5ff;
+            font-family: 'Orbitron', monospace;
+        }
+
+        .header .monedas {
+            font-size: 0.6rem;
+            font-weight: 600;
+            color: #ffdd00;
+        }
+
+        .game-logo {
+            font-size: 2.2rem;
+            margin-bottom: 0.2rem;
+            font-weight: 900;
+            font-family: 'Orbitron', monospace;
+            background: linear-gradient(135deg, #00f5ff, #7b2ffc, #ff00e5);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-align: center;
+            filter: drop-shadow(0 0 30px rgba(0, 245, 255, 0.2));
+        }
+
+        .game-logo-sub {
+            font-size: 0.6rem;
+            color: #7b8a9f;
+            text-align: center;
+            margin-bottom: 1rem;
+            letter-spacing: 4px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .menu-card {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 16px;
+            padding: 1.2rem 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .menu-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(0, 245, 255, 0.3);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .menu-card .icono {
+            font-size: 2.5rem;
+            display: block;
+            margin-bottom: 0.4rem;
+        }
+
+        .menu-card .nombre {
+            font-size: 0.55rem;
+            color: #c8d0e0;
+            font-weight: 600;
+        }
+
+        .menu-card .premio {
+            font-size: 0.45rem;
+            color: #ffdd00;
+            margin-top: 0.3rem;
+        }
+
+        .menu-card.quiz {
+            border-color: rgba(0, 245, 255, 0.15);
+            background: rgba(0, 245, 255, 0.03);
+        }
+
+        .menu-card.quiz:hover {
+            border-color: #00f5ff;
+            box-shadow: 0 0 30px rgba(0, 245, 255, 0.1);
+        }
+
+        .menu-card.memoria {
+            border-color: rgba(0, 255, 157, 0.15);
+            background: rgba(0, 255, 157, 0.03);
+        }
+
+        .menu-card.memoria:hover {
+            border-color: #00ff9d;
+            box-shadow: 0 0 30px rgba(0, 255, 157, 0.1);
+        }
+
+        .btn-volver {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            padding: 0.7rem 1.5rem;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.6rem;
+            font-weight: 600;
+            cursor: pointer;
+            color: #c8d0e0;
+            border-radius: 60px;
+            transition: all 0.3s ease;
+            margin-top: 1rem;
+        }
+
+        .btn-volver:hover {
+            border-color: #7b2ffc;
+            color: #ffffff;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #7b2ffc, #ff00e5);
+            border: none;
+            padding: 0.8rem 2rem;
+            font-size: 0.75rem;
+            font-weight: 700;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            border-radius: 60px;
+            transition: all 0.3s ease;
+            color: #ffffff;
+            box-shadow: 0 4px 20px rgba(123, 47, 252, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 0.5rem;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(123, 47, 252, 0.4);
+        }
+
+        .mensaje {
+            font-size: 0.5rem;
+            color: #7b8a9f;
+            margin-top: 0.5rem;
+            min-height: 30px;
+            font-weight: 600;
+        }
+
+        .mensaje-exito { color: #00ff9d; }
+        .mensaje-error { color: #ff0055; }
+        .mensaje-info { color: #00f5ff; }
+        .mensaje-nivel { color: #ffdd00; }
+
+        /* ========================================
+           CARTA DE MEMORIA
+           ======================================== */
+        .memoria-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.8rem;
+            max-width: 450px;
+            margin: 1rem auto;
+        }
+
+        .memoria-carta {
+            aspect-ratio: 1;
+            background: linear-gradient(145deg, rgba(123, 47, 252, 0.3), rgba(255, 0, 229, 0.2));
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.2rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            transform-style: preserve-3d;
+            min-height: 70px;
+        }
+
+        .memoria-carta .carta-contenido {
+            backface-visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .memoria-carta .carta-reverso {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotateY(0deg);
+            font-size: 1.8rem;
+            opacity: 1;
+        }
+
+        .memoria-carta .carta-frente {
+            opacity: 0;
+            transform: scale(0.5);
+        }
+
+        .memoria-carta.volteada {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: rgba(0, 245, 255, 0.3);
+            transform: scale(1.02);
+            box-shadow: 0 0 30px rgba(0, 245, 255, 0.05);
+        }
+
+        .memoria-carta.volteada .carta-reverso {
+            opacity: 0;
+            transform: translate(-50%, -50%) rotateY(180deg) scale(0.5);
+        }
+
+        .memoria-carta.volteada .carta-frente {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .memoria-carta.acertada {
+            background: rgba(0, 255, 157, 0.15);
+            border-color: #00ff9d;
+            box-shadow: 0 0 30px rgba(0, 255, 157, 0.1);
+            cursor: default;
+            transform: scale(0.95);
+        }
+
+        .memoria-carta.acertada .carta-reverso {
+            opacity: 0;
+            transform: translate(-50%, -50%) rotateY(180deg) scale(0.5);
+        }
+
+        .memoria-carta.acertada .carta-frente {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .memoria-carta.error {
+            background: rgba(255, 0, 85, 0.15);
+            border-color: #ff0055;
+            animation: shake 0.4s ease;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-8px); }
+            75% { transform: translateX(8px); }
+        }
+
+        .memoria-carta:not(.acertada):not(.volteada):hover {
+            border-color: rgba(0, 245, 255, 0.4);
+            transform: scale(1.05);
+        }
+
+        .memoria-info {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            font-size: 0.6rem;
+            color: #c8d0e0;
+            font-weight: 600;
+            margin: 0.5rem 0;
+        }
+
+        .memoria-info span {
+            color: #ffdd00;
+        }
+
+        /* ========================================
+           TETRIS
+           ======================================== */
+        .tetris-wrapper {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 1.5rem;
+            margin: 1rem 0;
+        }
+
+        .tetris-board {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 12px;
+            padding: 0.3rem;
+        }
+
+        .tetris-board table {
+            border-collapse: collapse;
+        }
+
+        .tetris-board td {
+            width: 26px;
+            height: 26px;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            background: rgba(0,0,0,0.3);
+            border-radius: 2px;
+        }
+
+        .tetris-board td.activo {
+            background: #00f5ff;
+            box-shadow: inset 0 0 10px rgba(0,245,255,0.3);
+        }
+
+        .tetris-board td.fijo {
+            background: #7b2ffc;
+            box-shadow: inset 0 0 10px rgba(123,47,252,0.3);
+        }
+
+        .tetris-board td.linea {
+            animation: flashLinea 0.3s ease-out;
+        }
+
+        @keyframes flashLinea {
+            0% { background: #ffdd00; transform: scale(1.05); }
+            100% { background: transparent; transform: scale(1); }
+        }
+
+        .tetris-info {
+            text-align: left;
+            min-width: 160px;
+            color: #c8d0e0;
+            font-size: 0.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .tetris-info div {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 0.5rem 0.8rem;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        .tetris-info .label {
+            color: #7b8a9f;
+            font-weight: 600;
+        }
+
+        .tetris-info .value {
+            color: #ffdd00;
+            font-size: 0.9rem;
+            font-weight: 700;
+        }
+
+        .tetris-preview td {
+            width: 20px;
+            height: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            background: rgba(0,0,0,0.3);
+            border-radius: 2px;
+        }
+
+        .tetris-preview td.activo {
+            background: #ff00e5;
+            box-shadow: inset 0 0 10px rgba(255,0,229,0.3);
+        }
+
+        .tetris-controles {
+            font-size: 0.4rem;
+            color: #7b8a9f;
+            margin-top: 0.5rem;
+            line-height: 1.8;
+            font-weight: 600;
+        }
+
+        .tetris-controles span {
+            color: #00f5ff;
+        }
+
+        /* ========================================
+           FÚTBOL
+           ======================================== */
+        .futbol-pregunta {
+            font-size: 0.9rem;
+            color: #c8d0e0;
+            margin: 1rem 0;
+            line-height: 1.8;
+            font-weight: 600;
+        }
+
+        .futbol-pregunta .jugador {
+            color: #00f5ff;
+            font-size: 1.1rem;
+        }
+
+        .futbol-opciones {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 0.7rem;
+            max-width: 450px;
+            margin: 1rem auto;
+        }
+
+        .futbol-opcion {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 12px;
+            padding: 0.8rem 1rem;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.6rem;
+            font-weight: 600;
+            cursor: pointer;
+            color: #c8d0e0;
+            transition: all 0.3s ease;
+        }
+
+        .futbol-opcion:hover:not(:disabled) {
+            border-color: #00f5ff;
+            background: rgba(0, 245, 255, 0.05);
+            transform: translateX(3px);
+        }
+
+        .futbol-opcion.correcta {
+            background: rgba(0, 255, 157, 0.1);
+            border-color: #00ff9d;
+            color: #00ff9d;
+        }
+
+        .futbol-opcion.incorrecta {
+            background: rgba(255, 0, 85, 0.1);
+            border-color: #ff0055;
+            color: #ff0055;
+        }
+
+        .futbol-opcion:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .futbol-resultado {
+            font-size: 0.6rem;
+            color: #ffdd00;
+            margin: 0.8rem 0;
+            min-height: 30px;
+            font-weight: 600;
+        }
+
+        .futbol-puntuacion {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin: 0.5rem 0;
+            font-size: 0.6rem;
+            color: #c8d0e0;
+            font-weight: 600;
+        }
+
+        .futbol-puntuacion span {
+            color: #ffdd00;
+        }
+
+        .futbol-emojis {
+            font-size: 2rem;
+            margin: 0.5rem 0;
+        }
+
+        .futbol-bar {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            margin: 0.5rem 0;
+            flex-wrap: wrap;
+        }
+
+        .futbol-bar .punto {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.06);
+            transition: all 0.3s;
+        }
+
+        .futbol-bar .punto.acertado {
+            background: #00ff9d;
+            box-shadow: 0 0 15px rgba(0,255,157,0.3);
+        }
+
+        .futbol-bar .punto.fallado {
+            background: #ff0055;
+            box-shadow: 0 0 15px rgba(255,0,85,0.3);
+        }
+
+        .futbol-bar .punto.actual {
+            border: 2px solid #00f5ff;
+            animation: pulsePunto 0.8s ease-in-out infinite alternate;
+        }
+
+        @keyframes pulsePunto {
+            0% { transform: scale(1); }
+            100% { transform: scale(1.2); }
+        }
+
+        @media (min-width: 600px) {
+            .futbol-opciones { grid-template-columns: repeat(2, 1fr); }
+            .memoria-grid { grid-template-columns: repeat(4, 1fr); }
+        }
+    </style>
+</head>
+<body>
+    <div id="appRoot"></div>
+
+    <script>
+        let monedas = 0;
+
+        function cargarMonedas() { monedas = 0; }
+
+        function sumarMonedas(cantidad) {
+            monedas += cantidad;
+            mostrarMensaje(`🎉 +${cantidad} 🪙 MONEDAS!`, 'exito');
+            actualizarHeader();
+        }
+
+        function mostrarMensaje(texto, tipo) {
+            const msg = document.getElementById('mensajeGlobal');
+            if (msg) {
+                msg.textContent = texto;
+                msg.className = `mensaje ${tipo === 'exito' ? 'mensaje-exito' : tipo === 'info' ? 'mensaje-info' : tipo === 'nivel' ? 'mensaje-nivel' : 'mensaje-error'}`;
+                setTimeout(() => {
+                    msg.textContent = '';
+                    msg.className = 'mensaje';
+                }, 3000);
+            }
+        }
+
+        function actualizarHeader() {
+            const monedasSpan = document.getElementById('headerMonedas');
+            if (monedasSpan) monedasSpan.textContent = monedas;
+        }
+
+        function volverInicio() { window.location.href = "index.html"; }
+        function abrirQuiz() { window.open('https://es.y8.com/games/quiz_brands_test_knowledge', '_blank'); }
+
+        // ========================================
+        // CARTA DE MEMORIA
+        // ========================================
+        const EMOJIS_MEMORIA = ['🎮', '🎯', '🎪', '🎨', '🎭', '🎵', '🎲', '🎸', '🚀', '🌟', '🌈', '⭐'];
+        let memoriaCartas = [];
+        let memoriaVolteadas = [];
+        let memoriaPares = 0;
+        let memoriaBloqueado = false;
+        let memoriaIntentos = 0;
+        const MEMORIA_TOTAL_PARES = 8;
+
+        function iniciarMemoria() {
+            cargarMonedas();
+            const paresSeleccionados = EMOJIS_MEMORIA.slice(0, MEMORIA_TOTAL_PARES);
+            const deck = [...paresSeleccionados, ...paresSeleccionados];
+            
+            for (let i = deck.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [deck[i], deck[j]] = [deck[j], deck[i]];
+            }
+            
+            memoriaCartas = deck.map((emoji, index) => ({
+                id: index,
+                emoji: emoji,
+                volteada: false,
+                acertada: false
+            }));
+            memoriaVolteadas = [];
+            memoriaPares = 0;
+            memoriaIntentos = 0;
+            memoriaBloqueado = false;
+            renderMemoria();
+        }
+
+        function renderMemoria() {
+            const appRoot = document.getElementById('appRoot');
+            
+            let cartasHtml = '';
+            memoriaCartas.forEach((carta, index) => {
+                let clases = 'memoria-carta';
+                if (carta.volteada) clases += ' volteada';
+                if (carta.acertada) clases += ' acertada';
+                cartasHtml += `
+                    <div class="${clases}" data-index="${index}">
+                        <span class="carta-reverso">❓</span>
+                        <span class="carta-frente">${carta.acertada ? '✅' : carta.emoji}</span>
+                    </div>
+                `;
+            });
+
+            appRoot.innerHTML = `
+                <div class="minigame-container">
+                    <div class="header-glow"></div>
+                    <div class="header">
+                        <div class="title">🧠 CARTA DE MEMORIA</div>
+                        <div class="monedas">🪙 <span id="headerMonedas">${monedas}</span></div>
+                    </div>
+                    <div style="font-size:0.7rem; font-weight:700; color:#00ff9d;">🧠 CARTA DE MEMORIA</div>
+                    <div class="memoria-info">
+                        <div>🎯 PARES: <span id="memoriaPares">0</span>/${MEMORIA_TOTAL_PARES}</div>
+                        <div>👆 INTENTOS: <span id="memoriaIntentos">0</span></div>
+                    </div>
+                    <div class="memoria-grid" id="memoriaGrid">
+                        ${cartasHtml}
+                    </div>
+                    <div id="memoriaMensaje" style="font-size:0.5rem; color:#7b8a9f; min-height:25px;"></div>
+                    <button class="btn-volver" id="volverMemoria">← VOLVER AL MENÚ</button>
+                    <div id="mensajeGlobal" class="mensaje"></div>
+                </div>
+            `;
+
+            document.getElementById('volverMemoria').addEventListener('click', renderMenu);
+            actualizarHeader();
+
+            document.querySelectorAll('.memoria-carta').forEach(el => {
+                el.addEventListener('click', () => clickMemoria(parseInt(el.dataset.index)));
+            });
+        }
+
+        function clickMemoria(index) {
+            if (memoriaBloqueado) return;
+            const carta = memoriaCartas[index];
+            if (carta.volteada || carta.acertada) return;
+            
+            carta.volteada = true;
+            memoriaVolteadas.push(index);
+            const mensaje = document.getElementById('memoriaMensaje');
+            
+            if (memoriaVolteadas.length === 2) {
+                memoriaBloqueado = true;
+                const idx1 = memoriaVolteadas[0];
+                const idx2 = memoriaVolteadas[1];
+                const c1 = memoriaCartas[idx1];
+                const c2 = memoriaCartas[idx2];
+                
+                memoriaIntentos++;
+                document.getElementById('memoriaIntentos').textContent = memoriaIntentos;
+                
+                if (c1.emoji === c2.emoji) {
+                    c1.acertada = true;
+                    c2.acertada = true;
+                    memoriaPares++;
+                    memoriaVolteadas = [];
+                    memoriaBloqueado = false;
+                    document.getElementById('memoriaPares').textContent = memoriaPares;
+                    if (mensaje) {
+                        mensaje.textContent = '✅ ¡PAR ENCONTRADO!';
+                        mensaje.style.color = '#00ff9d';
+                    }
+                    renderMemoriaGrid();
+                    
+                    if (memoriaPares === MEMORIA_TOTAL_PARES) {
+                        const premio = 20;
+                        sumarMonedas(premio);
+                        if (mensaje) {
+                            mensaje.textContent = `🏆 ¡COMPLETADO! +${premio}🪙`;
+                            mensaje.style.color = '#ffdd00';
+                        }
+                        setTimeout(renderMenu, 3000);
+                    }
+                } else {
+                    if (mensaje) {
+                        mensaje.textContent = '❌ NO COINCIDEN';
+                        mensaje.style.color = '#ff0055';
+                    }
+                    const cartasDom = document.querySelectorAll('.memoria-carta');
+                    cartasDom[idx1].classList.add('error');
+                    cartasDom[idx2].classList.add('error');
+                    
+                    setTimeout(() => {
+                        c1.volteada = false;
+                        c2.volteada = false;
+                        memoriaVolteadas = [];
+                        memoriaBloqueado = false;
+                        renderMemoriaGrid();
+                    }, 600);
+                }
+            }
+            
+            renderMemoriaGrid();
+        }
+
+        function renderMemoriaGrid() {
+            const grid = document.getElementById('memoriaGrid');
+            if (!grid) return;
+            
+            const cartasDom = grid.querySelectorAll('.memoria-carta');
+            cartasDom.forEach((el, index) => {
+                const carta = memoriaCartas[index];
+                el.className = 'memoria-carta';
+                if (carta.volteada) el.classList.add('volteada');
+                if (carta.acertada) el.classList.add('acertada');
+                const frente = el.querySelector('.carta-frente');
+                const reverso = el.querySelector('.carta-reverso');
+                if (frente) frente.textContent = carta.acertada ? '✅' : carta.emoji;
+            });
+            
+            document.getElementById('memoriaPares').textContent = memoriaPares;
+        }
+
+        // ========== MENÚ PRINCIPAL ==========
+        function renderMenu() {
+            cargarMonedas();
+            const appRoot = document.getElementById('appRoot');
+            appRoot.innerHTML = `
+                <div class="minigame-container">
+                    <div class="header-glow"></div>
+                    <div class="header">
+                        <div class="title">🎮 TECNOBRAINMATH</div>
+                        <div class="monedas">🪙 <span id="headerMonedas">${monedas}</span></div>
+                    </div>
+                    <div class="game-logo">MINIJUEGOS</div>
+                    <div class="game-logo-sub">✦ ELIGE TU RETO ✦</div>
+                    
+                    <div class="menu-grid">
+                        <div class="menu-card quiz" id="juegoQuiz">
+                            <span class="icono">🏷️</span>
+                            <span class="nombre">QUIZ BRANDS</span>
+                            <span class="premio">🎮 ¡JUEGA AHORA!</span>
+                        </div>
+                        <div class="menu-card memoria" id="juegoMemoria">
+                            <span class="icono">🧠</span>
+                            <span class="nombre">CARTA DE MEMORIA</span>
+                            <span class="premio">🏆 PREMIO: 20🪙</span>
+                        </div>
+                        <div class="menu-card" id="juegoTetris">
+                            <span class="icono">🧱</span>
+                            <span class="nombre">TETRIS 30 NIVELES</span>
+                            <span class="premio">🏆 5🪙 POR NIVEL</span>
+                        </div>
+                        <div class="menu-card" id="juegoFutbol">
+                            <span class="icono">⚽</span>
+                            <span class="nombre">FÚTBOL RETRO</span>
+                            <span class="premio">🏆 PREMIO: 30🪙</span>
+                        </div>
+                    </div>
+                    
+                    <button class="btn-volver" id="volverBtn">← VOLVER A LA TRIVIA</button>
+                    <div id="mensajeGlobal" class="mensaje"></div>
+                </div>
+            `;
+
+            document.getElementById('volverBtn').addEventListener('click', volverInicio);
+            document.getElementById('juegoQuiz').addEventListener('click', abrirQuiz);
+            document.getElementById('juegoMemoria').addEventListener('click', iniciarMemoria);
+            document.getElementById('juegoTetris').addEventListener('click', () => iniciarTetris());
+            document.getElementById('juegoFutbol').addEventListener('click', () => iniciarFutbol());
+        }
+
+        // ========================================
+        // TETRIS (código completo)
+        // ========================================
+        const TETRIS_PIEZAS = [
+            { forma: [[1,1,1,1]], color: '#00f5ff' },
+            { forma: [[1,1],[1,1]], color: '#ffdd00' },
+            { forma: [[0,1,0],[1,1,1]], color: '#7b2ffc' },
+            { forma: [[1,0,0],[1,1,1]], color: '#ff00e5' },
+            { forma: [[0,0,1],[1,1,1]], color: '#ff0055' },
+            { forma: [[1,1,0],[0,1,1]], color: '#00ff9d' },
+            { forma: [[0,1,1],[1,1,0]], color: '#ff8844' }
+        ];
+
+        let tetrisTablero = [], tetrisPiezaActual = null, tetrisPiezaSiguiente = null;
+        let tetrisPosX = 0, tetrisPosY = 0, tetrisPuntaje = 0, tetrisLineas = 0;
+        let tetrisNivel = 1, tetrisMonedasGanadas = 0, tetrisIntervalo = null, tetrisActivo = false;
+        const TETRIS_COLS = 10, TETRIS_FILAS = 20, TETRIS_MAX_NIVEL = 30, TETRIS_LINEAS_POR_NIVEL = 3;
+
+        function iniciarTetris() {
+            cargarMonedas();
+            tetrisTablero = Array(TETRIS_FILAS).fill().map(() => Array(TETRIS_COLS).fill(0));
+            tetrisPuntaje = 0; tetrisLineas = 0; tetrisNivel = 1; tetrisMonedasGanadas = 0;
+            tetrisActivo = true;
+            tetrisPiezaSiguiente = crearPiezaAleatoria();
+            renderTetris();
+            crearNuevaPieza();
+            if (tetrisIntervalo) clearInterval(tetrisIntervalo);
+            tetrisIntervalo = setInterval(() => { if (tetrisActivo) moverPieza(0, 1); }, calcularVelocidad());
+        }
+
+        function calcularVelocidad() {
+            const base = 550;
+            const reduccion = Math.min(tetrisNivel - 1, 25) * 16;
+            return Math.max(base - reduccion, 80);
+        }
+
+        function crearPiezaAleatoria() {
+            const idx = Math.floor(Math.random() * TETRIS_PIEZAS.length);
+            const pieza = TETRIS_PIEZAS[idx];
+            return { forma: pieza.forma.map(fila => [...fila]), color: pieza.color };
+        }
+
+        function crearNuevaPieza() {
+            tetrisPiezaActual = tetrisPiezaSiguiente || crearPiezaAleatoria();
+            tetrisPiezaSiguiente = crearPiezaAleatoria();
+            tetrisPosX = Math.floor((TETRIS_COLS - tetrisPiezaActual.forma[0].length) / 2);
+            tetrisPosY = 0;
+            if (colision(tetrisPiezaActual.forma, tetrisPosX, tetrisPosY)) {
+                tetrisActivo = false;
+                if (tetrisIntervalo) clearInterval(tetrisIntervalo);
+                const premio = tetrisMonedasGanadas;
+                if (premio > 0) { sumarMonedas(premio); mostrarMensaje(`💥 GAME OVER - GANASTE ${premio} 🪙!`, 'exito'); }
+                else mostrarMensaje(`💥 GAME OVER - NIVEL ${tetrisNivel-1} ALCANZADO`, 'error');
+                setTimeout(renderMenu, 3000);
+                return;
+            }
+            renderTetris();
+        }
+
+        function colision(forma, offsetX, offsetY) {
+            for (let y = 0; y < forma.length; y++) {
+                for (let x = 0; x < forma[y].length; x++) {
+                    if (forma[y][x]) {
+                        const newX = offsetX + x, newY = offsetY + y;
+                        if (newX < 0 || newX >= TETRIS_COLS || newY >= TETRIS_FILAS || newY < 0) return true;
+                        if (newY >= 0 && tetrisTablero[newY][newX]) return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        function fijarPieza() {
+            const forma = tetrisPiezaActual.forma;
+            for (let y = 0; y < forma.length; y++) {
+                for (let x = 0; x < forma[y].length; x++) {
+                    if (forma[y][x]) {
+                        const newY = tetrisPosY + y, newX = tetrisPosX + x;
+                        if (newY >= 0 && newY < TETRIS_FILAS && newX >= 0 && newX < TETRIS_COLS) {
+                            tetrisTablero[newY][newX] = tetrisPiezaActual.color;
+                        }
+                    }
+                }
+            }
+            let lineasEliminadas = 0;
+            for (let y = TETRIS_FILAS - 1; y >= 0; y--) {
+                if (tetrisTablero[y].every(celda => celda !== 0)) {
+                    tetrisTablero.splice(y, 1);
+                    tetrisTablero.unshift(Array(TETRIS_COLS).fill(0));
+                    lineasEliminadas++;
+                    y++;
+                }
+            }
+            if (lineasEliminadas > 0) {
+                const puntos = [0, 40, 100, 300, 1200];
+                tetrisPuntaje += puntos[Math.min(lineasEliminadas, 4)];
+                tetrisLineas += lineasEliminadas;
+                const nuevoNivel = Math.floor(tetrisLineas / TETRIS_LINEAS_POR_NIVEL) + 1;
+                if (nuevoNivel > tetrisNivel && nuevoNivel <= TETRIS_MAX_NIVEL) {
+                    tetrisNivel = nuevoNivel;
+                    tetrisMonedasGanadas += 5;
+                    sumarMonedas(5);
+                    mostrarMensaje(`⬆️ ¡NIVEL ${tetrisNivel} ALCANZADO! +5🪙`, 'nivel');
+                    if (tetrisIntervalo) {
+                        clearInterval(tetrisIntervalo);
+                        tetrisIntervalo = setInterval(() => {
+                            if (tetrisActivo) moverPieza(0, 1);
+                        }, calcularVelocidad());
+                    }
+                }
+                if (tetrisNivel >= TETRIS_MAX_NIVEL) {
+                    tetrisActivo = false;
+                    if (tetrisIntervalo) clearInterval(tetrisIntervalo);
+                    const premio = tetrisMonedasGanadas + 10;
+                    sumarMonedas(premio);
+                    mostrarMensaje(`🏆 ¡TETRIS COMPLETADO! +${premio}🪙`, 'exito');
+                    setTimeout(renderMenu, 3000);
+                }
+            }
+            crearNuevaPieza();
+        }
+
+        function moverPieza(dx, dy) {
+            if (!tetrisActivo || !tetrisPiezaActual) return false;
+            if (!colision(tetrisPiezaActual.forma, tetrisPosX + dx, tetrisPosY + dy)) {
+                tetrisPosX += dx; tetrisPosY += dy;
+                renderTetris();
+                return true;
+            } else if (dy === 1) {
+                fijarPieza();
+                renderTetris();
+                return false;
+            }
+            return false;
+        }
+
+        function rotarPieza() {
+            if (!tetrisActivo || !tetrisPiezaActual) return;
+            const forma = tetrisPiezaActual.forma;
+            const nuevaForma = forma[0].map((_, idx) => forma.map(fila => fila[idx]).reverse());
+            if (!colision(nuevaForma, tetrisPosX, tetrisPosY)) {
+                tetrisPiezaActual.forma = nuevaForma;
+                renderTetris();
+            }
+        }
+
+        function renderTetris() {
+            const appRoot = document.getElementById('appRoot');
+            let htmlTablero = '';
+            for (let y = 0; y < TETRIS_FILAS; y++) {
+                htmlTablero += '<tr>';
+                for (let x = 0; x < TETRIS_COLS; x++) {
+                    let celda = tetrisTablero[y][x];
+                    let clase = '';
+                    if (celda !== 0) clase = 'fijo';
+                    if (tetrisPiezaActual) {
+                        const forma = tetrisPiezaActual.forma;
+                        const posX = tetrisPosX, posY = tetrisPosY;
+                        if (y >= posY && y < posY + forma.length && x >= posX && x < posX + forma[0].length &&
+                            forma[y - posY][x - posX]) {
+                            clase = 'activo';
+                        }
+                    }
+                    htmlTablero += `<td class="${clase}"></td>`;
+                }
+                htmlTablero += '</tr>';
+            }
+
+            let previewHtml = '';
+            if (tetrisPiezaSiguiente) {
+                const forma = tetrisPiezaSiguiente.forma;
+                for (let y = 0; y < forma.length; y++) {
+                    previewHtml += '<tr>';
+                    for (let x = 0; x < forma[y].length; x++) {
+                        previewHtml += `<td class="${forma[y][x] ? 'activo' : ''}"></td>`;
+                    }
+                    previewHtml += '</tr>';
+                }
+            }
+
+            appRoot.innerHTML = `
+                <div class="minigame-container">
+                    <div class="header-glow"></div>
+                    <div class="header">
+                        <div class="title">🧱 TETRIS 30 NIVELES</div>
+                        <div class="monedas">🪙 <span id="headerMonedas">${monedas}</span></div>
+                    </div>
+                    <div style="font-size:0.7rem; font-weight:700; color:#00f5ff;">TETRIS - ${tetrisNivel}/${TETRIS_MAX_NIVEL}</div>
+                    <div style="font-size:0.4rem; color:#7b8a9f; margin-bottom:0.5rem;">${TETRIS_LINEAS_POR_NIVEL} LÍNEAS POR NIVEL</div>
+                    <div class="tetris-wrapper">
+                        <div class="tetris-board"><table>${htmlTablero}</table></div>
+                        <div class="tetris-info">
+                            <div><div class="label">🏆 PUNTOS</div><div class="value">${tetrisPuntaje}</div></div>
+                            <div><div class="label">📊 LÍNEAS</div><div class="value">${tetrisLineas}</div></div>
+                            <div><div class="label">⬆️ NIVEL</div><div class="value">${tetrisNivel}/${TETRIS_MAX_NIVEL}</div></div>
+                            <div><div class="label">🪙 GANADAS</div><div class="value">${tetrisMonedasGanadas}</div></div>
+                            <div><div class="label">🔮 SIGUIENTE</div><table class="tetris-preview">${previewHtml}</table></div>
+                            <div class="tetris-controles"><span>← →</span> MOVER &nbsp;|&nbsp; <span>↑</span> ROTAR &nbsp;|&nbsp; <span>↓</span> BAJAR &nbsp;|&nbsp; <span>ESPACIO</span> CAÍDA</div>
+                        </div>
+                    </div>
+                    <button class="btn-volver" id="volverTetris">← VOLVER AL MENÚ</button>
+                    <div id="mensajeGlobal" class="mensaje"></div>
+                </div>
+            `;
+
+            document.getElementById('volverTetris').addEventListener('click', () => {
+                tetrisActivo = false;
+                if (tetrisIntervalo) clearInterval(tetrisIntervalo);
+                renderMenu();
+            });
+
+            document.removeEventListener('keydown', handleTetrisKey);
+            document.addEventListener('keydown', handleTetrisKey);
+            actualizarHeader();
+        }
+
+        function handleTetrisKey(e) {
+            if (!tetrisActivo) return;
+            switch(e.key) {
+                case 'ArrowLeft': e.preventDefault(); moverPieza(-1, 0); break;
+                case 'ArrowRight': e.preventDefault(); moverPieza(1, 0); break;
+                case 'ArrowDown': e.preventDefault(); moverPieza(0, 1); break;
+                case 'ArrowUp': e.preventDefault(); rotarPieza(); break;
+                case ' ': e.preventDefault();
+                    while (!colision(tetrisPiezaActual.forma, tetrisPosX, tetrisPosY + 1)) tetrisPosY++;
+                    fijarPieza();
+                    renderTetris();
+                    break;
+            }
+        }
+
+        // ========================================
+        // FÚTBOL
+        // ========================================
+        const PREGUNTAS_FUTBOL = [
+            { jugador: "LIONEL MESSI", correcta: "INTER MIAMI", falsas: ["REAL MADRID", "BAYERN MÚNICH", "MANCHESTER CITY"] },
+            { jugador: "CRISTIANO RONALDO", correcta: "AL NASSR", falsas: ["BARCELONA", "LIVERPOOL", "PSG"] },
+            { jugador: "NEYMAR JR", correcta: "AL HILAL", falsas: ["REAL MADRID", "MANCHESTER UNITED", "JUVENTUS"] },
+            { jugador: "LUIS SUÁREZ", correcta: "INTER MIAMI", falsas: ["REAL MADRID", "PSG", "MANCHESTER CITY"] },
+            { jugador: "KILIAN MBAPPÉ", correcta: "PSG", falsas: ["BARCELONA", "LIVERPOOL", "BAYERN MÚNICH"] },
+            { jugador: "VINÍCIUS JR", correcta: "REAL MADRID", falsas: ["BARCELONA", "PSG", "MANCHESTER CITY"] },
+            { jugador: "ROBERT LEWANDOWSKI", correcta: "BARCELONA", falsas: ["REAL MADRID", "LIVERPOOL", "PSG"] },
+            { jugador: "KEVIN DE BRUYNE", correcta: "MANCHESTER CITY", falsas: ["REAL MADRID", "BARCELONA", "BAYERN MÚNICH"] },
+            { jugador: "ERLING HAALAND", correcta: "MANCHESTER CITY", falsas: ["REAL MADRID", "BARCELONA", "PSG"] },
+            { jugador: "MO SALAH", correcta: "LIVERPOOL", falsas: ["REAL MADRID", "BARCELONA", "BAYERN MÚNICH"] },
+            { jugador: "JAMES RODRÍGUEZ", correcta: "SÃO PAULO", falsas: ["BARCELONA", "LIVERPOOL", "PSG"] },
+            { jugador: "RADAMEL FALCAO", correcta: "RAYO VALLECANO", falsas: ["BARCELONA", "REAL MADRID", "BAYERN MÚNICH"] },
+            { jugador: "ANTOINE GRIEZMANN", correcta: "ATLÉTICO MADRID", falsas: ["LIVERPOOL", "PSG", "BAYERN MÚNICH"] },
+            { jugador: "PAULO DYBALA", correcta: "ROMA", falsas: ["REAL MADRID", "BARCELONA", "MANCHESTER CITY"] },
+            { jugador: "HARRY KANE", correcta: "BAYERN MÚNICH", falsas: ["BARCELONA", "REAL MADRID", "PSG"] },
+            { jugador: "JUANFER QUINTERO", correcta: "AMÉRICA DE CALI", falsas: ["BARCELONA", "REAL MADRID", "BAYERN MÚNICH"] },
+            { jugador: "CUAUHTÉMOC BLANCO", correcta: "AMÉRICA", falsas: ["REAL MADRID", "BARCELONA", "MANCHESTER UNITED"] },
+            { jugador: "HUGO SÁNCHEZ", correcta: "REAL MADRID", falsas: ["BARCELONA", "LIVERPOOL", "BAYERN MÚNICH"] },
+            { jugador: "RIVALDO", correcta: "BARCELONA", falsas: ["REAL MADRID", "MANCHESTER UNITED", "BAYERN MÚNICH"] },
+            { jugador: "RONALDINHO", correcta: "BARCELONA", falsas: ["REAL MADRID", "LIVERPOOL", "BAYERN MÚNICH"] }
+        ];
+
+        let futbolIndice = 0, futbolCorrectas = 0, futbolHistorial = [];
+
+        function iniciarFutbol() {
+            cargarMonedas();
+            futbolIndice = 0; futbolCorrectas = 0; futbolHistorial = [];
+            renderFutbol();
+        }
+
+        function renderFutbol() {
+            const appRoot = document.getElementById('appRoot');
+            if (futbolIndice >= PREGUNTAS_FUTBOL.length) {
+                const total = PREGUNTAS_FUTBOL.length;
+                const porcentaje = (futbolCorrectas / total) * 100;
+                let premio = 0;
+                if (porcentaje >= 80) premio = 30;
+                else if (porcentaje >= 60) premio = 20;
+                else if (porcentaje >= 40) premio = 10;
+                if (premio > 0) sumarMonedas(premio);
+                const mensajeFinal = porcentaje >= 80 ? '🏆 ¡EXCELENTE!' : porcentaje >= 60 ? '⭐ ¡MUY BIEN!' : porcentaje >= 40 ? '👍 BUEN INTENTO' : '😅 SIGUE PRACTICANDO';
+                appRoot.innerHTML = `
+                    <div class="minigame-container">
+                        <div class="header-glow"></div>
+                        <div class="game-logo" style="font-size:1.3rem;">⚽ FÚTBOL RETRO</div>
+                        <div class="futbol-emojis">${porcentaje >= 80 ? '🏆' : porcentaje >= 60 ? '⭐' : '📚'}</div>
+                        <div class="futbol-pregunta" style="font-size:0.6rem;">
+                            <div style="font-size:0.8rem; color:#00f5ff;">${mensajeFinal}</div>
+                            <div style="margin-top:0.5rem;">
+                                ✅ ${futbolCorrectas} de ${total} aciertos (${Math.round(porcentaje)}%)
+                                ${premio > 0 ? `<br>🎉 GANASTE ${premio} 🪙 MONEDAS!` : ''}
+                            </div>
+                        </div>
+                        <button class="btn-primary" id="volverFutbol">← VOLVER</button>
+                        <button class="btn-volver" id="repetirFutbol" style="margin-left:1rem;">🔄 REPETIR</button>
+                        <div id="mensajeGlobal" class="mensaje"></div>
+                    </div>
+                `;
+                document.getElementById('volverFutbol').addEventListener('click', renderMenu);
+                document.getElementById('repetirFutbol').addEventListener('click', iniciarFutbol);
+                return;
+            }
+
+            const p = PREGUNTAS_FUTBOL[futbolIndice];
+            const opciones = [p.correcta, ...p.falsas];
+            for (let i = opciones.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [opciones[i], opciones[j]] = [opciones[j], opciones[i]];
+            }
+            const indiceCorrecta = opciones.indexOf(p.correcta);
+            const letras = ['A', 'B', 'C', 'D'];
+            let opcionesHtml = '';
+            opciones.forEach((opt, idx) => {
+                opcionesHtml += `
+                    <button class="futbol-opcion" data-idx="${idx}">
+                        ${letras[idx]}. ${opt}
+                    </button>
+                `;
+            });
+
+            let barraHtml = '';
+            for (let i = 0; i < PREGUNTAS_FUTBOL.length; i++) {
+                let clase = 'punto';
+                if (i < futbolHistorial.length) {
+                    clase += futbolHistorial[i] ? ' acertado' : ' fallado';
+                } else if (i === futbolIndice) {
+                    clase += ' actual';
+                }
+                barraHtml += `<div class="${clase}"></div>`;
+            }
+
+            appRoot.innerHTML = `
+                <div class="minigame-container">
+                    <div class="header-glow"></div>
+                    <div class="header">
+                        <div class="title">⚽ FÚTBOL RETRO</div>
+                        <div class="monedas">🪙 <span id="headerMonedas">${monedas}</span></div>
+                    </div>
+                    <div class="futbol-puntuacion">
+                        <div>⚽ PREGUNTA <span>${futbolIndice + 1}/${PREGUNTAS_FUTBOL.length}</span></div>
+                        <div>✅ <span>${futbolCorrectas}</span></div>
+                    </div>
+                    <div class="futbol-bar">${barraHtml}</div>
+                    <div class="futbol-pregunta">
+                        ¿EN QUÉ CLUB JUGÓ <span class="jugador">${p.jugador}</span>?
+                    </div>
+                    <div class="futbol-opciones">${opcionesHtml}</div>
+                    <div class="futbol-resultado" id="futbolResultado"></div>
+                    <button class="btn-volver" id="volverFutbolMenu">← VOLVER AL MENÚ</button>
+                    <div id="mensajeGlobal" class="mensaje"></div>
+                </div>
+            `;
+
+            document.getElementById('volverFutbolMenu').addEventListener('click', renderMenu);
+
+            document.querySelectorAll('.futbol-opcion').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    if (btn.disabled) return;
+                    const idx = parseInt(btn.dataset.idx);
+                    const esCorrecta = idx === indiceCorrecta;
+                    const resultado = document.getElementById('futbolResultado');
+                    document.querySelectorAll('.futbol-opcion').forEach(b => b.disabled = true);
+                    if (esCorrecta) {
+                        btn.classList.add('correcta');
+                        futbolCorrectas++;
+                        futbolHistorial.push(true);
+                        resultado.textContent = `⚽ ¡GOL! ✅ CORRECTO - ${p.jugador} jugó en ${p.correcta}`;
+                        resultado.style.color = '#00ff9d';
+                    } else {
+                        btn.classList.add('incorrecta');
+                        document.querySelectorAll('.futbol-opcion')[indiceCorrecta].classList.add('correcta');
+                        futbolHistorial.push(false);
+                        resultado.textContent = `❌ INCORRECTO. ${p.jugador} jugó en ${p.correcta}`;
+                        resultado.style.color = '#ff0055';
+                    }
+                    setTimeout(() => { futbolIndice++; renderFutbol(); }, 2000);
+                });
+            });
+            actualizarHeader();
+        }
+
+        // ========================================
+        // INICIO
+        // ========================================
+        renderMenu();
+    </script>
+</body>
+</html>
