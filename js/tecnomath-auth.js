@@ -67,8 +67,13 @@
     catch (_) { clearSession(); return null; }
   }
 
+  /* Primero deja que Supabase restaure/refresque el token guardado y luego verifica al usuario.
+     Esto evita confundir nuestro indicador local "tecnomath_session" con una sesión real. */
   async function currentUser() {
     const db = await getClient();
+    const sessionResult = await db.auth.getSession();
+    if (sessionResult.error) throw sessionResult.error;
+    if (!sessionResult.data?.session) return null;
     const { data, error } = await db.auth.getUser();
     if (error) return null;
     return data.user || null;
@@ -131,6 +136,8 @@
     if (error) throw error;
     const profile = await ensureProfile(data.user);
     window.TecnomathCurrentAdmin = profile?.role === 'admin' || isAdminEmail(data.user.email) ? profile : null;
+    setSession(profile?.username);
+    window.dispatchEvent(new CustomEvent('tecnomath:authchange', { detail: { user: data.user, profile, event: 'SIGNED_IN' } }));
     return { user: data.user, profile };
   }
 
@@ -156,7 +163,7 @@
     const { error } = await db.auth.signOut({ scope: 'local' });
     clearSession();
     window.TecnomathCurrentAdmin = null;
-    window.dispatchEvent(new CustomEvent('tecnomath:authchange', { detail: { user: null, profile: null } }));
+    window.dispatchEvent(new CustomEvent('tecnomath:authchange', { detail: { user: null, profile: null, event: 'SIGNED_OUT' } }));
     if (error) throw error;
   }
 
@@ -193,14 +200,10 @@
     const user = await currentUser();
     if (!user) return null;
     const db = await getClient();
-    const { data, error } = await db.rpc('tecnomath_save_game_progress', {
-      p_game_id: String(gameId).trim(),
-      p_progress: progress ?? {}
-    });
+    const { data, error } = await db.rpc('tecnomath_save_game_progress', { p_game_id: String(gameId).trim(), p_progress: progress ?? {} });
     if (error) throw error;
     return data;
   }
-
   async function getGameProgress(gameId) {
     const user = await currentUser();
     if (!user) return null;
@@ -209,7 +212,6 @@
     if (error) throw error;
     return data || null;
   }
-
   async function deleteGameProgress(gameId) {
     const user = await currentUser();
     if (!user) return false;
@@ -218,7 +220,6 @@
     if (error) throw error;
     return true;
   }
-
   async function isAdmin() {
     const { user, profile } = await refreshAccount();
     return !!user && (isAdminEmail(user.email) || profile?.role === 'admin');
@@ -279,11 +280,7 @@
     const apply = (user, profile) => {
       if (!user) {
         if (display) display.textContent = 'Invitado';
-        if (logoutBtn) {
-          logoutBtn.textContent = '🚪 SALIR';
-          logoutBtn.style.display = 'none';
-          logoutBtn.disabled = false;
-        }
+        if (logoutBtn) { logoutBtn.textContent = '🚪 SALIR'; logoutBtn.style.display = 'none'; logoutBtn.disabled = false; }
         if (authLink) { authLink.href = 'pages/auth.html'; authLink.textContent = '🔑 ACCEDER'; }
         return;
       }
@@ -291,30 +288,17 @@
       setSession(username);
       if (display) display.textContent = username;
       if (authLink) { authLink.href = 'pages/profile.html'; authLink.textContent = '👤 PERFIL'; }
-      if (logoutBtn) {
-        logoutBtn.textContent = '🚪 SALIR';
-        logoutBtn.style.display = 'inline-block';
-        logoutBtn.disabled = false;
-      }
+      if (logoutBtn) { logoutBtn.textContent = '🚪 SALIR'; logoutBtn.style.display = 'inline-block'; logoutBtn.disabled = false; }
     };
 
     if (logoutBtn && !logoutBtn.dataset.tecnomathLogoutBound) {
       logoutBtn.dataset.tecnomathLogoutBound = 'true';
       logoutBtn.addEventListener('click', async (event) => {
-        event.preventDefault();
-        event.stopPropagation();
+        event.preventDefault(); event.stopPropagation();
         if (logoutBtn.disabled) return;
-        logoutBtn.disabled = true;
-        logoutBtn.textContent = '🚪 SALIENDO…';
-        try {
-          await signOut();
-          apply(null, null);
-        } catch (e) {
-          console.error('TecnoMath logout:', e);
-          logoutBtn.disabled = false;
-          logoutBtn.textContent = '🚪 SALIR';
-          alert('No se pudo cerrar sesión. Inténtalo de nuevo.');
-        }
+        logoutBtn.disabled = true; logoutBtn.textContent = '🚪 SALIENDO…';
+        try { await signOut(); apply(null, null); }
+        catch (e) { console.error('TecnoMath logout:', e); logoutBtn.disabled = false; logoutBtn.textContent = '🚪 SALIR'; alert('No se pudo cerrar sesión. Inténtalo de nuevo.'); }
       });
     }
 
@@ -323,20 +307,11 @@
       apply(account.user, account.profile);
     } catch (e) {
       console.error('TecnoMath portal auth:', e);
-      const session = getSession();
-      if (session?.username) {
-        if (display) display.textContent = cleanUsername(session.username);
-        if (authLink) { authLink.href = 'pages/profile.html'; authLink.textContent = '👤 PERFIL'; }
-        if (logoutBtn) { logoutBtn.textContent = '🚪 SALIR'; logoutBtn.style.display = 'inline-block'; logoutBtn.disabled = false; }
-      } else {
-        apply(null, null);
-      }
+      /* No mostramos una sesión falsa solo porque exista tecnoMath_session. */
+      apply(null, null);
     }
-    try {
-      await authState((user, profile) => apply(user, profile));
-    } catch (e) {
-      console.warn('TecnoMath auth listener:', e);
-    }
+    try { await authState((user, profile) => apply(user, profile)); }
+    catch (e) { console.warn('TecnoMath auth listener:', e); }
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', syncPortalFromSupabase, { once: true });
