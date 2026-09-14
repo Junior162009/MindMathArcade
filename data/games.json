@@ -83,5 +83,19 @@
     "authorEmail": "hack19861983@gmail.com",
     "sourceType": "upload",
     "publishedAt": "2026-09-13T23:29:21.574989+00:00"
+  },
+  {
+    "name": "Andy 11°",
+    "desc": "Trivia educativa de TecnoMath con retos y preguntas interactivas.",
+    "description": "TECNOBRAINMATH · Trivia.",
+    "url": "games/andy11°/index.html",
+    "imageUrl": "",
+    "icon": "🧠",
+    "category": "edu",
+    "deviceCompatibility": "both",
+    "evento": null,
+    "authorName": "Andy 11°",
+    "sourceType": "internal",
+    "version": "1.0"
   }
 ]
