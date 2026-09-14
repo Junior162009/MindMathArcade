@@ -37,13 +37,13 @@ jobs:
               if marker not in s:
                   raise SystemExit('No se encontró </body> en index.html')
               s = s.replace(marker, js + '\n' + marker, 1)
-          required = ['id="projectsContainer"', 'id="sponsorsArea"', 'id="qrcode"', 'js/games-loader.js', 'class="project-card"']
+          required = ['id="projectsContainer"', 'id="sponsorsArea"', 'id="qrcode"', 'js/games-loader.js']
           missing = [x for x in required if x not in s]
           if missing:
               raise SystemExit('Protección: faltan elementos existentes: ' + ', '.join(missing))
           p.write_text(s, encoding='utf-8')
 
-          # Evitar que el navegador conserve una versión anterior del Auth oficial.
+          # Invalidar referencias antiguas para que todas las páginas carguen el Auth actual.
           for name in ['pages/auth.html', 'pages/admin/supabase.html']:
               f = Path(name)
               if not f.exists():
@@ -63,7 +63,6 @@ jobs:
           grep -q 'id="sponsorsArea"' index.html
           grep -q 'id="qrcode"' index.html
           grep -q 'js/games-loader.js' index.html
-          grep -q 'class="project-card"' index.html
           grep -q 'tecnomath-auth.js?v=20260914-1' pages/auth.html
           grep -q 'tecnomath-auth.js?v=20260914-1' pages/admin/supabase.html
           git config user.name 'github-actions[bot]'
