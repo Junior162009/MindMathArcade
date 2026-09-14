@@ -7,29 +7,23 @@
 <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#060610">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎮</text></svg>">
-<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/css/tecnomath-ui-v2.css?v=2">
 </head>
 <body>
 <header>
   <div class="header-content">
     <div class="logo-area"><h1>⚡ TECNOMATH</h1><div class="subtitle">PLATAFORMA EDUCATIVA GAMIFICADA</div></div>
-    <div class="user-area"><span id="userDisplay">INVITADO</span><a class="auth-link" href="pages/auth.html">INICIAR SESIÓN</a><button id="tm-theme-toggle" type="button" aria-label="Cambiar tema">🌙</button><button id="tm-menu-toggle" type="button" aria-label="Abrir menú">☰</button></div>
+    <div class="user-area"><span id="userDisplay">INVITADO</span><a class="auth-link" href="pages/auth.html">INICIAR SESIÓN</a></div>
   </div>
-  <nav id="tm-main-nav"><a class="active" href="#inicio">INICIO</a><a href="#juegos">JUEGOS</a><a href="#patrocinadores">PATROCINADORES</a><a href="#estadisticas">ESTADÍSTICAS</a></nav>
 </header>
 <main id="inicio">
   <section class="hero"><h2>🎮 APRENDE. JUEGA. SUPERA.</h2><p>Explora juegos educativos interactivos de TecnoMath y conviértete en el mejor jugador.</p></section>
-  <div class="tm-ui-search-wrap"><input id="tm-ui-search" class="tm-ui-search" type="search" placeholder="🔎 Buscar juegos..." aria-label="Buscar juegos"></div>
   <section id="juegos"><div id="projectsContainer" class="container"></div></section>
   <section id="patrocinadores"><div id="sponsorsArea"></div></section>
-  <section id="estadisticas" class="tm-ui-stats"></section>
+  <section id="estadisticas"></section>
 </main>
 <div id="qrcode"></div>
-<button id="tm-back-top" type="button" aria-label="Volver arriba">↑</button>
 <script src="https://unpkg.com/@ruffle-rs/ruffle"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="js/games-loader.js"></script>
-<script src="js/tecnomath-ui-v2.js?v=2"></script>
 </body>
 </html>
