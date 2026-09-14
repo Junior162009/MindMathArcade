@@ -1,0 +1,940 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>TECNOBRAINMATH · Trivia</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@400;600;700;800&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #0a0e1a;
+            background-image: 
+                radial-gradient(ellipse at 20% 50%, rgba(0, 245, 255, 0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 50%, rgba(255, 0, 229, 0.08) 0%, transparent 50%);
+            font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 1.5rem;
+        }
+
+        @keyframes glowPulse {
+            0%, 100% { box-shadow: 0 0 20px rgba(0, 245, 255, 0.2), 0 0 60px rgba(0, 245, 255, 0.05); }
+            50% { box-shadow: 0 0 40px rgba(0, 245, 255, 0.4), 0 0 80px rgba(0, 245, 255, 0.1); }
+        }
+
+        .start-screen, .game-screen {
+            max-width: 750px;
+            width: 100%;
+            background: linear-gradient(145deg, rgba(13, 11, 26, 0.95), rgba(20, 15, 40, 0.95));
+            border-radius: 32px;
+            padding: 2.5rem 2.5rem 3rem;
+            text-align: center;
+            position: relative;
+            border: 1px solid rgba(0, 245, 255, 0.15);
+            animation: glowPulse 3s ease-in-out infinite;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 30px 60px rgba(0,0,0,0.6);
+        }
+
+        .game-screen {
+            max-width: 950px;
+        }
+
+        .header-glow {
+            position: absolute;
+            top: -1px;
+            left: 20%;
+            right: 20%;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, #00f5ff, #ff00e5, transparent);
+            border-radius: 50%;
+            filter: blur(2px);
+        }
+
+        .game-logo {
+            font-size: 2.8rem;
+            margin-bottom: 0.2rem;
+            font-weight: 900;
+            font-family: 'Orbitron', monospace;
+            background: linear-gradient(135deg, #00f5ff, #7b2ffc, #ff00e5);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            filter: drop-shadow(0 0 30px rgba(0, 245, 255, 0.3));
+            letter-spacing: 2px;
+        }
+
+        .game-logo-sub {
+            font-size: 0.8rem;
+            color: #7b8a9f;
+            margin-bottom: 1.5rem;
+            letter-spacing: 4px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .sub {
+            color: #00f5ff;
+            font-size: 0.7rem;
+            margin-bottom: 2rem;
+            font-weight: 600;
+            letter-spacing: 2px;
+            opacity: 0.8;
+        }
+
+        .resources-panel {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 20px;
+            padding: 1rem 1.5rem;
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+            backdrop-filter: blur(10px);
+        }
+
+        .resource {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #c8d0e0;
+            padding: 0.4rem 0.8rem;
+            border-radius: 12px;
+            background: rgba(0,0,0,0.3);
+        }
+
+        .resource .icon { font-size: 1.3rem; }
+        .resource-value {
+            color: #ffffff;
+            font-size: 1.1rem;
+            font-weight: 700;
+            min-width: 20px;
+        }
+        .resource.coins .resource-value { color: #ffdd00; }
+        .resource.score .resource-value { color: #00ff9d; }
+        .resource.lives .resource-value { color: #ff5e7e; }
+
+        .materias-reto {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 2rem;
+        }
+
+        .card-materia {
+            background: rgba(255, 255, 255, 0.04);
+            border: 2px solid rgba(255, 255, 255, 0.06);
+            border-radius: 16px;
+            padding: 1rem 1.2rem;
+            min-width: 120px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .card-materia:hover {
+            border-color: rgba(0, 245, 255, 0.3);
+            transform: translateY(-4px);
+            box-shadow: 0 10px 30px rgba(0, 245, 255, 0.1);
+        }
+
+        .card-materia.seleccionada {
+            background: linear-gradient(135deg, rgba(0, 245, 255, 0.15), rgba(123, 47, 252, 0.15));
+            border-color: #00f5ff;
+            box-shadow: 0 0 30px rgba(0, 245, 255, 0.15);
+        }
+
+        .materia-icono { font-size: 2.2rem; display: block; margin-bottom: 0.4rem; }
+        .materia-nombre { font-size: 0.65rem; color: #c8d0e0; font-weight: 600; }
+        .card-materia.seleccionada .materia-nombre { color: #ffffff; }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #7b2ffc, #ff00e5);
+            border: none;
+            padding: 0.9rem 2.5rem;
+            font-size: 0.85rem;
+            font-weight: 700;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            border-radius: 60px;
+            transition: all 0.3s ease;
+            color: #ffffff;
+            box-shadow: 0 4px 20px rgba(123, 47, 252, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 30px rgba(123, 47, 252, 0.4);
+        }
+
+        .btn-primary:active {
+            transform: scale(0.97);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.06);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            padding: 0.7rem 1.8rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            border-radius: 60px;
+            transition: all 0.3s ease;
+            color: #c8d0e0;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-secondary:hover {
+            border-color: #ffdd00;
+            color: #ffffff;
+            box-shadow: 0 0 30px rgba(255, 221, 0, 0.1);
+        }
+
+        .btn-secondary.gold {
+            border-color: #ffdd00;
+            color: #ffdd00;
+        }
+
+        .btn-secondary.gold:hover {
+            background: rgba(255, 221, 0, 0.1);
+        }
+
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+            background: rgba(255, 255, 255, 0.04);
+            border-radius: 16px;
+            padding: 0.8rem 1.2rem;
+            margin-bottom: 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .stat-retro {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.6rem;
+            font-weight: 600;
+            color: #c8d0e0;
+        }
+
+        .stat-retro span { color: #ffffff; font-weight: 700; }
+
+        .pregunta-box {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 20px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .pregunta-text {
+            font-size: 1rem;
+            line-height: 1.6;
+            color: #ffffff;
+            font-weight: 600;
+        }
+
+        .opciones-retro {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 0.8rem;
+            margin: 1.2rem 0;
+        }
+
+        .opcion-retro {
+            background: rgba(255, 255, 255, 0.04);
+            border: 2px solid rgba(255, 255, 255, 0.06);
+            border-radius: 14px;
+            padding: 0.9rem 1.2rem;
+            font-size: 0.75rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            color: #c8d0e0;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-align: left;
+        }
+
+        .opcion-retro:hover:not(:disabled) {
+            border-color: #00f5ff;
+            background: rgba(0, 245, 255, 0.05);
+            transform: translateX(5px);
+        }
+
+        .opcion-retro.correcta {
+            background: rgba(0, 255, 157, 0.15);
+            border-color: #00ff9d;
+            color: #00ff9d;
+            box-shadow: 0 0 30px rgba(0, 255, 157, 0.1);
+        }
+
+        .opcion-retro.incorrecta {
+            background: rgba(255, 0, 85, 0.15);
+            border-color: #ff0055;
+            color: #ff0055;
+            box-shadow: 0 0 30px rgba(255, 0, 85, 0.1);
+        }
+
+        .opcion-retro:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .opcion-retro.oculta { display: none; }
+
+        .letra-pixel {
+            background: rgba(255, 255, 255, 0.06);
+            color: #ffffff;
+            width: 32px;
+            height: 32px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.7rem;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .opcion-retro.correcta .letra-pixel { background: rgba(0, 255, 157, 0.2); color: #00ff9d; }
+        .opcion-retro.incorrecta .letra-pixel { background: rgba(255, 0, 85, 0.2); color: #ff0055; }
+
+        .btn-siguiente-retro {
+            background: linear-gradient(135deg, #7b2ffc, #ff00e5);
+            border: none;
+            padding: 0.8rem 2rem;
+            font-size: 0.7rem;
+            font-weight: 700;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            border-radius: 60px;
+            transition: all 0.3s ease;
+            color: #ffffff;
+            box-shadow: 0 4px 20px rgba(123, 47, 252, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-siguiente-retro:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(123, 47, 252, 0.4);
+        }
+
+        .ayudas-panel {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .ayuda-btn {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 0.5rem 1rem;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.55rem;
+            font-weight: 600;
+            cursor: pointer;
+            color: #c8d0e0;
+            border-radius: 60px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .ayuda-btn:active:not(:disabled) { transform: scale(0.97); }
+        .ayuda-btn:disabled, .ayuda-btn.disabled { opacity: 0.4; cursor: not-allowed; }
+
+        .ayuda-btn:hover:not(:disabled) {
+            border-color: #ffdd00;
+            color: #ffffff;
+            box-shadow: 0 0 20px rgba(255, 221, 0, 0.05);
+        }
+
+        .ayuda-count {
+            background: rgba(0,0,0,0.3);
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.5rem;
+            color: #ffdd00;
+        }
+
+        .hidden { display: none; }
+
+        .game-over-retro {
+            text-align: center;
+            padding: 1.5rem;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .reiniciar-retro {
+            background: linear-gradient(135deg, #ffdd00, #ff8844);
+            border: none;
+            padding: 0.7rem 1.5rem;
+            font-family: 'Inter', sans-serif;
+            font-weight: 700;
+            margin-top: 1rem;
+            cursor: pointer;
+            border-radius: 60px;
+            color: #0a0e1a;
+            font-size: 0.7rem;
+            transition: all 0.3s ease;
+        }
+
+        .reiniciar-retro:hover {
+            transform: scale(1.02);
+            box-shadow: 0 0 30px rgba(255, 221, 0, 0.2);
+        }
+
+        .pista-mensaje {
+            background: rgba(0, 245, 255, 0.05);
+            color: #00f5ff;
+            padding: 0.5rem;
+            margin-top: 0.5rem;
+            font-size: 0.5rem;
+            text-align: center;
+            min-height: 30px;
+            border-radius: 10px;
+            border: 1px solid rgba(0, 245, 255, 0.1);
+        }
+
+        .button-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.8rem;
+            margin-top: 0.5rem;
+        }
+
+        .minijuegos-btn {
+            margin-top: 1rem;
+            padding: 0.8rem 2rem;
+            background: linear-gradient(135deg, #ff00e5, #7b2ffc);
+            border: none;
+            border-radius: 60px;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: #ffffff;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px rgba(255, 0, 229, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        .minijuegos-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 30px rgba(255, 0, 229, 0.4);
+        }
+
+        @media (min-width: 600px) {
+            .opciones-retro { grid-template-columns: repeat(2, 1fr); }
+            .start-screen, .game-screen { padding: 2.5rem 3rem 3rem; }
+        }
+    </style>
+</head>
+<body>
+    <div id="appRoot"></div>
+
+    <script>
+        // ==================== BANCO DE PREGUNTAS ====================
+        const BANCO = {
+            historia: [
+                // NIVEL FÁCIL
+                { pregunta: "¿Qué evento histórico ocurrido en 1789 promovió los ideales de libertad, igualdad y fraternidad?", opciones: ["La Independencia de Estados Unidos", "La Revolución Francesa", "La Primera Guerra Mundial"], correcta: 1 },
+                { pregunta: "¿Cuál es el océano más grande del mundo?", opciones: ["Océano Atlántico", "Océano Pacífico", "Océano Índico"], correcta: 1 },
+                { pregunta: "¿Cuál es la norma suprema o 'ley de leyes' que organiza el Estado colombiano?", opciones: ["El Código Penal", "La Constitución Política de 1991", "El Código de Comercio"], correcta: 1 },
+                { pregunta: "¿En qué continente se encuentra ubicado el desierto del Sahara?", opciones: ["Asia", "América", "África"], correcta: 2 },
+                { pregunta: "¿Qué mecanismo de participación ciudadana en Colombia permite elegir a nuestros gobernantes?", opciones: ["El Plebiscito", "El Voto", "La Consulta Popular"], correcta: 1 },
+                // NIVEL MEDIO
+                { pregunta: "¿Qué período de la historia colombiana (siglo XX) estuvo marcado por el conflicto entre liberales y conservadores tras el asesinato de Jorge Eliécer Gaitán?", opciones: ["La Patria Boba", "La Violencia", "La Regeneración"], correcta: 1 },
+                { pregunta: "¿Cuál es la función principal de la rama legislativa del poder público?", opciones: ["Administrar justicia y sancionar delitos", "Elaborar, modificar y derogar las leyes", "Ejecutar los programas gubernamentales"], correcta: 1 },
+                { pregunta: "¿A qué se refiere el término 'Guerra Fría'?", opciones: ["A un conflicto armado directo en el Polo Norte", "A un enfrentamiento ideológico, político y económico entre EE.UU. y la URSS sin enfrentamiento armado directo entre ellos", "A las guerras de independencia de las colonias africanas"], correcta: 1 },
+                { pregunta: "¿Qué indicador económico mide el valor total de los bienes y servicios finales producidos en un país durante un tiempo determinado?", opciones: ["Índice de Precios al Consumidor (IPC)", "Producto Interno Bruto (PIB)", "Tasa de Desempleo"], correcta: 1 },
+                { pregunta: "¿En qué consistió la 'Triangulación Comercial' o Comercio Triangular del Atlántico durante la época colonial?", opciones: ["Intercambio de tecnología entre Europa, Asia y América", "Ruta entre Europa (manufacturas), África (esclavizados) y América (materias primas)", "Tratado comercial entre las tres potencias imperiales ibéricas"], correcta: 1 },
+                // NIVEL DIFÍCIL
+                { pregunta: "Durante el período conocido como 'El Frente Nacional' en Colombia (1958-1974), ¿cuál fue la principal estrategia para frenar la violencia bipartidista?", opciones: ["La creación de una Asamblea Nacional Constituyente", "La alternancia del poder ejecutivo y el reparto equitativo de cargos públicos entre Liberales y Conservadores", "La desmovilización generalizada de las guerrillas urbanas"], correcta: 1 },
+                { pregunta: "¿Qué principio filosófico y político fundamenta el concepto de 'Soberanía Popular'?", opciones: ["El poder emana exclusivamente de Dios y se delega al gobernante", "El poder reside en el pueblo, quien lo ejerce directamente o a través de sus representantes", "El control del Estado debe recaer únicamente en la clase trabajadora"], correcta: 1 },
+                { pregunta: "¿Cuál fue el impacto geopolítico inmediato de la Conferencia de Berlín (1884-1885)?", opciones: ["El fin de la Primera Guerra Mundial y la creación de la Sociedad de Naciones", "La repartición colonialista del continente africano entre las potencias europeas", "La independencia formal de las colonias británicas en Asia"], correcta: 1 },
+                { pregunta: "¿Qué es una 'Acción de Tutela' según el ordenamiento jurídico colombiano y cuándo procede?", opciones: ["Un juicio penal para encarcelar a un servidor público", "Un mecanismo constitucional inmediato para proteger derechos fundamentales cuando son vulnerados o amenazados por una autoridad o particular", "Un recurso económico para indemnizar víctimas de accidentes de tránsito"], correcta: 1 },
+                { pregunta: "¿En qué consiste el fenómeno sociopolítico de la 'Gentrificación'?", opciones: ["El desplazamiento de poblaciones rurales hacia grandes metrópolis industriales", "La transformación urbana de un barrio deteriorado que atrae inversión y población de mayor poder adquisitivo, desplazando a los residentes originales de bajos ingresos", "La expansión de zonas agrícolas sobre áreas protegidas de reserva natural"], correcta: 1 }
+            ],
+            matematicas: [
+                { pregunta: "15 × 4 = ?", opciones: ["60", "56", "64", "45"], correcta: 0 },
+                { pregunta: "¿Cuál es la raíz cuadrada de 144?", opciones: ["11", "12", "13", "14"], correcta: 1 },
+                { pregunta: "¿Cuál es el valor aproximado de π (pi)?", opciones: ["3.12", "3.14", "3.16", "2.98"], correcta: 1 },
+                { pregunta: "Si x + 8 = 20, ¿cuánto vale x?", opciones: ["10", "11", "12", "13"], correcta: 2 },
+                { pregunta: "¿Cuál es el área de un triángulo con base 6 y altura 4?", opciones: ["10", "12", "24", "20"], correcta: 1 },
+                { pregunta: "¿Cuánto es el 20% de 200?", opciones: ["20", "40", "60", "80"], correcta: 1 }
+            ],
+            lectura: [
+                // NIVEL FÁCIL
+                { pregunta: "¿Qué busca principalmente la lectura crítica?", opciones: ["Memorizar todo lo leído.", "Comprender, analizar y evaluar la información.", "Leer lo más rápido posible."], correcta: 1 },
+                { pregunta: "¿Qué se debe hacer antes de aceptar como verdadera una afirmación?", opciones: ["Analizar si tiene argumentos o evidencias.", "Compartirla inmediatamente.", "Creerla porque alguien la dijo."], correcta: 0 },
+                { pregunta: "¿Qué es una opinión?", opciones: ["Una idea personal sobre un tema.", "Un dato que siempre puede comprobarse.", "Una información científica."], correcta: 0 },
+                { pregunta: "¿Cuál es una buena forma de identificar la idea principal?", opciones: ["Fijarse únicamente en la primera palabra.", "Identificar qué idea explica principalmente el contenido.", "Escoger la oración más larga."], correcta: 1 },
+                { pregunta: "¿Qué significa inferir?", opciones: ["Copiar exactamente una información.", "Sacar una conclusión a partir de pistas o información disponible.", "Leer sin comprender."], correcta: 1 },
+                // NIVEL MEDIO
+                { pregunta: "¿Por qué es importante identificar la fuente de una información?", opciones: ["Para conocer su origen y valorar su confiabilidad.", "Para saber si el texto es largo.", "Para conocer cuántas palabras tiene."], correcta: 0 },
+                { pregunta: "Si un autor presenta solamente los beneficios de un producto y oculta sus posibles problemas, ¿qué podría estar ocurriendo?", opciones: ["Presenta una información completamente neutral.", "Puede existir un sesgo en la información.", "Está dando una definición."], correcta: 1 },
+                { pregunta: "¿Cuál de estas opciones representa mejor un argumento?", opciones: ["Una afirmación acompañada de razones que la apoyan.", "Una pregunta sin respuesta.", "Una palabra desconocida."], correcta: 0 },
+                { pregunta: "Si dos textos presentan opiniones diferentes sobre un mismo tema, ¿qué debería hacer un lector crítico?", opciones: ["Elegir inmediatamente el texto que le guste más.", "Comparar los argumentos y evidencias de ambos.", "Ignorar los dos textos."], correcta: 1 },
+                { pregunta: "¿Qué pregunta ayuda más a detectar una posible intención del autor?", opciones: ["¿Qué quiere lograr o transmitir con este texto?", "¿Cuántas letras tiene el título?", "¿Cuántos párrafos tiene?"], correcta: 0 },
+                // NIVEL DIFÍCIL
+                { pregunta: "Una noticia utiliza un título muy llamativo, pero el contenido no demuestra lo que afirma el título. ¿Qué debería hacer el lector?", opciones: ["Creer el título porque aparece en una noticia.", "Analizar el contenido y buscar evidencias antes de aceptar la afirmación.", "Compartirla para conocer la opinión de otras personas."], correcta: 1 },
+                { pregunta: "Si una persona afirma 'todos los jóvenes piensan igual' basándose solamente en la opinión de tres jóvenes, ¿qué problema presenta su argumento?", opciones: ["Una generalización basada en una muestra insuficiente.", "Una conclusión científica.", "Una comparación válida."], correcta: 0 },
+                { pregunta: "¿Cuál de estas situaciones demuestra mayor pensamiento crítico?", opciones: ["Aceptar una información porque muchas personas la comparten.", "Rechazar una información simplemente porque no coincide con lo que pensamos.", "Analizar evidencias, comparar fuentes y formar una conclusión propia."], correcta: 2 },
+                { pregunta: "Un autor utiliza palabras como 'obviamente', 'todos' y 'nadie' para defender su posición. ¿Qué debería preguntarse principalmente el lector?", opciones: ["Si esas afirmaciones realmente tienen suficiente evidencia.", "Si las palabras son fáciles de pronunciar.", "Si el texto tiene muchos párrafos."], correcta: 0 },
+                { pregunta: "¿Cuál sería la mejor conclusión de un lector crítico frente a una información que no presenta fuentes ni evidencias?", opciones: ["Es necesariamente falsa.", "Debe aceptarse porque parece convincente.", "Conviene mantener una actitud de duda y buscar información que permita comprobarla."], correcta: 2 }
+            ]
+        };
+
+        let gameState = {
+            materia: "historia",
+            vidas: 3,
+            puntuacion: 0,
+            monedas: 0,
+            pistas: 0,
+            saltos: 0,
+            preguntasPool: [],
+            indiceActual: 0,
+            preguntaActualObj: null,
+            respondida: false,
+            juegoActivo: false,
+            timerSeg: 15,
+            intervalo: null,
+            pistaUsadaEnEstaPregunta: false
+        };
+
+        function guardarProgreso() {}
+        function cargarProgreso() {
+            gameState.monedas = 0;
+            gameState.puntuacion = 0;
+            gameState.vidas = 3;
+            gameState.pistas = 0;
+            gameState.saltos = 0;
+        }
+
+        function irATienda() { window.location.href = "tienda.html"; }
+        function irAMinijuegos() { window.location.href = "minijuego.html"; }
+
+        function mezclarArray(arr) {
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        function cargarPreguntasMateria() {
+            const base = BANCO[gameState.materia];
+            gameState.preguntasPool = mezclarArray([...base]).slice(0, 10);
+            gameState.indiceActual = 0;
+        }
+
+        function obtenerPregunta() {
+            if (gameState.indiceActual < gameState.preguntasPool.length)
+                return gameState.preguntasPool[gameState.indiceActual];
+            return null;
+        }
+
+        function usarPista() {
+            if (!gameState.juegoActivo || gameState.respondida) {
+                mostrarMensajeTemp("⚠️ NO PUEDES USAR PISTA");
+                return;
+            }
+            if (gameState.pistaUsadaEnEstaPregunta) {
+                mostrarMensajeTemp("💡 YA USASTE UNA PISTA");
+                return;
+            }
+            if (gameState.pistas <= 0) {
+                mostrarMensajeTemp("❌ SIN PISTAS. ¡COMPRA!");
+                return;
+            }
+
+            const pregunta = gameState.preguntaActualObj;
+            const correctaIdx = pregunta.correcta;
+            const incorrectos = [];
+            
+            for (let i = 0; i < pregunta.opciones.length; i++) {
+                if (i !== correctaIdx) incorrectos.push(i);
+            }
+            
+            const mezclados = mezclarArray([...incorrectos]);
+            const eliminar = mezclados.slice(0, Math.min(1, incorrectos.length - 1));
+            
+            const botones = document.querySelectorAll('.opcion-retro');
+            eliminar.forEach(idx => {
+                if (botones[idx]) {
+                    botones[idx].classList.add('oculta');
+                    botones[idx].style.display = 'none';
+                }
+            });
+            
+            gameState.pistas--;
+            gameState.pistaUsadaEnEstaPregunta = true;
+            actualizarStatsJuego();
+            actualizarBotonesAyudas();
+            mostrarMensajeTemp("🔮 ¡OPCIÓN ELIMINADA!", "success");
+        }
+
+        function usarSaltar() {
+            if (!gameState.juegoActivo || gameState.respondida) {
+                mostrarMensajeTemp("⚠️ NO PUEDES SALTAR");
+                return;
+            }
+            if (gameState.saltos <= 0) {
+                mostrarMensajeTemp("❌ SIN SALTOS. ¡COMPRA!");
+                return;
+            }
+
+            gameState.saltos--;
+            actualizarStatsJuego();
+            actualizarBotonesAyudas();
+            mostrarMensajeTemp("⏩ ¡SALTANDO PREGUNTA!", "success");
+            
+            detenerTimer();
+            gameState.respondida = true;
+            avanzarPregunta();
+        }
+
+        function mostrarMensajeTemp(msg, tipo = "normal") {
+            const msgDiv = document.getElementById('mensajeTemporal');
+            if (msgDiv) {
+                msgDiv.textContent = msg;
+                msgDiv.style.background = tipo === "success" ? "rgba(0,255,157,0.1)" : "rgba(255,255,255,0.05)";
+                msgDiv.style.borderColor = tipo === "success" ? "rgba(0,255,157,0.2)" : "rgba(255,255,255,0.06)";
+                setTimeout(() => {
+                    if (msgDiv) msgDiv.textContent = "";
+                }, 2500);
+            }
+        }
+
+        function actualizarBotonesAyudas() {
+            const pistaBtn = document.getElementById('ayudaPistaBtn');
+            const saltarBtn = document.getElementById('ayudaSaltarBtn');
+            const pistaCount = document.getElementById('pistaCount');
+            const saltarCount = document.getElementById('saltarCount');
+            
+            if (pistaBtn) {
+                pistaBtn.disabled = (gameState.pistas <= 0 || gameState.respondida || gameState.pistaUsadaEnEstaPregunta || !gameState.juegoActivo);
+                if (pistaBtn.disabled) pistaBtn.classList.add('disabled');
+                else pistaBtn.classList.remove('disabled');
+            }
+            if (saltarBtn) {
+                saltarBtn.disabled = (gameState.saltos <= 0 || gameState.respondida || !gameState.juegoActivo);
+                if (saltarBtn.disabled) saltarBtn.classList.add('disabled');
+                else saltarBtn.classList.remove('disabled');
+            }
+            if (pistaCount) pistaCount.innerText = gameState.pistas;
+            if (saltarCount) saltarCount.innerText = gameState.saltos;
+        }
+
+        const appRoot = document.getElementById("appRoot");
+        let refreshInterval = null;
+
+        function renderStartScreen() {
+            if (refreshInterval) clearInterval(refreshInterval);
+            
+            appRoot.innerHTML = `
+                <div class="start-screen">
+                    <div class="header-glow"></div>
+                    <div class="game-logo">TECNOBRAINMATH</div>
+                    <div class="game-logo-sub">✦ TRIVIA CHALLENGE ✦</div>
+                    <div class="sub">▸ PRESS START TO PLAY ◂</div>
+                    
+                    <div class="resources-panel">
+                        <div class="resource coins">🪙 <span class="resource-value" id="monedasStart">${gameState.monedas}</span></div>
+                        <div class="resource score">🏆 <span class="resource-value" id="puntosStart">${gameState.puntuacion}</span></div>
+                        <div class="resource lives">❤️ <span class="resource-value" id="vidasStart">${gameState.vidas}</span></div>
+                    </div>
+                    
+                    <div class="resources-panel" style="border-color:rgba(255,221,0,0.1); gap:2rem;">
+                        <div class="resource">💡 <span class="resource-value" id="pistasStart">${gameState.pistas}</span></div>
+                        <div class="resource">⏩ <span class="resource-value" id="saltosStart">${gameState.saltos}</span></div>
+                    </div>
+                    
+                    <div class="materias-reto">
+                        <div class="card-materia ${gameState.materia === 'historia' ? 'seleccionada' : ''}" data-mat="historia">
+                            <div class="materia-icono">📜</div>
+                            <div class="materia-nombre">HISTORIA Y CÍVICA</div>
+                        </div>
+                        <div class="card-materia ${gameState.materia === 'matematicas' ? 'seleccionada' : ''}" data-mat="matematicas">
+                            <div class="materia-icono">🧮</div>
+                            <div class="materia-nombre">MATEMÁTICAS</div>
+                        </div>
+                        <div class="card-materia ${gameState.materia === 'lectura' ? 'seleccionada' : ''}" data-mat="lectura">
+                            <div class="materia-icono">📖</div>
+                            <div class="materia-nombre">LECTURA CRÍTICA</div>
+                        </div>
+                    </div>
+                    
+                    <button class="btn-primary" id="startGameBtn">▶ INICIAR RETO</button>
+                    
+                    <div class="button-group">
+                        <button class="btn-secondary gold" id="openShopBtn">🛒 TIENDA MISTERIOSA</button>
+                        <button class="minijuegos-btn" id="openMinijuegosBtn">
+                            <span class="icon">🎮</span> MINIJUEGOS
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            document.querySelectorAll('.card-materia').forEach(card => {
+                card.addEventListener('click', () => {
+                    gameState.materia = card.dataset.mat;
+                    renderStartScreen();
+                });
+            });
+            
+            document.getElementById('startGameBtn').addEventListener('click', iniciarJuego);
+            document.getElementById('openShopBtn').addEventListener('click', irATienda);
+            document.getElementById('openMinijuegosBtn').addEventListener('click', irAMinijuegos);
+            
+            refreshInterval = setInterval(() => {
+                const monedasSpan = document.getElementById('monedasStart');
+                const puntosSpan = document.getElementById('puntosStart');
+                const vidasSpan = document.getElementById('vidasStart');
+                const pistasSpan = document.getElementById('pistasStart');
+                const saltosSpan = document.getElementById('saltosStart');
+                if (monedasSpan) monedasSpan.innerText = gameState.monedas;
+                if (puntosSpan) puntosSpan.innerText = gameState.puntuacion;
+                if (vidasSpan) vidasSpan.innerText = gameState.vidas;
+                if (pistasSpan) pistasSpan.innerText = gameState.pistas;
+                if (saltosSpan) saltosSpan.innerText = gameState.saltos;
+            }, 200);
+        }
+
+        function detenerTimer() {
+            if (gameState.intervalo) {
+                clearInterval(gameState.intervalo);
+                gameState.intervalo = null;
+            }
+        }
+
+        function iniciarTimerJuego() {
+            detenerTimer();
+            gameState.timerSeg = 15;
+            const timerSpan = document.getElementById('timerGameValue');
+            if (timerSpan) timerSpan.innerText = gameState.timerSeg;
+            gameState.intervalo = setInterval(() => {
+                if (!gameState.juegoActivo || gameState.respondida) return;
+                gameState.timerSeg--;
+                if (timerSpan) timerSpan.innerText = gameState.timerSeg;
+                if (gameState.timerSeg <= 0) {
+                    detenerTimer();
+                    if (gameState.juegoActivo && !gameState.respondida) {
+                        manejarRespuestaJuego(-1);
+                    }
+                }
+            }, 1000);
+        }
+
+        function actualizarStatsJuego() {
+            const vidasSpan = document.getElementById('gameVidas');
+            const puntosSpan = document.getElementById('gamePuntos');
+            const monedasSpan = document.getElementById('gameMonedas');
+            const pistasSpan = document.getElementById('gamePistas');
+            const saltosSpan = document.getElementById('gameSaltos');
+            if (vidasSpan) vidasSpan.innerText = gameState.vidas;
+            if (puntosSpan) puntosSpan.innerText = gameState.puntuacion;
+            if (monedasSpan) monedasSpan.innerText = gameState.monedas;
+            if (pistasSpan) pistasSpan.innerText = gameState.pistas;
+            if (saltosSpan) saltosSpan.innerText = gameState.saltos;
+        }
+
+        function manejarRespuestaJuego(seleccion) {
+            if (!gameState.juegoActivo || gameState.respondida) return;
+            detenerTimer();
+            gameState.respondida = true;
+            const esCorrecta = (seleccion === gameState.preguntaActualObj.correcta);
+            
+            if (esCorrecta) {
+                gameState.puntuacion += 100;
+                if (gameState.timerSeg > 0) gameState.puntuacion += gameState.timerSeg * 2;
+                gameState.monedas += 5;
+            } else {
+                gameState.vidas -= 1;
+            }
+            
+            actualizarStatsJuego();
+            
+            const btns = document.querySelectorAll('.opcion-retro');
+            btns.forEach((btn, idx) => {
+                btn.disabled = true;
+                if (idx === gameState.preguntaActualObj.correcta) btn.classList.add('correcta');
+                if (idx === seleccion && !esCorrecta && seleccion !== -1) btn.classList.add('incorrecta');
+            });
+            
+            if (gameState.vidas <= 0) {
+                setTimeout(() => finalizarJuego(), 1000);
+                return;
+            }
+            
+            const nextBtn = document.getElementById('siguienteRetroBtn');
+            if (nextBtn) nextBtn.classList.remove('hidden');
+            actualizarBotonesAyudas();
+        }
+
+        function avanzarPregunta() {
+            if (!gameState.juegoActivo) return;
+            gameState.respondida = false;
+            gameState.pistaUsadaEnEstaPregunta = false;
+            gameState.indiceActual++;
+            const nueva = obtenerPregunta();
+            if (!nueva) {
+                gameState.puntuacion += 80;
+                finalizarJuego(true);
+                return;
+            }
+            gameState.preguntaActualObj = nueva;
+            renderGameScreen();
+            iniciarTimerJuego();
+        }
+
+        function renderGameScreen() {
+            const p = gameState.preguntaActualObj;
+            const letras = ['A', 'B', 'C', 'D'];
+            let opcionesHtml = '';
+            p.opciones.forEach((opt, idx) => {
+                opcionesHtml += `
+                    <button class="opcion-retro" data-idx="${idx}">
+                        <span class="letra-pixel">${letras[idx]}</span>
+                        ${opt}
+                    </button>
+                `;
+            });
+            
+            const html = `
+                <div class="game-screen">
+                    <div class="header-glow"></div>
+                    <div class="game-logo" style="font-size:1.5rem;">TECNOBRAINMATH</div>
+                    <div class="game-logo-sub" style="font-size:0.5rem;">✦ TRIVIA CHALLENGE ✦</div>
+                    <div class="game-header">
+                        <div class="stat-retro">❤️ <span id="gameVidas">${gameState.vidas}</span></div>
+                        <div class="stat-retro">🏆 <span id="gamePuntos">${gameState.puntuacion}</span></div>
+                        <div class="stat-retro">🪙 <span id="gameMonedas">${gameState.monedas}</span></div>
+                        <div class="stat-retro">⏱️ <span id="timerGameValue">${gameState.timerSeg}</span>s</div>
+                    </div>
+                    <div class="pregunta-box">
+                        <div class="pregunta-text">${p.pregunta}</div>
+                    </div>
+                    <div class="opciones-retro" id="opcionesRetroContainer">
+                        ${opcionesHtml}
+                    </div>
+                    <div style="display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap;">
+                        <button class="btn-siguiente-retro hidden" id="siguienteRetroBtn">➡️ SIGUIENTE</button>
+                    </div>
+                    
+                    <div class="ayudas-panel">
+                        <button class="ayuda-btn" id="ayudaPistaBtn">
+                            💡 PISTA <span class="ayuda-count" id="pistaCount">${gameState.pistas}</span>
+                        </button>
+                        <button class="ayuda-btn" id="ayudaSaltarBtn">
+                            ⏩ SALTAR <span class="ayuda-count" id="saltarCount">${gameState.saltos}</span>
+                        </button>
+                        <button class="btn-secondary gold" id="openShopFromGame" style="margin-top:0; padding:0.4rem 1.2rem; font-size:0.5rem;">🛒 TIENDA</button>
+                    </div>
+                    <div id="mensajeTemporal" class="pista-mensaje"></div>
+                </div>
+            `;
+            appRoot.innerHTML = html;
+            
+            document.querySelectorAll('.opcion-retro').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    if (!gameState.juegoActivo || gameState.respondida) return;
+                    const idx = parseInt(btn.dataset.idx);
+                    manejarRespuestaJuego(idx);
+                });
+            });
+            
+            document.getElementById('siguienteRetroBtn')?.addEventListener('click', avanzarPregunta);
+            document.getElementById('ayudaPistaBtn')?.addEventListener('click', usarPista);
+            document.getElementById('ayudaSaltarBtn')?.addEventListener('click', usarSaltar);
+            document.getElementById('openShopFromGame')?.addEventListener('click', irATienda);
+            
+            actualizarBotonesAyudas();
+        }
+
+        function finalizarJuego(completado = false) {
+            detenerTimer();
+            gameState.juegoActivo = false;
+            const mensaje = completado ? "🏆 ¡RETO COMPLETADO!" : "💀 GAME OVER";
+            appRoot.innerHTML = `
+                <div class="game-screen">
+                    <div class="game-over-retro">
+                        <div class="game-logo" style="font-size:1.3rem;">TECNOBRAINMATH</div>
+                        <div style="font-size:0.5rem; color:#ff00e5; margin-bottom:0.5rem;">✦ TRIVIA CHALLENGE ✦</div>
+                        <h2 style="color:#00f5ff; font-size:1.2rem;">${mensaje}</h2>
+                        <p style="margin:1rem 0; font-size:0.7rem; color:#c8d0e0;">🏅 PTS: <span style="color:#ffdd00;">${gameState.puntuacion}</span><br>🪙 MONEDAS: <span style="color:#ffdd00;">${gameState.monedas}</span><br>💡 PISTAS: <span style="color:#ffdd00;">${gameState.pistas}</span> | ⏩ SALTOS: <span style="color:#ffdd00;">${gameState.saltos}</span></p>
+                        <button class="reiniciar-retro" id="volverInicioBtn">🔄 VOLVER AL INICIO</button>
+                        <br><br>
+                        <button class="btn-secondary gold" id="shopFromGameOver">🛒 TIENDA</button>
+                        <br>
+                        <button class="minijuegos-btn" id="minijuegosFromGameOver" style="font-size:0.6rem; padding:0.6rem 1.5rem; margin-top:0.5rem;">
+                            <span class="icon">🎮</span> MINIJUEGOS
+                        </button>
+                    </div>
+                </div>
+            `;
+            document.getElementById('volverInicioBtn')?.addEventListener('click', () => {
+                renderStartScreen();
+            });
+            document.getElementById('shopFromGameOver')?.addEventListener('click', irATienda);
+            document.getElementById('minijuegosFromGameOver')?.addEventListener('click', irAMinijuegos);
+        }
+
+        function iniciarJuego() {
+            detenerTimer();
+            cargarPreguntasMateria();
+            const primera = obtenerPregunta();
+            if (!primera) return;
+            gameState.preguntaActualObj = primera;
+            gameState.respondida = false;
+            gameState.juegoActivo = true;
+            gameState.pistaUsadaEnEstaPregunta = false;
+            renderGameScreen();
+            iniciarTimerJuego();
+        }
+
+        cargarProgreso();
+        renderStartScreen();
+    </script>
+</body>
+</html>
