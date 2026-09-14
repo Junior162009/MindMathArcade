@@ -42,6 +42,16 @@ jobs:
           if missing:
               raise SystemExit('Protección: faltan elementos existentes: ' + ', '.join(missing))
           p.write_text(s, encoding='utf-8')
+
+          # Evitar que el navegador conserve una versión anterior del Auth oficial.
+          for name in ['pages/auth.html', 'pages/admin/supabase.html']:
+              f = Path(name)
+              if not f.exists():
+                  continue
+              t = f.read_text(encoding='utf-8')
+              t = t.replace('tecnomath-auth.js?v=20260911-4', 'tecnomath-auth.js?v=20260914-1')
+              t = t.replace('tecnomath-auth.js?v=20260911-8', 'tecnomath-auth.js?v=20260914-1')
+              f.write_text(t, encoding='utf-8')
           PY
 
       - name: Validar y publicar
@@ -54,12 +64,14 @@ jobs:
           grep -q 'id="qrcode"' index.html
           grep -q 'js/games-loader.js' index.html
           grep -q 'class="project-card"' index.html
+          grep -q 'tecnomath-auth.js?v=20260914-1' pages/auth.html
+          grep -q 'tecnomath-auth.js?v=20260914-1' pages/admin/supabase.html
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          if git diff --quiet -- index.html; then
-            echo 'La capa visual ya estaba conectada.'
+          if git diff --quiet -- index.html pages/auth.html pages/admin/supabase.html; then
+            echo 'La capa visual y las referencias de Auth ya estaban actualizadas.'
           else
-            git add index.html
-            git commit -m 'feat: conectar nuevo diseño visual TecnoMath [ui-v2]'
+            git add index.html pages/auth.html pages/admin/supabase.html
+            git commit -m 'fix: invalidar cache de Auth Supabase'
             git push
           fi
