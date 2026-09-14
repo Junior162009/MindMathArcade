@@ -1,82 +1,38 @@
-/* TecnoMath · corona de administrador (Supabase) */
+/* TecnoMath admin crown */
 (function(){
-  'use strict';
-  const ADMIN_LINK='pages/admin/index.html';
-  const FALLBACK_ADMINS=['delahozbarcelojunior@gmail.com','nicolenatera26@gmail.com','mateobarbosamatos@gmail.com','jandresvf23@gmail.com'];
-  let lastAdmin=false;
-
-  function setVisibility(admin){
-    lastAdmin=!!admin;
-    const btn=document.getElementById('adminAccessBtn');
-    const cloud=document.getElementById('admin-cloud');
-    const panel=document.getElementById('admin-panel');
-    if(btn){
-      btn.href=ADMIN_LINK;
-      btn.style.setProperty('display',lastAdmin?'inline-block':'none','important');
-      btn.style.setProperty('visibility',lastAdmin?'visible':'hidden','important');
-      btn.style.setProperty('opacity',lastAdmin?'1':'0','important');
-      btn.setAttribute('aria-hidden',lastAdmin?'false':'true');
-      btn.tabIndex=lastAdmin?0:-1;
-    }
-    if(cloud) cloud.style.setProperty('display','none','important');
-    if(!lastAdmin && panel) panel.style.setProperty('display','none','important');
+'use strict';
+const ADMIN_LINK='pages/admin/index.html';
+const ADMINS=['delahozbarcelojunior@gmail.com','nicolenatera26@gmail.com','mateobarbosamatos@gmail.com','jandresvf23@gmail.com'];
+const ADMIN_NAMES=['junior','nicole','mateo','jaider'];
+let isAdmin=false;
+function show(v){
+ isAdmin=!!v;
+ const b=document.getElementById('adminAccessBtn');
+ const c=document.getElementById('admin-cloud');
+ if(b){b.href=ADMIN_LINK;b.style.setProperty('display',isAdmin?'inline-block':'none','important');b.style.setProperty('visibility',isAdmin?'visible':'hidden','important');b.style.setProperty('opacity',isAdmin?'1':'0','important');b.setAttribute('aria-hidden',isAdmin?'false':'true');b.tabIndex=isAdmin?0:-1;}
+ if(c)c.style.setProperty('display','none','important');
+}
+function localAdmin(){try{const s=JSON.parse(localStorage.getItem('tecnomath_session')||'null');return ADMIN_NAMES.includes(String(s?.username||'').trim().toLowerCase());}catch(e){return false;}}
+async function sync(){
+ try{
+  if(!window.TecnomathAuth){show(localAdmin());return;}
+  const u=await window.TecnomathAuth.currentUser();
+  if(u){
+   const email=String(u.email||'').trim().toLowerCase();
+   if(ADMINS.includes(email)){show(true);return;}
+   const p=await window.TecnomathAuth.getProfile(u);
+   show(p?.role==='admin');return;
   }
-
-  function loadAuth(){
-    return new Promise((resolve,reject)=>{
-      if(window.TecnomathAuth)return resolve();
-      const old=document.querySelector('script[data-tecnomath-auth]');
-      if(old){old.addEventListener('load',resolve,{once:true});old.addEventListener('error',reject,{once:true});return;}
-      const s=document.createElement('script');
-      s.src='js/tecnomath-auth.js?v=20260914-admin';
-      s.dataset.tecnomathAuth='true';
-      s.onload=resolve;
-      s.onerror=()=>reject(new Error('No se pudo cargar TecnoMath Auth.'));
-      document.head.appendChild(s);
-    });
-  }
-
-  async function sync(){
-    try{
-      await loadAuth();
-      const user=await window.TecnomathAuth.currentUser();
-      if(!user){setVisibility(false);return;}
-      const email=String(user.email||'').trim().toLowerCase();
-      const configured=(window.TecnomathAuth.ADMIN_EMAILS||FALLBACK_ADMINS).map(e=>String(e).trim().toLowerCase());
-      if(configured.includes(email)){setVisibility(true);return;}
-      const profile=await window.TecnomathAuth.getProfile(user);
-      setVisibility(profile?.role==='admin');
-    }catch(e){
-      console.warn('TecnoMath Admin:',e);
-      setVisibility(false);
-    }
-  }
-
-  function start(){
-    setVisibility(false);
-    sync();
-    window.addEventListener('tecnomath:authchange',sync);
-    setTimeout(sync,300);
-    setTimeout(sync,800);
-    setTimeout(sync,1500);
-    setTimeout(sync,3000);
-    setInterval(sync,10000);
-    const observer=new MutationObserver(()=>{
-      const btn=document.getElementById('adminAccessBtn');
-      if(!btn)return;
-      const shouldShow=lastAdmin;
-      const visible=btn.style.display!=='none' && btn.style.visibility!=='hidden' && btn.style.opacity!=='0';
-      if(visible!==shouldShow || btn.href!==new URL(ADMIN_LINK,location.href).href){
-        btn.href=ADMIN_LINK;
-        btn.style.setProperty('display',shouldShow?'inline-block':'none','important');
-        btn.style.setProperty('visibility',shouldShow?'visible':'hidden','important');
-        btn.style.setProperty('opacity',shouldShow?'1':'0','important');
-        btn.tabIndex=shouldShow?0:-1;
-      }
-    });
-    if(document.body)observer.observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['style','class','hidden']});
-  }
-
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});
-  else start();
+  show(localAdmin());
+ }catch(e){show(localAdmin());}
+}
+function start(){
+ show(false);sync();
+ window.addEventListener('tecnomath:authchange',sync);
+ [300,800,1500,3000].forEach(t=>setTimeout(sync,t));
+ setInterval(sync,10000);
+ const o=new MutationObserver(()=>{const b=document.getElementById('adminAccessBtn');if(!b)return;b.style.setProperty('display',isAdmin?'inline-block':'none','important');b.style.setProperty('visibility',isAdmin?'visible':'hidden','important');b.style.setProperty('opacity',isAdmin?'1':'0','important');});
+ if(document.body)o.observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['style','class','hidden']});
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
 })();
