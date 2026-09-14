@@ -1,0 +1,14 @@
+/* TecnoMath homepage visual layer — independent from index.html
+   IMPORTANT: .project-card and its variants are intentionally untouched. */
+:root{--tm-neon-cyan:#00f5ff;--tm-neon-purple:#a855f7;--tm-bg:#060610;--tm-panel:#0b0b18}
+body{background:var(--tm-bg)!important;background-image:radial-gradient(circle at 15% 10%,rgba(168,85,247,.10),transparent 28%),radial-gradient(circle at 85% 20%,rgba(0,245,255,.08),transparent 30%)!important}
+header{backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:0 8px 30px rgba(0,0,0,.25);position:sticky;top:0;z-index:1000}
+header::after{content:"";display:block;height:2px;margin:10px -15px -15px;background:linear-gradient(90deg,transparent,var(--tm-neon-purple),var(--tm-neon-cyan),transparent);box-shadow:0 0 14px rgba(0,245,255,.3)}
+h1{background:linear-gradient(90deg,#b77cff,var(--tm-neon-cyan));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;text-shadow:none!important}
+.hero{position:relative;overflow:hidden;background:radial-gradient(circle at 50% 35%,rgba(168,85,247,.14),transparent 38%),linear-gradient(180deg,rgba(4,4,15,.55),rgba(7,7,17,.95));border-bottom:1px solid rgba(168,85,247,.22)}
+.hero::before{content:"";position:absolute;inset:0;pointer-events:none;background-image:linear-gradient(rgba(0,245,255,.045) 1px,transparent 1px),linear-gradient(90deg,rgba(168,85,247,.045) 1px,transparent 1px);background-size:44px 44px;mask-image:linear-gradient(to bottom,transparent,black 20%,black 80%,transparent);animation:tmHomeGrid 18s linear infinite}
+.hero>*{position:relative;z-index:1}
+.hero h2{text-shadow:0 0 16px rgba(255,230,0,.35)}
+.filters{position:relative;z-index:2}
+@keyframes tmHomeGrid{to{background-position:0 44px}}
+@media(prefers-reduced-motion:reduce){.hero::before{animation:none}}
