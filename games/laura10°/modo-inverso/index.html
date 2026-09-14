@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>BanderQuiz · Modo Inverso</title>
+<link rel="icon" href="logo.png">
+<script src="/js/tecnomath-auth.js"></script>
+<script src="/js/tecnomath-progress.js?v=20260911-10"></script>
+<script src="banderquiz-paises.js"></script>
+<style>
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;min-height:100vh;font-family:Segoe UI,Poppins,system-ui,sans-serif;color:#fff;background:radial-gradient(circle at 30% 15%,#282052,#090c1b 65%);display:grid;place-items:center;padding:18px;-webkit-tap-highlight-color:transparent}
+.wrap{width:min(760px,100%)}
+.top{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.back,.reset{border:1px solid #ffffff1c;background:#ffffff12;color:#fff;border-radius:12px;padding:9px 13px;font-weight:800;cursor:pointer;transition:.18s;touch-action:manipulation}
+.back:active,.reset:active{transform:scale(.95)}
+.back:hover,.reset:hover{background:#ffffff1f}
+.brand{font-weight:900;flex:1;text-align:center;font-size:.95rem;letter-spacing:.2px}
+.card{position:relative;background:#11172edb;border:1px solid #ffffff18;border-radius:28px;padding:24px;box-shadow:0 25px 70px #0008;backdrop-filter:blur(14px);overflow:hidden}
+.hero{text-align:center}
+.hero img{width:110px;max-width:35vw;filter:drop-shadow(0 10px 22px #0008)}
+h1{margin:8px 0 4px;font-size:clamp(1.8rem,6vw,2.6rem)}
+.sub{color:#b8bfd4;margin:0 0 18px}
+.stats{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.stat{background:#ffffff0d;border:1px solid #ffffff12;border-radius:99px;padding:7px 12px;font-weight:800;font-size:.92rem;white-space:nowrap}
+#lives{letter-spacing:1px}
+.levelbar{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.chip{font-size:.76rem;font-weight:900;letter-spacing:.4px;text-transform:uppercase;padding:6px 12px;border-radius:99px;background:linear-gradient(90deg,#f5c518,#e94560);color:#12162a}
+.chip.ghost{background:#ffffff12;color:#cfd6ea;border:1px solid #ffffff1a}
+.chip.hot{background:linear-gradient(90deg,#ff8a00,#e94560);color:#fff;animation:pulse 1s infinite}
+.flag{min-height:150px;display:flex;align-items:center;justify-content:center;text-align:center;margin:6px 0 12px}
+.flag img{width:min(220px,58vw);height:132px;object-fit:contain;display:block;filter:drop-shadow(0 12px 22px #0008)}
+.flag img.pop{animation:flagPop .5s cubic-bezier(.2,1.4,.5,1)}
+.flag-fallback{font-size:76px;line-height:1;font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif}
+.prompt{text-align:center;color:#c5cbe0;font-weight:700;margin-bottom:15px;font-size:1.02rem}
+.prompt b{color:#fff;font-size:1.15rem}
+.answers{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.answer{border:2px solid #ffffff14;background:#ffffff0a;color:#fff;border-radius:18px;padding:10px;cursor:pointer;transition:transform .15s,background .2s,border-color .2s,opacity .2s;min-height:118px;display:flex;align-items:center;justify-content:center;position:relative;touch-action:manipulation}
+.answer img{width:min(130px,26vw);height:78px;object-fit:contain;filter:drop-shadow(0 7px 12px #0008);pointer-events:none}
+.answer:hover:not(:disabled){transform:translateY(-3px);background:#ffffff16;border-color:#f5c518}
+.answer:active:not(:disabled){transform:scale(.97)}
+.answer.correct{background:#19a66b!important;border-color:#55efad!important;animation:pop .45s cubic-bezier(.2,1.5,.4,1)}
+.answer.wrong{background:#d83f5b!important;border-color:#ff8297!important;animation:shake .4s}
+.answer:disabled{cursor:default}
+.answer.dim{opacity:.42}
+.timer{height:8px;background:#252b43;border-radius:99px;overflow:hidden;margin-top:16px}
+.fill{height:100%;width:100%;background:linear-gradient(90deg,#f5c518,#e94560);transition:width .12s linear}
+.fill.low{background:linear-gradient(90deg,#e94560,#ff2b4e)}
+.msg{text-align:center;min-height:26px;margin-top:12px;font-weight:800}
+.progress{margin-top:12px;color:#aeb6cf;font-size:.85rem}
+.bar{height:7px;background:#ffffff12;border-radius:99px;overflow:hidden;margin-top:6px}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,#e94560,#f5c518);width:0;transition:width .3s}
+.overlay{position:fixed;inset:0;background:#000a;display:none;place-items:center;padding:18px;z-index:60}
+.overlay.show{display:grid}
+.over{width:min(430px,100%);background:#11172e;border:1px solid #ffffff1c;border-radius:26px;padding:28px;text-align:center}
+.over h2{font-size:2.2rem;margin:0 0 10px}
+.actions{display:flex;gap:10px;justify-content:center;margin-top:16px;flex-wrap:wrap}
+.actions button{border:0;border-radius:13px;padding:12px 18px;font-weight:900;cursor:pointer}
+.primary{background:#f5c518;color:#111}
+.secondary{background:#28314d;color:#fff}
+.float{position:fixed;left:50%;top:34%;transform:translateX(-50%);font-size:1.9rem;font-weight:900;color:#ffd84d;text-shadow:0 4px 18px #000c;pointer-events:none;animation:floatUp .95s ease-out forwards;z-index:70}
+.float.bonus{color:#ff9f43}
+.float.level{color:#7ef2c1;font-size:1.45rem;top:26%}
+@keyframes floatUp{0%{opacity:0;transform:translate(-50%,14px) scale(.6)}20%{opacity:1;transform:translate(-50%,0) scale(1.12)}100%{opacity:0;transform:translate(-50%,-80px) scale(1)}}
+@keyframes pop{0%{transform:scale(1)}45%{transform:scale(1.07)}100%{transform:scale(1)}}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-7px)}40%{transform:translateX(7px)}60%{transform:translateX(-5px)}80%{transform:translateX(5px)}}
+@keyframes flagPop{0%{transform:scale(.7);opacity:0}60%{transform:scale(1.06);opacity:1}100%{transform:scale(1)}}
+@keyframes pulse{0%,100%{filter:brightness(1)}50%{filter:brightness(1.3)}}
+@media(max-width:560px){
+  body{padding:10px}
+  .card{padding:16px;border-radius:22px}
+  .top .reset{display:none}
+  .brand{font-size:.82rem}
+  .hero img{width:80px}
+  h1{font-size:1.6rem}
+  .sub{font-size:.85rem;margin-bottom:12px}
+  .stat{padding:6px 10px;font-size:.82rem}
+  .answers{gap:10px}
+  .answer{min-height:96px;border-radius:16px;padding:8px}
+  .answer img{width:min(112px,30vw);height:66px}
+  .flag{min-height:120px}
+  .flag img{width:min(180px,60vw);height:104px}
+  .float{font-size:1.6rem}
+}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <div class="top">
+    <button class="back" id="back" type="button">← Menú</button>
+    <div class="brand">🔄 BanderQuiz · Modo Inverso</div>
+    <button class="reset" id="reset" type="button">Reiniciar</button>
+  </div>
+
+  <section class="card">
+    <div class="hero">
+      <img src="logo.png" alt="BanderQuiz">
+      <h1>Modo Inverso</h1>
+      <p class="sub">Te damos el país y tú reconoces su bandera.</p>
+    </div>
+
+    <div class="stats">
+      <span class="stat">⭐ <b id="score">0</b></span>
+      <span class="stat">🔥 <b id="streak">0</b></span>
+      <span class="stat" id="lives">❤️❤️❤️</span>
+      <span class="stat">⏱️ <b id="clock">12</b></span>
+      <span class="stat">🎯 <b id="accuracy">0%</b></span>
+    </div>
+
+    <div class="levelbar">
+      <span class="chip" id="levelChip">Nivel 1 · Fácil</span>
+      <span class="chip ghost" id="streakChip">🔥 Racha 0</span>
+    </div>
+
+    <div class="flag" id="flag"><span class="flag-fallback">❓</span></div>
+
+    <div class="prompt">🌎 ¿Cuál es la bandera de <b id="country">…</b>?</div>
+
+    <div class="answers" id="answers"></div>
+
+    <div class="timer"><div class="fill" id="timer"></div></div>
+
+    <div class="msg" id="msg">Preparando países…</div>
+
+    <div class="progress">
+      Pregunta <b id="question">1</b> · Aciertos <b id="correct">0</b>
+      <div class="bar"><i id="bar"></i></div>
+    </div>
+  </section>
+</main>
+
+<div class="overlay" id="overlay">
+  <div class="over">
+    <h2>🏁 Fin de la partida</h2>
+    <p id="summary"></p>
+    <div class="actions">
+      <button class="primary" id="retry" type="button">🔄 Jugar otra vez</button>
+      <button class="secondary" id="menu" type="button">🏠 Menú</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+'use strict';
+
+/* =====================================================================
+   1. UTILIDADES
+   ===================================================================== */
+var $ = function (id) { return document.getElementById(id); };
+var rnd = function (n) { return Math.floor(Math.random() * n); };
+var pick = function (a) { return a[rnd(a.length)]; };
+
+function shuffle(arr) {
+  var a = arr.slice(), i, j, t;
+  for (i = a.length - 1; i > 0; i--) {
+    j = rnd(i + 1); t = a[i]; a[i] = a[j]; a[j] = t;
+  }
+  return a;
+}
+function esc(s) {
+  return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+  });
+}
+
+/* =====================================================================
+   2. PAÍSES — reutiliza el sistema existente de banderquiz-paises.js
+   ===================================================================== */
+
+/* Correcciones EN -> ES por si la fuente devuelve algún nombre en inglés. */
+var NAME_ES = {
+  'United States': 'Estados Unidos', 'United States of America': 'Estados Unidos', 'USA': 'Estados Unidos',
+  'United Kingdom': 'Reino Unido', 'South Korea': 'Corea del Sur', 'North Korea': 'Corea del Norte',
+  'South Africa': 'Sudáfrica', 'Saudi Arabia': 'Arabia Saudita', 'Dominican Republic': 'República Dominicana',
+  'New Zealand': 'Nueva Zelanda', 'Netherlands': 'Países Bajos', 'Switzerland': 'Suiza',
+  'Germany': 'Alemania', 'Spain': 'España', 'France': 'Francia', 'Italy': 'Italia', 'Japan': 'Japón',
+  'Brazil': 'Brasil', 'Mexico': 'México', 'Canada': 'Canadá', 'Sweden': 'Suecia', 'Norway': 'Noruega',
+  'Denmark': 'Dinamarca', 'Finland': 'Finlandia', 'Poland': 'Polonia', 'Russia': 'Rusia',
+  'Greece': 'Grecia', 'Turkey': 'Turquía', 'Egypt': 'Egipto', 'Ireland': 'Irlanda', 'Iceland': 'Islandia',
+  'Australia': 'Australia', 'Austria': 'Austria', 'Belgium': 'Bélgica', 'Portugal': 'Portugal',
+  'Morocco': 'Marruecos', 'Nigeria': 'Nigeria', 'Kenya': 'Kenia', 'Ethiopia': 'Etiopía',
+  'Vietnam': 'Vietnam', 'Thailand': 'Tailandia', 'Philippines': 'Filipinas', 'Malaysia': 'Malasia',
+  'Singapore': 'Singapur', 'Indonesia': 'Indonesia', 'Chile': 'Chile', 'Peru': 'Perú',
+  'Colombia': 'Colombia', 'Venezuela': 'Venezuela', 'Ecuador': 'Ecuador', 'Bolivia': 'Bolivia',
+  'Paraguay': 'Paraguay', 'Uruguay': 'Uruguay', 'Cuba': 'Cuba', 'Costa Rica': 'Costa Rica',
+  'Panama': 'Panamá', 'Guatemala': 'Guatemala', 'Honduras': 'Honduras', 'Nicaragua': 'Nicaragua',
+  'El Salvador': 'El Salvador', 'Jamaica': 'Jamaica', 'Haiti': 'Haití', 'Israel': 'Israel',
+  'Iran': 'Irán', 'Iraq': 'Irak', 'Pakistan': 'Pakistán', 'Bangladesh': 'Bangladés',
+  'Sri Lanka': 'Sri Lanka', 'Ukraine': 'Ucrania', 'Romania': 'Rumania', 'Bulgaria': 'Bulgaria',
+  'Hungary': 'Hungría', 'Czech Republic': 'República Checa', 'Czechia': 'Chequia',
+  'Slovakia': 'Eslovaquia', 'Slovenia': 'Eslovenia', 'Croatia': 'Croacia', 'Serbia': 'Serbia',
+  'United Arab Emirates': 'Emiratos Árabes Unidos', 'Jordan': 'Jordania', 'Lebanon': 'Líbano',
+  'Syria': 'Siria', 'Afghanistan': 'Afganistán'
+};
+
+function toSpanish(n) {
+  if (!n) return null;
+  var key = String(n).trim();
+  return NAME_ES[key] || key;
+}
+
+/* Normaliza cualquier formato de la fuente de países. */
+function normalizeCountries(raw) {
+  var out = [], seen = {}, list, i, item, code, nm;
+  if (!raw) return out;
+  list = raw;
+  if (!Array.isArray(list) && typeof list === 'object') {
+    list = Object.keys(list).map(function (k) { return [k, list[k]]; });
+  }
+  if (!Array.isArray(list)) return out;
+  for (i = 0; i < list.length; i++) {
+    item = list[i]; code = null; nm = null;
+    if (Array.isArray(item)) { code = item[0]; nm = item[1] || item[2]; }
+    else if (item && typeof item === 'object') {
+      code = item.code || item.cc || item.iso2 || item.iso || item.id || item.alpha2;
+      nm = item.name || item.nombre || item.nombreEs || item.es || item.spanish;
+    }
+    if (!code) continue;
+    code = String(code).trim().toUpperCase();
+    if (!/^[A-Z]{2}$/.test(code)) continue;
+    if (seen[code]) continue;
+    seen[code] = true;
+    out.push([code, nm ? String(nm) : null]);
+  }
+  return out;
+}
+
+function readSource() {
+  return window.BanderQuizCountries || window.BanderQuizPaises || window.PAISES || null;
+}
+
+/* Red de seguridad: solo se usa si banderquiz-paises.js no carga nada. */
+var FALLBACK = [
+  ['CO','Colombia'],['EC','Ecuador'],['VE','Venezuela'],['PE','Perú'],['AR','Argentina'],
+  ['CL','Chile'],['BO','Bolivia'],['PY','Paraguay'],['UY','Uruguay'],['BR','Brasil'],
+  ['MX','México'],['US','Estados Unidos'],['CA','Canadá'],['CU','Cuba'],['DO','República Dominicana'],
+  ['GT','Guatemala'],['HN','Honduras'],['SV','El Salvador'],['NI','Nicaragua'],['CR','Costa Rica'],
+  ['PA','Panamá'],['ES','España'],['FR','Francia'],['IT','Italia'],['DE','Alemania'],
+  ['GB','Reino Unido'],['IE','Irlanda'],['PT','Portugal'],['NL','Países Bajos'],['BE','Bélgica'],
+  ['CH','Suiza'],['AT','Austria'],['SE','Suecia'],['NO','Noruega'],['DK','Dinamarca'],
+  ['FI','Finlandia'],['IS','Islandia'],['PL','Polonia'],['CZ','Chequia'],['SK','Eslovaquia'],
+  ['HU','Hungría'],['RO','Rumania'],['BG','Bulgaria'],['GR','Grecia'],['TR','Turquía'],
+  ['RU','Rusia'],['UA','Ucrania'],['CN','China'],['JP','Japón'],['KR','Corea del Sur'],
+  ['IN','India'],['ID','Indonesia'],['TH','Tailandia'],['VN','Vietnam'],['PH','Filipinas'],
+  ['MY','Malasia'],['SG','Singapur'],['AU','Australia'],['NZ','Nueva Zelanda'],['EG','Egipto'],
+  ['ZA','Sudáfrica'],['MA','Marruecos'],['NG','Nigeria'],['KE','Kenia'],['ET','Etiopía'],
+  ['SA','Arabia Saudita'],['AE','Emiratos Árabes Unidos'],['IL','Israel'],['IR','Irán'],['IQ','Irak'],
+  ['PK','Pakistán'],['BD','Bangladés'],['LK','Sri Lanka']
+];
+
+var COUNTRIES = [];   // [code, nombreFuente]
+var BY_CODE = {};     // code -> [code, nombre]
+
+function countryName(cc) {
+  try {
+    if (typeof window.BanderQuizCountryName === 'function') {
+      var n = window.BanderQuizCountryName(cc);
+      if (n) return toSpanish(n);
+    }
+  } catch (e) {}
+  var entry = BY_CODE[cc];
+  if (entry && entry[1]) return toSpanish(entry[1]);
+  return cc;
+}
+
+/* =====================================================================
+   3. BANDERAS — mismo sistema externo que el modo normal
+   ===================================================================== */
+var FLAG_JSON_URL = 'https://cdn.jsdelivr.net/npm/country-flag-emoji-json@2.0.0/dist/by-code.json';
+var FLAG_MAP = {};
+var FLAG_CANDIDATES = {};
+
+function emojiFor(cc) {
+  try {
+    if (typeof window.BanderQuizFlag === 'function') {
+      var e = window.BanderQuizFlag(cc);
+      if (e && e !== '🏳️') return e;
+    }
+  } catch (err) {}
+  if (/^[A-Z]{2}$/.test(cc)) {
+    try {
+      return String.fromCodePoint(cc.charCodeAt(0) - 65 + 0x1F1E6,
+                                  cc.charCodeAt(1) - 65 + 0x1F1E6);
+    } catch (err2) {}
+  }
+  return '🏳️';
+}
+
+function flagCandidates(cc) {
+  var list = [], entry;
+  /* 1) Función del sistema externo existente */
+  try {
+    if (typeof window.BanderQuizFlagUrl === 'function') {
+      var u = window.BanderQuizFlagUrl(cc);
+      if (u) list.push(u);
+    }
+  } catch (e) {}
+  /* 2) JSON externo de banderas (el mismo del modo normal) */
+  entry = FLAG_MAP[cc];
+  if (entry && entry.image) list.push(entry.image);
+  /* 3) CDN de respaldo para evitar banderas en blanco */
+  list.push('https://flagcdn.com/w320/' + cc.toLowerCase() + '.png');
+
+  return list.filter(function (v, i, a) { return v && a.indexOf(v) === i; });
+}
+
+function flagHtml(cc) {
+  var cands = flagCandidates(cc);
+  FLAG_CANDIDATES[cc] = cands;
+  return '<img src="' + esc(cands[0]) + '" alt="Bandera de ' + esc(countryName(cc)) + '"' +
+         ' data-cc="' + cc + '" data-step="0" loading="eager" decoding="async"' +
+         ' onerror="window.__bqFlagFail(this)">';
+}
+
+/* Cadena de fallbacks: sistema externo -> CDN -> emoji -> 🏳️ */
+window.__bqFlagFail = function (img) {
+  var cc = img.getAttribute('data-cc') || '';
+  var cands = FLAG_CANDIDATES[cc] || [];
+  var step = parseInt(img.getAttribute('data-step') || '0', 10) + 1;
+
+  if (step < cands.length) {
+    img.setAttribute('data-step', String(step));
+    img.src = cands[step];
+    return;
+  }
+  if (!img.getAttribute('data-emoji-done')) {
+    img.setAttribute('data-emoji-done', '1');
+    var em = emojiFor(cc);
+    if (em && em !== '🏳️') {
+      var sp = document.createElement('span');
+      sp.className = 'flag-fallback';
+      sp.textContent = em;
+      if (img.parentNode) img.parentNode.replaceChild(sp, img);
+      return;
+    }
+  }
+  var sp2 = document.createElement('span');
+  sp2.className = 'flag-fallback';
+  sp2.textContent = '🏳️';
+  if (img.parentNode) img.parentNode.replaceChild(sp2, img);
+};
+
+function loadFlagData() {
+  return fetch(FLAG_JSON_URL, { cache: 'force-cache' })
+    .then(function (r) { return r.ok ? r.json() : null; })
+    .then(function (j) { if (j && typeof j === 'object') FLAG_MAP = j; })
+    .catch(function () { FLAG_MAP = {}; });
+}
+
+/* =====================================================================
+   4. DISTRACTORES INTELIGENTES (banderas visualmente parecidas)
+   ===================================================================== */
+var SIMILAR_GROUPS = [
+  ['CO','EC','VE'],
+  ['ID','MC','PL','SG'],
+  ['RO','TD','MD','AD'],
+  ['IE','CI','IT','MX'],
+  ['AU','NZ','FJ','TV','GB'],
+  ['NL','LU','PY'],
+  ['RU','SK','SI','RS','HR','BG'],
+  ['NO','IS','DK','SE','FI'],
+  ['GT','HN','SV','NI'],
+  ['AR','UY'],
+  ['CU','PR','PH','CL','CZ'],
+  ['SN','ML','GN','CM','BJ','GH'],
+  ['EG','SY','IQ','YE','SD'],
+  ['JO','PS','KW','AE'],
+  ['BH','QA'],
+  ['TR','TN','DZ','MR'],
+  ['BD','JP','PW'],
+  ['KR','KP'],
+  ['US','MY','LR','CL'],
+  ['SA','PK','AF','MV'],
+  ['AT','LV','LB','PE'],
+  ['TH','CR'],
+  ['CN','VN','MA'],
+  ['EE','BW'],
+  ['IN','NE','IE','CI'],
+  ['DE','BE','NL','LU'],
+  ['BR','PT','ES']
+];
+
+var SIMILAR = {};
+SIMILAR_GROUPS.forEach(function (g) {
+  g.forEach(function (cc) {
+    if (!SIMILAR[cc]) SIMILAR[cc] = [];
+    g.forEach(function (o) {
+      if (o !== cc && SIMILAR[cc].indexOf(o) < 0) SIMILAR[cc].push(o);
+    });
+  });
+});
+
+/* Países muy conocidos -> nivel Fácil */
+var KNOWN = {};
+('US CA MX BR AR CL CO PE VE EC BO PY UY CU DO GT CR PA ES FR IT DE GB IE PT NL BE CH AT ' +
+ 'SE NO DK FI IS PL CZ SK HU RO BG GR TR RU UA CN JP KR IN ID TH VN PH MY SG AU NZ EG ZA ' +
+ 'MA NG KE ET SA AE IL IR IQ PK BD').split(' ').forEach(function (c) { KNOWN[c] = true; });
+
+/* =====================================================================
+   5. DIFICULTAD Y GENERACIÓN DE PREGUNTAS
+   ===================================================================== */
+var MAX_LEVEL = 4;
+var DIFF_NAMES = ['Fácil', 'Medio', 'Difícil', 'Extremo'];
+var TIME_BY_LEVEL = [14, 12, 10, 8];
+
+var RECENT = [];        // países recientes (anti-repetición)
+var RECENT_MAX = 8;
+var RECENT_SETS = [];   // firmas de combinaciones recientes
+var SET_MAX = 6;
+
+function poolFor(level) {
+  var p;
+  if (level <= 1) {
+    p = COUNTRIES.filter(function (c) { return KNOWN[c[0]]; });
+    return p.length >= 10 ? p : COUNTRIES;
+  }
+  if (level === 2) return COUNTRIES;
+  if (level === 3) {
+    p = COUNTRIES.filter(function (c) {
+      return (SIMILAR[c[0]] || []).some(function (o) { return BY_CODE[o]; });
+    });
+    return p.length >= 10 ? p : COUNTRIES;
+  }
+  p = COUNTRIES.filter(function (c) {
+    var s = (SIMILAR[c[0]] || []).filter(function (o) { return BY_CODE[o]; });
+    return s.length >= 3;
+  });
+  return p.length >= 8 ? p : COUNTRIES;
+}
+
+function chooseCorrect(pool) {
+  var cands = pool.filter(function (c) { return RECENT.indexOf(c[0]) < 0; });
+  if (cands.length < 4) cands = pool;
+  return pick(cands);
+}
+
+function buildOptions(correct, level, force) {
+  var wantSim = level >= 3 ? 3 : (level === 2 ? 2 : 1);
+  var opts = [correct], i, guard, c, sig;
+
+  var simCodes = shuffle((SIMILAR[correct[0]] || []).filter(function (cc) {
+    return BY_CODE[cc] && cc !== correct[0];
+  }));
+  var take = Math.min(wantSim, simCodes.length);
+  for (i = 0; i < take && opts.length < 4; i++) opts.push(BY_CODE[simCodes[i]]);
+
+  /* Relleno: en nivel 1 usa países conocidos; en niveles altos, cualquiera */
+  var base = (level <= 1) ? poolFor(1) : COUNTRIES;
+  var fillPool = shuffle(base.concat(COUNTRIES));
+  guard = 0;
+  while (opts.length < 4 && guard < 500) {
+    guard++;
+    c = fillPool[rnd(fillPool.length)] || pick(COUNTRIES);
+    if (!c) break;
+    if (opts.some(function (o) { return o[0] === c[0]; })) continue;
+    opts.push(c);
+  }
+  if (opts.length < 2) return null;
+
+  sig = opts.map(function (o) { return o[0]; }).sort().join('');
+  if (!force && RECENT_SETS.indexOf(sig) >= 0) return null;
+  RECENT_SETS.push(sig);
+  while (RECENT_SETS.length > SET_MAX) RECENT_SETS.shift();
+
+  return shuffle(opts);
+}
+
+function buildQuestion(level) {
+  var pool = poolFor(level);
+  var correct = null, options = null, attempt;
+
+  for (attempt = 0; attempt < 20; attempt++) {
+    correct = chooseCorrect(pool);
+    options = buildOptions(correct, level, false);
+    if (options) break;
+  }
+  if (!options) options = buildOptions(correct, level, true);
+
+  if (!options) {
+    var tmp = [correct];
+    shuffle(COUNTRIES).forEach(function (c) {
+      if (tmp.length < 4 && !tmp.some(function (o) { return o[0] === c[0]; })) tmp.push(c);
+    });
+    options = shuffle(tmp);
+  }
+  return { correct: correct, options: options };
+}
+
+/* =====================================================================
+   6. ESTADO DEL JUEGO
+   ===================================================================== */
+var current = null;
+var score = 0, total = 0, correctCount = 0;
+var streak = 0, bestStreak = 0, lives = 3, level = 1;
+var locked = true, timerId = null, timeLeft = 12, timeTotal = 12;
+
+function streakBonus(s) {
+  if (s === 3) return 5;
+  if (s === 5) return 15;
+  if (s === 10) return 40;
+  if (s > 10 && s % 5 === 0) return 25;
+  return 0;
+}
+
+function hearts() {
+  var s = '', i;
+  for (i = 0; i < 3; i++) s += (i < lives) ? '❤️' : '🖤';
+  return s;
+}
+
+function updateHUD() {
+  $('score').textContent = score;
+  $('streak').textContent = streak;
+  $('lives').textContent = hearts();
+  $('clock').textContent = Math.ceil(Math.max(0, timeLeft));
+  $('correct').textContent = correctCount;
+  var acc = total ? Math.round(correctCount / total * 100) : 0;
+  $('accuracy').textContent = acc + '%';
+  $('bar').style.width = acc + '%';
+  $('levelChip').textContent = 'Nivel ' + level + ' · ' + DIFF_NAMES[level - 1];
+  var sc = $('streakChip');
+  sc.textContent = '🔥 Racha ' + streak;
+  if (streak >= 3) sc.classList.add('hot'); else sc.classList.remove('hot');
+}
+
+function floatText(txt, cls) {
+  var el = document.createElement('div');
+  el.className = 'float' + (cls ? ' ' + cls : '');
+  el.textContent = txt;
+  document.body.appendChild(el);
+  setTimeout(function () { if (el.parentNode) el.parentNode.removeChild(el); }, 950);
+}
+
+/* =====================================================================
+   7. TEMPORIZADOR
+   ===================================================================== */
+function startTimer() {
+  clearInterval(timerId);
+  timeTotal = TIME_BY_LEVEL[level - 1] || 12;
+  timeLeft = timeTotal;
+
+  var fill = $('timer');
+  fill.classList.remove('low');
+  fill.style.width = '100%';
+  $('clock').textContent = Math.ceil(timeLeft);
+
+  timerId = setInterval(function () {
+    timeLeft -= 0.1;
+    if (timeLeft <= 0) {
+      timeLeft = 0;
+      fill.style.width = '0%';
+      $('clock').textContent = '0';
+      clearInterval(timerId);
+      answer(null, null);
+      return;
+    }
+    fill.style.width = (timeLeft / timeTotal * 100) + '%';
+    $('clock').textContent = Math.ceil(timeLeft);
+    if (timeLeft <= 3) fill.classList.add('low');
+  }, 100);
+}
+
+/* =====================================================================
+   8. RESPUESTA
+   ===================================================================== */
+function answer(cc, btn) {
+  if (locked || !current) return;
+  locked = true;
+  clearInterval(timerId);
+
+  total++;
+  var correctCode = current.correct[0];
+  var ok = (cc === correctCode);
+
+  var all = document.querySelectorAll('.answer');
+  Array.prototype.forEach.call(all, function (b) {
+    b.disabled = true;
+    if (b.getAttribute('data-id') !== correctCode) b.classList.add('dim');
+  });
+  var correctBtn = document.querySelector('.answer[data-id="' + correctCode + '"]');
+  if (correctBtn) {
+    correctBtn.classList.remove('dim');
+    correctBtn.classList.add('correct');
+  }
+
+  if (ok) {
+    correctCount++;
+    streak++;
+    if (streak > bestStreak) bestStreak = streak;
+
+    var bonus = streakBonus(streak);
+    var gained = (10 * level) + Math.ceil(timeLeft / 2) + bonus;
+    score += gained;
+
+    floatText('+' + gained + (bonus > 0 ? ' 🔥' : ''), bonus > 0 ? 'bonus' : '');
+    $('msg').textContent = bonus > 0
+      ? '✅ ¡Correcto! Racha ' + streak + ' → bonus +' + bonus
+      : '✅ ¡Correcto!';
+
+    var nextLevel = Math.min(MAX_LEVEL, 1 + Math.floor(correctCount / 5));
+    if (nextLevel > level) {
+      level = nextLevel;
+      setTimeout(function () {
+        floatText('⬆️ ¡NIVEL ' + level + ' · ' + DIFF_NAMES[level - 1] + '!', 'level');
+      }, 420);
+    }
+  } else {
+    streak = 0;
+    lives--;
+    if (btn) btn.classList.add('wrong');
+    $('msg').textContent = (cc === null)
+      ? '⏱️ ¡Tiempo agotado! Era ' + countryName(correctCode)
+      : '❌ Era ' + countryName(correctCode);
+  }
+
+  /* Revelar la bandera correcta */
+  var flagBox = $('flag');
+  flagBox.innerHTML = flagHtml(correctCode);
+  var im = flagBox.querySelector('img');
+  if (im) im.classList.add('pop');
+
+  updateHUD();
+  syncStats(false);
+
+  if (lives <= 0) { setTimeout(gameOver, 900); return; }
+  setTimeout(nextRound, ok ? 900 : 1200);
+}
+
+/* =====================================================================
+   9. SIGUIENTE RONDA
+   ===================================================================== */
+function nextRound() {
+  if (!COUNTRIES.length) {
+    $('msg').textContent = 'No hay países disponibles.';
+    return;
+  }
+
+  level = Math.min(MAX_LEVEL, 1 + Math.floor(correctCount / 5));
+  locked = false;
+
+  var q = buildQuestion(level);
+  current = q;
+
+  RECENT.push(q.correct[0]);
+  while (RECENT.length > RECENT_MAX) RECENT.shift();
+
+  $('country').textContent = countryName(q.correct[0]);
+  $('flag').innerHTML = '<span class="flag-fallback">❓</span>';
+
+  $('answers').innerHTML = q.options.map(function (c) {
+    return '<button class="answer" type="button" data-id="' + c[0] + '"' +
+           ' aria-label="' + esc(countryName(c[0])) + '">' + flagHtml(c[0]) + '</button>';
+  }).join('');
+
+  Array.prototype.forEach.call(document.querySelectorAll('.answer'), function (b) {
+    b.addEventListener('click', function () {
+      answer(b.getAttribute('data-id'), b);
+    });
+  });
+
+  $('question').textContent = total + 1;
+  $('msg').textContent = 'Elige la bandera correcta.';
+  updateHUD();
+  startTimer();
+}
+
+/* =====================================================================
+   10. ESTADÍSTICAS GLOBALES (reutiliza el sistema existente)
+   ===================================================================== */
+function syncStats(completed) {
+  var payload = {
+    mode: 'inverso',
+    game: 'banderquiz',
+    score: score,
+    totalQuestions: total,
+    correctAnswers: correctCount,
+    wrongAnswers: total - correctCount,
+    accuracy: total ? Math.round(correctCount / total * 100) : 0,
+    streak: streak,
+    bestStreak: bestStreak,
+    lives: lives,
+    level: level,
+    difficulty: DIFF_NAMES[level - 1],
+    completed: !!completed
+  };
+
+  var saved = false;
+  try {
+    if (window.TecnomathProgress && typeof window.TecnomathProgress.save === 'function') {
+      window.TecnomathProgress.save('banderquiz-inverso', payload);
+      saved = true;
+    }
+  } catch (e) {}
+
+  /* Hook opcional al sistema global de BanderQuiz (solo si no se guardó antes) */
+  if (!saved) {
+    try {
+      if (window.BanderQuizStats && typeof window.BanderQuizStats.register === 'function') {
+        window.BanderQuizStats.register('inverso', payload);
+      }
+    } catch (e2) {}
+  }
+}
+
+/* =====================================================================
+   11. FIN DE PARTIDA / REINICIO
+   ===================================================================== */
+function gameOver() {
+  clearInterval(timerId);
+  locked = true;
+  syncStats(true);
+
+  $('summary').innerHTML =
+    'Aciertos: <b>' + correctCount + '</b> de <b>' + total + '</b><br>' +
+    'Puntuación: <b>' + score + '</b><br>' +
+    'Mejor racha: <b>' + bestStreak + '</b> 🔥<br>' +
+    'Nivel alcanzado: <b>' + DIFF_NAMES[level - 1] + '</b><br>' +
+    'Precisión: <b>' + (total ? Math.round(correctCount / total * 100) : 0) + '%</b>';
+
+  $('overlay').classList.add('show');
+}
+
+function reset() {
+  clearInterval(timerId);
+  score = 0; total = 0; correctCount = 0;
+  streak = 0; bestStreak = 0; lives = 3; level = 1;
+  timeLeft = TIME_BY_LEVEL[0];
+  locked = false;
+  current = null;
+  RECENT.length = 0;
+  RECENT_SETS.length = 0;
+  $('overlay').classList.remove('show');
+  updateHUD();
+  nextRound();
+}
+
+/* =====================================================================
+   12. INICIALIZACIÓN
+   ===================================================================== */
+$('back').addEventListener('click', function () { location.href = 'menu.html'; });
+$('menu').addEventListener('click', function () { location.href = 'menu.html'; });
+$('retry').addEventListener('click', reset);
+$('reset').addEventListener('click', reset);
+
+function init() {
+  COUNTRIES = normalizeCountries(readSource());
+  if (COUNTRIES.length < 4) COUNTRIES = normalizeCountries(FALLBACK);
+
+  BY_CODE = {};
+  COUNTRIES.forEach(function (c) { BY_CODE[c[0]] = [c[0], c[1] || null]; });
+
+  updateHUD();
+
+  loadFlagData().then(function () {
+    $('msg').textContent = 'Elige la bandera correcta.';
+    reset();
+  });
+}
+
+init();
+
+})();
+</script>
+</body>
+</html>
