@@ -11,9 +11,17 @@ function setup(){
  if(!$('#tm-ui-top')){const b=document.createElement('button');b.id='tm-ui-top';b.type='button';b.textContent='↑';b.setAttribute('aria-label','Volver arriba');document.body.appendChild(b);b.addEventListener('click',()=>window.scrollTo({top:0,behavior:reduced()?'auto':'smooth'}));window.addEventListener('scroll',()=>b.classList.toggle('visible',window.scrollY>500),{passive:true})}
  if(!$('#tm-ui-stats')){const stats=document.createElement('section');stats.id='tm-ui-stats';stats.className='tm-ui-stats';stats.setAttribute('aria-label','Estadísticas del portal');stats.innerHTML='<h3>TECNO<span>MATH</span> EN NÚMEROS</h3><div class="tm-ui-stat-grid"><div class="tm-ui-stat"><strong data-stat="games">0</strong><span>JUEGOS</span></div><div class="tm-ui-stat"><strong data-stat="categories">0</strong><span>CATEGORÍAS</span></div><div class="tm-ui-stat"><strong data-stat="sponsors">0</strong><span>PATROCINADORES</span></div></div>';const footer=$('footer'),projects=$('#projectsContainer');if(projects&&projects.parentNode)projects.parentNode.insertBefore(stats,projects);else if(footer)footer.parentNode.insertBefore(stats,footer)}
  actualizarEstadisticas();const observer=new MutationObserver(()=>actualizarEstadisticas());const projects=$('#projectsContainer'),sponsors=$('#sponsorsArea');if(projects)observer.observe(projects,{childList:true});if(sponsors)observer.observe(sponsors,{childList:true});
+ loadAdminPortal();
 }
 function applyLight(button,on){document.body.classList.toggle('tm-light',on);localStorage.setItem('tm-ui-theme',on?'light':'dark');button.textContent=on?'☀':'☾';button.setAttribute('aria-pressed',String(on))}
 function filtrarJuegos(term){const q=String(term||'').trim().toLowerCase();$$('#projectsContainer .project-card').forEach(card=>{card.style.display=!q||(card.textContent||'').toLowerCase().includes(q)?'':'none'})}
 function actualizarEstadisticas(){const projects=$$('#projectsContainer .project-card'),sponsors=$$('#sponsorsArea .sponsor-card'),categories=new Set();projects.forEach(card=>{const desc=card.querySelector('.project-desc');if(desc)categories.add(desc.textContent.trim())});const values={games:projects.length,categories:categories.size,sponsors:sponsors.length};Object.entries(values).forEach(([key,target])=>{const el=$(`[data-stat="${key}"]`);if(el&&el.dataset.value!==String(target)){el.dataset.value=String(target);el.textContent=String(target)}})}
+function loadAdminPortal(){
+ if(window.__TECNO_MATH_ADMIN_PORTAL__)return;
+ window.__TECNO_MATH_ADMIN_PORTAL__=true;
+ const src='js/tecnomath-admin-portal.js?v=20260914-1';
+ if(document.querySelector('script[data-tecnomath-admin-portal]'))return;
+ const s=document.createElement('script');s.src=src;s.defer=false;s.dataset.tecnomathAdminPortal='true';s.onerror=()=>{console.warn('No se pudo cargar el controlador admin moderno.')};document.head.appendChild(s);
+}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',setup,{once:true});else setup();
 })();
