@@ -1,0 +1,57 @@
+name: Restaurar portada y aislar diseño TecnoMath
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  repair:
+    if: ${{ !contains(github.event.head_commit.message, '[homepage-repair]') }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Restaurar index funcional y conectar estilos externos
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin a5921e2fd941a3978b073a039026e551fd644c49
+          git checkout a5921e2fd941a3978b073a039026e551fd644c49 -- index.html
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('index.html')
+          s = p.read_text(encoding='utf-8')
+          link = '    <link rel="stylesheet" href="assets/css/tecnomath-home.css">\n'
+          if 'assets/css/tecnomath-home.css' not in s:
+              s = s.replace('</head>', link + '</head>', 1)
+          # Remove only the temporary UI workflows created during the failed redesign.
+          for name in (
+              '.github/workflows/implement-tecnomath-ui.yml',
+              '.github/workflows/fix-tm-ui-search.yml',
+              '.github/workflows/fix-tm-ui-newlines.yml',
+              '.github/workflows/restore-homepage-and-isolate-ui.yml',
+          ):
+              Path(name).unlink(missing_ok=True)
+          p.write_text(s, encoding='utf-8')
+          PY
+          test -s index.html
+          grep -q 'class="project-card"' index.html
+          grep -q 'assets/css/tecnomath-home.css' index.html
+          test -s assets/css/tecnomath-home.css
+
+      - name: Commit reparación
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html assets/css/tecnomath-home.css .github/workflows/implement-tecnomath-ui.yml .github/workflows/fix-tm-ui-search.yml .github/workflows/fix-tm-ui-newlines.yml .github/workflows/restore-homepage-and-isolate-ui.yml || true
+          git add -u
+          git commit -m 'fix: restaurar portada y aislar diseño [homepage-repair]' || exit 0
+          git push origin HEAD:main
