@@ -1779,6 +1779,136 @@ button:focus-visible,a:focus-visible,[role="button"]:focus-visible,input:focus-v
 @media (pointer:coarse){
   button,.icon-btn,.btn-exit-admin-game{min-height:44px;}
 }
+
+
+/* YOUTUBE_COMPACT_UI_V1 */
+/* Interfaz compacta: más contenido visible, menos sensación de zoom. */
+:root{
+  --tap:40px;
+  --fs-xs:10px; --fs-sm:12px; --fs-md:14px;
+  --fs-lg:17px; --fs-xl:23px; --fs-2xl:32px;
+  --r-sm:7px; --r-md:10px; --r-lg:14px; --r-xl:18px;
+}
+html,body{overflow:hidden}
+body{font-size:12px}
+#app{
+  width:100%;
+  max-width:none;
+  margin:0;
+  padding:0;
+}
+header{
+  min-height:56px;
+  height:56px;
+  padding:8px 18px;
+  gap:12px;
+  background:rgba(15,15,18,.96);
+  border-bottom:1px solid rgba(255,255,255,.08);
+  backdrop-filter:blur(18px);
+  -webkit-backdrop-filter:blur(18px);
+}
+header::after{display:none}
+.header-title{
+  font-size:12px;
+  letter-spacing:1.6px;
+}
+.header-rank{font-size:7px;margin-top:2px;letter-spacing:.7px}
+.header-mid{text-align:left;padding:0 2px}
+.icon-btn{width:36px;height:36px;border-radius:50%;font-size:14px}
+.coins-display{padding:6px 9px;font-size:11px;gap:4px}
+.btn-exit-admin-game{font-size:10px;padding:7px 10px}
+
+.hud{
+  grid-template-columns:repeat(5,minmax(0,1fr));
+  gap:0;
+  padding:7px 18px;
+  background:#0f0f12;
+  border-bottom:1px solid rgba(255,255,255,.07);
+}
+.hud-stat{
+  min-width:0;
+  padding:5px 3px;
+  border:0;
+  border-radius:0;
+  background:transparent;
+  gap:1px;
+}
+.hud-stat::before{display:none}
+.hud-label{font-size:6px;letter-spacing:.45px}
+.hud-val{font-size:13px;text-shadow:0 0 8px rgba(94,231,255,.3)}
+
+.view{padding:0 18px 18px;animation:viewIn .25s ease-out both}
+.view > *{max-width:1120px;margin-left:auto;margin-right:auto}
+
+/* Contenido de juego compacto y centrado, como un reproductor de YouTube. */
+.game-container,.game-card,.question-card,.quiz-card,.play-area,.question-area{
+  width:100%;
+  max-width:900px;
+}
+.game-card,.question-card,.quiz-card{
+  border-radius:12px;
+}
+.question-card,.question-area{
+  margin-top:10px;
+}
+
+/* Tipografía: jerarquía más contenida. */
+.question,.question-text,.problem,.equation{
+  font-size:clamp(22px,3.2vw,34px)!important;
+  line-height:1.15!important;
+}
+.answer-grid,.answers,.options,.choices{
+  gap:8px!important;
+}
+button,.answer-btn,.option-btn,.choice-btn{
+  min-height:40px;
+  font-size:13px!important;
+  border-radius:8px;
+}
+
+/* Pantalla final / menús: evitar tarjetas gigantes. */
+.result-card,.results-card,.start-card,.menu-card,.settings-card{
+  max-width:760px;
+  padding:18px!important;
+}
+.result-card h1,.results-card h1,.start-card h1,.menu-card h1{font-size:24px!important}
+
+/* Scroll interno limpio, como una página de contenido. */
+.view::-webkit-scrollbar{width:8px}
+.view::-webkit-scrollbar-track{background:transparent}
+.view::-webkit-scrollbar-thumb{background:rgba(255,255,255,.14);border-radius:20px}
+.view::-webkit-scrollbar-thumb:hover{background:rgba(255,255,255,.24)}
+
+/* Desktop: aprovechar el ancho sin convertir todo en tarjetas enormes. */
+@media (min-width:900px){
+  header{padding-left:28px;padding-right:28px}
+  .hud{padding-left:28px;padding-right:28px}
+  .view{padding-left:28px;padding-right:28px}
+  .view > *{max-width:1180px}
+  .question-card,.question-area,.game-card,.quiz-card,.game-container{max-width:940px}
+}
+
+/* Tablet y móvil mantienen controles cómodos sin desperdiciar espacio. */
+@media (max-width:700px){
+  header{padding-left:10px;padding-right:10px}
+  .hud{padding-left:10px;padding-right:10px}
+  .view{padding-left:10px;padding-right:10px;padding-bottom:10px}
+  .header-title{font-size:11px;letter-spacing:1px}
+  .coins-display{padding:5px 7px}
+  .question,.question-text,.problem,.equation{font-size:clamp(20px,7vw,28px)!important}
+}
+@media (max-width:420px){
+  .header-rank{display:none}
+  .hud{padding-top:5px;padding-bottom:5px}
+  .hud-label{font-size:5px}
+  .hud-val{font-size:12px}
+  .view{padding-left:8px;padding-right:8px}
+}
+
+@media (prefers-reduced-motion:reduce){
+  .view{animation:none}
+}
+
 </style>
 </head>
 <body data-theme="neon">
