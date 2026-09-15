@@ -57,3 +57,5 @@ jobs:
             git commit -m 'fix: polish MindMath game page [mindmath-game-fix]'
             git push
           fi
+
+      # v2: force the correction on the next main push after workflow creation.
