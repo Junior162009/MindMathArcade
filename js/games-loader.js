@@ -1,6 +1,7 @@
 /* TecnoMath · Catálogo dinámico */
 (function(){'use strict';
 const CATALOG='data/games.json';
+const JOLBERTH_GAME={name:'Jolberth11°',desc:'Juego educativo de Jolberth11°',url:'games/jolberth11°/index.html',imageUrl:'',icon:'🎮',category:'edu',deviceCompatibility:'both',evento:null,sourceType:'internal'};
 let loaderDone=false;
 function showLoader(){
   if(document.getElementById('tm-page-loader'))return;
@@ -15,8 +16,25 @@ function loadAdminPortal(){return new Promise((resolve)=>{if(document.querySelec
 function addMeta(property,content){let m=document.head.querySelector(`meta[property="${property}"]`);if(!m){m=document.createElement('meta');m.setAttribute('property',property);document.head.appendChild(m)}m.content=content}
 addMeta('og:title','TecnoMath | Plataforma Educativa Interactiva');addMeta('og:description','Juegos educativos, retos matemáticos y experiencias interactivas en TecnoMath.');addMeta('og:image','https://tecnomath.online/img/mindmath.png');addMeta('og:type','website');
 const nativeFetch=window.fetch.bind(window);
-window.fetch=function(input,init){try{const u=typeof input==='string'?input:input&&input.url||'';if(/(?:^|\/)juegos\.json(?:\?|$)/i.test(u)){const replacement=new URL(CATALOG,location.href).href;return nativeFetch(replacement,init)}}catch(e){}return nativeFetch(input,init)};
-async function loadCatalog(){try{const r=await nativeFetch(`${CATALOG}?v=${Date.now()}`,{cache:'no-store'});if(!r.ok)throw Error(`HTTP ${r.status}`);const data=await r.json();if(!Array.isArray(data))throw Error('games.json debe ser una lista');window.TecNoMathCatalog=data;console.log(`📚 Catálogo oficial: ${data.length} juegos`)}catch(e){console.warn('No se pudo cargar el catálogo oficial:',e.message)}}
+function ensureJolberth(data){
+  if(!Array.isArray(data))return data;
+  const exists=data.some(g=>g&&String(g.name||'').toLowerCase()==='jolberth11°' || g&&String(g.url||'').includes('games/jolberth11°/'));
+  return exists?data:[...data,JOLBERTH_GAME];
+}
+window.fetch=async function(input,init){
+  try{
+    const u=typeof input==='string'?input:input&&input.url||'';
+    if(/(?:^|\/)juegos\.json(?:\?|$)/i.test(u)){const replacement=new URL(CATALOG,location.href).href;input=replacement}
+    const response=await nativeFetch(input,init);
+    if(/(?:^|\/)data\/games\.json(?:\?|$)/i.test(new URL(typeof input==='string'?input:input&&input.url||'',location.href).pathname) || /(?:^|\/)juegos\.json(?:\?|$)/i.test(u)){
+      const data=await response.clone().json();
+      const augmented=ensureJolberth(data);
+      return new Response(JSON.stringify(augmented),{status:response.status,statusText:response.statusText,headers:response.headers});
+    }
+    return response;
+  }catch(e){return nativeFetch(input,init)}
+};
+async function loadCatalog(){try{const r=await nativeFetch(`${CATALOG}?v=${Date.now()}`,{cache:'no-store'});if(!r.ok)throw Error(`HTTP ${r.status}`);const data=ensureJolberth(await r.json());if(!Array.isArray(data))throw Error('games.json debe ser una lista');window.TecNoMathCatalog=data;console.log(`📚 Catálogo oficial: ${data.length} juegos`)}catch(e){console.warn('No se pudo cargar el catálogo oficial:',e.message)}}
 function injectCardStyles(){if(document.getElementById('tm-card-number-styles'))return;const s=document.createElement('style');s.id='tm-card-number-styles';s.textContent=`#projectsContainer .project-card{position:relative;transition:transform .25s ease,box-shadow .25s ease,border-color .25s ease}#projectsContainer .project-card:hover{transform:translateY(-6px)}.tm-order-badge{position:absolute;top:10px;left:10px;z-index:30;padding:5px 8px;border-radius:999px;background:#060610dd;border:1px solid #00f5ff;color:#00f5ff;font:700 10px Arial,sans-serif;line-height:1;pointer-events:none}`;document.head.appendChild(s)}
 function markCards(){const box=document.getElementById('projectsContainer');if(!box)return;const cards=[...box.querySelectorAll('.project-card')];cards.forEach((card,i)=>{let badge=card.querySelector('.tm-order-badge');if(!badge){badge=document.createElement('span');badge.className='tm-order-badge';card.appendChild(badge)}badge.textContent=`#${i+1}`})}
 function waitForCards(timeout=7000){return new Promise(resolve=>{const started=Date.now();const check=()=>{const box=document.getElementById('projectsContainer');const cards=box?[...box.querySelectorAll('.project-card')]:[];if(cards.length||Date.now()-started>timeout){markCards();resolve()}else requestAnimationFrame(check)};check()})}
