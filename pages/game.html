@@ -9,10 +9,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Orbitron:wght@500;700;800;900&family=Press+Start+2P&display=swap" rel="stylesheet">
 <script src="../js/shared.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-<script src="../js/firebase-config.js"></script>
+<script src="../js/tecnomath-auth.js?v=20260914-supabase"></script>
 <script src="../js/game-progress.js" data-tecnomath-game="mindmath-arcade"></script>
 <style>
 /* ═══════════════════════════════════════════════════════
@@ -2117,7 +2114,7 @@ button,.answer-btn,.option-btn,.choice-btn{
 
 <script>
 /* ═══════════════════════════════════════════════
-   TECNOMATH MOCK
+   TECNOMATH COMPATIBILITY
    ═══════════════════════════════════════════════ */
 if (typeof Tecnomath === 'undefined') {
   window.Tecnomath = {
@@ -2150,7 +2147,7 @@ if (typeof Tecnomath === 'undefined') {
   };
 }
 
-/* ═══════════════════════════════════════════════
+/* ═══════════════════════════════════════════════\n   MINDFMATH · SUPABASE BRIDGE\n   Fuente oficial de cuenta/progreso: Supabase Auth + PostgreSQL.\n   ═══════════════════════════════════════════════ */\n(function(){\n  const GAME_ID='mindmath-arcade';\n  const localCoins=()=>parseInt(localStorage.getItem('global_coins')||'0',10)||0;\n  const writeCoins=(n)=>{\n    const value=Math.max(0,Math.floor(Number(n)||0));\n    localStorage.setItem('global_coins',String(value));\n    window.TecnoMathProgress?.save?.(GAME_ID,{globalCoins:value});\n    return value;\n  };\n  window.Tecnomath=Object.assign(window.Tecnomath||{}, {\n    getCurrentUser:()=>window.TecnoMathProgress?.getUser?.()||null,\n    getCoins:()=>localCoins(),\n    addCoins:(amount)=>writeCoins(localCoins()+Number(amount||0)),\n    updateHighScore:(game,score)=>{\n      const key='highscore_'+game;\n      const old=parseInt(localStorage.getItem(key)||'0',10)||0;\n      if(Number(score)>old)localStorage.setItem(key,String(score));\n      window.TecnoMathProgress?.save?.(GAME_ID,{game,score,highScore:Math.max(old,Number(score)||0)});\n    },\n    getGameCoins:()=>stats.coins||0,\n    exchangeGlobalToLocal:(game,amount)=>{\n      const n=Math.floor(Number(amount)||0);\n      if(n<=0||localCoins()<n)return false;\n      writeCoins(localCoins()-n);\n      stats.coins+=(Math.floor(n*0.9));\n      saveStats();\n      return true;\n    },\n    isAdmin:()=>!!window.TecnomathCurrentAdmin||!!stats.isAdmin,\n    setAdmin:()=>{},\n    unsetAdmin:()=>{}\n  });\n  window.addEventListener('tecnomath:authchange',()=>{\n    setTimeout(()=>{\n      try{loadStats();}catch(_){}\n      try{updateHUD();renderMenu();}catch(_){}\n    },100);\n  });\n})();\n\n/* ═══════════════════════════════════════════════
    CONSTANTES
    ═══════════════════════════════════════════════ */
 const CATEGORIES = [
