@@ -32,6 +32,7 @@ function gameKey(g){
   return url||name;
 }
 function isEvent(g){return g&&g.evento!==null&&g.evento!==undefined&&String(g.evento).trim()!==''}
+function isStudentGame(g){return String(g?.sourceType||'').toLowerCase()==='upload'||Boolean(String(g?.submissionId||'').trim())}
 async function applyCatalogOrder(data){
   if(!Array.isArray(data)||!data.length)return data;
   try{
@@ -41,13 +42,14 @@ async function applyCatalogOrder(data){
     if(!Array.isArray(rows)||!rows.length)return data;
     const rank=new Map();
     for(const x of rows){const k=String(x?.game_key||'').trim();const n=Number(x?.sort_order);if(!k||!Number.isFinite(n)||rank.has(k))continue;rank.set(k,n)}
-    // El panel de administración ordena únicamente juegos normales.
-    // Los eventos conservan su posición independiente y no desplazan el catálogo normal.
     const normal=data.filter(g=>!isEvent(g));
     const events=data.filter(isEvent);
     const ranked=normal.filter(g=>rank.has(gameKey(g))).sort((a,b)=>rank.get(gameKey(a))-rank.get(gameKey(b))||normal.indexOf(a)-normal.indexOf(b));
     const missing=normal.filter(g=>!rank.has(gameKey(g)));
-    return [...ranked,...missing,...events];
+    const ordered=[...ranked,...missing];
+    const students=ordered.filter(isStudentGame);
+    const platform=ordered.filter(g=>!isStudentGame(g));
+    return [...students,...platform,...events];
   }catch(e){
     console.warn('No se pudo aplicar el orden guardado del catálogo:',e.message);
     return data;
