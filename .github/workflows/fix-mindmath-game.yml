@@ -1,0 +1,59 @@
+name: Fix MindMath game HTML
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'pages/game.html'
+      - '.github/workflows/fix-mindmath-game.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    if: ${{ !contains(github.event.head_commit.message, '[mindmath-game-fix]') }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Fix pages/game.html
+        shell: python
+        run: |
+          from pathlib import Path
+
+          p = Path('pages/game.html')
+          s = p.read_text(encoding='utf-8')
+          original = s
+
+          # Correct the relative path: game.html lives in /pages/ while shared.js lives in /js/.
+          s = s.replace('<script src="shared.js"></script>', '<script src="../js/shared.js"></script>')
+
+          # Clearer title for the official MindMath game.
+          s = s.replace('<title>MindMath Arcade · ODS Supremacy</title>', '<title>MindMath Arcade · Matemáticas Arcade</title>')
+
+          # Add a lightweight mobile/accessibility/performance polish layer once.
+          marker = '/* MINDFMATH_GAME_POLISH_V1 */'
+          if marker not in s:
+              css = '''\n<style id="mindmath-game-polish">\n/* MINDFMATH_GAME_POLISH_V1 */\nhtml,body{overscroll-behavior:none;}\nbutton,a,[role="button"],input,select,textarea{touch-action:manipulation;}\nbutton:focus-visible,a:focus-visible,[role="button"]:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--cyan,#5ee7ff);outline-offset:3px;}\n@media (max-width:600px){\n  #app{width:100%;max-width:none;}\n  header{padding:10px 12px;}\n  .hud{grid-template-columns:repeat(5,minmax(0,1fr));gap:5px;padding:8px 10px;}\n  .hud-stat{padding:6px 2px;min-width:0;}\n  .hud-label{font-size:6px;letter-spacing:.3px;white-space:nowrap;}\n  .hud-val{font-size:clamp(12px,4vw,16px);}\n  .view{padding-left:max(10px,env(safe-area-inset-left));padding-right:max(10px,env(safe-area-inset-right));}\n}\n@media (max-width:360px){\n  .header-title{font-size:10px;letter-spacing:2px;}\n  .header-rank{font-size:6px;}\n  .hud-label{font-size:5px;}\n}\n@media (prefers-reduced-motion:reduce){\n  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.01ms!important;}\n}\n@media (pointer:coarse){\n  button,.icon-btn,.btn-exit-admin-game{min-height:44px;}\n}\n</style>\n'''
+              s = s.replace('</head>', css + '</head>', 1)
+
+          if s != original:
+              p.write_text(s, encoding='utf-8')
+              print('MindMath game.html corrected.')
+          else:
+              print('No changes were necessary.')
+
+      - name: Commit correction
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add pages/game.html
+          if git diff --cached --quiet; then
+            echo 'Nothing to commit.'
+          else
+            git commit -m 'fix: polish MindMath game page [mindmath-game-fix]'
+            git push
+          fi
