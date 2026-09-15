@@ -14,7 +14,7 @@ function showLoader(){
 function hideLoader(){if(loaderDone)return;loaderDone=true;const d=document.getElementById('tm-page-loader');if(d){d.classList.add('tm-loader-hide');setTimeout(()=>d.remove(),500)}document.documentElement.classList.remove('tm-loading')}
 showLoader();
 function loadAuth(){return new Promise((resolve,reject)=>{if(window.TecnomathAuth)return resolve();const old=document.querySelector('script[data-tecnomath-auth]');if(old){old.addEventListener('load',resolve,{once:true});old.addEventListener('error',()=>reject(new Error('No se pudo cargar la autenticación TecnoMath.')),{once:true});return}const s=document.createElement('script');s.src='js/tecnomath-auth.js?v=20260914';s.dataset.tecnomathAuth='true';s.onload=resolve;s.onerror=()=>reject(new Error('No se pudo cargar la autenticación TecnoMath.'));document.head.appendChild(s)});}
-function loadAdminPortal(){return new Promise((resolve)=>{if(document.querySelector('script[data-tecnomath-admin-portal]'))return resolve();const s=document.createElement('script');s.src='js/tecnomath-admin-portal.js?v=20260914';s.dataset.tecnomathAdminPortal='true';s.onload=resolve;s.onerror=()=>resolve();document.head.appendChild(s)})}
+function loadAdminPortal(){return new Promise((resolve)=>{if(document.querySelector('script[data-tecnomath-admin-portal]'))return resolve();const s=document.createElement('script');s.src='js/tecnomath-admin-portal.js?v=20260914';s.dataset.tecnomathAdminPortal='true';s.onload=resolve;s.onerror=()=>resolve()})}
 function addMeta(property,content){let m=document.head.querySelector(`meta[property="${property}"]`);if(!m){m=document.createElement('meta');m.setAttribute('property',property);document.head.appendChild(m)}m.content=content}
 addMeta('og:title','TecnoMath | Plataforma Educativa Interactiva');addMeta('og:description','Juegos educativos, retos matemáticos y experiencias interactivas en TecnoMath.');addMeta('og:image','https://tecnomath.online/img/mindmath.png');addMeta('og:type','website');
 const nativeFetch=window.fetch.bind(window);
@@ -31,6 +31,7 @@ function gameKey(g){
   if(url==='games/jinete11°/index.html')return `${url}::${name}`;
   return url||name;
 }
+function isEvent(g){return g&&g.evento!==null&&g.evento!==undefined&&String(g.evento).trim()!==''}
 async function applyCatalogOrder(data){
   if(!Array.isArray(data)||!data.length)return data;
   try{
@@ -38,10 +39,15 @@ async function applyCatalogOrder(data){
     if(!r.ok)return data;
     const rows=await r.json();
     if(!Array.isArray(rows)||!rows.length)return data;
-    const rank=new Map(rows.map(x=>[String(x.game_key),Number(x.sort_order)]));
-    const ranked=data.filter(g=>rank.has(gameKey(g))).sort((a,b)=>rank.get(gameKey(a))-rank.get(gameKey(b)));
-    const missing=data.filter(g=>!rank.has(gameKey(g)));
-    return [...ranked,...missing];
+    const rank=new Map();
+    for(const x of rows){const k=String(x?.game_key||'').trim();const n=Number(x?.sort_order);if(!k||!Number.isFinite(n)||rank.has(k))continue;rank.set(k,n)}
+    // El panel de administración ordena únicamente juegos normales.
+    // Los eventos conservan su posición independiente y no desplazan el catálogo normal.
+    const normal=data.filter(g=>!isEvent(g));
+    const events=data.filter(isEvent);
+    const ranked=normal.filter(g=>rank.has(gameKey(g))).sort((a,b)=>rank.get(gameKey(a))-rank.get(gameKey(b))||normal.indexOf(a)-normal.indexOf(b));
+    const missing=normal.filter(g=>!rank.has(gameKey(g)));
+    return [...ranked,...missing,...events];
   }catch(e){
     console.warn('No se pudo aplicar el orden guardado del catálogo:',e.message);
     return data;
