@@ -4,11 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#07070d">
-<title>MindMath Arcade · ODS Supremacy</title>
+<title>MindMath Arcade · Matemáticas Arcade</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Orbitron:wght@500;700;800;900&family=Press+Start+2P&display=swap" rel="stylesheet">
-<script src="shared.js"></script>
+<script src="../js/shared.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
@@ -1751,6 +1751,33 @@ body.a11y .key{padding:20px 8px}
     transition-duration:.001ms!important;
   }
   body::before,body::after{display:none}
+}
+</style>
+
+<style id="mindmath-game-polish">
+/* MINDFMATH_GAME_POLISH_V1 */
+html,body{overscroll-behavior:none;}
+button,a,[role="button"],input,select,textarea{touch-action:manipulation;}
+button:focus-visible,a:focus-visible,[role="button"]:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--cyan,#5ee7ff);outline-offset:3px;}
+@media (max-width:600px){
+  #app{width:100%;max-width:none;}
+  header{padding:10px 12px;}
+  .hud{grid-template-columns:repeat(5,minmax(0,1fr));gap:5px;padding:8px 10px;}
+  .hud-stat{padding:6px 2px;min-width:0;}
+  .hud-label{font-size:6px;letter-spacing:.3px;white-space:nowrap;}
+  .hud-val{font-size:clamp(12px,4vw,16px);}
+  .view{padding-left:max(10px,env(safe-area-inset-left));padding-right:max(10px,env(safe-area-inset-right));}
+}
+@media (max-width:360px){
+  .header-title{font-size:10px;letter-spacing:2px;}
+  .header-rank{font-size:6px;}
+  .hud-label{font-size:5px;}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.01ms!important;}
+}
+@media (pointer:coarse){
+  button,.icon-btn,.btn-exit-admin-game{min-height:44px;}
 }
 </style>
 </head>
