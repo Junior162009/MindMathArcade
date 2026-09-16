@@ -1,6 +1,33 @@
 @import url("https://raw.githubusercontent.com/Junior162009/MindMathArcade/86bf81bea8f952d3a854ccc594ca3ec302d06f21/assets/css/tecnomath-ui-v2.css");
 
 /* ═══════════════════════════════════════════════════════
+   CORRECCIÓN DEL ENCABEZADO · PÁGINA PRINCIPAL
+   Evita que el título grande de la capa UI distorsione el header.
+   ═══════════════════════════════════════════════════════ */
+header h1{
+  font-size:clamp(12px,4vw,22px)!important;
+  line-height:1.25!important;
+  letter-spacing:2px!important;
+  margin:0!important;
+  max-width:100%!important;
+  white-space:normal!important;
+  overflow-wrap:anywhere!important;
+}
+header .subtitle{
+  font-size:clamp(4px,1.5vw,6px)!important;
+  line-height:1.5!important;
+  letter-spacing:1px!important;
+  margin-top:5px!important;
+}
+header .header-content{
+  min-width:0!important;
+}
+header .logo-area{
+  min-width:0!important;
+  max-width:100%!important;
+}
+
+/* ═══════════════════════════════════════════════════════
    TARJETAS DE JUEGOS · PÁGINA PRINCIPAL
    Mantiene el contenido, enlaces y funcionamiento existentes.
    ═══════════════════════════════════════════════════════ */
