@@ -1,78 +1,8 @@
 @import url("https://raw.githubusercontent.com/Junior162009/MindMathArcade/86bf81bea8f952d3a854ccc594ca3ec302d06f21/assets/css/tecnomath-ui-v2.css");
 
-/* ═══════════════════════════════════════════════════════
-   CORRECCIÓN DE LA ZONA SUPERIOR · PÁGINA PRINCIPAL
-   Evita que la capa UI convierta los textos superiores en
-   títulos gigantes o deformados.
-   ═══════════════════════════════════════════════════════ */
-header h1,
-header.tm-ui-header h1{
-  font-size:clamp(12px,4vw,22px)!important;
-  line-height:1.25!important;
-  letter-spacing:2px!important;
-  margin:0!important;
-  max-width:100%!important;
-  white-space:normal!important;
-  overflow-wrap:anywhere!important;
-}
-header .subtitle,
-header.tm-ui-header .subtitle{
-  font-size:clamp(4px,1.5vw,6px)!important;
-  line-height:1.5!important;
-  letter-spacing:1px!important;
-  margin-top:5px!important;
-}
-header .header-content{
-  min-width:0!important;
-}
-header .logo-area{
-  min-width:0!important;
-  max-width:100%!important;
-}
-
-/* Título principal del bloque superior: compacto y legible */
-.tm-ui-hero h2,
-.hero.tm-ui-hero h2{
-  font-family:'Press Start 2P',cursive!important;
-  font-size:clamp(10px,2.8vw,16px)!important;
-  line-height:1.5!important;
-  letter-spacing:0!important;
-  margin:12px auto 10px!important;
-  max-width:900px!important;
-  white-space:normal!important;
-  overflow-wrap:anywhere!important;
-  text-shadow:0 0 12px rgba(155,92,255,.28)!important;
-}
-
-/* Descripción del bloque superior */
-.tm-ui-hero p,
-.hero.tm-ui-hero p{
-  max-width:650px!important;
-  font-family:'Orbitron',sans-serif!important;
-  font-size:clamp(6px,1.4vw,9px)!important;
-  line-height:1.8!important;
-  margin:0 auto 12px!important;
-}
-
-/* Evita que los botones/controles de la capa nueva hagan crecer el header */
-.tm-ui-nav a{
-  font-size:10px!important;
-}
-.tm-ui-controls button{
-  font-size:12px!important;
-}
-
-/* El sistema antiguo de administración ya no debe aparecer en portada. */
-#adminAccessBtn,
-#admin-cloud,
-#admin-panel{
-  display:none!important;
-}
-
-/* ═══════════════════════════════════════════════════════
-   TARJETAS DE JUEGOS · PÁGINA PRINCIPAL
-   Mantiene el contenido, enlaces y funcionamiento existentes.
-   ═══════════════════════════════════════════════════════ */
+/* TARJETAS DE JUEGOS · PÁGINA PRINCIPAL
+   Único cambio personalizado: conservar el nuevo estilo de tarjetas.
+   Todo lo demás queda exactamente como estaba en la versión anterior. */
 #projectsContainer{
   grid-template-columns:repeat(auto-fit,minmax(240px,1fr))!important;
   gap:22px!important;
