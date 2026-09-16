@@ -4,15 +4,8 @@ const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>Array.from(r.query
 const reduced=()=>window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const isDesktop=()=>window.matchMedia('(pointer:fine) and (min-width:821px)').matches;
 
-function removeLegacyAdminUI(){
-  ['adminAccessBtn','admin-cloud','admin-panel','tm-ui-admin'].forEach(id=>{
-    document.getElementById(id)?.remove();
-  });
-}
-
 function setup(){
  const header=$('header'),hero=$('.hero');
- removeLegacyAdminUI();
  if(header){
    header.classList.add('tm-ui-header');
    const content=$('.header-content',header)||header;
@@ -176,7 +169,7 @@ function setupCursor(){
 function loadAdminPortal(){
  if(window.__TECNO_MATH_ADMIN_PORTAL__)return;
  window.__TECNO_MATH_ADMIN_PORTAL__=true;
- const src='js/tecnomath-admin-portal.js?v=20260915-1';
+ const src='js/tecnomath-admin-portal.js?v=20260914-1';
  if(document.querySelector('script[data-tecnomath-admin-portal]'))return;
  const s=document.createElement('script');s.src=src;s.defer=false;s.dataset.tecnomathAdminPortal='true';s.onerror=()=>{console.warn('No se pudo cargar el controlador admin moderno.')};document.head.appendChild(s);
 }
