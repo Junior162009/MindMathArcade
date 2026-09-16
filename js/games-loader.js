@@ -1,9 +1,6 @@
 /* TecnoMath · Catálogo dinámico */
 (function(){'use strict';
 const CATALOG='data/games.json';
-const SUPABASE_URL='https://xdszveoxdrdnwwzzvkav.supabase.co';
-const SUPABASE_KEY='sb_publishable_xwUE0aN1g0rb7aOLyXPAsA_kOAX9bOA';
-const JOLBERTH_GAME={name:'MENTEX',desc:'Juego educativo MENTEX',url:'games/jolberth11°/index.html',imageUrl:'',icon:'🎮',category:'edu',deviceCompatibility:'both',evento:null,sourceType:'internal'};
 let loaderDone=false;
 function showLoader(){
   if(document.getElementById('tm-page-loader'))return;
@@ -14,65 +11,16 @@ function showLoader(){
 function hideLoader(){if(loaderDone)return;loaderDone=true;const d=document.getElementById('tm-page-loader');if(d){d.classList.add('tm-loader-hide');setTimeout(()=>d.remove(),500)}document.documentElement.classList.remove('tm-loading')}
 showLoader();
 function loadAuth(){return new Promise((resolve,reject)=>{if(window.TecnomathAuth)return resolve();const old=document.querySelector('script[data-tecnomath-auth]');if(old){old.addEventListener('load',resolve,{once:true});old.addEventListener('error',()=>reject(new Error('No se pudo cargar la autenticación TecnoMath.')),{once:true});return}const s=document.createElement('script');s.src='js/tecnomath-auth.js?v=20260914';s.dataset.tecnomathAuth='true';s.onload=resolve;s.onerror=()=>reject(new Error('No se pudo cargar la autenticación TecnoMath.'));document.head.appendChild(s)});}
-function loadAdminPortal(){return new Promise((resolve)=>{if(document.querySelector('script[data-tecnomath-admin-portal]'))return resolve();const s=document.createElement('script');s.src='js/tecnomath-admin-portal.js?v=20260914';s.dataset.tecnomathAdminPortal='true';s.onload=resolve;s.onerror=()=>resolve()})}
+function loadAdminPortal(){return new Promise((resolve)=>{if(document.querySelector('script[data-tecnomath-admin-portal]'))return resolve();const s=document.createElement('script');s.src='js/tecnomath-admin-portal.js?v=20260914';s.dataset.tecnomathAdminPortal='true';s.onload=resolve;s.onerror=()=>resolve();document.head.appendChild(s)})}
 function addMeta(property,content){let m=document.head.querySelector(`meta[property="${property}"]`);if(!m){m=document.createElement('meta');m.setAttribute('property',property);document.head.appendChild(m)}m.content=content}
 addMeta('og:title','TecnoMath | Plataforma Educativa Interactiva');addMeta('og:description','Juegos educativos, retos matemáticos y experiencias interactivas en TecnoMath.');addMeta('og:image','https://tecnomath.online/img/mindmath.png');addMeta('og:type','website');
 const nativeFetch=window.fetch.bind(window);
-function ensureJolberth(data){
-  if(!Array.isArray(data))return data;
-  const exists=data.some(g=>g&&String(g.name||'').toLowerCase()==='mentex' || g&&String(g.url||'').includes('games/jolberth11°/'));
-  return exists?data:[...data,JOLBERTH_GAME];
-}
-function gameKey(g){
-  const submission=String(g?.submissionId||'').trim();
-  if(submission)return submission;
-  const url=String(g?.url||'').trim();
-  const name=String(g?.name||'').trim();
-  if(url==='games/jinete11°/index.html')return `${url}::${name}`;
-  return url||name;
-}
-function isEvent(g){return g&&g.evento!==null&&g.evento!==undefined&&String(g.evento).trim()!==''}
-function isStudentGame(g){return String(g?.sourceType||'').toLowerCase()==='upload'||Boolean(String(g?.submissionId||'').trim())}
-async function applyCatalogOrder(data){
-  if(!Array.isArray(data)||!data.length)return data;
-  try{
-    const r=await nativeFetch(`${SUPABASE_URL}/rest/v1/tecnomath_game_catalog_order?select=game_key,sort_order&order=sort_order.asc,game_key.asc`,{headers:{apikey:SUPABASE_KEY,Authorization:`Bearer ${SUPABASE_KEY}`,Accept:'application/json'},cache:'no-store'});
-    if(!r.ok)return data;
-    const rows=await r.json();
-    if(!Array.isArray(rows)||!rows.length)return data;
-    const rank=new Map();
-    for(const x of rows){const k=String(x?.game_key||'').trim();const n=Number(x?.sort_order);if(!k||!Number.isFinite(n)||rank.has(k))continue;rank.set(k,n)}
-    const normal=data.filter(g=>!isEvent(g));
-    const events=data.filter(isEvent);
-    const ranked=normal.filter(g=>rank.has(gameKey(g))).sort((a,b)=>rank.get(gameKey(a))-rank.get(gameKey(b))||normal.indexOf(a)-normal.indexOf(b));
-    const missing=normal.filter(g=>!rank.has(gameKey(g)));
-    const ordered=[...ranked,...missing];
-    const students=ordered.filter(isStudentGame);
-    const platform=ordered.filter(g=>!isStudentGame(g));
-    return [...students,...platform,...events];
-  }catch(e){
-    console.warn('No se pudo aplicar el orden guardado del catálogo:',e.message);
-    return data;
-  }
-}
-window.fetch=async function(input,init){
-  try{
-    const u=typeof input==='string'?input:input&&input.url||'';
-    if(/(?:^|\/)juegos\.json(?:\?|$)/i.test(u)){const replacement=new URL(CATALOG,location.href).href;input=replacement}
-    const response=await nativeFetch(input,init);
-    if(/(?:^|\/)data\/games\.json(?:\?|$)/i.test(new URL(typeof input==='string'?input:input&&input.url||'',location.href).pathname) || /(?:^|\/)juegos\.json(?:\?|$)/i.test(u)){
-      const data=await response.clone().json();
-      const augmented=await applyCatalogOrder(ensureJolberth(data));
-      return new Response(JSON.stringify(augmented),{status:response.status,statusText:response.statusText,headers:response.headers});
-    }
-    return response;
-  }catch(e){return nativeFetch(input,init)}
-};
-async function loadCatalog(){try{const r=await nativeFetch(`${CATALOG}?v=${Date.now()}`,{cache:'no-store'});if(!r.ok)throw Error(`HTTP ${r.status}`);const data=await applyCatalogOrder(ensureJolberth(await r.json()));if(!Array.isArray(data))throw Error('games.json debe ser una lista');window.TecNoMathCatalog=data;console.log(`📚 Catálogo oficial: ${data.length} juegos · orden Supabase aplicado`)}catch(e){console.warn('No se pudo cargar el catálogo oficial:',e.message)}}
+window.fetch=function(input,init){try{const u=typeof input==='string'?input:input&&input.url||'';if(/(?:^|\/)juegos\.json(?:\?|$)/i.test(u)){const replacement=new URL(CATALOG,location.href).href;return nativeFetch(replacement,init)}}catch(e){}return nativeFetch(input,init)};
+async function loadCatalog(){try{const r=await nativeFetch(`${CATALOG}?v=${Date.now()}`,{cache:'no-store'});if(!r.ok)throw Error(`HTTP ${r.status}`);const data=await r.json();if(!Array.isArray(data))throw Error('games.json debe ser una lista');window.TecNoMathCatalog=data;console.log(`📚 Catálogo oficial: ${data.length} juegos`)}catch(e){console.warn('No se pudo cargar el catálogo oficial:',e.message)}}
 function injectCardStyles(){if(document.getElementById('tm-card-number-styles'))return;const s=document.createElement('style');s.id='tm-card-number-styles';s.textContent=`#projectsContainer .project-card{position:relative;transition:transform .25s ease,box-shadow .25s ease,border-color .25s ease}#projectsContainer .project-card:hover{transform:translateY(-6px)}.tm-order-badge{position:absolute;top:10px;left:10px;z-index:30;padding:5px 8px;border-radius:999px;background:#060610dd;border:1px solid #00f5ff;color:#00f5ff;font:700 10px Arial,sans-serif;line-height:1;pointer-events:none}`;document.head.appendChild(s)}
 function markCards(){const box=document.getElementById('projectsContainer');if(!box)return;const cards=[...box.querySelectorAll('.project-card')];cards.forEach((card,i)=>{let badge=card.querySelector('.tm-order-badge');if(!badge){badge=document.createElement('span');badge.className='tm-order-badge';card.appendChild(badge)}badge.textContent=`#${i+1}`})}
 function waitForCards(timeout=7000){return new Promise(resolve=>{const started=Date.now();const check=()=>{const box=document.getElementById('projectsContainer');const cards=box?[...box.querySelectorAll('.project-card')]:[];if(cards.length||Date.now()-started>timeout){markCards();resolve()}else requestAnimationFrame(check)};check()})}
-async function boot(){try{await loadAuth();await loadCatalog();try{await loadAdminPortal()}catch(e){console.error('TecnoMath Auth:',e)}if(document.readyState==='loading')await new Promise(r=>document.addEventListener('DOMContentLoaded',r,{once:true}));await waitForCards();injectCardStyles();markCards();await new Promise(r=>setTimeout(r,350));}finally{hideLoader()}}
+async function boot(){try{await loadCatalog();try{await loadAuth();await loadAdminPortal()}catch(e){console.error('TecnoMath Auth:',e)}if(document.readyState==='loading')await new Promise(r=>document.addEventListener('DOMContentLoaded',r,{once:true}));await waitForCards();injectCardStyles();markCards();await new Promise(r=>setTimeout(r,350));}finally{hideLoader()}}
 boot();
 window.TecnoMathCatalogReload=async()=>{await loadCatalog();markCards()};
 })();
