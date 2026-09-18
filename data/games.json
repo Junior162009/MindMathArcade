@@ -397,7 +397,7 @@
     "description": "Actividad interactiva de lógica, conteo y gestión de recursos.",
     "category": "edu",
     "url": "games/cookie-clicker/index.html",
-    "imageUrl": "",
+    "imageUrl": "img/cookieclicker.png",
     "icon": "🍪",
     "deviceCompatibility": "both",
     "evento": null,
