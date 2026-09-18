@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#07070d">
+<title>Horror School · Descargas | TecnoMath</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Orbitron:wght@600;700;800;900&family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#06060c;--surface:rgba(20,20,34,.78);--border:rgba(255,255,255,.1);--text:#f5f4ff;--muted:#aaa8bf;--cyan:#5ee7ff;--pink:#ff5ed4;--red:#ff5470;--green:#5affa0}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;font-family:Inter,system-ui,sans-serif;color:var(--text);background:radial-gradient(900px 600px at 10% 0%,rgba(94,231,255,.1),transparent 60%),radial-gradient(900px 600px at 100% 10%,rgba(255,84,112,.1),transparent 60%),linear-gradient(180deg,#06060c,#0b0b16);overflow-x:hidden}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;background-image:linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);background-size:32px 32px}
+.wrap{position:relative;z-index:1;width:min(980px,calc(100% - 28px));margin:auto;padding:34px 0 60px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:14px;margin-bottom:28px}
+.brand{font:700 12px 'Press Start 2P',monospace;color:var(--cyan);letter-spacing:1px}
+.back{color:var(--muted);text-decoration:none;border:1px solid var(--border);padding:10px 14px;border-radius:12px;background:rgba(255,255,255,.03);font-weight:700}
+.back:hover{color:#fff;border-color:rgba(94,231,255,.4)}
+.hero{padding:34px;border:1px solid var(--border);border-radius:26px;background:linear-gradient(145deg,rgba(255,255,255,.06),rgba(255,255,255,.015)),var(--surface);backdrop-filter:blur(18px);box-shadow:0 30px 80px rgba(0,0,0,.35)}
+.badge{display:inline-flex;padding:7px 11px;border-radius:999px;border:1px solid rgba(255,84,112,.35);background:rgba(255,84,112,.1);color:#ffabb8;font-size:12px;font-weight:800}
+h1{font:800 clamp(28px,6vw,52px) 'Orbitron',sans-serif;margin:16px 0 10px;letter-spacing:1px}
+h1 span{background:linear-gradient(90deg,var(--cyan),var(--pink),var(--red));-webkit-background-clip:text;color:transparent}
+.lead{color:var(--muted);font-size:16px;line-height:1.7;max-width:720px}
+.downloads{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin-top:28px}
+.card{border:1px solid var(--border);border-radius:20px;padding:22px;background:rgba(255,255,255,.025)}
+.card h2{margin:0 0 8px;font-size:19px}.card p{margin:0 0 18px;color:var(--muted);line-height:1.6;font-size:14px}
+.btn{display:inline-flex;width:100%;justify-content:center;align-items:center;gap:9px;padding:14px 18px;border-radius:13px;text-decoration:none;font-weight:800;color:#031016;background:linear-gradient(135deg,var(--cyan),#8ff1ff);box-shadow:0 10px 30px rgba(94,231,255,.18)}
+.btn.disabled{opacity:.5;pointer-events:none;filter:grayscale(.35)}
+.meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}
+.meta span{font-size:11px;color:var(--muted);border:1px solid var(--border);padding:7px 9px;border-radius:999px}
+.notice{margin-top:18px;padding:14px 16px;border-radius:14px;border:1px solid rgba(255,213,122,.2);background:rgba(255,213,122,.05);color:#d8d4c1;font-size:13px;line-height:1.6}
+.steps{margin-top:28px}.steps h2{font-family:Orbitron,sans-serif}.steps ol{color:var(--muted);line-height:1.9;padding-left:22px}
+@media(max-width:600px){.hero{padding:22px}.top{align-items:flex-start}.back{font-size:12px}}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <div class="top">
+    <div class="brand">⚡ TECNOMATH</div>
+    <a class="back" href="../../index.html">← Volver</a>
+  </div>
+  <section class="hero">
+    <span class="badge">🎮 WINDOWS · DESCARGA</span>
+    <h1><span>Horror School</span></h1>
+    <p class="lead">Descarga la versión de PC de Horror School y ejecútala directamente en Windows. El paquete contiene el ejecutable y todos los archivos necesarios del juego.</p>
+
+    <div class="downloads">
+      <article class="card">
+        <h2>🖥️ Windows</h2>
+        <p>Build para PC. Descarga el paquete completo y descomprímelo antes de iniciar el juego.</p>
+        <a class="btn" href="../../downloads/HorrorSchool/Build.rar" download>⬇️ Descargar Horror School</a>
+        <div class="meta"><span>📦 RAR</span><span>🪟 Windows</span><span>🎮 PC</span></div>
+      </article>
+    </div>
+
+    <div class="notice">⚠️ Si Windows muestra una advertencia de seguridad, verifica que el archivo provenga de la distribución oficial de TecnoMath antes de ejecutarlo.</div>
+
+    <div class="steps">
+      <h2>Cómo instalar</h2>
+      <ol>
+        <li>Descarga <b>Build.rar</b>.</li>
+        <li>Extrae todo el contenido de la carpeta comprimida.</li>
+        <li>Abre la carpeta extraída y ejecuta <b>HorrorSchool.exe</b>.</li>
+        <li>No muevas ni elimines la carpeta <b>HorrorSchool_Data</b>, porque forma parte del juego.</li>
+      </ol>
+    </div>
+  </section>
+</main>
+</body>
+</html>
