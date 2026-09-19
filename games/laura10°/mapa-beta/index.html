@@ -40,11 +40,21 @@ function check(){if(!selected)return;const typed=norm(document.getElementById('a
 document.getElementById('check').onclick=check;document.getElementById('cancel').onclick=close;document.getElementById('back').onclick=()=>location.href='../menu.html';document.getElementById('answer').addEventListener('keydown',e=>{if(e.key==='Enter')check();if(e.key==='Escape')close()});document.getElementById('modal').addEventListener('click',e=>{if(e.target.id==='modal')close()});
 const restoreProgress=async()=>{if(!window.TecnoMathProgress)return null;try{return await window.TecnoMathProgress.restore('banderquiz-mundo')}catch(_){return null}};
 const loadFlags=async()=>{try{const r=await fetch(FLAG_URL,{cache:'force-cache'});if(!r.ok)throw new Error('flags');return await r.json()}catch(_){return []}};
-const loadWorld=async()=>{const urls=[
-  'https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json',
-  'https://unpkg.com/world-atlas@2/countries-110m.json',
-  'https://raw.githubusercontent.com/topojson/world-atlas/master/countries-110m.json'
-];let lastError=null;for(const url of urls){try{const r=await fetch(url,{cache:'force-cache'});if(r.ok)return await r.json()}catch(e){lastError=e}}throw lastError||new Error('map')};
+const WORLD_CACHE='banderquiz_mundo_world_v4';
+const fetchJsonWithTimeout=async(url,ms=9000)=>{const controller=new AbortController();const timer=setTimeout(()=>controller.abort(),ms);try{const r=await fetch(url,{cache:'no-store',signal:controller.signal,mode:'cors'});if(!r.ok)throw new Error('HTTP '+r.status);const data=await r.json();if(!data?.objects?.countries)throw new Error('invalid world');return data}finally{clearTimeout(timer)}};
+const loadWorld=async()=>{
+  try{const cached=localStorage.getItem(WORLD_CACHE);if(cached){const data=JSON.parse(cached);if(data?.objects?.countries)return data}}catch(_){ }
+  const urls=[
+    'https://cdn.jsdelivr.net/npm/visionscarto-world-atlas@1/world/110m.json',
+    'https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json',
+    'https://unpkg.com/world-atlas@2/countries-110m.json',
+    'https://raw.githubusercontent.com/topojson/world-atlas/master/countries-110m.json'
+  ];
+  const results=await Promise.allSettled(urls.map(url=>fetchJsonWithTimeout(url)));
+  const winner=results.find(x=>x.status==='fulfilled');
+  if(winner?.value){try{localStorage.setItem(WORLD_CACHE,JSON.stringify(winner.value))}catch(_){ }return winner.value}
+  throw new Error('No se pudo descargar ninguna fuente del mapa')
+};
 Promise.all([
   loadWorld(),
   loadFlags()
@@ -58,6 +68,7 @@ Promise.all([
   window.addEventListener('resize',()=>svg.call(zoom.transform,d3.zoomIdentity));
   await restoreProgress();
 }).catch(()=>{
-  document.getElementById('progressText').textContent='No se pudo cargar el mapa. Intenta recargar la página.';
+  document.getElementById('progressText').textContent='No se pudo cargar el mapa. Pulsa aquí para reintentar.';
+  const retry=document.createElement('button');retry.textContent='↻ Reintentar mapa';retry.className='back';retry.style.cssText='position:fixed;z-index:40;top:72px;left:50%;transform:translateX(-50%);font-size:.9rem';retry.onclick=()=>location.reload();document.body.appendChild(retry);
 });
 </script></body></html>
