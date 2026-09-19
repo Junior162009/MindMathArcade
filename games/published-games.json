@@ -83,5 +83,19 @@
     "authorEmail": "hack19861983@gmail.com",
     "sourceType": "upload",
     "publishedAt": "2026-09-13T23:29:21.574989+00:00"
+  },
+  {
+    "name": "Horror School",
+    "desc": "Juego de terror para PC con descarga y galería de capturas.",
+    "description": "Acceso directo a la página oficial de Horror School en TecnoMath.",
+    "category": "juegos",
+    "url": "games/downloader/HorrorSchool/index.html",
+    "imageUrl": "",
+    "icon": "🏫👻",
+    "deviceCompatibility": "pc",
+    "evento": null,
+    "authorName": "TecnoMath",
+    "sourceType": "internal",
+    "version": "1.0"
   }
 ]
