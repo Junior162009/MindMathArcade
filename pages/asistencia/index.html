@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Sistema virtual de asistencia escolar TecnoMath">
+<title>TecnoMath · Asistencia Escolar</title>
+<style>
+:root{--bg:#070b14;--panel:#101827;--panel2:#0c1320;--line:#24344b;--text:#f3f7ff;--muted:#9fb0c7;--cyan:#22d3ee;--green:#34d399;--red:#fb7185;--yellow:#fbbf24;--blue:#60a5fa;--shadow:0 16px 50px #0008}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:radial-gradient(circle at 20% 0,#12324a 0,transparent 35%),radial-gradient(circle at 100% 20%,#24204c 0,transparent 30%),var(--bg);color:var(--text);font-family:Inter,system-ui,Segoe UI,Arial,sans-serif;min-height:100vh}
+button,input,select{font:inherit}button{cursor:pointer}.app{max-width:1500px;margin:auto;padding:18px}.top{display:flex;gap:14px;align-items:center;justify-content:space-between;padding:16px 18px;border:1px solid var(--line);background:#0b1220dd;backdrop-filter:blur(16px);border-radius:20px;position:sticky;top:12px;z-index:20;box-shadow:var(--shadow)}.brand{display:flex;align-items:center;gap:12px}.logo{width:46px;height:46px;border-radius:14px;background:linear-gradient(135deg,var(--cyan),#6366f1);display:grid;place-items:center;font-size:25px}.brand h1{margin:0;font-size:clamp(17px,2vw,25px)}.brand small{color:var(--muted)}.actions{display:flex;gap:8px;flex-wrap:wrap}.btn{border:1px solid var(--line);background:#111d2d;color:var(--text);padding:10px 13px;border-radius:12px}.btn:hover{border-color:var(--cyan);transform:translateY(-1px)}.btn.primary{background:linear-gradient(135deg,#0891b2,#2563eb);border:0}.btn.success{background:#064e3b;border-color:#10b981}.btn.danger{background:#4c1d2a;border-color:#fb7185}.btn:disabled{opacity:.45;cursor:not-allowed;transform:none}
+.hero{padding:28px 4px 20px}.hero h2{font-size:clamp(25px,4vw,46px);margin:0 0 8px}.hero p{color:var(--muted);max-width:850px;line-height:1.6;margin:0}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:10px 0 22px}.stat{background:linear-gradient(180deg,#121e2f,#0d1523);border:1px solid var(--line);border-radius:17px;padding:17px}.stat span{display:block;color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.08em}.stat strong{display:block;font-size:29px;margin-top:7px}
+.section{margin:22px 0}.section-head{display:flex;align-items:end;justify-content:space-between;gap:12px;margin-bottom:12px}.section h3{margin:0;font-size:20px}.section-head small{color:var(--muted)}
+.days{display:grid;grid-template-columns:repeat(5,minmax(220px,1fr));gap:14px}.day{background:#0b1320cc;border:1px solid var(--line);border-radius:18px;padding:14px;min-height:100%}.day h4{margin:0 0 12px;font-size:15px;color:var(--cyan);letter-spacing:.08em}.class{border:1px solid #20304a;background:#101a29;border-radius:14px;padding:12px;margin:9px 0;position:relative;transition:.2s}.class:hover{border-color:#3a5779}.class.current{border-color:var(--green);box-shadow:0 0 0 1px #34d39933,0 10px 25px #34d39916}.class .num{position:absolute;right:10px;top:10px;color:#7f91a8;font-weight:700}.class b{display:block;font-size:14px;margin-bottom:5px;padding-right:28px}.class small{display:block;color:var(--muted);line-height:1.55}.badge{display:inline-flex;align-items:center;gap:5px;font-size:11px;border-radius:999px;padding:4px 8px;margin-top:8px;background:#152235;color:#c9d6e8}.badge.live{background:#064e3b;color:#a7f3d0}.badge.done{background:#263142;color:#cbd5e1}
+.panel{background:#0b1320dd;border:1px solid var(--line);border-radius:18px;padding:16px;box-shadow:0 12px 35px #0003}.teacher-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:15px}.current-card{border:1px solid #2a4560;border-radius:18px;padding:20px;background:linear-gradient(135deg,#10243a,#0c1523)}.current-card .subject{font-size:28px;font-weight:800}.pin{font-size:clamp(38px,6vw,64px);letter-spacing:.18em;text-align:center;color:#fff;margin:18px 0;background:#060b12;border:1px dashed #3b82f6;border-radius:16px;padding:16px;font-variant-numeric:tabular-nums}.presence{font-size:18px}.presence strong{color:var(--green)}.roster{max-height:410px;overflow:auto}.student-row{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:11px 2px;border-bottom:1px solid #1c293b}.student-row:last-child{border:0}.present{color:var(--green);font-weight:700}.absent{color:var(--red);font-weight:700}.pending{color:var(--yellow);font-weight:700}
+.formgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.field label{display:block;color:var(--muted);font-size:12px;margin-bottom:5px}.field input,.field select{width:100%;background:#070d17;color:var(--text);border:1px solid var(--line);border-radius:11px;padding:11px}.history{overflow:auto}.history table{width:100%;border-collapse:collapse;min-width:720px}.history th,.history td{text-align:left;padding:11px;border-bottom:1px solid var(--line);font-size:13px}.history th{color:var(--muted)}
+.notice{padding:12px 14px;border-radius:12px;background:#111d2d;border:1px solid var(--line);color:#d9e6f6;line-height:1.5}.notice.error{border-color:#7f1d1d;background:#2a1016}.notice.ok{border-color:#065f46;background:#09261e}.hidden{display:none!important}.muted{color:var(--muted)}.right{margin-left:auto}.login{max-width:520px;margin:90px auto}.login h2{margin-top:0}.empty{padding:25px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:14px}
+@media(max-width:1100px){.days{grid-template-columns:repeat(2,1fr)}.teacher-grid{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:680px){.app{padding:10px}.top{position:static;border-radius:15px;padding:12px}.brand small{display:none}.actions{width:100%}.actions .btn{flex:1}.days{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,1fr)}.stat strong{font-size:24px}.hero{padding-top:20px}.formgrid{grid-template-columns:1fr}.pin{letter-spacing:.1em;font-size:37px}.current-card .subject{font-size:23px}}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div id="root" class="app">
+  <header class="top">
+    <div class="brand"><div class="logo">📋</div><div><h1>Asistencia Escolar</h1><small>TecnoMath · control por clase</small></div></div>
+    <div class="actions"><a class="btn" href="../../index.html">← TecnoMath</a><button class="btn" id="logout">Salir</button></div>
+  </header>
+  <div id="loading" class="panel" style="margin-top:18px">Cargando sesión y horario…</div>
+  <main id="app" class="hidden">
+    <section class="hero"><h2 id="welcome">Sistema de asistencia</h2><p>La hora válida para registrar asistencia se determina en el servidor. El navegador solo presenta el estado y nunca decide si una asistencia es válida.</p></section>
+    <div id="notice"></div>
+    <section class="stats" id="stats"></section>
+    <section id="studentArea" class="hidden"></section>
+    <section id="teacherArea" class="hidden"></section>
+    <section id="adminArea" class="hidden"></section>
+    <section class="section"><div class="section-head"><h3>📅 Horario semanal</h3><small>Lunes a viernes · 6 clases por día</small></div><div id="schedule" class="days"></div></section>
+    <section class="section"><div class="section-head"><h3>🧾 Historial</h3><small>Solo clases que ya correspondían</small></div><div id="history" class="history panel"></div></section>
+  </main>
+</div>
+<script src="../../js/tecnomath-auth.js?v=20260919-att"></script>
+<script>
+'use strict';
+const SUPABASE_URL='https://xdszveoxdrdnwwzzvkav.supabase.co';
+const API='school-attendance-api';
+const DAYS=['','LUNES','MARTES','MIÉRCOLES','JUEVES','VIERNES'];
+const state={db:null,user:null,profile:null,role:null,student:null,teacher:null,schedules:[],sessions:[],currentSession:null,channel:null};
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const timeLabel=t=>{if(!t)return'';const [h,m]=String(t).slice(0,5).split(':').map(Number);const ap=h>=12?'PM':'AM';const hh=(h%12)||12;return hh+':'+String(m).padStart(2,'0')+' '+ap};
+const notice=(text,type='')=>{$('notice').innerHTML=text?'<div class="notice '+type+'">'+esc(text)+'</div>':''};
+async function api(body){const {data,error}=await state.db.functions.invoke(API,{body});if(error){let msg=error.message;try{if(error.context){const j=await error.context.json();msg=j.error||msg}}catch{}throw new Error(msg)}return data}
+async function init(){
+ try{
+  state.db=await TecnomathAuth.getClient();
+  const {data:{user},error}=await state.db.auth.getUser();if(error||!user)throw new Error('Debes iniciar sesión.');
+  state.user=user;
+  const {data:profile,error:pErr}=await state.db.from('school_profiles').select('id,auth_user_id,full_name,email,role,grade,group_name,active').eq('auth_user_id',user.id).maybeSingle();
+  if(pErr)throw pErr;
+  if(!profile)throw new Error('Tu cuenta todavía no está vinculada al sistema escolar. Un administrador debe asignarte como estudiante o profesor.');
+  state.profile=profile;state.role=profile.role;
+  $('welcome').textContent='Hola, '+profile.full_name;
+  $('loading').classList.add('hidden');$('app').classList.remove('hidden');
+  $('logout').onclick=()=>TecnomathAuth.signOut().then(()=>location.href='../auth.html');
+  await loadCommon();
+  if(state.role==='student')await loadStudent();
+  else if(state.role==='teacher')await loadTeacher();
+  else if(state.role==='admin')await loadAdmin();
+  renderSchedule();
+  renderHistory();
+ }catch(e){$('loading').innerHTML='<div class="notice error">'+esc(e.message||'No se pudo cargar el sistema.')+'</div>'}
+}
+async function loadCommon(){
+ const {data:schedules,error}=await state.db.from(state.role==='student'?'school_student_schedule':'school_teacher_schedule').select('*').order('weekday').order('class_number');if(error)throw error;state.schedules=schedules||[];
+ const {data:subjects}=await state.db.from('school_subjects').select('id,name,icon,active').order('name');
+ state.subjects=subjects||[];
+}
+function renderSchedule(){
+ const byDay=Object.fromEntries([1,2,3,4,5].map(d=>[d,[]]));state.schedules.forEach(s=>byDay[s.weekday]?.push(s));
+ const now=new Date();const day=((now.getDay()+6)%7)+1;const hm=now.toTimeString().slice(0,8);
+ $('schedule').innerHTML=[1,2,3,4,5].map(d=>'<article class="day"><h4>📅 '+DAYS[d]+'</h4>'+Array.from({length:6},(_,i)=>{const s=byDay[d].find(x=>Number(x.class_number)===i+1);if(!s)return '<div class="class"><span class="num">'+(i+1)+'</span><b>Clase '+(i+1)+'</b><small>Sin materia asignada</small></div>';const live=d===day&&hm>=s.start_time&&hm<s.end_time;return '<div class="class '+(live?'current':'')+'"><span class="num">'+s.class_number+'</span><b>'+(esc(s.icon||'📚'))+' '+esc(s.subject_name)+'</b><small>👨‍🏫 '+esc(s.teacher_name||'Profesor')+'<br>🕐 '+timeLabel(s.start_time)+' - '+timeLabel(s.end_time)+'</small>'+(live?'<span class="badge live">🟢 CLASE ACTUAL</span>':'<span class="badge">'+(d<day?'✓ PROGRAMADA':'PROGRAMADA')+'</span>')+'</div>'}).join('')+'</article>').join('');
+}
+async function loadStudent(){
+ $('studentArea').classList.remove('hidden');
+ const {data:student}=await state.db.from('school_students').select('id,grade,group_name,active').eq('profile_id',state.profile.id).maybeSingle();state.student=student;
+ const active=await api({action:'active'});state.currentSession=active.session||null;
+ const {data:records}=await state.db.from('school_attendance_records').select('id,session_id,status,marked_at,created_at').eq('student_id',student.id).order('created_at',{ascending:false});state.records=records||[];
+ renderStudent();statsStudent();subscribeRecords(student.id);
+}
+function statsStudent(){
+ const now=new Date();const day=((now.getDay()+6)%7)+1;const past=state.schedules.filter(s=>Number(s.weekday)<day || (Number(s.weekday)===day && now.toTimeString().slice(0,8)>=s.end_time));
+ const bySession=new Set((state.records||[]).map(r=>r.session_id));const present=(state.records||[]).filter(r=>r.status==='present').length;const absent=(state.records||[]).filter(r=>r.status==='absent').length;const applicable=Math.max(past.length,present+absent);const pct=applicable?((present/applicable)*100):0;
+ $('stats').innerHTML='<div class="stat"><span>Clases programadas</span><strong>'+past.length+'</strong></div><div class="stat"><span>Presentes</span><strong>'+present+'</strong></div><div class="stat"><span>Ausentes</span><strong>'+absent+'</strong></div><div class="stat"><span>Asistencia</span><strong>'+pct.toFixed(1)+'%</strong></div>';
+}
+function renderStudent(){
+ $('studentArea').innerHTML='<div class="section"><div class="section-head"><h3>🎓 Mi asistencia</h3><small>'+esc(state.profile.grade||'')+' · '+esc(state.profile.group_name||'')+'</small></div><div class="panel">'+(state.currentSession?'<div class="current-card"><span class="badge live">🟢 ASISTENCIA ABIERTA</span><div class="subject">'+esc(state.currentSession.schedule.subject.name)+'</div><p class="muted">Clase '+state.currentSession.schedule.class_number+' · '+timeLabel(state.currentSession.schedule.start_time)+' - '+timeLabel(state.currentSession.schedule.end_time)+' · '+esc(state.currentSession.schedule.teacher.profile.full_name)+'</p><div class="formgrid"><div class="field"><label>PIN del profesor</label><input id="pin" inputmode="numeric" maxlength="6" autocomplete="one-time-code" placeholder="6 dígitos"></div><div style="display:flex;align-items:end"><button class="btn primary" id="markBtn" style="width:100%">✓ Marcar asistencia</button></div></div></div>':'<div class="empty">No hay una asistencia abierta para tu clase actual.</div>')+'</div></div>';
+ $('markBtn')?.addEventListener('click',markAttendance);
+}
+async function markAttendance(){
+ const pin=$('pin').value.trim();if(!/^\d{6}$/.test(pin)){notice('El PIN debe tener exactamente 6 dígitos.','error');return}
+ $('markBtn').disabled=true;
+ try{await api({action:'mark',session_id:state.currentSession.id,pin});notice('✓ Asistencia registrada correctamente. La hora fue validada por el servidor.','ok');await loadStudent();renderSchedule();renderHistory()}catch(e){notice(errorText(e.message),'error')}finally{if($('markBtn'))$('markBtn').disabled=false}
+}
+function errorText(m){const map={INVALID_PIN:'PIN incorrecto.',OUTSIDE_CLASS_TIME:'La clase ya no está dentro de su horario.',WEEKEND_NOT_ALLOWED:'La asistencia no está disponible el fin de semana.',SESSION_CLOSED:'La asistencia ya está cerrada.',ALREADY_REGISTERED:'Ya registraste asistencia para esta clase.',STUDENT_NOT_IN_CLASS:'No perteneces al curso o grupo de esta clase.',CLASS_NOT_ACTIVE:'La clase no está activa en este momento.'};return map[m]||m}
+async function loadTeacher(){
+ $('teacherArea').classList.remove('hidden');
+ const {data:teacher}=await state.db.from('school_teachers').select('id,active').eq('profile_id',state.profile.id).maybeSingle();state.teacher=teacher;
+ const today=((new Date().getDay()+6)%7)+1;
+ const todaySchedules=state.schedules.filter(s=>Number(s.weekday)===today);
+ const ids=todaySchedules.map(s=>s.id);
+ const {data:sessions}=ids.length?await state.db.from('school_attendance_sessions').select('*').in('class_schedule_id',ids).order('created_at',{ascending:false}):{data:[]};
+ state.sessions=sessions||[];
+ const live=todaySchedules.find(s=>{const t=new Date().toTimeString().slice(0,8);return t>=s.start_time&&t<s.end_time});
+ state.currentSession=live?state.sessions.find(x=>x.class_schedule_id===live.id&&x.status==='active')||null:null;
+ renderTeacher();statsTeacher();subscribeTeacher();
+}
+function renderTeacher(){
+ const today=((new Date().getDay()+6)%7)+1;const todaySchedules=state.schedules.filter(s=>Number(s.weekday)===today);
+ $('teacherArea').innerHTML='<div class="section"><div class="section-head"><h3>👨‍🏫 Panel del profesor</h3><small>Solo administras tus propias clases</small></div><div class="teacher-grid"><div class="panel"><h3>Clases de hoy</h3>'+todaySchedules.map(s=>{const sess=state.sessions.find(x=>x.class_schedule_id===s.id&&x.status==='active');const live=new Date().toTimeString().slice(0,8)>=s.start_time&&new Date().toTimeString().slice(0,8)<s.end_time;return '<div class="class '+(live?'current':'')+'"><span class="num">'+s.class_number+'</span><b>'+esc(s.icon||'📚')+' '+esc(s.subject_name)+'</b><small>🕐 '+timeLabel(s.start_time)+' - '+timeLabel(s.end_time)+'<br>🎓 '+esc(s.grade)+' · '+esc(s.group_name)+'</small>'+(sess?'<span class="badge live">🟢 ACTIVA · PIN '+esc(sess.pin_display)+'</span>':'<span class="badge">'+(live?'⚪ LISTA PARA INICIAR':'PROGRAMADA')+'</span>')+'<div style="display:flex;gap:7px;margin-top:9px">'+(!sess&&live?'<button class="btn success start" data-id="'+s.id+'">▶ Iniciar</button>':'')+(sess?'<button class="btn danger close" data-id="'+sess.id+'">■ Cerrar</button>':'')+'</div></div>'}).join('')+'</div><div class="panel"><div id="livePanel"></div><div class="roster" id="roster"></div></div></div></div>';
+ document.querySelectorAll('.start').forEach(b=>b.onclick=()=>startSession(b.dataset.id));document.querySelectorAll('.close').forEach(b=>b.onclick=()=>closeSession(b.dataset.id));renderLivePanel();
+}
+async function renderLivePanel(){
+ const p=$('livePanel');if(!p)return;
+ if(!state.currentSession){p.innerHTML='<div class="empty">Selecciona/inicia la clase que esté dentro del horario.</div>';return}
+ p.innerHTML='<div class="current-card"><div class="badge live">🟢 CLASE ACTIVA</div><div class="subject">'+esc((state.schedules.find(s=>s.id===state.currentSession.class_schedule_id)||{}).subject_name||'Clase')+'</div><div class="pin">'+esc(state.currentSession.pin_display)+'</div><div class="presence" id="liveCount">Actualizando presentes…</div></div>';
+ await loadRoster(state.currentSession.id);
+}
+async function loadRoster(sessionId){
+ const {data:records}=await state.db.from('school_attendance_records').select('id,student_id,status,marked_at').eq('session_id',sessionId);
+ const ids=(records||[]).map(r=>r.student_id);
+ let students=[];if(ids.length){const {data}=await state.db.from('school_students').select('id,profile:school_profiles(full_name)').in('id',ids);students=data||[]}
+ const present=(records||[]).filter(r=>r.status==='present').length;
+ $('liveCount').innerHTML='<strong>'+present+'</strong> presentes · '+students.length+' registros';
+ $('roster').innerHTML=students.length?students.map(s=>{const r=records.find(x=>x.student_id===s.id);return '<div class="student-row"><span>'+esc(s.profile.full_name)+'</span><span class="'+(r?.status||'pending')+'">'+(r?.status==='present'?'PRESENTE':r?.status==='absent'?'AUSENTE':r?.status||'PENDIENTE')+'</span></div>'}).join(''):'<div class="empty">Aún no hay registros.</div>';
+}
+async function startSession(id){try{const r=await api({action:'start',schedule_id:id});notice('✓ Asistencia iniciada. PIN generado en servidor.','ok');await loadTeacher()}catch(e){notice(errorText(e.message),'error')}}
+async function closeSession(id){if(!confirm('¿Cerrar esta asistencia? Los estudiantes que no marcaron quedarán como AUSENTES.'))return;try{await api({action:'close',session_id:id});notice('✓ Asistencia cerrada y ausentes generados.','ok');await loadTeacher();renderHistory()}catch(e){notice(errorText(e.message),'error')}}
+function statsTeacher(){
+ const present=state.sessions.reduce((a,s)=>a,0);$('stats').innerHTML='<div class="stat"><span>Clases hoy</span><strong>'+state.schedules.filter(s=>Number(s.weekday)===((new Date().getDay()+6)%7)+1).length+'</strong></div><div class="stat"><span>Sesiones abiertas</span><strong>'+state.sessions.filter(s=>s.status==='active').length+'</strong></div><div class="stat"><span>Sesiones cerradas</span><strong>'+state.sessions.filter(s=>s.status==='closed').length+'</strong></div><div class="stat"><span>Rol</span><strong style="font-size:20px">PROFESOR</strong></div>';
+}
+function subscribeTeacher(){if(state.channel)state.channel.unsubscribe();state.channel=state.db.channel('attendance-teacher').on('postgres_changes',{event:'*',schema:'public',table:'school_attendance_records'},()=>{if(state.currentSession)loadRoster(state.currentSession.id)}).subscribe()}
+function subscribeRecords(studentId){if(state.channel)state.channel.unsubscribe();state.channel=state.db.channel('attendance-student').on('postgres_changes',{event:'*',schema:'public',table:'school_attendance_records',filter:'student_id=eq.'+studentId},async()=>{await loadStudent();renderHistory()}).subscribe()}
+async function loadAdmin(){
+ $('adminArea').classList.remove('hidden');
+ $('adminArea').innerHTML='<div class="section"><div class="section-head"><h3>🛠️ Administración</h3><small>Gestión escolar</small></div><div class="panel"><div class="formgrid"><div class="field"><label>Correo de usuario existente</label><input id="mEmail" type="email" placeholder="correo@ejemplo.com"></div><div class="field"><label>Nombre completo</label><input id="mName"></div><div class="field"><label>Rol</label><select id="mRole"><option value="student">Estudiante</option><option value="teacher">Profesor</option><option value="admin">Administrador</option></select></div><div class="field"><label>Curso</label><input id="mGrade" placeholder="10°"></div><div class="field"><label>Grupo</label><input id="mGroup" placeholder="A"></div></div><button class="btn primary" id="saveMember" style="margin-top:10px">Guardar usuario escolar</button><hr style="border-color:var(--line);border-width:1px 0 0;margin:20px 0"><div class="formgrid"><div class="field"><label>Materia</label><input id="subjectName" placeholder="Matemáticas"></div><div class="field"><label>Icono</label><input id="subjectIcon" value="📚"></div></div><button class="btn" id="saveSubject" style="margin-top:10px">Crear/actualizar materia</button><div id="adminList" style="margin-top:18px"></div></div></div>';
+ $('saveMember').onclick=adminMember;$('saveSubject').onclick=adminSubject;await refreshAdmin();
+}
+async function refreshAdmin(){const r=await api({action:'admin_list'});state.admin=r;$('adminList').innerHTML='<h4>Usuarios escolares</h4>'+(r.people||[]).map(p=>'<div class="student-row"><span>'+esc(p.full_name)+' · '+esc(p.email||'')+'</span><span>'+esc(p.role)+'</span></div>').join('')+'<h4 style="margin-top:18px">Horarios configurados</h4>'+(r.schedules||[]).map(s=>'<div class="student-row"><span>'+DAYS[s.weekday]+' · '+s.class_number+' · '+esc(s.subject.name)+' · '+timeLabel(s.start_time)+'-'+timeLabel(s.end_time)+'</span><span>'+esc(s.grade)+' '+esc(s.group_name)+'</span></div>').join('')||'<div class="empty">Sin registros.</div>'}
+async function adminMember(){try{await api({action:'admin_member',email:$('mEmail').value,full_name:$('mName').value,role:$('mRole').value,grade:$('mGrade').value,group_name:$('mGroup').value});notice('✓ Usuario escolar guardado.','ok');await refreshAdmin()}catch(e){notice(e.message,'error')}}
+async function adminSubject(){try{await api({action:'admin_subject',name:$('subjectName').value,icon:$('subjectIcon').value});notice('✓ Materia guardada.','ok');await refreshAdmin()}catch(e){notice(e.message,'error')}}
+async function renderHistory(){
+ if(!state.profile)return;
+ if(state.role==='student'){
+  const recs=state.records||[];const ids=[...new Set(recs.map(r=>r.session_id))];let rows=[];
+  if(ids.length){const {data:sess}=await state.db.from('school_attendance_sessions').select('id,started_at,class_schedule:school_class_schedules(start_time,end_time,weekday,subject:school_subjects(name))').in('id',ids);rows=sess||[]}
+  $('history').innerHTML=rows.length?'<table><thead><tr><th>Fecha</th><th>Materia</th><th>Hora</th><th>Estado</th></tr></thead><tbody>'+rows.map(s=>{const r=recs.find(x=>x.session_id===s.id);return '<tr><td>'+new Date(r?.created_at||s.started_at).toLocaleDateString('es-CO')+'</td><td>'+esc(s.class_schedule?.subject?.name||'')+'</td><td>'+timeLabel(s.class_schedule?.start_time)+' - '+timeLabel(s.class_schedule?.end_time)+'</td><td class="'+(r?.status||'')+'">'+esc(r?.status||'pendiente')+'</td></tr>'}).join('')+'</tbody></table>':'<div class="empty">Todavía no tienes registros de asistencia.</div>';
+ }else $('history').innerHTML='<div class="empty">El historial del profesor se muestra por sesión desde su panel. Puedes consultar las sesiones cerradas en Supabase y los registros en tiempo real.</div>';
+}
+init();
+</script>
+</body>
+</html>
