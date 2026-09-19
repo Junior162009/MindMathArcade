@@ -62,6 +62,71 @@ body.tv-mode .ranking-only-list{grid-template-columns:repeat(2,minmax(0,1fr))!im
 .ranking-only-list .live-rank:nth-child(-n+3) .rank-meta{font-size:10px!important}
 .ranking-only-list .live-rank:nth-child(-n+3) .rank-total{font-size:24px!important}
 .ranking-only-list .live-rank:nth-child(-n+3) .rank-total small{font-size:8px!important}
+</style><style>
+/* VISTA TV / PANTALLA DIVIDIDA: podio arriba + ranking abajo */
+.ranking-only{max-width:1500px!important;margin:8px auto!important;padding:0 14px!important}
+.ranking-only .hero{padding:8px 10px!important}
+.ranking-only .hero-copy{padding-bottom:4px!important}
+.ranking-only .hero-copy h1{font-size:clamp(22px,2.4vw,38px)!important;margin:3px 0!important}
+.ranking-only .hero-copy p{font-size:10px!important;margin:2px auto!important}
+.ranking-only .stats-grid{margin:7px 0!important;gap:7px!important}
+.ranking-only .stat-card{padding:7px 10px!important}
+.ranking-only .stat-card span{font-size:9px!important}
+.ranking-only .stat-card strong{font-size:17px!important}
+.ranking-panel{padding:10px!important}
+.ranking-only .section-head{margin-bottom:6px!important}
+.ranking-only .section-head h2{font-size:15px!important}
+
+/* Separación visual: podio */
+.ranking-only-list{display:flex!important;flex-direction:column!important;gap:5px!important;margin-top:7px!important}
+.ranking-only-list .live-rank{grid-template-columns:48px 52px minmax(0,1fr) 82px!important;gap:9px!important;padding:6px 10px!important;min-height:52px!important;border-radius:10px!important}
+
+/* Los tres primeros forman un podio horizontal grande */
+.ranking-only-list .live-rank:nth-child(-n+3){
+  min-height:92px!important;
+  padding:10px 14px!important;
+  border-radius:16px!important;
+}
+.ranking-only-list .live-rank:nth-child(1){
+  border:2px solid #ffd700!important;
+  background:linear-gradient(100deg,#241e05,#111126 48%,#1d1805)!important;
+  box-shadow:0 0 28px #ffd7002b!important;
+}
+.ranking-only-list .live-rank:nth-child(2){
+  border-color:#c9c9d0!important;
+  background:linear-gradient(100deg,#17171c,#111126 48%,#19191e)!important;
+  box-shadow:0 0 20px #c9c9d018!important;
+}
+.ranking-only-list .live-rank:nth-child(3){
+  border-color:#cd7f32!important;
+  background:linear-gradient(100deg,#21160d,#111126 48%,#1b120b)!important;
+  box-shadow:0 0 20px #cd7f3218!important;
+}
+.ranking-only-list .live-rank:nth-child(-n+3) .position{font-size:34px!important}
+.ranking-only-list .live-rank:nth-child(-n+3) .rank-logo{width:70px!important;height:70px!important;border-radius:13px!important}
+.ranking-only-list .live-rank:nth-child(-n+3) .rank-name{font-size:clamp(17px,2vw,27px)!important;line-height:1.15!important}
+.ranking-only-list .live-rank:nth-child(-n+3) .rank-meta{font-size:10px!important;margin-top:4px!important}
+.ranking-only-list .live-rank:nth-child(-n+3) .rank-total{font-size:28px!important}
+.ranking-only-list .live-rank:nth-child(-n+3) .rank-total small{font-size:9px!important}
+
+/* Separador claro entre podio y resto */
+.ranking-only-list .live-rank:nth-child(4){margin-top:8px!important;border-top:2px solid var(--cyan)!important}
+
+/* Puestos restantes compactos y fáciles de leer desde lejos */
+.ranking-only-list .live-rank:nth-child(n+4) .position{font-size:17px!important}
+.ranking-only-list .live-rank:nth-child(n+4) .rank-logo{width:44px!important;height:44px!important;border-radius:8px!important}
+.ranking-only-list .live-rank:nth-child(n+4) .rank-name{font-size:14px!important;font-weight:900!important}
+.ranking-only-list .live-rank:nth-child(n+4) .rank-meta{font-size:8px!important}
+.ranking-only-list .live-rank:nth-child(n+4) .rank-total{font-size:18px!important}
+.ranking-only-list .live-rank:nth-child(n+4) .rank-total small{font-size:7px!important}
+
+@media(max-width:850px){
+  .ranking-only-list .live-rank{grid-template-columns:40px 46px minmax(0,1fr) 62px!important}
+  .ranking-only-list .live-rank:nth-child(-n+3){min-height:78px!important}
+  .ranking-only-list .live-rank:nth-child(-n+3) .rank-logo{width:58px!important;height:58px!important}
+  .ranking-only-list .live-rank:nth-child(-n+3) .rank-name{font-size:16px!important}
+  .ranking-only-list .live-rank:nth-child(-n+3) .rank-total{font-size:22px!important}
+}
 </style></style></head><body><main class="voting-shell ranking-only"><header class="hero"><a class="brand" href="../index.html"><img src="../img/mindmath.png" alt="" class="brand-logo" onerror="this.style.display='none'"><span>⚡ TECNOMATH</span></a><div class="hero-copy"><span class="eyebrow">RESULTADOS EN VIVO</span><h1>🏆 RANKING DE VOTACIONES</h1><p>Consulta las posiciones, logos, nombres y votos de los juegos en tiempo real.</p></div><div class="live-badge" id="liveStatus"><i></i> CONECTANDO…</div></header><section class="stats-grid"><article class="stat-card"><span>🎮 Juegos</span><strong id="totalGames">—</strong></article><article class="stat-card"><span>❤️ Votos totales</span><strong id="totalVotes">—</strong></article><article class="stat-card"><span>🥇 Líder</span><strong id="leaderName">—</strong></article><article class="stat-card"><span>🕒 Actualización</span><strong id="updated">—</strong></article></section><section class="ranking-panel"><div class="section-head"><div><span class="eyebrow">TODAS LAS POSICIONES</span><h2>📊 Ranking completo</h2></div><button id="refresh" class="ghost-btn">↻ Actualizar</button></div><div id="ranking" class="ranking-only-list" aria-live="polite"></div></section><div class="back-vote"><a class="vote-btn" href="voting.html">❤️ IR A VOTAR</a><a class="ghost-btn" href="../index.html">🏠 INICIO</a></div></main><script>
 (function(){
 'use strict';
