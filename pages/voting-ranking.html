@@ -41,7 +41,31 @@
   .ranking-only-list .rank-name{font-size:11px}
   .ranking-only-list .rank-total{font-size:14px}
 }
+</style><style>
+body.tv-mode .ranking-only{max-width:1500px!important;margin:4px auto!important;padding:0 10px!important}
+body.tv-mode .hero{padding:6px 8px!important}
+body.tv-mode .hero-copy{padding-bottom:2px!important}
+body.tv-mode .hero-copy h1{font-size:22px!important;margin:2px 0!important}
+body.tv-mode .hero-copy p{font-size:8px!important;margin:2px auto!important}
+body.tv-mode .stats-grid{display:none!important}
+body.tv-mode .ranking-panel{padding:6px!important}
+body.tv-mode .section-head{margin-bottom:3px!important}
+body.tv-mode .section-head h2{font-size:13px!important}
+body.tv-mode .section-head .ghost-btn{display:none!important}
+body.tv-mode .ranking-only-list{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:4px!important;margin-top:4px!important}
+body.tv-mode .live-rank{grid-template-columns:28px 34px minmax(0,1fr) 48px!important;gap:4px!important;padding:4px 5px!important;min-height:42px!important;border-radius:7px!important}
+body.tv-mode .live-rank .position{font-size:13px!important}
+body.tv-mode .rank-logo{width:32px!important;height:32px!important;border-radius:6px!important}
+body.tv-mode .rank-name{font-size:10px!important;line-height:1.1!important}
+body.tv-mode .rank-meta{font-size:7px!important;margin-top:1px!important}
+body.tv-mode .rank-total{font-size:12px!important}
+body.tv-mode .rank-total small{font-size:6px!important;margin-top:0!important}
+body.tv-mode .back-vote{display:none!important}
+@media(max-width:1399px) and (min-width:900px){
+body.tv-mode .ranking-only-list{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+}
 </style></style></head><body><main class="voting-shell ranking-only"><header class="hero"><a class="brand" href="../index.html"><img src="../img/mindmath.png" alt="" class="brand-logo" onerror="this.style.display='none'"><span>⚡ TECNOMATH</span></a><div class="hero-copy"><span class="eyebrow">RESULTADOS EN VIVO</span><h1>🏆 RANKING DE VOTACIONES</h1><p>Consulta las posiciones, logos, nombres y votos de los juegos en tiempo real.</p></div><div class="live-badge" id="liveStatus"><i></i> CONECTANDO…</div></header><section class="stats-grid"><article class="stat-card"><span>🎮 Juegos</span><strong id="totalGames">—</strong></article><article class="stat-card"><span>❤️ Votos totales</span><strong id="totalVotes">—</strong></article><article class="stat-card"><span>🥇 Líder</span><strong id="leaderName">—</strong></article><article class="stat-card"><span>🕒 Actualización</span><strong id="updated">—</strong></article></section><section class="ranking-panel"><div class="section-head"><div><span class="eyebrow">TODAS LAS POSICIONES</span><h2>📊 Ranking completo</h2></div><button id="refresh" class="ghost-btn">↻ Actualizar</button></div><div id="ranking" class="ranking-only-list" aria-live="polite"></div></section><div class="back-vote"><a class="vote-btn" href="voting.html">❤️ IR A VOTAR</a><a class="ghost-btn" href="../index.html">🏠 INICIO</a></div></main><script>
+if(new URLSearchParams(location.search).get('tv')==='1')document.body.classList.add('tv-mode');
 (function(){
 'use strict';
 const SUPABASE_URL='https://xdszveoxdrdnwwzzvkav.supabase.co';
