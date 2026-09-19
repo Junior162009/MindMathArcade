@@ -79,6 +79,17 @@
             transition: transform .2s, background .2s, box-shadow .2s; line-height:1.2;
         }
         .auth-link:hover { background: rgba(255,0,255,0.1); box-shadow: 0 0 10px var(--neon-pink); transform:translateY(-1px); }
+        .voting-home-btn {
+            border-color: var(--neon-cyan);
+            color: var(--neon-cyan);
+            background: rgba(0,255,255,0.06);
+            text-shadow: 0 0 6px var(--neon-cyan);
+            box-shadow: 0 0 8px rgba(0,255,255,0.12);
+        }
+        .voting-home-btn:hover {
+            background: rgba(0,255,255,0.14);
+            box-shadow: 0 0 16px rgba(0,255,255,0.35);
+        }
         .auth-link:focus-visible, .filter-btn:focus-visible, .project-card:focus-visible, button:focus-visible, a:focus-visible { outline:2px solid var(--neon-yellow); outline-offset:3px; }
 
         /* Nube de admin */
@@ -523,6 +534,7 @@
             </div>
             <div class="user-area">
                 <span id="userDisplay">Invitado</span>
+                <a href="pages/voting.html" class="auth-link voting-home-btn" aria-label="Abrir votaciones">🗳️ VOTACIONES</a>
                 <a href="pages/auth.html" class="auth-link" id="authLink">🔑 ACCEDER</a>
                 <button id="logoutBtn" class="auth-link" type="button" style="display:none; background:transparent; cursor:pointer; font-family:'Press Start 2P', cursive; font-size:clamp(4px, 1.5vw, 6px);">🚪 SALIR</button>
                 <button id="adminAccessBtn" class="auth-link" style="border-color: var(--gold); color: var(--gold); background: transparent; cursor: pointer; font-family: 'Press Start 2P', cursive; font-size: clamp(4px, 1.5vw, 6px); padding: 4px 8px; border-radius: 4px;">👑 ADMIN</button>
