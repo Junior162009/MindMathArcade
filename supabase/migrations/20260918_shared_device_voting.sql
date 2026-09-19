@@ -76,3 +76,11 @@ after insert on public.game_votes
 for each row execute function public.tecnomath_broadcast_game_vote();
 
 drop policy if exists "Authenticated users can receive voting broadcasts" on realtime.messages;
+
+
+drop policy if exists "Public can read vote counts" on public.game_vote_counts;
+create policy "Public can read vote counts"
+  on public.game_vote_counts
+  for select
+  to anon, authenticated
+  using (true);
