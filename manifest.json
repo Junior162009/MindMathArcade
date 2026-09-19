@@ -1,7 +1,7 @@
 {
   "name": "TecnoMath - Plataforma Educativa Interactiva",
   "short_name": "TecnoMath",
-  "description": "Plataforma educativa interactiva para estudiantes y docentes con recursos, actividades y experiencias de aprendizaje digitales en matemáticas, ciencias, ecología y otras áreas.",
+  "description": "Plataforma educativa interactiva para estudiantes y docentes con recursos digitales, actividades de aprendizaje y experiencias prácticas de matemáticas, ciencias, ecología, geografía y tecnología.",
   "id": "https://tecnomath.online/",
   "start_url": "/index.html",
   "scope": "/",
@@ -12,14 +12,14 @@
   "orientation": "any",
   "background_color": "#060610",
   "theme_color": "#060610",
-  "categories": ["education"],
+  "categories": ["education", "productivity"],
   "screenshots": [
     {
       "src": "img/screenshot-1.png",
       "sizes": "1080x1920",
       "type": "image/png",
       "form_factor": "narrow",
-      "label": "Pantalla principal de la plataforma educativa TecnoMath"
+      "label": "Plataforma educativa TecnoMath para estudiantes y docentes"
     }
   ],
   "icons": [
