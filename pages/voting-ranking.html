@@ -4,7 +4,27 @@
 .ranking-only .hero-copy{padding-bottom:8px}
 .ranking-only-list{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px;margin-top:14px;align-items:start}
 .podium-side,.normal-ranking-side{min-width:0;display:flex;flex-direction:column}
-.podium-side{gap:8px;align-items:center}.normal-ranking-side{gap:4px;align-items:stretch}
+.podium-side{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;align-items:end}
+.normal-ranking-side{gap:4px;align-items:stretch}
+.podium-side .live-rank{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;text-align:center;gap:6px;padding:16px 12px 20px;width:100%!important;box-sizing:border-box;overflow:hidden;border-radius:18px;transition:transform .3s ease,box-shadow .3s ease,border-color .3s ease}
+.podium-side .live-rank:hover{transform:scale(1.02)}
+.podium-side .live-rank::after{content:"";position:absolute;left:10%;right:10%;bottom:0;height:3px;border-radius:99px;background:linear-gradient(90deg,transparent,currentColor,transparent);opacity:.9}
+.podium-side .live-rank:nth-child(1){grid-column:1 / -1;min-height:245px;padding:22px 20px 26px;border:1px solid rgba(255,203,84,.6);border-radius:18px;background:radial-gradient(120% 90% at 50% 0%,rgba(255,196,60,.20),transparent 62%),linear-gradient(165deg,#151006 0%,#0d1526 46%,#070b14 100%);box-shadow:0 0 0 1px rgba(255,214,110,.16),0 18px 46px rgba(0,0,0,.65),0 0 58px rgba(255,190,60,.24),inset 0 1px 0 rgba(255,235,180,.18);color:#ffeeb4}
+.podium-side .live-rank:nth-child(2){min-height:190px;border:1px solid rgba(185,200,216,.42);border-radius:18px;background:radial-gradient(120% 90% at 50% 0%,rgba(190,210,230,.13),transparent 62%),linear-gradient(165deg,#0e141d 0%,#0a1120 55%,#060a13 100%);box-shadow:0 14px 34px rgba(0,0,0,.6),0 0 40px rgba(160,190,220,.18),inset 0 1px 0 rgba(230,240,255,.12);color:#e6eef7}
+.podium-side .live-rank:nth-child(3){min-height:165px;border:1px solid rgba(205,139,78,.45);border-radius:18px;background:radial-gradient(120% 90% at 50% 0%,rgba(205,139,78,.15),transparent 62%),linear-gradient(165deg,#14100c 0%,#0a1120 55%,#060a13 100%);box-shadow:0 14px 34px rgba(0,0,0,.6),0 0 40px rgba(200,130,70,.18),inset 0 1px 0 rgba(255,220,190,.12);color:#f6d0a8}
+.podium-side .live-rank:nth-child(1) .position{font-size:38px;line-height:1}
+.podium-side .live-rank:nth-child(2) .position,.podium-side .live-rank:nth-child(3) .position{font-size:30px;line-height:1}
+.podium-side .live-rank:nth-child(1) .position::after{content:"CAMPEÓN";display:block;font-size:9px;letter-spacing:.3em;margin-top:4px;color:#ffc93c}
+.podium-side .live-rank:nth-child(1) .rank-logo{width:96px;height:96px;min-width:96px;min-height:96px;border-radius:20px;border-color:rgba(255,203,84,.55);box-shadow:0 10px 26px rgba(0,0,0,.6),0 0 32px rgba(255,190,60,.38)}
+.podium-side .live-rank:nth-child(2) .rank-logo,.podium-side .live-rank:nth-child(3) .rank-logo{width:72px;height:72px;min-width:72px;min-height:72px;border-radius:16px}
+.podium-side .live-rank .rank-name{font-size:clamp(14px,1.5vw,20px);line-height:1.1}
+.podium-side .live-rank:nth-child(1) .rank-name{font-size:clamp(17px,1.9vw,25px);color:#fff3cf}
+.podium-side .live-rank .rank-meta{font-size:8px;color:rgba(255,255,255,.72)}
+.podium-side .live-rank .rank-total{text-align:center;font-size:21px;line-height:1}
+.podium-side .live-rank:nth-child(1) .rank-total{font-size:28px;color:#ffc93c}
+.podium-side .live-rank .rank-total small{font-size:7px;margin-top:3px}
+.podium-side .live-rank:nth-child(1){animation:podiumGold 4.5s ease-in-out infinite}
+@keyframes podiumGold{0%,100%{box-shadow:0 0 0 1px rgba(255,214,110,.16),0 18px 46px rgba(0,0,0,.65),0 0 42px rgba(255,190,60,.20),inset 0 1px 0 rgba(255,235,180,.18)}50%{box-shadow:0 0 0 1px rgba(255,214,110,.28),0 18px 46px rgba(0,0,0,.65),0 0 76px rgba(255,196,60,.42),inset 0 1px 0 rgba(255,235,180,.3)}}
 .live-rank{display:grid;grid-template-columns:44px 52px minmax(0,1fr) 70px;align-items:center;gap:8px;width:100%;box-sizing:border-box;padding:7px 9px;min-height:54px;border:1px solid var(--line);border-radius:11px;background:linear-gradient(145deg,#111126,#090914);box-shadow:0 10px 30px #0004;transition:.25s}
 .live-rank:hover{transform:translateY(-2px);border-color:var(--cyan);box-shadow:0 12px 32px #00f5ff18}
 .position{font-size:17px;font-weight:1000;text-align:center}.rank-logo{width:44px;height:44px;border-radius:8px;object-fit:cover;background:#080812;border:1px solid #292943}
@@ -22,8 +42,11 @@
 .back-vote{margin-top:20px}
 @media(max-width:850px){
 .ranking-only-list{grid-template-columns:1fr;gap:14px}.podium-side,.normal-ranking-side{width:100%}
-.podium-side .live-rank:nth-child(1){width:100%;min-height:180px}.podium-side .live-rank:nth-child(2){width:100%;min-height:145px}.podium-side .live-rank:nth-child(3){width:100%;min-height:115px}
-.podium-side .live-rank:nth-child(1) .rank-logo{width:68px;height:68px;min-width:68px;min-height:68px}.podium-side .live-rank:nth-child(2) .rank-logo,.podium-side .live-rank:nth-child(3) .rank-logo{width:60px;height:60px;min-width:60px;min-height:60px}
+.podium-side{grid-template-columns:1fr;gap:10px}
+.podium-side .live-rank:nth-child(1){grid-column:auto;min-height:180px}
+.podium-side .live-rank:nth-child(2){min-height:145px}
+.podium-side .live-rank:nth-child(3){min-height:115px}
+.podium-side .live-rank:nth-child(1) .rank-logo{width:76px;height:76px;min-width:76px;min-height:76px}.podium-side .live-rank:nth-child(2) .rank-logo,.podium-side .live-rank:nth-child(3) .rank-logo{width:60px;height:60px;min-width:60px;min-height:60px}
 .normal-ranking-side .live-rank{min-height:38px;height:38px}.normal-ranking-side .live-rank .rank-logo{width:32px;height:32px}
 }
 body.tv-mode .ranking-only{max-width:1500px!important;margin:4px auto!important;padding:0 10px!important}body.tv-mode .hero{padding:6px 8px!important}body.tv-mode .hero-copy{padding-bottom:2px!important}body.tv-mode .hero-copy h1{font-size:22px!important;margin:2px 0!important}body.tv-mode .hero-copy p{font-size:8px!important;margin:2px auto!important}body.tv-mode .stats-grid{display:none!important}body.tv-mode .ranking-panel{padding:6px!important}body.tv-mode .section-head{margin-bottom:3px!important}body.tv-mode .section-head h2{font-size:13px!important}body.tv-mode .section-head .ghost-btn{display:none!important}
