@@ -30,20 +30,19 @@ create index game_votes_grade_idx on public.game_votes(grade);
 create unique index game_votes_one_per_student_per_game_idx
   on public.game_votes (lower(btrim(voter_name)), lower(btrim(grade)), game_id);
 
-create or replace function public.tecnomath_get_vote_counts()
-returns table(game_id text, votes bigint)
-language sql
-security definer
-set search_path=''
-stable
-as $$
-  select gv.game_id, count(*)::bigint
-  from public.game_votes gv
-  group by gv.game_id;
-$$;
+create table if not exists public.game_vote_counts(
+  game_id text primary key,
+  votes bigint not null default 0 check(votes>=0)
+);
 
-revoke execute on function public.tecnomath_get_vote_counts() from public;
-grant execute on function public.tecnomath_get_vote_counts() to anon, authenticated;
+alter table public.game_vote_counts enable row level security;
+revoke all on table public.game_vote_counts from anon, authenticated;
+grant select on table public.game_vote_counts to anon, authenticated;
+grant all on table public.game_vote_counts to service_role;
+
+insert into public.game_vote_counts(game_id,votes)
+select game_id,count(*)::bigint from public.game_votes group by game_id
+on conflict(game_id) do update set votes=excluded.votes;
 
 create or replace function public.tecnomath_broadcast_game_vote()
 returns trigger
@@ -52,6 +51,10 @@ security definer
 set search_path=''
 as $$
 begin
+  insert into public.game_vote_counts(game_id,votes)
+  values(NEW.game_id,1)
+  on conflict(game_id) do update set votes=public.game_vote_counts.votes+1;
+
   perform realtime.send(
     jsonb_build_object(
       'vote_id', NEW.id,
