@@ -40,8 +40,13 @@ function check(){if(!selected)return;const typed=norm(document.getElementById('a
 document.getElementById('check').onclick=check;document.getElementById('cancel').onclick=close;document.getElementById('back').onclick=()=>location.href='../menu.html';document.getElementById('answer').addEventListener('keydown',e=>{if(e.key==='Enter')check();if(e.key==='Escape')close()});document.getElementById('modal').addEventListener('click',e=>{if(e.target.id==='modal')close()});
 const restoreProgress=async()=>{if(!window.TecnoMathProgress)return null;try{return await window.TecnoMathProgress.restore('banderquiz-mundo')}catch(_){return null}};
 const loadFlags=async()=>{try{const r=await fetch(FLAG_URL,{cache:'force-cache'});if(!r.ok)throw new Error('flags');return await r.json()}catch(_){return []}};
+const loadWorld=async()=>{const urls=[
+  'https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json',
+  'https://unpkg.com/world-atlas@2/countries-110m.json',
+  'https://raw.githubusercontent.com/topojson/world-atlas/master/countries-110m.json'
+];let lastError=null;for(const url of urls){try{const r=await fetch(url,{cache:'force-cache'});if(r.ok)return await r.json()}catch(e){lastError=e}}throw lastError||new Error('map')};
 Promise.all([
-  fetch('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json').then(r=>{if(!r.ok)throw new Error('map');return r.json()}),
+  loadWorld(),
   loadFlags()
 ]).then(async([world,flags])=>{
   try{state=JSON.parse(localStorage.getItem(STORAGE)||'{"done":[],"score":0,"streak":0}')}catch(_){state={done:[],score:0,streak:0}}
@@ -53,6 +58,6 @@ Promise.all([
   window.addEventListener('resize',()=>svg.call(zoom.transform,d3.zoomIdentity));
   await restoreProgress();
 }).catch(()=>{
-  document.getElementById('progressText').textContent='No se pudo cargar el mapa. Revisa tu conexión.';
+  document.getElementById('progressText').textContent='No se pudo cargar el mapa. Intenta recargar la página.';
 });
 </script></body></html>
