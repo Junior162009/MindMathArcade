@@ -1,0 +1,1 @@
+create index if not exists game_votes_voter_id_idx on public.game_votes(voter_id);
