@@ -43,6 +43,25 @@ body.tv-mode .ranking-only-list{grid-template-columns:repeat(2,minmax(0,1fr))!im
 @media(max-width:850px){
  .ranking-only-list .live-rank{grid-template-columns:42px 48px minmax(0,1fr) 64px!important}
 }
+</style><style>
+/* Podio destacado para los tres primeros */
+.ranking-only-list .live-rank:nth-child(1),
+.ranking-only-list .live-rank:nth-child(2),
+.ranking-only-list .live-rank:nth-child(3){
+  min-height:78px!important;
+  padding:10px 14px!important;
+  border-radius:16px!important;
+  gap:12px!important;
+}
+.ranking-only-list .live-rank:nth-child(1){border-color:#ffd700!important;box-shadow:0 0 24px #ffd70022!important}
+.ranking-only-list .live-rank:nth-child(2){border-color:#c0c0c0!important;box-shadow:0 0 20px #c0c0c018!important}
+.ranking-only-list .live-rank:nth-child(3){border-color:#cd7f32!important;box-shadow:0 0 20px #cd7f3218!important}
+.ranking-only-list .live-rank:nth-child(-n+3) .position{font-size:30px!important}
+.ranking-only-list .live-rank:nth-child(-n+3) .rank-logo{width:62px!important;height:62px!important;border-radius:12px!important}
+.ranking-only-list .live-rank:nth-child(-n+3) .rank-name{font-size:clamp(15px,1.8vw,23px)!important}
+.ranking-only-list .live-rank:nth-child(-n+3) .rank-meta{font-size:10px!important}
+.ranking-only-list .live-rank:nth-child(-n+3) .rank-total{font-size:24px!important}
+.ranking-only-list .live-rank:nth-child(-n+3) .rank-total small{font-size:8px!important}
 </style></style></head><body><main class="voting-shell ranking-only"><header class="hero"><a class="brand" href="../index.html"><img src="../img/mindmath.png" alt="" class="brand-logo" onerror="this.style.display='none'"><span>⚡ TECNOMATH</span></a><div class="hero-copy"><span class="eyebrow">RESULTADOS EN VIVO</span><h1>🏆 RANKING DE VOTACIONES</h1><p>Consulta las posiciones, logos, nombres y votos de los juegos en tiempo real.</p></div><div class="live-badge" id="liveStatus"><i></i> CONECTANDO…</div></header><section class="stats-grid"><article class="stat-card"><span>🎮 Juegos</span><strong id="totalGames">—</strong></article><article class="stat-card"><span>❤️ Votos totales</span><strong id="totalVotes">—</strong></article><article class="stat-card"><span>🥇 Líder</span><strong id="leaderName">—</strong></article><article class="stat-card"><span>🕒 Actualización</span><strong id="updated">—</strong></article></section><section class="ranking-panel"><div class="section-head"><div><span class="eyebrow">TODAS LAS POSICIONES</span><h2>📊 Ranking completo</h2></div><button id="refresh" class="ghost-btn">↻ Actualizar</button></div><div id="ranking" class="ranking-only-list" aria-live="polite"></div></section><div class="back-vote"><a class="vote-btn" href="voting.html">❤️ IR A VOTAR</a><a class="ghost-btn" href="../index.html">🏠 INICIO</a></div></main><script>
 (function(){
 'use strict';
