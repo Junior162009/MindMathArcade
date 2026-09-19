@@ -488,6 +488,21 @@ body.tv-mode .ranking-only-list{grid-template-columns:repeat(2,minmax(0,1fr))!im
     height:32px!important;
   }
 }
+</style><style>
+/* IGUALAR EL ESPACIADO DE TODA LA COLUMNA DERECHA */
+.ranking-only-list .live-rank:nth-child(n+4){
+  align-self:start!important;
+  margin-top:0!important;
+  margin-bottom:0!important;
+  transform:none!important;
+}
+.ranking-only-list{
+  align-content:start!important;
+  row-gap:4px!important;
+}
+.ranking-only-list .live-rank:nth-child(n+4){
+  grid-row:auto!important;
+}
 </style></head><body><main class="voting-shell ranking-only"><header class="hero"><a class="brand" href="../index.html"><img src="../img/mindmath.png" alt="" class="brand-logo" onerror="this.style.display='none'"><span>⚡ TECNOMATH</span></a><div class="hero-copy"><span class="eyebrow">RESULTADOS EN VIVO</span><h1>🏆 RANKING DE VOTACIONES</h1><p>Consulta las posiciones, logos, nombres y votos de los juegos en tiempo real.</p></div><div class="live-badge" id="liveStatus"><i></i> CONECTANDO…</div></header><section class="stats-grid"><article class="stat-card"><span>🎮 Juegos</span><strong id="totalGames">—</strong></article><article class="stat-card"><span>❤️ Votos totales</span><strong id="totalVotes">—</strong></article><article class="stat-card"><span>🥇 Líder</span><strong id="leaderName">—</strong></article><article class="stat-card"><span>🕒 Actualización</span><strong id="updated">—</strong></article></section><section class="ranking-panel"><div class="section-head"><div><span class="eyebrow">TODAS LAS POSICIONES</span><h2>📊 Ranking completo</h2></div><button id="refresh" class="ghost-btn">↻ Actualizar</button></div><div id="ranking" class="ranking-only-list" aria-live="polite"></div></section><div class="back-vote"><a class="vote-btn" href="voting.html">❤️ IR A VOTAR</a><a class="ghost-btn" href="../index.html">🏠 INICIO</a></div></main><script>
 (function(){
 'use strict';
