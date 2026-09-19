@@ -18,5 +18,32 @@ function closeVote(){$('voteModal').classList.remove('open');state.selectedGame=
 async function submitVote(){const b=$('confirmVoteBtn'),name=$('voterName').value.trim(),grade=$('voterGrade').value;if(!state.selectedGame)return;if(name.length<2){toast('⚠️ Falta el nombre','Escribe el nombre del votante.');$('voterName').focus();return}if(!grade){toast('⚠️ Falta el grado','Selecciona el grado.');return}b.disabled=true;b.textContent='REGISTRANDO…';try{const r=await state.db.functions.invoke('submit-game-vote',{body:{voter_name:name,grade,game_id:gid(state.selectedGame)}});if(r.error){let msg=r.error.message||'No se pudo registrar el voto.';if(r.data?.error)msg=r.data.error;if(r.status===409||r.data?.duplicate){toast('ℹ️ Voto ya registrado',msg);return}throw Error(msg)}if(!r.data?.ok)throw Error(r.data?.error||'No se pudo registrar el voto.');if(r.data.vote?.id!=null)state.ignoredBroadcastIds.add(String(r.data.vote.id));await loadCounts();await refreshView();closeVote();toast('❤️ Voto registrado','El ranking se actualizará automáticamente.')}catch(e){console.error('TecnoMath voting:',e);toast('⚠️ No se pudo registrar',e.message||'Inténtalo nuevamente.')}finally{b.disabled=false;b.textContent='REGISTRAR VOTO'}}
 async function subscribe(){if(state.channel)await state.db.removeChannel(state.channel);state.channel=state.db.channel('tecnomath-voting').on('broadcast',{event:'VOTE'},async p=>{const voteId=String(p?.payload?.vote_id||'');const id=String(p?.payload?.game_id||'');if(!id)return;if(voteId&&state.ignoredBroadcastIds.has(voteId)){state.ignoredBroadcastIds.delete(voteId);return}try{await loadCounts();await refreshView()}catch(e){console.error('TecnoMath voting realtime refresh:',e)}}).subscribe(s=>{if(s==='SUBSCRIBED')live('','VOTACIONES EN VIVO');else if(['CHANNEL_ERROR','TIMED_OUT','CLOSED'].includes(s))live('warn','RECONECTANDO…')})}
 function bind(){$('search').addEventListener('input',renderGames);$('categoryFilter').addEventListener('change',renderGames);$('refreshBtn').addEventListener('click',async()=>{try{await loadCounts();await refreshView();toast('↻ Actualizado','Datos sincronizados con Supabase.')}catch(e){console.error(e);toast('⚠️ Error','No pudimos actualizar las votaciones.')}});$('gamesGrid').addEventListener('click',e=>{const b=e.target.closest('[data-vote]');if(b)openVote(b.dataset.vote)});$('cancelVoteBtn').onclick=closeVote;$('confirmVoteBtn').onclick=submitVote;$('voteModal').addEventListener('click',e=>{if(e.target.id==='voteModal')closeVote()});document.addEventListener('keydown',e=>{if(e.key==='Escape')closeVote()});window.addEventListener('beforeunload',()=>state.channel&&state.db.removeChannel(state.channel))}
-async function boot(){try{live('warn','CONECTANDO…');await loadCatalog();state.db=await TecnomathAuth.getClient();await loadCounts();bind();await refreshView();await subscribe()}catch(e){console.error('TecnoMath voting boot:',e);live('error','ERROR DE CONEXIÓN');$('gamesGrid').innerHTML='<div class="empty">⚠️ No pudimos cargar las votaciones. <button class="ghost-btn" onclick="location.reload()">Reintentar</button></div>'}}
+async function createVotingClient(){
+  if(!window.supabase?.createClient){
+    await new Promise((resolve,reject)=>{
+      const s=document.createElement('script');
+      s.src='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.0/dist/umd/supabase.min.js';
+      s.onload=resolve;
+      s.onerror=()=>reject(new Error('No se pudo cargar la biblioteca de Supabase.'));
+      document.head.appendChild(s);
+    });
+  }
+  return window.supabase.createClient('https://xdszveoxdrdnwwzzvkav.supabase.co','sb_publishable_xwUE0aN1g0rb7aOLyXPAsA_kOAX9bOA',{auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}});
+}
+async function boot(){
+  try{
+    live('warn','CONECTANDO…');
+    await loadCatalog();
+    state.db=await createVotingClient();
+    await loadCounts();
+    bind();
+    await refreshView();
+    await subscribe();
+  }catch(e){
+    console.error('TecnoMath voting boot:',e);
+    const detail=e?.message||String(e);
+    live('error','ERROR DE CONEXIÓN');
+    $('gamesGrid').innerHTML='<div class="empty">⚠️ No pudimos conectar con el sistema de votaciones.<br><small>'+esc(detail)+'</small><br><button class="ghost-btn" onclick="location.reload()">Reintentar</button></div>';
+  }
+}
 boot();})();
