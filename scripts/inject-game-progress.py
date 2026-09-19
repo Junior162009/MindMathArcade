@@ -24,19 +24,9 @@ for path in ROOT.glob('games/**/index.html'):
         if old in text:
             text = text.replace(old, AUTH_TAG + '\n' + TAG, 1)
 
-    # mapa-beta: wait for the Supabase account progress before reading the
-    # game's local state, otherwise a fresh device can render the default
-    # 0/195 state before the cloud snapshot is restored.
-    if path.as_posix() == 'games/laura10°/mapa-beta/index.html':
-        old_state = "let state=JSON.parse(localStorage.getItem(STORAGE)||'{\"done\":[],\"score\":0,\"streak\":0}'),selected=null,mapReady=false;"
-        new_state = "let state={done:[],score:0,streak:0},selected=null,mapReady=false;"
-        if old_state in text:
-            text = text.replace(old_state, new_state, 1)
-
-        old_promise = "Promise.all([fetch('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json').then(r=>{if(!r.ok)throw new Error('map');return r.json()}),fetch(FLAG_URL).then(r=>{if(!r.ok)throw new Error('flags');return r.json()})]).then(([world,flags])=>{buildFlagIndex(flags);"
-        new_promise = "Promise.all([window.TecnoMathProgress?window.TecnoMathProgress.restore('banderquiz-mundo').catch(()=>null):Promise.resolve(null),fetch('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json').then(r=>{if(!r.ok)throw new Error('map');return r.json()}),fetch(FLAG_URL).then(r=>{if(!r.ok)throw new Error('flags');return r.json()})]).then(([,world,flags])=>{try{state=JSON.parse(localStorage.getItem(STORAGE)||'{\"done\":[],\"score\":0,\"streak\":0}')}catch(_){state={done:[],score:0,streak:0}}buildFlagIndex(flags);"
-        if old_promise in text:
-            text = text.replace(old_promise, new_promise, 1)
+    # mapa-beta is intentionally not rewritten here.
+    # Its map/flag loading has independent fallbacks so it works without
+    # an account and remains stable when this automation runs.
 
     # Ensure every game gets the central progress loader.
     if 'tecnomath-progress.js' not in text:
