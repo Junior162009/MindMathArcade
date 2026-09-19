@@ -32,7 +32,7 @@ let state={done:[],score:0,streak:0},selected=null,mapReady=false;
 const app=d3.select('#map'),svg=d3.select(document.createElementNS('http://www.w3.org/2000/svg','svg')).attr('viewBox','0 0 1000 600');app.node().appendChild(svg.node());const g=svg.append('g');
 const projection=d3.geoEqualEarth().fitSize([1000,600],{type:'Sphere'}),path=d3.geoPath(projection);g.append('path').datum({type:'Sphere'}).attr('d',path).attr('fill','#111936').attr('stroke','#3a4569');
 const zoom=d3.zoom().scaleExtent([1,7]).translateExtent([[0,0],[1000,600]]).extent([[0,0],[1000,600]]).on('zoom',e=>g.attr('transform',e.transform));svg.call(zoom);
-function save(){localStorage.setItem(STORAGE,JSON.stringify(state));update()}
+function save(){try{if(window.TecnoMathProgress)window.TecnoMathProgress.save('banderquiz-mundo',state);else localStorage.setItem(STORAGE,JSON.stringify(state))}catch(_){localStorage.setItem(STORAGE,JSON.stringify(state))}update()}
 function update(){document.getElementById('fill').style.width=Math.min(100,state.done.length/TOTAL*100)+'%';document.getElementById('progressText').textContent=`${state.done.length} / ${TOTAL} países conquistados`;document.getElementById('score').textContent=state.score;document.getElementById('streak').textContent=state.streak}
 function openCountry(name,node){if(state.done.includes(name))return;selected={name,node};showExternalFlag(name);document.getElementById('countryName').textContent='¿Qué país es?';document.getElementById('answer').value='';document.getElementById('message').textContent='';document.getElementById('message').className='message';document.getElementById('modal').classList.add('show');setTimeout(()=>document.getElementById('answer').focus(),80)}
 function close(){document.getElementById('modal').classList.remove('show');selected=null}
@@ -59,7 +59,7 @@ Promise.all([
   loadWorld(),
   loadFlags()
 ]).then(async([world,flags])=>{
-  try{state=JSON.parse(localStorage.getItem(STORAGE)||'{"done":[],"score":0,"streak":0}')}catch(_){state={done:[],score:0,streak:0}}
+  try{state=window.TecnoMathProgress?.load('banderquiz-mundo')||JSON.parse(localStorage.getItem(STORAGE)||'{"done":[],"score":0,"streak":0}')}catch(_){state={done:[],score:0,streak:0}}
   buildFlagIndex(flags);
   const countries=topojson.feature(world,world.objects.countries);
   g.selectAll('.country').data(countries.features).join('path').attr('class','country').attr('d',path).on('click',(e,d)=>{const name=d.properties?.name;if(name)openCountry(name,d3.select(e.currentTarget))});
@@ -67,6 +67,9 @@ Promise.all([
   mapReady=true;update();
   window.addEventListener('resize',()=>svg.call(zoom.transform,d3.zoomIdentity));
   await restoreProgress();
+  try{const restored=window.TecnoMathProgress?.load('banderquiz-mundo');if(restored&&Array.isArray(restored.done)){state=restored;g.selectAll('.country').classed('done',d=>state.done.includes(d.properties?.name));update()}}catch(_){ }
+  if(window.TecnomathAuth?.authState)window.TecnomathAuth.authState(async()=>{try{const restored=await window.TecnoMathProgress?.restore('banderquiz-mundo');if(restored&&Array.isArray(restored.done)){state=restored;g.selectAll('.country').classed('done',d=>state.done.includes(d.properties?.name));update()}}catch(_){}}).catch(()=>{});
+  window.addEventListener('tecnomath:signed-out',()=>{state={done:[],score:0,streak:0};g.selectAll('.country').classed('done',false);update()});
 }).catch(()=>{
   document.getElementById('progressText').textContent='No se pudo cargar el mapa. Pulsa aquí para reintentar.';
   const retry=document.createElement('button');retry.textContent='↻ Reintentar mapa';retry.className='back';retry.style.cssText='position:fixed;z-index:40;top:72px;left:50%;transform:translateX(-50%);font-size:.9rem';retry.onclick=()=>location.reload();document.body.appendChild(retry);
