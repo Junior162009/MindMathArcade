@@ -74,5 +74,8 @@ Promise.all([
     try{const next=await window.TecnoMathProgress?.restore('banderquiz-mundo');state={done:Array.isArray(next?.done)?next.done:[],score:Number(next?.score)||0,streak:Number(next?.streak)||0};g.selectAll('.country').classed('done',d=>state.done.includes(d.properties?.name));update()}catch(_){state={done:[],score:0,streak:0};g.selectAll('.country').classed('done',false);update()}
   });
   window.addEventListener('tecnomath:signed-out',()=>{state={done:[],score:0,streak:0};close();g.selectAll('.country').classed('done',false);update()});
+}).catch(()=>{
+  document.getElementById('progressText').textContent='No se pudo cargar el mapa. Pulsa aquí para reintentar.';
+  const retry=document.createElement('button');retry.textContent='↻ Reintentar mapa';retry.className='back';retry.style.cssText='position:fixed;z-index:40;top:72px;left:50%;transform:translateX(-50%);font-size:.9rem';retry.onclick=()=>location.reload();document.body.appendChild(retry);
 });
 </script></body></html>
