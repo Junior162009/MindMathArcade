@@ -59,19 +59,20 @@ Promise.all([
   loadWorld(),
   loadFlags()
 ]).then(async([world,flags])=>{
-  try{state=window.TecnoMathProgress?.load('banderquiz-mundo')||JSON.parse(localStorage.getItem(STORAGE)||'{"done":[],"score":0,"streak":0}')}catch(_){state={done:[],score:0,streak:0}}
+  state={done:[],score:0,streak:0};
   buildFlagIndex(flags);
   const countries=topojson.feature(world,world.objects.countries);
   g.selectAll('.country').data(countries.features).join('path').attr('class','country').attr('d',path).on('click',(e,d)=>{const name=d.properties?.name;if(name)openCountry(name,d3.select(e.currentTarget))});
   g.selectAll('.country').classed('done',d=>state.done.includes(d.properties?.name));
   mapReady=true;update();
   window.addEventListener('resize',()=>svg.call(zoom.transform,d3.zoomIdentity));
-  await restoreProgress();
-  try{const restored=window.TecnoMathProgress?.load('banderquiz-mundo');if(restored&&Array.isArray(restored.done)){state=restored;g.selectAll('.country').classed('done',d=>state.done.includes(d.properties?.name));update()}}catch(_){ }
-  if(window.TecnomathAuth?.authState)window.TecnomathAuth.authState(async()=>{try{const restored=await window.TecnoMathProgress?.restore('banderquiz-mundo');if(restored&&Array.isArray(restored.done)){state=restored;g.selectAll('.country').classed('done',d=>state.done.includes(d.properties?.name));update()}}catch(_){}}).catch(()=>{});
-  window.addEventListener('tecnomath:signed-out',()=>{state={done:[],score:0,streak:0};g.selectAll('.country').classed('done',false);update()});
-}).catch(()=>{
-  document.getElementById('progressText').textContent='No se pudo cargar el mapa. Pulsa aquí para reintentar.';
-  const retry=document.createElement('button');retry.textContent='↻ Reintentar mapa';retry.className='back';retry.style.cssText='position:fixed;z-index:40;top:72px;left:50%;transform:translateX(-50%);font-size:.9rem';retry.onclick=()=>location.reload();document.body.appendChild(retry);
+  const restored=await restoreProgress();
+  if(restored&&Array.isArray(restored.done)){state={done:restored.done,score:Number(restored.score)||0,streak:Number(restored.streak)||0};g.selectAll('.country').classed('done',d=>state.done.includes(d.properties?.name));update()}
+  window.addEventListener('tecnomath:authchange',async(e)=>{
+    const user=e.detail?.user||null;
+    if(!user){state={done:[],score:0,streak:0};close();g.selectAll('.country').classed('done',false);update();return}
+    try{const next=await window.TecnoMathProgress?.restore('banderquiz-mundo');state={done:Array.isArray(next?.done)?next.done:[],score:Number(next?.score)||0,streak:Number(next?.streak)||0};g.selectAll('.country').classed('done',d=>state.done.includes(d.properties?.name));update()}catch(_){state={done:[],score:0,streak:0};g.selectAll('.country').classed('done',false);update()}
+  });
+  window.addEventListener('tecnomath:signed-out',()=>{state={done:[],score:0,streak:0};close();g.selectAll('.country').classed('done',false);update()});
 });
 </script></body></html>
