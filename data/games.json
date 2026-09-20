@@ -291,7 +291,7 @@
     "name": "TecnoMath IA",
     "desc": "Asistente educativo de inteligencia artificial para aprender, practicar y resolver dudas.",
     "url": "games/IA/index.html",
-    "imageUrl": "",
+    "imageUrl": "img/tecnomath-ia.svg",
     "icon": "🤖",
     "category": "IA",
     "deviceCompatibility": "both",
