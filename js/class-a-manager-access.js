@@ -1,4 +1,4 @@
-/* TecnoMath — acceso Clase A al Gestor de Juegos */
+/* TecnoMath — acceso visual Clase A al Gestor de Juegos */
 (function () {
   'use strict';
 
@@ -22,10 +22,8 @@
   }
 
   function boot() {
-    if (window.TecnomathAdminGuard?.requireAdmin) {
-      window.TecnomathAdminGuard.requireAdmin({ redirect: false }).then(render).catch(() => {});
-    }
-    window.addEventListener('tecnomath:admin-ready', render, { once: false });
+    window.addEventListener('tecnomath:admin-ready', render, { once: true });
+    if (window.TecnomathCurrentAdmin) render({ profile: window.TecnomathCurrentAdmin });
   }
 
   if (document.readyState === 'loading') {
