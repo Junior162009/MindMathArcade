@@ -17,7 +17,7 @@
   isAdmin(){return !!window.TecnomathCurrentAdmin;},
   setAdmin(){return !!window.TecnomathCurrentAdmin;},
   unsetAdmin(){window.TecnomathCurrentAdmin=null;},
-  getAdminEmails(){return window.TecnomathAuth?[...window.TecnomathAuth.ADMIN_EMAILS]:[];},
+  getAdminEmails(){return typeof window.TecnomathAuth?.getAdminEmails==='function'?window.TecnomathAuth.getAdminEmails():[];},
   getCoins(){
     if(this.isAdmin())return Infinity;
     const u=this.getCurrentUser(); if(!u)return 0;
