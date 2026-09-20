@@ -1,76 +1,39 @@
-name: Conectar nuevo diseño TecnoMath
+name: Verificar integración visual de TecnoMath
 
 on:
   push:
     paths:
       - 'assets/css/tecnomath-ui-v2.css'
       - 'js/tecnomath-ui-v2.js'
+      - 'index.html'
       - '.github/workflows/connect-tecnomath-ui.yml'
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  connect-ui:
+  verify-ui:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Conectar capa visual sin tocar el catálogo
+        with:
+          fetch-depth: 1
+      - name: Verificar capa visual sin mutar el repositorio
         shell: bash
         run: |
-          python3 - <<'PY'
-          from pathlib import Path
-          p = Path('index.html')
-          s = p.read_text(encoding='utf-8')
-          css = '    <link rel="stylesheet" href="assets/css/tecnomath-ui-v2.css">'
-          js = '    <script src="js/tecnomath-ui-v2.js" defer></script>'
-          if css not in s:
-              marker = '    <style>'
-              if marker not in s:
-                  raise SystemExit('No se encontró el bloque <style> de index.html')
-              s = s.replace(marker, css + '\n' + marker, 1)
-          if js not in s:
-              marker = '</body>'
-              if marker not in s:
-                  raise SystemExit('No se encontró </body> en index.html')
-              s = s.replace(marker, js + '\n' + marker, 1)
-          required = ['id="projectsContainer"', 'id="sponsorsArea"', 'id="qrcode"', 'js/games-loader.js']
-          missing = [x for x in required if x not in s]
-          if missing:
-              raise SystemExit('Protección: faltan elementos existentes: ' + ', '.join(missing))
-          p.write_text(s, encoding='utf-8')
-
-          # Invalidar referencias antiguas para que todas las páginas carguen el Auth actual.
-          for name in ['pages/auth.html', 'pages/admin/supabase.html']:
-              f = Path(name)
-              if not f.exists():
-                  continue
-              t = f.read_text(encoding='utf-8')
-              t = t.replace('tecnomath-auth.js?v=20260911-4', 'tecnomath-auth.js?v=20260914-1')
-              t = t.replace('tecnomath-auth.js?v=20260911-8', 'tecnomath-auth.js?v=20260914-1')
-              f.write_text(t, encoding='utf-8')
-          PY
-
-      - name: Validar y publicar
-        shell: bash
-        run: |
-          grep -q 'tecnomath-ui-v2.css' index.html
-          grep -q 'tecnomath-ui-v2.js' index.html
+          set -euo pipefail
+          test -f index.html
+          test -f assets/css/tecnomath-ui-v2.css
+          test -f js/tecnomath-ui-v2.js
           grep -q 'id="projectsContainer"' index.html
           grep -q 'id="sponsorsArea"' index.html
           grep -q 'id="qrcode"' index.html
           grep -q 'js/games-loader.js' index.html
-          grep -q 'tecnomath-auth.js?v=20260914-1' pages/auth.html
-          grep -q 'tecnomath-auth.js?v=20260914-1' pages/admin/supabase.html
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          if git diff --quiet -- index.html pages/auth.html pages/admin/supabase.html; then
-            echo 'La capa visual y las referencias de Auth ya estaban actualizadas.'
-          else
-            git add index.html pages/auth.html pages/admin/supabase.html
-            git commit -m 'fix: invalidar cache de Auth Supabase'
-            git push
+          grep -q 'js/tecnomath-auth.js' index.html
+          if grep -q 'pages/admin/supabase.html' index.html; then
+            echo 'ERROR: el portal no debe enlazar al panel administrativo histórico.'
+            exit 1
           fi
+          echo 'Integración visual y rutas administrativas: OK'
