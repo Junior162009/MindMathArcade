@@ -1,0 +1,19 @@
+name: Procesar Gestor de Juegos Clase A
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '*/5 * * * *'
+permissions:
+  contents: write
+env:
+  SUPABASE_URL: https://xdszveoxdrdnwwzzvkav.supabase.co
+jobs:
+  process:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 1}
+      - name: Procesar cambios del CMS Clase A
+        env:
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: python scripts/process-class-a-game-jobs.py
