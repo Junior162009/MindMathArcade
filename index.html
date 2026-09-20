@@ -894,28 +894,13 @@
         // ============================================================
         // 🟢 LISTA DE JUEGOS
         // ============================================================
-        const juegosRecomendados = [
-            { name: "MindMath Arcade", desc: "Matemáticas retro", url: "pages/game.html", imageUrl: "img/mindmath.png", icon: "🧮", category: "mates", deviceCompatibility: "both", evento: null },
-            { name: "BanderQuiz", desc: "Adivina banderas", url: "games/laura10°/menu.html", imageUrl: "img/banderquiz.png", icon: "🏳️🌎", category: "edu", deviceCompatibility: "both", evento: null },
-            { name: "Quizzer", desc: "Aprende de Forma Divertida", url: "games/esequiel11°/index.html", imageUrl: "img/quizzer.jpeg", icon: "🧮", category: "mates", deviceCompatibility: "both", evento: null },
-            { name: "Study", desc: "Aprende jugando con materias, retos y niveles", url: "games/anyur10°/index.html", imageUrl: "img/study.jpeg", icon: "📚", category: "educacion", deviceCompatibility: "both", evento: null },
-            { name: "FIXTEXT", desc: "Juego de texto", url: "games/dylan10°/index.html", imageUrl: "img/fixtext.jpeg", icon: "📝", category: "otros", deviceCompatibility: "both", evento: null },
-            { name: "Eco Recolector", desc: "Atrapa agua y reciclables", url: "pages/eco-collector.html", imageUrl: "img/ecorecolector.png", icon: "🌍", category: "eco", deviceCompatibility: "both", evento: null },
-            { name: "Animalandia", desc: "Alimenta animales", url: "pages/animalandia.html", imageUrl: "", icon: "🐮", category: "kids", deviceCompatibility: "mobile", evento: null },
-            { name: "SAPIENS", desc: "Pon a Prueba tu Mente y Demuestra lo que Sabes", url: "games/keiner10°/index.html", imageUrl: "img/sapiens.jpeg", icon: "🧠", category: "mates", deviceCompatibility: "both", evento: null },
-            { name: "PequeMentes", desc: "Juego educativo para aprender y divertirse", url: "https://enchanting-sprite-1043de.netlify.app/", imageUrl: "img/pequementes.jpg", icon: "🧠", category: "educacion", deviceCompatibility: "both", evento: null },
-            { name: "BIT RUSH", desc: "Runner de supervivencia y desafíos de lógica digital", url: "games/jinete11°/index.html", imageUrl: "img/bitrush.jpeg", icon: "🤖", category: "logica", deviceCompatibility: "both", evento: null },
-            { name: "MENTEX", desc: "Juego educativo MENTEX", url: "games/jolberth11°/index.html", imageUrl: "", icon: "🎮", category: "edu", deviceCompatibility: "both", evento: null },
-            { name: "Horror School", desc: "Juego de terror para PC con descarga y galería de capturas.", url: "games/downloader/HorrorSchool/index.html", imageUrl: "", icon: "🏫👻", category: "juegos", deviceCompatibility: "desktop", evento: null },
-            { name: "TecnoBrainMath", desc: "Trivia educativa de TecnoMath con retos y preguntas interactivas.", url: "games/andy11°/index.html", imageUrl: "games/andy11°/tecnobraintmath.jpeg", icon: "🧠", category: "edu", deviceCompatibility: "both", evento: null }
-];
-
-        // La lista integrada es el respaldo principal.
-        // Así los minijuegos aparecen aunque juegos.json no exista, falle
-        // al cargar desde GitHub Pages o tenga un formato incorrecto.
-        // Fuente principal integrada. Los juegos nunca dependen de juegos.json
-        // para poder aparecer en pantalla.
-        let projects = [...juegosRecomendados];
+        // ============================================================
+        // 🟢 CATÁLOGO DE JUEGOS
+        // ============================================================
+        // games.json es la ÚNICA fuente del catálogo.
+        // Para agregar, quitar o editar juegos, modifica:
+        // data/games.json
+        let projects = [];
 
         function normalizarJuego(game) {
             if (!game || typeof game !== 'object') return null;
@@ -972,21 +957,14 @@
             const container = document.getElementById('projectsContainer');
             const filters = document.getElementById('filtersContainer');
 
-            // Si el DOM todavía no está listo, esperamos.
             if (!container || !filters) {
                 window.addEventListener('DOMContentLoaded', cargarJuegos, { once: true });
                 return;
             }
 
-            // Normalizamos la lista incluida y la mostramos INMEDIATAMENTE.
-            projects = combinarJuegos(juegosRecomendados, []);
-            renderProjects('todos');
-            actualizarFiltros();
-
-            // juegos.json es opcional. Si existe, agregamos sus juegos sin
-            // borrar los que ya vienen incluidos en este index.html.
             try {
-                const response = await fetch('./juegos.json', {
+                // games.json es la única fuente oficial del catálogo.
+                const response = await fetch('./data/games.json', {
                     cache: 'no-store'
                 });
 
@@ -997,29 +975,19 @@
                 const data = await response.json();
 
                 if (!Array.isArray(data)) {
-                    throw new Error('El archivo no contiene una lista JSON');
+                    throw new Error('data/games.json no contiene una lista JSON');
                 }
 
-                const validGames = data
+                projects = data
                     .map(normalizarJuego)
                     .filter(Boolean);
 
-                if (validGames.length > 0) {
-                    projects = combinarJuegos(juegosRecomendados, validGames);
-                    console.log('✅ juegos.json procesado. Juegos disponibles:', projects.length);
-                } else {
-                    console.warn('⚠️ juegos.json no tiene juegos válidos. Se conserva la lista integrada.');
-                }
-
+                console.log('✅ data/games.json cargado. Juegos disponibles:', projects.length);
             } catch (error) {
-                console.warn(
-                    '⚠️ juegos.json no disponible; se conserva la lista integrada.',
-                    error.message
-                );
+                projects = [];
+                console.error('❌ No se pudo cargar data/games.json:', error);
             }
 
-            // Volvemos a dibujar después del intento de carga.
-            // Si JSON falla, los juegos integrados siguen ahí.
             renderProjects(currentActiveFilter);
             actualizarFiltros();
         }
