@@ -19,7 +19,7 @@ function actualizarEstadisticas(){const projects=$$('#projectsContainer .project
 function loadAdminPortal(){
  if(window.__TECNO_MATH_ADMIN_PORTAL__)return;
  window.__TECNO_MATH_ADMIN_PORTAL__=true;
- const src='js/tecnomath-admin-portal.js?v=20260914-1';
+ const src='js/tecnomath-admin-portal.js?v=20260920';
  if(document.querySelector('script[data-tecnomath-admin-portal]'))return;
  const s=document.createElement('script');s.src=src;s.defer=false;s.dataset.tecnomathAdminPortal='true';s.onerror=()=>{console.warn('No se pudo cargar el controlador admin moderno.')};document.head.appendChild(s);
 }
