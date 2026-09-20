@@ -228,3 +228,22 @@ using (
   bucket_id = 'game-downloads'
   and (storage.foldername(name))[1] = 'logos'
 );
+
+
+-- Storage: paquetes ZIP privados subidos desde el Gestor de Juegos Clase A.
+-- El publicador de GitHub los lee con la service key; no se expone el ZIP públicamente.
+drop policy if exists "class_a_upload_game_packages" on storage.objects;
+create policy "class_a_upload_game_packages"
+on storage.objects
+for insert
+to authenticated
+with check (
+  bucket_id = 'game-submissions'
+  and (storage.foldername(name))[1] = 'class-a-packages'
+  and exists (
+    select 1 from public.tecnomath_profiles p
+    where p.id = (select auth.uid())
+      and p.role = 'admin'
+      and p.admin_class = 'A'
+  )
+);
