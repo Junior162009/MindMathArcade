@@ -1,4 +1,5 @@
 // TecnoMath Shared API — compatibilidad común sobre Supabase Auth + PostgreSQL
+// Auditoría de compatibilidad: 2026-09-20
 (function () {
   'use strict';
   window.Tecnomath={
