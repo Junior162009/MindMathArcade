@@ -895,10 +895,9 @@
         // 🟢 LISTA DE JUEGOS
         // ============================================================
         const juegosRecomendados = [
-            // JUEGOS NORMALES (siempre visibles)
             { name: "MindMath Arcade", desc: "Matemáticas retro", url: "pages/game.html", imageUrl: "img/mindmath.png", icon: "🧮", category: "mates", deviceCompatibility: "both", evento: null },
             { name: "BanderQuiz", desc: "Adivina banderas", url: "games/laura10°/menu.html", imageUrl: "img/banderquiz.png", icon: "🏳️🌎", category: "edu", deviceCompatibility: "both", evento: null },
-            { name: "Quizzer", desc: "Aprende de Forma Divertida ", url: "games/esequiel11°/index.html", imageUrl: "img/quizzer.jpeg", icon: "🧮", category: "mates", deviceCompatibility: "both", evento: null },
+            { name: "Quizzer", desc: "Aprende de Forma Divertida", url: "games/esequiel11°/index.html", imageUrl: "img/quizzer.jpeg", icon: "🧮", category: "mates", deviceCompatibility: "both", evento: null },
             { name: "Study", desc: "Aprende jugando con materias, retos y niveles", url: "games/anyur10°/index.html", imageUrl: "img/study.jpeg", icon: "📚", category: "educacion", deviceCompatibility: "both", evento: null },
             { name: "FIXTEXT", desc: "Juego de texto", url: "games/dylan10°/index.html", imageUrl: "img/fixtext.jpeg", icon: "📝", category: "otros", deviceCompatibility: "both", evento: null },
             { name: "Eco Recolector", desc: "Atrapa agua y reciclables", url: "pages/eco-collector.html", imageUrl: "img/ecorecolector.png", icon: "🌍", category: "eco", deviceCompatibility: "both", evento: null },
@@ -906,41 +905,10 @@
             { name: "SAPIENS", desc: "Pon a Prueba tu Mente y Demuestra lo que Sabes", url: "games/keiner10°/index.html", imageUrl: "img/sapiens.jpeg", icon: "🧠", category: "mates", deviceCompatibility: "both", evento: null },
             { name: "PequeMentes", desc: "Juego educativo para aprender y divertirse", url: "https://enchanting-sprite-1043de.netlify.app/", imageUrl: "img/pequementes.jpg", icon: "🧠", category: "educacion", deviceCompatibility: "both", evento: null },
             { name: "BIT RUSH", desc: "Runner de supervivencia y desafíos de lógica digital", url: "games/jinete11°/index.html", imageUrl: "img/bitrush.jpeg", icon: "🤖", category: "logica", deviceCompatibility: "both", evento: null },
-            { name: "MathSolve", desc: "Resuelve problemas de triángulos", url: "pages/mathsolve.html", imageUrl: "img/mathsolve.png", icon: "📐", category: "mates", deviceCompatibility: "both", evento: null },
-            { name: "MathSolve 2", desc: "Triangulador matemático con fórmulas y procedimientos paso a paso", url: "pages/mathsolve2.html", imageUrl: "img/mathsolve2.png", icon: "📐", category: "mates", deviceCompatibility: "both", evento: null },
-            { name: "Tower Game", desc: "Construye una torre de bloques", url: "https://iamkun.github.io/tower_game/", imageUrl: "", icon: "🏗️", category: "puzzle", deviceCompatibility: "both", evento: null },
-            { name: "2048", desc: "Fusiona números", url: "https://gabrielecirulli.github.io/2048/", imageUrl: "", icon: "🔢", category: "puzzle", deviceCompatibility: "both", evento: null },
-            { name: "Pacman", desc: "El clásico comecocos", url: "https://pacman.platzh1rsch.ch/", imageUrl: "", icon: "🟡", category: "retro", deviceCompatibility: "desktop", evento: null },
-            { name: "Run 3", desc: "Corre por el espacio", url: "https://www.coolmathgames.com/0-run-3", imageUrl: "", icon: "🏃", category: "runners", deviceCompatibility: "both", evento: null },
-            { name: "Tower Building", desc: "Apila bloques para construir la torre más alta", url: "https://gameforge.com/en-US/littlegames/tower-building/", imageUrl: "", icon: "🏗️", category: "puzzle", deviceCompatibility: "both", evento: null },
-            { name: "Tappy Tower", desc: "Toca para crear bloques", url: "https://www.silvergames.com/en/tappy-tower", imageUrl: "", icon: "🏢", category: "puzzle", deviceCompatibility: "both", evento: null },
-            { name: "Stickman Archer", desc: "Arquería minimalista", url: "https://gamh5.com/category/bubble-shooter/", imageUrl: "", icon: "🏹", category: "shooter", deviceCompatibility: "both", evento: null },
-            { name: "2048 Merge", desc: "Fusiona números hasta 2048", url: "https://gamh5.com/category/merge/", imageUrl: "", icon: "🔢", category: "puzzle", deviceCompatibility: "both", evento: null },
-            { name: "Endless Car Race", desc: "Carrera sin fin", url: "https://gamh5.com/category/racing/", imageUrl: "", icon: "🏎️", category: "runners", deviceCompatibility: "both", evento: null },
-            { name: "Hexagon Fall", desc: "Caída a través de hexágonos", url: "https://gplpal.com/hexagon-fall-html5-skill-game/", imageUrl: "", icon: "⬡", category: "skill", deviceCompatibility: "both", evento: null },
-            { name: "Rocket Pult", desc: "Lanza cohetes con física", url: "https://gamesfree.io/rocket-pult.html", imageUrl: "", icon: "🚀", category: "physics", deviceCompatibility: "both", evento: null },
-            // 🎃 EXCLUSIVOS DE HALLOWEEN
-            { name: "Halloween Parade", desc: "Desfile de Halloween", url: "pages/halloween-parade.html", imageUrl: "", icon: "🎃", category: "halloween", deviceCompatibility: "both", evento: "halloween" },
-            { name: "Caza de Calabazas", desc: "Dispara a los fantasmas", url: "pages/halloween-game.html", imageUrl: "", icon: "🎃", category: "halloween", deviceCompatibility: "both", evento: "halloween" },
-
-            // 🎄 EXCLUSIVOS DE NAVIDAD
-            { name: "Trineo Navideño", desc: "Recoge regalos", url: "pages/navidad-game.html", imageUrl: "", icon: "🎄", category: "navidad", deviceCompatibility: "both", evento: "navidad" },
-            { name: "Elfos Trabajadores", desc: "Ayuda a los elfos", url: "pages/elfos-game.html", imageUrl: "", icon: "🧝", category: "navidad", deviceCompatibility: "both", evento: "navidad" },
-
-            // 🥳 EXCLUSIVOS DE CUMPLEAÑOS
-            { name: "Fiesta Globos", desc: "Revienta globos", url: "pages/cumple-game.html", imageUrl: "", icon: "🎈", category: "cumpleanos", deviceCompatibility: "both", evento: "cumpleanos" },
-            { name: "Pastel de Cumpleaños", desc: "Decora el pastel", url: "pages/pastel-game.html", imageUrl: "", icon: "🎂", category: "cumpleanos", deviceCompatibility: "both", evento: "cumpleanos" },
-
-            // 🎡 EXCLUSIVOS DE FERIA
-            { name: "Feria de Atracciones", desc: "Juegos de feria", url: "pages/feria-game.html", imageUrl: "", icon: "🎡", category: "feria", deviceCompatibility: "both", evento: "feria" },
-            { name: "Carrera de Globos", desc: "Carrera de globos", url: "pages/globos-race.html", imageUrl: "", icon: "🏆", category: "feria", deviceCompatibility: "both", evento: "feria" },
-
-            // 🔥 EXCLUSIVOS DE MEGA FERIA
-            { name: "Mega Tiro al Blanco", desc: "Puntería", url: "pages/tiro-game.html", imageUrl: "", icon: "🎯", category: "feria", deviceCompatibility: "both", evento: "feriaplus" },
-
-            // ⚽ EXCLUSIVOS DEL MUNDIAL
-            { name: "World Cup Penalty", desc: "Juego de penales del Mundial", url: "pages/world-cup-penalty.html", imageUrl: "", icon: "⚽", category: "mundial", deviceCompatibility: "both", evento: "mundial" }
-        ];
+            { name: "MENTEX", desc: "Juego educativo MENTEX", url: "games/jolberth11°/index.html", imageUrl: "", icon: "🎮", category: "edu", deviceCompatibility: "both", evento: null },
+            { name: "Horror School", desc: "Juego de terror para PC con descarga y galería de capturas.", url: "games/downloader/HorrorSchool/index.html", imageUrl: "", icon: "🏫👻", category: "juegos", deviceCompatibility: "desktop", evento: null },
+            { name: "TecnoBrainMath", desc: "Trivia educativa de TecnoMath con retos y preguntas interactivas.", url: "games/andy11°/index.html", imageUrl: "games/andy11°/tecnobraintmath.jpeg", icon: "🧠", category: "edu", deviceCompatibility: "both", evento: null }
+];
 
         // La lista integrada es el respaldo principal.
         // Así los minijuegos aparecen aunque juegos.json no exista, falle
