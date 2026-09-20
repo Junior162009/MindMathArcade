@@ -912,6 +912,10 @@
             if (!name || (!url && !swfUrl)) return null;
 
             return {
+                id: typeof game.id === 'string' && game.id.trim() ? game.id.trim() : '',
+                order: Number.isFinite(Number(game.order)) ? Number(game.order) : 9999,
+                status: typeof game.status === 'string' ? game.status : 'published',
+                allowVoting: game.allowVoting !== false,
                 name,
                 desc: typeof game.desc === 'string' && game.desc.trim()
                     ? game.desc
@@ -980,7 +984,9 @@
 
                 projects = data
                     .map(normalizarJuego)
-                    .filter(Boolean);
+                    .filter(Boolean)
+                    .filter(g => g.status !== 'hidden' && g.status !== 'draft')
+                    .sort((a,b) => (a.order - b.order) || a.name.localeCompare(b.name,'es'));
 
                 console.log('✅ data/games.json cargado. Juegos disponibles:', projects.length);
             } catch (error) {
