@@ -1,7 +1,7 @@
 /* TecnoMath Admin Crown — Supabase role only */
 (function(){
 'use strict';
-const ADMIN_LINK='pages/admin/supabase.html';
+const ADMIN_LINK='pages/admin/index.html';
 let isAdmin=false;
 
 function removeLegacy(){
