@@ -199,3 +199,32 @@ using (exists (
 ));
 
 drop index if exists public.game_votes_student_game_unique;
+
+ 
+-- Storage: logos subidos desde el Gestor de Juegos Clase A.
+-- Usa el bucket público existente game-downloads; no se crea ni recrea ningún bucket.
+drop policy if exists "class_a_upload_game_logos" on storage.objects;
+create policy "class_a_upload_game_logos"
+on storage.objects
+for insert
+to authenticated
+with check (
+  bucket_id = 'game-downloads'
+  and (storage.foldername(name))[1] = 'logos'
+  and exists (
+    select 1 from public.tecnomath_profiles p
+    where p.id = (select auth.uid())
+      and p.role = 'admin'
+      and p.admin_class = 'A'
+  )
+);
+
+drop policy if exists "public_read_game_logos" on storage.objects;
+create policy "public_read_game_logos"
+on storage.objects
+for select
+to public
+using (
+  bucket_id = 'game-downloads'
+  and (storage.foldername(name))[1] = 'logos'
+);
