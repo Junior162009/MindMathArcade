@@ -1,4 +1,4 @@
-import json,os,re,subprocess,urllib.parse,urllib.request
+import json,os,re,subprocess,urllib.parse,urllib.request,tempfile,zipfile,shutil
 from datetime import datetime,timezone
 from pathlib import Path
 U=os.environ['SUPABASE_URL'].rstrip('/');K=os.environ['SUPABASE_SERVICE_ROLE_KEY'].strip();B=U+'/rest/v1';H={'apikey':K,'Authorization':'Bearer '+K,'Content-Type':'application/json','Accept':'application/json','Prefer':'return=representation'}
@@ -9,10 +9,78 @@ def req(m,url,p=None):
    t=r.read().decode('utf-8','replace');return json.loads(t) if t else None
  except urllib.error.HTTPError as e: raise RuntimeError(f'HTTP {e.code}: {e.read().decode("utf-8","replace")}')
 def norm(g):
- g=dict(g or {});g['name']=str(g.get('name') or '').strip();g['desc']=str(g.get('desc') or g.get('description') or 'Juego educativo de TecnoMath').strip();g['description']=g['desc'];g['url']=str(g.get('url') or '').strip();g['imageUrl']=str(g.get('imageUrl') or '').strip();g['icon']=str(g.get('icon') or '🎮');g['category']=str(g.get('category') or 'otros');g['deviceCompatibility']=str(g.get('deviceCompatibility') or 'both');g['evento']=g.get('evento') or None;g['status']=str(g.get('status') or 'published');g['id']=str(g.get('id') or re.sub(r'[^a-z0-9._-]+','-',g['name'].lower()).strip('-'));g['allowVoting']=g.get('allowVoting') is not False;g['featured']=g.get('featured') is True;g['logoStoragePath']=str(g.get('logoStoragePath') or '').strip()
+ g=dict(g or {});g['name']=str(g.get('name') or '').strip();g['desc']=str(g.get('desc') or g.get('description') or 'Juego educativo de TecnoMath').strip();g['description']=g['desc'];g['url']=str(g.get('url') or '').strip();g['imageUrl']=str(g.get('imageUrl') or '').strip();g['icon']=str(g.get('icon') or '🎮');g['category']=str(g.get('category') or 'otros');g['deviceCompatibility']=str(g.get('deviceCompatibility') or 'both');g['evento']=g.get('evento') or None;g['status']=str(g.get('status') or 'published');g['id']=str(g.get('id') or re.sub(r'[^a-z0-9._-]+','-',g['name'].lower()).strip('-'));g['allowVoting']=g.get('allowVoting') is not False;g['featured']=g.get('featured') is True;g['entryFile']=str(g.get('entryFile') or 'index.html').strip();g['logoStoragePath']=str(g.get('logoStoragePath') or '').strip();g['packageStoragePath']=str(g.get('packageStoragePath') or '').strip();g['packageFileName']=str(g.get('packageFileName') or '').strip()
  try:g['order']=int(g.get('order') or 9999)
  except:g['order']=9999
  return g
+def materialize_package(g):
+ p=str(g.get('packageStoragePath') or '').strip().lstrip('/')
+ if not p: return g
+ if not p.startswith('class-a-packages/'): raise RuntimeError('Ruta de paquete no permitida.')
+ if not p.lower().endswith('.zip'): raise RuntimeError('El paquete debe ser ZIP.')
+ folder=re.sub(r'[^A-Za-z0-9._-]+','-',str(g.get('folder') or g.get('name') or 'juego').lower()).strip('-') or 'juego'
+ target=Path('games')/folder
+ tmp=None
+ try:
+  tmp=tempfile.NamedTemporaryFile(prefix='tecnomath-',suffix='.zip',delete=False);tmp.close()
+  url=f"{U}/storage/v1/object/authenticated/game-submissions/{urllib.parse.quote(p,safe='/')}"
+  req_obj=urllib.request.Request(url,headers={'apikey':K,'Authorization':'Bearer '+K})
+  total=0
+  with urllib.request.urlopen(req_obj,timeout=180) as r:
+   with open(tmp.name,'wb') as out:
+    while True:
+     chunk=r.read(1024*1024)
+     if not chunk: break
+     total+=len(chunk)
+     if total>100*1024*1024: raise RuntimeError('El ZIP supera el límite de 100 MB.')
+     out.write(chunk)
+  with zipfile.ZipFile(tmp.name) as z:
+   infos=[i for i in z.infolist() if not i.is_dir() and not i.filename.startswith('__MACOSX/') and not i.filename.endswith('/.DS_Store')]
+   if not infos: raise RuntimeError('El ZIP está vacío.')
+   if len(infos)>2000: raise RuntimeError('El ZIP contiene demasiados archivos.')
+   if sum(max(0,int(i.file_size)) for i in infos)>300*1024*1024: raise RuntimeError('El contenido descomprimido supera 300 MB.')
+   names=[]
+   for i in infos:
+    if i.flag_bits & 0x1: raise RuntimeError('Los ZIP cifrados no están permitidos.')
+    raw=i.filename.replace('\\','/')
+    norm_path=os.path.normpath(raw).replace('\\','/')
+    if norm_path in ('','.'): continue
+    if norm_path.startswith('/') or re.match(r'^[A-Za-z]:',norm_path) or any(part=='..' for part in norm_path.split('/')): raise RuntimeError('El ZIP contiene una ruta insegura.')
+    mode=(i.external_attr>>16)&0o170000
+    if mode==0o120000: raise RuntimeError('Los enlaces simbólicos dentro del ZIP no están permitidos.')
+    names.append(norm_path)
+   top={n.split('/')[0] for n in names if '/' in n}
+   has_root_file=any('/' not in n for n in names)
+   strip_root=bool(len(top)==1 and not has_root_file)
+   entries=[]
+   for i in infos:
+    raw=i.filename.replace('\\','/')
+    norm_path=os.path.normpath(raw).replace('\\','/')
+    if strip_root:
+     prefix=next(iter(top))+'/'
+     if norm_path.startswith(prefix): norm_path=norm_path[len(prefix):]
+    if not norm_path or norm_path in ('.','..'): continue
+    entries.append((i,norm_path))
+   target.mkdir(parents=True,exist_ok=True)
+   for i,rel in entries:
+    dest=target/rel;resolved=dest.resolve();base=target.resolve()
+    if base not in resolved.parents and resolved!=base: raise RuntimeError('Ruta de extracción insegura.')
+    dest.parent.mkdir(parents=True,exist_ok=True)
+    with z.open(i,'r') as src, open(dest,'wb') as dst: shutil.copyfileobj(src,dst,1024*1024)
+   candidates=[rel for _,rel in entries if rel.lower()=='index.html'] or [rel for _,rel in entries if rel.lower().endswith('/index.html')]
+   if not candidates: raise RuntimeError('No se encontró index.html dentro del ZIP.')
+   g['entryFile']=candidates[0];g['url']=f"games/{folder}/{g['entryFile']}"
+   image_ext={'.png','.jpg','.jpeg','.webp','.gif'}
+   logos=[rel for _,rel in entries if Path(rel).suffix.lower() in image_ext and re.search(r'(^|/)(logo|icon|cover|thumbnail|portada)([-_ ]|$)',Path(rel).stem,re.I)]
+   images=logos or [rel for _,rel in entries if Path(rel).suffix.lower() in image_ext]
+   if images:
+    src=target/images[0];ext=src.suffix.lower();safe_id=re.sub(r'[^A-Za-z0-9._-]+','-',str(g.get('id') or '')).strip('-')
+    if safe_id:
+     logo=Path('img/logos')/(safe_id+ext);logo.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(src,logo);g['imageUrl']=f"img/logos/{safe_id}{ext}"
+   return g
+ finally:
+  if tmp and os.path.exists(tmp.name): os.unlink(tmp.name)
+
 def materialize_logo(g):
  p=str(g.get('logoStoragePath') or '').strip().lstrip('/')
  if not p:
@@ -63,6 +131,7 @@ for j in jobs:
   if a=='publish':
    g=norm(p)
    if not g['name'] or not g['id'] or not g['url']:raise RuntimeError('Faltan nombre, ID o URL.')
+   g=materialize_package(g)
    g=materialize_logo(g)
    old=idx.get(g['id'])
    if old is None:
