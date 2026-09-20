@@ -126,7 +126,9 @@ c=load('data/games.json');done=[];changed=False
 for j in jobs:
  jid=j['id'];a=j.get('action');gid=str(j.get('game_id') or '');p=j.get('payload') or {}
  try:
-  req('PATCH',f'{B}/tecnomath_catalog_jobs?id=eq.{urllib.parse.quote(jid)}',{'status':'processing'})
+  claimed=req('PATCH',f'{B}/tecnomath_catalog_jobs?id=eq.{urllib.parse.quote(jid)}&status=eq.pending',{'status':'processing'})
+  if not claimed:
+   print('Job ya reclamado por otro publicador:',jid);continue
   c=[norm(x) for x in c];idx={str(x.get('id')):i for i,x in enumerate(c)}
   if a=='publish':
    g=norm(p)
