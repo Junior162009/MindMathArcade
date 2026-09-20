@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Space Mission - Desafíos con tiempo de lectura</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main>
+  <header class="hero">
+    <p class="eyebrow">SIMULADOR EDUCATIVO</p>
+    <h1>🚀 Space Mission</h1>
+    <p>Prepárate para una misión interplanetaria.</p>
+  </header>
+
+  <section class="resources">
+    <div class="resource"><span class="ico">⛽</span><div><small>Combustible</small><strong id="gas">1000</strong></div></div>
+    <div class="resource"><span class="ico">🫁</span><div><small>Oxígeno</small><strong id="oxygen">500</strong></div></div>
+  </section>
+
+  <section id="setup" class="screen active">
+    <div class="heading"><span class="step">1</span><div><h2>Selecciona tu destino</h2><p>Cada planeta requiere una cantidad diferente de recursos.</p></div></div>
+    <div id="planetGrid" class="grid"></div>
+
+    <div class="heading second"><span class="step">2</span><div><h2>Selecciona tu nave</h2><p>Elige la nave con la que realizarás la misión.</p></div></div>
+    <div id="shipGrid" class="grid"></div>
+
+    <div class="summary">
+      <div><small>Destino</small><strong id="planetSelected">Sin seleccionar</strong></div>
+      <div><small>Nave</small><strong id="shipSelected">Sin seleccionar</strong></div>
+    </div>
+
+    <p id="warning" class="warning hidden"></p>
+    <p id="resourceOk" class="success-note hidden"></p>
+
+    <div id="refillPanel" class="refill hidden">
+      <h3>⛽ Reabastecimiento disponible</h3>
+      <p id="refillInfo">Puedes recargar recursos antes de iniciar la misión.</p>
+      <div class="refill-buttons">
+        <button class="refill-btn" id="refillGas">⛽ +500 gasolina</button>
+        <button class="refill-btn" id="refillOxygen">🫁 +200 oxígeno</button>
+        <button class="refill-btn" id="refillBoth">⚡ Recargar ambos</button>
+      </div>
+    </div>
+
+    <button id="launch" class="primary" disabled>INICIAR MISIÓN 🚀</button>
+  </section>
+
+  <section id="mission" class="screen">
+    <div class="mission-top">
+      <div><p class="eyebrow">MISIÓN EN CURSO</p><h2 id="missionTitle">Destino</h2></div>
+      <button id="back" class="secondary">← Volver</button>
+    </div>
+
+    <div class="route-wrap">
+      <span class="planet-icon">🌎</span>
+      <div class="route"><div id="shipMarker" class="ship">🚀</div><div class="route-line"></div></div>
+      <span id="planetIcon" class="planet-icon">🪐</span>
+    </div>
+
+    <div class="progress-head"><span>Progreso de la misión</span><strong id="progressText">0%</strong></div>
+    <div class="track"><div id="progressBar" class="bar"></div></div>
+    <div class="checkpoints"><span>0%</span><span>20%</span><span>40%</span><span>60%</span><span>80%</span><span>100%</span></div>
+
+    <div id="missionCard" class="mission-card">
+      <h3 id="missionStatusTitle">🚀 Preparando lanzamiento...</h3>
+      <p id="missionStatusText">La nave comenzará a avanzar automáticamente.</p>
+      <button id="restartMission" class="secondary hidden" style="margin-top:16px">JUGAR DE NUEVO</button>
+    </div>
+  </section>
+</main>
+
+<div id="challengeOverlay" class="overlay hidden">
+  <div class="challenge-box">
+    <p class="alert-title">⚠️ ALERTA DE EMERGENCIA</p>
+    <h2 id="challengeTitle">Desafío</h2>
+    <p id="challengeDesc" class="challenge-desc"></p>
+    <div id="challengeTimer" class="timer">⏱️ <span id="timeLeft">15</span> segundos</div>
+    <div id="challengeArea" class="challenge-area"></div>
+    <div id="challengeFeedback" class="feedback"></div>
+  </div>
+</div>
+
+<script src="game.js"></script>
+</body>
+</html>
