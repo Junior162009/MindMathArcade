@@ -2,7 +2,7 @@ name: Procesar Gestor de Juegos Clase A
 on:
   workflow_dispatch:
   schedule:
-    - cron: '*/5 * * * *'
+    - cron: '*/1 * * * *'
 permissions:
   contents: write
 env:
