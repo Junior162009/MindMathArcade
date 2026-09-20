@@ -122,5 +122,27 @@
     "authorName": "Andy 11°",
     "sourceType": "internal",
     "version": "1.0"
+  },
+  {
+    "name": "MENTEX",
+    "desc": "Juego educativo MENTEX",
+    "url": "games/jolberth11°/index.html",
+    "imageUrl": "",
+    "icon": "🎮",
+    "category": "edu",
+    "deviceCompatibility": "both",
+    "evento": null,
+    "sourceType": "internal"
+  },
+  {
+    "name": "Horror School",
+    "desc": "Juego de terror para PC con descarga y galería de capturas.",
+    "url": "games/downloader/HorrorSchool/index.html",
+    "imageUrl": "",
+    "icon": "🏫👻",
+    "category": "juegos",
+    "deviceCompatibility": "desktop",
+    "evento": null,
+    "sourceType": "internal"
   }
 ]
