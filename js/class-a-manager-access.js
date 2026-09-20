@@ -1,43 +1,36 @@
-(() => {
-  async function addClassAManager() {
-    try {
-      const a = window.TecnomathAuth;
-      if (!a) return;
+/* TecnoMath — acceso Clase A al Gestor de Juegos */
+(function () {
+  'use strict';
 
-      const u = await a.currentUser();
-      if (!u) return;
+  function render(detail) {
+    const profile = detail?.profile || window.TecnomathCurrentAdmin;
+    if (!window.TecnomathAdminGuard?.isClassA(profile)) return;
 
-      const p = await a.getProfile(u);
-      const role = String(p?.role || '').toLowerCase();
-      const adminClass = String(
-        p?.admin_class ?? p?.class ?? p?.adminClass ?? ''
-      ).toUpperCase();
+    const grid = document.querySelector('.quick-grid');
+    if (!grid || grid.querySelector('[data-class-a-manager]')) return;
 
-      if (role !== 'admin' || adminClass !== 'A') return;
+    const card = document.createElement('a');
+    card.className = 'quick-card external class-a-manager-card';
+    card.dataset.classAManager = 'true';
+    card.href = './games-manager.html';
+    card.setAttribute('aria-label', 'Abrir Gestor de Juegos Clase A');
+    card.innerHTML =
+      '<span class="quick-icon" aria-hidden="true">🎮</span>' +
+      '<strong>Gestor de Juegos</strong>' +
+      '<small>Agregar, editar, ordenar, ocultar y publicar juegos desde un solo panel.</small>';
+    grid.appendChild(card);
+  }
 
-      const grid = document.querySelector('.quick-grid');
-      if (!grid || grid.querySelector('[data-class-a-manager]')) return;
-
-      const x = document.createElement('a');
-      x.className = 'quick-card external';
-      x.dataset.classA = 'manager';
-      x.dataset.classAManager = 'true';
-      x.href = './games-manager.html';
-      x.innerHTML = '<span class="quick-icon">🎮</span><strong>Gestor de juegos Clase A</strong><small>Agregar, editar, ordenar, ocultar y publicar juegos desde un solo panel.</small>';
-      grid.appendChild(x);
-    } catch (e) {
-      console.warn('Clase A manager access:', e);
+  function boot() {
+    if (window.TecnomathAdminGuard?.requireAdmin) {
+      window.TecnomathAdminGuard.requireAdmin({ redirect: false }).then(render).catch(() => {});
     }
+    window.addEventListener('tecnomath:admin-ready', render, { once: false });
   }
 
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', addClassAManager, { once: true });
+    document.addEventListener('DOMContentLoaded', boot, { once: true });
   } else {
-    addClassAManager();
+    boot();
   }
-
-  // Auth may finish loading after DOMContentLoaded.
-  window.addEventListener('tecnomath:admin-ready', addClassAManager);
-  window.addEventListener('tecnomath:auth-ready', addClassAManager);
-  window.addEventListener('tecnomath-auth-ready', addClassAManager);
 })();
