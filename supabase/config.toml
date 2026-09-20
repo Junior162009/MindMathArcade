@@ -1,0 +1,25 @@
+project_id = "xdszveoxdrdnwwzzvkav"
+
+[functions.send-quiz-email]
+verify_jwt = false
+
+[functions.quiz-device]
+verify_jwt = false
+
+[functions.admin-list-users]
+verify_jwt = true
+
+[functions.send-voting-report]
+verify_jwt = true
+
+[functions.submit-game-vote]
+verify_jwt = false
+
+[functions.school-attendance-api]
+verify_jwt = true
+
+[functions.ai-assistant]
+verify_jwt = true
+
+[functions.aulacontigo-ai]
+verify_jwt = false
