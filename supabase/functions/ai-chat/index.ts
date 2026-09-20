@@ -1,6 +1,6 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 const OPENROUTER_URL="https://openrouter.ai/api/v1/chat/completions";
-const MODEL=Deno.env.get("OPENROUTER_MODEL")||"openai/gpt-4.1-mini";
+const MODEL=Deno.env.get("OPENROUTER_MODEL")||"openrouter/free";
 const API_KEY=Deno.env.get("OPENROUTER_API_KEY");
 const cors={"Access-Control-Allow-Origin":"https://tecnomath.online","Access-Control-Allow-Headers":"authorization, x-client-info, apikey, content-type","Access-Control-Allow-Methods":"POST, OPTIONS","Content-Type":"application/json"};
 const SYSTEM=[
