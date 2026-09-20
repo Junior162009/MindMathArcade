@@ -1,94 +1,36 @@
-name: Fix Supabase portal session bridge
+name: Verify Supabase portal session bridge
 
 on:
   push:
     branches: [main]
+    paths:
+      - 'js/tecnomath-auth.js'
+      - 'js/shared.js'
+      - 'index.html'
+      - '.github/workflows/fix-supabase-portal-session.yml'
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  patch-shared-auth:
+  verify:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Patch shared auth bridge
-        shell: python
-        run: |
-          from pathlib import Path
-          p = Path('js/shared.js')
-          s = p.read_text(encoding='utf-8')
-          marker = '/* TECNOMATH_SUPABASE_PORTAL_BRIDGE_V1 */'
-          if marker in s:
-              print('Bridge already installed')
-              raise SystemExit(0)
-
-          bridge = r'''
-
-  /* TECNOMATH_SUPABASE_PORTAL_BRIDGE_V1 */
-  // Puente: el portal histórico pinta la identidad desde Tecnomath/Firebase,
-  // mientras el login oficial ahora está en Supabase.
-  function setupSupabasePortalBridge(){
-    const path=location.pathname;
-    const isMainIndex=path==='/'||path.endsWith('/index.html');
-    if(!isMainIndex)return;
-
-    const sync=()=>{
-      if(!window.TecnomathAuth)return;
-      window.TecnomathAuth.authState(async(user,profile)=>{
-        const display=document.getElementById('userDisplay');
-        const authLink=document.getElementById('authLink');
-        const logoutBtn=document.getElementById('logoutBtn');
-        if(!user){
-          window.TecnomathCurrentAdmin=null;
-          if(display)display.textContent='Invitado';
-          if(logoutBtn)logoutBtn.style.display='none';
-          if(authLink){authLink.style.display='inline-block';authLink.href='pages/auth.html';authLink.textContent='🔑 ACCEDER';}
-          return;
-        }
-        const username=String(profile?.username||user.user_metadata?.username||user.email?.split('@')[0]||'Usuario').trim();
-        window.Tecnomath.setSession(username);
-        window.TecnomathCurrentAdmin=profile?.role==='admin'?profile:null;
-        if(display)display.textContent=username+' · 💰 '+(window.Tecnomath.getCoins?.()??0);
-        if(authLink){authLink.style.display='inline-block';authLink.href='pages/profile.html';authLink.textContent='👤 PERFIL';}
-        if(logoutBtn)logoutBtn.style.display='inline-block';
-      });
-    };
-
-    const load=()=>{
-      if(window.TecnomathAuth)return sync();
-      if(document.querySelector('script[data-tecnomath-auth-bridge]'))return;
-      const s=document.createElement('script');
-      s.src='/js/tecnomath-auth.js?v=portal-session-2';
-      s.async=true;
-      s.dataset.tecnomathAuthBridge='true';
-      s.onload=sync;
-      s.onerror=()=>console.warn('TecnoMath: no se pudo cargar Supabase Auth.');
-      document.head.appendChild(s);
-    };
-    if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',load,{once:true});else load();
-  }
-  setupSupabasePortalBridge();
-'''
-          if not s.rstrip().endswith('})();'):
-              raise SystemExit('shared.js no termina con el cierre esperado')
-          idx = s.rfind('})();')
-          s = s[:idx] + bridge + '\n' + s[idx:]
-          p.write_text(s, encoding='utf-8')
-          print('Bridge installed')
-
-      - name: Commit bridge
+        with:
+          fetch-depth: 1
+      - name: Verificar integración Supabase
         shell: bash
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add js/shared.js
-          if git diff --cached --quiet; then
-            echo "No changes"
-            exit 0
+          set -euo pipefail
+          test -f js/tecnomath-auth.js
+          test -f js/shared.js
+          grep -q 'js/tecnomath-auth.js' index.html
+          grep -q 'window.TecnomathAuth' js/tecnomath-auth.js
+          if grep -qE 'firebase\.auth\(|firebase\.database\(' js/shared.js; then
+            echo "ERROR: shared.js todavía contiene llamadas directas a Firebase."
+            exit 1
           fi
-          git commit -m "fix(auth): bridge Supabase session to TecnoMath portal"
-          git push
+          echo "Puente de sesión Supabase: OK"
