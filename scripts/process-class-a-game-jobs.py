@@ -37,6 +37,10 @@ for j in jobs:
    if not g['name'] or not g['id'] or not g['url']:raise RuntimeError('Faltan nombre, ID o URL.')
    old=idx.get(g['id'])
    if old is None:
+    for i,x in enumerate(c):
+     if str(x.get('name') or '').strip().lower()==g['name'].lower() or str(x.get('url') or '').strip().lower()==g['url'].lower():
+      old=i;break
+   if old is None:
     if any(x['name'].lower()==g['name'].lower() for x in c):raise RuntimeError('Nombre duplicado.')
     if any(x['url'].lower()==g['url'].lower() for x in c):raise RuntimeError('URL duplicada.')
     c.append(g)
