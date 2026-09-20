@@ -68,7 +68,7 @@ function normalizeGame(input: Game): Game {
   g.name = String(g.name ?? "").trim();
   g.desc = String(g.desc ?? g.description ?? "Juego educativo de TecnoMath").trim();
   g.description = String(g.description ?? g.desc).trim();
-  g.id = cleanId(g.id || g.name);
+  if (g.id) g.id = cleanId(g.id);
   g.icon = String(g.icon || "🎮");
   g.category = String(g.category || "otros");
   g.deviceCompatibility = String(g.deviceCompatibility || "both");
@@ -89,7 +89,7 @@ function validateCatalog(catalog: Game[]) {
   const names = new Set<string>();
   const urls = new Set<string>();
   for (const g of catalog) {
-    const id = String(g.id || "");
+    const id = String(g.id || cleanId(g.name) || "");
     const name = String(g.name || "").trim().toLowerCase();
     const url = String(g.url || "").trim();
     if (!/^[a-z0-9._-]+$/i.test(id)) throw new Error("Catálogo inválido: ID inseguro.");
