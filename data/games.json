@@ -285,5 +285,24 @@
     "urlType": "internal",
     "publishDate": "2026-09-20T19:47:26.980Z",
     "grade": ""
+  },
+  {
+    "id": "tecnomath-ia",
+    "name": "TecnoMath IA",
+    "desc": "Asistente educativo de inteligencia artificial para aprender, practicar y resolver dudas.",
+    "url": "games/IA/index.html",
+    "imageUrl": "",
+    "icon": "🤖",
+    "category": "IA",
+    "deviceCompatibility": "both",
+    "evento": null,
+    "sourceType": "internal",
+    "description": "Tutor educativo con IA para estudiantes.",
+    "status": "published",
+    "allowVoting": false,
+    "featured": true,
+    "order": 15,
+    "urlType": "internal",
+    "grade": "Todos"
   }
 ]
