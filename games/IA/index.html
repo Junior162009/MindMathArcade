@@ -1,30 +1,66 @@
 <!doctype html>
-<html lang="es"><head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#070712"><meta name="description" content="TecnoMath IA: asistente educativo.">
-<title>TecnoMath IA</title><link rel="stylesheet" href="css/ia.css"><script src="/js/tecnomath-progress.js?v=20260911-9"></script>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b0b0f">
+<meta name="description" content="TecnoMath IA: asistente educativo.">
+<title>TecnoMath IA</title>
+<link rel="stylesheet" href="css/ia.css">
+<script src="/js/tecnomath-progress.js?v=20260922-1"></script>
 </head>
-<body><div class="app-shell">
-<header class="topbar">
-<a class="brand" href="../../index.html"><span class="brand-mark">TM</span><span><b>TECNOMATH</b><small>INTELIGENCIA ARTIFICIAL</small></span></a>
-<div class="top-actions"><span class="status"><i></i> IA ONLINE</span><button id="clearBtn" class="icon-btn" type="button" title="Nueva conversación">＋</button></div>
-</header>
-<main class="layout">
-<aside class="intro-panel"><div class="orb">🤖</div><p class="eyebrow">ASISTENTE EDUCATIVO</p>
-<h1>Aprende con<br><span>TecnoMath IA</span></h1>
-<p class="lead">Pregunta, practica y entiende. La IA te explica paso a paso y se adapta a lo que necesitas.</p>
-<div class="feature-list"><div><b>01</b><span>Explicaciones claras y paso a paso</span></div><div><b>02</b><span>Matemáticas, ciencias, español y tecnología</span></div><div><b>03</b><span>Ejercicios, tareas y preparación de exámenes</span></div></div>
-<div class="tip"><strong>💡 Consejo</strong><span>Cuéntame qué grado cursas o qué tema estás viendo para adaptar mejor la explicación.</span></div></aside>
-<section class="chat-card" aria-label="Chat con TecnoMath IA">
-<div class="chat-head"><div><strong>TecnoMath IA</strong><span>Tu tutor digital</span></div><span class="secure">● CONECTADO</span></div>
-<div id="messages" class="messages" aria-live="polite"></div>
-<div class="quick-actions">
-<button data-prompt="Explícame un tema de matemáticas paso a paso">🧮 Matemáticas</button>
-<button data-prompt="Explícame un tema de ciencias con un ejemplo">🔬 Ciencias</button>
-<button data-prompt="Ayúdame a mejorar mi español y explícame por qué">📚 Español</button>
-<button data-prompt="Explícame un concepto de tecnología de forma sencilla">💻 Tecnología</button>
-<button data-prompt="Créame un ejercicio de nivel escolar y luego revisa mi respuesta">📝 Crear ejercicio</button>
+<body>
+<div class="app">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-top">
+      <a class="brand" href="../../index.html" aria-label="Volver a TecnoMath">
+        <span class="brand-mark">TM</span>
+        <span class="brand-name">TecnoMath</span>
+      </a>
+      <button id="newChatBtn" class="new-chat" type="button"><span>＋</span> Nueva conversación</button>
+      <nav class="side-nav" aria-label="Navegación">
+        <a class="nav-item active" href="#"><span>✦</span> TecnoMath IA</a>
+        <a class="nav-item" href="../../index.html"><span>⌂</span> Explorar TecnoMath</a>
+      </nav>
+      <div class="history-title">ASISTENTE</div>
+      <div class="history-placeholder">Tu conversación actual<br><small>El historial se mantiene durante esta sesión.</small></div>
+    </div>
+    <div class="sidebar-bottom">
+      <div class="ai-badge"><i></i><span><b>IA online</b><small>Asistente educativo</small></span></div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="mobile-topbar">
+      <button id="menuBtn" class="icon-btn" type="button" aria-label="Abrir menú">☰</button>
+      <span>TecnoMath IA</span>
+      <button id="mobileNewBtn" class="icon-btn" type="button" aria-label="Nueva conversación">＋</button>
+    </header>
+
+    <section class="chat">
+      <div id="messages" class="messages" aria-live="polite"></div>
+
+      <div class="composer-wrap">
+        <div class="quick-actions" aria-label="Acciones rápidas">
+          <button data-prompt="Explícame un tema de matemáticas paso a paso">🧮 Matemáticas</button>
+          <button data-prompt="Explícame un tema de ciencias con un ejemplo">🔬 Ciencias</button>
+          <button data-prompt="Ayúdame con español y explícame por qué">📚 Español</button>
+          <button data-prompt="Explícame un concepto de tecnología de forma sencilla">💻 Tecnología</button>
+          <button data-prompt="Créame un ejercicio de nivel escolar y luego revisa mi respuesta">📝 Crear ejercicio</button>
+        </div>
+        <form id="chatForm" class="composer">
+          <textarea id="input" rows="1" maxlength="4000" placeholder="Pregunta lo que quieras..." aria-label="Pregunta para TecnoMath IA"></textarea>
+          <button id="sendBtn" class="send-btn" type="submit" aria-label="Enviar">↑</button>
+        </form>
+        <div class="composer-foot">
+          <span id="counter">0/4000</span>
+          <span>TecnoMath IA puede cometer errores. Verifica la información importante.</span>
+        </div>
+      </div>
+    </section>
+  </main>
 </div>
-<form id="chatForm" class="composer"><textarea id="input" rows="1" maxlength="4000" placeholder="Escribe tu pregunta..." aria-label="Pregunta para TecnoMath IA"></textarea><button id="sendBtn" type="submit" aria-label="Enviar">➤</button></form>
-<div class="composer-foot"><span id="counter">0/4000</span><span>Enter para enviar · Shift+Enter para nueva línea</span></div>
-</section></main></div><script src="js/ia.js"></script></body></html>
+<div id="sidebarBackdrop" class="backdrop"></div>
+<script src="js/ia.js"></script>
+</body>
+</html>
