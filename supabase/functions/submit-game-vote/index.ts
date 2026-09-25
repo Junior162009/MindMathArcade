@@ -15,7 +15,6 @@ const CORS = {
 const clean = (value: unknown, max: number) =>
   String(value ?? "").replace(/\s+/g, " ").trim().slice(0, max);
 
-const allowedGrades = new Set(["6°", "7°", "8°", "9°", "10°", "11°"]);
 let catalogCache: { expiresAt: number; ids: Set<string> } = {
   expiresAt: 0,
   ids: new Set()
@@ -63,24 +62,37 @@ Deno.serve(async (req: Request) => {
   try {
     const body = await req.json().catch(() => ({}));
     const voterName = clean(body.voter_name, 80);
-    const grade = clean(body.grade, 10);
+    const gradeId = clean(body.grade_id, 80);
     const gameId = clean(body.game_id, 500);
 
     if (voterName.length < 2) throw new Error("Escribe el nombre del votante.");
-    if (!allowedGrades.has(grade)) throw new Error("Selecciona un grado válido.");
+    if (!gradeId) throw new Error("Selecciona un grado válido.");
     if (!gameId) throw new Error("Selecciona un juego.");
 
     const validGameIds = await getVotingGameIds();
-    if (!validGameIds.has(gameId)) throw new Error("El juego seleccionado no está disponible para votación.");
+    if (!validGameIds.has(gameId)) {
+      throw new Error("El juego seleccionado no está disponible para votación.");
+    }
+
+    const { data: gradeRow, error: gradeError } = await admin
+      .from("tecnomath_voting_grades")
+      .select("id,grade,group_name,label")
+      .eq("id", gradeId)
+      .eq("active", true)
+      .maybeSingle();
+
+    if (gradeError) throw gradeError;
+    if (!gradeRow) throw new Error("El grado seleccionado no existe o está inactivo.");
 
     const { data, error } = await admin
       .from("game_votes")
       .insert({
         game_id: gameId,
         voter_name: voterName,
-        grade
+        grade: gradeRow.label,
+        grade_id: gradeRow.id
       })
-      .select("id, game_id, created_at")
+      .select("id, game_id, grade_id, grade, created_at")
       .single();
 
     if (error) {
