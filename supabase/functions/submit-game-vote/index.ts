@@ -63,10 +63,12 @@ Deno.serve(async (req: Request) => {
     const body = await req.json().catch(() => ({}));
     const voterName = clean(body.voter_name, 80);
     const gradeId = clean(body.grade_id, 80);
+    const studentId = clean(body.student_id, 80);
     const gameId = clean(body.game_id, 500);
 
     if (voterName.length < 2) throw new Error("Escribe el nombre del votante.");
     if (!gradeId) throw new Error("Selecciona un grado válido.");
+    if (!studentId) throw new Error("Selecciona un estudiante válido.");
     if (!gameId) throw new Error("Selecciona un juego.");
 
     const validGameIds = await getVotingGameIds();
@@ -84,15 +86,27 @@ Deno.serve(async (req: Request) => {
     if (gradeError) throw gradeError;
     if (!gradeRow) throw new Error("El grado seleccionado no existe o está inactivo.");
 
+    const { data: studentRow, error: studentError } = await admin
+      .from("tecnomath_voting_students")
+      .select("id,grade_id,full_name,active")
+      .eq("id", studentId)
+      .eq("active", true)
+      .maybeSingle();
+
+    if (studentError) throw studentError;
+    if (!studentRow) throw new Error("El estudiante seleccionado no existe o está inactivo.");
+    if (String(studentRow.grade_id) !== String(gradeRow.id)) throw new Error("El estudiante no pertenece al grado seleccionado.");
+
     const { data, error } = await admin
       .from("game_votes")
       .insert({
         game_id: gameId,
         voter_name: voterName,
         grade: gradeRow.label,
-        grade_id: gradeRow.id
+        grade_id: gradeRow.id,
+        student_id: studentRow.id
       })
-      .select("id, game_id, grade_id, grade, created_at")
+      .select("id, game_id, grade_id, student_id, grade, created_at")
       .single();
 
     if (error) {
