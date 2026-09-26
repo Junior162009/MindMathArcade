@@ -24,6 +24,8 @@
 
   <main class="game-shell">
     <div class="canvas-wrap">
+      <div class="external-art" aria-hidden="true"><img id="externalCityArt" hidden></div>
+      <div id="lottieFx" class="lottie-fx" aria-hidden="true"><canvas id="mathverseLottie" width="360" height="360"></canvas></div>
       <canvas id="world" width="1280" height="720" aria-label="Mundo jugable de Mathverse"></canvas>
       <div id="interaction" class="interaction hidden">E · INTERACTUAR</div>
       <div id="toast" class="toast" aria-live="polite"></div>
@@ -37,7 +39,7 @@
       <section><h3>⚡ ENERGÍA</h3><div class="meter"><i id="energyBar"></i></div><b id="energyText">0 / 100</b></section>
       <section><h3>🎯 PROGRESO</h3><div class="progress-list" id="problemList"></div></section>
       <section><h3>🧠 HABILIDAD</h3><p>Álgebra · Variables · Relaciones</p><div class="skill-bar"><i id="skillBar"></i></div></section>
-      <p class="save-status" id="saveStatus">● Guardado local</p>
+      <p class="save-status" id="saveStatus">● Guardado local</p><p class="external-status" id="externalStatus">● Recursos externos gratuitos</p><p class="external-credit" id="externalCredit" hidden></p>
     </aside>
   </main>
 </div>
@@ -70,6 +72,7 @@
 </div>
 <script src="mathverse-data.js?v=20260925-mvp"></script>
 <script src="math-engine.js?v=20260925-mvp"></script>
+<script src="external-assets.js?v=20260925-free-assets"></script>
 <script src="mathverse.js?v=20260925-mvp"></script>
 </body>
 </html>
