@@ -34,3 +34,15 @@ No se almacenan contraseñas, tokens ni secretos.
 PC: WASD / flechas + E. Esc pausa.
 
 Móvil/tablet: controles táctiles.
+
+
+## Recursos externos gratuitos
+
+Mathverse incorpora una capa opcional de recursos externos que no es crítica para el gameplay:
+
+- Openverse API para arte ambiental con licencias abiertas y atribución cuando está disponible.
+- dotLottie / LottieFiles para una animación externa al resolver sistemas.
+- Canvas/CSS como fallback si Internet falla.
+- Los recursos externos se cargan de forma diferida.
+- No se guarda ninguna API key en el frontend.
+- Problemas, consecuencias, progreso y guardado siguen funcionando sin recursos externos.
