@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#070713">
+<meta name="description" content="TecnoMath: Mathverse — las matemáticas modifican físicamente el mundo.">
+<title>🎮 TECNOMATH: MATHVERSE</title>
+<link rel="stylesheet" href="mathverse.css">
+<script src="../../js/tecnomath-progress.js?v=20260925-mathverse"></script>
+</head>
+<body>
+<div id="app">
+  <header class="hud">
+    <a class="brand" href="../../index.html" aria-label="Volver a TecnoMath">TM <span>TECNO<span>MATH</span></span></a>
+    <div class="zone-title"><b>🌆 CIUDAD DE LAS VARIABLES</b><small>Mathverse · Álgebra</small></div>
+    <div class="hud-stats">
+      <div><small>NIVEL</small><strong id="level">1</strong></div>
+      <div class="xp-box"><small>XP</small><strong id="xp">0</strong><div class="xp-track"><i id="xpBar"></i></div></div>
+      <button id="inventoryBtn" class="hud-btn" type="button">🎒 <span>Inventario</span></button>
+      <button id="pauseBtn" class="hud-btn" type="button">Ⅱ</button>
+    </div>
+  </header>
+
+  <main class="game-shell">
+    <div class="canvas-wrap">
+      <canvas id="world" width="1280" height="720" aria-label="Mundo jugable de Mathverse"></canvas>
+      <div id="interaction" class="interaction hidden">E · INTERACTUAR</div>
+      <div id="toast" class="toast" aria-live="polite"></div>
+      <div class="mission"><span>OBJETIVO</span><b id="missionText">Explora la ciudad y encuentra una máquina activa.</b></div>
+      <div id="touchControls" class="touch-controls" aria-label="Controles táctiles">
+        <button data-key="ArrowUp">▲</button><div><button data-key="ArrowLeft">◀</button><button data-key="ArrowDown">▼</button><button data-key="ArrowRight">▶</button></div>
+      </div>
+    </div>
+    <aside class="side-panel">
+      <section><h3>🌆 CIUDAD</h3><p id="worldStatus">5 sistemas matemáticos esperan ser activados.</p></section>
+      <section><h3>⚡ ENERGÍA</h3><div class="meter"><i id="energyBar"></i></div><b id="energyText">0 / 100</b></section>
+      <section><h3>🎯 PROGRESO</h3><div class="progress-list" id="problemList"></div></section>
+      <section><h3>🧠 HABILIDAD</h3><p>Álgebra · Variables · Relaciones</p><div class="skill-bar"><i id="skillBar"></i></div></section>
+      <p class="save-status" id="saveStatus">● Guardado local</p>
+    </aside>
+  </main>
+</div>
+
+<div id="problemModal" class="modal hidden" role="dialog" aria-modal="true">
+  <div class="modal-card problem-card">
+    <button class="close" data-close="problemModal" aria-label="Cerrar">×</button>
+    <div class="problem-kicker" id="problemZone">SISTEMA MATEMÁTICO</div>
+    <h2 id="problemTitle">La máquina necesita energía</h2>
+    <p id="problemStory"></p>
+    <div class="equation" id="equation"></div>
+    <div class="attempts" id="attempts"></div>
+    <input id="answer" inputmode="decimal" autocomplete="off" placeholder="Escribe tu solución…" aria-label="Solución">
+    <div class="problem-actions"><button id="solveBtn" class="primary">ACTIVAR</button><button id="hintBtn" class="secondary">💡 PISTA</button></div>
+    <div id="hint" class="hint"></div>
+    <div id="feedback" class="feedback"></div>
+  </div>
+</div>
+
+<div id="inventoryModal" class="modal hidden" role="dialog" aria-modal="true">
+ <div class="modal-card"><button class="close" data-close="inventoryModal">×</button><div class="problem-kicker">INVENTARIO</div><h2>Herramientas de Mathverse</h2><div id="inventoryGrid" class="inventory-grid"></div></div>
+</div>
+
+<div id="pauseModal" class="modal hidden" role="dialog" aria-modal="true">
+ <div class="modal-card pause-card"><div class="problem-kicker">MATHVERSE</div><h2>Juego en pausa</h2><p>Las variables siguen esperando. El mundo no avanza mientras estás en pausa.</p><button id="resumeBtn" class="primary">CONTINUAR</button><a href="../../index.html" class="secondary link-btn">VOLVER A TECNOMATH</a></div>
+</div>
+
+<div id="finishModal" class="modal hidden" role="dialog" aria-modal="true">
+ <div class="modal-card"><div class="finish-icon">🌌</div><div class="problem-kicker">ZONA COMPLETADA</div><h2>La ciudad vuelve a tener energía.</h2><p>Has demostrado que las variables pueden cambiar el mundo. La siguiente frontera será el Circuito Vectorial.</p><div class="reward">+250 XP · TÍTULO: EXPLORADOR DE VARIABLES</div><button id="finishBtn" class="primary">SEGUIR EXPLORANDO</button></div>
+</div>
+<script src="mathverse.js?v=20260925-mvp"></script>
+</body>
+</html>
