@@ -379,10 +379,10 @@
   },
   {
     "id": "tecnomath-ia",
-    "name": "TecnoMath IA",
+    "name": "💎DMVJY💎",
     "desc": "Asistente educativo de inteligencia artificial para aprender, practicar y resolver dudas.",
     "url": "games/IA/index.html",
-    "imageUrl": "img/tecnomath-ia.svg",
+    "imageUrl": "img/logos/tecnomath-ia.jpeg?v=1790532799838",
     "icon": "🤖",
     "category": "IA",
     "deviceCompatibility": "both",
@@ -400,7 +400,8 @@
     "entryFile": "index.html",
     "logoStoragePath": "",
     "packageStoragePath": "",
-    "packageFileName": ""
+    "packageFileName": "",
+    "identityVersion": 1790532800273
   },
   {
     "id": "mathverse",
