@@ -23,3 +23,6 @@ verify_jwt = true
 
 [functions.aulacontigo-ai]
 verify_jwt = false
+
+[functions.ai-chat]
+verify_jwt = false
