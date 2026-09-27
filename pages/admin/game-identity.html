@@ -49,7 +49,7 @@ const ALLOWED=['image/png','image/jpeg','image/webp','image/svg+xml'];
 const MAX=2*1024*1024;
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function status(t,type=''){ $('status').textContent=t; $('status').className='status '+type; }
-function root(){return location.pathname.includes('/pages/')?'../':'./'}
+function root(){return location.pathname.includes('/pages/admin/')?'../../':'./'}
 function abs(p){return new URL(p,location.href).href}
 function mark(){dirty=true;$('save').disabled=false;$('name').classList.add('dirty')}
 function clearDirty(){dirty=false;$('save').disabled=true;$('name').classList.remove('dirty')}
