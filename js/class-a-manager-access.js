@@ -19,6 +19,16 @@
       '<strong>Gestor de Juegos</strong>' +
       '<small>Agregar, editar, ordenar, ocultar y publicar juegos desde un solo panel.</small>';
     grid.appendChild(card);
+    const visibility=document.createElement('a');
+    visibility.className='quick-card external class-a-visibility-card';
+    visibility.dataset.classAVisibility='true';
+    visibility.href='./game-visibility.html';
+    visibility.setAttribute('aria-label','Abrir Gestión de visibilidad de juegos');
+    visibility.innerHTML=
+      '<span class="quick-icon" aria-hidden="true">👁️</span>' +
+      '<strong>Visibilidad de juegos</strong>' +
+      '<small>Mostrar u ocultar juegos al instante sin GitHub Actions ni reconstruir el catálogo.</small>';
+    grid.appendChild(visibility);
   }
 
   function boot() {
