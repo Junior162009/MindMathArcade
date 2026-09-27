@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Editar identidad · TecnoMath</title>
+<link rel="stylesheet" href="../../css/admin.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.0/dist/umd/supabase.min.js"></script>
+<script src="../../js/tecnomath-auth.js?v=20260927-identity"></script>
+<script src="../../js/admin-guard.js?v=20260927-identity"></script>
+<style>
+:root{--bg:#060610;--card:#0d0d1a;--line:#292943;--cyan:#00ffff;--green:#39ff14;--muted:#aaa}
+body{background:radial-gradient(circle at 15% 0%,#12122a 0,transparent 34%),var(--bg);color:#fff;font-family:Arial,sans-serif}
+.wrap{max-width:900px;margin:0 auto;padding:24px}.back{color:var(--cyan);text-decoration:none}.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:22px;margin-top:18px}.grid{display:grid;gap:16px}.label{display:grid;gap:8px;font-weight:700}.label small{color:var(--muted);font-weight:400}.input,.select{width:100%;box-sizing:border-box;padding:13px;border-radius:10px;border:1px solid var(--line);background:#090914;color:#fff}.logo-box{display:grid;gap:12px;justify-items:center;padding:20px;border:1px dashed var(--line);border-radius:14px;background:#090914}.logo-preview{width:180px;height:180px;object-fit:contain;border-radius:14px;background:#111126;display:none}.logo-preview.show{display:block}.upload{display:inline-flex;align-items:center;justify-content:center;padding:12px 16px;border-radius:10px;background:#111126;border:1px solid var(--line);cursor:pointer}.upload input{display:none}.actions{display:flex;gap:10px;flex-wrap:wrap}.btn{border:0;border-radius:10px;padding:13px 18px;font-weight:800;cursor:pointer}.save{background:var(--green);color:#001}.save:disabled{opacity:.55;cursor:not-allowed}.cancel{background:#111126;color:#fff;border:1px solid var(--line)}.status{margin-top:14px;padding:12px;border-radius:10px;background:#111126;color:#ddd}.status.ok{color:var(--green)}.status.error{color:#ff9db0}.meta{font-size:12px;color:var(--muted)}.dirty{outline:1px solid #ffe600}.game-row{display:flex;gap:12px;align-items:center}.game-thumb{width:48px;height:48px;object-fit:contain;border-radius:8px;background:#111126}.game-row span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}@media(max-width:600px){.wrap{padding:14px}.card{padding:16px}.logo-preview{width:140px;height:140px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<a class="back" href="index.html">← Volver al panel Admin A</a>
+<section class="card">
+<p style="color:var(--cyan);letter-spacing:.12em;font-size:12px;font-weight:800">ADMINISTRACIÓN · CLASE A</p>
+<h1>🎨 Editar identidad del juego</h1>
+<p style="color:var(--muted)">Cambia el nombre y el logo sin modificar el <code>game_id</code>. Los cambios se escriben en GitHub y quedan en el catálogo oficial.</p>
+<div id="status" class="status">⏳ Comprobando permisos…</div>
+<div class="grid" style="margin-top:18px">
+<label class="label">Seleccionar juego
+<select id="game" class="select"><option value="">⏳ Cargando catálogo…</option></select>
+<small>Solo aparecen juegos del catálogo maestro.</small></label>
+<div id="currentMeta" class="meta"></div>
+<div class="logo-box">
+<strong>🖼️ Logo actual / vista previa</strong>
+<img id="preview" class="logo-preview" alt="Vista previa del logo">
+<div id="noLogo" class="meta">Sin logo</div>
+<label class="upload">📤 Cargar nuevo logo<input id="logo" type="file" accept=".png,.jpg,.jpeg,.webp,.svg,image/png,image/jpeg,image/webp,image/svg+xml"></label>
+<div id="fileMeta" class="meta">PNG, JPG, JPEG, WEBP o SVG · máximo 2 MB</div>
+</div>
+<label class="label">Nombre del juego
+<input id="name" class="input" maxlength="120" autocomplete="off">
+<small>El ID estable no cambia.</small></label>
+<div class="actions"><button id="save" class="btn save" disabled>💾 Guardar cambios</button><button id="cancel" class="btn cancel" type="button">↩️ Descartar cambios</button></div>
+</div>
+</section>
+</div>
+<script>
+'use strict';
+(async()=>{
+const $=id=>document.getElementById(id);let db=null,catalog=[],selected=null,dirty=false,logoFile=null;
+const ALLOWED=['image/png','image/jpeg','image/webp','image/svg+xml'];
+const MAX=2*1024*1024;
+const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function status(t,type=''){ $('status').textContent=t; $('status').className='status '+type; }
+function root(){return location.pathname.includes('/pages/')?'../':'./'}
+function abs(p){return new URL(p,location.href).href}
+function mark(){dirty=true;$('save').disabled=false;$('name').classList.add('dirty')}
+function clearDirty(){dirty=false;$('save').disabled=true;$('name').classList.remove('dirty')}
+function showGame(g){selected=g||null;if(!g){$('name').value='';$('currentMeta').textContent='';$('preview').classList.remove('show');$('noLogo').style.display='block';return}
+$('name').value=g.name||'';$('currentMeta').textContent='ID estable: '+g.id+' · Logo: '+(g.imageUrl||'sin logo');
+const src=g.imageUrl?abs(g.imageUrl)+'?v='+encodeURIComponent(g.updatedAt||'catalog'):'';$('preview').src=src;$('preview').classList.toggle('show',!!src);$('noLogo').style.display=src?'none':'block';logoFile=null;$('logo').value='';$('fileMeta').textContent='PNG, JPG, JPEG, WEBP o SVG · máximo 2 MB';clearDirty();}
+function render(){const s=$('game');s.innerHTML='<option value="">Selecciona un juego…</option>'+catalog.filter(g=>!g.evento).map(g=>'<option value="'+esc(g.id)+'">'+esc(g.name||g.id)+'</option>').join('');if(selected)s.value=selected.id}
+async function load(){const r=await fetch(root()+'data/games.json?v='+Date.now(),{cache:'no-store'});if(!r.ok)throw Error('No se pudo cargar el catálogo.');catalog=await r.json();render();if(catalog.length){sselect(catalog[0].id)}}
+function sselect(id){const g=catalog.find(x=>String(x.id)===String(id));showGame(g);$('game').value=id}
+function validName(v){return v.trim().length>=1&&v.trim().length<=120}
+function fileType(f){return ALLOWED.includes(f.type)||/\.(png|jpe?g|webp|svg)$/i.test(f.name)}
+$('game').addEventListener('change',e=>{if(dirty&&!confirm('⚠️ Tienes cambios sin guardar. ¿Cambiar de juego y descartarlos?')){e.target.value=selected?.id||'';return} sselect(e.target.value)});
+$('name').addEventListener('input',mark);
+$('logo').addEventListener('change',e=>{const f=e.target.files?.[0];if(!f)return;if(!fileType(f)){e.target.value='';status('❌ Formato no permitido.','error');return}if(f.size>MAX){e.target.value='';status('❌ El logo supera 2 MB.','error');return}logoFile=f;const u=URL.createObjectURL(f);$('preview').src=u;$('preview').classList.add('show');$('noLogo').style.display='none';$('fileMeta').textContent=f.name+' · '+Math.round(f.size/1024)+' KB';mark()});
+$('cancel').onclick=()=>{if(dirty&&!confirm('¿Descartar los cambios sin guardar?'))return;showGame(selected)};
+window.addEventListener('beforeunload',e=>{if(dirty){e.preventDefault();e.returnValue=''}});
+$('save').onclick=async()=>{
+if(!selected)return;if(!validName($('name').value)){status('❌ El nombre es obligatorio.','error');return}
+$('save').disabled=true;status('⏳ Guardando en GitHub…');
+try{
+let logo=null;
+if(logoFile){
+ const b64=await new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(String(r.result).split(',')[1]);r.onerror=rej;r.readAsDataURL(logoFile)});
+ logo={name:logoFile.name,type:logoFile.type,size:logoFile.size,base64:b64};
+}
+const {data:result,error}=await db.functions.invoke('edit-game-identity',{body:{game_id:selected.id,name:$('name').value.trim(),logo}});
+if(error)throw error;if(!result?.ok||!result.commitSha)throw Error(result?.error||'GitHub no confirmó el cambio.');
+status('✅ Cambios guardados correctamente · Commit '+result.commitSha,'ok');
+clearDirty();await load();sselect(selected.id);
+}catch(e){status('❌ '+(e?.message||e),'error');$('save').disabled=false}
+};
+try{
+const guard=await window.TecnomathAdminGuard.requireAdmin({redirect:true});if(!window.TecnomathAdminGuard.isClassA(guard.profile))throw Error('Solo un administrador Clase A puede editar identidades.');
+db=await window.TecnomathAuth.getClient();status('⏳ Cargando catálogo…');await load();status('✅ Listo. Los cambios se guardan permanentemente en GitHub.','ok');
+}catch(e){status('❌ '+(e?.message||e),'error')}
+})();
+</script>
+</body></html>
