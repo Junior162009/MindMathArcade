@@ -37,9 +37,9 @@ Deno.serve(async(req)=>{
     const entries:any[]=[];
     if(logo){
       const bytes=b64bytes(String(logo.base64));if(bytes.length!==Number(logo.size))throw Error("Tamaño del logo inconsistente.");const e=ext(String(logo.name||""),String(logo.type));validBytes(bytes,e);
-      newPath="img/logos/"+gameId+e;const sh=await blob(bytes);entries.push({path:newPath,mode:"100644",type:"blob",sha:sh});
+      newPath="img/logos/"+gameId+e+"?v="+Date.now();const repoLogoPath=newPath.split("?")[0];const sh=await blob(bytes);entries.push({path:repoLogoPath,mode:"100644",type:"blob",sha:sh});
       const oldPath=String(old.imageUrl||"").split("?")[0];
-      if(oldPath.startsWith("img/logos/")&&oldPath!==newPath&&catalog.filter((g:any)=>String(g.imageUrl||"").split("?")[0]===oldPath).length===1)entries.push({path:oldPath,mode:"100644",type:"blob",sha:null});
+      if(oldPath.startsWith("img/logos/")&&oldPath!==newPath.split("?")[0]&&catalog.filter((g:any)=>String(g.imageUrl||"").split("?")[0]===oldPath).length===1)entries.push({path:oldPath,mode:"100644",type:"blob",sha:null});
     }
     next[idx]={...old,id:old.id,name,imageUrl:newPath,identityVersion:Date.now()};
     validateCatalog(next);
