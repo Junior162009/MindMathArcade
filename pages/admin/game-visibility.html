@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>🎮 Visibilidad de juegos · TecnoMath</title>
+<link rel="stylesheet" href="../../css/admin.css">
+<script src="../../js/tecnomath-auth.js?v=20260927-visibility"></script>
+<script src="../../js/admin-guard.js?v=20260927-visibility"></script>
+<style>
+:root{--bg:#060610;--card:#0d0d1a;--line:#292943;--cyan:#00ffff;--green:#39ff14;--red:#ff496c;--muted:#aaa}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(circle at 15% 0%,#12122a 0,transparent 34%),var(--bg);color:#fff;font-family:Arial,sans-serif}
+.wrap{width:min(1120px,94%);margin:24px auto 60px}.top{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;flex-wrap:wrap}.back{color:var(--cyan);text-decoration:none;font-weight:800}.hero,.panel{margin-top:18px;padding:20px;border:1px solid var(--line);border-radius:18px;background:linear-gradient(145deg,#0e0e20,#090914);box-shadow:0 16px 45px #0006}.hero h1{margin:5px 0 8px;font-size:clamp(24px,5vw,38px);color:var(--cyan)}.hero p,.muted{color:var(--muted);line-height:1.55}
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;margin:18px 0}.search{flex:1;min-width:230px;padding:12px 14px;border:1px solid var(--line);border-radius:11px;background:#070711;color:#fff;outline:none}.search:focus{border-color:var(--cyan);box-shadow:0 0 0 3px #00ffff18}
+.filters{display:flex;gap:8px;flex-wrap:wrap}.filter{border:1px solid var(--line);border-radius:999px;padding:10px 13px;background:#0a0a16;color:#aaa;cursor:pointer;font-weight:800}.filter.active{color:var(--cyan);border-color:var(--cyan);background:#00ffff10}
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:14px 0}.stat{padding:14px;border:1px solid var(--line);border-radius:13px;background:#090914}.stat span{display:block;color:var(--muted);font-size:12px}.stat b{display:block;font-size:24px;margin-top:6px}
+.list{display:grid;gap:10px}.game{display:grid;grid-template-columns:64px 1fr auto;gap:14px;align-items:center;padding:13px;border:1px solid var(--line);border-radius:14px;background:#090914}.icon{width:64px;height:64px;border-radius:13px;border:1px solid #33334d;background:#060610;display:grid;place-items:center;font-size:30px;overflow:hidden}.icon img{width:100%;height:100%;object-fit:cover}.name{font-weight:900;font-size:16px}.meta{color:var(--muted);font-size:12px;margin-top:5px;line-height:1.5}.status{display:inline-flex;align-items:center;gap:5px;margin-top:7px;padding:5px 9px;border-radius:999px;font-size:11px;font-weight:900}.status.visible{color:#9dff91;background:#12351a;border:1px solid #2b7b37}.status.hidden{color:#ff9aaa;background:#3a1420;border:1px solid #7d2d43}.status.draft{color:#ffe681;background:#392e0f;border:1px solid #77631c}
+.actions{display:flex;gap:8px;justify-content:flex-end}.btn{border:0;border-radius:10px;padding:11px 14px;font-weight:900;cursor:pointer}.hide{background:#3a1420;color:#ffb0bd;border:1px solid #7d2d43}.show{background:#17391c;color:#aaff9d;border:1px solid #34783d}.btn:disabled{opacity:.55;cursor:wait}
+.empty{padding:22px;text-align:center;border:1px dashed var(--line);border-radius:13px;color:var(--muted)}.notice{min-height:22px;margin-top:12px;color:var(--muted)}.notice.ok{color:#9dff91}.notice.error{color:#ff9aaa}
+@media(max-width:700px){.stats{grid-template-columns:1fr}.game{grid-template-columns:50px 1fr}.icon{width:50px;height:50px;font-size:24px}.actions{grid-column:1/-1;justify-content:stretch}.actions .btn{flex:1}.name{font-size:14px}}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <div class="top"><div><a class="back" href="./index.html">← Centro de control</a><h1>🎮 Visibilidad de juegos</h1><p class="muted">Admin A · cambia la visibilidad sin commits, GitHub Actions ni reconstrucciones del catálogo.</p></div><span id="access" class="status">⏳ Comprobando acceso…</span></div>
+  <section class="panel">
+    <div class="toolbar"><input id="search" class="search" type="search" placeholder="🔎 Buscar por nombre, ID o slug…" autocomplete="off"><div class="filters"><button class="filter active" data-filter="all">Todos</button><button class="filter" data-filter="published">Visibles</button><button class="filter" data-filter="hidden">Ocultos</button></div></div>
+    <div class="stats"><article class="stat"><span>🎮 Juegos</span><b id="total">—</b></article><article class="stat"><span>🟢 Visibles</span><b id="visible">—</b></article><article class="stat"><span>🔴 Ocultos</span><b id="hidden">—</b></article></div>
+    <div id="notice" class="notice" role="status" aria-live="polite"></div>
+    <div id="list" class="list"><div class="empty">⏳ Cargando catálogo…</div></div>
+  </section>
+</main>
+<script>
+'use strict';
+(async()=>{
+  const $=id=>document.getElementById(id);
+  const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const state={db:null,user:null,profile:null,games:[],visibility:new Map(),query:'',filter:'all',busy:new Set(),channel:null};
+  const say=(text,type='')=>{$('notice').textContent=text;$('notice').className='notice '+type};
+  const effectiveStatus=g=>state.visibility.get(String(g.id))||((g.status==='hidden')?'hidden':(g.status==='draft'?'draft':'published'));
+  const visibleGames=()=>state.games.filter(g=>g?.id&&!g?.evento);
+  const filtered=()=>visibleGames().filter(g=>{
+    const s=effectiveStatus(g),q=state.query.toLowerCase();
+    return (state.filter==='all'||s===state.filter)&&(!q||[g.name,g.id,g.slug,g.folder,g.url].join(' ').toLowerCase().includes(q));
+  });
+  function render(){
+    const all=visibleGames(),vis=all.filter(g=>effectiveStatus(g)==='published').length,hidden=all.filter(g=>effectiveStatus(g)==='hidden').length;
+    $('total').textContent=all.length;$('visible').textContent=vis;$('hidden').textContent=hidden;
+    const rows=filtered();
+    $('list').innerHTML=rows.length?rows.map(g=>{
+      const id=String(g.id),s=effectiveStatus(g),busy=state.busy.has(id);
+      const img=g.imageUrl?'<img src="'+esc(g.imageUrl)+'" alt="" onerror="this.style.display=\'none\'">':'<span>'+esc(g.icon||'🎮')+'</span>';
+      const action=s==='hidden'?'<button class="btn show" '+(busy?'disabled':'')+' data-action="show" data-id="'+esc(id)+'">'+(busy?'⏳ Guardando…':'👁️ MOSTRAR')+'</button>':s==='published'?'<button class="btn hide" '+(busy?'disabled':'')+' data-action="hide" data-id="'+esc(id)+'">'+(busy?'⏳ Guardando…':'🙈 OCULTAR')+'</button>':'<button class="btn" disabled>📝 BORRADOR</button>';
+      return '<article class="game"><div class="icon">'+img+'</div><div><div class="name">'+esc(g.icon||'🎮')+' '+esc(g.name||id)+'</div><div class="meta">ID: '+esc(id)+' · '+esc(g.url||'')+'</div><span class="status '+esc(s==='published'?'visible':s==='hidden'?'hidden':'draft')+'">'+(s==='published'?'🟢 Visible':s==='hidden'?'🔴 Oculto':'📝 Borrador')+'</span></div><div class="actions">'+action+'</div></article>';
+    }).join(''):'<div class="empty">📭 No hay juegos que coincidan.</div>';
+  }
+  async function load(){
+    say('⏳ Cargando catálogo y estados…');
+    const [cat,vis]=await Promise.all([
+      fetch('../../data/games.json?v='+Date.now(),{cache:'no-store'}).then(r=>{if(!r.ok)throw Error('No se pudo cargar el catálogo maestro.');return r.json()}),
+      state.db.from('game_visibility').select('game_id,status,updated_at,updated_by')
+    ]);
+    if(vis.error)throw vis.error;
+    state.games=Array.isArray(cat)?cat:[];
+    state.visibility=new Map((vis.data||[]).map(x=>[String(x.game_id),String(x.status)]));
+    render();say('✅ Estado de visibilidad sincronizado.','ok');
+  }
+  async function change(id,next){
+    if(state.busy.has(id))return;
+    const game=state.games.find(g=>String(g.id)===id);if(!game)return;
+    if(next==='hidden'&&!confirm('¿Ocultar "'+(game.name||id)+'"?\n\nNo se eliminarán sus archivos ni su progreso.'))return;
+    const previous=effectiveStatus(game);
+    state.busy.add(id);state.visibility.set(id,next);render();say(next==='hidden'?'🙈 Guardando…':'👁️ Guardando…');
+    try{
+      const {data,error}=await state.db.functions.invoke('game-visibility',{body:{game_id:id,status:next}});
+      if(error)throw error;
+      if(!data?.ok)throw Error(data?.error||'Supabase no confirmó el cambio.');
+      state.visibility.set(id,next);
+      say(next==='hidden'?'🔴 Juego ocultado inmediatamente.':'🟢 Juego mostrado inmediatamente.','ok');
+    }catch(e){
+      state.visibility.set(id,previous);
+      say('❌ No se pudo cambiar la visibilidad. '+(e?.message||e),'error');
+    }finally{state.busy.delete(id);render();}
+  }
+  function subscribe(){
+    state.channel=state.db.channel('game-visibility-admin').on('postgres_changes',{event:'*',schema:'public',table:'game_visibility'},payload=>{
+      const row=payload.new||payload.old;if(!row?.game_id)return;
+      if(payload.eventType==='DELETE')state.visibility.delete(String(row.game_id));else state.visibility.set(String(row.game_id),String(row.status));
+      render();
+    }).subscribe(status=>{if(status==='SUBSCRIBED')console.info('TecnoMath visibilidad: Realtime activo.');});
+  }
+  $('search').oninput=e=>{state.query=e.target.value.trim();render()};
+  document.querySelectorAll('.filter').forEach(b=>b.onclick=()=>{document.querySelectorAll('.filter').forEach(x=>x.classList.remove('active'));b.classList.add('active');state.filter=b.dataset.filter;render()});
+  $('list').onclick=e=>{const b=e.target.closest('[data-action]');if(b)change(b.dataset.id,b.dataset.action==='hide'?'hidden':'published')};
+  try{
+    const ready=await window.TecnomathAdminGuard.requireAdmin({redirect:true});
+    if(!window.TecnomathAdminGuard.isClassA(ready.profile))throw Error('Esta herramienta requiere un administrador Clase A.');
+    state.user=ready.user;state.profile=ready.profile;state.db=await window.TecnomathAuth.getClient();
+    $('access').textContent='🟢 CLASE A';$('access').className='status visible';
+    await load();subscribe();
+  }catch(e){$('access').textContent='⛔ SIN ACCESO';$('access').className='status hidden';$('list').innerHTML='<div class="empty">⛔ '+esc(e?.message||e)+'</div>';say('No se pudo abrir el gestor de visibilidad.','error');console.error('TecnoMath game visibility:',e)}
+  window.addEventListener('beforeunload',()=>{if(state.channel&&state.db)state.db.removeChannel(state.channel)});
+})();
+</script>
+</body>
+</html>
