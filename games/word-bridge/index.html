@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Word Bridge: juego educativo para practicar inglés y español mediante imágenes y pistas.">
+<title>Word Bridge — English ↔ Español</title><link rel="stylesheet" href="./style.css">
+</head>
+<body><main class="app">
+<header class="topbar"><div><span class="eyebrow">IDIOMAS</span><h1>Word Bridge</h1><p>Conecta la imagen con la palabra correcta.</p></div>
+<div class="scorebox"><span>PUNTOS</span><strong id="score">0</strong></div></header>
+<section class="progress-wrap"><div class="progress-meta"><span id="roundLabel">Ronda 1 de 10</span><span id="streak">🔥 0 racha</span></div><div class="progress"><div id="progressBar"></div></div></section>
+<section class="mode-card"><div class="mode-switch"><button class="mode active" data-mode="english">🇬🇧 Inglés → Español</button><button class="mode" data-mode="spanish">🇪🇸 Español → Inglés</button></div>
+<div class="challenge"><div class="image-card"><img id="clueImage" alt="Pista visual"><span class="image-label">PISTA VISUAL</span></div>
+<div class="question"><span class="tag" id="direction">TRADUCE AL ESPAÑOL</span><h2 id="prompt">¿Cómo se dice?</h2><p id="hint">Observa la imagen y elige la respuesta.</p><div id="answers" class="answers"></div><p id="feedback" class="feedback" role="status" aria-live="polite"></p></div></div></section>
+<section class="help"><span>💡</span><div><strong>Aprende jugando</strong><p>Si fallas, verás la respuesta para ayudarte a recordarla.</p></div></section>
+<button id="restart" class="restart">↻ Reiniciar partida</button>
+</main><script src="./script.js"></script></body></html>
