@@ -456,5 +456,32 @@
     "logoStoragePath": "",
     "packageStoragePath": "",
     "packageFileName": ""
+  },
+  {
+    "id": "pollito-race",
+    "name": "🐔 POLLITO RACE",
+    "desc": "Carrera educativa de 3 carriles con preguntas de Matemáticas, Español y Sociales.",
+    "description": "Juego educativo de carreras donde responder correctamente hace avanzar al pollito.",
+    "url": "games/pollito-race/index.html",
+    "imageUrl": "games/pollito-race/assets/pollito-race.svg",
+    "icon": "🐔",
+    "category": "educacion",
+    "deviceCompatibility": "both",
+    "evento": null,
+    "sourceType": "internal",
+    "status": "published",
+    "allowVoting": true,
+    "featured": false,
+    "order": 18,
+    "urlType": "internal",
+    "publishDate": "2026-09-28T16:42:39.574Z",
+    "authorName": "TecnoMath",
+    "grade": "Todos",
+    "folder": "games/pollito-race",
+    "folderPath": "games/pollito-race",
+    "entryFile": "index.html",
+    "logoStoragePath": "",
+    "packageStoragePath": "",
+    "packageFileName": ""
   }
 ]

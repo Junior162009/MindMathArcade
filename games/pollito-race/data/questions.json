@@ -1,0 +1,458 @@
+[
+  {
+    "category": "matematicas",
+    "difficulty": "facil",
+    "question": "¿Cuánto es 8 × 7?",
+    "options": [
+      "54",
+      "56",
+      "64",
+      "48"
+    ],
+    "correct": 1
+  },
+  {
+    "category": "matematicas",
+    "difficulty": "facil",
+    "question": "¿Cuánto es 45 ÷ 5?",
+    "options": [
+      "7",
+      "8",
+      "9",
+      "10"
+    ],
+    "correct": 2
+  },
+  {
+    "category": "matematicas",
+    "difficulty": "facil",
+    "question": "¿Cuál es 120 + 35?",
+    "options": [
+      "145",
+      "155",
+      "165",
+      "150"
+    ],
+    "correct": 1
+  },
+  {
+    "category": "matematicas",
+    "difficulty": "facil",
+    "question": "¿Cuál es el 50% de 80?",
+    "options": [
+      "20",
+      "30",
+      "40",
+      "50"
+    ],
+    "correct": 2
+  },
+  {
+    "category": "matematicas",
+    "difficulty": "normal",
+    "question": "Si x + 7 = 19, ¿cuánto vale x?",
+    "options": [
+      "10",
+      "11",
+      "12",
+      "13"
+    ],
+    "correct": 2
+  },
+  {
+    "category": "matematicas",
+    "difficulty": "normal",
+    "question": "¿Cuál es 3² + 4²?",
+    "options": [
+      "12",
+      "25",
+      "49",
+      "24"
+    ],
+    "correct": 1
+  },
+  {
+    "category": "matematicas",
+    "difficulty": "normal",
+    "question": "¿Qué fracción es equivalente a 1/2?",
+    "options": [
+      "2/3",
+      "3/6",
+      "4/6",
+      "5/8"
+    ],
+    "correct": 1
+  },
+  {
+    "category": "matematicas",
+    "difficulty": "normal",
+    "question": "Un rectángulo mide 8 cm por 5 cm. ¿Cuál es su área?",
+    "options": [
+      "13 cm²",
+      "26 cm²",
+      "40 cm²",
+      "80 cm²"
+    ],
+    "correct": 2
+  },
+  {
+    "category": "matematicas",
+    "difficulty": "dificil",
+    "question": "Resuelve: 2x + 5 = 17.",
+    "options": [
+      "5",
+      "6",
+      "7",
+      "8"
+    ],
+    "correct": 1
+  },
+  {
+    "category": "matematicas",
+    "difficulty": "dificil",
+    "question": "¿Cuánto es 3/4 + 2/3?",
+    "options": [
+      "5/7",
+      "13/12",
+      "17/12",
+      "11/12"
+    ],
+    "correct": 1
+  },
+  {
+    "category": "matematicas",
+    "difficulty": "dificil",
+    "question": "Un producto de $80.000 aumenta 25%. ¿Cuál es el nuevo precio?",
+    "options": [
+      "$90.000",
+      "$95.000",
+      "$100.000",
+      "$105.000"
+    ],
+    "correct": 2
+  },
+  {
+    "category": "matematicas",
+    "difficulty": "dificil",
+    "question": "¿Cuál es la pendiente de y = 3x − 2?",
+    "options": [
+      "−2",
+      "2",
+      "3",
+      "−3"
+    ],
+    "correct": 2
+  },
+  {
+    "category": "espanol",
+    "difficulty": "facil",
+    "question": "¿Cuál palabra está escrita correctamente?",
+    "options": [
+      "Havía",
+      "Había",
+      "Abía",
+      "Havía"
+    ],
+    "correct": 1
+  },
+  {
+    "category": "espanol",
+    "difficulty": "facil",
+    "question": "¿Cuál es un sinónimo de “feliz”?",
+    "options": [
+      "Triste",
+      "Alegre",
+      "Enojado",
+      "Cansado"
+    ],
+    "correct": 1
+  },
+  {
+    "category": "espanol",
+    "difficulty": "facil",
+    "question": "¿Cuál es el antónimo de “rápido”?",
+    "options": [
+      "Veloz",
+      "Ligero",
+      "Lento",
+      "Pronto"
+    ],
+    "correct": 2
+  },
+  {
+    "category": "espanol",
+    "difficulty": "facil",
+    "question": "En “El perro corre”, ¿cuál es el verbo?",
+    "options": [
+      "El",
+      "perro",
+      "corre",
+      "perro corre"
+    ],
+    "correct": 2
+  },
+  {
+    "category": "espanol",
+    "difficulty": "normal",
+    "question": "¿Cuál oración tiene un adjetivo?",
+    "options": [
+      "Luis estudia.",
+      "La casa grande.",
+      "Ana corre.",
+      "Pedro llegó."
+    ],
+    "correct": 1
+  },
+  {
+    "category": "espanol",
+    "difficulty": "normal",
+    "question": "¿Qué recurso compara usando “como”?",
+    "options": [
+      "Metáfora",
+      "Símil",
+      "Hipérbole",
+      "Ironía"
+    ],
+    "correct": 1
+  },
+  {
+    "category": "espanol",
+    "difficulty": "normal",
+    "question": "¿Cuál palabra es esdrújula?",
+    "options": [
+      "Camión",
+      "Árbol",
+      "Música",
+      "Papel"
+    ],
+    "correct": 2
+  },
+  {
+    "category": "espanol",
+    "difficulty": "normal",
+    "question": "¿Qué tipo de texto defiende una opinión con razones?",
+    "options": [
+      "Argumentativo",
+      "Narrativo",
+      "Instructivo",
+      "Descriptivo"
+    ],
+    "correct": 0
+  },
+  {
+    "category": "espanol",
+    "difficulty": "dificil",
+    "question": "¿Qué figura literaria exagera una idea intencionalmente?",
+    "options": [
+      "Hipérbole",
+      "Símil",
+      "Anáfora",
+      "Epíteto"
+    ],
+    "correct": 0
+  },
+  {
+    "category": "espanol",
+    "difficulty": "dificil",
+    "question": "¿Qué función del lenguaje busca influir en el receptor?",
+    "options": [
+      "Referencial",
+      "Apelativa",
+      "Poética",
+      "Metalingüística"
+    ],
+    "correct": 1
+  },
+  {
+    "category": "espanol",
+    "difficulty": "dificil",
+    "question": "¿Cuál oración usa correctamente la coma vocativa?",
+    "options": [
+      "Carlos ven aquí.",
+      "Carlos, ven aquí.",
+      "Carlos ven, aquí.",
+      "Carlos, ven, aquí."
+    ],
+    "correct": 1
+  },
+  {
+    "category": "espanol",
+    "difficulty": "dificil",
+    "question": "¿Cuál palabra contiene un hiato?",
+    "options": [
+      "Tierra",
+      "Cuidado",
+      "País",
+      "Ciudad"
+    ],
+    "correct": 2
+  },
+  {
+    "category": "sociales",
+    "difficulty": "facil",
+    "question": "¿Cuál es la capital de Colombia?",
+    "options": [
+      "Medellín",
+      "Cali",
+      "Bogotá",
+      "Cartagena"
+    ],
+    "correct": 2
+  },
+  {
+    "category": "sociales",
+    "difficulty": "facil",
+    "question": "¿En qué continente está Colombia?",
+    "options": [
+      "Europa",
+      "Asia",
+      "América",
+      "África"
+    ],
+    "correct": 2
+  },
+  {
+    "category": "sociales",
+    "difficulty": "facil",
+    "question": "¿Qué poder del Estado crea las leyes?",
+    "options": [
+      "Ejecutivo",
+      "Judicial",
+      "Legislativo",
+      "Electoral"
+    ],
+    "correct": 2
+  },
+  {
+    "category": "sociales",
+    "difficulty": "facil",
+    "question": "¿Cuál es un derecho fundamental?",
+    "options": [
+      "Derecho a la vida",
+      "Conducir sin licencia",
+      "Ignorar las leyes",
+      "No cumplir normas"
+    ],
+    "correct": 0
+  },
+  {
+    "category": "sociales",
+    "difficulty": "facil",
+    "question": "¿Qué océano baña la costa occidental de Colombia?",
+    "options": [
+      "Atlántico",
+      "Pacífico",
+      "Índico",
+      "Ártico"
+    ],
+    "correct": 1
+  },
+  {
+    "category": "sociales",
+    "difficulty": "normal",
+    "question": "¿En qué año comenzó el proceso independentista del 20 de julio en Colombia?",
+    "options": [
+      "1492",
+      "1810",
+      "1821",
+      "1903"
+    ],
+    "correct": 1
+  },
+  {
+    "category": "sociales",
+    "difficulty": "normal",
+    "question": "¿Qué documento establece las normas fundamentales del Estado colombiano?",
+    "options": [
+      "Código postal",
+      "Constitución Política",
+      "Manual escolar",
+      "Registro civil"
+    ],
+    "correct": 1
+  },
+  {
+    "category": "sociales",
+    "difficulty": "normal",
+    "question": "¿Qué rama del poder público administra justicia?",
+    "options": [
+      "Ejecutiva",
+      "Legislativa",
+      "Judicial",
+      "Municipal"
+    ],
+    "correct": 2
+  },
+  {
+    "category": "sociales",
+    "difficulty": "normal",
+    "question": "¿Cuál es un recurso natural renovable?",
+    "options": [
+      "Petróleo",
+      "Carbón",
+      "Viento",
+      "Gas natural"
+    ],
+    "correct": 2
+  },
+  {
+    "category": "sociales",
+    "difficulty": "normal",
+    "question": "¿Qué línea imaginaria divide la Tierra en hemisferio norte y sur?",
+    "options": [
+      "Trópico de Cáncer",
+      "Ecuador",
+      "Greenwich",
+      "Trópico de Capricornio"
+    ],
+    "correct": 1
+  },
+  {
+    "category": "sociales",
+    "difficulty": "dificil",
+    "question": "¿Qué fue la Revolución Industrial?",
+    "options": [
+      "Transición hacia producción mecanizada",
+      "Descubrimiento de América",
+      "Creación de la ONU",
+      "Independencia de Colombia"
+    ],
+    "correct": 0
+  },
+  {
+    "category": "sociales",
+    "difficulty": "dificil",
+    "question": "¿Qué rama del poder público está encabezada a nivel nacional por el Presidente?",
+    "options": [
+      "Judicial",
+      "Legislativa",
+      "Ejecutiva",
+      "Electoral"
+    ],
+    "correct": 2
+  },
+  {
+    "category": "sociales",
+    "difficulty": "dificil",
+    "question": "¿Qué organización internacional fue creada en 1945 para promover cooperación y paz?",
+    "options": [
+      "ONU",
+      "OTAN",
+      "OEA",
+      "UNESCO"
+    ],
+    "correct": 0
+  },
+  {
+    "category": "sociales",
+    "difficulty": "dificil",
+    "question": "¿Qué concepto describe la participación de personas en las decisiones de una sociedad?",
+    "options": [
+      "Ciudadanía",
+      "Aislamiento",
+      "Mercantilismo",
+      "Feudalismo"
+    ],
+    "correct": 0
+  }
+]
