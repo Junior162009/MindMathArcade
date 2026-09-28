@@ -6,12 +6,11 @@
 <meta name="theme-color" content="#080a0f">
 <title>🐔 Pollito Race — TecnoMath</title>
 <link rel="stylesheet" href="./css/style.css">
-<script src="/js/tecnomath-progress.js?v=20260911-9"></script>
 </head>
 <body>
 <header class="topbar">
   <a class="brand" href="../../index.html" aria-label="Volver a TecnoMath">🐔 <span>POLLITO <b>RACE</b><small>DESAFÍO EDUCATIVO</small></span></a>
-  <div id="hud" class="hud hidden">
+  <div id="hud" class="hud hidden" aria-live="polite">
     <span>🏁 <b id="hudProgress">0%</b></span><span>❤️ <b id="hudLives">3</b></span><span>⭐ <b id="hudScore">0</b></span>
   </div>
 </header>
@@ -23,48 +22,48 @@
       <small class="eyebrow">TECNOMATH · JUEGO EDUCATIVO</small>
       <h1>🐔 POLLITO <em>RACE</em></h1>
       <p>Responde preguntas, acelera tu pollito y cruza la meta antes que los rivales.</p>
-      <div class="actions"><button id="play" class="btn primary">▶ JUGAR</button><button data-modal="how" class="btn secondary">❓ CÓMO JUGAR</button></div>
+      <div class="actions"><button id="play" class="btn primary" type="button">▶ JUGAR</button><button data-modal="how" class="btn secondary" type="button">❓ CÓMO JUGAR</button></div>
     </div>
     <div class="preview"><div class="preview-title">🏁 3 CARRILES</div><div class="preview-track"><div>🐔</div><div>🐤</div><div>🐥</div><b>🏁</b></div></div>
   </div>
   <div class="home-grid">
-    <button id="categories" class="tile red">📚<strong>CATEGORÍAS</strong><small>Matemáticas · Español · Sociales</small></button>
-    <button data-modal="records" class="tile yellow">🏆<strong>RÉCORDS</strong><small>Guarda tus mejores carreras</small></button>
-    <button data-modal="how" class="tile blue">❓<strong>CÓMO JUGAR</strong><small>Aprende mientras corres</small></button>
+    <button id="categories" class="tile red" type="button">📚<strong>CATEGORÍAS</strong><small>Matemáticas · Español · Sociales</small></button>
+    <button data-modal="records" class="tile yellow" type="button">🏆<strong>RÉCORDS</strong><small>Guarda tus mejores carreras</small></button>
+    <button data-modal="how" class="tile blue" type="button">❓<strong>CÓMO JUGAR</strong><small>Aprende mientras corres</small></button>
   </div>
 </section>
 
 <section id="setup" class="screen">
-  <div class="section-head"><button id="back" class="icon-btn">←</button><div><small class="eyebrow">NUEVA CARRERA</small><h2>Elige tu desafío</h2></div></div>
+  <div class="section-head"><button id="back" class="icon-btn" type="button">←</button><div><small class="eyebrow">NUEVA CARRERA</small><h2>Elige tu desafío</h2></div></div>
   <div class="setup-grid">
     <div class="panel"><h3>📚 Categoría</h3><div class="choices">
-      <button class="choice active red" data-cat="matematicas">🔴 <b>MATEMÁTICAS</b><small>Problemas y números</small></button>
-      <button class="choice blue" data-cat="espanol">🔵 <b>ESPAÑOL</b><small>Lengua y literatura</small></button>
-      <button class="choice yellow" data-cat="sociales">🟡 <b>SOCIALES</b><small>Historia y ciudadanía</small></button>
-      <button class="choice purple" data-cat="aleatorio">🎲 <b>ALEATORIO</b><small>Las tres materias</small></button>
+      <button class="choice active red" type="button" data-cat="matematicas">🔴 <b>MATEMÁTICAS</b><small>Problemas y números</small></button>
+      <button class="choice blue" type="button" data-cat="espanol">🔵 <b>ESPAÑOL</b><small>Lengua y literatura</small></button>
+      <button class="choice yellow" type="button" data-cat="sociales">🟡 <b>SOCIALES</b><small>Historia y ciudadanía</small></button>
+      <button class="choice purple" type="button" data-cat="aleatorio">🎲 <b>ALEATORIO</b><small>Las tres materias</small></button>
     </div></div>
     <div class="panel"><h3>⚡ Dificultad</h3><div class="choices one">
-      <button class="choice active" data-diff="facil">🟢 <b>FÁCIL</b><small>Rivales lentos</small></button>
-      <button class="choice" data-diff="normal">🟡 <b>NORMAL</b><small>Ritmo equilibrado</small></button>
-      <button class="choice" data-diff="dificil">🔴 <b>DIFÍCIL</b><small>Rivales rápidos</small></button>
+      <button class="choice active" type="button" data-diff="facil">🟢 <b>FÁCIL</b><small>Rivales lentos</small></button>
+      <button class="choice" type="button" data-diff="normal">🟡 <b>NORMAL</b><small>Ritmo equilibrado</small></button>
+      <button class="choice" type="button" data-diff="dificil">🔴 <b>DIFÍCIL</b><small>Rivales rápidos</small></button>
     </div></div>
   </div>
   <div id="selection" class="selection"></div>
-  <button id="start" class="btn primary full">🏁 INICIAR CARRERA</button>
+  <button id="start" class="btn primary full" type="button">🏁 INICIAR CARRERA</button>
 </section>
 
 <section id="race" class="screen">
   <div class="race-top"><div class="race-stats"><span>📚 <b id="raceCategory"></b></span><span>✅ <b id="correctCount">0</b></span><span>❌ <b id="wrongCount">0</b></span><span>🔥 <b id="streak">0</b></span><span>⭐ <b id="score">0</b></span></div></div>
   <div class="race-card">
-    <div class="track" id="track">
-      <div class="lane"><span class="lane-no">1</span><div id="player" class="runner">🐔</div></div>
-      <div class="lane"><span class="lane-no">2</span><div id="rival1" class="runner">🐤</div></div>
-      <div class="lane"><span class="lane-no">3</span><div id="rival2" class="runner">🐥</div></div>
+    <div class="track" id="track" aria-label="Pista de tres carriles">
+      <div class="lane"><span class="lane-no">1</span><div id="player" class="runner player-runner" role="img" aria-label="Pollito jugador"></div></div>
+      <div class="lane"><span class="lane-no">2</span><div id="rival1" class="runner rival-one" role="img" aria-label="Pollito rival uno"></div></div>
+      <div class="lane"><span class="lane-no">3</span><div id="rival2" class="runner rival-two" role="img" aria-label="Pollito rival dos"></div></div>
       <div class="start-line">SALIDA</div><div class="finish-line">🏁</div>
     </div>
     <div class="progress-row"><span>🏁 PROGRESO</span><b id="progressText">0%</b></div>
     <div class="progress"><i id="progressBar"></i></div>
-    <div id="raceMessage" class="race-message">Responde para avanzar.</div>
+    <div id="raceMessage" class="race-message" aria-live="polite">Responde para avanzar.</div>
   </div>
   <div class="question-card">
     <div class="question-head"><span id="categoryBadge">🔴 MATEMÁTICAS</span><small id="questionNumber">Pregunta 1</small></div>
@@ -77,13 +76,13 @@
 <section id="result" class="screen">
   <div class="result-card"><div id="resultEmoji" class="result-emoji">🏆</div><small class="eyebrow">CARRERA TERMINADA</small><h2 id="resultTitle"></h2><p id="resultText"></p>
     <div class="result-stats"><div><small>POSICIÓN</small><b id="resultPosition">-</b></div><div><small>CORRECTAS</small><b id="resultCorrect">0</b></div><div><small>INCORRECTAS</small><b id="resultWrong">0</b></div><div><small>PUNTOS</small><b id="resultScore">0</b></div></div>
-    <div class="result-actions"><button id="again" class="btn primary">🔄 JUGAR OTRA VEZ</button><button id="menu" class="btn secondary">⌂ MENÚ</button></div>
+    <div class="result-actions"><button id="again" class="btn primary" type="button">🔄 JUGAR OTRA VEZ</button><button id="menu" class="btn secondary" type="button">⌂ MENÚ</button></div>
   </div>
 </section>
 </main>
 
-<div id="how" class="modal"><div class="modal-card"><button class="close" data-close="how">×</button><small class="eyebrow">REGLAS</small><h2>🐔 ¿Cómo se juega?</h2><ol><li>Escoge una categoría y dificultad.</li><li>Cada ronda presenta 4 respuestas y solo una es correcta.</li><li>Acertar hace avanzar a tu pollito.</li><li>Fallar quita avance y una vida, pero puedes seguir jugando.</li><li>Los rivales avanzan después de cada respuesta.</li><li>Quien llegue primero a la meta gana.</li></ol></div></div>
-<div id="records" class="modal"><div class="modal-card"><button class="close" data-close="records">×</button><small class="eyebrow">HISTORIAL LOCAL</small><h2>🏆 Récords</h2><div id="recordsList"></div><button id="clearRecords" class="btn secondary full">🗑️ BORRAR RÉCORDS</button></div></div>
+<div id="how" class="modal" role="dialog" aria-modal="true" aria-labelledby="how-title"><div class="modal-card"><button class="close" type="button" data-close="how" aria-label="Cerrar">×</button><small class="eyebrow">REGLAS</small><h2 id="how-title">🐔 ¿Cómo se juega?</h2><ol><li>Escoge una categoría y dificultad.</li><li>Cada ronda presenta 4 respuestas y solo una es correcta.</li><li>Acertar hace avanzar a tu pollito.</li><li>Fallar quita avance y una vida, pero puedes seguir jugando.</li><li>Los rivales avanzan después de cada respuesta.</li><li>Quien llegue primero a la meta gana.</li></ol></div></div>
+<div id="records" class="modal" role="dialog" aria-modal="true" aria-labelledby="records-title"><div class="modal-card"><button class="close" type="button" data-close="records" aria-label="Cerrar">×</button><small class="eyebrow">HISTORIAL LOCAL</small><h2 id="records-title">🏆 Récords</h2><div id="recordsList"></div><button id="clearRecords" class="btn secondary full" type="button">🗑️ BORRAR RÉCORDS</button></div></div>
 
 <script src="./js/main.js" defer></script>
 </body>
