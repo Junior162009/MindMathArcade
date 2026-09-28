@@ -429,5 +429,32 @@
     "logoStoragePath": "",
     "packageStoragePath": "",
     "packageFileName": ""
+  },
+  {
+    "id": "word-bridge",
+    "name": "Word Bridge",
+    "desc": "Aprende inglés y español con imágenes, pistas y retos de traducción.",
+    "description": "Juego educativo bilingüe de inglés y español basado en pistas visuales.",
+    "url": "games/word-bridge/index.html",
+    "imageUrl": "https://cdn.jsdelivr.net/gh/hfg-gmuend/openmoji@latest/color/svg/1F34E.svg",
+    "icon": "🌎",
+    "category": "idiomas",
+    "deviceCompatibility": "both",
+    "evento": null,
+    "sourceType": "internal",
+    "status": "published",
+    "allowVoting": true,
+    "featured": false,
+    "order": 17,
+    "urlType": "internal",
+    "publishDate": "2026-09-28T01:29:39.895Z",
+    "authorName": "TecnoMath",
+    "grade": "Todos",
+    "folder": "games/word-bridge",
+    "folderPath": "games/word-bridge",
+    "entryFile": "index.html",
+    "logoStoragePath": "",
+    "packageStoragePath": "",
+    "packageFileName": ""
   }
 ]
