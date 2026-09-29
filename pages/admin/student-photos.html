@@ -37,7 +37,7 @@ main{max-width:1450px;margin:auto;padding:22px 18px 45px}.hero{display:flex;just
     <div>
       <div class="eyebrow">ADMINISTRACIÓN · LISTA RÁPIDA</div>
       <h1>📸 Control de fotos</h1>
-      <p>Usa la lista de estudiantes que ya existe en Supabase. Marca quién <b>ya dio la foto</b> y quién <b>falta</b>. Los cambios quedan guardados en Supabase.</p>
+      <p>Solo se muestran estudiantes de <b>11°</b>. El nombre se ordena como <b>primer nombre + los dos apellidos</b>. Los nombres rayados de la lista entregada se cargan como <b>FOTO</b>.</p>
     </div>
   </section>
 
@@ -45,9 +45,7 @@ main{max-width:1450px;margin:auto;padding:22px 18px 45px}.hero{display:flex;just
 
   <div class="toolbar">
     <input id="search" type="search" placeholder="🔎 Buscar por nombre…" autocomplete="off">
-    <select id="grade">
-      <option value="">Todos los cursos</option>
-    </select>
+    <div style="display:flex;align-items:center;justify-content:center;padding:0 14px;border:1px solid var(--line);border-radius:11px;background:#0e0e1d;color:#fff;font-weight:900">🎓 SOLO 11°</div>
     <button id="save" class="save" type="button">💾 Guardar cambios <span id="pending">(0)</span></button>
     <button id="allPhoto" type="button">📸 Marcar todos FOTO</button>
     <button id="allNoPhoto" class="danger" type="button">❌ Marcar todos NO FOTO</button>
@@ -98,9 +96,33 @@ main{max-width:1450px;margin:auto;padding:22px 18px 45px}.hero{display:flex;just
         break;
       }
     }
-    const firstSurname=t.slice(0,surnameEnd).join(' ');
+    const surnames=t.slice(0,surnameEnd);
     const firstName=t[surnameEnd]||t[t.length-1]||'';
-    return {display:(firstName+' '+firstSurname).toUpperCase(),full:t.join(' ')};
+    return {
+      display:(firstName+' '+surnames.join(' ')).toUpperCase(),
+      short:(firstName+' '+(surnames[0]||'')).toUpperCase(),
+      full:t.join(' ')
+    };
+  }
+  const PHOTO_SEED=[["EMMANUEL","AGUILERA"],["MATEO","BARBOSA"],["FABIANA","BENITEZ"],["GABRIEL","BONILLA"],["JEFTER","CAMACHO"],["JOSE","DELAHOZ"],["JHOANGEL","JINETE"],["YENDIS","MARCHENA"],["JAHIR","MAYORGA"],["YADIR","PEÑA"],["LAURA","BARRERA"],["OSCAR","VELEZ"],["JULISSA","VELEZ"],["SHARON","VELEZ"],["ANDY","HERNANDEZ"]];
+  function normalizeName(v){
+    return String(v||'').normalize('NFD').replace(/[\\u0300-\\u036f]/g,'').toUpperCase().replace(/[^A-Z0-9 ]+/g,' ').replace(/\\s+/g,' ').trim();
+  }
+  function seedCrossedPhotoStatuses(){
+    const existing=new Set(state.photoMap.keys());
+    const rows=[];
+    for(const s of state.students){
+      if(!/^11/i.test(String(s.gradeLabel||''))) continue;
+      const n=normalizeName(s.full_name);
+      const match=PHOTO_SEED.some(([first,surname])=>{
+        const f=normalizeName(first), sur=normalizeName(surname);
+        return n.includes(f) && n.includes(sur);
+      });
+      if(match && !existing.has(key(s.id))){
+        rows.push({student_id:s.id,has_photo:true,updated_by:state.user.id,updated_at:new Date().toISOString()});
+      }
+    }
+    return rows;
   }
   function key(id){return String(id)}
   function effectiveHasPhoto(id){
@@ -110,7 +132,7 @@ main{max-width:1450px;margin:auto;padding:22px 18px 45px}.hero{display:flex;just
   function visibleStudents(){
     const q=$('search').value.trim().toLowerCase();
     return state.students.filter(s=>{
-      const gradeOk=!state.grade||s.gradeLabel===state.grade;
+      const gradeOk=/^11/i.test(String(s.gradeLabel||''));
       const info=firstNameAndSurname(s.full_name);
       return gradeOk && (!q || (info.display+' '+info.full).toLowerCase().includes(q));
     }).sort((a,b)=>firstNameAndSurname(a.full_name).display.localeCompare(firstNameAndSurname(b.full_name).display,'es'));
@@ -148,13 +170,16 @@ main{max-width:1450px;margin:auto;padding:22px 18px 45px}.hero{display:flex;just
     if(e2)throw e2;
     state.photoMap=new Map((photos||[]).map(x=>[key(x.student_id),Boolean(x.has_photo)]));
     state.pending.clear();
+    const seeded=seedCrossedPhotoStatuses();
+    if(seeded.length){
+      const {error:seedError}=await state.db.from('tecnomath_student_photos').upsert(seeded,{onConflict:'student_id'});
+      if(seedError) throw seedError;
+      seeded.forEach(x=>state.photoMap.set(key(x.student_id),true));
+    }
     const grades=[...new Set(state.students.map(s=>s.gradeLabel))].sort((a,b)=>a.localeCompare(b,'es',{numeric:true}));
-    const current=$('grade').value;
-    $('grade').innerHTML='<option value="">Todos los cursos</option>'+grades.map(g=>'<option value="'+esc(g)+'">'+esc(g)+'</option>').join('');
-    $('grade').value=grades.includes(current)?current:(grades.includes('11A')?'11A':'');
-    state.grade=$('grade').value;
+    state.grade='11';
     render();
-    notice('✅ Lista cargada. Marca y luego pulsa “Guardar cambios”.','ok');
+    notice('✅ 11° cargado. Los nombres rayados de la lista fueron registrados como FOTO.','ok');
   }
   async function save(){
     if(!state.pending.size){notice('No hay cambios pendientes.','');return}
@@ -182,7 +207,7 @@ main{max-width:1450px;margin:auto;padding:22px 18px 45px}.hero{display:flex;just
     render();
   }
   $('search').addEventListener('input',render);
-  $('grade').addEventListener('change',e=>{state.grade=e.target.value;render()});
+  
   $('save').addEventListener('click',save);
   $('allPhoto').addEventListener('click',()=>setVisible(true));
   $('allNoPhoto').addEventListener('click',()=>setVisible(false));
