@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Fotos de estudiantes · TecnoMath</title>
+<link rel="stylesheet" href="../../css/admin.css">
+<script src="../../js/tecnomath-auth.js?v=20260929-photo"></script>
+<script src="../../js/admin-guard.js?v=20260929-photo"></script>
+<style>
+:root{--bg:#060610;--card:#0d0d1a;--line:#292943;--text:#fff;--muted:#a8a8ba;--green:#39ff14;--pink:#ff4fd8;--red:#ff5c7a;--cyan:#00ffff}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 15% 0,#17172e 0,transparent 34%),var(--bg);color:var(--text);font-family:Inter,system-ui,Segoe UI,Arial,sans-serif;min-height:100vh}
+.topbar{position:sticky;top:0;z-index:20;display:flex;justify-content:space-between;align-items:center;gap:12px;padding:13px 18px;background:#080812ee;border-bottom:1px solid var(--line);backdrop-filter:blur(14px)}
+.topbar a,.topbar button{color:#fff;text-decoration:none;border:1px solid var(--line);background:#111122;border-radius:10px;padding:9px 12px;cursor:pointer}
+main{max-width:1450px;margin:auto;padding:22px 18px 45px}.hero{display:flex;justify-content:space-between;gap:20px;align-items:end;margin:8px 0 20px}.hero h1{margin:3px 0 8px;font-size:clamp(28px,4vw,48px)}.hero p{margin:0;color:var(--muted);line-height:1.55}.eyebrow{color:var(--cyan);font-size:12px;font-weight:900;letter-spacing:.12em}
+.toolbar{display:grid;grid-template-columns:minmax(230px,1fr) 180px auto auto auto;gap:10px;margin:16px 0}.toolbar input,.toolbar select,.toolbar button{min-height:44px;border:1px solid var(--line);border-radius:11px;background:#0e0e1d;color:#fff;padding:10px 12px}.toolbar button{cursor:pointer;font-weight:800}.toolbar .save{border-color:#247a31;background:#123019;color:#baffae}.toolbar .danger{border-color:#7b2940;background:#2b1019}.toolbar .ghost{background:#111122}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:14px 0}.stat{background:linear-gradient(145deg,#101021,#0b0b16);border:1px solid var(--line);border-radius:14px;padding:15px}.stat span{display:block;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.08em}.stat b{display:block;font-size:28px;margin-top:6px}
+.notice{min-height:20px;margin:8px 0 14px;color:var(--muted)}.notice.ok{color:#aaff9c}.notice.error{color:#ff9db0}
+.columns{display:grid;grid-template-columns:1fr 1fr;gap:16px}.panel{border:1px solid var(--line);border-radius:17px;background:#0a0a15d9;padding:15px;box-shadow:0 12px 40px #0005;min-width:0}.panel-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px}.panel-head h2{margin:0;font-size:20px}.count{padding:5px 9px;border-radius:999px;font-weight:900;font-size:12px}.count.green{background:#0b3d17;color:#aaff9c;border:1px solid #247a31}.count.red{background:#401321;color:#ffb4c3;border:1px solid #7b2940}
+.list{display:grid;gap:7px;max-height:62vh;overflow:auto;padding-right:3px}.student{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 12px;border:1px solid #202039;border-radius:12px;background:#0e0e1b;transition:.15s}.student:hover{border-color:#3a3a62;transform:translateY(-1px)}.student-name{font-weight:800;letter-spacing:.01em}.student-full{display:block;color:#6f6f82;font-size:10px;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:500px}.toggle{border:1px solid var(--line);border-radius:9px;background:#171727;color:#fff;padding:7px 10px;cursor:pointer;font-weight:900;white-space:nowrap}.toggle.photo{border-color:#247a31;background:#103217;color:#baffae}.toggle.no{border-color:#7b2940;background:#2d111b;color:#ffb4c3}
+.empty{padding:25px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:12px}
+.pending-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--pink);margin-left:6px;vertical-align:middle}
+@media(max-width:900px){.toolbar{grid-template-columns:1fr 1fr}.toolbar input{grid-column:1/-1}.columns{grid-template-columns:1fr}.list{max-height:none}.stats{grid-template-columns:repeat(2,1fr)}.hero{align-items:flex-start;flex-direction:column}}
+@media(max-width:520px){main{padding:15px 10px 35px}.toolbar{grid-template-columns:1fr}.toolbar>*{width:100%}.stats{grid-template-columns:1fr 1fr}.stat b{font-size:23px}.student{padding:10px}.student-full{max-width:180px}}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div><strong>⚡ TECNOMATH</strong> <span> · Control de fotos</span></div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap">
+    <a href="./index.html">← Admin</a>
+    <button id="logout" type="button">Salir</button>
+  </div>
+</header>
+<main>
+  <section class="hero">
+    <div>
+      <div class="eyebrow">ADMINISTRACIÓN · LISTA RÁPIDA</div>
+      <h1>📸 Control de fotos</h1>
+      <p>Usa la lista de estudiantes que ya existe en Supabase. Marca quién <b>ya dio la foto</b> y quién <b>falta</b>. Los cambios quedan guardados en Supabase.</p>
+    </div>
+  </section>
+
+  <div id="notice" class="notice">⏳ Comprobando acceso y cargando estudiantes…</div>
+
+  <div class="toolbar">
+    <input id="search" type="search" placeholder="🔎 Buscar por nombre…" autocomplete="off">
+    <select id="grade">
+      <option value="">Todos los cursos</option>
+    </select>
+    <button id="save" class="save" type="button">💾 Guardar cambios <span id="pending">(0)</span></button>
+    <button id="allPhoto" type="button">📸 Marcar todos FOTO</button>
+    <button id="allNoPhoto" class="danger" type="button">❌ Marcar todos NO FOTO</button>
+  </div>
+
+  <section class="stats" aria-label="Resumen">
+    <article class="stat"><span>Total estudiantes</span><b id="total">—</b></article>
+    <article class="stat"><span>📸 Ya dieron foto</span><b id="photoCount">—</b></article>
+    <article class="stat"><span>❌ Faltan</span><b id="noPhotoCount">—</b></article>
+    <article class="stat"><span>💾 Cambios pendientes</span><b id="pendingCount">0</b></article>
+  </section>
+
+  <section class="columns">
+    <article class="panel">
+      <div class="panel-head">
+        <h2>📸 FOTO — ya la dieron</h2>
+        <span id="photoBadge" class="count green">0</span>
+      </div>
+      <div id="photoList" class="list"></div>
+    </article>
+    <article class="panel">
+      <div class="panel-head">
+        <h2>❌ NO FOTO — faltan</h2>
+        <span id="noPhotoBadge" class="count red">0</span>
+      </div>
+      <div id="noPhotoList" class="list"></div>
+    </article>
+  </section>
+</main>
+
+<script>
+'use strict';
+(async function(){
+  const $=id=>document.getElementById(id);
+  const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const state={db:null,user:null,students:[],photoMap:new Map(),pending:new Map(),grade:''};
+
+  function notice(msg,type=''){ $('notice').textContent=msg; $('notice').className='notice '+type; }
+  function firstNameAndSurname(full){
+    const t=String(full||'').trim().split(/\s+/).filter(Boolean);
+    if(!t.length)return {display:'Sin nombre'};
+    const prefixes=[['DE','LA'],['DE','LOS'],['DE','LAS'],['DEL'],['DE']];
+    let surnameEnd=1;
+    const upper=t.map(x=>x.toUpperCase());
+    for(const p of prefixes){
+      if(upper.slice(0,p.length).join(' ')===p.join(' ')){
+        surnameEnd=p.length+1;
+        break;
+      }
+    }
+    const firstSurname=t.slice(0,surnameEnd).join(' ');
+    const firstName=t[surnameEnd]||t[t.length-1]||'';
+    return {display:(firstName+' '+firstSurname).toUpperCase(),full:t.join(' ')};
+  }
+  function key(id){return String(id)}
+  function effectiveHasPhoto(id){
+    const k=key(id);
+    return state.pending.has(k)?state.pending.get(k):Boolean(state.photoMap.get(k));
+  }
+  function visibleStudents(){
+    const q=$('search').value.trim().toLowerCase();
+    return state.students.filter(s=>{
+      const gradeOk=!state.grade||s.gradeLabel===state.grade;
+      const info=firstNameAndSurname(s.full_name);
+      return gradeOk && (!q || (info.display+' '+info.full).toLowerCase().includes(q));
+    }).sort((a,b)=>firstNameAndSurname(a.full_name).display.localeCompare(firstNameAndSurname(b.full_name).display,'es'));
+  }
+  function render(){
+    const rows=visibleStudents();
+    const photo=rows.filter(s=>effectiveHasPhoto(s.id));
+    const no=rows.filter(s=>!effectiveHasPhoto(s.id));
+    $('total').textContent=rows.length;
+    $('photoCount').textContent=photo.length;
+    $('noPhotoCount').textContent=no.length;
+    $('photoBadge').textContent=photo.length;
+    $('noPhotoBadge').textContent=no.length;
+    $('pending').textContent='('+state.pending.size+')';
+    $('pendingCount').textContent=state.pending.size;
+    const card=(s,has)=>{
+      const info=firstNameAndSurname(s.full_name);
+      const pending=state.pending.has(key(s.id))?'<span class="pending-dot" title="Cambio sin guardar"></span>':'';
+      return '<div class="student"><div><div class="student-name">'+esc(info.display)+pending+'</div><small class="student-full">'+esc(s.gradeLabel)+' · '+esc(info.full)+'</small></div><button class="toggle '+(has?'photo':'no')+'" type="button" data-id="'+esc(s.id)+'">'+(has?'📸 FOTO':'❌ NO FOTO')+'</button></div>';
+    };
+    $('photoList').innerHTML=photo.length?photo.map(s=>card(s,true)).join(''):'<div class="empty">Nadie marcado con foto todavía.</div>';
+    $('noPhotoList').innerHTML=no.length?no.map(s=>card(s,false)).join(''):'<div class="empty">Todos los estudiantes visibles tienen foto.</div>';
+  }
+  async function load(){
+    notice('⏳ Cargando lista de estudiantes y estados…');
+    const {data:students,error:e1}=await state.db
+      .from('tecnomath_voting_students')
+      .select('id,full_name,active,grade_id,grade:tecnomath_voting_grades(id,grade,group_name,label)')
+      .eq('active',true);
+    if(e1)throw e1;
+    state.students=(students||[]).map(s=>({...s,gradeLabel:s.grade?.label||((s.grade?.grade||'')+(s.grade?.group_name||''))||'Sin curso'}));
+    const {data:photos,error:e2}=await state.db
+      .from('tecnomath_student_photos')
+      .select('student_id,has_photo');
+    if(e2)throw e2;
+    state.photoMap=new Map((photos||[]).map(x=>[key(x.student_id),Boolean(x.has_photo)]));
+    state.pending.clear();
+    const grades=[...new Set(state.students.map(s=>s.gradeLabel))].sort((a,b)=>a.localeCompare(b,'es',{numeric:true}));
+    const current=$('grade').value;
+    $('grade').innerHTML='<option value="">Todos los cursos</option>'+grades.map(g=>'<option value="'+esc(g)+'">'+esc(g)+'</option>').join('');
+    $('grade').value=grades.includes(current)?current:(grades.includes('11A')?'11A':'');
+    state.grade=$('grade').value;
+    render();
+    notice('✅ Lista cargada. Marca y luego pulsa “Guardar cambios”.','ok');
+  }
+  async function save(){
+    if(!state.pending.size){notice('No hay cambios pendientes.','');return}
+    const rows=[...state.pending.entries()].map(([student_id,has_photo])=>({
+      student_id,has_photo,updated_by:state.user.id,updated_at:new Date().toISOString()
+    }));
+    $('save').disabled=true;
+    try{
+      const {error}=await state.db.from('tecnomath_student_photos').upsert(rows,{onConflict:'student_id'});
+      if(error)throw error;
+      for(const [id,val] of state.pending){state.photoMap.set(id,val)}
+      const n=state.pending.size;state.pending.clear();render();
+      notice('✅ Se guardaron '+n+' cambios en Supabase.','ok');
+    }catch(e){notice('❌ No se pudieron guardar los cambios: '+(e.message||e),'error')}
+    finally{$('save').disabled=false}
+  }
+  function setVisible(value){
+    visibleStudents().forEach(s=>state.pending.set(key(s.id),value));
+    render();
+    notice('Cambios preparados. Pulsa “Guardar cambios” para guardarlos.','');
+  }
+  function toggle(id){
+    const s=state.students.find(x=>key(x.id)===key(id));if(!s)return;
+    state.pending.set(key(id),!effectiveHasPhoto(id));
+    render();
+  }
+  $('search').addEventListener('input',render);
+  $('grade').addEventListener('change',e=>{state.grade=e.target.value;render()});
+  $('save').addEventListener('click',save);
+  $('allPhoto').addEventListener('click',()=>setVisible(true));
+  $('allNoPhoto').addEventListener('click',()=>setVisible(false));
+  document.addEventListener('click',e=>{const b=e.target.closest('.toggle');if(b)toggle(b.dataset.id)});
+  $('logout').addEventListener('click',async()=>{try{await state.db.auth.signOut()}finally{location.href='../../index.html'}});
+
+  try{
+    const ready=await window.TecnomathAdminGuard.requireAdmin({redirect:true});
+    state.user=ready.user;
+    state.db=await window.TecnomathAuth.getClient();
+    await load();
+  }catch(e){
+    notice('❌ '+(e.message||'No se pudo cargar la herramienta.'),'error');
+  }
+})();
+</script>
+</body>
+</html>
