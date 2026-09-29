@@ -84,45 +84,27 @@ main{max-width:1450px;margin:auto;padding:22px 18px 45px}.hero{display:flex;just
   const state={db:null,user:null,students:[],photoMap:new Map(),pending:new Map(),grade:''};
 
   function notice(msg,type=''){ $('notice').textContent=msg; $('notice').className='notice '+type; }
+  // Supabase guarda full_name como: APELLIDO 1 + APELLIDO 2 + NOMBRES.
+  // La interfaz muestra: PRIMER NOMBRE + APELLIDO 1 + APELLIDO 2.
   function firstNameAndSurname(full){
     const t=String(full||'').trim().split(/\s+/).filter(Boolean);
-    if(!t.length)return {display:'Sin nombre'};
-    const prefixes=[['DE','LA'],['DE','LOS'],['DE','LAS'],['DEL'],['DE']];
-    let surnameEnd=1;
-    const upper=t.map(x=>x.toUpperCase());
-    for(const p of prefixes){
-      if(upper.slice(0,p.length).join(' ')===p.join(' ')){
-        surnameEnd=p.length+1;
-        break;
-      }
-    }
-    const surnames=t.slice(0,surnameEnd);
-    const firstName=t[surnameEnd]||t[t.length-1]||'';
+    if(!t.length)return {display:'Sin nombre',firstName:'',surname1:'',surname2:'',full:''};
+    let surname1End=1;
+    // Apellidos compuestos que empiezan por DE/DEL/DE LA/DE LOS/DE LAS.
+    const u=t.map(x=>x.toUpperCase());
+    if(u[0]==='DE' && u[1]==='LA' && u[2]) surname1End=3;
+    else if(u[0]==='DE' && (u[1]==='LOS'||u[1]==='LAS') && u[2]) surname1End=3;
+    else if(u[0]==='DEL' && u[1]) surname1End=2;
+    const surname1=t.slice(0,surname1End).join(' ');
+    const surname2=t[surname1End]||'';
+    const firstName=t[surname1End+1]||t[surname1End]||'';
     return {
-      display:(firstName+' '+surnames.join(' ')).toUpperCase(),
-      short:(firstName+' '+(surnames[0]||'')).toUpperCase(),
+      display:(firstName+' '+surname1+' '+surname2).replace(/\s+/g,' ').trim().toUpperCase(),
+      firstName:firstName.toUpperCase(),
+      surname1:surname1.toUpperCase(),
+      surname2:surname2.toUpperCase(),
       full:t.join(' ')
     };
-  }
-  const PHOTO_SEED=[["EMMANUEL","AGUILERA"],["MATEO","BARBOSA"],["FABIANA","BENITEZ"],["GABRIEL","BONILLA"],["JEFTER","CAMACHO"],["JOSE","DELAHOZ"],["JHOANGEL","JINETE"],["YENDIS","MARCHENA"],["JAHIR","MAYORGA"],["YADIR","PEÑA"],["LAURA","BARRERA"],["OSCAR","VELEZ"],["JULISSA","VELEZ"],["SHARON","VELEZ"],["ANDY","HERNANDEZ"]];
-  function normalizeName(v){
-    return String(v||'').normalize('NFD').replace(/[\\u0300-\\u036f]/g,'').toUpperCase().replace(/[^A-Z0-9 ]+/g,' ').replace(/\\s+/g,' ').trim();
-  }
-  function seedCrossedPhotoStatuses(){
-    const existing=new Set(state.photoMap.keys());
-    const rows=[];
-    for(const s of state.students){
-      if(!/^11/i.test(String(s.gradeLabel||''))) continue;
-      const n=normalizeName(s.full_name);
-      const match=PHOTO_SEED.some(([first,surname])=>{
-        const f=normalizeName(first), sur=normalizeName(surname);
-        return n.includes(f) && n.includes(sur);
-      });
-      if(match && !existing.has(key(s.id))){
-        rows.push({student_id:s.id,has_photo:true,updated_by:state.user.id,updated_at:new Date().toISOString()});
-      }
-    }
-    return rows;
   }
   function key(id){return String(id)}
   function effectiveHasPhoto(id){
@@ -134,8 +116,13 @@ main{max-width:1450px;margin:auto;padding:22px 18px 45px}.hero{display:flex;just
     return state.students.filter(s=>{
       const gradeOk=/^11/i.test(String(s.gradeLabel||''));
       const info=firstNameAndSurname(s.full_name);
-      return gradeOk && (!q || (info.display+' '+info.full).toLowerCase().includes(q));
-    }).sort((a,b)=>firstNameAndSurname(a.full_name).display.localeCompare(firstNameAndSurname(b.full_name).display,'es'));
+      return gradeOk && (!q || (info.display+' '+info.full).toLocaleLowerCase('es').includes(q.toLocaleLowerCase('es')));
+    }).sort((a,b)=>{
+      const A=firstNameAndSurname(a.full_name), B=firstNameAndSurname(b.full_name);
+      return A.firstName.localeCompare(B.firstName,'es',{sensitivity:'base'}) ||
+        A.surname1.localeCompare(B.surname1,'es',{sensitivity:'base'}) ||
+        A.surname2.localeCompare(B.surname2,'es',{sensitivity:'base'});
+    });
   }
   function render(){
     const rows=visibleStudents();
@@ -157,29 +144,37 @@ main{max-width:1450px;margin:auto;padding:22px 18px 45px}.hero{display:flex;just
     $('noPhotoList').innerHTML=no.length?no.map(s=>card(s,false)).join(''):'<div class="empty">Todos los estudiantes visibles tienen foto.</div>';
   }
   async function load(){
-    notice('⏳ Cargando lista de estudiantes y estados…');
+    notice('⏳ Cargando únicamente estudiantes activos de 11° y sus estados…');
+    const {data:gradeRows,error:gError}=await state.db
+      .from('tecnomath_voting_grades')
+      .select('id,grade,group_name,label')
+      .eq('active',true)
+      .eq('grade','11');
+    if(gError)throw gError;
+    const gradeIds=(gradeRows||[]).map(g=>g.id);
+    if(!gradeIds.length){
+      state.students=[]; state.photoMap=new Map(); state.pending.clear(); render();
+      notice('⚠️ No hay un grado 11° activo en Supabase.','error');
+      return;
+    }
+    const gradeById=new Map((gradeRows||[]).map(g=>[key(g.id),g]));
     const {data:students,error:e1}=await state.db
       .from('tecnomath_voting_students')
-      .select('id,full_name,active,grade_id,grade:tecnomath_voting_grades(id,grade,group_name,label)')
-      .eq('active',true);
+      .select('id,full_name,active,grade_id')
+      .eq('active',true)
+      .in('grade_id',gradeIds);
     if(e1)throw e1;
-    state.students=(students||[]).map(s=>({...s,gradeLabel:s.grade?.label||((s.grade?.grade||'')+(s.grade?.group_name||''))||'Sin curso'}));
-    const {data:photos,error:e2}=await state.db
-      .from('tecnomath_student_photos')
-      .select('student_id,has_photo');
+    state.students=(students||[]).map(s=>({...s,gradeLabel:gradeById.get(key(s.grade_id))?.label||'11°'}));
+    const studentIds=state.students.map(s=>s.id);
+    const {data:photos,error:e2}=studentIds.length
+      ? await state.db.from('tecnomath_student_photos').select('student_id,has_photo').in('student_id',studentIds)
+      : {data:[],error:null};
     if(e2)throw e2;
     state.photoMap=new Map((photos||[]).map(x=>[key(x.student_id),Boolean(x.has_photo)]));
     state.pending.clear();
-    const seeded=seedCrossedPhotoStatuses();
-    if(seeded.length){
-      const {error:seedError}=await state.db.from('tecnomath_student_photos').upsert(seeded,{onConflict:'student_id'});
-      if(seedError) throw seedError;
-      seeded.forEach(x=>state.photoMap.set(key(x.student_id),true));
-    }
-    const grades=[...new Set(state.students.map(s=>s.gradeLabel))].sort((a,b)=>a.localeCompare(b,'es',{numeric:true}));
     state.grade='11';
     render();
-    notice('✅ 11° cargado. Los nombres rayados de la lista fueron registrados como FOTO.','ok');
+    notice('✅ 11° cargado desde Supabase. No se modifica ningún nombre original.','ok');
   }
   async function save(){
     if(!state.pending.size){notice('No hay cambios pendientes.','');return}
