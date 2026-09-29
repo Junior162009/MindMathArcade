@@ -165,7 +165,7 @@
     "name": "MENTEX",
     "desc": "Juego educativo MENTEX",
     "url": "games/jolberth11°/index.html",
-    "imageUrl": "",
+    "imageUrl": "img/logos/mentex.jpg?v=1790685970242",
     "icon": "🎮",
     "category": "edu",
     "deviceCompatibility": "both",
@@ -186,7 +186,8 @@
     "entryFile": "index.html",
     "logoStoragePath": "",
     "packageStoragePath": "",
-    "packageFileName": ""
+    "packageFileName": "",
+    "identityVersion": 1790685970894
   },
   {
     "name": "MindMath Arcade",
