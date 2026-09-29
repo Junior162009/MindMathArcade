@@ -23,7 +23,11 @@ main{max-width:1450px;margin:auto;padding:22px 18px 45px}.hero{display:flex;just
 @media(max-width:900px){.toolbar{grid-template-columns:1fr 1fr}.toolbar input{grid-column:1/-1}.columns{grid-template-columns:1fr}.list{max-height:none}.stats{grid-template-columns:repeat(2,1fr)}.hero{align-items:flex-start;flex-direction:column}}
 @media(max-width:520px){main{padding:15px 10px 35px}.toolbar{grid-template-columns:1fr}.toolbar>*{width:100%}.stats{grid-template-columns:1fr 1fr}.stat b{font-size:23px}.student{padding:10px}.student-full{max-width:180px}}
 </style>
-</head>
+<style>
+.columns{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.column.no-go{border-color:#7f1d1d}.toggle.no_go{background:#7f1d1d;color:#fff}.toggle.photo{background:#166534;color:#fff}.toggle.no_photo{background:#374151;color:#fff}
+@media(max-width:900px){.columns{grid-template-columns:1fr}}
+</style></head>
 <body>
 <header class="topbar">
   <div><strong>⚡ TECNOMATH</strong> <span> · Control de fotos</span></div>
@@ -107,10 +111,11 @@ main{max-width:1450px;margin:auto;padding:22px 18px 45px}.hero{display:flex;just
     };
   }
   function key(id){return String(id)}
-  function effectiveHasPhoto(id){
+  function effectiveStatus(id){
     const k=key(id);
-    return state.pending.has(k)?state.pending.get(k):Boolean(state.photoMap.get(k));
+    return state.pending.has(k)?state.pending.get(k):(state.statusMap.get(k)||'no_photo');
   }
+  function effectiveHasPhoto(id){ return effectiveStatus(id)==='photo'; }
   function visibleStudents(){
     const q=$('search').value.trim().toLowerCase();
     return state.students.filter(s=>{
@@ -126,22 +131,28 @@ main{max-width:1450px;margin:auto;padding:22px 18px 45px}.hero{display:flex;just
   }
   function render(){
     const rows=visibleStudents();
-    const photo=rows.filter(s=>effectiveHasPhoto(s.id));
-    const no=rows.filter(s=>!effectiveHasPhoto(s.id));
+    const photo=rows.filter(s=>effectiveStatus(s.id)==='photo');
+    const no=rows.filter(s=>effectiveStatus(s.id)==='no_photo');
+    const noGo=rows.filter(s=>effectiveStatus(s.id)==='no_go');
     $('total').textContent=rows.length;
     $('photoCount').textContent=photo.length;
     $('noPhotoCount').textContent=no.length;
     $('photoBadge').textContent=photo.length;
     $('noPhotoBadge').textContent=no.length;
+    $('noGoCount').textContent=noGo.length;
+    $('noGoBadge').textContent=noGo.length;
     $('pending').textContent='('+state.pending.size+')';
     $('pendingCount').textContent=state.pending.size;
     const card=(s,has)=>{
       const info=firstNameAndSurname(s.full_name);
       const pending=state.pending.has(key(s.id))?'<span class="pending-dot" title="Cambio sin guardar"></span>':'';
-      return '<div class="student"><div><div class="student-name">'+esc(info.display)+pending+'</div><small class="student-full">'+esc(s.gradeLabel)+' · '+esc(info.full)+'</small></div><button class="toggle '+(has?'photo':'no')+'" type="button" data-id="'+esc(s.id)+'">'+(has?'📸 FOTO':'❌ NO FOTO')+'</button></div>';
+      const status=effectiveStatus(s.id);
+      const label=status==='photo'?'📸 FOTO':status==='no_go'?'🚫 NO VA':'❌ NO FOTO';
+      return '<div class="student"><div><div class="student-name">'+esc(info.display)+pending+'</div><small class="student-full">'+esc(s.gradeLabel)+'</small></div><button class="toggle '+status+'" type="button" data-id="'+esc(s.id)+'">'+label+'</button></div>';
     };
     $('photoList').innerHTML=photo.length?photo.map(s=>card(s,true)).join(''):'<div class="empty">Nadie marcado con foto todavía.</div>';
-    $('noPhotoList').innerHTML=no.length?no.map(s=>card(s,false)).join(''):'<div class="empty">Todos los estudiantes visibles tienen foto.</div>';
+    $('noPhotoList').innerHTML=no.length?no.map(s=>card(s,false)).join(''):'<div class="empty">No faltan fotos.</div>';
+    $('noGoList').innerHTML=noGo.length?noGo.map(s=>card(s,false)).join(''):'<div class="empty">Nadie marcado como NO VA.</div>';
   }
   async function load(){
     notice('⏳ Cargando únicamente estudiantes activos de 11° y sus estados…');
@@ -171,6 +182,7 @@ main{max-width:1450px;margin:auto;padding:22px 18px 45px}.hero{display:flex;just
       : {data:[],error:null};
     if(e2)throw e2;
     state.photoMap=new Map((photos||[]).map(x=>[key(x.student_id),Boolean(x.has_photo)]));
+    state.statusMap=new Map((photos||[]).map(x=>[key(x.student_id),x.no_go?'no_go':(x.has_photo?'photo':'no_photo')]));
     state.pending.clear();
     state.grade='11';
     render();
@@ -178,27 +190,28 @@ main{max-width:1450px;margin:auto;padding:22px 18px 45px}.hero{display:flex;just
   }
   async function save(){
     if(!state.pending.size){notice('No hay cambios pendientes.','');return}
-    const rows=[...state.pending.entries()].map(([student_id,has_photo])=>({
-      student_id,has_photo,updated_by:state.user.id,updated_at:new Date().toISOString()
+    const rows=[...state.pending.entries()].map(([student_id,status])=>({
+      student_id,has_photo:status==='photo',no_go:status==='no_go',updated_by:state.user.id,updated_at:new Date().toISOString()
     }));
     $('save').disabled=true;
     try{
       const {error}=await state.db.from('tecnomath_student_photos').upsert(rows,{onConflict:'student_id'});
       if(error)throw error;
-      for(const [id,val] of state.pending){state.photoMap.set(id,val)}
+      for(const [id,val] of state.pending){state.statusMap.set(id,val);state.photoMap.set(id,val==='photo')}
       const n=state.pending.size;state.pending.clear();render();
       notice('✅ Se guardaron '+n+' cambios en Supabase.','ok');
     }catch(e){notice('❌ No se pudieron guardar los cambios: '+(e.message||e),'error')}
     finally{$('save').disabled=false}
   }
   function setVisible(value){
-    visibleStudents().forEach(s=>state.pending.set(key(s.id),value));
+    visibleStudents().forEach(s=>state.pending.set(key(s.id),value?'photo':'no_photo'));
     render();
     notice('Cambios preparados. Pulsa “Guardar cambios” para guardarlos.','');
   }
   function toggle(id){
     const s=state.students.find(x=>key(x.id)===key(id));if(!s)return;
-    state.pending.set(key(id),!effectiveHasPhoto(id));
+    const current=effectiveStatus(id);
+    state.pending.set(key(id),current==='photo'?'no_photo':current==='no_photo'?'no_go':'photo');
     render();
   }
   $('search').addEventListener('input',render);
@@ -206,6 +219,7 @@ main{max-width:1450px;margin:auto;padding:22px 18px 45px}.hero{display:flex;just
   $('save').addEventListener('click',save);
   $('allPhoto').addEventListener('click',()=>setVisible(true));
   $('allNoPhoto').addEventListener('click',()=>setVisible(false));
+  $('allNoGo').addEventListener('click',()=>{visibleStudents().forEach(s=>state.pending.set(key(s.id),'no_go'));render();notice('Cambios preparados. Pulsa “Guardar cambios”.','')});
   document.addEventListener('click',e=>{const b=e.target.closest('.toggle');if(b)toggle(b.dataset.id)});
   $('logout').addEventListener('click',async()=>{try{await state.db.auth.signOut()}finally{location.href='../../index.html'}});
 
