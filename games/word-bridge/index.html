@@ -1,18 +1,33 @@
 <!doctype html>
 <html lang="es">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="description" content="Word Bridge: juego educativo para practicar inglés y español mediante imágenes y pistas.">
-<title>Word Bridge — English ↔ Español</title><link rel="stylesheet" href="./style.css">
-<script src="/js/tecnomath-progress.js?v=20260911-9"></script>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="EASY LINGO — aprende inglés jugando con vocabulario, retos, niveles y recompensas.">
+<meta name="theme-color" content="#17122f"><title>🌎 EASY LINGO — Learn English. Play. Improve.</title>
+<link rel="stylesheet" href="./style.css"><script src="/js/tecnomath-progress.js?v=20261002-easyl"></script>
 </head>
-<body><main class="app">
-<header class="topbar"><div><span class="eyebrow">IDIOMAS</span><h1>Word Bridge</h1><p>Conecta la imagen con la palabra correcta.</p></div>
-<div class="scorebox"><span>PUNTOS</span><strong id="score">0</strong></div></header>
-<section class="progress-wrap"><div class="progress-meta"><span id="roundLabel">Ronda 1 de 10</span><span id="streak">🔥 0 racha</span></div><div class="progress"><div id="progressBar"></div></div></section>
-<section class="mode-card"><div class="mode-switch"><button class="mode active" data-mode="english">🇬🇧 Inglés → Español</button><button class="mode" data-mode="spanish">🇪🇸 Español → Inglés</button></div>
-<div class="challenge"><div class="image-card"><img id="clueImage" alt="Pista visual"><span class="image-label">PISTA VISUAL</span></div>
-<div class="question"><span class="tag" id="direction">TRADUCE AL ESPAÑOL</span><h2 id="prompt">¿Cómo se dice?</h2><p id="hint">Observa la imagen y elige la respuesta.</p><div id="answers" class="answers"></div><p id="feedback" class="feedback" role="status" aria-live="polite"></p></div></div></section>
-<section class="help"><span>💡</span><div><strong>Aprende jugando</strong><p>Si fallas, verás la respuesta para ayudarte a recordarla.</p></div></section>
-<button id="restart" class="restart">↻ Reiniciar partida</button>
-</main><script src="./script.js"></script></body></html>
+<body>
+<div id="app">
+<header class="topbar">
+<button class="brand" id="homeBtn"><span class="brand-mark">🌎</span><span><b>EASY LINGO</b><small>Learn English. Play. Improve.</small></span></button>
+<div class="hud"><span>⭐ <b id="xp">0</b> XP</span><span>🏆 <b id="levelHud">1</b></span><span>🔥 <b id="bestStreak">0</b></span><button id="soundBtn" class="icon-btn" aria-label="Sonido">🔊</button></div>
+</header>
+<main>
+<section id="home" class="screen active">
+<div class="hero"><div class="hero-copy"><span class="eyebrow">ENGLISH ADVENTURE</span><h1>Aprende inglés.<br><em>Juega y progresa.</em></h1><p>Palabras, imágenes, retos, rachas y recompensas en una aventura hecha para aprender.</p><div class="hero-actions"><button id="playBtn" class="primary">▶ JUGAR</button><button id="learnBtn" class="secondary">📖 APRENDER</button></div></div><div class="hero-art"><div class="orb">🌎</div><div class="float-card c1">🔥 Racha</div><div class="float-card c2">✨ +10 XP</div><div class="float-card c3">🏆 ¡Nuevo logro!</div></div></div>
+<div class="home-grid"><button class="menu-card" id="levelsBtn"><span>📚</span><b>NIVELES</b><small>Desbloquea nuevos retos</small></button><button class="menu-card" id="achievementsBtn"><span>🏆</span><b>LOGROS</b><small>Colecciona recompensas</small></button><button class="menu-card" id="settingsBtn"><span>⚙️</span><b>CONFIGURACIÓN</b><small>Sonido y progreso</small></button><div class="progress-card"><div><span>PROGRESO</span><strong id="homeProgress">0%</strong></div><div class="xpbar"><i id="homeBar"></i></div><small id="homeStats">Nivel 1 · 0 XP · 0 niveles completados</small></div></div>
+</section>
+<section id="game" class="screen">
+<div class="game-head"><button class="ghost" id="quitBtn">← Salir</button><div class="game-title"><b>EASY LINGO</b><span id="gameLevel">NIVEL 1 · BEGINNER</span></div><div class="game-stats"><span>⭐ <b id="score">0</b></span><span>🔥 <b id="streak">0</b></span><span>✨ <b id="gameXp">0</b></span></div></div>
+<div class="question-progress"><div><span id="roundLabel">Pregunta 1/10</span><span id="typeLabel">RETO</span></div><div class="progress"><i id="gameBar"></i></div></div>
+<article class="question-card"><div id="visual" class="visual"></div><div class="question-content"><span class="tag" id="tag">RETO</span><h2 id="prompt">Cargando...</h2><p id="hint">Prepárate.</p><div id="answers" class="answers"></div><div id="writeArea" class="write-area hidden"><input id="writeInput" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="Escribe aquí..."><button id="checkBtn" class="primary">COMPROBAR ✓</button></div><div id="lettersArea" class="letters-area hidden"><div id="letterBank"></div><div id="wordBuild"></div><button id="clearLetters" class="ghost">↶ Borrar</button></div><div id="feedback" class="feedback" aria-live="polite"></div></div></article>
+<div class="game-bottom"><button id="hintBtn" class="hint-btn">💡 PISTA <span id="hintCount">2</span></button><div id="timer" class="timer hidden">⏱️ <b>15</b></div></div>
+</section>
+<section id="levels" class="screen"><div class="section-head"><button class="ghost backHome">← Inicio</button><div><span class="eyebrow">CAMPAÑA</span><h2>NIVELES</h2></div></div><div id="levelsGrid" class="levels-grid"></div></section>
+<section id="learn" class="screen"><div class="section-head"><button class="ghost backHome">← Inicio</button><div><span class="eyebrow">ACADEMIA</span><h2>📖 APRENDER</h2></div></div><div id="categories" class="category-tabs"></div><div id="learnGrid" class="learn-grid"></div></section>
+<section id="achievements" class="screen"><div class="section-head"><button class="ghost backHome">← Inicio</button><div><span class="eyebrow">COLECCIÓN</span><h2>🏆 LOGROS</h2></div></div><div id="achievementGrid" class="achievement-grid"></div></section>
+<section id="settings" class="screen"><div class="section-head"><button class="ghost backHome">← Inicio</button><div><span class="eyebrow">PERSONALIZA</span><h2>⚙️ CONFIGURACIÓN</h2></div></div><div class="settings-card"><button class="setting-row" id="toggleSound"><span>🔊 Sonidos</span><b id="soundState">ON</b></button><button class="setting-row" id="toggleMusic"><span>🎵 Música</span><b id="musicState">OFF</b></button><button class="setting-row" id="toggleAnimations"><span>✨ Animaciones</span><b id="animationsState">ON</b></button><button class="danger" id="resetProgress">🔄 Reiniciar progreso</button></div></section>
+</main>
+<div id="modal" class="modal hidden"><div class="modal-box" id="modalContent"></div></div>
+<div id="toast" class="toast"></div>
+</div><script type="module" src="./script.js"></script></body></html>
