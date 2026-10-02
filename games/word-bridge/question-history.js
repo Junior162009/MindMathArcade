@@ -68,6 +68,7 @@ export async function recordQuestion(questionId,result){
   return row;
 }
 export async function reloadQuestionHistory(){await load();return history}
+export async function refreshQuestionHistoryForCurrentUser(){ready=null;remote=null;user=null;history=new Map();await init();return history}
 export async function resetQuestionHistory(){
   await init();
   if(user&&remote){
