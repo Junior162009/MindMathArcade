@@ -38,7 +38,8 @@ export const WORDS = [
  {id:"horse",en:"horse",es:"caballo",emoji:"🐴",cat:"animals",level:2},
  {id:"door",en:"door",es:"puerta",emoji:"🚪",cat:"home",level:2},
  {id:"window",en:"window",es:"ventana",emoji:"🪟",cat:"home",level:2},
- {id:"pencil",en:"pencil",es:"lápiz",emoji:"✏️",cat:"school",level:3}
+ {id:"pencil",en:"pencil",es:"lápiz",emoji:"✏️",cat:"school",level:3},
+ {id:"computer",en:"computer",es:"computador",emoji:"💻",cat:"school",level:3}
 ];
 export const LEVELS=[
  {id:1,name:"BEGINNER",color:"green",minWords:1},
