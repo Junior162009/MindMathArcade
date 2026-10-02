@@ -1,25 +1,115 @@
-import {WORDS,LEVELS,CATEGORIES} from "./data.js";
+import {WORDS,LEVELS,CATEGORIES,QUESTION_BANK,QUESTION_BANK_SIZE} from "./data.js";
 import {createQuestion,isCorrect,shuffle} from "./engine.js";
 import {loadProgress,saveProgress,addXP,recordAnswer,resetProgress} from "./progress.js";
+import {initQuestionHistory,getAnsweredIds,recordQuestion,getStats,reloadQuestionHistory} from "./question-history.js";
 import {AudioManager} from "./audio.js";
 import {ACHIEVEMENTS,checkAchievements} from "./achievements.js";
 
 const $=id=>document.getElementById(id);
-let progress=loadProgress(),screen="home",level=1,score=0,streak=0,maxStreak=0,round=0,total=10,used=new Set(),current=null,locked=false,hints=2,letters=[],timerId=null;
-const show=(id)=>{document.querySelectorAll(".screen").forEach(s=>s.classList.toggle("active",s.id===id));screen=id;window.scrollTo({top:0,behavior:"smooth"})};
-const toast=(msg)=>{const t=$("toast");t.textContent=msg;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),1800)};
-function refresh(){progress=loadProgress();$("xp").textContent=progress.xp;$("levelHud").textContent=progress.unlockedLevel;$("bestStreak").textContent=progress.bestStreak;$("homeProgress").textContent=Math.min(100,Math.round(progress.completedLevels.length/5*100))+"%";$("homeBar").style.width=$("homeProgress").textContent;$("homeStats").textContent="Nivel "+progress.unlockedLevel+" · "+progress.xp+" XP · "+progress.completedLevels.length+" niveles completados";$("soundState").textContent=progress.sound?"ON":"OFF";$("musicState").textContent=progress.music?"ON":"OFF";$("animationsState").textContent=progress.animations?"ON":"OFF";$("soundBtn").textContent=progress.sound?"🔊":"🔇"}
-function renderLevels(){const icons=["🟢","🔵","🟣","🟠","🔴"];$("levelsGrid").innerHTML=LEVELS.map(l=>{const ok=l.id<=progress.unlockedLevel;const done=progress.completedLevels.includes(l.id);return '<article class="level-card '+(!ok?"locked":"")+'"><div class="level-icon">'+(ok?icons[l.id-1]:"🔒")+'</div><h3>NIVEL '+l.id+' — '+l.name+'</h3><p>'+["Vocabulario básico, imágenes y muchas pistas.","Más vocabulario y variedad.","Retos combinados y menos ayudas.","Desafíos difíciles y vocabulario menos frecuente.","Combinación maestra de modalidades."][l.id-1]+'</p><small>'+ (done?"✅ COMPLETADO":ok?"🔓 DESBLOQUEADO":"🔒 BLOQUEADO")+'</small><button class="'+(ok?"primary":"ghost")+'" data-level="'+l.id+'" '+(!ok?"disabled":"")+'>▶ JUGAR</button></article>'}).join("");document.querySelectorAll("[data-level]").forEach(b=>b.onclick=()=>startGame(+b.dataset.level))}
-function renderAchievements(){const ids=new Set(progress.achievements);$("achievementGrid").innerHTML=ACHIEVEMENTS.map(a=>'<article class="achievement '+(!ids.has(a.id)?"locked":"")+'"><span>'+ (ids.has(a.id)?a.icon:"🔒")+'</span><div><b>'+ (ids.has(a.id)?a.title:"???")+'</b><br><small>'+a.desc+'</small></div></article>').join("")}
-function renderLearn(cat="food"){const list=WORDS.filter(w=>w.cat===cat);$("categories").innerHTML=Object.entries(CATEGORIES).map(([id,name])=>'<button class="category-tab '+(id===cat?"active":"")+'" data-cat="'+id+'">'+name+'</button>').join("");document.querySelectorAll("[data-cat]").forEach(b=>b.onclick=()=>renderLearn(b.dataset.cat));$("learnGrid").innerHTML=list.map(w=>'<article class="learn-card"><div class="learn-emoji">'+w.emoji+'</div><div><b>'+w.en+'</b><br><small>'+w.es+'</small></div><button class="listen" data-word="'+w.en+'">🔊</button></article>').join("");document.querySelectorAll("[data-word]").forEach(b=>b.onclick=()=>speak(b.dataset.word))}
+let progress=loadProgress(),screen="home",level=1,score=0,streak=0,maxStreak=0,round=0,total=10,used=new Set(),answeredIds=new Set(),current=null,locked=false,hints=2,letters=[],timerId=null,historyReady=false;
+const show=id=>{document.querySelectorAll(".screen").forEach(s=>s.classList.toggle("active",s.id===id));screen=id;window.scrollTo({top:0,behavior:"smooth"})};
+const toast=msg=>{const t=$("toast");t.textContent=msg;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),1800)};
+function refreshQuestionStats(){
+  const s=getStats(QUESTION_BANK_SIZE);
+  const pct=Math.round(s.completed/QUESTION_BANK_SIZE*100);
+  $("questionStats").textContent="Preguntas completadas: "+s.completed+" / "+QUESTION_BANK_SIZE+" · Restantes: "+s.remaining+" · Precisión: "+s.accuracy+"%";
+  $("homeProgress").textContent=pct+"%";$("homeBar").style.width=pct+"%";
+}
+function refresh(){
+  progress=loadProgress();$("xp").textContent=progress.xp;$("levelHud").textContent=progress.unlockedLevel;$("bestStreak").textContent=progress.bestStreak;
+  $("homeStats").textContent="Nivel "+progress.unlockedLevel+" · "+progress.xp+" XP · "+progress.completedLevels.length+" niveles completados";
+  $("soundState").textContent=progress.sound?"ON":"OFF";$("musicState").textContent=progress.music?"ON":"OFF";$("animationsState").textContent=progress.animations?"ON":"OFF";$("soundBtn").textContent=progress.sound?"🔊":"🔇";
+  refreshQuestionStats();
+}
+function renderLevels(){
+  const icons=["🟢","🔵","🟣","🟠","🔴"];
+  $("levelsGrid").innerHTML=LEVELS.map(l=>{const ok=l.id<=progress.unlockedLevel,done=progress.completedLevels.includes(l.id);
+    return '<article class="level-card '+(!ok?"locked":"")+'"><div class="level-icon">'+(ok?icons[l.id-1]:"🔒")+'</div><h3>NIVEL '+l.id+' — '+l.name+'</h3><p>'+["Vocabulario básico, imágenes y muchas pistas.","Más vocabulario y variedad.","Retos combinados y menos ayudas.","Desafíos difíciles y vocabulario menos frecuente.","Combinación maestra de modalidades."][l.id-1]+'</p><small>'+(done?"✅ COMPLETADO":ok?"🔓 DESBLOQUEADO":"🔒 BLOQUEADO")+'</small><button class="'+(ok?"primary":"ghost")+'" data-level="'+l.id+'" '+(!ok?"disabled":"")+'>▶ JUGAR</button></article>'}).join("");
+  document.querySelectorAll("[data-level]").forEach(b=>b.onclick=()=>startGame(+b.dataset.level));
+}
+function renderAchievements(){const ids=new Set(progress.achievements);$("achievementGrid").innerHTML=ACHIEVEMENTS.map(a=>'<article class="achievement '+(!ids.has(a.id)?"locked":"")+'"><span>'+(ids.has(a.id)?a.icon:"🔒")+'</span><div><b>'+(ids.has(a.id)?a.title:"???")+'</b><br><small>'+a.desc+"</small></div></article>").join("")}
+function renderLearn(cat="food"){
+  const list=WORDS.filter(w=>w.cat===cat);$("categories").innerHTML=Object.entries(CATEGORIES).map(([id,name])=>'<button class="category-tab '+(id===cat?"active":"")+'" data-cat="'+id+'">'+name+"</button>").join("");
+  document.querySelectorAll("[data-cat]").forEach(b=>b.onclick=()=>renderLearn(b.dataset.cat));
+  $("learnGrid").innerHTML=list.map(w=>'<article class="learn-card"><div class="learn-emoji">'+w.emoji+'</div><div><b>'+w.en+"</b><br><small>"+w.es+'</small></div><button class="listen" data-word="'+w.en+'">🔊</button></article>').join("");
+  document.querySelectorAll("[data-word]").forEach(b=>b.onclick=()=>speak(b.dataset.word));
+}
 function speak(word){if(!progress.sound)return;try{const u=new SpeechSynthesisUtterance(word);u.lang="en-US";u.rate=.82;speechSynthesis.cancel();speechSynthesis.speak(u)}catch{}}
-function startGame(l){AudioManager.startMusic();level=l;score=0;streak=0;maxStreak=0;round=0;used=new Set();hints=2;show("game");$("gameLevel").textContent="NIVEL "+level+" · "+LEVELS[level-1].name;nextQuestion()}
-function nextQuestion(){clearInterval(timerId);if(round>=total){finish();return}round++;locked=false;current=createQuestion(level,used);renderQuestion();if(current.type==="listen")setTimeout(()=>speak(current.word.en),180);if((current.type==="vocabulary"||current.type==="listen")&&level>=3)startTimer()}
-function renderQuestion(){$("score").textContent=score;$("streak").textContent=streak;$("gameXp").textContent=progress.xp;$("roundLabel").textContent="Pregunta "+round+"/"+total;$("gameBar").style.width=(round/total*100)+"%";$("typeLabel").textContent=current.type.replace("imageToWord","IMAGEN → PALABRA").replace("esToEn","ESPAÑOL → INGLÉS").replace("enToEs","INGLÉS → ESPAÑOL").replace("wordToImage","PALABRA → IMAGEN").replace("write","ESCRIBE").replace("letters","ORDENA").replace("listen","ESCUCHA").replace("vocabulary","VOCABULARIO");$("tag").textContent=$("typeLabel").textContent;$("prompt").textContent=current.prompt;$("hint").textContent=current.hint;$("feedback").textContent="";$("feedback").className="feedback";$("answers").innerHTML="";$("writeArea").classList.add("hidden");$("lettersArea").classList.add("hidden");$("visual").innerHTML=current.type==="wordToImage"?'<div class="emoji-visual">🔎</div>':'<img src="'+current.image+'" alt="'+current.word.en+'">';if(current.type==="write"){ $("visual").innerHTML='<div class="emoji-visual">'+current.word.emoji+'</div>';$("writeArea").classList.remove("hidden");$("writeInput").value="";setTimeout(()=>$("writeInput").focus(),50)}else if(current.type==="letters"){letters=[];$("lettersArea").classList.remove("hidden");$("letterBank").innerHTML=current.letters.map((l,i)=>'<button class="letter" data-i="'+i+'">'+l+'</button>').join("");$("wordBuild").innerHTML='<span class="built"></span>';document.querySelectorAll(".letter").forEach(b=>b.onclick=()=>pickLetter(+b.dataset.i))}else{current.choices.forEach(choice=>{const b=document.createElement("button");b.className="answer";if(current.type==="wordToImage"){b.classList.add("image-choice");b.innerHTML='<span class="choice-emoji">'+choice.emoji+'</span><span>'+choice.en+'</span>';b.onclick=()=>answer(b,choice.id===current.word.id?current.answer:choice.id)}else{b.textContent=choice;b.onclick=()=>answer(b,choice)}$("answers").appendChild(b)})}}
-function answer(btn,value){if(locked)return;locked=true;clearInterval(timerId);document.querySelectorAll(".answer").forEach(b=>b.disabled=true);const ok=isCorrect(current,value);if(ok){score++;streak++;maxStreak=Math.max(maxStreak,streak);btn.classList.add("correct");$("feedback").textContent="🎉 ¡Correcto! +1 punto · ✨ +10 XP";$("feedback").className="feedback ok";AudioManager.correct();addXP(10);if(streak>=3)toast("🔥 ¡Racha x"+streak+"!")}else{streak=0;btn.classList.add("wrong");$("feedback").textContent="❌ Incorrecto · Respuesta: "+current.answer;$("feedback").className="feedback no";AudioManager.wrong()}recordAnswer(ok,streak);refresh();setTimeout(nextQuestion,650)}
-function checkWrite(){if(locked)return;const value=$("writeInput").value;locked=true;const ok=isCorrect(current,value);if(ok){score++;streak++;maxStreak=Math.max(maxStreak,streak);$("feedback").textContent="🎉 ¡Correcto! +1 punto · ✨ +10 XP";$("feedback").className="feedback ok";AudioManager.correct();addXP(10)}else{streak=0;$("feedback").textContent="❌ Incorrecto · La respuesta correcta es: "+current.answer;$("feedback").className="feedback no";AudioManager.wrong()}recordAnswer(ok,streak);refresh();setTimeout(nextQuestion,900)}
-function pickLetter(i){if(locked)return;const btn=document.querySelector('[data-i="'+i+'"]');if(btn.classList.contains("used"))return;btn.classList.add("used");letters.push(current.letters[i]);$("wordBuild").querySelector(".built").textContent=letters.join("");if(letters.length===current.letters.length){locked=true;const ok=isCorrect(current,letters.join(""));if(ok){score++;streak++;maxStreak=Math.max(maxStreak,streak);$("feedback").textContent="🎉 ¡Palabra formada! +1 punto · ✨ +10 XP";$("feedback").className="feedback ok";AudioManager.correct();addXP(10)}else{$("feedback").textContent="❌ Era: "+current.answer;$("feedback").className="feedback no";streak=0;AudioManager.wrong()}recordAnswer(ok,streak);refresh();setTimeout(nextQuestion,850)}}
-function startTimer(){let left=15;$("timer").classList.remove("hidden");$("timer").innerHTML="⏱️ <b>"+left+"</b>";timerId=setInterval(()=>{left--;$("timer").innerHTML="⏱️ <b>"+left+"</b>";if(left<=0){clearInterval(timerId);if(!locked){locked=true;streak=0;$("feedback").textContent="⏰ Tiempo agotado · Respuesta: "+current.answer;$("feedback").className="feedback no";AudioManager.wrong();recordAnswer(false,0);setTimeout(nextQuestion,850)}}},1000)}
-function finish(){clearInterval(timerId);const pct=Math.round(score/total*100),reward=pct===100?"💎 PERFECTO":pct>=80?"🥇 ORO":pct>=50?"🥈 PLATA":"🥉 BRONCE";let completed=[...progress.completedLevels];if(pct>=80&&!completed.includes(level))completed.push(level);const unlocked=Math.min(5,Math.max(progress.unlockedLevel,pct>=80?level+1:level));saveProgress({completedLevels:completed,unlockedLevel:unlocked,bestStreak:Math.max(progress.bestStreak,maxStreak)});const unlockedAchievements=checkAchievements({score,total,bestStreak:maxStreak,level});refresh();if(pct===100)AudioManager.perfect();else AudioManager.level();const ach=unlockedAchievements.length?'<p>✨ LOGRO DESBLOQUEADO: <b>'+unlockedAchievements[0].title+'</b></p>':"";$("modalContent").innerHTML='<div class="modal-box"><div style="font-size:70px">'+(pct===100?"👑":"🏆")+'</div><h2>'+(pct===100?"PERFECT SCORE!":"¡PARTIDA COMPLETADA!")+'</h2><p>'+(pct===100?"🎉 ¡Has respondido todo correctamente!":"¡Buen trabajo! Sigue practicando para dominar el nivel.")+'</p><div class="result-stats"><div class="result-stat">⭐<b>'+score+"/"+total+'</b><small>Puntos</small></div><div class="result-stat">🎯<b>'+pct+'%</b><small>Precisión</small></div><div class="result-stat">🔥<b>'+maxStreak+'</b><small>Racha máxima</small></div><div class="result-stat">✨<b>'+(score*10)+'</b><small>XP ganada</small></div></div><h3>'+reward+'</h3>'+ (unlocked>level?'<p>🔓 ¡Has desbloqueado el nivel '+unlocked+'!</p>':"")+ach+'<button class="primary" id="continueBtn">CONTINUAR</button></div>';$("modal").classList.remove("hidden");$("continueBtn").onclick=()=>{$("modal").classList.add("hidden");show("home");refresh()};}
-$("playBtn").onclick=()=>startGame(progress.unlockedLevel);$("learnBtn").onclick=()=>{show("learn");renderLearn()};$("levelsBtn").onclick=()=>{show("levels");renderLevels()};$("achievementsBtn").onclick=()=>{show("achievements");renderAchievements()};$("settingsBtn").onclick=()=>{show("settings");refresh()};$("homeBtn").onclick=()=>show("home");$("quitBtn").onclick=()=>show("home");document.querySelectorAll(".backHome").forEach(b=>b.onclick=()=>show("home"));$("soundBtn").onclick=()=>{AudioManager.toggle();refresh()};$("toggleSound").onclick=()=>{AudioManager.toggle();refresh()};$("toggleMusic").onclick=()=>{const p=loadProgress();AudioManager.setMusic(!p.music);refresh()};$("toggleAnimations").onclick=()=>{const p=loadProgress();saveProgress({animations:!p.animations});refresh()};$("resetProgress").onclick=()=>{if(confirm("¿Seguro que quieres borrar todo tu progreso de EASY LINGO?")){resetProgress();refresh();renderLevels();renderAchievements();toast("Progreso reiniciado")}};$("checkBtn").onclick=checkWrite;$("writeInput").addEventListener("keydown",e=>{if(e.key==="Enter")checkWrite()});$("hintBtn").onclick=()=>{if(hints<=0||locked)return;hints--;$("hintCount").textContent=hints;if(current.type==="write")$("hint").textContent="💡 Pista: empieza con “"+current.answer[0].toUpperCase()+"”";else{$("hint").textContent="💡 Pista: la respuesta tiene "+current.answer.length+" caracteres.";document.querySelectorAll(".answer").forEach(b=>{if(b.textContent!==current.answer&&b.textContent!==current.word.en&&b.textContent!==current.word.es)b.style.opacity=".45"})}toast("💡 Pista utilizada")};
-refresh();renderLevels();renderAchievements();renderLearn();
+async function ensureHistory(){if(!historyReady){await initQuestionHistory();historyReady=true}answeredIds=getAnsweredIds();refreshQuestionStats()}
+async function startGame(l){
+  await ensureHistory();
+  const available=[...QUESTION_BANK].filter(q=>!answeredIds.has(q.id)&&q.level<=l).length;
+  if(!available){showCompletion();return}
+  AudioManager.startMusic();level=l;score=0;streak=0;maxStreak=0;round=0;total=Math.min(10,available);used=new Set();hints=2;
+  $("hintCount").textContent=hints;show("game");$("gameLevel").textContent="NIVEL "+level+" · "+LEVELS[level-1].name;nextQuestion();
+}
+function nextQuestion(){
+  clearInterval(timerId);$("timer").classList.add("hidden");
+  if(round>=total){finish();return}
+  round++;locked=false;
+  current=createQuestion(level,used,answeredIds);
+  if(!current){finish();return}
+  renderQuestion();
+  if(current.type==="listen")setTimeout(()=>speak(current.word.en),180);
+  if((current.type==="vocabulary"||current.type==="listen")&&level>=3)startTimer();
+}
+function typeLabel(type){return {imageToWord:"IMAGEN → PALABRA",esToEn:"ESPAÑOL → INGLÉS",enToEs:"INGLÉS → ESPAÑOL",wordToImage:"PALABRA → IMAGEN",write:"ESCRIBE",letters:"ORDENA",listen:"ESCUCHA",vocabulary:"VOCABULARIO"}[type]||"RETO"}
+function renderQuestion(){
+  $("score").textContent=score;$("streak").textContent=streak;$("gameXp").textContent=progress.xp;$("roundLabel").textContent="Pregunta "+round+"/"+total;$("gameBar").style.width=(round/total*100)+"%";
+  $("typeLabel").textContent=typeLabel(current.type);$("tag").textContent=$( "typeLabel").textContent;$("prompt").textContent=current.prompt;$("hint").textContent=current.hint;$("feedback").textContent="";$("feedback").className="feedback";$("answers").innerHTML="";$("writeArea").classList.add("hidden");$("lettersArea").classList.add("hidden");
+  $("visual").innerHTML=current.type==="wordToImage"?'<div class="emoji-visual">🔎</div>':'<img src="'+current.image+'" alt="'+current.word.en+'">';
+  if(current.type==="write"){ $("visual").innerHTML='<div class="emoji-visual">'+current.word.emoji+"</div>";$("writeArea").classList.remove("hidden");$("writeInput").value="";setTimeout(()=>$("writeInput").focus(),50)}
+  else if(current.type==="letters"){letters=[];$("lettersArea").classList.remove("hidden");$("letterBank").innerHTML=current.letters.map((l,i)=>'<button class="letter" data-i="'+i+'">'+l+"</button>").join("");$("wordBuild").innerHTML='<span class="built"></span>';document.querySelectorAll(".letter").forEach(b=>b.onclick=()=>pickLetter(+b.dataset.i))}
+  else current.choices.forEach(choice=>{
+    const b=document.createElement("button");b.className="answer";
+    if(current.type==="wordToImage"){b.classList.add("image-choice");b.innerHTML='<span class="choice-emoji">'+choice.emoji+'</span><span>'+choice.en+"</span>";b.onclick=()=>answer(b,choice.id)}
+    else{b.textContent=choice;b.onclick=()=>answer(b,choice)}
+    $("answers").appendChild(b);
+  });
+}
+async function commitAnswer(ok){
+  await recordQuestion(current.id,ok?"correct":"wrong");
+  answeredIds.add(current.id);recordAnswer(ok,streak);refresh();return true;
+}
+async function answer(btn,value){
+  if(locked)return;locked=true;clearInterval(timerId);document.querySelectorAll(".answer").forEach(b=>b.disabled=true);
+  const ok=isCorrect(current,value);
+  if(ok){score++;streak++;maxStreak=Math.max(maxStreak,streak);btn.classList.add("correct");$("feedback").textContent="🎉 ¡Correcto! +1 punto · ✨ +10 XP";$("feedback").className="feedback ok";AudioManager.correct();addXP(10);if(streak>=3)toast("🔥 ¡Racha x"+streak+"!")}
+  else{streak=0;btn.classList.add("wrong");$("feedback").textContent="❌ Incorrecto · Respuesta: "+(current.type==="wordToImage"?current.word.en:current.answer);$("feedback").className="feedback no";AudioManager.wrong()}
+  await commitAnswer(ok);setTimeout(nextQuestion,650);
+}
+async function checkWrite(){
+  if(locked)return;locked=true;const value=$("writeInput").value,ok=isCorrect(current,value);
+  if(ok){score++;streak++;maxStreak=Math.max(maxStreak,streak);$("feedback").textContent="🎉 ¡Correcto! +1 punto · ✨ +10 XP";$("feedback").className="feedback ok";AudioManager.correct();addXP(10)}
+  else{streak=0;$("feedback").textContent="❌ Incorrecto · La respuesta correcta es: "+current.answer;$("feedback").className="feedback no";AudioManager.wrong()}
+  await commitAnswer(ok);setTimeout(nextQuestion,900);
+}
+async function pickLetter(i){
+  if(locked)return;const btn=document.querySelector('[data-i="'+i+'"]');if(btn.classList.contains("used"))return;btn.classList.add("used");letters.push(current.letters[i]);$("wordBuild").querySelector(".built").textContent=letters.join("");
+  if(letters.length===current.letters.length){locked=true;const ok=isCorrect(current,letters.join(""));
+    if(ok){score++;streak++;maxStreak=Math.max(maxStreak,streak);$("feedback").textContent="🎉 ¡Palabra formada! +1 punto · ✨ +10 XP";$("feedback").className="feedback ok";AudioManager.correct();addXP(10)}
+    else{$("feedback").textContent="❌ Era: "+current.answer;$("feedback").className="feedback no";streak=0;AudioManager.wrong()}
+    await commitAnswer(ok);setTimeout(nextQuestion,850);
+  }
+}
+function startTimer(){let left=15;$("timer").classList.remove("hidden");$("timer").innerHTML="⏱️ <b>"+left+"</b>";timerId=setInterval(()=>{left--;$("timer").innerHTML="⏱️ <b>"+left+"</b>";if(left<=0){clearInterval(timerId);if(!locked){locked=true;streak=0;$("feedback").textContent="⏰ Tiempo agotado · Respuesta: "+current.answer;$("feedback").className="feedback no";AudioManager.wrong();commitAnswer(false).then(()=>setTimeout(nextQuestion,850))}}},1000)}
+function showCompletion(){
+  refresh();const s=getStats(QUESTION_BANK_SIZE);
+  $("modalContent").innerHTML='<div class="modal-box"><div style="font-size:70px">🎉</div><h2>¡COMPLETASTE EASY LINGO!</h2><p>Has respondido todas las preguntas disponibles. No se repetirán automáticamente.</p><div class="result-stats"><div class="result-stat">📚<b>'+s.completed+"/"+s.total+'</b><small>Completadas</small></div><div class="result-stat">🎯<b>'+s.accuracy+'%</b><small>Precisión</small></div><div class="result-stat">✨<b>'+progress.xp+'</b><small>XP total</small></div><div class="result-stat">🔥<b>'+progress.bestStreak+'</b><small>Mejor racha</small></div></div><button class="primary" id="completionHome">VOLVER AL INICIO</button></div>';
+  $("modal").classList.remove("hidden");$("completionHome").onclick=()=>{$("modal").classList.add("hidden");show("home")};
+}
+function finish(){
+  clearInterval(timerId);const pct=Math.round(score/total*100),reward=pct===100?"💎 PERFECTO":pct>=80?"🥇 ORO":pct>=50?"🥈 PLATA":"🥉 BRONCE";
+  let completed=[...progress.completedLevels];if(pct>=80&&!completed.includes(level))completed.push(level);
+  const unlocked=Math.min(5,Math.max(progress.unlockedLevel,pct>=80?level+1:level));
+  saveProgress({completedLevels:completed,unlockedLevel:unlocked,bestStreak:Math.max(progress.bestStreak,maxStreak)});
+  const unlockedAchievements=checkAchievements({score,total,bestStreak:maxStreak,level});refresh();if(pct===100)AudioManager.perfect();else AudioManager.level();
+  const ach=unlockedAchievements.length?'<p>✨ LOGRO DESBLOQUEADO: <b>'+unlockedAchievements[0].title+"</b></p>":"";
+  const s=getStats(QUESTION_BANK_SIZE);
+  $("modalContent").innerHTML='<div class="modal-box"><div style="font-size:70px">'+(pct===100?"👑":"🏆")+'</div><h2>'+(pct===100?"PERFECT SCORE!":"¡PARTIDA COMPLETADA!")+'</h2><p>'+(pct===100?"🎉 ¡Has respondido todo correctamente!":"¡Buen trabajo! Las preguntas respondidas ya no volverán al modo JUGAR.")+'</p><div class="result-stats"><div class="result-stat">⭐<b>'+score+"/"+total+'</b><small>Puntos</small></div><div class="result-stat">🎯<b>'+pct+"%</b><small>Precisión</small></div><div class="result-stat">🔥<b>"+maxStreak+"</b><small>Racha máxima</small></div><div class="result-stat">📚<b>"+s.completed+"/"+s.total+"</b><small>Banco usado</small></div></div><h3>'+reward+"</h3>"+(unlocked>level?"<p>🔓 ¡Has desbloqueado el nivel "+unlocked+"!</p>":"")+ach+'<button class="primary" id="continueBtn">CONTINUAR</button></div>';
+  $("modal").classList.remove("hidden");$("continueBtn").onclick=()=>{$("modal").classList.add("hidden");show("home");refresh()};
+}
+$("playBtn").onclick=()=>startGame(progress.unlockedLevel);$("learnBtn").onclick=()=>{show("learn");renderLearn()};$("levelsBtn").onclick=()=>{show("levels");renderLevels()};$("achievementsBtn").onclick=()=>{show("achievements");renderAchievements()};$("settingsBtn").onclick=()=>{show("settings");refresh()};$("homeBtn").onclick=()=>show("home");$("quitBtn").onclick=()=>show("home");document.querySelectorAll(".backHome").forEach(b=>b.onclick=()=>show("home"));$("soundBtn").onclick=()=>{AudioManager.toggle();refresh()};$("toggleSound").onclick=()=>{AudioManager.toggle();refresh()};$("toggleMusic").onclick=()=>{const p=loadProgress();AudioManager.setMusic(!p.music);refresh()};$("toggleAnimations").onclick=()=>{const p=loadProgress();saveProgress({animations:!p.animations});refresh()};$("resetProgress").onclick=()=>{if(confirm("¿Seguro que quieres reiniciar XP, niveles y logros? El historial de preguntas se conserva para evitar repeticiones.")){resetProgress();refresh();renderLevels();renderAchievements();toast("Progreso reiniciado; historial conservado")}};$("checkBtn").onclick=checkWrite;$("writeInput").addEventListener("keydown",e=>{if(e.key==="Enter")checkWrite()});
+$("hintBtn").onclick=()=>{if(hints<=0||locked)return;hints--;$("hintCount").textContent=hints;if(current.type==="write")$("hint").textContent="💡 Pista: empieza con “"+current.answer[0].toUpperCase()+"”";else{$("hint").textContent="💡 Pista: la respuesta tiene "+String(current.type==="wordToImage"?current.word.en:current.answer).length+" caracteres.";document.querySelectorAll(".answer").forEach(b=>{if(b.textContent!==current.answer&&b.textContent!==current.word.en&&b.textContent!==current.word.es)b.style.opacity=".45"})}toast("💡 Pista utilizada")};
+window.addEventListener("tecnomath:authchange",async()=>{historyReady=false;await ensureHistory();refresh()});
+(async()=>{try{await ensureHistory()}catch(e){console.warn("Easy Lingo history:",e)}refresh();renderLevels();renderAchievements();renderLearn()})();
