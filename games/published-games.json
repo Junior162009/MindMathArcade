@@ -437,7 +437,7 @@
     "desc": "Learn English. Play. Improve.",
     "description": "Videojuego educativo de inglés con niveles, retos, imágenes, rachas, XP y logros.",
     "url": "games/word-bridge/index.html",
-    "imageUrl": "",
+    "imageUrl": "img/logos/word-bridge.png?v=1790969883085",
     "icon": "🌎",
     "category": "idiomas",
     "deviceCompatibility": "both",
@@ -456,7 +456,8 @@
     "entryFile": "index.html",
     "logoStoragePath": "",
     "packageStoragePath": "",
-    "packageFileName": ""
+    "packageFileName": "",
+    "identityVersion": 1790969884448
   },
   {
     "id": "pollito-race",
