@@ -1,63 +1,26 @@
-export const EASY_LINGO_VERSION = 2;
+export const EASY_LINGO_VERSION = 3;
 export const WORDS = [
- {id:"apple",en:"apple",es:"manzana",emoji:"🍎",cat:"food",level:1},
- {id:"book",en:"book",es:"libro",emoji:"📖",cat:"school",level:1},
- {id:"house",en:"house",es:"casa",emoji:"🏠",cat:"home",level:1},
- {id:"dog",en:"dog",es:"perro",emoji:"🐶",cat:"animals",level:1},
- {id:"cat",en:"cat",es:"gato",emoji:"🐱",cat:"animals",level:1},
- {id:"car",en:"car",es:"carro",emoji:"🚗",cat:"transport",level:1},
- {id:"sun",en:"sun",es:"sol",emoji:"☀️",cat:"nature",level:1},
- {id:"school",en:"school",es:"escuela",emoji:"🏫",cat:"school",level:1},
- {id:"water",en:"water",es:"agua",emoji:"💧",cat:"food",level:1},
- {id:"tree",en:"tree",es:"árbol",emoji:"🌳",cat:"nature",level:1},
- {id:"fish",en:"fish",es:"pez",emoji:"🐟",cat:"animals",level:1},
- {id:"bread",en:"bread",es:"pan",emoji:"🍞",cat:"food",level:2},
- {id:"milk",en:"milk",es:"leche",emoji:"🥛",cat:"food",level:2},
- {id:"shirt",en:"shirt",es:"camisa",emoji:"👕",cat:"clothes",level:2},
- {id:"shoes",en:"shoes",es:"zapatos",emoji:"👟",cat:"clothes",level:2},
- {id:"family",en:"family",es:"familia",emoji:"👨‍👩‍👧",cat:"family",level:2},
- {id:"bus",en:"bus",es:"autobús",emoji:"🚌",cat:"transport",level:2},
- {id:"teacher",en:"teacher",es:"profesor",emoji:"🧑‍🏫",cat:"school",level:2},
- {id:"garden",en:"garden",es:"jardín",emoji:"🌻",cat:"nature",level:2},
- {id:"breakfast",en:"breakfast",es:"desayuno",emoji:"🥞",cat:"food",level:3},
- {id:"library",en:"library",es:"biblioteca",emoji:"📚",cat:"school",level:3},
- {id:"bicycle",en:"bicycle",es:"bicicleta",emoji:"🚲",cat:"transport",level:3},
- {id:"rainbow",en:"rainbow",es:"arcoíris",emoji:"🌈",cat:"nature",level:3},
- {id:"jacket",en:"jacket",es:"chaqueta",emoji:"🧥",cat:"clothes",level:3},
- {id:"neighbor",en:"neighbor",es:"vecino",emoji:"🏘️",cat:"family",level:3},
- {id:"kitchen",en:"kitchen",es:"cocina",emoji:"🍳",cat:"home",level:4},
- {id:"mountain",en:"mountain",es:"montaña",emoji:"⛰️",cat:"nature",level:4},
- {id:"adventure",en:"adventure",es:"aventura",emoji:"🗺️",cat:"nature",level:4},
- {id:"friendship",en:"friendship",es:"amistad",emoji:"🤝",cat:"family",level:4},
- {id:"environment",en:"environment",es:"medio ambiente",emoji:"🌎",cat:"nature",level:5},
- {id:"knowledge",en:"knowledge",es:"conocimiento",emoji:"🧠",cat:"school",level:5},
- {id:"achievement",en:"achievement",es:"logro",emoji:"🏆",cat:"school",level:5},
- {id:"banana",en:"banana",es:"banano",emoji:"🍌",cat:"food",level:1},
- {id:"orange",en:"orange",es:"naranja",emoji:"🍊",cat:"food",level:1},
- {id:"bird",en:"bird",es:"pájaro",emoji:"🐦",cat:"animals",level:1},
- {id:"horse",en:"horse",es:"caballo",emoji:"🐴",cat:"animals",level:2},
- {id:"door",en:"door",es:"puerta",emoji:"🚪",cat:"home",level:2},
- {id:"window",en:"window",es:"ventana",emoji:"🪟",cat:"home",level:2},
- {id:"pencil",en:"pencil",es:"lápiz",emoji:"✏️",cat:"school",level:3},
- {id:"computer",en:"computer",es:"computador",emoji:"💻",cat:"school",level:3}
-];
-export const LEVELS=[
- {id:1,name:"BEGINNER",color:"green",minWords:1},
- {id:2,name:"ELEMENTARY",color:"blue",minWords:2},
- {id:3,name:"INTERMEDIATE",color:"purple",minWords:3},
- {id:4,name:"ADVANCED",color:"orange",minWords:4},
- {id:5,name:"MASTER",color:"red",minWords:5}
-];
-export const CATEGORIES={food:"🍎 Comida",animals:"🐾 Animales",home:"🏠 Casa",clothes:"👕 Ropa",transport:"🚗 Transporte",nature:"🌳 Naturaleza",family:"👨‍👩‍👧 Familia",school:"📚 Escuela"};
-export const QUESTION_TYPES=["imageToWord","esToEn","enToEs","write","letters","wordToImage","listen","vocabulary"];
+{id:"apple",en:"apple",es:"manzana",emoji:"🍎",cat:"food",level:1},{id:"book",en:"book",es:"libro",emoji:"📖",cat:"school",level:1},{id:"house",en:"house",es:"casa",emoji:"🏠",cat:"home",level:1},{id:"dog",en:"dog",es:"perro",emoji:"🐶",cat:"animals",level:1},{id:"cat",en:"cat",es:"gato",emoji:"🐱",cat:"animals",level:1},{id:"car",en:"car",es:"carro",emoji:"🚗",cat:"transport",level:1},{id:"sun",en:"sun",es:"sol",emoji:"☀️",cat:"nature",level:1},{id:"school",en:"school",es:"escuela",emoji:"🏫",cat:"school",level:1},{id:"water",en:"water",es:"agua",emoji:"💧",cat:"food",level:1},{id:"tree",en:"tree",es:"árbol",emoji:"🌳",cat:"nature",level:1},{id:"fish",en:"fish",es:"pez",emoji:"🐟",cat:"animals",level:1},{id:"bread",en:"bread",es:"pan",emoji:"🍞",cat:"food",level:2},{id:"milk",en:"milk",es:"leche",emoji:"🥛",cat:"food",level:2},{id:"shirt",en:"shirt",es:"camisa",emoji:"👕",cat:"clothes",level:2},{id:"shoes",en:"shoes",es:"zapatos",emoji:"👟",cat:"clothes",level:2},{id:"family",en:"family",es:"familia",emoji:"👨‍👩‍👧",cat:"family",level:2},{id:"bus",en:"bus",es:"autobús",emoji:"🚌",cat:"transport",level:2},{id:"teacher",en:"teacher",es:"profesor",emoji:"🧑‍🏫",cat:"school",level:2},{id:"garden",en:"garden",es:"jardín",emoji:"🌻",cat:"nature",level:2},{id:"breakfast",en:"breakfast",es:"desayuno",emoji:"🥞",cat:"food",level:3},{id:"library",en:"library",es:"biblioteca",emoji:"📚",cat:"school",level:3},{id:"bicycle",en:"bicycle",es:"bicicleta",emoji:"🚲",cat:"transport",level:3},{id:"rainbow",en:"rainbow",es:"arcoíris",emoji:"🌈",cat:"nature",level:3},{id:"jacket",en:"jacket",es:"chaqueta",emoji:"🧥",cat:"clothes",level:3},{id:"neighbor",en:"neighbor",es:"vecino",emoji:"🏘️",cat:"family",level:3},{id:"kitchen",en:"kitchen",es:"cocina",emoji:"🍳",cat:"home",level:4},{id:"mountain",en:"mountain",es:"montaña",emoji:"⛰️",cat:"nature",level:4},{id:"adventure",en:"adventure",es:"aventura",emoji:"🗺️",cat:"nature",level:4},{id:"friendship",en:"friendship",es:"amistad",emoji:"🤝",cat:"family",level:4},{id:"environment",en:"environment",es:"medio ambiente",emoji:"🌎",cat:"nature",level:5},{id:"knowledge",en:"knowledge",es:"conocimiento",emoji:"🧠",cat:"school",level:5},{id:"achievement",en:"achievement",es:"logro",emoji:"🏆",cat:"school",level:5},{id:"banana",en:"banana",es:"banano",emoji:"🍌",cat:"food",level:1},{id:"orange",en:"orange",es:"naranja",emoji:"🍊",cat:"food",level:1},{id:"bird",en:"bird",es:"pájaro",emoji:"🐦",cat:"animals",level:1},{id:"horse",en:"horse",es:"caballo",emoji:"🐴",cat:"animals",level:2},{id:"door",en:"door",es:"puerta",emoji:"🚪",cat:"home",level:2},{id:"window",en:"window",es:"ventana",emoji:"🪟",cat:"home",level:2},{id:"pencil",en:"pencil",es:"lápiz",emoji:"✏️",cat:"school",level:3},{id:"computer",en:"computer",es:"computador",emoji:"💻",cat:"school",level:3},
+["egg","egg","huevo","🥚","food",1],["cheese","cheese","queso","🧀","food",1],["rice","rice","arroz","🍚","food",1],["meat","meat","carne","🥩","food",2],["chicken","chicken","pollo","🍗","food",1],["cake","cake","pastel","🍰","food",1],["cookie","cookie","galleta","🍪","food",1],["pizza","pizza","pizza","🍕","food",1],["tomato","tomato","tomate","🍅","food",1],["carrot","carrot","zanahoria","🥕","food",1],
+["lion","lion","león","🦁","animals",2],["tiger","tiger","tigre","🐯","animals",2],["elephant","elephant","elefante","🐘","animals",2],["monkey","monkey","mono","🐒","animals",1],["rabbit","rabbit","conejo","🐰","animals",1],["mouse","mouse","ratón","🐭","animals",1],["cow","cow","vaca","🐮","animals",1],["pig","pig","cerdo","🐷","animals",1],["sheep","sheep","oveja","🐑","animals",1],["snake","snake","serpiente","🐍","animals",2],
+["bed","bed","cama","🛏️","home",1],["chair","chair","silla","🪑","home",1],["table","table","mesa","🪵","home",1],["sofa","sofa","sofá","🛋️","home",1],["bathroom","bathroom","baño","🚿","home",2],
+["mother","mother","madre","👩","family",1],["father","father","padre","👨","family",1],["sister","sister","hermana","👧","family",1],["brother","brother","hermano","👦","family",1],["grandmother","grandmother","abuela","👵","family",2],
+["red","red","rojo","🔴","colors",1],["blue","blue","azul","🔵","colors",1],["green","green","verde","🟢","colors",1],["yellow","yellow","amarillo","🟡","colors",1],["purple","purple","morado","🟣","colors",1],
+["one","one","uno","1️⃣","numbers",1],["two","two","dos","2️⃣","numbers",1],["three","three","tres","3️⃣","numbers",1],["four","four","cuatro","4️⃣","numbers",1],["five","five","cinco","5️⃣","numbers",1],
+["hat","hat","sombrero","🎩","clothes",1],["pants","pants","pantalones","👖","clothes",1],["dress","dress","vestido","👗","clothes",1],["socks","socks","medias","🧦","clothes",1],["coat","coat","abrigo","🧥","clothes",2],
+["head","head","cabeza","🙂","body",1],["eye","eye","ojo","👁️","body",1],["ear","ear","oreja","👂","body",1],["nose","nose","nariz","👃","body",1],["hand","hand","mano","✋","body",1],
+["flower","flower","flor","🌸","nature",1],["grass","grass","césped","🌱","nature",1],["river","river","río","🏞️","nature",2],["ocean","ocean","océano","🌊","nature",2],["forest","forest","bosque","🌲","nature",2],
+["cloud","cloud","nube","☁️","weather",1],["rain","rain","lluvia","🌧️","weather",1],["snow","snow","nieve","❄️","weather",2],["wind","wind","viento","💨","weather",2],["storm","storm","tormenta","⛈️","weather",3],
+["train","train","tren","🚆","transport",1],["plane","plane","avión","✈️","transport",1],["boat","boat","barco","⛵","transport",1],["taxi","taxi","taxi","🚕","transport",1],["truck","truck","camión","🚚","transport",2],
+["phone","phone","teléfono","📱","technology",1],["tablet","tablet","tableta","📲","technology",1],["keyboard","keyboard","teclado","⌨️","technology",2],["screen","screen","pantalla","🖥️","technology",2],["camera","camera","cámara","📷","technology",1],
+["football","football","fútbol","⚽","sports",1],["basketball","basketball","baloncesto","🏀","sports",1],["tennis","tennis","tenis","🎾","sports",1],["swimming","swimming","natación","🏊","sports",2],["volleyball","volleyball","voleibol","🏐","sports",2],
+["doctor","doctor","médico","🧑‍⚕️","jobs",2],["nurse","nurse","enfermero","👩‍⚕️","jobs",2],["farmer","farmer","agricultor","🧑‍🌾","jobs",2],["driver","driver","conductor","🧑‍✈️","jobs",2],["artist","artist","artista","🎨","jobs",2],
+["city","city","ciudad","🏙️","places",2],["park","park","parque","🏞️","places",1],["hospital","hospital","hospital","🏥","places",2],["market","market","mercado","🛒","places",2],["airport","airport","aeropuerto","🛫","places",2]
+].map(w=>Array.isArray(w)?{id:w[0],en:w[1],es:w[2],emoji:w[3],cat:w[4],level:w[5]}:w);
 
-// Banco oficial: 40 palabras x 5 modalidades = 200 preguntas únicas.
-// Cada entrada tiene un ID estable para impedir repeticiones dentro de una partida.
-export const QUESTION_BANK = WORDS.slice(0,40).flatMap((word,index)=>[
- {id:`q-${index+1}-image`,wordId:word.id,type:"imageToWord"},
- {id:`q-${index+1}-es-en`,wordId:word.id,type:"esToEn"},
- {id:`q-${index+1}-en-es`,wordId:word.id,type:"enToEs"},
- {id:`q-${index+1}-write`,wordId:word.id,type:"write"},
- {id:`q-${index+1}-letters`,wordId:word.id,type:"letters"}
-]);
-export const QUESTION_BANK_SIZE = QUESTION_BANK.length;
+export const LEVELS=[{id:1,name:"BEGINNER",color:"green",minWords:1},{id:2,name:"ELEMENTARY",color:"blue",minWords:2},{id:3,name:"INTERMEDIATE",color:"purple",minWords:3},{id:4,name:"ADVANCED",color:"orange",minWords:4},{id:5,name:"MASTER",color:"red",minWords:5}];
+export const CATEGORIES={food:"🍎 Comida",animals:"🐾 Animales",school:"📚 Escuela",home:"🏠 Casa",family:"👨‍👩‍👧 Familia",colors:"🎨 Colores",numbers:"🔢 Números",clothes:"👕 Ropa",body:"🧍 Cuerpo",nature:"🌳 Naturaleza",weather:"🌦️ Clima",transport:"🚗 Transporte",technology:"💻 Tecnología",sports:"⚽ Deportes",jobs:"🧑‍💼 Profesiones",places:"📍 Lugares"};
+export const QUESTION_TYPES=["imageToWord","esToEn","enToEs","write","letters","wordToImage","listen","vocabulary"];
+const TYPES=[["imageToWord","image"],["esToEn","es-en"],["enToEs","en-es"],["write","write"],["letters","letters"],["wordToImage","word-image"],["listen","listen"],["vocabulary","vocabulary"]];
+export const QUESTION_BANK=WORDS.flatMap((word,i)=>TYPES.map(([type,suffix],j)=>({id:`easylingo-q-${String(i*8+j+1).padStart(6,"0")}`,wordId:word.id,type,level:word.level,category:word.cat,variant:suffix})));
+export const QUESTION_BANK_SIZE=QUESTION_BANK.length;
