@@ -1,7 +1,7 @@
 import {WORDS,LEVELS,CATEGORIES,QUESTION_BANK,QUESTION_BANK_SIZE} from "./data.js";
 import {createQuestion,isCorrect,shuffle} from "./engine.js";
 import {loadProgress,saveProgress,addXP,recordAnswer,resetProgress} from "./progress.js";
-import {initQuestionHistory,getAnsweredIds,recordQuestion,getStats,reloadQuestionHistory} from "./question-history.js";
+import {initQuestionHistory,getAnsweredIds,recordQuestion,getStats,refreshQuestionHistoryForCurrentUser} from "./question-history.js";
 import {AudioManager} from "./audio.js";
 import {ACHIEVEMENTS,checkAchievements} from "./achievements.js";
 
@@ -111,5 +111,5 @@ function finish(){
 }
 $("playBtn").onclick=()=>startGame(progress.unlockedLevel);$("learnBtn").onclick=()=>{show("learn");renderLearn()};$("levelsBtn").onclick=()=>{show("levels");renderLevels()};$("achievementsBtn").onclick=()=>{show("achievements");renderAchievements()};$("settingsBtn").onclick=()=>{show("settings");refresh()};$("homeBtn").onclick=()=>show("home");$("quitBtn").onclick=()=>show("home");document.querySelectorAll(".backHome").forEach(b=>b.onclick=()=>show("home"));$("soundBtn").onclick=()=>{AudioManager.toggle();refresh()};$("toggleSound").onclick=()=>{AudioManager.toggle();refresh()};$("toggleMusic").onclick=()=>{const p=loadProgress();AudioManager.setMusic(!p.music);refresh()};$("toggleAnimations").onclick=()=>{const p=loadProgress();saveProgress({animations:!p.animations});refresh()};$("resetProgress").onclick=()=>{if(confirm("¿Seguro que quieres reiniciar XP, niveles y logros? El historial de preguntas se conserva para evitar repeticiones.")){resetProgress();refresh();renderLevels();renderAchievements();toast("Progreso reiniciado; historial conservado")}};$("checkBtn").onclick=checkWrite;$("writeInput").addEventListener("keydown",e=>{if(e.key==="Enter")checkWrite()});
 $("hintBtn").onclick=()=>{if(hints<=0||locked)return;hints--;$("hintCount").textContent=hints;if(current.type==="write")$("hint").textContent="💡 Pista: empieza con “"+current.answer[0].toUpperCase()+"”";else{$("hint").textContent="💡 Pista: la respuesta tiene "+String(current.type==="wordToImage"?current.word.en:current.answer).length+" caracteres.";document.querySelectorAll(".answer").forEach(b=>{if(b.textContent!==current.answer&&b.textContent!==current.word.en&&b.textContent!==current.word.es)b.style.opacity=".45"})}toast("💡 Pista utilizada")};
-window.addEventListener("tecnomath:authchange",async()=>{historyReady=false;await ensureHistory();refresh()});
+window.addEventListener("tecnomath:authchange",async()=>{historyReady=false;await refreshQuestionHistoryForCurrentUser();historyReady=true;answeredIds=getAnsweredIds();refresh()});
 (async()=>{try{await ensureHistory()}catch(e){console.warn("Easy Lingo history:",e)}refresh();renderLevels();renderAchievements();renderLearn()})();
