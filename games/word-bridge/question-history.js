@@ -1,5 +1,6 @@
 const TABLE="easy_lingo_question_history";
 const LOCAL_KEY="easyLingoQuestionHistory";
+function localKey(){return LOCAL_KEY+"_"+String(user?.id||getGuestId())}
 const GUEST_KEY="easyLingoGuestId";
 let remote=null,user=null,history=new Map(),ready=null;
 
@@ -24,14 +25,14 @@ async function init(){
 }
 function localHistory(){
   try{
-    const raw=JSON.parse(localStorage.getItem(LOCAL_KEY)||"{}");
+    const raw=JSON.parse(localStorage.getItem(localKey())||"{}");
     return raw&&typeof raw==="object"?raw:{};
   }catch{return {}}
 }
 function saveLocal(){
   const obj={};
   history.forEach((v,k)=>obj[k]=v);
-  localStorage.setItem(LOCAL_KEY,JSON.stringify(obj));
+  localStorage.setItem(localKey(),JSON.stringify(obj));
 }
 async function load(){
   history=new Map();
