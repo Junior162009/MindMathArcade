@@ -1,0 +1,4 @@
+import {loadProgress,saveProgress} from "./progress.js";
+let ctx=null;
+function tone(freq,duration=.12,when=0){const p=loadProgress();if(!p.sound)return;try{ctx??=new (window.AudioContext||window.webkitAudioContext)();const o=ctx.createOscillator(),g=ctx.createGain();o.frequency.value=freq;o.type="sine";g.gain.setValueAtTime(.045,ctx.currentTime+when);g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+when+duration);o.connect(g).connect(ctx.destination);o.start(ctx.currentTime+when);o.stop(ctx.currentTime+when+duration)}catch{}}
+export const AudioManager={correct(){tone(660,.1);tone(880,.16,.1)},wrong(){tone(190,.18)},click(){tone(420,.05)},level(){tone(523,.12);tone(659,.12,.12);tone(784,.2,.24)},perfect(){[523,659,784,1046].forEach((f,i)=>tone(f,.16,i*.09))},toggle(){const p=loadProgress();saveProgress({sound:!p.sound});return !p.sound},get sound(){return loadProgress().sound}};
