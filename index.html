@@ -1129,7 +1129,10 @@
             } else if (filterCategory && filterCategory !== 'todos') {
                 filtered = filtered.filter(p => p.category === filterCategory);
             }
-            // El orden visual siempre lo determina el nombre oficial.\n            filtered = window.TecnoMathGameOrder.sortGamesByName(filtered);\n\n            if (filtered.length === 0) {
+            // El orden visual siempre lo determina el nombre oficial.
+            filtered = window.TecnoMathGameOrder.sortGamesByName(filtered);
+
+            if (filtered.length === 0) {
                 const empty = document.createElement('div');
                 empty.style.gridColumn = '1 / -1';
                 empty.style.textAlign = 'center';
