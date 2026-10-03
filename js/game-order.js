@@ -15,8 +15,16 @@
     return value ? value.trim().replace(/\\s+/g, ' ') : '';
   }
 
+  function getGameSortName(game) {
+    return getGameDisplayName(game)
+      .replace(/^[^\\p{L}\\p{N}]+/u, '')
+      .replace(/[^\\p{L}\\p{N}]+$/u, '')
+      .replace(/\\s+/g, ' ')
+      .trim();
+  }
+
   function compareGameNames(a, b) {
-    return collator.compare(getGameDisplayName(a), getGameDisplayName(b));
+    return collator.compare(getGameSortName(a), getGameSortName(b));
   }
 
   function sortGamesByName(games) {
@@ -33,6 +41,7 @@
 
   global.TecnoMathGameOrder = Object.freeze({
     getGameDisplayName,
+    getGameSortName,
     compareGameNames,
     sortGamesByName,
     sortRanking
