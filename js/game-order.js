@@ -12,14 +12,14 @@
     if (!game || typeof game !== 'object') return '';
     const candidates = [game.name, game.title, game.nombre];
     const value = candidates.find(v => typeof v === 'string' && v.trim());
-    return value ? value.trim().replace(/\\s+/g, ' ') : '';
+    return value ? value.trim().replace(/\s+/g, ' ') : '';
   }
 
   function getGameSortName(game) {
     return getGameDisplayName(game)
       .replace(/^[^\\p{L}\\p{N}]+/u, '')
       .replace(/[^\\p{L}\\p{N}]+$/u, '')
-      .replace(/\\s+/g, ' ')
+      .replace(/\s+/g, ' ')
       .trim();
   }
 
