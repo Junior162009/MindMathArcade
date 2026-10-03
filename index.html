@@ -54,7 +54,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="assets/css/tecnomath-ui-v2.css">
+    <link rel="stylesheet" href="assets/css/tecnomath-ui-v2.css">\n    <script src="./js/game-order.js?v=20261002" defer></script>
     <style>
         /* ==============================
            ESTILOS BASE (se sobrescriben con los temas)
@@ -1020,7 +1020,7 @@
                     .map(normalizarJuego)
                     .filter(Boolean)
                     .filter(g => g.status !== 'hidden' && g.status !== 'draft')
-                    .sort((a,b) => (a.order - b.order) || a.name.localeCompare(b.name,'es'));
+                    .sort(window.TecnoMathGameOrder.compareGameNames);
 
                 console.log('✅ data/games.json cargado. Juegos disponibles:', projects.length);
             } catch (error) {
@@ -1129,17 +1129,7 @@
             } else if (filterCategory && filterCategory !== 'todos') {
                 filtered = filtered.filter(p => p.category === filterCategory);
             }
-            if (activeEvent) {
-                filtered.sort((a, b) => {
-                    const aExclusive = a.evento === activeEvent;
-                    const bExclusive = b.evento === activeEvent;
-                    if (aExclusive && !bExclusive) return -1;
-                    if (!aExclusive && bExclusive) return 1;
-                    return 0;
-                });
-            }
-
-            if (filtered.length === 0) {
+            // El orden visual siempre lo determina el nombre oficial.\n            filtered = window.TecnoMathGameOrder.sortGamesByName(filtered);\n\n            if (filtered.length === 0) {
                 const empty = document.createElement('div');
                 empty.style.gridColumn = '1 / -1';
                 empty.style.textAlign = 'center';
