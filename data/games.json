@@ -512,5 +512,32 @@
     "logoStoragePath": "",
     "packageStoragePath": "",
     "packageFileName": ""
+  },
+  {
+    "id": "matemia",
+    "name": "🧮 MATEMIA",
+    "desc": "Aventura educativa de matemáticas, exploración, cofres y desafíos.",
+    "description": "Juego de aventura en Python y Pygame con zoom, exploración, combate y retos matemáticos.",
+    "url": "https://junior162009.github.io/Proyecto_ambicioso2026/",
+    "imageUrl": "",
+    "icon": "🧮",
+    "category": "mates",
+    "deviceCompatibility": "both",
+    "evento": null,
+    "sourceType": "external",
+    "status": "published",
+    "allowVoting": true,
+    "featured": false,
+    "order": 20,
+    "urlType": "external",
+    "publishDate": "2026-10-10T03:45:00.000Z",
+    "authorName": "TecnoMath",
+    "grade": "Todos",
+    "folder": "",
+    "folderPath": "",
+    "entryFile": "index.html",
+    "logoStoragePath": "",
+    "packageStoragePath": "",
+    "packageFileName": ""
   }
 ]
