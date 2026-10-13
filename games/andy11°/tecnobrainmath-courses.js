@@ -202,6 +202,7 @@
     ];
     const row=cases[i];
     if(!row) return null;
+    if(g<=4) return {q:row[0],correct:row[1],distractors:row[2],topic:row[3],exp:"Aplica la regla matemática correspondiente y comprueba el resultado."};
     q=row[0]; correct=row[1]; distractors=row.slice(2,5); topic=row[5]||"Razonamiento cuantitativo";
     return {q,correct,distractors,topic,exp:"Aplica la regla matemática correspondiente y comprueba el resultado."};
   };
