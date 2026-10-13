@@ -181,7 +181,7 @@
       ["¿Cuánto es −"+a+" + "+(a+b)+"?",b,[a+b,-b,a],"Números enteros"],
       ["¿Cuánto es "+a+"/"+b+" × "+b+"?",a,[a+b,a*b,b],"Fracciones"],
       ["¿Cuál es el "+b+" % de "+(a*10)+"?",(a*10*b)/100,[a*b,a*10*b,a+b],"Porcentajes"],
-      ["Si 3 cuadernos cuestan "+(b*3)+", ¿cuánto cuestan 5 al mismo precio?",b*5,b*3+5,b+5,b*4,"Proporcionalidad"],
+      ["Si 3 cuadernos cuestan "+(b*3)+", ¿cuánto cuestan 5 al mismo precio?",b*5,[b*3+5,b+5,b*4],"Proporcionalidad"],
       ["Resuelve x + "+b+" = "+(a+b)+". ¿Cuánto vale x?",a,[a+b,b,a-1],"Ecuaciones"],
       ["¿Cuál es el promedio de "+a+", "+(a+2)+" y "+(a+4)+"?",a+2,[a,a+3,a+4],"Estadística"],
       ["¿Cuántos grados tiene un ángulo recto?",90,[45,180,360],"Geometría"],
