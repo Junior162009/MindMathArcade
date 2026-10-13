@@ -64,6 +64,12 @@
     .cart-fab{position:fixed;right:16px;bottom:16px;z-index:30;box-shadow:0 8px 25px #0003}
     .cart-badge{display:inline-grid;place-items:center;min-width:24px;height:24px;padding:0 6px;border-radius:50%;background:var(--yellow);color:#222}
     .card .price{font-variant-numeric:tabular-nums}
+    .review-panel{margin-top:24px;background:#fff;border:2px solid var(--yellow);border-radius:24px;padding:24px;box-shadow:var(--shadow)}
+    .review-panel[hidden]{display:none}.review-panel h3{font-family:'Baloo 2';font-size:1.8rem;color:var(--red);margin-bottom:8px}
+    .review-items{padding:12px 0}.review-item{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid #eee}
+    .review-item span:last-child{font-weight:800;text-align:right;white-space:nowrap}
+    .step-label{display:inline-block;background:var(--yellow);padding:5px 12px;border-radius:99px;font-weight:900;font-size:.8rem;margin-bottom:10px}
+    @media(max-width:600px){.review-panel{padding:18px}.review-item{font-size:.9rem}}
     @media(max-width:760px){.order-layout{grid-template-columns:1fr}.order-panel{padding:18px}.cart-fab{right:12px;bottom:12px}}
     @media(max-width:420px){.form-grid{grid-template-columns:1fr}.field.full{grid-column:auto}.buy-controls{grid-template-columns:1fr}.buy-controls .btn{grid-column:auto}.hero h1{font-size:3.3rem}.order-actions{flex-direction:column}.order-actions .btn{width:100%}}
 
@@ -94,8 +100,8 @@
         <div class="section-head"><h2>Completa tu pedido</h2><p>Elige tus banderillas, revisa el total y prepara tu orden para enviarla por WhatsApp.</p></div>
         <div class="order-layout">
           <div class="order-panel" id="cartPanel" aria-live="polite">
-            <h3>🛒 Mi carrito <span id="cartCount" class="cart-badge">0</span></h3>
-            <div id="cartItems"><div class="cart-empty">Tu carrito está vacío. ¡Elige tus banderillas favoritas del menú! 🌭</div></div>
+            <h3>🛒 Mi carrito (<span id="cartCount" class="cart-badge">0</span>)</h3>
+            <div id="cartItems"><div class="cart-empty">Tu carrito está vacío. ¡Agrega tus banderillas favoritas y disfruta de Happybander! ❤️</div></div>
             <div class="cart-summary">
               <div class="summary-row"><span>Total de unidades</span><strong id="totalUnits">0</strong></div>
               <div class="summary-row"><span>Subtotal de productos</span><strong id="cartSubtotal">$0</strong></div>
@@ -128,6 +134,24 @@
               <button type="submit" class="btn btn-red" style="width:100%;margin-top:16px">Enviar mi pedido por WhatsApp 💬</button>
               <p style="font-size:.78rem;color:#666;margin-top:10px">WhatsApp se abrirá con tu pedido preparado. Revisa el mensaje y pulsa enviar allí; el pedido no se confirma hasta que el negocio responda.</p>
             </form>
+          </div>
+        </div>
+        <div id="orderReview" class="review-panel" hidden aria-live="polite">
+          <span class="step-label">PASO 3 · REVISIÓN FINAL</span>
+          <h3>¿Tu pedido está listo? 🌭</h3>
+          <p>Revisa los productos, las cantidades y el total de tu compra. Si quieres agregar algo más, puedes regresar a la tienda antes de enviar tu pedido.</p>
+          <div id="reviewItems" class="review-items"></div>
+          <div class="cart-summary">
+            <div class="summary-row"><span>Total de productos diferentes</span><strong id="reviewDifferent">0</strong></div>
+            <div class="summary-row"><span>Total de unidades</span><strong id="reviewUnits">0</strong></div>
+            <div class="summary-row"><span>Subtotal de productos</span><strong id="reviewSubtotal">$0</strong></div>
+            <div class="summary-row"><span>Domicilio</span><strong id="reviewDelivery">No aplica</strong></div>
+            <div class="summary-row total"><span>TOTAL ESTIMADO</span><strong id="reviewTotal">$0</strong></div>
+          </div>
+          <p id="reviewCustomer" class="delivery-note"></p>
+          <div class="order-actions">
+            <button type="button" class="btn btn-light" id="reviewContinue">Seguir comprando</button>
+            <button type="button" class="btn btn-red" id="confirmWhatsApp">Confirmar pedido por WhatsApp 💬</button>
           </div>
         </div>
       </div>
@@ -187,6 +211,7 @@
     };
     const setQty = (id, qty) => {
       if (!products.has(id)) return;
+      if (pendingWhatsAppUrl) closeReview();
       const normalized = Math.max(0, Math.min(99, Number.isFinite(qty) ? Math.trunc(qty) : 0));
       if (normalized > 0) cart.set(id, normalized); else cart.delete(id);
       updateCardQuantity(id); persist(); renderCart();
@@ -222,7 +247,7 @@
       products.set(id, {id, name, price, card});
       const controls = document.createElement('div');
       controls.className = 'buy-controls';
-      controls.innerHTML = '<div class="qty-control" aria-label="Cantidad de ' + name.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;') + '"><button type="button" data-minus="' + id + '" aria-label="Disminuir cantidad">−</button><output data-product-qty="' + id + '" aria-live="polite">0</output><button type="button" data-plus="' + id + '" aria-label="Aumentar cantidad">+</button></div><button type="button" class="btn btn-red" data-add="' + id + '">Agregar al pedido</button>';
+      controls.innerHTML = '<div class="qty-control" aria-label="Cantidad de ' + name.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;') + '"><button type="button" data-minus="' + id + '" aria-label="Disminuir cantidad">−</button><output data-product-qty="' + id + '" aria-live="polite">0</output><button type="button" data-plus="' + id + '" aria-label="Aumentar cantidad">+</button></div><button type="button" class="btn btn-red" data-add="' + id + '">Agregar al carrito</button>';
       card.appendChild(controls);
     });
     document.addEventListener('click', event => {
@@ -269,7 +294,8 @@
       });
     }
     $('clearCart').addEventListener('click', () => {
-      cart.clear(); cards.forEach((_, index) => updateCardQuantity('hb-' + (index + 1)));
+      if (!cart.size || !window.confirm('¿Seguro que deseas vaciar todo el carrito?')) return;
+      closeReview(); cart.clear(); cards.forEach((_, index) => updateCardQuantity('hb-' + (index + 1)));
       persist(); renderCart(); announce('Carrito vacío.');
     });
     $('continueShopping').addEventListener('click', () => document.querySelector('#menu').scrollIntoView({behavior:'smooth'}));
@@ -288,47 +314,71 @@
       box.scrollIntoView({behavior:'smooth', block:'nearest'});
     }
     function addOptional(lines, label, text) { if (text) lines.push('• ' + label + ': ' + text); }
+    let pendingWhatsAppUrl = '';
+    const closeReview = () => { $('orderReview').hidden = true; pendingWhatsAppUrl = ''; };
+    $('reviewContinue').addEventListener('click', () => {
+      closeReview();
+      $('menu').scrollIntoView({behavior:'smooth'});
+    });
+    $('confirmWhatsApp').addEventListener('click', () => {
+      if (!pendingWhatsAppUrl) return showError('Revisa los datos y prepara nuevamente tu pedido.');
+      const url = pendingWhatsAppUrl;
+      const popup = window.open(url, '_blank');
+      if (!popup) window.location.href = url;
+      const box = $('formMessage'); box.className = 'form-message success';
+      box.textContent = 'WhatsApp está listo con tu pedido. Revisa el mensaje y pulsa enviar para contactar a Happybander.';
+      box.hidden = false;
+    });
     $('orderForm').addEventListener('submit', event => {
       event.preventDefault();
       $('formMessage').hidden = true;
       const entries = Array.from(cart.entries()).filter(([id, qty]) => products.has(id) && Number.isSafeInteger(qty) && qty > 0);
       if (!entries.length) return showError('Tu pedido está vacío. Agrega al menos una banderilla antes de continuar.');
       if (!value('customerName')) { $('customerName').focus(); return showError('Completa el nombre completo para continuar.'); }
-      if (!value('customerPhone')) { $('customerPhone').focus(); return showError('Completa el número de contacto para continuar.'); }
+      const phone = value('customerPhone');
+      if (!phone || !/[0-9]{7,}/.test(phone.replace(/\\D/g, ''))) { $('customerPhone').focus(); return showError('Ingresa un número de contacto válido con al menos 7 dígitos.'); }
       const home = $('deliveryType').value === 'domicilio';
       if (home && !value('customerAddress')) { $('customerAddress').focus(); return showError('Para el domicilio, escribe la dirección completa.'); }
       if (home && !value('customerNeighborhood')) { $('customerNeighborhood').focus(); return showError('Para el domicilio, escribe el barrio o sector.'); }
       const units = entries.reduce((sum, [, qty]) => sum + qty, 0);
       const amount = entries.reduce((sum, [id, qty]) => sum + products.get(id).price * qty, 0);
       const lines = [
-        '🌭 ¡Hola, Happybander! Quiero realizar un pedido de banderillas coreanas.',
+        '🌭 ¡Hola, Happybander! Quiero realizar un pedido.',
         '',
         '👤 DATOS DEL CLIENTE',
         '• Nombre: ' + value('customerName'),
-        '• Contacto: ' + value('customerPhone'),
+        '• Contacto: ' + phone,
         '',
-        '🛒 MI PEDIDO'
+        '🛒 MI ORDEN'
       ];
+      const review = $('reviewItems'); review.replaceChildren();
       entries.forEach(([id, qty], index) => {
-        const product = products.get(id);
-        lines.push('', (index + 1) + '. ' + product.name, '   • Cantidad: ' + qty, '   • Precio unitario: ' + money(product.price), '   • Subtotal: ' + money(product.price * qty));
+        const product = products.get(id), lineTotal = product.price * qty;
+        lines.push('', (index + 1) + '. ' + product.name, '   • Cantidad: ' + qty, '   • Precio unitario: ' + money(product.price), '   • Subtotal: ' + money(lineTotal));
+        const row = document.createElement('div'); row.className = 'review-item';
+        const name = document.createElement('span'); name.textContent = product.name + ' × ' + qty + ' (' + money(product.price) + ' c/u)';
+        const price = document.createElement('span'); price.textContent = money(lineTotal);
+        row.append(name, price); review.appendChild(row);
       });
-      lines.push('', '━━━━━━━━━━━━━━━━━━', '', '📦 RESUMEN DE LA COMPRA', '• Total de unidades: ' + units, '• Subtotal de productos: ' + money(amount), '• Costo de domicilio: ' + (home ? 'Por confirmar por WhatsApp' : 'No aplica'), '• TOTAL ESTIMADO: ' + money(amount), '', '🚚 ENTREGA', '• Modalidad: ' + (home ? 'Domicilio' : 'Recoger en el establecimiento'));
+      lines.push('', '📦 RESUMEN DE LA COMPRA', '• Total de productos diferentes: ' + entries.length, '• Total de unidades: ' + units, '• Subtotal de productos: ' + money(amount), '• Domicilio: ' + (home ? 'Costo por confirmar por WhatsApp' : 'No aplica'), '• TOTAL ESTIMADO: ' + money(amount) + ' COP.', '', '🚚 ENTREGA', '• Modalidad: ' + (home ? 'Domicilio' : 'Recoger en el establecimiento'));
       if (home) {
         addOptional(lines, 'Dirección', value('customerAddress'));
         addOptional(lines, 'Barrio o sector', value('customerNeighborhood'));
         addOptional(lines, 'Referencias', value('customerReference'));
-      } else {
-        lines.push('• No se requiere dirección domiciliaria; recogeré en el establecimiento.');
-      }
+      } else lines.push('• Recogeré en el establecimiento.');
       addOptional(lines, 'Salsas o preferencias', value('saucePreference'));
       addOptional(lines, 'Instrucciones especiales', value('specialInstructions'));
       addOptional(lines, 'Observaciones adicionales', value('extraNotes'));
-      lines.push('', '💬 CONFIRMACIÓN', 'Por favor, confirmen la disponibilidad de los productos, el tiempo estimado de preparación y, si corresponde, el costo del domicilio.', '', 'Muchas gracias. ¡Quedo pendiente de su respuesta! 🌭❤️');
-      const url = 'https://wa.me/' + WHATSAPP_NUMBER + '?text=' + encodeURIComponent(lines.join('\n'));
-      const popup = window.open(url, '_blank');
-      if (!popup) window.location.href = url;
-      const box = $('formMessage'); box.className = 'form-message success'; box.textContent = 'Tu mensaje está preparado en WhatsApp. Revísalo y pulsa enviar para contactar a Happybander.'; box.hidden = false;
+      lines.push('', '💬 CONFIRMACIÓN', 'Por favor, confirmen la disponibilidad de los productos, el tiempo de preparación y, si corresponde, el costo del domicilio.', '', 'Muchas gracias. ¡Quedo pendiente de su respuesta! 🌭❤️');
+      pendingWhatsAppUrl = 'https://wa.me/' + WHATSAPP_NUMBER + '?text=' + encodeURIComponent(lines.join('\\n'));
+      $('reviewDifferent').textContent = entries.length;
+      $('reviewUnits').textContent = units;
+      $('reviewSubtotal').textContent = money(amount);
+      $('reviewDelivery').textContent = home ? 'Por confirmar por WhatsApp' : 'No aplica';
+      $('reviewTotal').textContent = money(amount);
+      $('reviewCustomer').textContent = 'Cliente: ' + value('customerName') + ' · Entrega: ' + (home ? 'Domicilio a ' + value('customerAddress') + ', ' + value('customerNeighborhood') : 'Recoger en el establecimiento') + '. El pedido no queda confirmado hasta que Happybander responda por WhatsApp.';
+      $('orderReview').hidden = false;
+      $('orderReview').scrollIntoView({behavior:'smooth', block:'start'});
     });
     restore();
     cart.forEach((_, id) => updateCardQuantity(id));
