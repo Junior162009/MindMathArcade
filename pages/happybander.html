@@ -326,7 +326,7 @@
       addOptional(lines, 'Observaciones adicionales', value('extraNotes'));
       lines.push('', '💬 CONFIRMACIÓN', 'Por favor, confirmen la disponibilidad de los productos, el tiempo estimado de preparación y, si corresponde, el costo del domicilio.', '', 'Muchas gracias. ¡Quedo pendiente de su respuesta! 🌭❤️');
       const url = 'https://wa.me/' + WHATSAPP_NUMBER + '?text=' + encodeURIComponent(lines.join('\n'));
-      const popup = window.open(url, '_blank', 'noopener,noreferrer');
+      const popup = window.open(url, '_blank');
       if (!popup) window.location.href = url;
       const box = $('formMessage'); box.className = 'form-message success'; box.textContent = 'Tu mensaje está preparado en WhatsApp. Revísalo y pulsa enviar para contactar a Happybander.'; box.hidden = false;
     });
