@@ -213,8 +213,16 @@
     const q = gameState.preguntaActualObj;
     const correct = selection === q.correcta;
     const previousCount = gameState.respondidas || 0;
+    const scoreBefore = gameState.puntuacion;
+    const coinsBefore = gameState.monedas;
     originalAnswer(selection);
     if (gameState.materia !== "matematicas") return;
+    /* La práctica de errores enseña, pero no genera puntos ni monedas duplicadas. */
+    if (gameState.modoPracticaErrores) {
+      gameState.puntuacion = scoreBefore;
+      gameState.monedas = coinsBefore;
+      actualizarStatsJuego();
+    }
     gameState.respondidas = previousCount + 1;
     if (correct) {
       gameState.respuestasCorrectas = (gameState.respuestasCorrectas || 0) + 1;
