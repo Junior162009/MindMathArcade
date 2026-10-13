@@ -181,7 +181,7 @@
       ["¿Cuánto es −"+a+" + "+(a+b)+"?",b,[a+b,-b,a],"Números enteros"],
       ["¿Cuánto es "+a+"/"+b+" × "+b+"?",a,[a+b,a*b,b],"Fracciones"],
       ["¿Cuál es el "+b+" % de "+(a*10)+"?",(a*10*b)/100,[a*b,a*10*b,a+b],"Porcentajes"],
-      ["Si 3 cuadernos cuestan "+(b*3)+", ¿cuánto cuestan 5 al mismo precio?",b*5,b*3+5,b+5,b*4].slice(0,3),"Proporcionalidad"],
+      ["Si 3 cuadernos cuestan "+(b*3)+", ¿cuánto cuestan 5 al mismo precio?",b*5,b*3+5,b+5,b*4,"Proporcionalidad"],
       ["Resuelve x + "+b+" = "+(a+b)+". ¿Cuánto vale x?",a,[a+b,b,a-1],"Ecuaciones"],
       ["¿Cuál es el promedio de "+a+", "+(a+2)+" y "+(a+4)+"?",a+2,[a,a+3,a+4],"Estadística"],
       ["¿Cuántos grados tiene un ángulo recto?",90,[45,180,360],"Geometría"],
@@ -285,7 +285,7 @@
       } else {
         const bank=socialBanks[course<4?0:1];
         const row=bank[(course*2+serial)%bank.length];
-        item=makeQuestion(subject,course,serial,row[0],row.slice(1,2).concat(row[2]),row[1],row[3],"La opción correcta corresponde al concepto social o ciudadano descrito.",course<4?1:course<8?2:3);
+        item=makeQuestion(subject,course,serial,row[0],[row[1]].concat(row[2]),row[1],row[3],"La opción correcta corresponde al concepto social o ciudadano descrito.",course<4?1:course<8?2:3);
       }
       if(!item || !item.pregunta || !Array.isArray(item.opciones) || item.opciones.length!==4) continue;
       if(item.correcta<0 || item.correcta>3) continue;
