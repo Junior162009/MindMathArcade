@@ -34,11 +34,44 @@
     footer{background:var(--dark);color:#ddd;text-align:center;padding:35px 20px}.footer-brand{font-family:'Baloo 2';font-size:1.8rem;color:#fff;font-weight:800}.footer-brand span{color:var(--yellow)}footer p{font-size:.85rem;margin-top:6px}
     @media(max-width:900px){.hero{grid-template-columns:1fr}.hero-image img{height:390px}.menu-grid,.feature-grid{grid-template-columns:1fr 1fr}.process{grid-template-columns:1fr 1fr}.stats{grid-template-columns:repeat(3,1fr)}.about-grid,.location-grid{grid-template-columns:1fr}.links{display:none}}
     @media(max-width:600px){.hero{padding-top:42px}.hero-image img{height:320px}.menu-grid,.feature-grid,.process{grid-template-columns:1fr}.stats{grid-template-columns:1fr 1fr}.top{font-size:.72rem}.card-img{height:230px}}
+
+    /* Compra interactiva Happybander */
+    .buy-controls{padding:0 20px 20px;display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center}
+    .qty-control{display:flex;align-items:center;gap:10px;border:1px solid #eadfce;border-radius:999px;padding:5px;width:max-content;background:#fff}
+    .qty-control button{width:34px;height:34px;border:0;border-radius:50%;background:var(--cream);font-size:1.2rem;font-weight:900;cursor:pointer;color:var(--red)}
+    .qty-control output{min-width:18px;text-align:center;font-weight:800}
+    .buy-controls .btn{grid-column:1/-1;width:100%}
+    .order-section{background:#fff9e9}
+    .order-layout{display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start}
+    .order-panel{background:#fff;border-radius:24px;padding:24px;box-shadow:var(--shadow);border:1px solid #f0e4d2;min-width:0}
+    .order-panel h3{font-family:'Baloo 2';font-size:1.65rem;color:var(--red);margin-bottom:14px}
+    .cart-empty{padding:18px;background:var(--cream);border-radius:15px;text-align:center;color:#655b4b}
+    .cart-line{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;padding:14px 0;border-bottom:1px solid #eee}
+    .cart-line:last-child{border-bottom:0}.cart-line strong{display:block;overflow-wrap:anywhere}
+    .cart-line small{color:#666}.cart-line-actions{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-top:7px}
+    .mini-btn{border:1px solid #ddd;background:#fff;border-radius:9px;padding:5px 9px;cursor:pointer;font-weight:800}
+    .remove-btn{color:var(--red)}.line-total{font-weight:800;white-space:nowrap;text-align:right}
+    .cart-summary{margin-top:16px;padding-top:15px;border-top:2px dashed #e5d6bf}
+    .summary-row{display:flex;justify-content:space-between;gap:12px;padding:4px 0}
+    .summary-row.total{font-size:1.2rem;font-weight:900;color:var(--red);margin-top:5px}
+    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+    .field{display:flex;flex-direction:column;gap:5px;min-width:0}.field.full{grid-column:1/-1}
+    .field label{font-size:.88rem;font-weight:700}.field input,.field select,.field textarea{width:100%;font:inherit;font-size:.95rem;padding:11px 12px;border:1px solid #d9d2c7;border-radius:12px;background:#fff;color:var(--dark)}
+    .field textarea{min-height:82px;resize:vertical}.field input:focus,.field select:focus,.field textarea:focus{outline:2px solid var(--yellow);border-color:var(--yellow)}
+    .delivery-note,.form-message{padding:12px 14px;border-radius:12px;background:var(--cream);font-size:.87rem;margin:12px 0}
+    .form-message.error{background:#ffebee;color:#9b1c1c}.form-message.success{background:#e8f5e9;color:#205b29}
+    .order-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:15px}.order-actions .btn{flex:1}
+    .cart-fab{position:fixed;right:16px;bottom:16px;z-index:30;box-shadow:0 8px 25px #0003}
+    .cart-badge{display:inline-grid;place-items:center;min-width:24px;height:24px;padding:0 6px;border-radius:50%;background:var(--yellow);color:#222}
+    .card .price{font-variant-numeric:tabular-nums}
+    @media(max-width:760px){.order-layout{grid-template-columns:1fr}.order-panel{padding:18px}.cart-fab{right:12px;bottom:12px}}
+    @media(max-width:420px){.form-grid{grid-template-columns:1fr}.field.full{grid-column:auto}.buy-controls{grid-template-columns:1fr}.buy-controls .btn{grid-column:auto}.hero h1{font-size:3.3rem}.order-actions{flex-direction:column}.order-actions .btn{width:100%}}
+
   </style>
 </head>
 <body>
   <div class="top">📍 Soledad, Atlántico · Banderillas coreanas · <strong>Felicidad en cada bocado</strong></div>
-  <header><nav><a class="brand" href="#inicio">Happy<span>bander</span></a><div class="links"><a href="#menu">Menú</a><a href="#nosotros">Nosotros</a><a href="#proceso">Proceso</a><a href="#ubicacion">Ubicación</a></div><a class="btn btn-red" href="#pedido">Pedir</a></nav></header>
+  <header><nav><a class="brand" href="#inicio">Happy<span>bander</span></a><div class="links"><a href="#menu">Menú</a><a href="#nosotros">Nosotros</a><a href="#proceso">Proceso</a><a href="#ubicacion">Ubicación</a></div><a class="btn btn-red" href="#pedido">Pedir <span id="navCartCount" class="cart-badge" aria-label="unidades en el carrito">0</span></a></nav></header>
 
   <main>
     <section class="hero" id="inicio">
@@ -55,6 +88,51 @@
       <article class="card"><img class="card-img" src="https://cuisinegenial.com/assets/images/crispy-korean-dogs-hero.jpg?w=480" alt="Banderilla coreana con azúcar y salsa" loading="lazy"><div class="card-body"><h3>Con Azúcar y Salsa Coreana</h3><div class="price">$7.500</div><p>El contraste dulce y salado que caracteriza el estilo coreano.</p></div></article>
     </div></div></section>
 
+
+    <section id="pedido" class="order-section">
+      <div class="wrap">
+        <div class="section-head"><h2>Completa tu pedido</h2><p>Elige tus banderillas, revisa el total y prepara tu orden para enviarla por WhatsApp.</p></div>
+        <div class="order-layout">
+          <div class="order-panel" id="cartPanel" aria-live="polite">
+            <h3>🛒 Mi carrito <span id="cartCount" class="cart-badge">0</span></h3>
+            <div id="cartItems"><div class="cart-empty">Tu carrito está vacío. ¡Elige tus banderillas favoritas del menú! 🌭</div></div>
+            <div class="cart-summary">
+              <div class="summary-row"><span>Total de unidades</span><strong id="totalUnits">0</strong></div>
+              <div class="summary-row"><span>Subtotal de productos</span><strong id="cartSubtotal">$0</strong></div>
+              <div class="summary-row"><span>Domicilio</span><strong id="deliveryCostLabel">Por confirmar</strong></div>
+              <div class="summary-row total"><span>Total estimado</span><strong id="cartTotal">$0</strong></div>
+              <p class="delivery-note">El costo de domicilio, si aplica, se confirma por WhatsApp y no está incluido en este total.</p>
+            </div>
+            <div class="order-actions"><button type="button" class="btn btn-light" id="continueShopping">Seguir comprando</button><button type="button" class="btn btn-light" id="clearCart">Vaciar carrito</button></div>
+          </div>
+          <div class="order-panel">
+            <h3>👤 Tus datos</h3>
+            <form id="orderForm" novalidate>
+              <div class="form-grid">
+                <div class="field full"><label for="customerName">Nombre completo *</label><input id="customerName" name="customerName" autocomplete="name" required maxlength="100" placeholder="Tu nombre y apellido"></div>
+                <div class="field"><label for="customerPhone">Número de contacto *</label><input id="customerPhone" name="customerPhone" type="tel" autocomplete="tel" required maxlength="25" placeholder="Tu número de teléfono"></div>
+                <div class="field"><label for="deliveryType">Tipo de pedido *</label><select id="deliveryType" name="deliveryType" required><option value="recoger">Recoger en el establecimiento</option><option value="domicilio">Domicilio</option></select></div>
+                <div id="deliveryFields" class="field full" hidden>
+                  <div class="form-grid">
+                    <div class="field full"><label for="customerAddress">Dirección completa *</label><input id="customerAddress" name="customerAddress" autocomplete="street-address" maxlength="180" placeholder="Calle, carrera, número, apartamento"></div>
+                    <div class="field"><label for="customerNeighborhood">Barrio o sector *</label><input id="customerNeighborhood" name="customerNeighborhood" maxlength="100" placeholder="Tu barrio o sector"></div>
+                    <div class="field"><label for="customerReference">Referencias (opcional)</label><input id="customerReference" name="customerReference" maxlength="180" placeholder="Punto de referencia"></div>
+                  </div>
+                </div>
+                <div class="field full"><label for="saucePreference">Salsas o preferencias (opcional)</label><select id="saucePreference" name="saucePreference"><option value="">Sin preferencia indicada</option><option>Salsa coreana dulce-picante</option><option>Salsa de soja</option><option>Salsa de queso</option><option>Queso extra</option><option>Azúcar</option><option>Papas crunch</option></select></div>
+                <div class="field full"><label for="specialInstructions">Instrucciones especiales (opcional)</label><textarea id="specialInstructions" name="specialInstructions" maxlength="500" placeholder="Cuéntanos si tienes alguna indicación para preparar tu pedido"></textarea></div>
+                <div class="field full"><label for="extraNotes">Observaciones adicionales (opcional)</label><textarea id="extraNotes" name="extraNotes" maxlength="300" placeholder="Otra información que debamos conocer"></textarea></div>
+              </div>
+              <div id="pickupNote" class="delivery-note">📍 Recogerás tu pedido en el establecimiento. No necesitas ingresar una dirección domiciliaria.</div>
+              <div id="formMessage" class="form-message" role="status" aria-live="polite" hidden></div>
+              <button type="submit" class="btn btn-red" style="width:100%;margin-top:16px">Enviar mi pedido por WhatsApp 💬</button>
+              <p style="font-size:.78rem;color:#666;margin-top:10px">WhatsApp se abrirá con tu pedido preparado. Revisa el mensaje y pulsa enviar allí; el pedido no se confirma hasta que el negocio responda.</p>
+            </form>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <section class="features"><div class="wrap"><div class="section-head"><h2>¿Por qué Happybander?</h2><p>Una propuesta pensada para jóvenes y para quienes quieren probar algo diferente en Soledad.</p></div><div class="feature-grid"><div class="feature"><div class="icon">🌟</div><b>6 variedades</b><span>Opciones para distintos gustos y antojos.</span></div><div class="feature"><div class="icon">😋</div><b>Sabor diferente</b><span>Una experiencia inspirada en la comida callejera coreana.</span></div><div class="feature"><div class="icon">🧀</div><b>Ingredientes de calidad</b><span>Combinaciones de salchicha, mozzarella, salsas y toppings.</span></div><div class="feature"><div class="icon">🌱</div><b>Más sostenible</b><span>Uso proyectado de palitos de madera compostables.</span></div><div class="feature"><div class="icon">📸</div><b>Instagrameable</b><span>Presentaciones pensadas para compartir y fotografiar.</span></div><div class="feature"><div class="icon">💛</div><b>Precio accesible</b><span>Variedades oficiales entre $7.000 y $8.500.</span></div></div></div></section>
 
     <section id="nosotros"><div class="wrap"><div class="section-head"><h2>La marca</h2><p>Happybander nace como una propuesta gastronómica innovadora para Soledad.</p></div><div class="about-grid"><div class="about-box"><h3>🎯 Misión</h3><p>Ofrecer una propuesta gastronómica innovadora en Soledad, combinando originalidad, calidad y sabor.</p></div><div class="about-box"><h3>🚀 Visión 2035</h3><p>Ser reconocida como una referencia gastronómica en Soledad y avanzar hacia una expansión municipal y regional.</p></div></div><div class="stats"><div class="stat"><strong>6</strong><span>variedades</span></div><div class="stat"><strong>$7k–$8.5k</strong><span>rango de precios</span></div><div class="stat"><strong>1.200</strong><span>banderillas/mes</span></div><div class="stat"><strong>13–30</strong><span>público objetivo</span></div><div class="stat"><strong>5</strong><span>socios</span></div></div></div></section>
@@ -63,9 +141,200 @@
 
     <section id="proceso"><div class="wrap"><div class="section-head"><h2>Así se prepara</h2><p>Un proceso organizado desde la recepción de ingredientes hasta la entrega.</p></div><div class="process"><div class="step"><span>1</span><h3>Recepción y almacenamiento</h3><p>Organización de ingredientes y materias primas.</p></div><div class="step"><span>2</span><h3>Preparación de la mezcla</h3><p>Se prepara la base para el recubrimiento.</p></div><div class="step"><span>3</span><h3>Armado</h3><p>Se montan las bases sobre el palito.</p></div><div class="step"><span>4</span><h3>Empanizado</h3><p>La banderilla recibe su cobertura crujiente.</p></div><div class="step"><span>5</span><h3>Fritura</h3><p>Se cocina hasta obtener un acabado dorado.</p></div><div class="step"><span>6</span><h3>Salsas y toppings</h3><p>Se termina según la combinación elegida.</p></div><div class="step"><span>7</span><h3>Empaque</h3><p>Preparación para conservar presentación y producto.</p></div><div class="step"><span>8</span><h3>Entrega</h3><p>El pedido queda listo para el cliente.</p></div></div></div></section>
 
-    <section class="location" id="ubicacion"><div class="wrap"><div class="section-head"><h2>Encuéntranos</h2><p>Información oficial disponible para el proyecto.</p></div><div class="location-grid"><div><div class="address">📍 Tv 1B Sur #68B-30<br>Soledad, Atlántico, Colombia</div><p>Happybander está dirigido principalmente a jóvenes de 13 a 30 años.</p><div class="notice">🗺️ El mapa interactivo se habilitará cuando se configure el enlace real de ubicación. No se incluye una ubicación inventada.</div></div><div class="contact-box" id="pedido"><h3>¿Quieres pedir?</h3><p>Haz tu pedido o consulta la disponibilidad por WhatsApp. ¡Estamos para atenderte!</p><p style="margin:12px 0;font-weight:800;font-size:1.15rem">📱 +57 318 971 0643</p><br><a class="btn btn-red" href="https://wa.me/573189710643?text=Hola%20Happybander%2C%20quiero%20hacer%20un%20pedido%20de%20banderillas%20coreanas." target="_blank" rel="noopener noreferrer">Pedir por WhatsApp 💬</a></div></div></div></section>
+    <section class="location" id="ubicacion"><div class="wrap"><div class="section-head"><h2>Encuéntranos</h2><p>Información oficial disponible para el proyecto.</p></div><div class="location-grid"><div><div class="address">📍 Tv 1B Sur #68B-30<br>Soledad, Atlántico, Colombia</div><p>Happybander está dirigido principalmente a jóvenes de 13 a 30 años.</p><div class="notice">🗺️ El mapa interactivo se habilitará cuando se configure el enlace real de ubicación. No se incluye una ubicación inventada.</div></div><div class="contact-box" id="contacto"><h3>¿Quieres pedir?</h3><p>Haz tu pedido o consulta la disponibilidad por WhatsApp. ¡Estamos para atenderte!</p><p style="margin:12px 0;font-weight:800;font-size:1.15rem">📱 +57 318 971 0643</p><br><a class="btn btn-red" href="#pedido">Armar mi pedido 💬</a></div></div></div></section>
   </main>
 
   <footer><div class="footer-brand">Happy<span>bander</span></div><p>Felicidad en cada bocado · Soledad, Atlántico</p><p>Proyecto integrado en TecnoMath.</p><p style="margin-top:14px"><a href="/" style="color:#F2A900;text-decoration:none;font-weight:700">← Volver a TecnoMath</a></p></footer>
+
+  <a class="btn btn-red cart-fab" href="#pedido" aria-label="Ver mi carrito">🛒 Ver mi carrito <span id="floatingCartCount" class="cart-badge">0</span></a>
+  <script>
+  (() => {
+    'use strict';
+    const WHATSAPP_NUMBER = '573189710643';
+    const STORAGE_KEY = 'happybander_cart_v1';
+    const cards = Array.from(document.querySelectorAll('#menu .menu-grid .card'));
+    const products = new Map();
+    const cart = new Map();
+    const $ = id => document.getElementById(id);
+    const money = value => new Intl.NumberFormat('es-CO', {style:'currency',currency:'COP',maximumFractionDigits:0}).format(value);
+    const safePrice = card => {
+      const raw = card.querySelector('.price')?.textContent || '';
+      const value = Number(raw.replace(/[^0-9]/g, ''));
+      return Number.isSafeInteger(value) && value > 0 ? value : 0;
+    };
+    const persist = () => {
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(Array.from(cart.entries()))); } catch (_) {}
+    };
+    const restore = () => {
+      try {
+        const raw = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
+        if (!Array.isArray(raw)) return;
+        raw.forEach(entry => {
+          if (!Array.isArray(entry) || entry.length !== 2) return;
+          const [id, qty] = entry;
+          if (products.has(id) && Number.isSafeInteger(qty) && qty > 0 && qty <= 99) cart.set(id, qty);
+        });
+      } catch (_) {
+        try { localStorage.removeItem(STORAGE_KEY); } catch (_) {}
+      }
+    };
+    const quantity = id => cart.get(id) || 0;
+    const totalUnits = () => Array.from(cart.values()).reduce((sum, qty) => sum + qty, 0);
+    const subtotal = () => Array.from(cart.entries()).reduce((sum, [id, qty]) => sum + products.get(id).price * qty, 0);
+    const updateCardQuantity = id => {
+      const control = document.querySelector('[data-product-qty="' + id + '"]');
+      if (control) control.textContent = String(quantity(id));
+    };
+    const setQty = (id, qty) => {
+      if (!products.has(id)) return;
+      const normalized = Math.max(0, Math.min(99, Number.isFinite(qty) ? Math.trunc(qty) : 0));
+      if (normalized > 0) cart.set(id, normalized); else cart.delete(id);
+      updateCardQuantity(id); persist(); renderCart();
+    };
+    const announce = text => {
+      let node = $('cartNotice');
+      if (!node) {
+        node = document.createElement('p'); node.id = 'cartNotice'; node.className = 'form-message success';
+        node.setAttribute('role','status'); node.style.cssText = 'position:fixed;left:50%;bottom:82px;transform:translateX(-50%);z-index:40;box-shadow:0 6px 20px #0002;max-width:calc(100% - 24px)';
+        document.body.appendChild(node);
+      }
+      node.textContent = text; node.hidden = false;
+      clearTimeout(node._timer); node._timer = setTimeout(() => { node.hidden = true; }, 2200);
+    };
+    cards.forEach((card, index) => {
+      const name = (card.querySelector('h3')?.textContent || '').trim();
+      const price = safePrice(card);
+      const id = 'hb-' + (index + 1);
+      const img = card.querySelector('img');
+      if (img) {
+        img.loading = 'lazy';
+        img.addEventListener('error', () => {
+          if (!img.dataset.fallbackUsed) {
+            img.dataset.fallbackUsed = '1';
+            img.src = 'https://i.blogs.es/11fdde/como-hacer-banderillas-coreanas-de-salchicha-y-queso-1-/650_1200.jpg';
+          } else {
+            img.style.background = '#fff4d6';
+            img.style.objectFit = 'contain';
+            img.alt = img.alt || 'Banderilla coreana; imagen ilustrativa no disponible temporalmente';
+          }
+        });
+      }
+      products.set(id, {id, name, price, card});
+      const controls = document.createElement('div');
+      controls.className = 'buy-controls';
+      controls.innerHTML = '<div class="qty-control" aria-label="Cantidad de ' + name.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;') + '"><button type="button" data-minus="' + id + '" aria-label="Disminuir cantidad">−</button><output data-product-qty="' + id + '" aria-live="polite">0</output><button type="button" data-plus="' + id + '" aria-label="Aumentar cantidad">+</button></div><button type="button" class="btn btn-red" data-add="' + id + '">Agregar al pedido</button>';
+      card.appendChild(controls);
+    });
+    document.addEventListener('click', event => {
+      const add = event.target.closest('[data-add]');
+      const plus = event.target.closest('[data-plus]');
+      const minus = event.target.closest('[data-minus]');
+      if (add) { const id = add.dataset.add; setQty(id, quantity(id) + 1); announce('¡Agregado a tu pedido! 🌭'); }
+      if (plus) setQty(plus.dataset.plus, quantity(plus.dataset.plus) + 1);
+      if (minus) setQty(minus.dataset.minus, quantity(minus.dataset.minus) - 1);
+      const cartAction = event.target.closest('[data-cart-action]');
+      if (cartAction) {
+        const id = cartAction.dataset.id;
+        if (cartAction.dataset.cartAction === 'remove') setQty(id, 0);
+        if (cartAction.dataset.cartAction === 'plus') setQty(id, quantity(id) + 1);
+        if (cartAction.dataset.cartAction === 'minus') setQty(id, quantity(id) - 1);
+      }
+    });
+    function renderCart() {
+      const entries = Array.from(cart.entries()).filter(([id, qty]) => products.has(id) && qty > 0);
+      const units = totalUnits(), amount = subtotal();
+      $('cartCount').textContent = units;
+      $('navCartCount').textContent = units;
+      $('floatingCartCount').textContent = units;
+      $('totalUnits').textContent = units;
+      $('cartSubtotal').textContent = money(amount);
+      $('cartTotal').textContent = money(amount);
+      const host = $('cartItems');
+      if (!entries.length) {
+        host.innerHTML = '<div class="cart-empty">Tu carrito está vacío. ¡Elige tus banderillas favoritas del menú! 🌭</div>';
+        return;
+      }
+      host.replaceChildren();
+      entries.forEach(([id, qty]) => {
+        const product = products.get(id), line = document.createElement('div');
+        line.className = 'cart-line';
+        const info = document.createElement('div');
+        const title = document.createElement('strong'); title.textContent = product.name;
+        const unit = document.createElement('small'); unit.textContent = money(product.price) + ' por unidad';
+        const actions = document.createElement('div'); actions.className = 'cart-line-actions';
+        actions.innerHTML = '<button type="button" class="mini-btn" data-cart-action="minus" data-id="' + id + '" aria-label="Disminuir cantidad">−</button><span aria-label="Cantidad">' + qty + '</span><button type="button" class="mini-btn" data-cart-action="plus" data-id="' + id + '" aria-label="Aumentar cantidad">+</button><button type="button" class="mini-btn remove-btn" data-cart-action="remove" data-id="' + id + '">Eliminar</button>';
+        info.append(title, unit, actions);
+        const total = document.createElement('div'); total.className = 'line-total'; total.textContent = money(product.price * qty);
+        line.append(info, total); host.appendChild(line);
+      });
+    }
+    $('clearCart').addEventListener('click', () => {
+      cart.clear(); cards.forEach((_, index) => updateCardQuantity('hb-' + (index + 1)));
+      persist(); renderCart(); announce('Carrito vacío.');
+    });
+    $('continueShopping').addEventListener('click', () => document.querySelector('#menu').scrollIntoView({behavior:'smooth'}));
+    const updateDelivery = () => {
+      const isHome = $('deliveryType').value === 'domicilio';
+      $('deliveryFields').hidden = !isHome;
+      $('customerAddress').required = isHome;
+      $('customerNeighborhood').required = isHome;
+      $('pickupNote').hidden = isHome;
+      $('deliveryCostLabel').textContent = isHome ? 'Por confirmar' : 'No aplica';
+    };
+    $('deliveryType').addEventListener('change', updateDelivery);
+    function value(id) { return $(id).value.trim(); }
+    function showError(message) {
+      const box = $('formMessage'); box.className = 'form-message error'; box.textContent = message; box.hidden = false;
+      box.scrollIntoView({behavior:'smooth', block:'nearest'});
+    }
+    function addOptional(lines, label, text) { if (text) lines.push('• ' + label + ': ' + text); }
+    $('orderForm').addEventListener('submit', event => {
+      event.preventDefault();
+      $('formMessage').hidden = true;
+      const entries = Array.from(cart.entries()).filter(([id, qty]) => products.has(id) && Number.isSafeInteger(qty) && qty > 0);
+      if (!entries.length) return showError('Tu pedido está vacío. Agrega al menos una banderilla antes de continuar.');
+      if (!value('customerName')) { $('customerName').focus(); return showError('Completa el nombre completo para continuar.'); }
+      if (!value('customerPhone')) { $('customerPhone').focus(); return showError('Completa el número de contacto para continuar.'); }
+      const home = $('deliveryType').value === 'domicilio';
+      if (home && !value('customerAddress')) { $('customerAddress').focus(); return showError('Para el domicilio, escribe la dirección completa.'); }
+      if (home && !value('customerNeighborhood')) { $('customerNeighborhood').focus(); return showError('Para el domicilio, escribe el barrio o sector.'); }
+      const units = entries.reduce((sum, [, qty]) => sum + qty, 0);
+      const amount = entries.reduce((sum, [id, qty]) => sum + products.get(id).price * qty, 0);
+      const lines = [
+        '🌭 ¡Hola, Happybander! Quiero realizar un pedido de banderillas coreanas.',
+        '',
+        '👤 DATOS DEL CLIENTE',
+        '• Nombre: ' + value('customerName'),
+        '• Contacto: ' + value('customerPhone'),
+        '',
+        '🛒 MI PEDIDO'
+      ];
+      entries.forEach(([id, qty], index) => {
+        const product = products.get(id);
+        lines.push('', (index + 1) + '. ' + product.name, '   • Cantidad: ' + qty, '   • Precio unitario: ' + money(product.price), '   • Subtotal: ' + money(product.price * qty));
+      });
+      lines.push('', '━━━━━━━━━━━━━━━━━━', '', '📦 RESUMEN DE LA COMPRA', '• Total de unidades: ' + units, '• Subtotal de productos: ' + money(amount), '• Costo de domicilio: ' + (home ? 'Por confirmar por WhatsApp' : 'No aplica'), '• TOTAL ESTIMADO: ' + money(amount), '', '🚚 ENTREGA', '• Modalidad: ' + (home ? 'Domicilio' : 'Recoger en el establecimiento'));
+      if (home) {
+        addOptional(lines, 'Dirección', value('customerAddress'));
+        addOptional(lines, 'Barrio o sector', value('customerNeighborhood'));
+        addOptional(lines, 'Referencias', value('customerReference'));
+      } else {
+        lines.push('• No se requiere dirección domiciliaria; recogeré en el establecimiento.');
+      }
+      addOptional(lines, 'Salsas o preferencias', value('saucePreference'));
+      addOptional(lines, 'Instrucciones especiales', value('specialInstructions'));
+      addOptional(lines, 'Observaciones adicionales', value('extraNotes'));
+      lines.push('', '💬 CONFIRMACIÓN', 'Por favor, confirmen la disponibilidad de los productos, el tiempo estimado de preparación y, si corresponde, el costo del domicilio.', '', 'Muchas gracias. ¡Quedo pendiente de su respuesta! 🌭❤️');
+      const url = 'https://wa.me/' + WHATSAPP_NUMBER + '?text=' + encodeURIComponent(lines.join('\n'));
+      const popup = window.open(url, '_blank', 'noopener,noreferrer');
+      if (!popup) window.location.href = url;
+      const box = $('formMessage'); box.className = 'form-message success'; box.textContent = 'Tu mensaje está preparado en WhatsApp. Revísalo y pulsa enviar para contactar a Happybander.'; box.hidden = false;
+    });
+    restore();
+    cart.forEach((_, id) => updateCardQuantity(id));
+    renderCart(); updateDelivery();
+  })();
+  </script>
+
 </body>
 </html>
