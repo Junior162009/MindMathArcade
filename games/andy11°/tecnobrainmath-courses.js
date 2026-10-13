@@ -50,15 +50,56 @@
     q.explicacion = q.explicacion || m.explanation;
   });
 
-  /* Clasificación inicial por dificultad del banco existente: fácil (6.º-7.º), medio (8.º-9.º), difícil (10.º-11.º). */
-  ["historia", "lectura"].forEach(function (subject) {
+  /*
+   * Clasificación explícita de TODAS las preguntas que ya existen en index.html.
+   * Curso colombiano: 0 = Transición; 1..5 primaria; 6..9 secundaria; 10..11 media.
+   * No se inventan preguntas nuevas: se ubica cada pregunta por contenido y complejidad.
+   */
+  const classification = {
+    historia: [
+      { curso: 8, tema: "Revolución Francesa", dificultad: 2, explicacion: "La Revolución Francesa comenzó en 1789 y difundió los ideales de libertad, igualdad y fraternidad." },
+      { curso: 5, tema: "Geografía: océanos", dificultad: 1, explicacion: "El océano Pacífico es el más grande del planeta." },
+      { curso: 7, tema: "Constitución colombiana", dificultad: 2, explicacion: "La Constitución Política de 1991 es la norma suprema del Estado colombiano." },
+      { curso: 5, tema: "Geografía: continentes", dificultad: 1, explicacion: "El desierto del Sahara se encuentra en el norte de África." },
+      { curso: 5, tema: "Participación ciudadana", dificultad: 1, explicacion: "El voto permite a los ciudadanos elegir a sus representantes y gobernantes." },
+      { curso: 9, tema: "Historia de Colombia: La Violencia", dificultad: 2, explicacion: "La Violencia fue un período de conflicto bipartidista que se intensificó después del asesinato de Jorge Eliécer Gaitán en 1948." },
+      { curso: 7, tema: "Ramas del poder público", dificultad: 2, explicacion: "La rama legislativa debate, elabora, modifica y deroga las leyes." },
+      { curso: 9, tema: "Historia mundial: Guerra Fría", dificultad: 3, explicacion: "La Guerra Fría fue una rivalidad política, económica, militar e ideológica entre Estados Unidos y la Unión Soviética." },
+      { curso: 10, tema: "Economía: PIB", dificultad: 3, explicacion: "El producto interno bruto (PIB) mide el valor de los bienes y servicios finales producidos en un país durante un período." },
+      { curso: 8, tema: "Historia colonial: comercio triangular", dificultad: 2, explicacion: "El comercio triangular conectó Europa, África y América; estuvo ligado al tráfico esclavista y al intercambio de manufacturas y materias primas." },
+      { curso: 10, tema: "Historia de Colombia: Frente Nacional", dificultad: 3, explicacion: "Entre 1958 y 1974, liberales y conservadores acordaron alternarse la Presidencia y repartirse cargos públicos." },
+      { curso: 8, tema: "Ciudadanía: soberanía popular", dificultad: 2, explicacion: "La soberanía popular sostiene que el poder político reside en el pueblo, que puede ejercerlo directamente o mediante representantes." },
+      { curso: 9, tema: "Colonialismo: Conferencia de Berlín", dificultad: 3, explicacion: "La Conferencia de Berlín de 1884–1885 estableció reglas para la ocupación y aceleró el reparto colonial europeo de África." },
+      { curso: 9, tema: "Constitución: acción de tutela", dificultad: 3, explicacion: "La tutela es un mecanismo judicial preferente y rápido para proteger derechos fundamentales cuando están amenazados o vulnerados." },
+      { curso: 11, tema: "Geografía urbana: gentrificación", dificultad: 3, explicacion: "La gentrificación transforma un barrio mediante inversiones y llegada de residentes con mayor poder adquisitivo, lo que puede desplazar a habitantes originales." }
+    ],
+    lectura: [
+      { curso: 6, tema: "Propósito de la lectura crítica", dificultad: 1, explicacion: "La lectura crítica requiere comprender, analizar y evaluar lo que comunica un texto, no solo memorizarlo." },
+      { curso: 6, tema: "Evaluación de afirmaciones", dificultad: 1, explicacion: "Antes de aceptar una afirmación conviene revisar sus argumentos, evidencias y fuentes." },
+      { curso: 6, tema: "Hecho y opinión", dificultad: 1, explicacion: "Una opinión expresa una valoración o idea personal; no equivale necesariamente a un hecho comprobable." },
+      { curso: 6, tema: "Idea principal", dificultad: 1, explicacion: "La idea principal expresa el mensaje central que organiza o explica el contenido del texto." },
+      { curso: 6, tema: "Inferencias", dificultad: 1, explicacion: "Inferir es construir una conclusión usando pistas del texto y conocimientos pertinentes." },
+      { curso: 8, tema: "Confiabilidad de las fuentes", dificultad: 2, explicacion: "Conocer el origen de la información ayuda a evaluar la autoridad, el contexto y la confiabilidad de una fuente." },
+      { curso: 8, tema: "Sesgo del autor", dificultad: 2, explicacion: "Mostrar solo beneficios y ocultar problemas puede revelar un sesgo o una presentación parcial." },
+      { curso: 8, tema: "Estructura del argumento", dificultad: 2, explicacion: "Un argumento presenta una afirmación respaldada por razones o evidencias." },
+      { curso: 8, tema: "Comparación de textos", dificultad: 2, explicacion: "Un lector crítico compara argumentos y evidencias de las fuentes antes de decidir qué postura está mejor sustentada." },
+      { curso: 8, tema: "Intención comunicativa", dificultad: 2, explicacion: "La intención comunicativa es lo que el autor busca lograr, explicar, defender o provocar con su texto." },
+      { curso: 10, tema: "Titulares y evidencia", dificultad: 3, explicacion: "Un titular llamativo no prueba por sí mismo una afirmación; debe contrastarse con el contenido y sus evidencias." },
+      { curso: 10, tema: "Generalización apresurada", dificultad: 3, explicacion: "Sacar una conclusión sobre todos a partir de solo tres casos es una generalización con una muestra insuficiente." },
+      { curso: 10, tema: "Evaluación de evidencias", dificultad: 3, explicacion: "El pensamiento crítico analiza evidencias, contrasta fuentes y construye conclusiones razonadas." },
+      { curso: 11, tema: "Lenguaje absoluto y falacias", dificultad: 3, explicacion: "Palabras absolutas como «todos» o «nadie» necesitan respaldo; el lector debe comprobar si la evidencia justifica esa generalización." },
+      { curso: 11, tema: "Conclusiones y verificación", dificultad: 3, explicacion: "Si una información no presenta fuentes ni evidencias, lo prudente es suspender el juicio y buscar formas de verificarla." }
+    ]
+  };
+  Object.keys(classification).forEach(function (subject) {
     (BANCO[subject] || []).forEach(function (q, index) {
-      if (Number.isInteger(q.curso)) return;
-      const band = Math.floor(index / 5);
-      q.curso = band === 0 ? (index % 2 === 0 ? 6 : 7) : band === 1 ? (index % 2 === 0 ? 8 : 9) : (index % 2 === 0 ? 10 : 11);
-      q.tema = q.tema || subject;
-      q.dificultad = q.dificultad || band + 1;
+      const meta = classification[subject][index];
+      if (!meta) return;
       q.id = q.id || "tbm-" + subject + "-" + String(index + 1).padStart(3, "0");
+      q.curso = meta.curso;
+      q.tema = meta.tema;
+      q.dificultad = meta.dificultad;
+      q.explicacion = q.explicacion || meta.explicacion;
     });
   });
 
