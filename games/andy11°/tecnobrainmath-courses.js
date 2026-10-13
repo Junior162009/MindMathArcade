@@ -50,7 +50,19 @@
     q.explicacion = q.explicacion || m.explanation;
   });
 
-  gameState.cursoSeleccionado = gameState.cursoSeleccionado ?? null;
+  /* Clasificación inicial por dificultad del banco existente: fácil (6.º-7.º), medio (8.º-9.º), difícil (10.º-11.º). */
+  ["historia", "lectura"].forEach(function (subject) {
+    (BANCO[subject] || []).forEach(function (q, index) {
+      if (Number.isInteger(q.curso)) return;
+      const band = Math.floor(index / 5);
+      q.curso = band === 0 ? (index % 2 === 0 ? 6 : 7) : band === 1 ? (index % 2 === 0 ? 8 : 9) : (index % 2 === 0 ? 10 : 11);
+      q.tema = q.tema || subject;
+      q.dificultad = q.dificultad || band + 1;
+      q.id = q.id || "tbm-" + subject + "-" + String(index + 1).padStart(3, "0");
+    });
+  });
+
+  gameState.cursoSeleccionado = gameState.cursoSeleccionado ?? (function(){ try { const n = Number(localStorage.getItem("tecnobrainmath-course-selected-v1")); return localStorage.getItem("tecnobrainmath-course-selected-v1") !== null && Number.isInteger(n) && n >= 0 && n <= 11 ? n : null; } catch (_) { return null; } })();
   gameState.respondidas = gameState.respondidas || 0;
   gameState.respuestasCorrectas = gameState.respuestasCorrectas || 0;
   gameState.preguntasFalladas = gameState.preguntasFalladas || [];
@@ -59,8 +71,9 @@
   gameState.modoPracticaErrores = false;
   gameState.dificultadActual = 1;
 
-  function countForCourse(id) {
-    return (BANCO.matematicas || []).filter(function (q) { return q.curso === id; }).length;
+  function countForCourse(id, subject) {
+    const key = subject || gameState.materia;
+    return (BANCO[key] || []).filter(function (q) { return q.curso === id; }).length;
   }
   function escapeHtml(value) {
     return String(value == null ? "" : value).replace(/[&<>"']/g, function (c) {
@@ -70,42 +83,37 @@
   function renderCourseScreen() {
     if (typeof refreshInterval !== "undefined" && refreshInterval) clearInterval(refreshInterval);
     detenerTimer();
-    const sections = [1, 2, 3, 4].map(function (groupId) {
-      const g = groups[groupId];
-      const cards = courses.filter(function (c) { return c.group === groupId; }).map(function (c) {
-        const count = countForCourse(c.id);
-        return '<button type="button" class="grade-card ' + (gameState.cursoSeleccionado === c.id ? "selected" : "") + '" data-grade="' + c.id + '">' +
-          '<span class="grade-icon">' + c.icon + '</span><strong>' + c.name + '</strong><small>' + c.desc + '</small>' +
-          '<small>Dificultad recomendada: ' + c.level + '</small><span class="availability">' +
-          (count ? count + " pregunta(s) disponible(s)" : "Banco pendiente de clasificar") + "</span></button>";
-      }).join("");
-      return '<section class="grade-group"><h3 style="color:' + g.color + '">' + g.title + '</h3><div class="grade-grid">' + cards + "</div></section>";
+    const subjectNames = { matematicas: "Matemáticas", lectura: "Lectura crítica", historia: "Historia y cívica" };
+    const cards = courses.map(function (course) {
+      const count = countForCourse(course.id, gameState.materia);
+      return '<button type="button" class="grade-card ' + (gameState.cursoSeleccionado === course.id ? "selected" : "") + '" data-grade="' + course.id + '" aria-pressed="' + (gameState.cursoSeleccionado === course.id) + '">' +
+        '<span class="grade-icon">' + course.icon + '</span><strong>' + course.name + '</strong></button>';
     }).join("");
-    appRoot.innerHTML = '<div class="grade-screen"><div class="header-glow"></div><div class="game-logo">TECNOBRAINMATH</div>' +
-      '<h2 class="grade-heading">🎒 ¿En qué curso estás?</h2><p class="grade-intro">Elige tu curso para practicar matemáticas de tu nivel. Las preguntas de cursos superiores no aparecerán aquí. El banco actual es pequeño; los cursos sin preguntas se muestran claramente.</p>' +
-      sections + '<div id="gradeMessage" role="status" aria-live="polite" style="color:#ffdd00;min-height:1.5rem;margin:.8rem 0;"></div>' +
-      '<div style="display:flex;gap:.7rem;justify-content:center;flex-wrap:wrap;"><button class="btn-secondary" id="backSubjectsBtn">← Volver</button>' +
-      '<button class="btn-primary" id="beginGradeBtn" ' + (gameState.cursoSeleccionado === null || countForCourse(gameState.cursoSeleccionado) === 0 ? "disabled" : "") + '>▶ COMENZAR CURSO</button></div></div>';
+    const selectedCount = gameState.cursoSeleccionado === null ? 0 : countForCourse(gameState.cursoSeleccionado, gameState.materia);
+    appRoot.innerHTML = '<div class="grade-screen compact-grade"><div class="header-glow"></div><div class="game-logo">TECNOBRAINMATH</div>' +
+      '<h2 class="grade-heading">¿Qué curso?</h2><p class="grade-subject">' + subjectNames[gameState.materia] + '</p>' +
+      '<div class="grade-grid compact-grade-grid">' + cards + '</div>' +
+      '<div id="gradeMessage" role="status" aria-live="polite" class="grade-message">' + (gameState.cursoSeleccionado !== null && !selectedCount ? "Aún no hay preguntas para este curso." : "") + '</div>' +
+      '<div class="grade-actions"><button class="btn-secondary" id="backSubjectsBtn">←</button>' +
+      '<button class="btn-primary" id="beginGradeBtn" ' + (!selectedCount ? "disabled" : "") + '>▶ JUGAR</button></div></div>';
     document.querySelectorAll("[data-grade]").forEach(function (button) {
       button.addEventListener("click", function () {
         const id = Number(button.dataset.grade);
         gameState.cursoSeleccionado = id;
+        try { localStorage.setItem("tecnobrainmath-course-selected-v1", String(id)); } catch (_) {}
         document.querySelectorAll("[data-grade]").forEach(function (b) {
-          b.classList.toggle("selected", Number(b.dataset.grade) === id);
+          const selected = Number(b.dataset.grade) === id;
+          b.classList.toggle("selected", selected);
+          b.setAttribute("aria-pressed", String(selected));
         });
-        const available = countForCourse(id);
+        const available = countForCourse(id, gameState.materia);
         document.getElementById("beginGradeBtn").disabled = available === 0;
-        document.getElementById("gradeMessage").textContent = available
-          ? "Elegiste " + courses.find(function (c) { return c.id === id; }).name + ". Hay " + available + " pregunta(s) disponible(s)."
-          : "Este curso aún no tiene preguntas clasificadas. Elige otro curso; no mezclaremos niveles.";
+        document.getElementById("gradeMessage").textContent = available ? "" : "Aún no hay preguntas para este curso.";
       });
     });
-    document.getElementById("backSubjectsBtn").addEventListener("click", function () { renderStartScreen(); });
+    document.getElementById("backSubjectsBtn").addEventListener("click", renderStartScreen);
     document.getElementById("beginGradeBtn").addEventListener("click", function () {
-      if (gameState.cursoSeleccionado === null || !countForCourse(gameState.cursoSeleccionado)) {
-        document.getElementById("gradeMessage").textContent = "No hay preguntas disponibles para este curso. Selecciona otro.";
-        return;
-      }
+      if (gameState.cursoSeleccionado === null || !countForCourse(gameState.cursoSeleccionado, gameState.materia)) return;
       iniciarJuego();
     });
   }
@@ -120,22 +128,27 @@
       '<div class="materias-reto"><div class="card-materia ' + (gameState.materia === "historia" ? "seleccionada" : "") + '" data-mat="historia"><div class="materia-icono">📜</div><div class="materia-nombre">HISTORIA Y CÍVICA</div></div>' +
       '<div class="card-materia ' + (gameState.materia === "matematicas" ? "seleccionada" : "") + '" data-mat="matematicas"><div class="materia-icono">🧮</div><div class="materia-nombre">MATEMÁTICAS POR CURSO</div></div>' +
       '<div class="card-materia ' + (gameState.materia === "lectura" ? "seleccionada" : "") + '" data-mat="lectura"><div class="materia-icono">📖</div><div class="materia-nombre">LECTURA CRÍTICA</div></div></div>' +
-      (gameState.materia === "matematicas" ? '<p style="color:#aab7cb;margin:-.7rem 0 1rem;">Selecciona tu curso antes de comenzar para adaptar las preguntas a tu nivel.</p>' : "") +
-      '<button class="btn-primary" id="startGameBtn">▶ ' + (gameState.materia === "matematicas" ? "ELEGIR CURSO" : "INICIAR RETO") + '</button>' +
+      '<button class="btn-primary" id="startGameBtn">▶ ELEGIR CURSO</button>' +
       '<div class="button-group"><button class="btn-secondary gold" id="openShopBtn">🛒 TIENDA MISTERIOSA</button><button class="minijuegos-btn" id="openMinijuegosBtn">🎮 MINIJUEGOS</button></div></div>';
     document.querySelectorAll(".card-materia").forEach(function (card) {
       card.addEventListener("click", function () { gameState.materia = card.dataset.mat; renderStartScreen(); });
     });
     document.getElementById("startGameBtn").addEventListener("click", function () {
-      if (gameState.materia === "matematicas") renderCourseScreen();
-      else originalStartGame();
+      renderCourseScreen();
     });
     document.getElementById("openShopBtn").addEventListener("click", irATienda);
     document.getElementById("openMinijuegosBtn").addEventListener("click", irAMinijuegos);
   };
 
   cargarPreguntasMateria = function () {
-    if (gameState.materia !== "matematicas") return originalLoadQuestions();
+    if (gameState.materia !== "matematicas") {
+      const filtered = (BANCO[gameState.materia] || []).filter(function (q) {
+        return Number.isInteger(q.curso) && q.curso === gameState.cursoSeleccionado;
+      });
+      gameState.preguntasPool = mezclarArray(filtered.slice()).slice(0, 10);
+      gameState.indiceActual = 0;
+      return;
+    }
     gameState.preguntasPool = (BANCO.matematicas || []).filter(function (q) {
       return Number.isInteger(q.curso) && q.curso === gameState.cursoSeleccionado;
     }).slice().sort(function (a, b) {
@@ -162,7 +175,19 @@
   };
 
   iniciarJuego = function () {
-    if (gameState.materia !== "matematicas") return originalStartGame();
+    if (gameState.materia !== "matematicas") {
+      detenerTimer();
+      cargarPreguntasMateria();
+      const firstQuestion = obtenerPregunta();
+      if (!firstQuestion) { renderCourseScreen(); return; }
+      gameState.preguntaActualObj = firstQuestion;
+      gameState.respondida = false;
+      gameState.juegoActivo = true;
+      gameState.pistaUsadaEnEstaPregunta = false;
+      renderGameScreen();
+      iniciarTimerJuego();
+      return;
+    }
     detenerTimer();
     gameState.modoPracticaErrores = false;
     cargarPreguntasMateria();
@@ -178,7 +203,6 @@
 
   renderGameScreen = function () {
     originalRenderGame();
-    if (gameState.materia !== "matematicas") return;
     const p = gameState.preguntaActualObj;
     if (!p) return;
     const header = document.querySelector(".game-header");
@@ -186,7 +210,7 @@
       const course = courses.find(function (c) { return c.id === gameState.cursoSeleccionado; });
       const label = document.createElement("div");
       label.className = "stat-retro";
-      label.textContent = "🎒 " + (course ? course.name : "Curso") + " · " + (p.tema || "Matemáticas");
+      label.textContent = "🎒 " + (course ? course.name : "Curso") + " · " + (p.tema || gameState.materia);
       header.appendChild(label);
     }
     const box = document.querySelector(".pregunta-box");
@@ -244,7 +268,18 @@
   };
 
   avanzarPregunta = function () {
-    if (gameState.materia !== "matematicas") return originalAdvance();
+    if (gameState.materia !== "matematicas") {
+      if (!gameState.juegoActivo) return;
+      gameState.respondida = false;
+      gameState.pistaUsadaEnEstaPregunta = false;
+      gameState.indiceActual++;
+      const nextQuestion = obtenerPregunta();
+      if (!nextQuestion) { finalizarJuego(true); return; }
+      gameState.preguntaActualObj = nextQuestion;
+      renderGameScreen();
+      iniciarTimerJuego();
+      return;
+    }
     if (!gameState.juegoActivo) return;
     gameState.respondida = false;
     gameState.pistaUsadaEnEstaPregunta = false;
@@ -274,7 +309,7 @@
   }
 
   finalizarJuego = function (completed) {
-    if (gameState.materia !== "matematicas") return originalFinish(completed);
+    if (gameState.materia !== "matematicas") { detenerTimer(); gameState.juegoActivo = false; originalFinish(completed); return; }
     detenerTimer();
     gameState.juegoActivo = false;
     if (!gameState.modoPracticaErrores) {
@@ -337,6 +372,7 @@
   const style = document.createElement("style");
   style.textContent = ".grade-screen{max-width:1050px;width:100%;background:linear-gradient(145deg,rgba(13,11,26,.97),rgba(20,15,40,.97));border:1px solid rgba(0,245,255,.18);border-radius:28px;padding:clamp(1rem,3vw,2.5rem)}" +
     ".grade-heading{color:#fff;font-size:clamp(1.35rem,3vw,2rem);margin:.5rem 0}.grade-intro{color:#aab7cb;line-height:1.6;margin-bottom:1.4rem}" +
+    ".compact-grade{text-align:center;max-width:760px}.grade-subject{color:#00f5ff;font-size:.9rem;margin:.25rem 0 1rem}.compact-grade-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:.55rem}.compact-grade .grade-card{min-height:0;padding:.8rem .4rem;text-align:center;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:.25rem}.compact-grade .grade-icon{font-size:1.35rem;margin:0}.compact-grade .grade-card strong{font-size:.88rem;margin:0}.grade-message{min-height:1.2rem;color:#ffdd00;font-size:.78rem;margin:.6rem 0}.grade-actions{display:flex;justify-content:center;gap:.6rem}.compact-grade .btn-primary,.compact-grade .btn-secondary{padding:.7rem 1.3rem}.compact-grade .grade-card small,.compact-grade .availability{display:none}@media(max-width:420px){.compact-grade-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.compact-grade .grade-card{padding:.75rem .3rem}}" +
     ".grade-group{margin:1.2rem 0;text-align:left}.grade-group h3{margin-bottom:.8rem;font-size:1rem}.grade-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:.8rem}" +
     ".grade-card{text-align:left;border:2px solid rgba(255,255,255,.12);border-radius:16px;background:rgba(255,255,255,.045);padding:1rem;color:#fff;cursor:pointer;min-height:150px;transition:transform .2s,border-color .2s}" +
     ".grade-card:hover,.grade-card.selected{border-color:#00f5ff;transform:translateY(-2px);background:rgba(0,245,255,.09)}.grade-card .grade-icon{font-size:1.8rem;display:block;margin-bottom:.4rem}" +
