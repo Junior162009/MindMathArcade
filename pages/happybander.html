@@ -103,7 +103,7 @@
             <h3>🛒 Mi carrito (<span id="cartCount" class="cart-badge">0</span>)</h3>
             <div id="cartItems"><div class="cart-empty">Tu carrito está vacío. ¡Agrega tus banderillas favoritas y disfruta de Happybander! ❤️</div></div>
             <div class="cart-summary">
-              <div class="summary-row"><span>Total de unidades</span><strong id="totalUnits">0</strong></div>
+              <div class="summary-row"><span>Productos diferentes</span><strong id="differentProducts">0</strong></div><div class="summary-row"><span>Total de unidades</span><strong id="totalUnits">0</strong></div>
               <div class="summary-row"><span>Subtotal de productos</span><strong id="cartSubtotal">$0</strong></div>
               <div class="summary-row"><span>Domicilio</span><strong id="deliveryCostLabel">Por confirmar</strong></div>
               <div class="summary-row total"><span>Total estimado</span><strong id="cartTotal">$0</strong></div>
@@ -131,7 +131,7 @@
               </div>
               <div id="pickupNote" class="delivery-note">📍 Recogerás tu pedido en el establecimiento. No necesitas ingresar una dirección domiciliaria.</div>
               <div id="formMessage" class="form-message" role="status" aria-live="polite" hidden></div>
-              <button type="submit" class="btn btn-red" style="width:100%;margin-top:16px">Enviar mi pedido por WhatsApp 💬</button>
+              <button type="submit" class="btn btn-red" style="width:100%;margin-top:16px">Revisar pedido antes de WhatsApp 💬</button>
               <p style="font-size:.78rem;color:#666;margin-top:10px">WhatsApp se abrirá con tu pedido preparado. Revisa el mensaje y pulsa enviar allí; el pedido no se confirma hasta que el negocio responda.</p>
             </form>
           </div>
@@ -271,6 +271,7 @@
       $('cartCount').textContent = units;
       $('navCartCount').textContent = units;
       $('floatingCartCount').textContent = units;
+      $('differentProducts').textContent = entries.length;
       $('totalUnits').textContent = units;
       $('cartSubtotal').textContent = money(amount);
       $('cartTotal').textContent = money(amount);
