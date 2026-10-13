@@ -116,6 +116,7 @@
       '<div class="game-logo-sub">✦ TRIVIA CHALLENGE ✦</div><div class="sub">▸ ELIGE UN RETO PARA COMENZAR ◂</div>' +
       '<div class="resources-panel"><div class="resource coins">🪙 <span class="resource-value">' + gameState.monedas + '</span></div>' +
       '<div class="resource score">🏆 <span class="resource-value">' + gameState.puntuacion + '</span></div><div class="resource lives">❤️ <span class="resource-value">' + gameState.vidas + '</span></div></div>' +
+      '<div class="resources-panel" style="border-color:rgba(255,221,0,.1);gap:2rem;"><div class="resource">💡 <span class="resource-value">' + gameState.pistas + '</span></div><div class="resource">⏩ <span class="resource-value">' + gameState.saltos + '</span></div></div>' +
       '<div class="materias-reto"><div class="card-materia ' + (gameState.materia === "historia" ? "seleccionada" : "") + '" data-mat="historia"><div class="materia-icono">📜</div><div class="materia-nombre">HISTORIA Y CÍVICA</div></div>' +
       '<div class="card-materia ' + (gameState.materia === "matematicas" ? "seleccionada" : "") + '" data-mat="matematicas"><div class="materia-icono">🧮</div><div class="materia-nombre">MATEMÁTICAS POR CURSO</div></div>' +
       '<div class="card-materia ' + (gameState.materia === "lectura" ? "seleccionada" : "") + '" data-mat="lectura"><div class="materia-icono">📖</div><div class="materia-nombre">LECTURA CRÍTICA</div></div></div>' +
