@@ -617,7 +617,21 @@
     <p>Recorre la ciudad, esquiva el tráfico y entrega todas las pizzas resolviendo operaciones matemáticas.</p>
     <p class="small" id="controlsHelp">← → moverte &nbsp;·&nbsp; ESPACIO / ↑ saltar<br>SHIFT turbo &nbsp;·&nbsp; P pausa</p>
     <button class="btn" id="btnPlay">▶ JUGAR</button>
+    <button class="btn secondary" id="btnSettings">⚙️ AJUSTES</button>
     <button class="btn secondary" id="btnChangeDevice">🔀 CAMBIAR DISPOSITIVO</button>
+  </div>
+</div>
+
+<div class="overlay hidden" id="ovSettings">
+  <div class="panel">
+    <h2>⚙️ AJUSTES</h2>
+    <p>Velocidad de movimiento</p>
+    <p class="small">Elige el ritmo que prefieras. Puedes cambiarlo con el mando.</p>
+    <button class="btn secondary" data-speed="0.75">🐢 Lenta</button>
+    <button class="btn secondary" data-speed="1">🚶 Normal</button>
+    <button class="btn secondary" data-speed="1.25">⚡ Rápida</button>
+    <p class="small" id="speedCurrent">Velocidad actual: Normal</p>
+    <button class="btn green" id="btnSettingsBack">✅ GUARDAR Y VOLVER</button>
   </div>
 </div>
 
@@ -809,6 +823,7 @@ const ov = {
   pause:    document.getElementById('ovPause'),
   question: document.getElementById('ovQuestion'),
   qPanel:   document.getElementById('qPanel'),
+  settings: document.getElementById('ovSettings'),
   level:    document.getElementById('ovLevel'),
   lvPanel:  document.getElementById('lvPanel'),
   gameover: document.getElementById('ovGameOver'),
@@ -829,6 +844,7 @@ const game = {
   coins: 0,
   lives: 3,
   turbo: CFG.TURBO_MAX,
+  speedPreference: 1,
   turboActive: false,
   turboLocked: false,
   time: 0,
@@ -879,6 +895,7 @@ const world = {
   obstacles: [],
   coins: [],
   deliveries: [],
+  hearts: [],
   cfg: LEVELS[0]
 };
 
@@ -976,9 +993,9 @@ function onPointerDown(e){
     return;
   }
   if (action === 'select'){
-    input.turbo = !input.turbo;
-    el.classList.toggle('pressed', input.turbo);
     activePointers.set(e.pointerId, 'select');
+    el.classList.add('pressed');
+    if(typeof window.MENTEXToggleFullscreen==='function') window.MENTEXToggleFullscreen();
     return;
   }
 
@@ -1074,6 +1091,7 @@ function buildWorld(cfg, levelNum){
   world.obstacles   = [];
   world.coins       = [];
   world.deliveries  = [];
+  world.hearts      = [];
   world.cfg         = cfg;
 
   const gaps = [];
@@ -1134,7 +1152,7 @@ function buildWorld(cfg, levelNum){
     const w = 52;
     const x = findSpot(600 + rng()*(len-1200), w, 20, avoid.concat(world.obstacles), 150);
     if (x === null) continue;
-    world.obstacles.push({ type:'box', x:x, y:CFG.GROUND_Y-52, w:w, h:52 });
+    world.obstacles.push({ type:'box', x:x, y:CFG.GROUND_Y-52, w:w, h:52, dropHeart:rng()<0.32, opened:false });
   }
   for (let i=0;i<cfg.cones;i++){
     const w = 30;
@@ -1312,6 +1330,7 @@ function hideAllOverlays(){
   ov.device.classList.add('hidden');
   ov.menu.classList.add('hidden');
   ov.pause.classList.add('hidden');
+  ov.settings.classList.add('hidden');
   ov.question.classList.add('hidden');
   ov.level.classList.add('hidden');
   ov.gameover.classList.add('hidden');
@@ -1580,8 +1599,9 @@ function updatePlayer(dt){
     if (game.turbo >= CFG.TURBO_MAX){ game.turbo = CFG.TURBO_MAX; game.turboLocked = false; }
   }
 
-  const limit = game.turboActive ? CFG.MAX_SPEED * CFG.TURBO_MULT : CFG.MAX_SPEED;
-  let accel = player.onGround ? CFG.MOVE_ACCEL : CFG.AIR_ACCEL;
+  const preferredSpeed = CFG.MAX_SPEED * game.speedPreference;
+  const limit = game.turboActive ? preferredSpeed * CFG.TURBO_MULT : preferredSpeed;
+  let accel = (player.onGround ? CFG.MOVE_ACCEL : CFG.AIR_ACCEL) * game.speedPreference;
   if (game.turboActive) accel *= 1.6;
 
   if (moveLeft && !moveRight){
@@ -1601,7 +1621,7 @@ function updatePlayer(dt){
     if (Math.abs(player.vx) - dec < limit) player.vx = Math.sign(player.vx) * limit;
     else player.vx -= Math.sign(player.vx) * dec;
   }
-  player.vx = clamp(player.vx, -CFG.MAX_SPEED * CFG.TURBO_MULT - 5, CFG.MAX_SPEED * CFG.TURBO_MULT + 5);
+  player.vx = clamp(player.vx, -CFG.MAX_SPEED * game.speedPreference * CFG.TURBO_MULT - 5, CFG.MAX_SPEED * game.speedPreference * CFG.TURBO_MULT + 5);
 
   if (player.jumpBuf > 0) player.jumpBuf -= dt;
   if (player.coyote > 0)  player.coyote  -= dt;
@@ -1694,16 +1714,27 @@ function updateObstacles(){
 }
 
 function checkObstacleCollisions(){
-  if (player.invuln > 0) return;
   const pr = {
     x: player.x + 6,
     y: player.y + 5,
     w: player.w - 12,
     h: player.h - 10
   };
-  for (let i=0;i<world.obstacles.length;i++){
+  for (let i=world.obstacles.length-1;i>=0;i--){
     const o = world.obstacles[i];
-    if (aabb(pr, o)){ damage(o); return; }
+    if (!aabb(pr, o)) continue;
+    if (o.type === 'box'){
+      // Las cajas nunca quitan vida: se abren al tocarlas.
+      world.obstacles.splice(i,1);
+      spawnParticles(o.x+o.w/2,o.y+o.h/2,'#d99b58',10);
+      if (o.dropHeart){
+        world.hearts.push({x:o.x+o.w/2,y:o.y-18,r:15,got:false,life:8});
+        spawnParticles(o.x+o.w/2,o.y-18,'#ff6685',8);
+      }
+      continue;
+    }
+    if (player.invuln > 0) return;
+    damage(o); return;
   }
 }
 
@@ -1745,6 +1776,25 @@ function checkCoins(){
   }
 }
 
+function checkHearts(dt){
+  const px=player.x+player.w/2, py=player.y+player.h/2;
+  for(let i=world.hearts.length-1;i>=0;i--){
+    const h=world.hearts[i];
+    h.life-=dt;
+    h.y-=18*dt;
+    if(h.life<=0){world.hearts.splice(i,1);continue;}
+    const dx=px-h.x,dy=py-h.y;
+    if(dx*dx+dy*dy<(h.r+24)*(h.r+24)){
+      h.got=true;
+      if(game.lives<5) game.lives++;
+      game.score+=25;
+      spawnParticles(h.x,h.y,'#ff6685',12);
+      world.hearts.splice(i,1);
+      updateHUD();
+    }
+  }
+}
+
 function checkDeliveries(){
   if (game.screen !== 'playing') return;
   for (let i=0;i<world.deliveries.length;i++){
@@ -1768,6 +1818,7 @@ function update(dt){
   updateObstacles();
   checkObstacleCollisions();
   checkCoins();
+  checkHearts(dt);
   checkDeliveries();
   updateParticles(dt);
   updateCamera(dt);
@@ -2006,6 +2057,19 @@ function drawCoins(){
   }
 }
 
+function drawHearts(){
+  for(let i=0;i<world.hearts.length;i++){
+    const h=world.hearts[i];
+    if(h.x<cam.x-40||h.x>cam.x+viewW+40) continue;
+    const pulse=1+Math.sin(game.time*7+i)*0.10;
+    ctx.save();
+    ctx.translate(h.x,h.y);ctx.scale(pulse,pulse);
+    ctx.font='27px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.shadowColor='#ff426f';ctx.shadowBlur=14;ctx.fillText('❤️',0,0);
+    ctx.restore();
+  }
+}
+
 function drawObstacles(){
   for (let i=0;i<world.obstacles.length;i++){
     const o = world.obstacles[i];
@@ -2191,6 +2255,7 @@ function render(){
   drawGround();
   drawDeliveryZonesAndHouses();
   drawCoins();
+  drawHearts();
   drawObstacles();
   drawPizzaTrail();
   drawPlayer();
@@ -2425,8 +2490,40 @@ function bindDeviceSelector(){
 /* ============================================================
    18. BOTONES DE MENÚS
    ============================================================ */
+function openSettings(){
+  game.settingsReturnScreen=game.screen;
+  if(game.screen==='playing') pauseGame();
+  game.screen='settings';
+  clearInputs();
+  updateSpeedSettingsUI();
+  showOverlay(ov.settings);
+}
+function updateSpeedSettingsUI(){
+  const labels={'0.75':'Lenta','1':'Normal','1.25':'Rápida'};
+  document.querySelectorAll('[data-speed]').forEach(btn=>{
+    const active=Number(btn.dataset.speed)===game.speedPreference;
+    btn.classList.toggle('green',active);
+    btn.classList.toggle('gamepad-selected',active);
+    btn.setAttribute('aria-pressed',String(active));
+  });
+  const current=document.getElementById('speedCurrent');
+  if(current) current.textContent='Velocidad actual: '+(labels[String(game.speedPreference)]||'Normal');
+}
+function closeSettings(){
+  ov.settings.classList.add('hidden');
+  game.screen='menu';
+  showOverlay(ov.menu);
+}
+
 function bindButtons(){
   document.getElementById('btnPlay').addEventListener('click', startNewGame);
+  document.getElementById('btnSettings').addEventListener('click', openSettings);
+  document.getElementById('btnSettingsBack').addEventListener('click', closeSettings);
+  document.querySelectorAll('[data-speed]').forEach(btn=>btn.addEventListener('click',()=>{
+    game.speedPreference=Number(btn.dataset.speed)||1;
+    try{localStorage.setItem('mentexPizzaSpeed',String(game.speedPreference));}catch(_){}
+    updateSpeedSettingsUI();
+  }));
   document.getElementById('btnResume').addEventListener('click', resumeGame);
   document.getElementById('btnRestart').addEventListener('click', function(){ startLevel(game.level); });
   document.getElementById('btnExit').addEventListener('click', function(){
@@ -2458,6 +2555,10 @@ function bindButtons(){
    19. INIT
    ============================================================ */
 function init(){
+  try{
+    const savedSpeed=Number(localStorage.getItem('mentexPizzaSpeed'));
+    if([0.75,1,1.25].includes(savedSpeed)) game.speedPreference=savedSpeed;
+  }catch(_){}
   loadAllAssets();
   initTouchControls();
   bindButtons();
@@ -2557,7 +2658,7 @@ init();
   let statusTimer = null, statusGeneration = 0;
   let previousJump = false, previousTurbo = false;
   const DEADZONE = 0.22, REPEAT_MS = 210, START_DEBOUNCE_MS = 280;
-  const BUTTON = { A:0, B:1, X:2, Y:3, LB:4, RB:5, BACK:8, START:9, UP:12, DOWN:13, LEFT:14, RIGHT:15 };
+  const BUTTON = { A:0, B:1, X:2, Y:3, LB:4, RB:5, SELECT:8, BACK:8, START:9, UP:12, DOWN:13, LEFT:14, RIGHT:15 };
 
   function escapeText(value){return String(value).replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));}
   function setStatus(gp){
@@ -2715,10 +2816,10 @@ init();
         syncOverlay();
         const dir=up?'up':downDir?'down':left?'left':right?'right':'';
         doNavigation(dir,performance.now());
-        if(justPressed(gp,BUTTON.Y) && typeof window.MENTEXToggleFullscreen==='function') window.MENTEXToggleFullscreen();
+        if(justPressed(gp,BUTTON.SELECT) && typeof window.MENTEXToggleFullscreen==='function') window.MENTEXToggleFullscreen();
         if(justPressed(gp,BUTTON.A)) confirm();
         if(justPressed(gp,BUTTON.B)) back();
-        if(justPressed(gp,BUTTON.BACK)) back();
+        // SELECT/BACK se reserva para pantalla completa; B vuelve atrás.
       }else{
         doNavigation('',performance.now());
       }
