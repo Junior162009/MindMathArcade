@@ -874,6 +874,7 @@ const particles = [];
    5. CONTROLES
    ============================================================ */
 const input = { left:false, right:false, jump:false, turbo:false };
+const gamepadInput = { left:false, right:false, turbo:false };
 
 function pressJump(){
   input.jump = true;
@@ -1541,7 +1542,10 @@ function answerQuestion(value, btns){
    12. FÍSICA
    ============================================================ */
 function updatePlayer(dt){
-  const wantTurbo = input.turbo && game.turbo > 1 && (input.left || input.right) && !game.turboLocked;
+  const moveLeft = input.left || gamepadInput.left;
+  const moveRight = input.right || gamepadInput.right;
+  const turboPressed = input.turbo || gamepadInput.turbo;
+  const wantTurbo = turboPressed && game.turbo > 1 && (moveLeft || moveRight) && !game.turboLocked;
   game.turboActive = wantTurbo;
 
   if (wantTurbo){
@@ -1556,10 +1560,10 @@ function updatePlayer(dt){
   let accel = player.onGround ? CFG.MOVE_ACCEL : CFG.AIR_ACCEL;
   if (game.turboActive) accel *= 1.6;
 
-  if (input.left && !input.right){
+  if (moveLeft && !moveRight){
     player.vx -= accel * dt;
     player.facing = -1;
-  } else if (input.right && !input.left){
+  } else if (moveRight && !moveLeft){
     player.vx += accel * dt;
     player.facing = 1;
   } else {
@@ -2551,12 +2555,12 @@ init();
       const x = Math.abs(axes[0] || 0) > DEADZONE ? axes[0] : 0;
       const y = Math.abs(axes[1] || 0) > DEADZONE ? axes[1] : 0;
       // Establecer estado por frame evita repetición por mantener el joystick.
-      input.left = x < 0 || buttonDown(gp,14);
-      input.right = x > 0 || buttonDown(gp,15);
+      gamepadInput.left = x < 0 || buttonDown(gp,14);
+      gamepadInput.right = x > 0 || buttonDown(gp,15);
       const dpadUp = buttonDown(gp,12);
       const jumpNow = buttonDown(gp,0) || buttonDown(gp,3) || dpadUp || y < -0.65;
       const turboNow = buttonDown(gp,1) || buttonDown(gp,4) || buttonDown(gp,5);
-      input.turbo = turboNow;
+      gamepadInput.turbo = turboNow;
       if(jumpNow && !previousJump && game.screen === 'playing') pressJump();
       if(!jumpNow) releaseJump();
       previousJump = jumpNow;
@@ -2577,7 +2581,7 @@ init();
       previousButtons = (gp.buttons || []).map(b => !!(b && (b.pressed || b.value > 0.55)));
     } else {
       if(activeIndex !== null){
-        input.left=false; input.right=false; input.turbo=false; releaseJump();
+        gamepadInput.left=false; gamepadInput.right=false; gamepadInput.turbo=false; releaseJump();
         previousJump=false; previousTurbo=false; previousButtons=[];
         activeIndex=null;
       }
@@ -2593,8 +2597,8 @@ init();
   });
   window.addEventListener('gamepaddisconnected', e => {
     if(activeIndex===e.gamepad.index){
-      activeIndex=null; previousButtons=[]; input.left=false; input.right=false;
-      input.turbo=false; releaseJump(); previousJump=false; previousTurbo=false;
+      activeIndex=null; previousButtons=[]; gamepadInput.left=false; gamepadInput.right=false;
+      gamepadInput.turbo=false; releaseJump(); previousJump=false; previousTurbo=false;
       setStatus(null);
     }
   });
