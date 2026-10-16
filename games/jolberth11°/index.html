@@ -462,6 +462,28 @@
     .q-text{ font-size:32px; }
     .q-opt{ font-size:19px; padding:14px 6px; }
   }
+
+  /* Estado y ayuda del mando físico: añadido sin alterar el HUD original */
+  #gamepadStatus{
+    position:fixed; left:50%; top:58px; transform:translateX(-50%);
+    z-index:30; max-width:calc(100vw - 24px); padding:7px 12px;
+    border-radius:12px; background:rgba(10,16,32,.88);
+    border:1px solid rgba(255,255,255,.18); color:#d9e7ff;
+    font-size:12px; line-height:1.35; text-align:center;
+    box-shadow:0 4px 18px rgba(0,0,0,.3); pointer-events:auto;
+  }
+  #gamepadStatus.connected{border-color:#3ddc84;color:#a9ffd0}
+  #gamepadHelpBtn{margin-left:7px;border:0;border-radius:7px;padding:4px 7px;background:#ffcc33;color:#18233b;font-weight:bold}
+  #gamepadHelp{
+    position:fixed; z-index:80; left:50%; top:50%; transform:translate(-50%,-50%);
+    width:min(360px,calc(100vw - 28px)); padding:18px; border-radius:16px;
+    color:#fff; background:#141d33; border:1px solid rgba(255,204,51,.5);
+    box-shadow:0 16px 50px #000b; font-size:14px; line-height:1.55;
+  }
+  #gamepadHelp[hidden]{display:none}
+  #gamepadHelp button{width:100%;margin-top:10px;padding:10px;border:0;border-radius:9px;font-weight:bold;background:#ffcc33}
+  @media(max-width:480px){#gamepadStatus{top:5px;font-size:11px;padding:5px 8px} body.retro #gamepadStatus{top:5px}}
+
 </style>
 <script src="/js/tecnomath-progress.js?v=20260911-9"></script>
 </head>
@@ -2438,6 +2460,153 @@ function init(){
 init();
 
 })();
+</script>
+
+<div id="gamepadStatus" role="status" aria-live="polite">🎮 Mando no detectado · 📱 Controles táctiles activos <button id="gamepadHelpBtn" type="button">Ayuda</button></div>
+<div id="gamepadHelp" hidden>
+  <strong>🎮 Gamepad X3 · MENTEX</strong><br>
+  1. Conecta el mando por Bluetooth o USB antes o durante la partida.<br>
+  2. Abre esta página en el navegador y pulsa un botón del mando si no aparece conectado.<br>
+  3. Joystick izquierdo / cruceta: moverse · A (botón 0): saltar · B (botón 1): turbo · START (botón 9): pausa.<br>
+  <small>La numeración puede variar según el modo del mando y el navegador. Los controles táctiles y teclado siguen disponibles.</small>
+  <button id="gamepadHelpClose" type="button">Cerrar</button>
+</div>
+
+<script>
+
+/* ============================================================
+   GAMEPAD API — Gamepad X3 / mandos Bluetooth y USB
+   Conserva la entrada original de teclado y controles táctiles.
+   ============================================================ */
+(function initGamepadSupport(){
+  const status = document.getElementById('gamepadStatus');
+  const help = document.getElementById('gamepadHelp');
+  const helpBtn = document.getElementById('gamepadHelpBtn');
+  const helpClose = document.getElementById('gamepadHelpClose');
+  let activeIndex = null;
+  let previousButtons = [];
+  let previousPauseAt = 0;
+  let previousJump = false;
+  let previousTurbo = false;
+  let lastConnectHint = 0;
+  const DEADZONE = 0.22;
+
+  function setStatus(gp){
+    if (!status) return;
+    if (gp) {
+      status.classList.add('connected');
+      status.innerHTML = '🎮 Mando conectado: ' + escapeText(gp.id || 'Gamepad') +
+        ' · 📱 Táctil activo <button id="gamepadHelpBtn" type="button">Ayuda</button>';
+    } else {
+      status.classList.remove('connected');
+      status.innerHTML = '🎮 Mando no detectado · 📱 Controles táctiles activos <button id="gamepadHelpBtn" type="button">Ayuda</button>';
+    }
+    const b = document.getElementById('gamepadHelpBtn');
+    if (b) b.addEventListener('click', () => { if(help) help.hidden = false; });
+  }
+  function escapeText(s){
+    return String(s).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+  }
+  function connectedGamepad(){
+    if (!navigator.getGamepads) return null;
+    const list = navigator.getGamepads();
+    if (!list) return null;
+    if (activeIndex !== null && list[activeIndex] && list[activeIndex].connected) return list[activeIndex];
+    for (let i=0;i<list.length;i++) if(list[i] && list[i].connected) {
+      activeIndex = i; previousButtons = []; return list[i];
+    }
+    activeIndex = null;
+    return null;
+  }
+  function buttonDown(gp, i){
+    const b = gp.buttons && gp.buttons[i];
+    return !!(b && (b.pressed || b.value > 0.55));
+  }
+  function justPressed(gp, i){
+    const down = buttonDown(gp, i);
+    const was = !!previousButtons[i];
+    return down && !was;
+  }
+  function clickFirst(selector){
+    const el = document.querySelector(selector);
+    if(el && !el.disabled) el.click();
+  }
+  function handleMenuButton(){
+    if(game.screen === 'device') clickFirst('.device-btn.selected') || clickFirst('.device-btn[data-device="mobile"]');
+    else if(game.screen === 'menu') clickFirst('#ovMenu .btn');
+    else if(game.screen === 'paused') clickFirst('#ovPause .btn');
+    else if(game.screen === 'question') {
+      const options = Array.from(document.querySelectorAll('#qOptions .q-opt:not(:disabled)'));
+      if(options.length) options[0].click();
+      else clickFirst('#btnQContinue');
+    } else if(game.screen === 'levelcomplete') clickFirst('#btnNextLevel');
+    else if(game.screen === 'gameover') clickFirst('#ovGameOver .btn');
+    else if(game.screen === 'victory') clickFirst('#ovVictory .btn');
+  }
+  function poll(){
+    const gp = connectedGamepad();
+    if(gp){
+      if(Date.now()-lastConnectHint>1200){ setStatus(gp); lastConnectHint=Date.now(); }
+      const axes = gp.axes || [];
+      const x = Math.abs(axes[0] || 0) > DEADZONE ? axes[0] : 0;
+      const y = Math.abs(axes[1] || 0) > DEADZONE ? axes[1] : 0;
+      // Establecer estado por frame evita repetición por mantener el joystick.
+      input.left = x < 0 || buttonDown(gp,14);
+      input.right = x > 0 || buttonDown(gp,15);
+      const dpadUp = buttonDown(gp,12);
+      const jumpNow = buttonDown(gp,0) || buttonDown(gp,3) || dpadUp || y < -0.65;
+      const turboNow = buttonDown(gp,1) || buttonDown(gp,4) || buttonDown(gp,5);
+      input.turbo = turboNow;
+      if(jumpNow && !previousJump && game.screen === 'playing') pressJump();
+      if(!jumpNow) releaseJump();
+      previousJump = jumpNow;
+      previousTurbo = turboNow;
+
+      // START / botón 9: acción única al pulsar, con pequeña protección antirrebote.
+      if(justPressed(gp,9) && Date.now()-previousPauseAt>250){
+        previousPauseAt=Date.now();
+        if(game.screen === 'playing' || game.screen === 'paused') togglePause();
+        else handleMenuButton();
+      }
+      // A también confirma una opción en menús; en partida es salto.
+      if(justPressed(gp,0) && game.screen !== 'playing') handleMenuButton();
+      // B/East: turbo en partida; en paneles intenta retroceder/cerrar.
+      if(justPressed(gp,1) && game.screen !== 'playing' && game.screen !== 'paused'){
+        if(help && !help.hidden) help.hidden=true;
+      }
+      previousButtons = (gp.buttons || []).map(b => !!(b && (b.pressed || b.value > 0.55)));
+    } else {
+      if(activeIndex !== null){
+        input.left=false; input.right=false; input.turbo=false; releaseJump();
+        previousJump=false; previousTurbo=false; previousButtons=[];
+        activeIndex=null;
+      }
+      if(status && !status.classList.contains('connected')) {
+        status.classList.remove('connected');
+      }
+    }
+    requestAnimationFrame(poll);
+  }
+  window.addEventListener('gamepadconnected', e => {
+    activeIndex=e.gamepad.index; previousButtons=[];
+    setStatus(e.gamepad);
+  });
+  window.addEventListener('gamepaddisconnected', e => {
+    if(activeIndex===e.gamepad.index){
+      activeIndex=null; previousButtons=[]; input.left=false; input.right=false;
+      input.turbo=false; releaseJump(); previousJump=false; previousTurbo=false;
+      setStatus(null);
+    }
+  });
+  if(helpBtn) helpBtn.addEventListener('click',()=>{if(help)help.hidden=false;});
+  if(helpClose) helpClose.addEventListener('click',()=>{if(help)help.hidden=true;});
+  document.addEventListener('keydown',e=>{
+    if(e.key==='Escape' && help && !help.hidden) help.hidden=true;
+  });
+  setStatus(null);
+  requestAnimationFrame(poll);
+})();
+
 </script>
 </body>
 </html>
