@@ -2533,7 +2533,8 @@ init();
   }
   function clickFirst(selector){
     const el = document.querySelector(selector);
-    if(el && !el.disabled) el.click();
+    if(el && !el.disabled) { el.click(); return true; }
+    return false;
   }
   function handleMenuButton(){
     if(game.screen === 'device') clickFirst('.device-btn.selected') || clickFirst('.device-btn[data-device="mobile"]');
