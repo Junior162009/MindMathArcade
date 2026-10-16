@@ -91,6 +91,18 @@
   }
   #hint.hide{ opacity:0; }
 
+  #deliveryPrompt{
+    position:fixed; left:50%; bottom:48px; transform:translateX(-50%);
+    z-index:13; max-width:calc(100vw - 24px); padding:6px 10px;
+    border:1px solid rgba(255,204,51,.48); border-radius:10px;
+    background:rgba(8,13,26,.84); color:#ffe8a3;
+    font:600 12px/1.25 system-ui,sans-serif; text-align:center;
+    white-space:nowrap; pointer-events:none; box-shadow:0 3px 12px #0005;
+  }
+  #deliveryPrompt[hidden]{display:none!important}
+  body.retro #deliveryPrompt{bottom:auto;top:38px;left:50%;font-size:11px;padding:5px 8px}
+  @media(max-width:480px){#deliveryPrompt{bottom:42px;font-size:11px;padding:5px 8px;max-width:calc(100vw - 18px)}}
+
   #touch{ display:none !important; }
 
   /* ============================================================
@@ -528,6 +540,7 @@
 <div id="turboWrap"><div id="turboBar"></div></div>
 
 <div id="hint">← → moverte · ESPACIO saltar · SHIFT turbo · P pausa</div>
+<div id="deliveryPrompt" role="status" aria-live="polite" hidden>🏠 Casa cercana · Pulsa X para entregar</div>
 
 <div id="touch"></div>
 
@@ -835,6 +848,7 @@ const ov = {
 };
 
 const hintEl        = document.getElementById('hint');
+const deliveryPromptEl = document.getElementById('deliveryPrompt');
 const controlsHelp  = document.getElementById('controlsHelp');
 const retroConsoleEl = document.getElementById('retroConsole');
 
@@ -911,6 +925,13 @@ const particles = [];
    ============================================================ */
 const input = { left:false, right:false, jump:false, turbo:false };
 const gamepadInput = { left:false, right:false, turbo:false };
+let nearbyDelivery = null;
+
+function interactWithNearbyDelivery(){
+  if(game.screen !== 'playing' || !nearbyDelivery || nearbyDelivery.done) return false;
+  openQuestion(nearbyDelivery);
+  return true;
+}
 
 function pressJump(){
   input.jump = true;
@@ -945,6 +966,9 @@ window.addEventListener('keydown', (e)=>{
       if (!e.repeat) pressJump();
       break;
     case 'ShiftLeft': case 'ShiftRight': input.turbo = true; break;
+    case 'KeyX':
+      if(!e.repeat) interactWithNearbyDelivery();
+      break;
     case 'KeyP': case 'Escape':
       if (!e.repeat) togglePause();
       break;
@@ -1360,6 +1384,8 @@ function resetPlayer(x){
 }
 
 function buildLevel(n){
+  nearbyDelivery = null;
+  if(deliveryPromptEl) deliveryPromptEl.hidden = true;
   game.level = n;
   buildWorld(LEVELS[n-1], n);
   resetPlayer(60);
@@ -1800,13 +1826,36 @@ function checkHearts(dt){
 }
 
 function checkDeliveries(){
-  if (game.screen !== 'playing') return;
-  for (let i=0;i<world.deliveries.length;i++){
-    const d = world.deliveries[i];
-    if (d.done) continue;
-    const zone = { x: d.x + 10, y: CFG.GROUND_Y - 110, w: d.w - 20, h: 110 };
-    if (aabb(player, zone)){ openQuestion(d); return; }
+  // La comprobación de proximidad solo actualiza el aviso; nunca abre preguntas.
+  nearbyDelivery = null;
+  if (game.screen !== 'playing'){
+    if(deliveryPromptEl) deliveryPromptEl.hidden = true;
+    return;
   }
+  const playerCenterX = player.x + player.w/2;
+  const playerBottom = player.y + player.h;
+  let nearestDistance = Infinity;
+  const INTERACTION_RADIUS_X = 112;
+  const MAX_VERTICAL_DISTANCE = 175;
+  for(let i=0;i<world.deliveries.length;i++){
+    const d = world.deliveries[i];
+    if(d.done) continue;
+    const houseCenterX = d.x + d.w/2;
+    const dx = Math.abs(playerCenterX - houseCenterX);
+    const dy = Math.abs(playerBottom - CFG.GROUND_Y);
+    if(dx > INTERACTION_RADIUS_X || dy > MAX_VERTICAL_DISTANCE) continue;
+    const distance = Math.hypot(dx, dy);
+    if(distance < nearestDistance){
+      nearestDistance = distance;
+      nearbyDelivery = d;
+    }
+  }
+  const canShow = !!nearbyDelivery && game.screen === 'playing' && !activeGameOverlayVisible();
+  if(deliveryPromptEl) deliveryPromptEl.hidden = !canShow;
+}
+
+function activeGameOverlayVisible(){
+  return !!document.querySelector('.overlay:not(.hidden)');
 }
 
 function updateCamera(dt){
@@ -2602,6 +2651,7 @@ function init(){
 window.MENTEXGamepadBridge = {
   input: gamepadInput,
   get screen(){ return game.screen; },
+  interactWithNearbyDelivery,
   pressJump,
   releaseJump,
   togglePause
@@ -2847,6 +2897,10 @@ init();
         // SELECT/BACK se reserva para pantalla completa; B vuelve atrás.
       }else{
         doNavigation('',performance.now());
+        // X es una acción por flanco: mantener el botón no repite la entrega.
+        if(justPressed(gp,BUTTON.X) && bridge && typeof bridge.interactWithNearbyDelivery==='function'){
+          bridge.interactWithNearbyDelivery();
+        }
       }
       if(justPressed(gp,BUTTON.START) && Date.now()-lastStartAt>START_DEBOUNCE_MS){
         lastStartAt=Date.now();
