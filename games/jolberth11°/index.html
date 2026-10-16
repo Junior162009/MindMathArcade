@@ -626,11 +626,15 @@
   <div class="panel">
     <h2>⚙️ AJUSTES</h2>
     <p>Velocidad de movimiento</p>
-    <p class="small">Elige el ritmo que prefieras. Puedes cambiarlo con el mando.</p>
-    <button class="btn secondary" data-speed="0.75">🐢 Lenta</button>
-    <button class="btn secondary" data-speed="1">🚶 Normal</button>
-    <button class="btn secondary" data-speed="1.25">⚡ Rápida</button>
-    <p class="small" id="speedCurrent">Velocidad actual: Normal</p>
+    <p class="small">Toca la barra o usa izquierda/derecha en el mando para ajustar la velocidad.</p>
+    <label for="speedRange" class="speed-label">Velocidad: <strong id="speedPercent">100%</strong></label>
+    <input id="speedRange" type="range" min="0.5" max="1.5" step="0.05" value="1" aria-label="Velocidad del jugador" />
+    <div class="speed-presets">
+      <button class="btn secondary" data-speed="0.75">🐢 Lenta</button>
+      <button class="btn secondary" data-speed="1">🚶 Normal</button>
+      <button class="btn secondary" data-speed="1.25">⚡ Rápida</button>
+    </div>
+    <p class="small" id="speedCurrent">Velocidad actual: 100%</p>
     <button class="btn green" id="btnSettingsBack">✅ GUARDAR Y VOLVER</button>
   </div>
 </div>
@@ -2498,8 +2502,17 @@ function openSettings(){
   updateSpeedSettingsUI();
   showOverlay(ov.settings);
 }
+function applySpeedPreference(value){
+  game.speedPreference=Math.max(0.5,Math.min(1.5,Math.round(Number(value)*20)/20));
+  try{localStorage.setItem('mentexPizzaSpeed',String(game.speedPreference));}catch(_){}
+  updateSpeedSettingsUI();
+}
 function updateSpeedSettingsUI(){
   const labels={'0.75':'Lenta','1':'Normal','1.25':'Rápida'};
+  const range=document.getElementById('speedRange');
+  const percent=document.getElementById('speedPercent');
+  if(range) range.value=String(game.speedPreference);
+  if(percent) percent.textContent=Math.round(game.speedPreference*100)+'%';
   document.querySelectorAll('[data-speed]').forEach(btn=>{
     const active=Number(btn.dataset.speed)===game.speedPreference;
     btn.classList.toggle('green',active);
@@ -2507,7 +2520,7 @@ function updateSpeedSettingsUI(){
     btn.setAttribute('aria-pressed',String(active));
   });
   const current=document.getElementById('speedCurrent');
-  if(current) current.textContent='Velocidad actual: '+(labels[String(game.speedPreference)]||'Normal');
+  if(current) current.textContent='Velocidad actual: '+Math.round(game.speedPreference*100)+'%'+(labels[String(game.speedPreference)]?' · '+labels[String(game.speedPreference)]:'');
 }
 function closeSettings(){
   ov.settings.classList.add('hidden');
@@ -2519,11 +2532,9 @@ function bindButtons(){
   document.getElementById('btnPlay').addEventListener('click', startNewGame);
   document.getElementById('btnSettings').addEventListener('click', openSettings);
   document.getElementById('btnSettingsBack').addEventListener('click', closeSettings);
-  document.querySelectorAll('[data-speed]').forEach(btn=>btn.addEventListener('click',()=>{
-    game.speedPreference=Number(btn.dataset.speed)||1;
-    try{localStorage.setItem('mentexPizzaSpeed',String(game.speedPreference));}catch(_){}
-    updateSpeedSettingsUI();
-  }));
+  const speedRange=document.getElementById('speedRange');
+  if(speedRange) speedRange.addEventListener('input',()=>applySpeedPreference(speedRange.value));
+  document.querySelectorAll('[data-speed]').forEach(btn=>btn.addEventListener('click',()=>applySpeedPreference(btn.dataset.speed)));
   document.getElementById('btnResume').addEventListener('click', resumeGame);
   document.getElementById('btnRestart').addEventListener('click', function(){ startLevel(game.level); });
   document.getElementById('btnExit').addEventListener('click', function(){
@@ -2618,6 +2629,10 @@ init();
   #gamepadStatus[hidden]{display:none!important}
   #gamepadStatus button{display:none!important}
   #gamepadHelp button{margin-left:8px;border:0;border-radius:7px;padding:5px 9px;font-weight:700;cursor:pointer}
+  #ovSettings .speed-label{display:block;margin:14px 0 8px;color:#fff;font-weight:700}
+  #ovSettings #speedRange{display:block;width:100%;min-height:36px;margin:8px 0 14px;accent-color:#ffd700;cursor:pointer;touch-action:pan-x}
+  #ovSettings .speed-presets{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+  #ovSettings .speed-presets .btn{margin:3px;min-width:90px}
   #gamepadHelp{position:fixed;z-index:1001;left:50%;top:50%;transform:translate(-50%,-50%);width:min(92vw,430px);padding:20px;border:2px solid #ffcc33;border-radius:16px;background:#111a30;color:#fff;box-shadow:0 20px 60px #000b;line-height:1.6}
   #gamepadHelp[hidden]{display:none}
   .gamepad-selected{
@@ -2815,7 +2830,17 @@ init();
       if(!inPlay){
         syncOverlay();
         const dir=up?'up':downDir?'down':left?'left':right?'right':'';
-        doNavigation(dir,performance.now());
+        if(activeOverlay() && activeOverlay().id==='ovSettings' && selected && selected.id==='speedRange' && (left||right)){
+          const range=document.getElementById('speedRange');
+          if(range){
+            const delta=right?Number(range.step||0.05):-Number(range.step||0.05);
+            range.value=String(Math.max(Number(range.min),Math.min(Number(range.max),Number(range.value)+delta)));
+            range.dispatchEvent(new Event('input',{bubbles:true}));
+          }
+          doNavigation('',performance.now());
+        }else{
+          doNavigation(dir,performance.now());
+        }
         if(justPressed(gp,BUTTON.SELECT) && typeof window.MENTEXToggleFullscreen==='function') window.MENTEXToggleFullscreen();
         if(justPressed(gp,BUTTON.A)) confirm();
         if(justPressed(gp,BUTTON.B)) back();
