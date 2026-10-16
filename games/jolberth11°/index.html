@@ -2486,144 +2486,186 @@ init();
   <button id="gamepadHelpClose" type="button">Cerrar</button>
 </div>
 
+<style>
+  #gamepadStatus{position:fixed;right:10px;bottom:10px;z-index:1000;max-width:min(92vw,420px);padding:8px 12px;border:1px solid #52617b;border-radius:12px;background:rgba(8,13,26,.92);color:#dce8ff;font:12px/1.4 system-ui,sans-serif;box-shadow:0 5px 18px #0006}
+  #gamepadStatus.connected{border-color:#3ddc84;color:#aaffcb}
+  #gamepadStatus button,#gamepadHelp button{margin-left:8px;border:0;border-radius:7px;padding:5px 9px;font-weight:700;cursor:pointer}
+  #gamepadHelp{position:fixed;z-index:1001;left:50%;top:50%;transform:translate(-50%,-50%);width:min(92vw,430px);padding:20px;border:2px solid #ffcc33;border-radius:16px;background:#111a30;color:#fff;box-shadow:0 20px 60px #000b;line-height:1.6}
+  #gamepadHelp[hidden]{display:none}
+  .gamepad-selected{outline:3px solid #3ddc84!important;outline-offset:3px!important;filter:brightness(1.12);position:relative;z-index:2}
+  .device-btn.gamepad-selected,.q-opt.gamepad-selected{box-shadow:0 0 0 3px #3ddc84,0 0 18px #3ddc8470!important}
+  @media(max-width:600px){#gamepadStatus{font-size:11px;right:6px;bottom:6px;padding:6px 8px}}
+</style>
 <script>
-
-/* ============================================================
-   GAMEPAD API — Gamepad X3 / mandos Bluetooth y USB
-   Conserva la entrada original de teclado y controles táctiles.
-   ============================================================ */
+/* GAMEPAD API centralizado: movimiento, navegación, selección y acciones */
 (function initGamepadSupport(){
+  'use strict';
   const bridge = window.MENTEXGamepadBridge;
-  if (!bridge) { console.error('MENTEX: no se pudo conectar el mando con el juego.'); return; }
   const status = document.getElementById('gamepadStatus');
   const help = document.getElementById('gamepadHelp');
-  const helpBtn = document.getElementById('gamepadHelpBtn');
-  const helpClose = document.getElementById('gamepadHelpClose');
-  let activeIndex = null;
-  let previousButtons = [];
-  let previousPauseAt = 0;
-  let previousJump = false;
-  let previousTurbo = false;
-  let lastConnectHint = 0;
-  const DEADZONE = 0.22;
+  let activeIndex = null, previousButtons = [], selected = null, currentOverlay = null;
+  let lastNavAt = 0, navDirection = '', lastStartAt = 0;
+  let previousJump = false, previousTurbo = false;
+  const DEADZONE = 0.22, REPEAT_MS = 210, START_DEBOUNCE_MS = 280;
+  const BUTTON = { A:0, B:1, X:2, Y:3, LB:4, RB:5, BACK:8, START:9, UP:12, DOWN:13, LEFT:14, RIGHT:15 };
 
+  function escapeText(value){return String(value).replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));}
   function setStatus(gp){
-    if (!status) return;
-    if (gp) {
-      status.classList.add('connected');
-      status.innerHTML = '🎮 Mando conectado: ' + escapeText(gp.id || 'Gamepad') +
-        ' · 📱 Táctil activo <button id="gamepadHelpBtn" type="button">Ayuda</button>';
-    } else {
-      status.classList.remove('connected');
-      status.innerHTML = '🎮 Mando no detectado · 📱 Controles táctiles activos <button id="gamepadHelpBtn" type="button">Ayuda</button>';
-    }
-    const b = document.getElementById('gamepadHelpBtn');
-    if (b) b.addEventListener('click', () => { if(help) help.hidden = false; });
-  }
-  function escapeText(s){
-    return String(s).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+    if(!status) return;
+    status.classList.toggle('connected',!!gp);
+    status.innerHTML = (gp ? '🎮 Mando conectado: '+escapeText(gp.id || 'Gamepad') : '🎮 Mando no detectado')+
+      (navigator.getGamepads ? ' · Controles táctiles/teclado activos' : ' · Este navegador no ofrece Gamepad API')+
+      ' <button id="gamepadHelpBtn" type="button">Ayuda</button>';
+    const b=document.getElementById('gamepadHelpBtn');
+    if(b) b.addEventListener('click',()=>{if(help)help.hidden=false;});
   }
   function connectedGamepad(){
-    if (!navigator.getGamepads) return null;
-    const list = navigator.getGamepads();
-    if (!list) return null;
-    if (activeIndex !== null && list[activeIndex] && list[activeIndex].connected) return list[activeIndex];
-    for (let i=0;i<list.length;i++) if(list[i] && list[i].connected) {
-      activeIndex = i; previousButtons = []; return list[i];
+    if(!navigator.getGamepads) return null;
+    const pads=navigator.getGamepads();
+    if(!pads) return null;
+    if(activeIndex!==null && pads[activeIndex] && pads[activeIndex].connected) return pads[activeIndex];
+    for(let i=0;i<pads.length;i++) if(pads[i] && pads[i].connected){activeIndex=i;previousButtons=[];return pads[i];}
+    activeIndex=null; return null;
+  }
+  function down(gp,i){const b=gp.buttons&&gp.buttons[i];return !!(b&&(b.pressed||b.value>0.55));}
+  function justPressed(gp,i){return down(gp,i)&&!previousButtons[i];}
+  function visible(el){return !!(el && !el.disabled && !el.hidden && !el.closest('[hidden]') && el.getClientRects().length && getComputedStyle(el).visibility!=='hidden' && !el.classList.contains('hidden') && el.getAttribute('aria-disabled')!=='true');}
+  function activeOverlay(){return document.querySelector('.overlay:not(.hidden)');}
+  function candidates(){
+    const overlay=activeOverlay();
+    if(!overlay) return [];
+    return Array.from(overlay.querySelectorAll('button,[role="button"],input,select,[tabindex]:not([tabindex="-1"])'))
+      .filter(visible)
+      .filter(el=>!el.matches('#gamepadHelpBtn,#gamepadHelpClose') && !el.classList.contains('locked') && el.dataset.locked!=='true');
+  }
+  function clearSelection(){
+    document.querySelectorAll('.gamepad-selected').forEach(el=>el.classList.remove('gamepad-selected'));
+    selected=null;
+  }
+  function select(el){
+    if(!visible(el)) return;
+    if(selected && selected!==el) selected.classList.remove('gamepad-selected');
+    selected=el; selected.classList.add('gamepad-selected');
+    if(typeof selected.scrollIntoView==='function') selected.scrollIntoView({block:'nearest',inline:'nearest',behavior:'auto'});
+  }
+  function syncOverlay(){
+    const overlay=activeOverlay();
+    if(overlay!==currentOverlay){
+      clearSelection(); currentOverlay=overlay;
+      const list=candidates();
+      if(list.length) select(list[0]);
+    } else if(selected && !visible(selected)){
+      clearSelection(); const list=candidates(); if(list.length) select(list[0]);
     }
-    activeIndex = null;
-    return null;
   }
-  function buttonDown(gp, i){
-    const b = gp.buttons && gp.buttons[i];
-    return !!(b && (b.pressed || b.value > 0.55));
+  function navigate(dir){
+    syncOverlay();
+    const list=candidates();
+    if(!list.length) return;
+    if(!selected || !list.includes(selected)){select(list[0]);return;}
+    const origin=selected.getBoundingClientRect();
+    const cx=origin.left+origin.width/2, cy=origin.top+origin.height/2;
+    const scored=list.filter(el=>el!==selected).map(el=>{
+      const r=el.getBoundingClientRect(), x=r.left+r.width/2, y=r.top+r.height/2;
+      const dx=x-cx, dy=y-cy;
+      const primary=dir==='left'?-dx:dir==='right'?dx:dir==='up'?-dy:dy;
+      const cross=(dir==='left'||dir==='right')?Math.abs(dy):Math.abs(dx);
+      if(primary<=2) return null;
+      return {el,score:primary+cross*1.7,primary,cross};
+    }).filter(Boolean).sort((a,b)=>a.score-b.score);
+    if(scored.length) select(scored[0].el);
+    else {
+      const ordered=list.slice().sort((a,b)=>{
+        const ra=a.getBoundingClientRect(), rb=b.getBoundingClientRect();
+        return (dir==='up'?ra.top-rb.top:dir==='down'?rb.top-ra.top:dir==='left'?ra.left-rb.left:rb.left-ra.left);
+      });
+      const i=ordered.indexOf(selected); select(ordered[(i+1)%ordered.length]||ordered[0]);
+    }
   }
-  function justPressed(gp, i){
-    const down = buttonDown(gp, i);
-    const was = !!previousButtons[i];
-    return down && !was;
+  function confirm(){
+    syncOverlay();
+    if(help && !help.hidden){help.hidden=true;return;}
+    if(visible(selected) && typeof selected.click==='function') selected.click();
   }
-  function clickFirst(selector){
-    const el = document.querySelector(selector);
-    if(el && !el.disabled) { el.click(); return true; }
-    return false;
+  function back(){
+    if(help && !help.hidden){help.hidden=true;return;}
+    if(bridge && bridge.screen==='paused'){bridge.togglePause();return;}
+    // La pregunta matemática no se cancela: el juego no define esa acción.
+    // En otras pantallas solo se retrocede si existe una acción de regreso explícita.
+    const overlay=activeOverlay();
+    if(overlay){
+      const backButton=overlay.querySelector('[data-gamepad-back],#btnChangeDevice');
+      if(visible(backButton)) backButton.click();
+    }
   }
-  function handleMenuButton(){
-    if(bridge.screen === 'device') clickFirst('.device-btn.selected') || clickFirst('.device-btn[data-device="mobile"]');
-    else if(bridge.screen === 'menu') clickFirst('#ovMenu .btn');
-    else if(bridge.screen === 'paused') clickFirst('#ovPause .btn');
-    else if(bridge.screen === 'question') {
-      const options = Array.from(document.querySelectorAll('#qOptions .q-opt:not(:disabled)'));
-      if(options.length) options[0].click();
-      else clickFirst('#btnQContinue');
-    } else if(bridge.screen === 'levelcomplete') clickFirst('#btnNextLevel');
-    else if(bridge.screen === 'gameover') clickFirst('#ovGameOver .btn');
-    else if(bridge.screen === 'victory') clickFirst('#ovVictory .btn');
+  function doNavigation(dir, now){
+    if(!dir){navDirection='';lastNavAt=0;return;}
+    if(dir!==navDirection){navDirection=dir;lastNavAt=now;navigate(dir);return;}
+    if(now-lastNavAt>=REPEAT_MS){lastNavAt=now;navigate(dir);}
   }
   function poll(){
-    const gp = connectedGamepad();
+    const gp=connectedGamepad();
     if(gp){
-      if(Date.now()-lastConnectHint>1200){ setStatus(gp); lastConnectHint=Date.now(); }
-      const axes = gp.axes || [];
-      const x = Math.abs(axes[0] || 0) > DEADZONE ? axes[0] : 0;
-      const y = Math.abs(axes[1] || 0) > DEADZONE ? axes[1] : 0;
-      // Establecer estado por frame evita repetición por mantener el joystick.
-      bridge.input.left = x < 0 || buttonDown(gp,14);
-      bridge.input.right = x > 0 || buttonDown(gp,15);
-      const dpadUp = buttonDown(gp,12);
-      const jumpNow = buttonDown(gp,0) || buttonDown(gp,3) || dpadUp || y < -0.65;
-      const turboNow = buttonDown(gp,1) || buttonDown(gp,4) || buttonDown(gp,5);
-      bridge.input.turbo = turboNow;
-      if(jumpNow && !previousJump && bridge.screen === 'playing') bridge.pressJump();
-      if(!jumpNow) bridge.releaseJump();
-      previousJump = jumpNow;
-      previousTurbo = turboNow;
-
-      // START / botón 9: acción única al pulsar, con pequeña protección antirrebote.
-      if(justPressed(gp,9) && Date.now()-previousPauseAt>250){
-        previousPauseAt=Date.now();
-        if(bridge.screen === 'playing' || bridge.screen === 'paused') bridge.togglePause();
-        else handleMenuButton();
+      if(!status.classList.contains('connected')) setStatus(gp);
+      const axes=gp.axes||[];
+      const x=Math.abs(axes[0]||0)>DEADZONE?axes[0]:0;
+      const y=Math.abs(axes[1]||0)>DEADZONE?axes[1]:0;
+      const left=x<0||down(gp,BUTTON.LEFT), right=x>0||down(gp,BUTTON.RIGHT);
+      const up=y<0||down(gp,BUTTON.UP), downDir=y>0||down(gp,BUTTON.DOWN);
+      const inPlay=bridge && bridge.screen==='playing';
+      if(bridge){
+        bridge.input.left=!!(inPlay&&left);
+        bridge.input.right=!!(inPlay&&right);
+        const jumpNow=down(gp,BUTTON.A);
+        const turboNow=down(gp,BUTTON.B)||down(gp,BUTTON.LB)||down(gp,BUTTON.RB);
+        bridge.input.turbo=!!(inPlay&&turboNow);
+        if(inPlay && jumpNow && !previousJump) bridge.pressJump();
+        if(!jumpNow || !inPlay) bridge.releaseJump();
+        previousJump=jumpNow; previousTurbo=turboNow;
       }
-      // A también confirma una opción en menús; en partida es salto.
-      if(justPressed(gp,0) && bridge.screen !== 'playing') handleMenuButton();
-      // B/East: turbo en partida; en paneles intenta retroceder/cerrar.
-      if(justPressed(gp,1) && bridge.screen !== 'playing' && bridge.screen !== 'paused'){
-        if(help && !help.hidden) help.hidden=true;
+      if(!inPlay){
+        syncOverlay();
+        const dir=up?'up':downDir?'down':left?'left':right?'right':'';
+        doNavigation(dir,performance.now());
+        if(justPressed(gp,BUTTON.A)) confirm();
+        if(justPressed(gp,BUTTON.B)) back();
+        if(justPressed(gp,BUTTON.BACK)) back();
+      }else{
+        doNavigation('',performance.now());
       }
-      previousButtons = (gp.buttons || []).map(b => !!(b && (b.pressed || b.value > 0.55)));
-    } else {
-      if(activeIndex !== null){
-        bridge.input.left=false; bridge.input.right=false; bridge.input.turbo=false; bridge.releaseJump();
-        previousJump=false; previousTurbo=false; previousButtons=[];
-        activeIndex=null;
+      if(justPressed(gp,BUTTON.START) && Date.now()-lastStartAt>START_DEBOUNCE_MS){
+        lastStartAt=Date.now();
+        if(bridge && (bridge.screen==='playing'||bridge.screen==='paused')) bridge.togglePause();
+        else confirm();
+        // Evita que START se interprete también en el overlay que acaba de abrir.
+        currentOverlay=null; clearSelection(); navDirection=''; lastNavAt=0;
       }
-      if(status && !status.classList.contains('connected')) {
-        status.classList.remove('connected');
+      previousButtons=(gp.buttons||[]).map(b=>!!(b&&(b.pressed||b.value>0.55)));
+    }else{
+      if(activeIndex!==null && bridge){
+        bridge.input.left=false;bridge.input.right=false;bridge.input.turbo=false;bridge.releaseJump();
       }
+      if(activeIndex!==null){previousButtons=[];previousJump=false;previousTurbo=false;selected=null;currentOverlay=null;navDirection='';}
+      activeIndex=null;
+      if(status && status.classList.contains('connected')) setStatus(null);
+      syncOverlay();
     }
     requestAnimationFrame(poll);
   }
-  window.addEventListener('gamepadconnected', e => {
-    activeIndex=e.gamepad.index; previousButtons=[];
-    setStatus(e.gamepad);
-  });
-  window.addEventListener('gamepaddisconnected', e => {
+  window.addEventListener('gamepadconnected',e=>{activeIndex=e.gamepad.index;previousButtons=[];setStatus(e.gamepad);currentOverlay=null;});
+  window.addEventListener('gamepaddisconnected',e=>{
     if(activeIndex===e.gamepad.index){
-      activeIndex=null; previousButtons=[]; bridge.input.left=false; bridge.input.right=false;
-      bridge.input.turbo=false; bridge.releaseJump(); previousJump=false; previousTurbo=false;
-      setStatus(null);
+      activeIndex=null;previousButtons=[];previousJump=false;previousTurbo=false;
+      if(bridge){bridge.input.left=false;bridge.input.right=false;bridge.input.turbo=false;bridge.releaseJump();}
+      clearSelection();currentOverlay=null;navDirection='';setStatus(null);
     }
   });
-  if(helpBtn) helpBtn.addEventListener('click',()=>{if(help)help.hidden=false;});
-  if(helpClose) helpClose.addEventListener('click',()=>{if(help)help.hidden=true;});
-  document.addEventListener('keydown',e=>{
-    if(e.key==='Escape' && help && !help.hidden) help.hidden=true;
-  });
+  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&help&&!help.hidden)help.hidden=true;});
+  if(helpClose)helpClose.addEventListener('click',()=>{if(help)help.hidden=true;});
   setStatus(null);
+  if(!navigator.getGamepads) setStatus(null);
   requestAnimationFrame(poll);
 })();
-
 </script>
 </body>
 </html>
