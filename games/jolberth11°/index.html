@@ -889,6 +889,9 @@ function clearInputs(){
   input.right = false;
   input.jump  = false;
   input.turbo = false;
+  gamepadInput.left = false;
+  gamepadInput.right = false;
+  gamepadInput.turbo = false;
   activePointers.clear();
   document.querySelectorAll('.tbtn.pressed, .pad-btn.pressed, .ab-btn.pressed, .pill.pressed')
     .forEach(b => b.classList.remove('pressed'));
@@ -1438,9 +1441,11 @@ function victory(){
    ============================================================ */
 let currentDelivery = null;
 let currentQuestion = null;
+let currentQuestionAnswered = false;
 
 function openQuestion(delivery){
-  if (delivery.done) return;
+  if (delivery.done || game.screen === 'question') return;
+  currentQuestionAnswered = false;
   game.screen = 'question';
   clearInputs();
 
@@ -1472,6 +1477,10 @@ function openQuestion(delivery){
 }
 
 function answerQuestion(value, btns){
+  if (currentQuestionAnswered || game.screen !== 'question' || !currentQuestion || !currentDelivery) return;
+  const chosenButton = Array.from(btns || []).find(b => parseInt(b.dataset.value, 10) === value);
+  if (!chosenButton || chosenButton.disabled) return;
+  currentQuestionAnswered = true;
   const correct = (value === currentQuestion.answer);
 
   btns.forEach(b=>{
@@ -2492,8 +2501,29 @@ init();
   #gamepadStatus button,#gamepadHelp button{margin-left:8px;border:0;border-radius:7px;padding:5px 9px;font-weight:700;cursor:pointer}
   #gamepadHelp{position:fixed;z-index:1001;left:50%;top:50%;transform:translate(-50%,-50%);width:min(92vw,430px);padding:20px;border:2px solid #ffcc33;border-radius:16px;background:#111a30;color:#fff;box-shadow:0 20px 60px #000b;line-height:1.6}
   #gamepadHelp[hidden]{display:none}
-  .gamepad-selected{outline:3px solid #3ddc84!important;outline-offset:3px!important;filter:brightness(1.12);position:relative;z-index:2}
-  .device-btn.gamepad-selected,.q-opt.gamepad-selected{box-shadow:0 0 0 3px #3ddc84,0 0 18px #3ddc8470!important}
+  .gamepad-selected{
+    outline:3px solid #FFD700!important;
+    outline-offset:3px!important;
+    filter:brightness(1.12);
+    position:relative;
+    z-index:2;
+    box-shadow:0 0 0 2px rgba(255,215,0,.18),0 0 16px rgba(255,215,0,.28)!important;
+  }
+  .q-opt.gamepad-selected-answer{
+    border:3px solid #FFD700!important;
+    background:linear-gradient(180deg,#66572a,#35405a)!important;
+    color:#fff!important;
+    box-shadow:0 0 0 1px rgba(255,215,0,.35),0 0 18px rgba(255,215,0,.48),0 4px 0 #16243d!important;
+    filter:brightness(1.12);
+    transform:translateY(-1px);
+  }
+  .q-opt.gamepad-selected-answer:disabled{opacity:1}
+  .q-opt.correct{border-color:#8dffbb!important}
+  .q-opt.wrong{border-color:#ffb3b3!important}
+  .device-btn.gamepad-selected{border-color:#FFD700!important}
+  @media(prefers-reduced-motion:reduce){
+    .gamepad-selected,.q-opt.gamepad-selected-answer{transition:none!important;animation:none!important}
+  }
   @media(max-width:600px){#gamepadStatus{font-size:11px;right:6px;bottom:6px;padding:6px 8px}}
 </style>
 <script>
@@ -2503,6 +2533,7 @@ init();
   const bridge = window.MENTEXGamepadBridge;
   const status = document.getElementById('gamepadStatus');
   const help = document.getElementById('gamepadHelp');
+  const helpClose = document.getElementById('gamepadHelpClose');
   let activeIndex = null, previousButtons = [], selected = null, currentOverlay = null;
   let lastNavAt = 0, navDirection = '', lastStartAt = 0;
   let previousJump = false, previousTurbo = false;
@@ -2539,23 +2570,38 @@ init();
       .filter(el=>!el.matches('#gamepadHelpBtn,#gamepadHelpClose') && !el.classList.contains('locked') && el.dataset.locked!=='true');
   }
   function clearSelection(){
-    document.querySelectorAll('.gamepad-selected').forEach(el=>el.classList.remove('gamepad-selected'));
+    document.querySelectorAll('.gamepad-selected,.gamepad-selected-answer')
+      .forEach(el=>el.classList.remove('gamepad-selected','gamepad-selected-answer'));
     selected=null;
   }
   function select(el){
     if(!visible(el)) return;
-    if(selected && selected!==el) selected.classList.remove('gamepad-selected');
-    selected=el; selected.classList.add('gamepad-selected');
+    if(selected && selected!==el){
+      selected.classList.remove('gamepad-selected','gamepad-selected-answer');
+    }
+    selected=el;
+    selected.classList.add('gamepad-selected');
+    if(selected.matches('.q-opt')) selected.classList.add('gamepad-selected-answer');
+    else selected.classList.remove('gamepad-selected-answer');
     if(typeof selected.scrollIntoView==='function') selected.scrollIntoView({block:'nearest',inline:'nearest',behavior:'auto'});
   }
   function syncOverlay(){
     const overlay=activeOverlay();
     if(overlay!==currentOverlay){
-      clearSelection(); currentOverlay=overlay;
+      clearSelection();
+      currentOverlay=overlay;
+      const list=candidates();
+      if(list.length){
+        // Las respuestas matemáticas reciben selección inicial sin confirmarse.
+        const firstAnswer=overlay && overlay.id==='ovQuestion'
+          ? list.find(el=>el.matches('.q-opt') && !el.disabled)
+          : null;
+        select(firstAnswer || list[0]);
+      }
+    } else if(selected && !visible(selected)){
+      clearSelection();
       const list=candidates();
       if(list.length) select(list[0]);
-    } else if(selected && !visible(selected)){
-      clearSelection(); const list=candidates(); if(list.length) select(list[0]);
     }
   }
   function navigate(dir){
@@ -2660,7 +2706,7 @@ init();
     }
   });
   document.addEventListener('keydown',e=>{if(e.key==='Escape'&&help&&!help.hidden)help.hidden=true;});
-  if(helpClose)helpClose.addEventListener('click',()=>{if(help)help.hidden=true;});
+  if(helpClose) helpClose.addEventListener('click',()=>{if(help)help.hidden=true;});
   setStatus(null);
   if(!navigator.getGamepads) setStatus(null);
   requestAnimationFrame(poll);
