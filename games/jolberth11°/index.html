@@ -2590,13 +2590,12 @@ init();
   function back(){
     if(help && !help.hidden){help.hidden=true;return;}
     if(bridge && bridge.screen==='paused'){bridge.togglePause();return;}
-    // La pregunta matemática no se cancela: el juego no define esa acción.
-    // En otras pantallas solo se retrocede si existe una acción de regreso explícita.
+    // Las preguntas no se cancelan porque la lógica original no ofrece esa acción.
     const overlay=activeOverlay();
-    if(overlay){
-      const backButton=overlay.querySelector('[data-gamepad-back],#btnChangeDevice');
-      if(visible(backButton)) backButton.click();
-    }
+    const backButton=overlay && overlay.querySelector('[data-gamepad-back]');
+    if(visible(backButton)){backButton.click();return;}
+    // SELECT/BACK abre la ayuda cuando la pantalla no define una acción de regreso.
+    if(help) help.hidden=false;
   }
   function doNavigation(dir, now){
     if(!dir){navDirection='';lastNavAt=0;return;}
