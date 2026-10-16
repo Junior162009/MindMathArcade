@@ -463,6 +463,20 @@
     .q-opt{ font-size:19px; padding:14px 6px; }
   }
 
+  /* Controles Android: pantalla completa sin tapar el juego */
+  #fullscreenToggle{
+    display:none; position:fixed; right:10px; top:10px; z-index:1001;
+    align-items:center; justify-content:center; gap:6px;
+    min-height:36px; padding:7px 10px; border:1px solid rgba(255,204,51,.72);
+    border-radius:10px; background:rgba(8,13,26,.82); color:#ffe08a;
+    font:600 12px/1.1 system-ui,sans-serif; box-shadow:0 2px 8px #0005;
+    touch-action:manipulation; cursor:pointer;
+  }
+  #fullscreenToggle:active{transform:scale(.97)}
+  body.retro #fullscreenToggle{display:flex}
+  body.retro:fullscreen #fullscreenToggle{top:calc(env(safe-area-inset-top, 0px) + 8px);right:calc(env(safe-area-inset-right, 0px) + 8px)}
+  @media(max-width:480px){#fullscreenToggle{right:6px;top:6px;min-height:32px;padding:6px 8px;font-size:11px}}
+
   /* Aviso temporal, independiente de la navegación del mando */
   #gamepadStatus{
     position:fixed; right:10px; bottom:10px; z-index:1000;
@@ -2486,6 +2500,7 @@ init();
 })();
 </script>
 
+<button id="fullscreenToggle" type="button" aria-label="Activar pantalla completa" title="Pantalla completa">⛶ Pantalla completa</button>
 <div id="gamepadStatus" role="status" aria-live="polite">🎮 Mando no detectado · 📱 Controles táctiles activos <button id="gamepadHelpBtn" type="button">Ayuda</button></div>
 <div id="gamepadHelp" hidden>
   <strong>🎮 Gamepad X3 · MENTEX</strong><br>
@@ -2700,6 +2715,7 @@ init();
         syncOverlay();
         const dir=up?'up':downDir?'down':left?'left':right?'right':'';
         doNavigation(dir,performance.now());
+        if(justPressed(gp,BUTTON.Y) && typeof window.MENTEXToggleFullscreen==='function') window.MENTEXToggleFullscreen();
         if(justPressed(gp,BUTTON.A)) confirm();
         if(justPressed(gp,BUTTON.B)) back();
         if(justPressed(gp,BUTTON.BACK)) back();
@@ -2744,6 +2760,44 @@ init();
   if(helpClose) helpClose.addEventListener('click',()=>{if(help)help.hidden=true;});
   if(status){status.hidden=true;status.textContent='';status.classList.remove('connected');}
   requestAnimationFrame(poll);
+})();
+</script>
+<script>
+/* Pantalla completa para Android: activación táctil o botón Y del mando. */
+(function initFullscreenControl(){
+  const button=document.getElementById('fullscreenToggle');
+  if(!button) return;
+  const isFullscreen=()=>!!(document.fullscreenElement||document.webkitFullscreenElement);
+  function updateButton(){
+    const active=isFullscreen();
+    button.innerHTML=active?'⤢ Salir de pantalla completa':'⛶ Pantalla completa';
+    button.setAttribute('aria-label',active?'Salir de pantalla completa':'Activar pantalla completa');
+    button.title=active?'Salir de pantalla completa':'Pantalla completa';
+  }
+  window.MENTEXToggleFullscreen=async function(){
+    try{
+      if(isFullscreen()){
+        if(document.exitFullscreen) await document.exitFullscreen();
+        else if(document.webkitExitFullscreen) document.webkitExitFullscreen();
+        return;
+      }
+      const target=document.documentElement;
+      if(target.requestFullscreen) await target.requestFullscreen({navigationUI:'hide'});
+      else if(target.webkitRequestFullscreen) target.webkitRequestFullscreen();
+      else if(target.webkitRequestFullScreen) target.webkitRequestFullScreen();
+      // Android permite bloquear orientación solo en contextos compatibles; es opcional.
+      if(screen.orientation && screen.orientation.lock){
+        try{ await screen.orientation.lock('landscape'); }catch(_){}
+      }
+    }catch(_){
+      // Si el navegador no admite pantalla completa, el juego sigue funcionando normal.
+    }finally{updateButton();}
+  };
+  button.addEventListener('click',()=>window.MENTEXToggleFullscreen());
+  document.addEventListener('fullscreenchange',updateButton);
+  document.addEventListener('webkitfullscreenchange',updateButton);
+  window.addEventListener('orientationchange',()=>setTimeout(updateButton,180));
+  updateButton();
 })();
 </script>
 </body>
