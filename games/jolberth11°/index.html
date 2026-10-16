@@ -2536,6 +2536,7 @@ init();
   const helpClose = document.getElementById('gamepadHelpClose');
   let activeIndex = null, previousButtons = [], selected = null, currentOverlay = null;
   let lastNavAt = 0, navDirection = '', lastStartAt = 0;
+  let statusTimer = null, statusGeneration = 0;
   let previousJump = false, previousTurbo = false;
   const DEADZONE = 0.22, REPEAT_MS = 210, START_DEBOUNCE_MS = 280;
   const BUTTON = { A:0, B:1, X:2, Y:3, LB:4, RB:5, BACK:8, START:9, UP:12, DOWN:13, LEFT:14, RIGHT:15 };
@@ -2543,12 +2544,25 @@ init();
   function escapeText(value){return String(value).replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));}
   function setStatus(gp){
     if(!status) return;
-    status.classList.toggle('connected',!!gp);
-    status.innerHTML = (gp ? '🎮 Mando conectado: '+escapeText(gp.id || 'Gamepad') : '🎮 Mando no detectado')+
-      (navigator.getGamepads ? ' · Controles táctiles/teclado activos' : ' · Este navegador no ofrece Gamepad API')+
-      ' <button id="gamepadHelpBtn" type="button">Ayuda</button>';
-    const b=document.getElementById('gamepadHelpBtn');
-    if(b) b.addEventListener('click',()=>{if(help)help.hidden=false;});
+    // Aviso temporal: nunca se vuelve a mostrar desde el bucle de lectura.
+    if(statusTimer){clearTimeout(statusTimer);statusTimer=null;}
+    const generation=++statusGeneration;
+    if(!gp){
+      status.classList.remove('connected');
+      status.hidden=true;
+      status.textContent='';
+      return;
+    }
+    status.classList.add('connected');
+    status.textContent='🎮 Mando '+escapeText(gp.id || 'X3')+' conectado';
+    status.hidden=false;
+    statusTimer=setTimeout(()=>{
+      if(generation!==statusGeneration) return;
+      status.hidden=true;
+      status.textContent='';
+      status.classList.remove('connected');
+      statusTimer=null;
+    },5000);
   }
   function connectedGamepad(){
     if(!navigator.getGamepads) return null;
@@ -2651,7 +2665,6 @@ init();
   function poll(){
     const gp=connectedGamepad();
     if(gp){
-      if(!status.classList.contains('connected')) setStatus(gp);
       const axes=gp.axes||[];
       const x=Math.abs(axes[0]||0)>DEADZONE?axes[0]:0;
       const y=Math.abs(axes[1]||0)>DEADZONE?axes[1]:0;
@@ -2697,7 +2710,14 @@ init();
     }
     requestAnimationFrame(poll);
   }
-  window.addEventListener('gamepadconnected',e=>{activeIndex=e.gamepad.index;previousButtons=[];setStatus(e.gamepad);currentOverlay=null;});
+  window.addEventListener('gamepadconnected',e=>{
+    activeIndex=e.gamepad.index;
+    previousButtons=[];
+    previousJump=false;
+    previousTurbo=false;
+    setStatus(e.gamepad);
+    currentOverlay=null;
+  });
   window.addEventListener('gamepaddisconnected',e=>{
     if(activeIndex===e.gamepad.index){
       activeIndex=null;previousButtons=[];previousJump=false;previousTurbo=false;
@@ -2707,8 +2727,7 @@ init();
   });
   document.addEventListener('keydown',e=>{if(e.key==='Escape'&&help&&!help.hidden)help.hidden=true;});
   if(helpClose) helpClose.addEventListener('click',()=>{if(help)help.hidden=true;});
-  setStatus(null);
-  if(!navigator.getGamepads) setStatus(null);
+  if(status){status.hidden=true;status.textContent='';status.classList.remove('connected');}
   requestAnimationFrame(poll);
 })();
 </script>
