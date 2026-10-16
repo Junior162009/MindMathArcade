@@ -2461,6 +2461,16 @@ function init(){
   requestAnimationFrame(loop);
 }
 
+// Puente público mínimo para que el script del mando pueda acceder al juego,
+// cuya lógica está encapsulada en esta función.
+window.MENTEXGamepadBridge = {
+  input: gamepadInput,
+  get screen(){ return game.screen; },
+  pressJump,
+  releaseJump,
+  togglePause
+};
+
 init();
 
 })();
@@ -2483,6 +2493,8 @@ init();
    Conserva la entrada original de teclado y controles táctiles.
    ============================================================ */
 (function initGamepadSupport(){
+  const bridge = window.MENTEXGamepadBridge;
+  if (!bridge) { console.error('MENTEX: no se pudo conectar el mando con el juego.'); return; }
   const status = document.getElementById('gamepadStatus');
   const help = document.getElementById('gamepadHelp');
   const helpBtn = document.getElementById('gamepadHelpBtn');
@@ -2537,16 +2549,16 @@ init();
     return false;
   }
   function handleMenuButton(){
-    if(game.screen === 'device') clickFirst('.device-btn.selected') || clickFirst('.device-btn[data-device="mobile"]');
-    else if(game.screen === 'menu') clickFirst('#ovMenu .btn');
-    else if(game.screen === 'paused') clickFirst('#ovPause .btn');
-    else if(game.screen === 'question') {
+    if(bridge.screen === 'device') clickFirst('.device-btn.selected') || clickFirst('.device-btn[data-device="mobile"]');
+    else if(bridge.screen === 'menu') clickFirst('#ovMenu .btn');
+    else if(bridge.screen === 'paused') clickFirst('#ovPause .btn');
+    else if(bridge.screen === 'question') {
       const options = Array.from(document.querySelectorAll('#qOptions .q-opt:not(:disabled)'));
       if(options.length) options[0].click();
       else clickFirst('#btnQContinue');
-    } else if(game.screen === 'levelcomplete') clickFirst('#btnNextLevel');
-    else if(game.screen === 'gameover') clickFirst('#ovGameOver .btn');
-    else if(game.screen === 'victory') clickFirst('#ovVictory .btn');
+    } else if(bridge.screen === 'levelcomplete') clickFirst('#btnNextLevel');
+    else if(bridge.screen === 'gameover') clickFirst('#ovGameOver .btn');
+    else if(bridge.screen === 'victory') clickFirst('#ovVictory .btn');
   }
   function poll(){
     const gp = connectedGamepad();
@@ -2556,33 +2568,33 @@ init();
       const x = Math.abs(axes[0] || 0) > DEADZONE ? axes[0] : 0;
       const y = Math.abs(axes[1] || 0) > DEADZONE ? axes[1] : 0;
       // Establecer estado por frame evita repetición por mantener el joystick.
-      gamepadInput.left = x < 0 || buttonDown(gp,14);
-      gamepadInput.right = x > 0 || buttonDown(gp,15);
+      bridge.input.left = x < 0 || buttonDown(gp,14);
+      bridge.input.right = x > 0 || buttonDown(gp,15);
       const dpadUp = buttonDown(gp,12);
       const jumpNow = buttonDown(gp,0) || buttonDown(gp,3) || dpadUp || y < -0.65;
       const turboNow = buttonDown(gp,1) || buttonDown(gp,4) || buttonDown(gp,5);
-      gamepadInput.turbo = turboNow;
-      if(jumpNow && !previousJump && game.screen === 'playing') pressJump();
-      if(!jumpNow) releaseJump();
+      bridge.input.turbo = turboNow;
+      if(jumpNow && !previousJump && bridge.screen === 'playing') bridge.pressJump();
+      if(!jumpNow) bridge.releaseJump();
       previousJump = jumpNow;
       previousTurbo = turboNow;
 
       // START / botón 9: acción única al pulsar, con pequeña protección antirrebote.
       if(justPressed(gp,9) && Date.now()-previousPauseAt>250){
         previousPauseAt=Date.now();
-        if(game.screen === 'playing' || game.screen === 'paused') togglePause();
+        if(bridge.screen === 'playing' || bridge.screen === 'paused') bridge.togglePause();
         else handleMenuButton();
       }
       // A también confirma una opción en menús; en partida es salto.
-      if(justPressed(gp,0) && game.screen !== 'playing') handleMenuButton();
+      if(justPressed(gp,0) && bridge.screen !== 'playing') handleMenuButton();
       // B/East: turbo en partida; en paneles intenta retroceder/cerrar.
-      if(justPressed(gp,1) && game.screen !== 'playing' && game.screen !== 'paused'){
+      if(justPressed(gp,1) && bridge.screen !== 'playing' && bridge.screen !== 'paused'){
         if(help && !help.hidden) help.hidden=true;
       }
       previousButtons = (gp.buttons || []).map(b => !!(b && (b.pressed || b.value > 0.55)));
     } else {
       if(activeIndex !== null){
-        gamepadInput.left=false; gamepadInput.right=false; gamepadInput.turbo=false; releaseJump();
+        bridge.input.left=false; bridge.input.right=false; bridge.input.turbo=false; bridge.releaseJump();
         previousJump=false; previousTurbo=false; previousButtons=[];
         activeIndex=null;
       }
@@ -2598,8 +2610,8 @@ init();
   });
   window.addEventListener('gamepaddisconnected', e => {
     if(activeIndex===e.gamepad.index){
-      activeIndex=null; previousButtons=[]; gamepadInput.left=false; gamepadInput.right=false;
-      gamepadInput.turbo=false; releaseJump(); previousJump=false; previousTurbo=false;
+      activeIndex=null; previousButtons=[]; bridge.input.left=false; bridge.input.right=false;
+      bridge.input.turbo=false; bridge.releaseJump(); previousJump=false; previousTurbo=false;
       setStatus(null);
     }
   });
