@@ -463,17 +463,18 @@
     .q-opt{ font-size:19px; padding:14px 6px; }
   }
 
-  /* Estado y ayuda del mando físico: añadido sin alterar el HUD original */
+  /* Aviso temporal, independiente de la navegación del mando */
   #gamepadStatus{
-    position:fixed; left:50%; top:58px; transform:translateX(-50%);
-    z-index:30; max-width:calc(100vw - 24px); padding:7px 12px;
-    border-radius:12px; background:rgba(10,16,32,.88);
-    border:1px solid rgba(255,255,255,.18); color:#d9e7ff;
-    font-size:12px; line-height:1.35; text-align:center;
-    box-shadow:0 4px 18px rgba(0,0,0,.3); pointer-events:auto;
+    position:fixed; right:10px; bottom:10px; z-index:1000;
+    width:max-content; max-width:calc(100vw - 20px);
+    padding:4px 8px; border:1px solid rgba(61,220,132,.55);
+    border-radius:8px; background:rgba(8,13,26,.78);
+    color:#a9eec1; font:12px/1.25 system-ui,sans-serif;
+    box-shadow:none; pointer-events:none;
   }
-  #gamepadStatus.connected{border-color:#3ddc84;color:#a9ffd0}
-  #gamepadHelpBtn{margin-left:7px;border:0;border-radius:7px;padding:4px 7px;background:#ffcc33;color:#18233b;font-weight:bold}
+  #gamepadStatus.connected{border-color:rgba(61,220,132,.55);color:#a9eec1}
+  #gamepadStatus[hidden]{display:none!important}
+  #gamepadHelpBtn{display:none!important}
   #gamepadHelp{
     position:fixed; z-index:80; left:50%; top:50%; transform:translate(-50%,-50%);
     width:min(360px,calc(100vw - 28px)); padding:18px; border-radius:16px;
@@ -2496,9 +2497,11 @@ init();
 </div>
 
 <style>
-  #gamepadStatus{position:fixed;right:10px;bottom:10px;z-index:1000;max-width:min(92vw,420px);padding:8px 12px;border:1px solid #52617b;border-radius:12px;background:rgba(8,13,26,.92);color:#dce8ff;font:12px/1.4 system-ui,sans-serif;box-shadow:0 5px 18px #0006}
-  #gamepadStatus.connected{border-color:#3ddc84;color:#aaffcb}
-  #gamepadStatus button,#gamepadHelp button{margin-left:8px;border:0;border-radius:7px;padding:5px 9px;font-weight:700;cursor:pointer}
+  #gamepadStatus{position:fixed;right:10px;bottom:10px;z-index:1000;width:max-content;max-width:calc(100vw - 20px);padding:4px 8px;border:1px solid rgba(61,220,132,.55);border-radius:8px;background:rgba(8,13,26,.78);color:#a9eec1;font:12px/1.25 system-ui,sans-serif;box-shadow:none;pointer-events:none}
+  #gamepadStatus.connected{border-color:rgba(61,220,132,.55);color:#a9eec1}
+  #gamepadStatus[hidden]{display:none!important}
+  #gamepadStatus button{display:none!important}
+  #gamepadHelp button{margin-left:8px;border:0;border-radius:7px;padding:5px 9px;font-weight:700;cursor:pointer}
   #gamepadHelp{position:fixed;z-index:1001;left:50%;top:50%;transform:translate(-50%,-50%);width:min(92vw,430px);padding:20px;border:2px solid #ffcc33;border-radius:16px;background:#111a30;color:#fff;box-shadow:0 20px 60px #000b;line-height:1.6}
   #gamepadHelp[hidden]{display:none}
   .gamepad-selected{
@@ -2524,7 +2527,7 @@ init();
   @media(prefers-reduced-motion:reduce){
     .gamepad-selected,.q-opt.gamepad-selected-answer{transition:none!important;animation:none!important}
   }
-  @media(max-width:600px){#gamepadStatus{font-size:11px;right:6px;bottom:6px;padding:6px 8px}}
+  @media(max-width:600px){#gamepadStatus{font-size:11px;right:6px;bottom:6px;padding:4px 7px;max-width:calc(100vw - 12px)}}
 </style>
 <script>
 /* GAMEPAD API centralizado: movimiento, navegación, selección y acciones */
@@ -2554,7 +2557,7 @@ init();
       return;
     }
     status.classList.add('connected');
-    status.textContent='🎮 Mando '+escapeText(gp.id || 'X3')+' conectado';
+    status.textContent='🎮 Mando X3 conectado';
     status.hidden=false;
     statusTimer=setTimeout(()=>{
       if(generation!==statusGeneration) return;
@@ -2612,10 +2615,22 @@ init();
           : null;
         select(firstAnswer || list[0]);
       }
-    } else if(selected && !visible(selected)){
-      clearSelection();
+    } else {
       const list=candidates();
-      if(list.length) select(list[0]);
+      if(selected && (!visible(selected) || !list.includes(selected))){
+        clearSelection();
+        if(list.length){
+          const firstAnswer=overlay && overlay.id==='ovQuestion'
+            ? list.find(el=>el.matches('.q-opt') && !el.disabled)
+            : null;
+          select(firstAnswer || list[0]);
+        }
+      } else if(!selected && list.length){
+        const firstAnswer=overlay && overlay.id==='ovQuestion'
+          ? list.find(el=>el.matches('.q-opt') && !el.disabled)
+          : null;
+        select(firstAnswer || list[0]);
+      }
     }
   }
   function navigate(dir){
