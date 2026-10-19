@@ -26,3 +26,6 @@ verify_jwt = false
 
 [functions.ai-chat]
 verify_jwt = false
+
+[functions.submit-game-rating]
+verify_jwt = false
