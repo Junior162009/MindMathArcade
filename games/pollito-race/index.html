@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#080a0f">
-<meta name="description" content="CHIKEN RACE: juego educativo arcade donde respondes preguntas y avanzas evitando vehículos.">
+<meta name="description" content="CHIKEN RACE: arcade educativo de carretera vertical; acertar hace avanzar al pollo y fallar provoca un atropello.">
 <title>🐔 CHIKEN RACE — TecnoMath</title>
 <link rel="stylesheet" href="./css/style.css">
 <script src="/js/tecnomath-progress.js?v=20260911-9"></script>
@@ -13,7 +13,7 @@
 <header class="topbar">
   <a class="brand" href="../../index.html" aria-label="Volver a TecnoMath">🐔 <span>CHIKEN <b>RACE</b><small>ARCADE EDUCATIVO</small></span></a>
   <div id="hud" class="hud hidden" aria-live="polite">
-    <span>🏆 <b id="hudLevel">1</b></span><span>❤️ <b id="hudLives">3</b></span><span>⭐ <b id="hudScore">0</b></span><span>📏 <b id="hudDistance">0m</b></span>
+    <span>🏆 NIVEL <b id="hudLevel">1</b></span><span>❤️ <b id="hudLives">3</b></span><span>⭐ <b id="hudScore">0</b></span><span>🔥 COMBO <b id="hudCombo">0</b></span><span>📏 <b id="hudDistance">0m</b></span>
   </div>
 </header>
 <main>
@@ -22,7 +22,7 @@
     <div>
       <small class="eyebrow">TECNOMATH · ARCADE EDUCATIVO</small>
       <h1>🐔 CHIKEN <em>RACE</em></h1>
-      <p>Responde preguntas, haz avanzar a tu pollo y sobrevive al tráfico. Una respuesta incorrecta puede terminar en un atropello arcade.</p>
+      <p>Responde para cruzar una carretera vertical: acertar te acerca a la meta; fallar hace que un vehículo atraviese tu carril.</p>
       <div class="actions"><button id="play" class="btn primary" type="button">▶ JUGAR</button><button data-modal="how" class="btn secondary" type="button">❓ CÓMO JUGAR</button></div>
     </div>
     <div class="preview"><div class="preview-title">🛣️ CARRETERA · UN SOLO POLLO</div><div class="preview-track"><div class="preview-lane"><span>🐔</span><i>🚗</i></div><div class="preview-lane"><span></span><i>🚌</i></div><div class="preview-lane"><span></span><i>🚕</i></div></div></div>
@@ -52,14 +52,18 @@
   <button id="start" class="btn primary full" type="button">🏁 INICIAR CHIKEN RACE</button>
 </section>
 <section id="race" class="screen">
-  <div class="race-stats"><span>📚 <b id="raceCategory"></b></span><span>❤️ <b id="raceLives">3</b></span><span>🔥 <b id="streak">0</b></span><span>⭐ <b id="score">0</b></span><span>📏 <b id="raceDistance">0m</b></span></div>
+  <div class="race-stats"><span>📚 <b id="raceCategory"></b></span><span>❤️ <b id="raceLives">3</b></span><span>🔥 COMBO <b id="streak">0</b></span><span>⭐ <b id="score">0</b></span><span>📏 <b id="raceDistance">0m</b></span></div>
   <div class="race-card">
-    <div class="track" id="track" aria-label="Carretera de tres carriles">
-      <div class="lane"><span class="lane-no">1</span><div id="player" class="runner player-runner" role="img" aria-label="Único pollo jugador">🐔</div><div class="traffic traffic-a">🚗</div></div>
-      <div class="lane"><span class="lane-no">2</span><div class="traffic traffic-b">🚕</div></div>
-      <div class="lane"><span class="lane-no">3</span><div class="traffic traffic-c">🚌</div></div>
-      <div class="road-mark mark1"></div><div class="road-mark mark2"></div><div class="road-mark mark3"></div>
-      <div class="safe-line">ZONA SEGURA</div>
+    <div class="track" id="track" aria-label="Carretera vertical de tres carriles">
+      <div class="grass grass-left"></div><div class="grass grass-right"></div>
+      <div class="finish-line" id="finishLine">🏁 META</div>
+      <div class="lane lane-vertical" data-lane="0"><span class="lane-no">1</span></div>
+      <div class="lane lane-vertical" data-lane="1"><span class="lane-no">2</span></div>
+      <div class="lane lane-vertical" data-lane="2"><span class="lane-no">3</span></div>
+      <div class="road-segments" id="roadSegments" aria-hidden="true"></div>
+      <div id="player" class="runner player-runner" role="img" aria-label="Único pollo jugador">🐔</div>
+      <div id="crashCar" class="crash-car" aria-hidden="true"></div>
+      <div id="impactMark" class="impact-mark" aria-hidden="true">💥</div>
     </div>
     <div class="progress-row"><span>🏁 PROGRESO</span><b id="progressText">0%</b></div><div class="progress"><i id="progressBar"></i></div>
     <div id="raceMessage" class="race-message" aria-live="polite">Responde para avanzar.</div>
@@ -76,7 +80,7 @@
   </div>
 </section>
 </main>
-<div id="how" class="modal" role="dialog" aria-modal="true" aria-labelledby="how-title"><div class="modal-card"><button class="close" type="button" data-close="how" aria-label="Cerrar">×</button><small class="eyebrow">REGLAS</small><h2 id="how-title">🐔 ¿Cómo se juega?</h2><ol><li>Elige una categoría y dificultad.</li><li>Responde una pregunta para mover al único pollo.</li><li>Si aciertas, avanzas, ganas puntos y aumentas tu combo.</li><li>Si fallas, un vehículo cruza y atropella al pollo de forma arcade: 💥. Pierdes una vida.</li><li>El tráfico se vuelve más rápido conforme sube el nivel.</li><li>Cuando te quedas sin vidas, aparece GAME OVER.</li></ol></div></div>
+<div id="how" class="modal" role="dialog" aria-modal="true" aria-labelledby="how-title"><div class="modal-card"><button class="close" type="button" data-close="how" aria-label="Cerrar">×</button><small class="eyebrow">REGLAS</small><h2 id="how-title">🐔 ¿Cómo se juega?</h2><ol><li>Elige una categoría y dificultad.</li><li>Responde una pregunta para mover al único pollo.</li><li>Si aciertas, avanzas, ganas puntos y aumentas tu combo.</li><li>Si fallas, un vehículo cruza y atropella al pollo de forma arcade: 💥. Pierdes una vida.</li><li>Los vehículos aparecen únicamente después de una respuesta incorrecta.</li><li>Cuando te quedas sin vidas, aparece GAME OVER.</li></ol></div></div>
 <div id="records" class="modal" role="dialog" aria-modal="true" aria-labelledby="records-title"><div class="modal-card"><button class="close" type="button" data-close="records" aria-label="Cerrar">×</button><small class="eyebrow">HISTORIAL LOCAL</small><h2 id="records-title">🏆 Récords</h2><div id="recordsList"></div><button id="clearRecords" class="btn secondary full" type="button">🗑️ BORRAR RÉCORDS</button></div></div>
 <script src="./js/main.js" defer></script>
 </body>
