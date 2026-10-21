@@ -1,474 +1,133 @@
 (() => {
 "use strict";
-
 const $ = (id) => document.getElementById(id);
 const screens = [...document.querySelectorAll(".screen")];
-
 const CONFIG = {
-  facil:   { player: 18, penalty: 7, rivals: [7, 9] },
-  normal:  { player: 17, penalty: 8, rivals: [10, 12] },
-  dificil: { player: 16, penalty: 9, rivals: [12, 14] }
+  facil: { advance: 18, penalty: 0, traffic: 1, speed: 1 },
+  normal: { advance: 16, penalty: 0, traffic: 1.15, speed: 1.15 },
+  dificil: { advance: 14, penalty: 0, traffic: 1.35, speed: 1.35 }
 };
-
 const CATEGORY = {
   matematicas: { label: "🔴 MATEMÁTICAS", color: "#ff435d" },
   espanol: { label: "🔵 ESPAÑOL", color: "#4b91ff" },
   sociales: { label: "🟡 SOCIALES", color: "#f4c842" },
   aleatorio: { label: "🎲 ALEATORIO", color: "#a46bff" }
 };
-
 const VALID_CATEGORIES = new Set(["matematicas", "espanol", "sociales"]);
 const VALID_DIFFICULTIES = new Set(["facil", "normal", "dificil"]);
-
 const state = {
-  category: "matematicas",
-  difficulty: "facil",
-  questions: [],
-  used: new Set(),
-  current: null,
-  locked: true,
-  round: 0,
-  player: 0,
-  rivals: [0, 0],
-  correct: 0,
-  wrong: 0,
-  streak: 0,
-  lives: 3,
-  score: 0,
-  finished: false,
-  countdownTimer: null,
-  nextQuestionTimer: null
+  category: "matematicas", difficulty: "facil", questions: [], used: new Set(), current: null,
+  locked: true, round: 0, player: 0, correct: 0, wrong: 0, streak: 0, bestCombo: 0,
+  lives: 3, score: 0, finished: false, level: 1, distance: 0, countdownTimer: null, nextQuestionTimer: null
 };
-
-function show(id) {
-  screens.forEach((screen) => screen.classList.toggle("active", screen.id === id));
-  $("hud").classList.toggle("hidden", id !== "race");
-  window.scrollTo({ top: 0, behavior: "instant" });
-}
-
-function shuffle(items) {
-  const array = [...items];
-  for (let i = array.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [array[i], array[j]] = [array[j], array[i]];
-  }
-  return array;
-}
-
-function setSelection() {
-  $("selection").textContent =
-    CATEGORY[state.category].label + " · " +
-    state.difficulty.toUpperCase() + " · 3 carriles · 4 opciones";
-}
-
-function validateQuestions(data) {
-  if (!Array.isArray(data) || data.length === 0) {
-    throw new Error("questions.json no contiene un banco de preguntas válido.");
-  }
-
-  const errors = [];
-  data.forEach((q, index) => {
-    const n = index + 1;
-    if (!q || typeof q !== "object") {
-      errors.push("Pregunta #" + n + ": no es un objeto.");
-      return;
-    }
-    if (!VALID_CATEGORIES.has(q.category)) errors.push("Pregunta #" + n + ": categoría inválida.");
-    if (!VALID_DIFFICULTIES.has(q.difficulty)) errors.push("Pregunta #" + n + ": dificultad inválida.");
-    if (typeof q.question !== "string" || !q.question.trim()) errors.push("Pregunta #" + n + ": texto vacío.");
-    if (!Array.isArray(q.options) || q.options.length !== 4) {
-      errors.push("Pregunta #" + n + ": debe tener exactamente 4 opciones.");
-    } else {
-      const normalized = q.options.map((option) => String(option).trim().toLocaleLowerCase("es"));
-      if (normalized.some((option) => !option)) errors.push("Pregunta #" + n + ": hay opciones vacías.");
-      if (new Set(normalized).size !== 4) errors.push("Pregunta #" + n + ": las opciones deben ser diferentes.");
-    }
-    if (!Number.isInteger(q.correct) || q.correct < 0 || q.correct > 3) {
-      errors.push("Pregunta #" + n + ": correct debe estar entre 0 y 3.");
-    }
+let audioContext = null;
+function show(id){ screens.forEach(s => s.classList.toggle("active", s.id === id)); $("hud").classList.toggle("hidden", id !== "race"); window.scrollTo({top:0,behavior:"instant"}); }
+function shuffle(items){ const a=[...items]; for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
+function setSelection(){ $("selection").textContent = `${CATEGORY[state.category].label} · ${state.difficulty.toUpperCase()} · 1 pollo · 3 vidas`; }
+function validateQuestions(data){
+  if(!Array.isArray(data)||!data.length) throw new Error("questions.json no contiene un banco de preguntas válido.");
+  const errors=[];
+  data.forEach((q,i)=>{
+    if(!q||typeof q!=="object"){errors.push(`Pregunta #${i+1}: objeto inválido.`);return;}
+    if(!VALID_CATEGORIES.has(q.category)) errors.push(`Pregunta #${i+1}: categoría inválida.`);
+    if(!VALID_DIFFICULTIES.has(q.difficulty)) errors.push(`Pregunta #${i+1}: dificultad inválida.`);
+    if(typeof q.question!=="string"||!q.question.trim()) errors.push(`Pregunta #${i+1}: texto vacío.`);
+    if(!Array.isArray(q.options)||q.options.length!==4) errors.push(`Pregunta #${i+1}: debe tener 4 opciones.`);
+    if(!Number.isInteger(q.correct)||q.correct<0||q.correct>3) errors.push(`Pregunta #${i+1}: correct inválido.`);
   });
-
-  if (errors.length) {
-    throw new Error("Banco de preguntas inválido:\n" + errors.join("\n"));
-  }
+  if(errors.length) throw new Error("Banco de preguntas inválido:\n"+errors.join("\n"));
 }
-
-async function loadQuestions() {
-  if (state.questions.length) return;
-  try {
-    const response = await fetch("./data/questions.json", { cache: "no-store" });
-    if (!response.ok) throw new Error("HTTP " + response.status);
-    const data = await response.json();
-    validateQuestions(data);
-    state.questions = data;
-  } catch (error) {
-    console.error("POLLITO RACE: no se pudo cargar questions.json", error);
-    throw new Error(
-      "No se pudo cargar questions.json. Abre el juego desde TecnoMath/GitHub Pages o un servidor local para permitir la carga del JSON."
-    );
-  }
+async function loadQuestions(){
+  if(state.questions.length) return;
+  const response=await fetch("./data/questions.json",{cache:"no-store"});
+  if(!response.ok) throw new Error(`No se pudo cargar questions.json (HTTP ${response.status}).`);
+  const data=await response.json(); validateQuestions(data); state.questions=data;
 }
-
-function availableQuestions() {
-  let pool = state.questions.filter((q) =>
-    state.category === "aleatorio" || q.category === state.category
-  );
-  const byDifficulty = pool.filter((q) => q.difficulty === state.difficulty);
-  if (byDifficulty.length >= 4) pool = byDifficulty;
+function availableQuestions(){
+  let pool=state.questions.filter(q=>state.category==="aleatorio"||q.category===state.category);
+  const same=pool.filter(q=>q.difficulty===state.difficulty);
+  if(same.length>=4) pool=same;
   return pool;
 }
-
-function resetGame() {
-  clearTimers();
-  state.used.clear();
-  state.current = null;
-  state.locked = true;
-  state.round = 0;
-  state.player = 0;
-  state.rivals = [0, 0];
-  state.correct = 0;
-  state.wrong = 0;
-  state.streak = 0;
-  state.lives = 3;
-  state.score = 0;
-  state.finished = false;
-  $("answers").replaceChildren();
-  $("feedback").textContent = "";
-  $("raceMessage").textContent = "Preparando carrera…";
+function resetGame(){
+  clearTimers(); state.used.clear(); state.current=null; state.locked=true; state.round=0; state.player=0;
+  state.correct=0;state.wrong=0;state.streak=0;state.bestCombo=0;state.lives=3;state.score=0;state.finished=false;state.level=1;state.distance=0;
+  $("answers").replaceChildren(); $("feedback").textContent=""; $("raceMessage").textContent="Preparando partida…";
+  $("player").className="runner player-runner"; render();
+}
+function render(){
+  state.distance=Math.round(state.player*10);
+  $("hudLevel").textContent=state.level; $("hudLives").textContent=state.lives>0?"❤️".repeat(state.lives):"0"; $("hudScore").textContent=state.score; $("hudDistance").textContent=state.distance+"m";
+  $("raceLives").textContent=state.lives>0?"❤️".repeat(state.lives):"0"; $("streak").textContent=state.streak?"x"+state.streak:"0"; $("score").textContent=state.score; $("raceDistance").textContent=state.distance+"m";
+  $("progressText").textContent=Math.round(state.player)+"%"; $("progressBar").style.width=Math.min(100,state.player)+"%";
+  $("player").style.left=(13+state.player*0.78)+"%";
+}
+function chooseQuestion(){
+  const pool=availableQuestions(); if(!pool.length) throw new Error("No hay preguntas para esta configuración.");
+  let candidates=pool.filter(q=>!state.used.has(q.question)); if(!candidates.length){state.used.clear();candidates=pool;}
+  state.current=candidates[Math.floor(Math.random()*candidates.length)]; state.used.add(state.current.question);
+  $("questionNumber").textContent="Pregunta "+(state.round+1); $("question").textContent=state.current.question;
+  $("categoryBadge").textContent=CATEGORY[state.current.category].label; $("categoryBadge").style.background=CATEGORY[state.current.category].color;
+  $("feedback").textContent=""; $("feedback").className="feedback"; $("answers").replaceChildren();
+  shuffle(state.current.options.map((text,index)=>({text,index}))).forEach(option=>{
+    const b=document.createElement("button"); b.className="answer"; b.type="button"; b.textContent=option.text; b.dataset.answerIndex=String(option.index); b.addEventListener("click",()=>answer(option.index,b),{once:true}); $("answers").appendChild(b);
+  });
+}
+function initAudio(){ try{audioContext ||= new (window.AudioContext||window.webkitAudioContext)(); if(audioContext.state==="suspended") audioContext.resume();}catch(_){audioContext=null;} }
+function beep(freq,duration,type="sine"){ if(!audioContext)return; try{const o=audioContext.createOscillator(),g=audioContext.createGain();o.type=type;o.frequency.value=freq;g.gain.setValueAtTime(.045,audioContext.currentTime);g.gain.exponentialRampToValueAtTime(.001,audioContext.currentTime+duration);o.connect(g);g.connect(audioContext.destination);o.start();o.stop(audioContext.currentTime+duration);}catch(_){} }
+function impactEffect(){
+  const el=document.createElement("div");el.className="impact";el.innerHTML="<span>🐔 🚗💥</span>";document.body.appendChild(el);window.setTimeout(()=>el.remove(),700);
+  $("track").classList.remove("hit-state");void $("track").offsetWidth;$("track").classList.add("hit-state");animateRunner("player","hit");beep(110,.18,"sawtooth");beep(70,.25,"square");
+}
+function answer(index,clicked){
+  if(state.locked||state.finished||!state.current)return; state.locked=true; document.querySelectorAll(".answer").forEach(b=>b.disabled=true);
+  const q=state.current, correct=index===q.correct;
+  if(correct){
+    state.correct++;state.streak++;state.bestCombo=Math.max(state.bestCombo,state.streak);state.level=Math.min(10,1+Math.floor(state.correct/3));
+    const mult=Math.min(5,state.streak),points=100+50*mult+state.level*10;state.score+=points;
+    state.player=Math.min(100,state.player+CONFIG[state.difficulty].advance+Math.min(5,state.streak)); clicked.classList.add("correct");
+    $("feedback").className="feedback good";$("feedback").textContent=`¡CORRECTO! 🐔💨 +${points} puntos · combo x${mult}`;$("raceMessage").textContent="⚡ ¡Respuesta correcta! El pollo avanza.";animateRunner("player","bump");beep(660,.08);beep(880,.1);
+  }else{
+    state.wrong++;state.streak=0;state.lives=Math.max(0,state.lives-1);clicked.classList.add("wrong");
+    document.querySelectorAll(".answer").forEach(b=>{if(Number(b.dataset.answerIndex)===q.correct)b.classList.add("correct");});
+    $("feedback").className="feedback bad";$("feedback").textContent=`¡INCORRECTO! La respuesta era: ${q.options[q.correct]}`;$("raceMessage").textContent=state.lives?"🚗💥 ¡El carro atropelló al pollo! Pierdes una vida.":"🚗💥 ¡Última vida perdida!";impactEffect();
+  }
   render();
+  if(state.lives<=0){state.nextQuestionTimer=window.setTimeout(()=>finishGame(true),900);return;}
+  if(state.player>=100){state.nextQuestionTimer=window.setTimeout(()=>finishGame(false),650);return;}
+  state.nextQuestionTimer=window.setTimeout(()=>{state.round++;state.locked=false;chooseQuestion();},700);
 }
-
-function render() {
-  $("hudProgress").textContent = Math.round(state.player) + "%";
-  $("hudLives").textContent = state.lives > 0 ? "❤️".repeat(state.lives) : "0";
-  $("hudScore").textContent = state.score;
-  $("correctCount").textContent = state.correct;
-  $("wrongCount").textContent = state.wrong;
-  $("streak").textContent = state.streak ? "x" + Math.min(4, state.streak) : "0";
-  $("score").textContent = state.score;
-  $("progressText").textContent = Math.round(state.player) + "%";
-  $("progressBar").style.width = Math.min(100, state.player) + "%";
-  $("player").style.left = (8 + state.player * 0.78) + "%";
-  $("rival1").style.left = (8 + state.rivals[0] * 0.78) + "%";
-  $("rival2").style.left = (8 + state.rivals[1] * 0.78) + "%";
+function animateRunner(id,cls){const el=$(id);el.classList.remove(cls);void el.offsetWidth;el.classList.add(cls);window.setTimeout(()=>el.classList.remove(cls),700);}
+function startCountdown(){
+  clearTimers();const overlay=document.createElement("div");overlay.className="countdown";overlay.innerHTML="<strong>3</strong><span>¡PREPÁRATE!</span>";document.body.appendChild(overlay);let n=3;
+  const tick=()=>{if(state.finished){overlay.remove();return;}if(n>0){overlay.querySelector("strong").textContent=n;overlay.querySelector("span").textContent=n===3?"¡PREPÁRATE!":"¡LISTO!";beep(300,.08);n--;state.countdownTimer=setTimeout(tick,650);}else{overlay.querySelector("strong").textContent="GO!";overlay.querySelector("span").textContent="¡CRUZA LA CARRETERA!";beep(800,.12);state.countdownTimer=setTimeout(()=>{overlay.remove();state.locked=false;chooseQuestion();},500);}};tick();
 }
-
-function chooseQuestion() {
-  const pool = availableQuestions();
-  if (!pool.length) throw new Error("No hay preguntas para esta configuración.");
-
-  let candidates = pool.filter((q) => !state.used.has(q.question));
-  if (!candidates.length) {
-    state.used.clear();
-    candidates = pool;
-  }
-
-  const question = candidates[Math.floor(Math.random() * candidates.length)];
-  state.current = question;
-  state.used.add(question.question);
-
-  $("questionNumber").textContent = "Pregunta " + (state.round + 1);
-  $("question").textContent = question.question;
-  $("categoryBadge").textContent = CATEGORY[question.category].label;
-  $("categoryBadge").style.background = CATEGORY[question.category].color;
-  $("feedback").textContent = "";
-  $("feedback").className = "feedback";
-  $("answers").replaceChildren();
-
-  shuffle(question.options.map((text, index) => ({ text, index }))).forEach((option) => {
-    const button = document.createElement("button");
-    button.className = "answer";
-    button.type = "button";
-    button.textContent = option.text;
-    button.dataset.answerIndex = String(option.index);
-    button.addEventListener("click", () => answer(option.index, button), { once: true });
-    $("answers").appendChild(button);
-  });
+function finishGame(gameOver){
+  if(state.finished)return;state.finished=true;state.locked=true;clearTimers();
+  const won=!gameOver&&state.player>=100;const bonus=won?300+state.level*25:0;state.score+=bonus;render();
+  $("resultEmoji").textContent=won?"🏆":"💀";$("resultTitle").textContent=won?"¡CRUZASTE LA CARRETERA!":"GAME OVER";
+  $("resultText").textContent=won?`¡Lo lograste! El único pollo llegó a salvo y ganaste ${bonus} puntos de bonificación.`:"El tráfico ganó esta vez. ¡Aprende de tus errores y vuelve a intentarlo!";
+  $("resultScore").textContent=state.score;$("resultCorrect").textContent=state.correct;$("resultWrong").textContent=state.wrong;$("resultDistance").textContent=state.distance+"m";$("resultCombo").textContent=state.bestCombo;$("resultLevel").textContent=state.level;saveRecord(won);show("result");
 }
-
-function answer(index, clicked) {
-  if (state.locked || state.finished || !state.current) return;
-  state.locked = true;
-
-  document.querySelectorAll(".answer").forEach((button) => {
-    button.disabled = true;
-  });
-
-  const question = state.current;
-  const correct = index === question.correct;
-
-  if (correct) {
-    state.correct++;
-    state.streak++;
-    const multiplier = Math.min(4, state.streak);
-    const points = 100 + (multiplier > 1 ? 50 * multiplier : 0);
-    state.score += points;
-    state.player = Math.min(100, state.player + CONFIG[state.difficulty].player + Math.min(3, state.streak - 1));
-    clicked.classList.add("correct");
-    $("feedback").className = "feedback good";
-    $("feedback").textContent = "¡CORRECTO! 🐔💨 +" + points + " puntos · racha x" + multiplier;
-    $("raceMessage").textContent = "⚡ ¡Tu pollito acelera!";
-    animateRunner("player", "bump");
-  } else {
-    state.wrong++;
-    state.streak = 0;
-    state.lives = Math.max(0, state.lives - 1);
-    state.player = Math.max(0, state.player - CONFIG[state.difficulty].penalty);
-    clicked.classList.add("wrong");
-    document.querySelectorAll(".answer").forEach((button) => {
-      if (Number(button.dataset.answerIndex) === question.correct) button.classList.add("correct");
-    });
-    $("feedback").className = "feedback bad";
-    $("feedback").textContent = "¡INCORRECTO! 😵 Correcta: " + question.options[question.correct];
-    $("raceMessage").textContent = state.lives
-      ? "💥 Pierdes distancia, pero sigues en carrera."
-      : "💥 Sin vidas. Todavía puedes terminar la carrera.";
-    animateRunner("player", "shake");
-  }
-
-  advanceRivals();
-  render();
-
-  if (checkFinish()) return;
-
-  state.nextQuestionTimer = window.setTimeout(() => {
-    if (state.finished) return;
-    state.round++;
-    state.locked = false;
-    chooseQuestion();
-  }, 700);
+function saveRecord(won){try{const key="chickenRiceRecords",records=JSON.parse(localStorage.getItem(key)||"[]");records.push({score:state.score,won,correct:state.correct,wrong:state.wrong,distance:state.distance,combo:state.bestCombo,level:state.level,category:state.category,difficulty:state.difficulty,date:new Date().toLocaleDateString("es-CO")});records.sort((a,b)=>b.score-a.score);localStorage.setItem(key,JSON.stringify(records.slice(0,10)));}catch(_) {}}
+function renderRecords(){
+  let records=[];try{records=JSON.parse(localStorage.getItem("chickenRiceRecords")||"[]");}catch(_){records=[];}
+  $("recordsList").replaceChildren();if(!records.length){const p=document.createElement("p");p.className="records-empty";p.textContent="Todavía no hay récords.";$("recordsList").appendChild(p);return;}
+  records.forEach((r,i)=>{const item=document.createElement("div");item.className="record";const info=document.createElement("span");info.textContent=`#${i+1} · ${r.won?"🏆 GANADA":"💀 GAME OVER"}`;const small=document.createElement("small");small.textContent=`${(CATEGORY[r.category]?.label||r.category)} · ${r.correct} correctas · ${r.date}`;info.appendChild(small);const score=document.createElement("b");score.textContent=r.score+" pts";item.append(info,score);$("recordsList").appendChild(item);});
 }
-
-function animateRunner(id, className) {
-  const runner = $(id);
-  runner.classList.remove(className);
-  void runner.offsetWidth;
-  runner.classList.add(className);
-  window.setTimeout(() => runner.classList.remove(className), 400);
+function startRace(){
+  initAudio();loadQuestions().then(()=>{resetGame();$("raceCategory").textContent=CATEGORY[state.category].label;$("raceMessage").textContent="🛣️ Responde bien para avanzar. ¡Cuidado con los carros!";show("race");startCountdown();}).catch(err=>{console.error(err);alert(err.message||"No se pudo iniciar CHICKEN RICE.");});
 }
-
-function advanceRivals() {
-  const cfg = CONFIG[state.difficulty];
-  const lead = state.player - Math.max(...state.rivals);
-  state.rivals = state.rivals.map((position, index) =>
-    Math.min(100, position + cfg.rivals[index] + (lead > 25 ? 1 : 0))
-  );
+function clearTimers(){if(state.countdownTimer)clearTimeout(state.countdownTimer);if(state.nextQuestionTimer)clearTimeout(state.nextQuestionTimer);state.countdownTimer=null;state.nextQuestionTimer=null;document.querySelectorAll(".countdown").forEach(e=>e.remove());}
+function bind(){
+  $("play").addEventListener("click",()=>show("setup"));$("categories").addEventListener("click",()=>show("setup"));$("back").addEventListener("click",()=>show("home"));$("start").addEventListener("click",startRace);$("again").addEventListener("click",startRace);$("menu").addEventListener("click",()=>show("home"));
+  document.querySelectorAll("[data-cat]").forEach(b=>b.addEventListener("click",()=>{document.querySelectorAll("[data-cat]").forEach(x=>x.classList.remove("active"));b.classList.add("active");state.category=b.dataset.cat;setSelection();}));
+  document.querySelectorAll("[data-diff]").forEach(b=>b.addEventListener("click",()=>{document.querySelectorAll("[data-diff]").forEach(x=>x.classList.remove("active"));b.classList.add("active");state.difficulty=b.dataset.diff;setSelection();}));
+  document.querySelectorAll("[data-modal]").forEach(b=>b.addEventListener("click",()=>{$(b.dataset.modal).classList.add("open");if(b.dataset.modal==="records")renderRecords();}));
+  document.querySelectorAll("[data-close]").forEach(b=>b.addEventListener("click",()=>$(b.dataset.close).classList.remove("open")));
+  document.querySelectorAll(".modal").forEach(m=>m.addEventListener("click",e=>{if(e.target===m)m.classList.remove("open");}));
+  $("clearRecords").addEventListener("click",()=>{localStorage.removeItem("chickenRiceRecords");renderRecords();});
+  setSelection();
 }
-
-function checkFinish() {
-  const positions = [state.player, ...state.rivals];
-  if (positions.every((position) => position < 100)) return false;
-
-  const ordered = positions
-    .map((position, index) => ({ position, index }))
-    .sort((a, b) => b.position - a.position || a.index - b.index);
-  const position = ordered.findIndex((item) => item.index === 0) + 1;
-  finish(position);
-  return true;
-}
-
-function finish(position) {
-  state.finished = true;
-  state.locked = true;
-  clearTimers();
-
-  const bonus = position === 1 ? 300 : position === 2 ? 150 : 50;
-  state.score += bonus;
-
-  $("resultEmoji").textContent = position === 1 ? "🏆" : position === 2 ? "🥈" : "🥉";
-  $("resultTitle").textContent = position === 1 ? "¡GANASTE!" : position === 2 ? "¡SEGUNDO LUGAR!" : "¡TERCER LUGAR!";
-  $("resultText").textContent = position === 1
-    ? "¡Excelente! Tu pollito cruzó la meta primero."
-    : "¡Buen trabajo! Practica y vuelve a correr para mejorar tu posición.";
-  $("resultPosition").textContent = position + ".º";
-  $("resultCorrect").textContent = state.correct;
-  $("resultWrong").textContent = state.wrong;
-  $("resultScore").textContent = state.score;
-
-  saveRecord(position);
-  show("result");
-}
-
-function saveRecord(position) {
-  try {
-    const records = JSON.parse(localStorage.getItem("pollitoRaceRecords") || "[]");
-    records.push({
-      score: state.score,
-      position,
-      correct: state.correct,
-      wrong: state.wrong,
-      category: state.category,
-      difficulty: state.difficulty,
-      date: new Date().toLocaleDateString("es-CO")
-    });
-    records.sort((a, b) => b.score - a.score);
-    localStorage.setItem("pollitoRaceRecords", JSON.stringify(records.slice(0, 10)));
-  } catch (error) {
-    console.warn("Récord no guardado:", error);
-  }
-}
-
-function renderRecords() {
-  let records = [];
-  try {
-    records = JSON.parse(localStorage.getItem("pollitoRaceRecords") || "[]");
-  } catch (_) {
-    records = [];
-  }
-
-  $("recordsList").replaceChildren();
-  if (!records.length) {
-    const empty = document.createElement("p");
-    empty.className = "records-empty";
-    empty.textContent = "Todavía no hay récords.";
-    $("recordsList").appendChild(empty);
-    return;
-  }
-
-  records.forEach((record, index) => {
-    const item = document.createElement("div");
-    item.className = "record";
-
-    const info = document.createElement("span");
-    info.textContent = "#" + (index + 1) + " · " + (CATEGORY[record.category]?.label || record.category);
-
-    const details = document.createElement("small");
-    details.textContent = (record.difficulty || "").toUpperCase() + " · " + record.correct + " correctas · " + record.date;
-    info.appendChild(details);
-
-    const score = document.createElement("b");
-    score.textContent = record.score + " pts";
-
-    item.append(info, score);
-    $("recordsList").appendChild(item);
-  });
-}
-
-function startRace() {
-  loadQuestions()
-    .then(() => {
-      resetGame();
-      $("raceCategory").textContent = CATEGORY[state.category].label;
-      $("raceMessage").textContent = "🏁 ¡Prepárate! La carrera empieza ahora.";
-      show("race");
-      startCountdown();
-    })
-    .catch((error) => {
-      console.error(error);
-      alert(error.message);
-    });
-}
-
-function startCountdown() {
-  clearTimers();
-  const overlay = document.createElement("div");
-  overlay.className = "countdown";
-  overlay.setAttribute("role", "status");
-  overlay.setAttribute("aria-live", "assertive");
-  overlay.innerHTML = "<strong>3</strong><span>¡PREPÁRATE!</span>";
-  document.body.appendChild(overlay);
-
-  let number = 3;
-  const tick = () => {
-    if (state.finished) {
-      overlay.remove();
-      return;
-    }
-
-    if (number > 0) {
-      overlay.querySelector("strong").textContent = String(number);
-      overlay.querySelector("span").textContent = number === 3 ? "¡PREPÁRATE!" : "¡LISTO!";
-      number--;
-      state.countdownTimer = window.setTimeout(tick, 700);
-      return;
-    }
-
-    overlay.querySelector("strong").textContent = "🏁";
-    overlay.querySelector("span").textContent = "¡CORRE!";
-    state.countdownTimer = window.setTimeout(() => {
-      overlay.remove();
-      state.locked = false;
-      chooseQuestion();
-      render();
-    }, 500);
-  };
-
-  tick();
-}
-
-function clearTimers() {
-  if (state.countdownTimer) {
-    clearTimeout(state.countdownTimer);
-    state.countdownTimer = null;
-  }
-  if (state.nextQuestionTimer) {
-    clearTimeout(state.nextQuestionTimer);
-    state.nextQuestionTimer = null;
-  }
-  document.querySelectorAll(".countdown").forEach((node) => node.remove());
-}
-
-function openModal(id) {
-  $(id).classList.add("open");
-  if (id === "records") renderRecords();
-}
-
-document.querySelectorAll("[data-cat]").forEach((button) => {
-  button.addEventListener("click", () => {
-    document.querySelectorAll("[data-cat]").forEach((item) => item.classList.remove("active"));
-    button.classList.add("active");
-    state.category = button.dataset.cat;
-    setSelection();
-  });
-});
-
-document.querySelectorAll("[data-diff]").forEach((button) => {
-  button.addEventListener("click", () => {
-    document.querySelectorAll("[data-diff]").forEach((item) => item.classList.remove("active"));
-    button.classList.add("active");
-    state.difficulty = button.dataset.diff;
-    setSelection();
-  });
-});
-
-$("play").addEventListener("click", () => show("setup"));
-$("categories").addEventListener("click", () => show("setup"));
-$("back").addEventListener("click", () => show("home"));
-$("start").addEventListener("click", startRace);
-$("again").addEventListener("click", () => {
-  resetGame();
-  show("setup");
-});
-$("menu").addEventListener("click", () => {
-  clearTimers();
-  show("home");
-});
-
-document.querySelectorAll("[data-modal]").forEach((button) => {
-  button.addEventListener("click", () => openModal(button.dataset.modal));
-});
-
-document.querySelectorAll("[data-close]").forEach((button) => {
-  button.addEventListener("click", () => $(button.dataset.close).classList.remove("open"));
-});
-
-document.querySelectorAll(".modal").forEach((modal) => {
-  modal.addEventListener("click", (event) => {
-    if (event.target === modal) modal.classList.remove("open");
-  });
-});
-
-$("clearRecords").addEventListener("click", () => {
-  localStorage.removeItem("pollitoRaceRecords");
-  renderRecords();
-});
-
-document.addEventListener("keydown", (event) => {
-  if (event.key === "Escape") {
-    document.querySelectorAll(".modal.open").forEach((modal) => modal.classList.remove("open"));
-  }
-});
-
-setSelection();
-render();
+document.addEventListener("DOMContentLoaded",bind);
 })();
