@@ -1022,29 +1022,7 @@
                     .filter(Boolean)
                     .filter(g => g.status !== 'hidden' && g.status !== 'draft');
 
-                // La página principal comparte el orden guardado en Orden de votaciones.
-                // Los juegos que no estén en esa lista conservan su orden relativo al final.
-                try {
-                    const db = await window.TecnomathAuth.getClient();
-                    const setting = await db.rpc('tecnomath_get_setting', { p_key: 'voting_game_order' });
-                    if (setting.error) throw setting.error;
-                    let savedOrder = setting.data;
-                    if (typeof savedOrder === 'string') {
-                        try { savedOrder = JSON.parse(savedOrder); } catch (_) { savedOrder = []; }
-                    }
-                    if (Array.isArray(savedOrder) && savedOrder.length) {
-                        const positions = new Map(savedOrder.map((key, index) => [String(key), index]));
-                        projects = projects.map((game, index) => ({ game, index, key: String(game.url || game.name || '').trim() }))
-                            .sort((a, b) => {
-                                const pa = positions.has(a.key) ? positions.get(a.key) : Number.MAX_SAFE_INTEGER;
-                                const pb = positions.has(b.key) ? positions.get(b.key) : Number.MAX_SAFE_INTEGER;
-                                return pa - pb || a.index - b.index;
-                            })
-                            .map(item => item.game);
-                    }
-                } catch (orderError) {
-                    console.warn('No se pudo cargar el orden de votaciones; se conserva el orden del catálogo:', orderError);
-                }
+                // El orden centralizado se aplica únicamente en js/published-games.js.
 
                 console.log('✅ data/games.json cargado. Juegos disponibles:', projects.length);
             } catch (error) {
