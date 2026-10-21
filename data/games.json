@@ -94,7 +94,7 @@
     "sourceType": "internal",
     "description": "Asistente educativo de inteligencia artificial para aprender, practicar y resolver dudas.",
     "status": "published",
-    "allowVoting": false,
+    "allowVoting": true,
     "featured": true,
     "order": 4,
     "urlType": "internal",
