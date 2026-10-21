@@ -24,7 +24,8 @@ body{background:radial-gradient(circle at 15% 0,#141431 0,transparent 36%),var(-
 (function(){
 'use strict';
 const $=id=>document.getElementById(id), esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const EXCLUDED=new Set(["Eco Recolector","MathSolve","MathSolve 2","Tower Game","2048","Pacman","Run 3","Tower Building","Tappy Tower","Stickman Archer","2048 Merge","Endless Car Race","Hexagon Fall","Rocket Pult","Cookie Clicker","Quiz: Reseña Crítica","TecnoMath Aula"]);\nconst state={db:null,games:[],visibility:new Map(),stats:new Map(),selected:new Set(),loading:false};
+const EXCLUDED=new Set(["Eco Recolector","MathSolve","MathSolve 2","Tower Game","2048","Pacman","Run 3","Tower Building","Tappy Tower","Stickman Archer","2048 Merge","Endless Car Race","Hexagon Fall","Rocket Pult","Cookie Clicker","Quiz: Reseña Crítica","TecnoMath Aula"]);
+const state={db:null,games:[],visibility:new Map(),stats:new Map(),selected:new Set(),loading:false};
 function notice(msg,type=''){const el=$('notice');el.textContent=msg;el.className='notice '+type}
 function key(g){return String(g.id||g.url||'').trim()}
 function fmtDate(v){if(!v)return '—';const d=new Date(v);return Number.isNaN(d.getTime())?'—':d.toLocaleString('es-CO',{dateStyle:'short',timeStyle:'short'})}
