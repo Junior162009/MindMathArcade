@@ -27,3 +27,144 @@
 @keyframes roadShake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}50%{transform:translateX(5px)}75%{transform:translateX(-3px)}}
 @keyframes safeFlash{0%,100%{filter:brightness(1)}45%{filter:brightness(1.45)}}
 @media(max-width:520px){.track{height:clamp(370px,56vh,500px);min-height:370px}.runner{width:52px;height:52px}.crash-car{width:52px;height:52px}.race-stats{grid-template-columns:repeat(3,1fr)}.finish-line{height:30px;font-size:10px}}
+
+
+/* === CHIKEN RACE · Happy Arcade visual refresh === */
+:root{--bg:#eaf8ff;--panel:#fff;--panel2:#f4f0ff;--line:#c9e5f5;--text:#18314c;--muted:#58728d;--red:#ff5470;--blue:#168cff;--yellow:#ffcf35;--purple:#9557f5;--green:#35c978;--road:#596574;--road2:#687585}
+html{background:#eaf8ff;overflow-x:hidden}body{color:var(--text);background:radial-gradient(circle at 8% 8%,#fff4a8 0 5%,transparent 19%),radial-gradient(circle at 92% 15%,#ffd8ef 0 4%,transparent 19%),linear-gradient(145deg,#b9f0ff 0%,#e7e2ff 45%,#fff0c8 100%);background-attachment:fixed;overflow-x:hidden}
+body:before{content:"✦　☁　✿　★　☁　✦";position:fixed;inset:95px 0 auto;z-index:-1;pointer-events:none;text-align:center;font-size:clamp(24px,4vw,44px);letter-spacing:clamp(8px,4vw,48px);color:#fff9;text-shadow:0 3px 0 #8dddf344;white-space:nowrap;animation:skyDrift 18s ease-in-out infinite alternate}
+.topbar{background:#ffffffdf;border-bottom:2px solid #ffffff;box-shadow:0 5px 20px #5a83a51c;backdrop-filter:blur(12px)}.brand{color:#233b65}.brand b{color:#ff9e26}.brand small{color:#6984a0}.hud span,.race-stats span{background:#fff;border:1px solid #c6e4f6;color:#294667;box-shadow:0 4px 0 #bddcec;border-radius:13px}.eyebrow{color:#8851e8}
+.hero{min-height:460px}.hero h1{color:#254a7a;text-shadow:0 4px 0 #fff;letter-spacing:-3px}.hero h1 em{color:#ff8d2c;text-shadow:0 3px 0 #ffe0a3}.hero p{color:#3d5b78}.btn{transition:transform .16s ease,filter .16s ease,box-shadow .16s ease;box-shadow:0 5px 0 #00000018}.btn:hover{filter:brightness(1.04);transform:translateY(-2px)}.btn:active{transform:translateY(2px);box-shadow:0 2px 0 #00000018}.primary{background:linear-gradient(135deg,#ffe45c,#ffad35);color:#55340a;box-shadow:0 6px 0 #e58c24,0 12px 24px #ffbd3c45}.primary:hover{box-shadow:0 8px 0 #e58c24,0 15px 26px #ffbd3c55}.secondary{background:linear-gradient(135deg,#a879ff,#7951e8);color:#fff;border:0;box-shadow:0 5px 0 #6039c1}.preview{border:3px solid #fff;background:linear-gradient(145deg,#a5e9ff,#c6b7ff 52%,#ffd6ed);box-shadow:0 16px 35px #5e7eb52b}.preview-title{color:#315580}.preview-track{border:4px solid #fff;box-shadow:0 8px 0 #527d9d33;background:repeating-linear-gradient(90deg,#596574 0 45px,#687585 45px 90px)}.preview-lane{border-bottom:2px dashed #fff}.preview-lane span{filter:drop-shadow(0 4px 2px #20334a33)}.home-grid{gap:15px}.tile{background:#ffffffed;border:2px solid #fff;color:#28466a;box-shadow:0 8px 0 #8cb9d52a,0 14px 25px #658bb01a;transition:transform .18s,box-shadow .18s}.tile:hover{transform:translateY(-4px) rotate(-.4deg);box-shadow:0 12px 0 #8cb9d52a,0 18px 28px #658bb02a}.tile small{color:#627d99}.tile.red{box-shadow:inset 0 5px #ff6580,0 8px 0 #8cb9d52a}.tile.blue{box-shadow:inset 0 5px #3aa5ff,0 8px 0 #8cb9d52a}.tile.yellow{box-shadow:inset 0 5px #ffd34f,0 8px 0 #8cb9d52a}
+.panel,.selection{background:#ffffffed;border:2px solid #fff;box-shadow:0 9px 0 #8cb9d52a,0 14px 30px #658bb018}.section-head h2{color:#254a7a}.icon-btn,.close{background:#fff;color:#31547b;border:2px solid #d4e8f7}.choice{background:linear-gradient(135deg,#fff,#f3f8ff);color:#294667;border:2px solid #d8eaf8;transition:transform .16s,border-color .16s,box-shadow .16s}.choice:hover{transform:translateY(-2px)}.choice small{color:#66809b}.choice.active{background:linear-gradient(135deg,#fff8d6,#fff);border-color:#ffbf31;box-shadow:inset 0 0 0 1px #ffbf31,0 4px 0 #f3d68a}.choice.red.active{border-color:#ff7188;box-shadow:inset 0 0 0 1px #ff7188,0 4px 0 #ffc1cb}.choice.blue.active{border-color:#54adff;box-shadow:inset 0 0 0 1px #54adff,0 4px 0 #b9e0ff}.choice.purple.active{border-color:#a47bff;box-shadow:inset 0 0 0 1px #a47bff,0 4px 0 #ddceff}
+.race-card,.question-card{background:#ffffffed;border:2px solid #fff;box-shadow:0 9px 0 #8cb9d52a,0 14px 30px #658bb018}.track{border:5px solid #fff;box-shadow:inset 0 0 0 3px #475565,0 10px 0 #76b68c,0 17px 28px #315f6940;background:repeating-linear-gradient(90deg,#596574 0 52px,#687585 52px 104px)}.track .lane.lane-vertical{background:linear-gradient(90deg,#586574,#6c7887 50%,#586574);border-right:3px dashed #ffffffb8}.grass{width:12px;background:repeating-linear-gradient(0deg,#28a85d 0 12px,#4bd979 12px 24px,#8be66a 24px 30px)}.finish-line{color:#fff;background:repeating-linear-gradient(90deg,#fff 0 12px,#ff5d79 12px 24px);text-shadow:0 2px 4px #23354a;box-shadow:0 4px 0 #253c5533}.runner{filter:drop-shadow(0 0 5px #fff) drop-shadow(0 7px 4px #25354a66)}.runner.bump{filter:drop-shadow(0 0 11px #71ffac) drop-shadow(0 7px 4px #25354a55)}.crash-car .emoji-sprite{filter:drop-shadow(0 0 4px #fff) drop-shadow(0 6px 4px #25354a77)}.road-segment.safe{background:linear-gradient(90deg,#38df8b66,#80ffaecc,#38df8b66);box-shadow:inset 0 0 0 2px #a4ffb9,0 0 18px #39e78d88}.progress-row{color:#58728d;font-weight:800}.progress{background:#dcebf6;border:1px solid #c6deef;height:12px}.progress i{background:linear-gradient(90deg,#36d984,#c5f75c,#ffcf35);border-radius:20px;box-shadow:0 0 12px #6be99b88}.race-message{color:#426b8a}.question-head span{box-shadow:0 3px 0 #e8c24a}.question-head small{color:#66809b}.question-card h2{color:#213f63}.answer{background:linear-gradient(135deg,#fff,#eff8ff);color:#294667;border:2px solid #d2e7f7;box-shadow:0 4px 0 #c6ddeb;transition:transform .16s,border-color .16s,background .16s}.answer:hover:not(:disabled){transform:translateY(-3px);border-color:#71bcff;box-shadow:0 7px 0 #c6ddeb}.answer:active:not(:disabled){transform:translateY(1px)}.answer.correct{background:linear-gradient(135deg,#e0ffec,#baf8d2);border-color:#31c978;color:#17683d;box-shadow:0 4px 0 #8de5b1}.answer.wrong{background:linear-gradient(135deg,#ffe6e8,#ffcbd2);border-color:#ff6075;color:#a52d44;box-shadow:0 4px 0 #f6a7b3}.feedback.good{color:#179958}.feedback.bad{color:#d83b55}.result-card{background:linear-gradient(145deg,#fff,#f1f7ff);border:3px solid #fff;box-shadow:0 12px 0 #8cb9d52a,0 20px 45px #658bb029}.result-card h2{color:#7145d4}.result-card p{color:#58728d}.result-stats div{background:linear-gradient(145deg,#f5fbff,#e9f4ff);border:1px solid #cce4f5}.result-stats small{color:#64809b}.modal{background:#27486a88;backdrop-filter:blur(8px)}.modal-card{background:linear-gradient(145deg,#fff,#f1f7ff);border:3px solid #fff;box-shadow:0 20px 60px #26496a40}.modal-card li{color:#405f7e}.record{background:#f5fbff;border:1px solid #d0e6f6}.record small,.records-empty{color:#67829d}.countdown{background:linear-gradient(145deg,#70dfffed,#b8a0ffed,#ffcae6ed);backdrop-filter:blur(8px)}.countdown strong{color:#ffdf47;text-shadow:0 5px 0 #ec8d3d,0 9px 20px #24486a55}.countdown span{color:#fff;text-shadow:0 2px 4px #4a4e9b}
+@keyframes skyDrift{from{transform:translateX(-12px) translateY(0)}to{transform:translateX(12px) translateY(10px)}}
+@media(max-width:520px){.topbar{height:auto;min-height:64px;gap:8px;align-items:flex-start;flex-direction:column}.brand{font-size:24px}.hud{justify-content:flex-start;width:100%}.screen{min-height:calc(100vh - 64px)}.hero{min-height:0;padding:18px 0}.hero h1{font-size:clamp(43px,12vw,58px)}.preview{height:270px}.race-card,.question-card{padding:9px}.track{border-width:4px}.answer{min-height:54px}.race-stats span{font-size:10px;padding:8px 6px}}
+@media(hover:none){.btn:hover,.tile:hover,.choice:hover,.answer:hover:not(:disabled){transform:none}}
+@media(prefers-reduced-motion:reduce){body:before{animation:none}.btn,.tile,.choice,.answer{transition:none}}
+
+
+/* === FIT-TO-SCREEN · compacto, claro y adaptable === */
+:root{--bg:#eaf8ff;--panel:#fff;--panel2:#f5f0ff;--line:#cce5f4;--text:#203b5c;--muted:#5e7892}
+html,body{min-height:100%;background-color:#dff5ff}
+body{background:radial-gradient(ellipse at 8% 0%,#fff3a8 0,transparent 27%),radial-gradient(ellipse at 96% 12%,#ffd9ed 0,transparent 28%),linear-gradient(145deg,#b9efff,#e8e0ff 55%,#fff0cc);color:#203b5c}
+.topbar{min-height:58px;height:auto;padding:7px clamp(10px,2vw,28px);gap:10px}
+main{width:min(1320px,calc(100% - 24px));margin-inline:auto}
+.screen{min-height:calc(100svh - 58px);padding:clamp(12px,2vh,24px) 0 clamp(12px,2vh,24px)}
+.hero{min-height:0;min-height:calc(100svh - 210px);gap:clamp(14px,2vw,28px)}
+.hero h1{font-size:clamp(42px,5.7vw,76px);margin:8px 0}
+.hero p{font-size:clamp(14px,1.25vw,18px);line-height:1.4;margin-bottom:16px}
+.preview{height:clamp(230px,48svh,420px)}
+.preview-track{height:clamp(150px,28svh,245px)}
+.home-grid{gap:10px}
+.tile{padding:clamp(10px,1.5vw,18px)}
+.setup-grid{gap:12px}
+.panel{padding:clamp(12px,1.7vw,20px)}
+.choices{gap:7px}
+.choice{padding:clamp(9px,1.2vw,13px)}
+.selection{margin:10px 0;padding:9px}
+#start{min-height:44px}
+.race-stats{gap:6px;margin-bottom:7px}
+.race-stats span{padding:6px 8px;font-size:clamp(10px,.9vw,12px)}
+.race-card{padding:clamp(7px,1vw,11px)}
+.track{height:clamp(230px,42svh,470px);min-height:0;max-height:470px}
+.finish-line{height:clamp(24px,4vh,34px)}
+.road-segments{inset:clamp(24px,4vh,34px) 10px 0}
+.runner{width:clamp(42px,5.2vw,64px);height:clamp(42px,5.2vw,64px)}
+.crash-car{width:clamp(44px,5.5vw,66px);height:clamp(44px,5.5vw,66px)}
+.progress-row{margin:6px 1px 4px}
+.progress{height:9px}
+.race-message{min-height:22px;padding:5px 2px 0;font-size:11px}
+.question-card{margin-top:7px;padding:clamp(9px,1.1vw,13px)}
+.question-card h2{font-size:clamp(16px,1.8vw,24px);line-height:1.2;margin:8px 0}
+.question-head span{font-size:9px;padding:4px 7px}
+.answers{gap:7px}
+.answer{min-height:clamp(42px,6.8vh,58px);padding:8px 11px;font-size:clamp(12px,1.05vw,15px)}
+.feedback{min-height:20px;padding-top:5px;font-size:11px}
+.result-card{margin:clamp(10px,3vh,28px) auto;padding:clamp(18px,3vh,32px)}
+.result-emoji{font-size:clamp(42px,7vh,68px)}
+.result-card h2{font-size:clamp(25px,3vw,34px)}
+.result-stats{margin:clamp(12px,2vh,22px) 0}
+.modal-card{background:linear-gradient(145deg,#fff,#f3f7ff);color:#203b5c}
+.modal-card li{color:#405f7e}
+.countdown{background:linear-gradient(135deg,#6cddffef,#b9a0ffef,#ffcae6ef)}
+/* El juego ocupa el alto útil sin imponer scroll global; solo modales pueden desplazarse. */
+@media(min-width:801px) and (min-height:650px){
+  #race.screen.active{display:grid;grid-template-columns:minmax(0,1.03fr) minmax(0,.97fr);grid-template-rows:auto 1fr;align-content:start;align-items:start;column-gap:12px;row-gap:7px}
+  #race .race-stats{grid-column:1/-1;grid-row:1;grid-template-columns:repeat(5,minmax(0,1fr));margin:0}
+  #race .race-card{grid-column:1;grid-row:2;min-width:0}
+  #race .question-card{grid-column:2;grid-row:2;margin:0;align-self:start}
+  #race .track{height:clamp(280px,57svh,560px);max-height:560px}
+  #race .question-card h2{font-size:clamp(18px,1.65vw,25px);margin:clamp(10px,2vh,18px) 0}
+  #race .answer{min-height:clamp(48px,9vh,72px);font-size:clamp(13px,1vw,16px)}
+}
+@media(max-width:800px){
+  main{width:calc(100% - 18px)}
+  .screen{padding-top:12px;padding-bottom:14px}
+  .hero{min-height:0}
+  .preview{height:clamp(190px,32svh,290px)}
+  .preview-track{height:clamp(125px,22svh,195px)}
+  .home-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .tile{padding:10px;font-size:13px}
+  .tile strong{font-size:12px}
+  .tile small{font-size:10px}
+  .setup-grid{grid-template-columns:1fr 1fr}
+  .choices{grid-template-columns:1fr}
+  .choice{padding:9px;font-size:12px}
+  .track{height:clamp(225px,36svh,390px);max-height:390px}
+  .race-stats{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .question-card h2{font-size:clamp(17px,3.2vw,23px)}
+  .answers{grid-template-columns:1fr 1fr}
+  .answer{min-height:48px}
+}
+@media(max-width:520px){
+  .topbar{position:relative;padding:7px 10px;flex-direction:row;align-items:center}
+  .brand{font-size:21px;gap:5px}
+  .brand span{font-size:12px}
+  .brand small{font-size:7px}
+  .hud{width:auto;gap:4px;justify-content:flex-end}
+  .hud span{font-size:9px;padding:5px 6px}
+  .screen{min-height:calc(100svh - 56px);padding:10px 0}
+  .hero{gap:12px}
+  .hero h1{font-size:clamp(38px,11vw,54px);letter-spacing:-2px}
+  .hero p{font-size:14px;margin-bottom:12px}
+  .actions .btn{flex:1;padding:10px 11px;min-height:42px}
+  .home-grid{grid-template-columns:1fr;gap:7px}
+  .tile{grid-template-columns:auto 1fr;align-items:center;column-gap:9px;padding:9px 12px}
+  .tile small{grid-column:2}
+  .setup-grid{grid-template-columns:1fr;gap:8px}
+  .panel h3{margin-bottom:9px;font-size:15px}
+  .panel .choices{grid-template-columns:1fr 1fr}
+  .panel .choice{font-size:11px;padding:8px;gap:3px}
+  .panel .choice small{font-size:10px}
+  .race-stats{grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}
+  .race-stats span{font-size:9px;padding:6px 4px;text-align:center}
+  .track{height:clamp(205px,31svh,300px);min-height:205px}
+  .finish-line{height:24px;font-size:9px;letter-spacing:1px}
+  .road-segments{inset:24px 8px 0}
+  .runner{width:44px;height:44px}
+  .crash-car{width:45px;height:45px}
+  .lane-no{width:17px;height:17px;font-size:8px}
+  .question-card{padding:9px}
+  .question-card h2{font-size:clamp(16px,4.7vw,21px);margin:8px 0}
+  .answers{gap:6px}
+  .answer{min-height:44px;padding:8px;font-size:12px;border-radius:10px}
+  .race-message{font-size:10px}
+}
+@media(max-width:380px){
+  .brand{font-size:18px}.brand span{font-size:10px}
+  .hud span{font-size:8px;padding:4px}
+  .panel .choices{grid-template-columns:1fr}
+  .track{height:205px}
+  .answer{font-size:11px;padding:7px}
+}
+@media(max-height:720px) and (min-width:801px){
+  .screen{padding-top:8px;padding-bottom:8px}
+  #race .track{height:clamp(200px,39svh,340px)}
+  #race .question-card h2{margin:7px 0;font-size:clamp(16px,1.5vw,21px)}
+  #race .answer{min-height:42px}
+  .race-message{min-height:18px}
+}
+@media(prefers-reduced-motion:reduce){
+  body:before{animation:none}
+  .runner,.btn,.tile,.choice,.answer{transition:none}
+}
