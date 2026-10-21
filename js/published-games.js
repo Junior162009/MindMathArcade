@@ -3,6 +3,7 @@
   'use strict';
   const state={db:null,visibility:new Map(),channel:null,base:[],order:[],orderLoaded:false};
   const gameKey=g=>String(g?.url||g?.name||'').trim();
+  const orderKey=value=>String(value??'').trim().toLowerCase();
 
   function applyVisibility(){
     if(typeof projects==='undefined'||typeof renderProjects!=='function')return;
@@ -17,10 +18,10 @@
     });
     // El orden guardado de voting_game_order manda; juegos nuevos quedan al final.
     if(state.orderLoaded&&state.order.length){
-      const positions=new Map(state.order.map((key,index)=>[String(key),index]));
+      const positions=new Map(state.order.map((key,index)=>[orderKey(key),index]));
       finalProjects.sort((a,b)=>{
-        const pa=positions.has(gameKey(a))?positions.get(gameKey(a)):Number.MAX_SAFE_INTEGER;
-        const pb=positions.has(gameKey(b))?positions.get(gameKey(b)):Number.MAX_SAFE_INTEGER;
+        const pa=positions.has(orderKey(gameKey(a)))?positions.get(orderKey(gameKey(a))):Number.MAX_SAFE_INTEGER;
+        const pb=positions.has(orderKey(gameKey(b)))?positions.get(orderKey(gameKey(b))):Number.MAX_SAFE_INTEGER;
         return pa-pb;
       });
     }
