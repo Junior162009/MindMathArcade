@@ -1130,8 +1130,13 @@
             } else if (filterCategory && filterCategory !== 'todos') {
                 filtered = filtered.filter(p => p.category === filterCategory);
             }
-            // El orden visual siempre lo determina el nombre oficial.
-            filtered = window.TecnoMathGameOrder.sortGamesByName(filtered);
+            // El catálogo público respeta la posición manual guardada por el editor de juegos.
+            // Los empates conservan un desempate estable por nombre, sin reemplazar el orden configurado.
+            filtered = filtered.map((game, index) => ({ game, index })).sort((a, b) => {
+                const ao = Number(a.game.order ?? 9999);
+                const bo = Number(b.game.order ?? 9999);
+                return ao - bo || a.index - b.index;
+            }).map(item => item.game);
 
             if (filtered.length === 0) {
                 const empty = document.createElement('div');
