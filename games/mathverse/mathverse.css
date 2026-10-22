@@ -8,3 +8,59 @@
 @media(max-width:900px){.game-shell{grid-template-columns:1fr}.side-panel{display:none}.hud{height:62px;padding:8px 10px}.zone-title{display:none}.hud-stats{margin-left:auto}.hud-btn span{display:none}.xp-box{min-width:85px!important}.game-shell{height:calc(100vh - 62px)}.touch-controls{display:flex}.mission{max-width:280px}.mission b{font-size:10px}}
 @media(max-width:520px){.brand{font-size:11px}.hud-stats{gap:5px}.hud-stats>div:first-child{display:none}.xp-box{min-width:75px!important}.hud-btn{padding:8px}.modal-card{padding:20px}.equation{font-size:20px}.inventory-grid{grid-template-columns:1fr}}
 .canvas-wrap>canvas{position:relative;z-index:1}.canvas-wrap .mission,.canvas-wrap .interaction,.canvas-wrap .toast,.canvas-wrap .touch-controls{z-index:3}.lottie-fx{position:absolute;left:50%;top:50%;width:min(360px,55vw);height:min(360px,55vw);transform:translate(-50%,-50%) scale(.65);opacity:0;pointer-events:none;z-index:4;filter:drop-shadow(0 0 25px rgba(0,234,255,.45))}.lottie-fx canvas{width:100%;height:100%}.lottie-fx.show{animation:mathverseLottieIn .9s ease-out forwards}.world-pulse{animation:worldPulse .9s ease-out}@keyframes mathverseLottieIn{0%{opacity:0;transform:translate(-50%,-50%) scale(.55)}22%{opacity:1;transform:translate(-50%,-50%) scale(1)}72%{opacity:1;transform:translate(-50%,-50%) scale(1.04)}100%{opacity:0;transform:translate(-50%,-50%) scale(1.18)}}@keyframes worldPulse{0%{filter:brightness(1)}35%{filter:brightness(1.45) saturate(1.25)}100%{filter:brightness(1)}}@media(prefers-reduced-motion:reduce){.lottie-fx{display:none!important}.world-pulse{animation:none}}
+
+/* Device selection and adaptive controls */
+.device-picker{position:fixed;inset:0;z-index:1000;display:grid;place-items:center;padding:max(16px,env(safe-area-inset-top)) 16px max(16px,env(safe-area-inset-bottom));background:rgba(2,3,12,.94);backdrop-filter:blur(14px)}
+.device-picker.hidden{display:none!important}.device-picker-card{width:min(540px,100%);max-height:calc(100dvh - 32px);overflow:auto;padding:clamp(20px,5vw,32px);border:1px solid #26304d;border-radius:22px;background:linear-gradient(145deg,#10172a,#080914);box-shadow:0 25px 90px #000c}
+.device-picker-kicker{color:var(--cyan);font-size:10px;font-weight:900;letter-spacing:2px}.device-picker-card h2{font-size:clamp(21px,5vw,30px);line-height:1.2;margin:12px 0}.device-picker-card p{color:var(--muted);font-size:13px;line-height:1.55}.device-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:22px 0 14px}.device-options button{min-height:150px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:16px 10px;border:1px solid #34415e;border-radius:16px;background:#0b1020;color:var(--text);cursor:pointer}.device-options button>span{font-size:34px}.device-options button b{font-size:14px}.device-options button small{font-size:11px;color:var(--muted);text-align:center}.device-options button.recommended{border-color:var(--cyan);box-shadow:inset 0 0 0 1px #00eaff55,0 0 22px #00eaff12}.device-options button:focus-visible,.device-controls-head button:focus-visible{outline:3px solid var(--yellow);outline-offset:3px}.device-recommendation{margin-bottom:0!important}.device-cancel{width:100%;padding:10px;background:#11162a;color:var(--text);border:1px solid var(--line);border-radius:10px}
+#deviceSettings{white-space:nowrap;font-size:11px}#deviceSettings span{display:inline!important}
+#deviceControls{display:none}
+.device-mobile .game-shell{display:flex;flex-direction:column;grid-template-columns:none;height:calc(100dvh - var(--hud-height,54px));height:calc(100vh - var(--hud-height,54px));min-height:0;overflow:hidden}
+.device-mobile .canvas-wrap{position:relative;flex:0 0 50%;height:50%;min-height:0;width:100%;overflow:hidden;border-bottom:1px solid var(--line)}
+.device-mobile #world{width:100%;height:100%;object-fit:contain}
+.device-mobile .side-panel{display:none}
+.device-mobile #deviceControls{display:flex;flex:0 0 50%;height:50%;min-height:0;max-height:50%;flex-direction:column;padding:8px 14px max(10px,env(safe-area-inset-bottom));background:linear-gradient(180deg,#0b0e1c,#070811);gap:8px;overflow:hidden;touch-action:pan-y}
+.device-controls-head{display:flex;align-items:center;justify-content:space-between;gap:8px;color:var(--cyan);font-size:10px;font-weight:900;letter-spacing:1.4px}
+.device-controls-head button{font-size:11px;padding:7px 10px;border-radius:9px;border:1px solid #35415e;background:#11172a;color:var(--text)}
+.device-controls-body{display:flex;flex:1;min-height:0;align-items:center;justify-content:space-around;gap:20px}
+.device-pad{position:relative;width:min(36vw,190px);height:min(36vw,190px);max-height:100%;aspect-ratio:1;border:2px solid #667493;border-radius:50%;background:radial-gradient(circle,#17233b 0,#0a1020 72%);box-shadow:inset 0 0 24px #0008,0 8px 24px #0005;touch-action:none;user-select:none;-webkit-user-select:none;flex-shrink:0}
+.device-knob{position:absolute;left:50%;top:50%;width:43%;height:43%;border:2px solid var(--cyan);border-radius:50%;transform:translate(-50%,-50%);background:#00eaff45;box-shadow:0 0 22px #00eaff35;pointer-events:none}
+.device-action-buttons{display:flex;align-items:center;justify-content:center;gap:clamp(8px,3vw,18px);flex-wrap:wrap}
+.device-action-buttons button{width:clamp(64px,18vw,90px);height:clamp(64px,18vw,90px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border:2px solid var(--pink);border-radius:50%;background:#260d2b;color:#fff;font-size:24px;font-weight:900;touch-action:manipulation;user-select:none;-webkit-user-select:none}
+.device-action-buttons button small{font-size:9px;font-weight:700}
+.device-action-buttons button:active{transform:scale(.95);background:#46133f}
+.device-mobile .hud{height:54px;min-height:54px;padding:6px 8px;gap:8px;--hud-height:54px}
+.device-mobile .zone-title{display:none}.device-mobile .hud-stats{margin-left:auto;gap:5px}.device-mobile .hud-stats>div{display:none}.device-mobile #deviceSettings{max-width:108px;overflow:hidden;text-overflow:ellipsis;padding:7px 8px}.device-mobile .brand{font-size:11px}
+.device-mobile .mission{left:7px;top:7px;max-width:min(65%,300px);padding:6px 8px}.device-mobile .mission b{font-size:9px}.device-mobile .interaction{bottom:7px;font-size:10px;padding:7px 10px}
+.device-mobile .canvas-wrap #mpTouch,.device-mobile #touchControls{display:none!important}
+.device-mobile #problemModal{z-index:200;place-items:start center;padding: max(8px,env(safe-area-inset-top)) 8px max(8px,env(safe-area-inset-bottom));overflow:hidden}
+.device-mobile #problemModal .modal-card{width:100%;height:100%;max-height:100%;overflow-y:auto;overscroll-behavior:contain;padding:clamp(18px,4vw,28px);border-radius:16px;scrollbar-gutter:stable}
+.device-mobile #problemModal .problem-card{display:flex;flex-direction:column;gap:8px}
+.device-mobile #problemModal h2{font-size:clamp(20px,5.4vw,28px);line-height:1.25;overflow-wrap:anywhere}
+.device-mobile #problemStory{font-size:clamp(14px,3.7vw,17px);line-height:1.6;overflow-wrap:anywhere}
+.device-mobile .equation{font-size:clamp(22px,6vw,32px);margin:8px 0;padding:clamp(12px,3vw,20px);overflow-wrap:anywhere}
+.device-mobile .problem-card input{min-height:52px;font-size:18px}.device-mobile .problem-actions button{min-height:50px;font-size:14px}.device-mobile .hint,.device-mobile .feedback{font-size:13px;line-height:1.5;overflow-wrap:anywhere}
+.device-mobile .modal{padding:10px;overflow:auto}.device-mobile .modal:not(#problemModal){padding:10px}
+.device-mobile #inventoryModal .modal-card,.device-mobile #pauseModal .modal-card,.device-mobile #finishModal .modal-card{max-height:calc(100dvh - 20px);overflow:auto}
+.device-pc #deviceControls{display:none!important}.device-pc .game-shell{height:calc(100vh - 70px)}
+.device-pc #deviceSettings{font-size:11px}
+@media (orientation:landscape) and (max-width:900px){
+ .device-mobile .hud{height:46px;min-height:46px;--hud-height:46px}
+ .device-mobile .game-shell{height:calc(100dvh - 46px);height:calc(100vh - 46px)}
+ .device-mobile .canvas-wrap{flex-basis:50%;height:50%}
+ .device-mobile #deviceControls{padding:4px 12px max(5px,env(safe-area-inset-bottom));gap:3px}
+ .device-mobile .device-controls-head{font-size:9px}.device-mobile .device-controls-head button{padding:4px 8px}
+ .device-mobile .device-pad{width:min(25vh,150px);height:min(25vh,150px)}
+ .device-mobile .device-action-buttons button{width:min(15vh,66px);height:min(15vh,66px);font-size:20px}
+ .device-mobile .device-action-buttons button small{font-size:8px}
+}
+@media(max-width:380px){.device-options{gap:8px}.device-options button{min-height:125px;padding:10px 6px}.device-options button b{font-size:12px}.device-mobile #deviceSettings{max-width:82px;font-size:10px}.device-mobile .device-pad{width:min(33vw,140px);height:min(33vw,140px)}}
+@media(prefers-reduced-motion:no-preference){.device-picker-card{animation:devicePickerIn .22s ease-out}@keyframes devicePickerIn{from{opacity:0;transform:translateY(8px) scale(.99)}to{opacity:1;transform:none}}}
+
+/* Final viewport sizing: prefer dynamic viewport units and include safe areas. */
+.device-mobile .game-shell{height:calc(100vh - var(--hud-height,54px));height:calc(100dvh - var(--hud-height,54px))}
+.device-mobile .hud{--hud-height:calc(54px + env(safe-area-inset-top,0px));height:var(--hud-height);min-height:var(--hud-height);padding-top:max(6px,env(safe-area-inset-top,0px))}
+@media (orientation:landscape) and (max-width:900px){
+ .device-mobile .hud{--hud-height:calc(46px + env(safe-area-inset-top,0px));height:var(--hud-height);min-height:var(--hud-height);padding-top:max(4px,env(safe-area-inset-top,0px))}
+ .device-mobile .game-shell{height:calc(100vh - var(--hud-height,46px));height:calc(100dvh - var(--hud-height,46px))}
+}
