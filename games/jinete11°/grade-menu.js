@@ -25,25 +25,38 @@
     const idx=levelIndex[grade]??3, max=addMax[idx], factor=Math.max(10,mulMax[idx]), list=[];
     const addSeen=new Set(), subSeen=new Set(), mulSeen=new Set();
     for(let i=0;i<80;i++){
-      // Pares distintos por índice, con dificultad ajustada al grado.
-      let a,b,key;
-      a=1+((i*37+idx*11)%(max+1));b=1+((i*53+idx*17)%(max+1));
-      key=a+'+'+b;
+      let a=1+((i*37+idx*11)%(max+1));
+      let b=1+((i*53+idx*17)%(max+1));
+      let key=a+'+'+b;
       while(addSeen.has(key)){a=a%(max+1)+1;b=(b+1)%(max+1);key=a+'+'+b}
       addSeen.add(key);
       let ans=a+b, opts=makeOptions(ans,i+idx*83);
       list.push([a+' + '+b+' = ?',opts,opts.indexOf(String(ans)),a+' + '+b+' = '+ans+'.',opLabels[0]]);
-      a=1+((i*41+idx*13)%(max+1));b=1+((i*29+idx*19)%(max+1));
-      if(i%3===0)a+=max;
-      key=a+'-'+b;
-      while(subSeen.has(key)){a++;key=a+'-'+b}
-      subSeen.add(key);ans=a-b;opts=makeOptions(ans,i+idx*97+19);
-      list.push([a+' - '+b+' = ?',opts,opts.indexOf(String(ans)),a+' - '+b+' = '+ans+'.',opLabels[1]]);
-      a=1+((i*17+idx*7)%factor);b=1+(Math.floor(i/Math.max(1,factor))+i*3)%factor;
-      key=a+'×'+b;
-      while(mulSeen.has(key)){b=b%factor+1;key=a+'×'+b}
-      mulSeen.add(key);ans=a*b;opts=makeOptions(ans,i+idx*113+37);
-      list.push([a+' × '+b+' = ?',opts,opts.indexOf(String(ans)),a+' × '+b+' = '+ans+'.',opLabels[2]]);
+
+      // En Transición a 4.º se practica resta sin resultados negativos.
+      let subA,subB;
+      if(idx<=4){
+        subB=1+((i*29+idx*7)%Math.max(2,max));
+        subA=subB+((i*41+idx*13)%Math.max(2,max));
+      }else{
+        subA=1+((i*41+idx*13)%(max+1));
+        subB=1+((i*29+idx*19)%(max+1));
+        if(idx>=6 && i%4===0) subA=-(1+((i*11+idx)%(max||1)));
+      }
+      key=subA+'-'+subB;
+      while(subSeen.has(key)){subA++;if(idx<=4&&subA<subB)subA=subB;key=subA+'-'+subB}
+      subSeen.add(key);ans=subA-subB;opts=makeOptions(ans,i+idx*97+19);
+      list.push([subA+' - '+subB+' = ?',opts,opts.indexOf(String(ans)),subA+' - '+subB+' = '+ans+'.',opLabels[1]]);
+
+      // Multiplicación solo desde 5.º en adelante.
+      if(idx>=5){
+        a=1+((i*17+idx*7)%factor);
+        b=1+((Math.floor(i/Math.max(1,factor))+i*3)%factor);
+        key=a+'×'+b;
+        while(mulSeen.has(key)){b=b%factor+1;key=a+'×'+b}
+        mulSeen.add(key);ans=a*b;opts=makeOptions(ans,i+idx*113+37);
+        list.push([a+' × '+b+' = ?',opts,opts.indexOf(String(ans)),a+' × '+b+' = '+ans+'.',opLabels[2]]);
+      }
     }
     return list;
   }
