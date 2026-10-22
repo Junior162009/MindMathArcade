@@ -34,8 +34,7 @@ Deno.serve(async (req: Request) => {
     if (ge) throw ge; if (!grade) return send({ok:false,error:"El grado no es válido."},400);
     const { data: student, error: se } = await admin.from("tecnomath_voting_students").select("id,grade_id,active").eq("id", student_id).eq("active", true).maybeSingle();
     if (se) throw se; if (!student || String(student.grade_id) !== String(grade.id)) return send({ok:false,error:"El estudiante no pertenece al grado seleccionado."},400);
-    const { data, error } = await admin.from("game_ratings").insert({ game_id, student_id, grade_id, score }).select("id,game_id,score,created_at").single();
-    if (error?.code === "23505") return send({ok:false,duplicate:true,error:"Este estudiante ya calificó este juego. Cada juego admite una sola calificación por estudiante."},409);
+    const { data, error } = await admin.from("game_ratings").upsert({ game_id, student_id, grade_id, score }, { onConflict: "student_id,game_id" }).select("id,game_id,score,created_at").single();
     if (error) throw error;
     return send({ok:true,rating:data});
   } catch (e) {
