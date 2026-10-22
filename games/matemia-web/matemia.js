@@ -24,6 +24,8 @@ const missionDefs=[
 {id:'boss',title:'Guardián de los cristales',desc:'Derrota al Guardián de la Cueva.',kind:'boss',need:1,reward:300}
 ];
 const s={p:{x:80,y:80,w:25,h:29,hp:100,maxHp:100,xp:0,coins:50,damage:25,speed:175,invuln:0,attackCd:0,effects:{},inventory:{potion:2,ammo:2},level:1},area:0,keys:new Set(),walls:new Set(),chests:[],enemies:[],npcs:[],portals:[],shots:[],enemyShots:[],missions:{intro:{accepted:true,progress:0,done:false,claimed:false}},visited:['pueblo'],opened:0,kills:0,advanced:0,paused:false,running:false,over:false,dialog:null,question:null,last:0,clock:0,assets:{},assetCredits:[],target:null,portalCooldown:0};
+// Input API compartida con los controles táctiles: usa el mismo estado que el teclado, sin simular eventos del navegador.
+window.MathverseMobileInput={set(key,pressed){const k=String(key).toLowerCase();if(!['arrowup','arrowdown','arrowleft','arrowright','w','a','s','d'].includes(k))return;if(pressed)s.keys.add(k);else s.keys.delete(k)},clear(){s.keys.clear()}};
 const rand=(a,b)=>Math.floor(Math.random()*(b-a+1))+a,dist=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
 const multiplayer={client:null,channel:null,room:'',id:'p-'+Math.random().toString(36).slice(2,10),name:'Aventurero',peers:{},connected:false,sendClock:0};
 const SUPABASE_URL='https://xdszveoxdrdnwwzzvkav.supabase.co';
