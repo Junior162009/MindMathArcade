@@ -42,7 +42,7 @@ async function joinMultiplayer(room,name){
   multiplayer.client=multiplayer.client||window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{realtime:{params:{eventsPerSecond:10}}});
   multiplayer.room=room;multiplayer.name=name;multiplayer.peers={};multiplayer.connected=false;multiplayer.sendClock=0;
   const channel=multiplayer.client.channel('mathverse-room-'+room,{config:{presence:{key:multiplayer.id},broadcast:{self:false}}});multiplayer.channel=channel;
-  channel.on('presence',{event:'sync'},()=>{const state=channel.presenceState();const next={};Object.values(state).flat().forEach(peer=>{if(peer.id&&peer.id!==multiplayer.id)next[peer.id]={...peer}});multiplayer.peers={...next,...multiplayer.peers}});
+  channel.on('presence',{event:'sync'},()=>{const state=channel.presenceState();const next={};Object.values(state).flat().forEach(peer=>{if(peer.id&&peer.id!==multiplayer.id)next[peer.id]={...peer}});const current=multiplayer.peers;Object.keys(next).forEach(id=>{if(current[id])next[id]={...next[id],...current[id]}});multiplayer.peers=next});
   channel.on('broadcast',{event:'position'},({payload})=>{if(payload?.id&&payload.id!==multiplayer.id)multiplayer.peers[payload.id]=payload});
   channel.on('broadcast',{event:'leave'},({payload})=>{if(payload?.id)delete multiplayer.peers[payload.id]});
   channel.subscribe(async status=>{if(status==='SUBSCRIBED'){multiplayer.connected=true;await channel.track({id:multiplayer.id,name:multiplayer.name,area:s.area,x:s.p.x,y:s.p.y,level:s.p.level||1});toast('¡Sala '+room+' conectada! Comparte el código.')}else if(status==='CHANNEL_ERROR'||status==='TIMED_OUT'){multiplayer.connected=false;toast('No se pudo conectar a la sala. Revisa la conexión.')}});
