@@ -168,3 +168,11 @@ body{height:100vh;height:100dvh;display:flex;flex-direction:column}
   #checkAnswer{min-height:30px;padding:5px 10px}
   #feedback{min-height:14px;font-size:11px}
 }
+
+
+/* MATHVERSE: panel de multijugador y enemigos diferenciados. */
+#dialogBody label{display:block;text-align:left;color:var(--cyan);font-size:12px;font-weight:800;margin:8px 0 3px}
+#dialogBody input{width:100%;min-height:40px;padding:9px 11px;border:1px solid #6860b2;border-radius:9px;background:#15143a;color:#fff;font:inherit}
+#dialogBody .hint{line-height:1.35}
+#multiplayerBtn{grid-column:1/-1;border-color:#4a9ba9;color:#9cf4ff;font-weight:800}
+@media(max-width:620px){#multiplayerBtn{grid-column:auto}}
