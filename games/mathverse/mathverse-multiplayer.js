@@ -1,0 +1,71 @@
+(()=>{
+'use strict';
+const SUPABASE_URL='https://xdszveoxdrdnwwzzvkav.supabase.co';
+const SUPABASE_KEY='sb_publishable_xwUE0aN1g0rb7aOLyXPAsA_kOAX9bOA';
+const ROOM_RE=/^[A-Z0-9_-]{3,24}$/;
+const q=new URLSearchParams(location.search);
+const roomFromUrl=(q.get('room')||'').trim().toUpperCase();
+const saved=(()=>{try{return JSON.parse(localStorage.getItem('mathverse_mp')||'{}')}catch(_){return{}}})();
+const me={id:(crypto.randomUUID?crypto.randomUUID():Math.random().toString(36).slice(2)),name:String(saved.name||'Jugador').slice(0,18)};
+let room=ROOM_RE.test(roomFromUrl)?roomFromUrl:String(saved.room||'').toUpperCase();
+let channel=null,joined=false,lastSent=0,lastX=160,lastY=520,lastWorld='',remote=new Map(),remoteCanvas,remoteCtx;
+const $=id=>document.getElementById(id);
+function esc(s){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+function ensureUI(){
+ const hud=document.querySelector('.hud');
+ if(!hud||document.getElementById('mpBtn'))return;
+ const b=document.createElement('button');b.id='mpBtn';b.className='hud-btn';b.type='button';b.textContent='👥';b.title='Multijugador';hud.querySelector('.hud-stats').prepend(b);b.onclick=()=>document.getElementById('mpPanel').classList.remove('hidden');
+ const panel=document.createElement('div');panel.id='mpPanel';panel.className='mp-panel hidden';panel.innerHTML=`<div class="mp-card"><button id="mpClose" class="mp-close">×</button><div class="mp-kicker">MATHVERSE · MULTIJUGADOR</div><h2>Comparte la misma partida</h2><p>Usa el mismo código de sala en los dos dispositivos.</p><label>Tu nombre<input id="mpName" maxlength="18" value="${esc(me.name)}" autocomplete="nickname"></label><label>Código de sala<input id="mpRoom" maxlength="24" value="${esc(room)}" placeholder="EJ: MATH2026" autocapitalize="characters"></label><div class="mp-actions"><button id="mpJoin" class="primary">CONECTAR</button><button id="mpCopy" class="secondary">COPIAR INVITACIÓN</button></div><div id="mpStatus" class="mp-status">● Desconectado</div><div id="mpPlayers" class="mp-players"></div></div>`;document.body.appendChild(panel);
+ $('mpClose').onclick=()=>panel.classList.add('hidden');$('mpJoin').onclick=join; $('mpCopy').onclick=copyInvite;
+}
+function setStatus(t,ok=false){const el=$('mpStatus');if(el){el.textContent=(ok?'● ':'○ ')+t;el.classList.toggle('ok',ok)}}
+function roomCode(){const r=String($('mpRoom')?.value||room).trim().toUpperCase();if(!ROOM_RE.test(r)){setStatus('Código inválido: usa 3–24 caracteres');return null}return r}
+function savePrefs(){try{localStorage.setItem('mathverse_mp',JSON.stringify({name:me.name,room}))}catch(_){} }
+async function join(){
+ const r=roomCode();if(!r||!window.supabase){setStatus(window.supabase?'Código inválido':'No se pudo cargar Realtime');return}
+ room=r;me.name=String($('mpName').value||'Jugador').trim().slice(0,18)||'Jugador';savePrefs();if(channel){try{await channel.unsubscribe()}catch(_){}channel=null}
+ setStatus('Conectando…');
+ channel=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY).channel('mathverse:'+room,{config:{broadcast:{ack:true},presence:{key:me.id}}});
+ channel.on('broadcast',{event:'state'},({payload})=>{if(!payload||payload.id===me.id)return;remote.set(payload.id,{...payload,rx:Number(payload.x)||0,ry:Number(payload.y)||0,tx:Number(payload.x)||0,ty:Number(payload.y)||0,last:performance.now()});drawRemote()});
+ channel.on('broadcast',{event:'action'},({payload})=>{if(!payload||payload.id===me.id)return;const text=payload.type==='solve'?'⚡ '+(payload.name||'Jugador')+' activó un sistema':payload.type==='interact'?'↔ '+(payload.name||'Jugador')+' está interactuando':'👤 '+(payload.name||'Jugador')+' realizó una acción';if(window.dispatchEvent)window.dispatchEvent(new CustomEvent('mathverse:remote-action',{detail:payload}));toast(text)});
+ channel.on('presence',{event:'sync'},()=>{const p=channel.presenceState();Object.values(p).flat().filter(x=>x.id&&x.id!==me.id).forEach(x=>{remote.set(x.id,{...x,rx:Number(x.x)||160,ry:Number(x.y)||520,tx:Number(x.x)||160,ty:Number(x.y)||520,last:performance.now()})});drawRemote();updatePlayers()});
+ channel.on('presence',{event:'join',key:key=>{if(key!==me.id)updatePlayers()}}).on('presence',{event:'leave',key:key=>{remote.delete(key);drawRemote();updatePlayers()}});
+ const status=await channel.subscribe(async s=>{if(s==='SUBSCRIBED'){joined=true;setStatus('Conectado · sala '+room,true);await channel.track({id:me.id,name:me.name,x:lastX,y:lastY});updateInviteUrl();updatePlayers()}else if(s==='CHANNEL_ERROR'||s==='TIMED_OUT'){joined=false;setStatus('Error de conexión')}});
+ if(status&&status!=='SUBSCRIBED')setStatus('Conectando…');
+}
+function updateInviteUrl(){const u=new URL(location.href);u.searchParams.set('room',room);history.replaceState(null,'',u)}
+async function copyInvite(){if(!room)room=roomCode();if(!room)return;updateInviteUrl();try{await navigator.clipboard.writeText(location.href);setStatus('Invitación copiada',true)}catch(_){setStatus('Abre/copía la URL actual')}}
+function toast(t){const el=$('toast');if(!el)return;el.textContent=t;el.classList.add('show');clearTimeout(toast.t);toast.t=setTimeout(()=>el.classList.remove('show'),1800)}
+function readLocal(){try{return JSON.parse(localStorage.getItem('mathverse_state')||'{}')}catch(_){return{}}}
+function readSolved(){const p=readLocal();return Array.isArray(p.events)?p.events.slice(-8):[]}
+function capturePlayer(){
+ const c=$('world');if(!c)return;
+ if(!c.__mpStroke){const original=c.getContext('2d').strokeRect;const ctx=c.getContext('2d');ctx.strokeRect=function(x,y,w,h){if(x===-13&&y===-1&&w===26&&h===29){const t=this.getTransform();if(Number.isFinite(t.e)&&Number.isFinite(t.f)){lastX=t.e;lastY=t.f}}return original.call(this,x,y,w,h)}}
+}
+function send(){if(!joined||!channel)return;const now=performance.now();if(now-lastSent<66)return;lastSent=now;const p=readLocal();const solved=Array.isArray(p.solved)?p.solved:Object.keys(p.solved||{});const payload={id:me.id,name:me.name,x:lastX,y:lastY,energy:Number(p.energy||0),xp:Number(p.xp||0),level:Number(p.level||1),solved,events:readSolved(),t:Date.now()};channel.send({type:'broadcast',event:'state',payload}).catch(()=>{});channel.track({id:me.id,name:me.name,x:lastX,y:lastY}).catch(()=>{});if(JSON.stringify(solved)!==lastWorld){lastWorld=JSON.stringify(solved);channel.send({type:'broadcast',event:'action',payload:{id:me.id,name:me.name,type:'world',solved}}).catch(()=>{})}}
+function sendAction(type,data={}){if(!joined||!channel)return;channel.send({type:'broadcast',event:'action',payload:{id:me.id,name:me.name,type,...data}}).catch(()=>{})}
+function drawRemote(){
+ if(!remoteCanvas){remoteCanvas=document.createElement('canvas');remoteCanvas.id='remotePlayers';remoteCanvas.width=1280;remoteCanvas.height=720;remoteCanvas.style.cssText='position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:2';$('world')?.parentElement?.appendChild(remoteCanvas);remoteCtx=remoteCanvas.getContext('2d')}
+ if(!remoteCtx)return;remoteCtx.clearRect(0,0,1280,720);const now=performance.now();remote.forEach(p=>{p.rx+=(p.tx-p.rx)*.22;p.ry+=(p.ty-p.ry)*.22;const x=p.rx,y=p.ry;remoteCtx.save();remoteCtx.shadowColor='#ff31d2';remoteCtx.shadowBlur=18;remoteCtx.fillStyle='#ff31d2';remoteCtx.beginPath();remoteCtx.arc(x,y-11,10,0,Math.PI*2);remoteCtx.fill();remoteCtx.shadowBlur=0;remoteCtx.fillStyle='#26152c';remoteCtx.fillRect(x-13,y-1,26,29);remoteCtx.strokeStyle='#00eaff';remoteCtx.strokeRect(x-13,y-1,26,29);remoteCtx.fillStyle='#fff';remoteCtx.font='bold 11px system-ui';remoteCtx.textAlign='center';remoteCtx.fillText(p.name||'Jugador',x,y-30);remoteCtx.restore()});requestAnimationFrame(drawRemote)}
+function updatePlayers(){const el=$('mpPlayers');if(!el)return;el.innerHTML=joined?`<b>🟢 ${esc(me.name)}</b> · sala <b>${esc(room)}</b><br><span>${remote.size} otro(s) conectado(s)</span>`:'Sin conexión'}
+function installMobile(){
+ const old=$('touchControls');if(old)old.style.display='none';if(document.getElementById('mpTouch'))return;
+ const wrap=document.createElement('div');wrap.id='mpTouch';wrap.innerHTML='<div class="mp-stick"><div class="mp-knob"></div></div><div class="mp-actions-touch"><button data-key="e" class="mp-action">↔</button></div>';$('world').parentElement.appendChild(wrap);
+ const stick=wrap.querySelector('.mp-stick'),knob=wrap.querySelector('.mp-knob');let pid=null,cx=0,cy=0;
+ function key(k,type){window.dispatchEvent(new KeyboardEvent(type,{key:k,code:k.length===1?'Key'+k.toUpperCase():k,bubbles:true,cancelable:true}))}
+ function reset(){pid=null;knob.style.transform='translate(-50%,-50%)';['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].forEach(k=>key(k,'keyup'))}
+ stick.addEventListener('pointerdown',e=>{pid=e.pointerId;stick.setPointerCapture(pid);const r=stick.getBoundingClientRect();cx=r.left+r.width/2;cy=r.top+r.height/2;moveStick(e);e.preventDefault()});
+ stick.addEventListener('pointermove',e=>{if(e.pointerId===pid)moveStick(e)});stick.addEventListener('pointerup',reset);stick.addEventListener('pointercancel',reset);
+ function moveStick(e){const dx=e.clientX-cx,dy=e.clientY-cy,len=Math.hypot(dx,dy),max=52, nx=len?dx/Math.max(len,max)*max:0,ny=len?dy/Math.max(len,max)*max:0;knob.style.transform=`translate(calc(-50% + ${nx}px),calc(-50% + ${ny}px))`;const dead=12;key('ArrowLeft',nx<-dead?'keydown':'keyup');key('ArrowRight',nx>dead?'keydown':'keyup');key('ArrowUp',ny<-dead?'keydown':'keyup');key('ArrowDown',ny>dead?'keydown':'keyup');e.preventDefault()}
+ wrap.querySelector('.mp-action').addEventListener('pointerdown',e=>{key('e','keydown');setTimeout(()=>key('e','keyup'),90);sendAction('interact');e.preventDefault()});
+ document.addEventListener('touchmove',e=>{if(e.target.closest('#mpTouch'))e.preventDefault()},{passive:false});
+}
+function installInstrumentation(){
+ capturePlayer();
+ const solve=$('solveBtn');if(solve&&!solve.__mp){solve.__mp=true;solve.addEventListener('click',()=>setTimeout(()=>sendAction('solve'),40))}
+ const answer=$('answer');if(answer&&!answer.__mp){answer.__mp=true;answer.addEventListener('keydown',e=>{if(e.key==='Enter')sendAction('solve')})}
+ setInterval(send,66);setInterval(capturePlayer,1000);setInterval(updatePlayers,1000);setInterval(()=>{if(joined&&room)document.title='MATHVERSE · '+room},2000);
+}
+function boot(){ensureUI();installMobile();installInstrumentation();if(room){$('mpPanel').classList.remove('hidden');setTimeout(join,250)}else setStatus('● Desconectado · crea o escribe una sala');}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
+})();
