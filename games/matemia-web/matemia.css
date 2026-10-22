@@ -101,3 +101,17 @@ body{height:100vh;height:100dvh;display:flex;flex-direction:column}
  .hero h1{font-size:30px}
  .overlay article{padding:10px}
 }
+
+/* MATHVERSE: texto legible y preguntas abiertas/cerradas */
+#questionPanel article{width:min(96%,680px);padding:clamp(18px,3vw,30px)}
+#questionTitle{font-size:clamp(22px,3.2vw,32px);line-height:1.2}
+#problem{font-size:clamp(30px,4.2vw,48px);line-height:1.25;letter-spacing:0;overflow-wrap:anywhere;text-wrap:balance;margin:18px 0;padding:clamp(16px,3vw,26px)}
+#answerForm{display:grid;gap:12px}
+#answerForm input{box-sizing:border-box;width:100%;min-height:54px;font-size:clamp(19px,2.5vw,24px);line-height:1.3}
+.answer-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:8px 0}
+.answer-option{min-height:54px;text-align:left;white-space:normal;font-size:clamp(16px,2vw,20px);line-height:1.3;padding:12px 14px;border:2px solid #7065c8;border-radius:12px;background:#201c53;color:#fff;cursor:pointer}
+.answer-option[aria-pressed="true"]{border-color:#ffe16a;background:#51428f;box-shadow:0 0 0 2px #ffe16a44}
+#checkAnswer{min-height:48px;font-size:15px}
+#feedback{font-size:16px;line-height:1.4}
+@media(max-width:560px){#questionPanel article{width:100%;padding:15px}#problem{font-size:clamp(23px,6vw,34px);line-height:1.3;margin:10px 0;padding:14px 9px}.answer-options{grid-template-columns:1fr;gap:8px}.answer-option{min-height:48px;font-size:17px;padding:10px 12px}#answerForm input{font-size:19px;min-height:48px}#feedback{font-size:14px}}
+@media(max-height:520px){#questionPanel article{padding:10px 16px}#problem{font-size:clamp(22px,4vh,32px);margin:7px 0;padding:8px}#questionTitle{font-size:20px}.answer-options{gap:5px}.answer-option{min-height:36px;padding:6px 10px}#answerForm{gap:6px}}
