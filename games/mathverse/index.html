@@ -8,6 +8,7 @@
 <title>🎮 TECNOMATH: MATHVERSE</title>
 <link rel="stylesheet" href="mathverse.css">
 <script src="../../js/tecnomath-progress.js?v=20260925-mathverse"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.58.0/dist/umd/supabase.js"></script>
 </head>
 <body>
 <div id="app">
@@ -24,7 +25,6 @@
 
   <main class="game-shell">
     <div class="canvas-wrap">
-      
       <div id="lottieFx" class="lottie-fx" aria-hidden="true"><canvas id="mathverseLottie" width="360" height="360"></canvas></div>
       <canvas id="world" width="1280" height="720" aria-label="Mundo jugable de Mathverse"></canvas>
       <div id="interaction" class="interaction hidden">E · INTERACTUAR</div>
@@ -74,5 +74,6 @@
 <script src="math-engine.js?v=20260925-mvp"></script>
 <script src="external-assets.js?v=20260925-free-assets"></script>
 <script src="mathverse.js?v=20260925-mvp"></script>
+<script src="mathverse-multiplayer.js?v=20261021-realtime"></script>
 </body>
 </html>
