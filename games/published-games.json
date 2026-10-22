@@ -461,9 +461,9 @@
   },
   {
     "id": "mathverse",
-    "name": "🎮 TECNOMATH: MATHVERSE",
-    "desc": "Aventura de exploración donde las matemáticas modifican físicamente el mundo.",
-    "description": "Aventura y estrategia educativa en Ciudad de las Variables.",
+    "name": "MATHVERSE",
+    "desc": "Aventura matemática: explora, combate criaturas y resuelve cofres.",
+    "description": "MATHVERSE: videojuego educativo web de aventura matemática.",
     "url": "games/matemia-web/index.html",
     "imageUrl": "",
     "icon": "🌌",
