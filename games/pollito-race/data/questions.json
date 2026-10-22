@@ -454,5 +454,845 @@
       "Feudalismo"
     ],
     "correct": 0
+  },
+  {
+    "category": "matematicas",
+    "difficulty": "facil",
+    "question": "¿Cuánto es 9 × 6?",
+    "options": [
+      "54",
+      "45",
+      "63",
+      "56"
+    ],
+    "correct": 0
+  },
+  {
+    "category": "matematicas",
+    "difficulty": "facil",
+    "question": "¿Cuánto es 144 ÷ 12?",
+    "options": [
+      "10",
+      "11",
+      "12",
+      "14"
+    ],
+    "correct": 2
+  },
+  {
+    "category": "matematicas",
+    "difficulty": "facil",
+    "question": "¿Cuánto es 375 + 248?",
+    "options": [
+      "613",
+      "623",
+      "633",
+      "623"
+    ],
+    "correct": 1
+  },
+  {
+    "category": "matematicas",
+    "difficulty": "facil",
+    "question": "¿Cuánto es 900 − 467?",
+    "options": [
+      "433",
+      "443",
+      "423",
+      "437"
+    ],
+    "correct": 0
+  },
+  {
+    "category": "matematicas",
+    "difficulty": "facil",
+    "question": "¿Cuál es el 10% de 250?",
+    "options": [
+      "2,5",
+      "15",
+      "25",
+      "50"
+    ],
+    "correct": 2
+  },
+  {
+    "category": "matematicas",
+    "difficulty": "facil",
+    "question": "¿Cuántos lados tiene un hexágono?",
+    "options": [
+      "5",
+      "6",
+      "7",
+      "8"
+    ],
+    "correct": 1
+  },
+  {
+    "category": "matematicas",
+    "difficulty": "facil",
+    "question": "¿Cuál número es primo?",
+    "options": [
+      "21",
+      "27",
+      "29",
+      "33"
+    ],
+    "correct": 2
+  },
+  {
+    "category": "matematicas",
+    "difficulty": "facil",
+    "question": "¿Cuántos minutos hay en 2 horas y media?",
+    "options": [
+      "120",
+      "130",
+      "150",
+      "180"
+    ],
+    "correct": 2
+  },
+  {
+    "category": "matematicas",
+    "difficulty": "facil",
+    "question": "¿Cuál es el perímetro de un cuadrado de lado 7 cm?",
+    "options": [
+      "14 cm",
+      "21 cm",
+      "28 cm",
+      "49 cm"
+    ],
+    "correct": 2
+  },
+  {
+    "category": "matematicas",
+    "difficulty": "facil",
+    "question": "¿Qué número representa 3/4 en decimal?",
+    "options": [
+      "0,25",
+      "0,5",
+      "0,75",
+      "1,25"
+    ],
+    "correct": 2
+  },
+  {
+    "category": "matematicas",
+    "difficulty": "normal",
+    "question": "Si 5x = 45, ¿cuánto vale x?",
+    "options": [
+      "8",
+      "9",
+      "10",
+      "40"
+    ],
+    "correct": 1
+  },
+  {
+    "category": "matematicas",
+    "difficulty": "normal",
+    "question": "¿Cuál es la media de 4, 6, 8 y 10?",
+    "options": [
+      "6",
+      "7",
+      "8",
+      "9"
+    ],
+    "correct": 1
+  },
+  {
+    "category": "matematicas",
+    "difficulty": "normal",
+    "question": "Un triángulo tiene ángulos de 50° y 60°. ¿Cuánto mide el tercero?",
+    "options": [
+      "60°",
+      "70°",
+      "80°",
+      "90°"
+    ],
+    "correct": 1
+  },
+  {
+    "category": "matematicas",
+    "difficulty": "normal",
+    "question": "¿Cuál es la raíz cuadrada de 196?",
+    "options": [
+      "12",
+      "13",
+      "14",
+      "16"
+    ],
+    "correct": 2
+  },
+  {
+    "category": "matematicas",
+    "difficulty": "normal",
+    "question": "¿Cuánto es 2/5 de 100?",
+    "options": [
+      "20",
+      "25",
+      "40",
+      "50"
+    ],
+    "correct": 2
+  },
+  {
+    "category": "matematicas",
+    "difficulty": "normal",
+    "question": "Un bus recorre 180 km en 3 horas. ¿Cuál es su velocidad media?",
+    "options": [
+      "50 km/h",
+      "60 km/h",
+      "70 km/h",
+      "90 km/h"
+    ],
+    "correct": 1
+  },
+  {
+    "category": "matematicas",
+    "difficulty": "normal",
+    "question": "¿Cuál es la expresión de «el doble de un número menos 3»?",
+    "options": [
+      "2x−3",
+      "x²−3",
+      "2(x−3)",
+      "x+2−3"
+    ],
+    "correct": 0
+  },
+  {
+    "category": "matematicas",
+    "difficulty": "normal",
+    "question": "¿Cuál es el área de un triángulo de base 10 cm y altura 6 cm?",
+    "options": [
+      "16 cm²",
+      "30 cm²",
+      "60 cm²",
+      "32 cm²"
+    ],
+    "correct": 1
+  },
+  {
+    "category": "matematicas",
+    "difficulty": "dificil",
+    "question": "Resuelve: 3(x − 2) = 21.",
+    "options": [
+      "5",
+      "7",
+      "9",
+      "11"
+    ],
+    "correct": 2
+  },
+  {
+    "category": "matematicas",
+    "difficulty": "dificil",
+    "question": "¿Cuál es la probabilidad de sacar un número par al lanzar un dado justo?",
+    "options": [
+      "1/6",
+      "1/3",
+      "1/2",
+      "2/3"
+    ],
+    "correct": 2
+  },
+  {
+    "category": "matematicas",
+    "difficulty": "dificil",
+    "question": "¿Cuál es la factorización de x² − 9?",
+    "options": [
+      "(x−3)(x+3)",
+      "(x−9)(x+1)",
+      "(x−3)²",
+      "(x+9)(x−1)"
+    ],
+    "correct": 0
+  },
+  {
+    "category": "matematicas",
+    "difficulty": "dificil",
+    "question": "Si y = 2x + 1 y x = 4, ¿cuánto vale y?",
+    "options": [
+      "7",
+      "8",
+      "9",
+      "10"
+    ],
+    "correct": 2
+  },
+  {
+    "category": "matematicas",
+    "difficulty": "dificil",
+    "question": "Un artículo de $120.000 tiene descuento del 15%. ¿Cuánto se paga?",
+    "options": [
+      "$18.000",
+      "$102.000",
+      "$105.000",
+      "$108.000"
+    ],
+    "correct": 1
+  },
+  {
+    "category": "matematicas",
+    "difficulty": "dificil",
+    "question": "¿Cuál es el volumen de un cubo de arista 4 cm?",
+    "options": [
+      "16 cm³",
+      "32 cm³",
+      "48 cm³",
+      "64 cm³"
+    ],
+    "correct": 3
+  },
+  {
+    "category": "matematicas",
+    "difficulty": "dificil",
+    "question": "¿Qué valor tiene la mediana de 3, 9, 4, 7 y 12?",
+    "options": [
+      "4",
+      "7",
+      "9",
+      "12"
+    ],
+    "correct": 1
+  },
+  {
+    "category": "espanol",
+    "difficulty": "facil",
+    "question": "¿Cuál palabra lleva tilde correctamente?",
+    "options": [
+      "Lapiz",
+      "Cancion",
+      "Fácil",
+      "Arbol"
+    ],
+    "correct": 2
+  },
+  {
+    "category": "espanol",
+    "difficulty": "facil",
+    "question": "¿Cuál es el sujeto de «Las niñas cantan en el patio»?",
+    "options": [
+      "cantan",
+      "en el patio",
+      "Las niñas",
+      "el patio"
+    ],
+    "correct": 2
+  },
+  {
+    "category": "espanol",
+    "difficulty": "facil",
+    "question": "¿Cuál palabra es un sustantivo?",
+    "options": [
+      "correr",
+      "hermoso",
+      "mesa",
+      "rápidamente"
+    ],
+    "correct": 2
+  },
+  {
+    "category": "espanol",
+    "difficulty": "facil",
+    "question": "¿Cuál es el plural de «luz»?",
+    "options": [
+      "luzes",
+      "luces",
+      "luzs",
+      "luzes"
+    ],
+    "correct": 1
+  },
+  {
+    "category": "espanol",
+    "difficulty": "facil",
+    "question": "¿Qué signo se usa al final de una pregunta directa?",
+    "options": [
+      "Punto",
+      "Coma",
+      "Signo de interrogación",
+      "Dos puntos"
+    ],
+    "correct": 2
+  },
+  {
+    "category": "espanol",
+    "difficulty": "facil",
+    "question": "¿Cuál palabra es un antónimo de «generoso»?",
+    "options": [
+      "Amable",
+      "Egoísta",
+      "Solidario",
+      "Bondadoso"
+    ],
+    "correct": 1
+  },
+  {
+    "category": "espanol",
+    "difficulty": "facil",
+    "question": "¿Cuál oración está en pasado?",
+    "options": [
+      "Mañana viajaré",
+      "Ahora estudio",
+      "Ayer llovió",
+      "Voy a salir"
+    ],
+    "correct": 2
+  },
+  {
+    "category": "espanol",
+    "difficulty": "facil",
+    "question": "¿Cuál palabra es un adverbio de lugar?",
+    "options": [
+      "Ayer",
+      "Aquí",
+      "Mucho",
+      "Rápidamente"
+    ],
+    "correct": 1
+  },
+  {
+    "category": "espanol",
+    "difficulty": "normal",
+    "question": "En «Aunque llovía, salimos», ¿qué relación expresa «aunque»?",
+    "options": [
+      "Causa",
+      "Concesión",
+      "Finalidad",
+      "Consecuencia"
+    ],
+    "correct": 1
+  },
+  {
+    "category": "espanol",
+    "difficulty": "normal",
+    "question": "¿Cuál es el predicado en «Mi hermano menor juega fútbol»?",
+    "options": [
+      "Mi hermano",
+      "Mi hermano menor",
+      "juega fútbol",
+      "fútbol"
+    ],
+    "correct": 2
+  },
+  {
+    "category": "espanol",
+    "difficulty": "normal",
+    "question": "¿Qué tipo de narrador cuenta la historia usando «yo» y participa en ella?",
+    "options": [
+      "Omnisciente",
+      "Protagonista en primera persona",
+      "Observador externo",
+      "Narrador objetivo en tercera persona"
+    ],
+    "correct": 1
+  },
+  {
+    "category": "espanol",
+    "difficulty": "normal",
+    "question": "¿Cuál palabra está correctamente escrita?",
+    "options": [
+      "Exepción",
+      "Excepción",
+      "Ecepción",
+      "Exsepción"
+    ],
+    "correct": 1
+  },
+  {
+    "category": "espanol",
+    "difficulty": "normal",
+    "question": "¿Qué es la idea principal de un texto?",
+    "options": [
+      "Un dato decorativo",
+      "El tema o mensaje central",
+      "La última palabra",
+      "Una cita siempre textual"
+    ],
+    "correct": 1
+  },
+  {
+    "category": "espanol",
+    "difficulty": "normal",
+    "question": "¿Cuál oración usa correctamente «porque»?",
+    "options": [
+      "No fui por qué llovió",
+      "No fui porque llovió",
+      "No fui porqué llovió",
+      "No fui por que llovió"
+    ],
+    "correct": 1
+  },
+  {
+    "category": "espanol",
+    "difficulty": "normal",
+    "question": "¿Qué figura literaria aparece en «Tus dientes son perlas»?",
+    "options": [
+      "Símil",
+      "Metáfora",
+      "Hipérbole",
+      "Onomatopeya"
+    ],
+    "correct": 1
+  },
+  {
+    "category": "espanol",
+    "difficulty": "normal",
+    "question": "¿Cuál conector expresa consecuencia?",
+    "options": [
+      "Sin embargo",
+      "Por ejemplo",
+      "Por lo tanto",
+      "Aunque"
+    ],
+    "correct": 2
+  },
+  {
+    "category": "espanol",
+    "difficulty": "dificil",
+    "question": "¿Qué es una tesis en un texto argumentativo?",
+    "options": [
+      "Una anécdota secundaria",
+      "La postura que se busca defender",
+      "La lista de personajes",
+      "La bibliografía únicamente"
+    ],
+    "correct": 1
+  },
+  {
+    "category": "espanol",
+    "difficulty": "dificil",
+    "question": "¿Qué diferencia principal hay entre denotación y connotación?",
+    "options": [
+      "No hay diferencia",
+      "Denotación es sentido literal; connotación, sentido asociado",
+      "Denotación es rima; connotación, métrica",
+      "Una solo aparece en poesía"
+    ],
+    "correct": 1
+  },
+  {
+    "category": "espanol",
+    "difficulty": "dificil",
+    "question": "¿Cuál oración presenta una subordinada causal?",
+    "options": [
+      "Te llamaré cuando llegue",
+      "No salió porque estaba enfermo",
+      "Aunque llueva, iremos",
+      "Quiero que vengas"
+    ],
+    "correct": 1
+  },
+  {
+    "category": "espanol",
+    "difficulty": "dificil",
+    "question": "¿Qué recurso repite una o varias palabras al inicio de versos o frases?",
+    "options": [
+      "Anáfora",
+      "Hipérbaton",
+      "Ironía",
+      "Elipsis"
+    ],
+    "correct": 0
+  },
+  {
+    "category": "espanol",
+    "difficulty": "dificil",
+    "question": "¿Qué característica define principalmente al realismo literario?",
+    "options": [
+      "Mundos mágicos como regla",
+      "Representación verosímil de la vida y la sociedad",
+      "Solo versos de ocho sílabas",
+      "Ausencia de personajes"
+    ],
+    "correct": 1
+  },
+  {
+    "category": "espanol",
+    "difficulty": "dificil",
+    "question": "¿Cuál es el propósito principal de una reseña crítica?",
+    "options": [
+      "Contar sin evaluar",
+      "Resumir y valorar una obra con argumentos",
+      "Dar instrucciones de montaje",
+      "Enumerar palabras"
+    ],
+    "correct": 1
+  },
+  {
+    "category": "sociales",
+    "difficulty": "facil",
+    "question": "¿Cuál es la moneda oficial de Colombia?",
+    "options": [
+      "Dólar",
+      "Peso colombiano",
+      "Euro",
+      "Sol"
+    ],
+    "correct": 1
+  },
+  {
+    "category": "sociales",
+    "difficulty": "facil",
+    "question": "¿Qué colores tiene la bandera de Colombia?",
+    "options": [
+      "Verde, blanco y rojo",
+      "Amarillo, azul y rojo",
+      "Azul, blanco y verde",
+      "Rojo, negro y amarillo"
+    ],
+    "correct": 1
+  },
+  {
+    "category": "sociales",
+    "difficulty": "facil",
+    "question": "¿Cuál de estos es un departamento de Colombia?",
+    "options": [
+      "Quito",
+      "Atlántico",
+      "Lima",
+      "Caracas"
+    ],
+    "correct": 1
+  },
+  {
+    "category": "sociales",
+    "difficulty": "facil",
+    "question": "¿Qué océano se encuentra al norte de Colombia, junto al mar Caribe?",
+    "options": [
+      "Océano Índico",
+      "Océano Atlántico",
+      "Océano Ártico",
+      "Océano Pacífico"
+    ],
+    "correct": 1
+  },
+  {
+    "category": "sociales",
+    "difficulty": "facil",
+    "question": "¿Qué autoridad dirige una alcaldía municipal?",
+    "options": [
+      "Gobernador",
+      "Alcalde o alcaldesa",
+      "Congresista",
+      "Magistrado"
+    ],
+    "correct": 1
+  },
+  {
+    "category": "sociales",
+    "difficulty": "facil",
+    "question": "¿Qué actividad pertenece al sector primario de la economía?",
+    "options": [
+      "Agricultura",
+      "Fabricación de celulares",
+      "Banca",
+      "Transporte urbano"
+    ],
+    "correct": 0
+  },
+  {
+    "category": "sociales",
+    "difficulty": "facil",
+    "question": "¿Qué instrumento representa la superficie terrestre mediante símbolos y escala?",
+    "options": [
+      "Novela",
+      "Mapa",
+      "Calendario",
+      "Termómetro"
+    ],
+    "correct": 1
+  },
+  {
+    "category": "sociales",
+    "difficulty": "facil",
+    "question": "¿Qué significa respetar la diversidad cultural?",
+    "options": [
+      "Imponer una sola costumbre",
+      "Valorar distintas tradiciones e identidades",
+      "Prohibir otras lenguas",
+      "Evitar toda convivencia"
+    ],
+    "correct": 1
+  },
+  {
+    "category": "sociales",
+    "difficulty": "normal",
+    "question": "¿Qué proceso histórico culminó con la disolución de la Gran Colombia en 1830?",
+    "options": [
+      "La separación de Venezuela y Ecuador, entre otros procesos",
+      "La conquista española",
+      "La Guerra de los Mil Días",
+      "La independencia de Haití"
+    ],
+    "correct": 0
+  },
+  {
+    "category": "sociales",
+    "difficulty": "normal",
+    "question": "¿Cuál es la función principal de la Constitución Política?",
+    "options": [
+      "Organizar el Estado y reconocer derechos",
+      "Fijar todos los precios",
+      "Reemplazar las elecciones",
+      "Regular solo los deportes"
+    ],
+    "correct": 0
+  },
+  {
+    "category": "sociales",
+    "difficulty": "normal",
+    "question": "¿Qué rama del poder público elabora y reforma las leyes en Colombia?",
+    "options": [
+      "Ejecutiva",
+      "Legislativa",
+      "Judicial",
+      "Militar"
+    ],
+    "correct": 1
+  },
+  {
+    "category": "sociales",
+    "difficulty": "normal",
+    "question": "¿Qué es la migración?",
+    "options": [
+      "Cambio de lugar de residencia de personas",
+      "Movimiento de placas únicamente",
+      "Intercambio de productos solamente",
+      "Crecimiento de una montaña"
+    ],
+    "correct": 0
+  },
+  {
+    "category": "sociales",
+    "difficulty": "normal",
+    "question": "¿Qué línea de longitud pasa por Greenwich y sirve de referencia para medir longitudes?",
+    "options": [
+      "Ecuador",
+      "Meridiano de Greenwich",
+      "Trópico de Capricornio",
+      "Círculo polar ártico"
+    ],
+    "correct": 1
+  },
+  {
+    "category": "sociales",
+    "difficulty": "normal",
+    "question": "¿Cuál fue una consecuencia importante de la Revolución Industrial?",
+    "options": [
+      "Aumento de la producción mecanizada y crecimiento urbano",
+      "Desaparición de las ciudades",
+      "Fin de todo comercio",
+      "Invención de la agricultura"
+    ],
+    "correct": 0
+  },
+  {
+    "category": "sociales",
+    "difficulty": "normal",
+    "question": "¿Qué es la democracia participativa?",
+    "options": [
+      "Participación ciudadana en decisiones públicas",
+      "Gobierno sin leyes",
+      "Poder heredado de una familia",
+      "Prohibición del voto"
+    ],
+    "correct": 0
+  },
+  {
+    "category": "sociales",
+    "difficulty": "normal",
+    "question": "¿Cuál es un ejemplo de patrimonio cultural inmaterial?",
+    "options": [
+      "Una tradición oral o una danza tradicional",
+      "Una carretera",
+      "Un edificio moderno sin historia",
+      "Una máquina industrial"
+    ],
+    "correct": 0
+  },
+  {
+    "category": "sociales",
+    "difficulty": "dificil",
+    "question": "¿Qué principio establece que todas las personas deben recibir el mismo trato ante la ley?",
+    "options": [
+      "Censura",
+      "Igualdad ante la ley",
+      "Monopolio",
+      "Aislamiento"
+    ],
+    "correct": 1
+  },
+  {
+    "category": "sociales",
+    "difficulty": "dificil",
+    "question": "¿Qué fue la Regeneración en la historia política colombiana del siglo XIX?",
+    "options": [
+      "Un movimiento político asociado a la Constitución de 1886",
+      "La independencia de España en 1810",
+      "La creación de la ONU",
+      "La colonización de América"
+    ],
+    "correct": 0
+  },
+  {
+    "category": "sociales",
+    "difficulty": "dificil",
+    "question": "¿Qué indicador mide el valor total de bienes y servicios finales producidos en un país durante un periodo?",
+    "options": [
+      "PIB",
+      "IPC únicamente",
+      "Tasa de natalidad",
+      "Esperanza de vida"
+    ],
+    "correct": 0
+  },
+  {
+    "category": "sociales",
+    "difficulty": "dificil",
+    "question": "¿Qué caracteriza a una fuente histórica primaria?",
+    "options": [
+      "Fue creada en la época estudiada o por un participante directo",
+      "Siempre es un resumen moderno",
+      "No tiene relación con el pasado",
+      "Es necesariamente una novela actual"
+    ],
+    "correct": 0
+  },
+  {
+    "category": "sociales",
+    "difficulty": "dificil",
+    "question": "¿Cuál es una función central de la Corte Constitucional de Colombia?",
+    "options": [
+      "Velar por la supremacía e integridad de la Constitución",
+      "Aprobar el presupuesto municipal",
+      "Dirigir todas las alcaldías",
+      "Organizar los equipos deportivos"
+    ],
+    "correct": 0
+  },
+  {
+    "category": "sociales",
+    "difficulty": "dificil",
+    "question": "¿Qué se entiende por desarrollo sostenible?",
+    "options": [
+      "Satisfacer necesidades actuales sin comprometer las futuras",
+      "Usar todos los recursos rápidamente",
+      "Priorizar solo el crecimiento inmediato",
+      "Eliminar toda actividad económica"
+    ],
+    "correct": 0
+  },
+  {
+    "category": "sociales",
+    "difficulty": "dificil",
+    "question": "¿Qué efecto puede tener la deforestación sobre el suelo?",
+    "options": [
+      "Aumentar siempre su fertilidad",
+      "Incrementar erosión y pérdida de hábitats",
+      "Eliminar el riesgo de inundaciones",
+      "Detener el ciclo del agua"
+    ],
+    "correct": 1
   }
 ]
