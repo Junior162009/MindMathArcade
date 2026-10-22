@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0b1220"><meta name="description" content="MATHVERSE: trivia educativa de cinco materias con retos rápidos, ilustraciones transparentes y recursos online.">
-<title>MATHVERSE — TecnoMath Arcade</title><link rel="stylesheet" href="./matemia.css">
+<title>MATHVERSE — TecnoMath Arcade</title><link rel="stylesheet" href="./matemia.css"><link rel="stylesheet" href="./device-adaptation.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.58.0/dist/umd/supabase.js" defer></script><script src="/js/tecnomath-progress.js?v=20260911-9"></script>
 </head>
 <body>
-<header class="topbar"><a href="../../index.html" class="back">← TecnoMath Arcade</a><div class="brand">🧮 MATHVERSE <small>TRIVIA EDUCATIVA</small></div><div class="head-actions"><button id="saveBtn" title="Guardar partida">💾</button><button id="pauseBtn" title="Pausar">Ⅱ</button></div></header>
+<header class="topbar"><a href="../../index.html" class="back">← TecnoMath Arcade</a><div class="brand">🧮 MATHVERSE <small>TRIVIA EDUCATIVA</small></div><div class="head-actions" id="headActions"><button id="saveBtn" title="Guardar partida">💾</button><button id="pauseBtn" title="Pausar">Ⅱ</button></div></header>
 <main class="layout">
 <section class="game-shell">
 <div class="hud"><div><span>❤️ VIDA</span><strong id="hpText">100 / 100</strong><div class="bar"><i id="hpBar"></i></div></div><div><span>✨ EXPERIENCIA</span><strong id="xpText">0 XP · NIVEL 1</strong><div class="bar"><i id="xpBar"></i></div></div><div><span>🪙 MONEDAS</span><strong id="coinText">0</strong></div><div><span>🗺️ ÁREA</span><strong id="areaText">Pueblo de Matemia</strong></div></div>
@@ -27,4 +27,4 @@
 <section><h2>🌐 Recursos online</h2><p id="assetStatus" class="muted">Los recursos gráficos externos se cargan de forma opcional.</p><div id="credits" class="credits">Ilustraciones: buscando recursos con licencia abierta…</div></section>
 <a href="../../index.html" class="back-link">Volver al catálogo de TecnoMath</a>
 </aside></main>
-<script src="./matemia.js" defer></script></body></html>
+<script src="./matemia.js" defer></script><script src="./device-adaptation.js" defer></script></body></html>
