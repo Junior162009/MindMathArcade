@@ -4,7 +4,7 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0b1220"><meta name="description" content="MATHVERSE: trivia educativa de cinco materias con retos rápidos, ilustraciones transparentes y recursos online.">
 <title>MATHVERSE — TecnoMath Arcade</title><link rel="stylesheet" href="./matemia.css">
-<script src="/js/tecnomath-progress.js?v=20260911-9"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.58.0/dist/umd/supabase.js" defer></script><script src="/js/tecnomath-progress.js?v=20260911-9"></script>
 </head>
 <body>
 <header class="topbar"><a href="../../index.html" class="back">← TecnoMath Arcade</a><div class="brand">🧮 MATHVERSE <small>TRIVIA EDUCATIVA</small></div><div class="head-actions"><button id="saveBtn" title="Guardar partida">💾</button><button id="pauseBtn" title="Pausar">Ⅱ</button></div></header>
@@ -23,7 +23,7 @@
 <aside class="side-panel">
 <section><h2>📜 Diario</h2><p id="journal">Habla con los habitantes del pueblo para descubrir tu primera misión.</p><div class="mission-box"><b>🎯 Misión activa</b><p id="missionText">Habla con el Anciano para comenzar.</p><div class="bar"><i id="missionBar"></i></div><small id="missionProgress">0 / 1</small></div></section>
 <section><h2>🎒 Inventario</h2><div id="inventoryList" class="inventory"></div><button id="inventoryBtn" class="secondary wide">ABRIR INVENTARIO</button></section>
-<section><h2>🧭 Accesos rápidos</h2><div class="quick-actions"><button id="mapBtn">🗺️ Mapa</button><button id="missionsBtn">📜 Misiones</button><button id="shopBtn">🛒 Tienda</button><button id="helpBtn">❔ Ayuda</button></div></section>
+<section><h2>🧭 Accesos rápidos</h2><div class="quick-actions"><button id="mapBtn">🗺️ Mapa</button><button id="missionsBtn">📜 Misiones</button><button id="shopBtn">🛒 Tienda</button><button id="helpBtn">❔ Ayuda</button><button id="multiplayerBtn">🌐 Multijugador</button></div></section>
 <section><h2>🌐 Recursos online</h2><p id="assetStatus" class="muted">Los recursos gráficos externos se cargan de forma opcional.</p><div id="credits" class="credits">Ilustraciones: buscando recursos con licencia abierta…</div></section>
 <a href="../../index.html" class="back-link">Volver al catálogo de TecnoMath</a>
 </aside></main>
