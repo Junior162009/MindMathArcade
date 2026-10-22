@@ -4,7 +4,6 @@ insert into public.game_visibility (game_id, status)
 values
   ('word-bridge','published'),
   ('mathverse','published'),
-  ('pollito-race','published'),
   ('tecnomath-ia','hidden'),
   ('animalandia','published'),
   ('banderquiz','published'),
