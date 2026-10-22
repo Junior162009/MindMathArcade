@@ -485,5 +485,24 @@
     "logoStoragePath": "",
     "packageStoragePath": "",
     "packageFileName": ""
+  },
+  {
+    "id": "edugo-live",
+    "name": "Edugo.live",
+    "desc": "Plataforma educativa interactiva.",
+    "description": "Acceso directo a Edugo.live para explorar su plataforma educativa.",
+    "url": "https://edugo.live/",
+    "imageUrl": "",
+    "icon": "🎓",
+    "category": "educacion",
+    "deviceCompatibility": "both",
+    "evento": null,
+    "sourceType": "external",
+    "status": "published",
+    "allowVoting": true,
+    "featured": false,
+    "urlType": "external",
+    "authorName": "TecnoMath",
+    "grade": "Todos"
   }
 ]
