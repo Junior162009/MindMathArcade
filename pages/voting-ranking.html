@@ -69,7 +69,7 @@ body.tv-mode .normal-ranking-side .live-rank .position{font-size:15px!important;
 const SUPABASE_URL='https://xdszveoxdrdnwwzzvkav.supabase.co';
 const SUPABASE_KEY='sb_publishable_xwUE0aN1g0rb7aOLyXPAsA_kOAX9bOA';
 const CATALOG_URL='../data/games.json',POLL_MS=5000;
-const EXCLUDED_VOTING_GAMES=new Set(["Eco Recolector","MathSolve","MathSolve 2","Tower Game","2048","Pacman","Run 3","Tower Building","Tappy Tower","Stickman Archer","2048 Merge","Endless Car Race","Hexagon Fall","Rocket Pult","Cookie Clicker","Quiz: Reseña Crítica","TecnoMath Aula"]);
+const EXCLUDED_VOTING_GAMES=new Set(["Animalandia","MindMath Arcade","Minman Arcade","Eco Recolector","MathSolve","MathSolve 2","Tower Game","2048","Pacman","Run 3","Tower Building","Tappy Tower","Stickman Archer","2048 Merge","Endless Car Race","Hexagon Fall","Rocket Pult","Cookie Clicker","Quiz: Reseña Crítica","TecnoMath Aula"]);
 const S={db:null,games:[],stats:new Map(),channel:null,pollTimer:null,realtime:false,loading:false};
 const $=id=>document.getElementById(id),gid=g=>String(g.url||g.name||'').trim();
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
