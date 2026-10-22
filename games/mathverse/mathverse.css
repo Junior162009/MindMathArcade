@@ -56,3 +56,11 @@
 }
 @media(max-width:380px){.device-options{gap:8px}.device-options button{min-height:125px;padding:10px 6px}.device-options button b{font-size:12px}.device-mobile #deviceSettings{max-width:82px;font-size:10px}.device-mobile .device-pad{width:min(33vw,140px);height:min(33vw,140px)}}
 @media(prefers-reduced-motion:no-preference){.device-picker-card{animation:devicePickerIn .22s ease-out}@keyframes devicePickerIn{from{opacity:0;transform:translateY(8px) scale(.99)}to{opacity:1;transform:none}}}
+
+/* Final viewport sizing: prefer dynamic viewport units and include safe areas. */
+.device-mobile .game-shell{height:calc(100vh - var(--hud-height,54px));height:calc(100dvh - var(--hud-height,54px))}
+.device-mobile .hud{--hud-height:calc(54px + env(safe-area-inset-top,0px));height:var(--hud-height);min-height:var(--hud-height);padding-top:max(6px,env(safe-area-inset-top,0px))}
+@media (orientation:landscape) and (max-width:900px){
+ .device-mobile .hud{--hud-height:calc(46px + env(safe-area-inset-top,0px));height:var(--hud-height);min-height:var(--hud-height);padding-top:max(4px,env(safe-area-inset-top,0px))}
+ .device-mobile .game-shell{height:calc(100vh - var(--hud-height,46px));height:calc(100dvh - var(--hud-height,46px))}
+}
