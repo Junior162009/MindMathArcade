@@ -71,7 +71,7 @@ const subjectQuestions={
 function normalizeAnswer(value){return String(value).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim().replace(/[¿?¡!.,;:]/g,'').replace(/\s+/g,' ')}
 function randomQuestion(level){
  const subjects=Object.keys(subjectQuestions);
- if(Math.random()<0.84){
+ if(Math.random()<(1/6)){
   const pool=level>=3?['sum','sub','mul','div','pow','root','mixed']:level>=2?['sum','sub','mul','div','mixed']:['sum','sub','mul'];
   const type=pool[rand(0,pool.length-1)];let a,b,question,answer,hint;
   if(type==='sum'){a=rand(1,30);b=rand(1,30);question=a+' + '+b;answer=a+b;hint='Suma primero las decenas y luego las unidades.'}
