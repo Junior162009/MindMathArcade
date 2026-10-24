@@ -1,0 +1,42 @@
+{
+  "administrators": [
+    {
+      "id": "admin_001",
+      "nombre": "Junior",
+      "email": "delahozbarcelojunior@gmail.com",
+      "rol": "super_admin",
+      "activo": true,
+      "notificaciones": true
+    },
+    {
+      "id": "admin_002",
+      "nombre": "Administrador 2",
+      "email": "admin2@tecnomath.com",
+      "rol": "admin",
+      "activo": true,
+      "notificaciones": true
+    },
+    {
+      "id": "admin_003",
+      "nombre": "Administrador 3",
+      "email": "admin3@tecnomath.com",
+      "rol": "admin",
+      "activo": true,
+      "notificaciones": true
+    },
+    {
+      "id": "admin_004",
+      "nombre": "Administrador 4",
+      "email": "admin4@tecnomath.com",
+      "rol": "admin",
+      "activo": true,
+      "notificaciones": false
+    }
+  ],
+  "configuracion": {
+    "notificacionesHabilitadas": true,
+    "correoRemitente": "sistema@tecnomath.com",
+    "maxNotificacionesPorDia": 100
+  },
+  "ultimaActualizacion": "2025-01-15T00:00:00Z"
+}
