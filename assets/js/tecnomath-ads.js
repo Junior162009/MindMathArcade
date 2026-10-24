@@ -1,12 +1,10 @@
-/* TecnoMathAds — provider-neutral advertising foundation.
- * No ad-network script or identifier is loaded until a real provider is configured.
- */
+/* TecnoMathAds — provider-neutral advertising layer. */
 (function (window, document) {
   'use strict';
-
-  const CONFIG = Object.freeze({
-    enabled: false,
-    provider: null,
+  const CONFIG = {
+    enabled: true,
+    provider: 'google-adsense',
+    publisherId: 'ca-pub-9426294483156864',
     showOnHome: true,
     showOnCatalog: true,
     showOnInfoPages: true,
@@ -14,82 +12,41 @@
     premiumRemovesAds: true,
     contextualOnly: true,
     reservedMinHeight: 90
-  });
-
+  };
   const providers = Object.create(null);
 
   function registerProvider(name, adapter) {
-    if (!name || !adapter || typeof adapter.render !== 'function') return;
-    providers[name] = adapter;
+    if (name && adapter && typeof adapter.render === 'function') providers[name] = adapter;
   }
-
   function isPremium() {
-    // Intentionally does not invent a Premium state. A future subscription
-    // system can expose window.TecnoMathSubscription.isPremium().
     try {
-      return Boolean(
-        window.TecnoMathSubscription &&
+      return Boolean(window.TecnoMathSubscription &&
         typeof window.TecnoMathSubscription.isPremium === 'function' &&
-        window.TecnoMathSubscription.isPremium()
-      );
-    } catch (_) {
-      return false;
-    }
+        window.TecnoMathSubscription.isPremium());
+    } catch (_) { return false; }
   }
-
   function shouldShow() {
-    if (!CONFIG.enabled) return false;
-    if (CONFIG.premiumRemovesAds && isPremium()) return false;
-    return true;
+    return CONFIG.enabled && !(CONFIG.premiumRemovesAds && isPremium());
   }
-
   function render(target, options) {
     const element = typeof target === 'string' ? document.querySelector(target) : target;
-    if (!element) return false;
-
+    if (!element || !shouldShow()) {
+      if (element) element.hidden = true;
+      return false;
+    }
+    const provider = providers[(options && options.provider) || CONFIG.provider];
+    if (!provider) { element.hidden = true; return false; }
     element.classList.add('tecnomath-ad-slot');
     element.setAttribute('aria-label', 'Publicidad');
-    element.dataset.adsReady = 'true';
-
-    if (!shouldShow()) {
-      element.hidden = true;
-      return false;
-    }
-
-    const providerName = (options && options.provider) || CONFIG.provider;
-    const provider = providerName && providers[providerName];
-    if (!provider) {
-      // Keep the slot invisible until a real provider is configured.
-      element.hidden = true;
-      return false;
-    }
-
+    element.style.minHeight = CONFIG.reservedMinHeight + 'px';
     element.hidden = false;
-    element.style.minHeight = `${CONFIG.reservedMinHeight}px`;
-    element.innerHTML = '';
     provider.render(element, options || {});
     return true;
   }
-
   function hide(target) {
     const element = typeof target === 'string' ? document.querySelector(target) : target;
     if (element) element.hidden = true;
   }
-
-  function configure(next) {
-    Object.assign(CONFIG, next || {});
-  }
-
-  window.TecnoMathAds = Object.freeze({
-    config: CONFIG,
-    registerProvider,
-    render,
-    hide,
-    configure,
-    isPremium,
-    shouldShow
-  });
-
-  // Neutral adapter hook: a real provider can be registered later without
-  // changing pages that already contain ad slots.
+  function configure(next) { Object.assign(CONFIG, next || {}); }
+  window.TecnoMathAds = Object.freeze({ config: CONFIG, registerProvider, render, hide, configure, isPremium, shouldShow });
 })(window, document);
