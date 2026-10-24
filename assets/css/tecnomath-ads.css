@@ -1,0 +1,33 @@
+.tecnomath-ad-slot {
+  width: 100%;
+  max-width: 100%;
+  min-height: 90px;
+  margin: 18px auto;
+  padding: 10px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  contain: layout paint;
+  box-sizing: border-box;
+}
+
+.tecnomath-ad-slot[hidden] { display: none !important; }
+
+.tecnomath-ad-slot::before {
+  content: 'Publicidad';
+  font: 600 10px/1.2 system-ui, sans-serif;
+  letter-spacing: .04em;
+  opacity: .58;
+}
+
+@media (max-width: 640px) {
+  .tecnomath-ad-slot {
+    min-height: 72px;
+    margin: 14px auto;
+    padding: 8px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tecnomath-ad-slot { scroll-behavior: auto; }
+}
